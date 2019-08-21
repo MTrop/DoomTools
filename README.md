@@ -2,15 +2,6 @@
 
 Copyright (c) 2019 Matt Tropiano  
 
-### NOTICE
-
-This library is an offshoot/rewrite of [Black Rook Software's Doom Struct Project](https://github.com/BlackRookSoftware/Doom), 
-of which I have been granted rights to rewrite (the rights were granted to myself BY myself).
-
-All deprecated classes from the origin project will not be in this one.
-All end users are encouraged to switch to this one, as this project will be 
-actively maintained.
-
 ### Required Libraries
 
 [Doom](https://github.com/MTrop/DoomStruct)
