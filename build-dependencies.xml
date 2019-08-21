@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="dependencies">
+
+	<!-- Folders and File Names -->
+
+	<property name="dependencies.dir" value="deps" />
+
+	<!-- Git Macros -->
+	
+	<macrodef name="git">
+		<attribute name="command" />
+		<attribute name="dir" default="" />
+		<element name="args" optional="true" />
+		<sequential>
+			<echo message="git @{command}" />
+			<exec executable="git" dir="@{dir}">
+				<arg value="@{command}" />
+				<args/>
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="git-clone">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<sequential>
+			<git command="clone">
+				<args>
+					<arg value="@{repository}" />
+					<arg value="@{dest}" />
+				</args>
+			</git>
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="git-pull">
+		<attribute name="dest" />
+		<sequential>
+			<git command="pull" dir="@{dest}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="git-clone-pull">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<sequential>
+			<git-clone repository="@{repository}" dest="@{dest}" />
+			<git-pull dest="@{dest}" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="git-clone-shallow">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<sequential>
+			<git command="clone">
+				<args>
+					<arg value="@{repository}" />
+					<arg value="@{dest}" />
+					<arg value="--depth=1" />
+				</args>
+			</git>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="git-export">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<sequential>
+			<git-clone-shallow repository="@{repository}" dest="@{dest}" />
+			<delete dir="@{dest}/.git" includeemptydirs="true" casesensitive="false" /> 
+		</sequential>
+	</macrodef>
+
+	<!-- Targets -->
+
+	<target name="clean.dependencies">
+		<delete quiet="true" includeemptydirs="true">
+			<fileset dir="${dependencies.dir}" includes="**/*" defaultexcludes="false" />
+		</delete>
+	</target>
+	
+	<target name="init.dependencies" depends="clean.dependencies">
+		<mkdir dir="${dependencies.dir}" />
+	</target>
+
+	<target name="dependency.properties">
+		<echo message="Writing to build.properties...." />
+		<echo message="dev.base=${dependencies.dir}&#10;" file="build.properties" append="true" />
+	</target>
+	
+</project>

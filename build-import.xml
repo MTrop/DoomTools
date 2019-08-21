@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="imported" default="compile">
+	
+	<!-- Folders and File Names -->
+	<tstamp>
+		<format property="build.date" pattern="yyyy.MM.dd.HHmmssSSS" timezone="UTC"/>
+	</tstamp>
+	<property name="build.version.appendix" value="SNAPSHOT" />
+	<property name="build.version.number" value="${build.date}" />
+	<property name="build.version" value="${build.version.number}-${build.version.appendix}" />
+
+	<property name="src.dir" value="src/main/java" />
+	<property name="resource.dir" value="src/main/resources" />
+	<property name="test.src.dir" value="src/test/java" />
+	<property name="test.resource.dir" value="src/test/resources" />
+
+	<property name="examples.dir" value="examples" />
+	<property name="bin.dir" value="bin" />
+
+	<property name="build.dir" value="build" />
+
+	<property name="jar.dir" value="${build.dir}/jar" />
+	<property name="docs.dir" value="${build.dir}/docs" />
+	<property name="zip.dir" value="${build.dir}/zip" />
+
+	<property name="jar.filename" value="${project.archive}-${build.version.number}.jar" />
+	<property name="jar.sources.filename" value="${project.archive}-${build.version.number}-sources.jar" />
+	<property name="jar.javadoc.filename" value="${project.archive}-${build.version.number}-javadoc.jar" />
+
+	<property name="zip.filename" value="${project.archive}-bin-${build.version}.zip" />
+	<property name="zip.sources.filename" value="${project.archive}-src-${build.version}.zip" />
+	<property name="zip.javadoc.filename" value="${project.archive}-javadocs-${build.version}.zip" />
+	
+	<!-- Filesets -->
+	
+	<patternset id="pattern.documents">
+		<include name="AUTHORS.txt" />
+		<include name="LICENSE.txt" />
+		<include name="README.md" />
+		<include name="docs/*.*" />
+	</patternset>
+	
+	<fileset id="fileset.documents" dir=".">
+		<patternset refid="pattern.documents" />
+	</fileset>
+	
+	<!-- ====================== Targets ====================== -->
+
+	<!-- Clean -->
+
+	<target name="clean.compile" description="Cleans up the compiled binaries.">
+		<delete dir="${bin.dir}" includeemptydirs="true" casesensitive="false"/>
+	</target>
+
+	<target name="clean.jar" description="Cleans up the compiled JARs.">
+		<delete dir="${jar.dir}" includeemptydirs="true" casesensitive="false"/>
+	</target>
+	
+	<target name="clean.docs" description="Cleans up the compiled documentation.">
+		<delete dir="${docs.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+
+	<target name="clean.zip" description="Cleans up the zipped archives.">
+		<delete dir="${zip.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+
+	<target name="clean" depends="clean.jar, clean.docs, clean.zip, clean.compile"  description="Cleans up everything.">
+	</target>
+	
+	<!-- Javadocs -->
+
+	<target name="init.docs" depends="clean.docs" description="Initializes the documentation folders.">
+		<mkdir dir="${docs.dir}" />
+	</target>
+
+	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
+        <javadoc access="protected" 
+        	additionalparam="-J-Xmx512m  " 
+        	author="true" 
+        	classpath="${project.classpath}${path.separator}${bin.dir}" 
+        	doctitle="${project.javadoc.title}" 
+        	sourcepath="${src.dir}" 
+        	packagenames="${project.javadoc.packages}"
+        	destdir="${docs.dir}" 
+        	splitindex="true" 
+        	use="true" 
+        	version="true" 
+        	nodeprecated="false" 
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false"
+    		>
+            <link href="https://docs.oracle.com/en/java/javase/11/docs/api/"/>
+        </javadoc>
+    </target>	
+	
+	<!-- Preparation -->
+
+	<target name="available.path.checks">
+		<available file="${src.dir}"  property="src.dir.available"/>
+		<available file="${resource.dir}"  property="resource.dir.available"/>
+		<available file="${test.src.dir}"  property="test.src.dir.available"/>
+		<available file="${test.resource.dir}"  property="test.resource.dir.available"/>
+	</target>
+	
+	<!-- Compiling -->
+	
+	<target name="init.compile" depends="clean.compile" description="Initializes the compilation folders.">
+		<mkdir dir="${bin.dir}" />
+	</target>
+
+	<target name="compile.src" if="src.dir.available">
+		<javac 
+			source="1.8"
+			target="1.8"
+			compiler="javac1.8"
+			bootclasspath="${project.compiler.bootclasspath}"
+			srcdir="${src.dir}" 
+			destdir="${bin.dir}"
+            includeAntRuntime="false"
+			classpath="${project.classpath}"
+			debug="off" 
+			/>
+	</target>
+
+	<target name="compile.resources" if="resource.dir.available">
+		<copy todir="${bin.dir}">
+			<fileset dir="${resource.dir}" />
+		</copy>
+	</target>
+
+	<target name="compile" depends="available.path.checks, init.compile, compile.src, compile.resources" description="Compiles the project.">
+	</target>
+
+	<!-- Compiling Tests -->
+
+	<target name="compile.test.src" depends="compile" if="test.src.dir.available">
+		<javac 
+			source="1.8"
+			target="1.8"
+			compiler="javac1.8"
+			bootclasspath="${project.compiler.bootclasspath}"
+			srcdir="${test.src.dir}" 
+			destdir="${bin.dir}"
+            includeAntRuntime="false"
+			classpath="${project.classpath}"
+			debug="off" 
+			/>
+	</target>
+	
+	<target name="compile.test.resources" if="test.resource.dir.available">
+		<copy todir="${bin.dir}">
+			<fileset dir="${test.resource.dir}" />
+		</copy>
+	</target>
+
+	<target name="compile.test" depends="compile, compile.test.src, compile.test.resources" description="Compiles the project." if="test.src.dir.available">
+		<copy todir="${bin.dir}" failonerror="false">
+			<fileset dir="${test.resource.dir}" />
+		</copy>
+	</target>
+
+	<!-- JAR -->
+	
+	<target name="init.jar" depends="clean.jar" description="Initializes the JAR folders.">
+		<mkdir dir="${jar.dir}" />
+	</target>
+
+	<target name="jar.bin" depends="init.jar, compile" description="JARs up the compiled files.">
+		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" />
+	</target>
+	
+	<target name="jar.sources.src" if="src.dir.available">
+		<jar basedir="${src.dir}" destfile="${jar.dir}/${jar.sources.filename}" />
+	</target>
+
+	<target name="jar.sources.resource" if="resource.dir.available">
+		<jar basedir="${resource.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+	</target>
+
+	<target name="jar.sources" depends="init.jar, jar.sources.src, jar.sources.resource" description="JARs up the sources.">
+	</target>
+
+	<target name="jar.javadoc" depends="init.jar, javadoc" description="JARs up the Javadoc files.">
+		<jar basedir="${docs.dir}" destfile="${jar.dir}/${jar.javadoc.filename}" />
+	</target>
+
+	<target name="jar" depends="jar.bin, jar.sources, jar.javadoc" description="Generates all JARs.">
+	</target>
+
+	<!-- Zip -->
+	
+	<target name="init.zip" depends="clean.zip" description="Initializes the ZIP folders.">
+		<mkdir dir="${zip.dir}" />
+	</target>
+
+	<target name="zip.jar" depends="init.zip, jar" description="Archives the main JAR.">
+		<delete file="${zip.dir}/${zip.filename}" />
+		<zip destfile="${zip.dir}/${zip.filename}">
+			<fileset file="${jar.dir}/${jar.filename}" />
+		</zip>
+		<zip destfile="${zip.dir}/${zip.filename}" update="true">
+			<fileset refid="fileset.documents" />
+		</zip>
+	</target>
+
+	<target name="zip.docs" depends="init.zip, javadoc" description="Archives the documentation.">
+		<delete file="${zip.dir}/${zip.javadoc.filename}" />
+		<zip basedir="${docs.dir}" destfile="${zip.dir}/${zip.javadoc.filename}" compress="true">
+		</zip>
+	</target>
+	
+	<target name="zip.src.code" if="src.dir.available">
+		<delete file="${zip.dir}/${zip.sources.filename}" />
+		<zip destfile="${zip.dir}/${zip.sources.filename}" compress="true">
+			<zipfileset dir="${src.dir}" prefix="${src.dir}" />
+			<zipfileset dir="${test.src.dir}" prefix="${test.src.dir}" erroronmissingdir="false" />
+		</zip>
+		<zip destfile="${zip.dir}/${zip.sources.filename}" update="true">
+			<fileset refid="fileset.documents" />
+		</zip>
+		<zip destfile="${zip.dir}/${zip.sources.filename}" update="true">
+			<fileset dir="." includes="*.xml" />
+		</zip>
+	</target>
+
+	<target name="zip.src.resources" if="resource.dir.available">
+		<zip destfile="${zip.dir}/${zip.sources.filename}" update="true">
+			<zipfileset dir="${resource.dir}" prefix="${resource.dir}" erroronmissingdir="false" />
+			<zipfileset dir="${test.resource.dir}" prefix="${test.resource.dir}" erroronmissingdir="false" />
+		</zip>
+	</target>
+
+	<target name="zip.src" depends="init.zip, zip.src.code, zip.src.resources" description="Archives the source code and resources.">
+	</target>
+
+	<target name="zip" depends="zip.jar, zip.docs, zip.src" description="Creates all archives.">
+	</target>
+
+	<!-- Test -->
+
+	<target name="test" depends="compile.test" if="test.src.dir.available">
+		<java classpath="${project.classpath}${path.separator}${bin.dir}" classname="${project.testclass.main}" fork="true" failonerror="true">
+			<arg value="${project.testclass}"/>
+		</java>
+	</target>
+
+	<!-- Release -->
+
+	<target name="release" depends="jar, test, zip">
+	</target>
+	
+</project>

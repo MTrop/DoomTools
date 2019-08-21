@@ -1,0 +1,2 @@
+Matt Tropiano <mtropiano@gmail.com>
+	- API and implementation

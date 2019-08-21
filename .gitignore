@@ -1,0 +1,15 @@
+/bin
+/build
+/deps
+/target
+/.idea
+build.properties
+.settings
+.classpath
+.project
+*.ipr
+*.iml
+*.iws
+Thumbs.db
+desktop.ini
+.README.md.html

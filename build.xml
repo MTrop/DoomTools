@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<!-- ====================================================================== 
+     Doom Struct Build File    
+     Matt Tropiano                                                                
+     ====================================================================== -->
+<project name="build" default="compile">
+
+	<description>Doom Struct</description>
+
+	<property file="build.properties" />
+
+	<!-- Dependencies -->
+	<property name="dev.base" value=".." />
+	<property name="S" value="${path.separator}" />
+
+	<!-- Project Libs -->
+	
+	<!-- Project Info -->
+	<property name="project.archive" value="wadmerge" />
+	<property name="project.javadoc.title" value="WadMerge" />
+	<property name="project.classpath" value=""/>
+	<property name="project.compiler.bootclasspath" value="" />
+	<property name="project.testclass" value=""/>
+	<property name="project.testclass.main" value=""/>
+	<property name="project.javadoc.packages" value="
+		"
+	/>
+	
+	<import file="build-dependencies.xml" />
+	<import file="build-import.xml" />
+
+	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
+        <javadoc access="protected" 
+        	additionalparam="-J-Xmx512m  " author="true" 
+        	classpath="${bin.dir}" 
+        	doctitle="${project.javadoc.title}" 
+        	sourcepath="${src.dir}" 
+        	packagenames="${project.javadoc.packages}"
+        	destdir="${docs.dir}" 
+        	splitindex="true" 
+        	use="true" 
+        	version="true" 
+        	nodeprecated="false" 
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false"
+    		>
+            <link href="https://docs.oracle.com/en/java/javase/11/docs/api/"/>
+        </javadoc>
+    </target>	
+
+	<target name="dependency.doom">
+		<git-export repository="https://github.com/MTrop/DoomStruct.git" dest="${dependencies.dir}/Doom" />
+		<ant antfile="${dependencies.dir}/Doom/build.xml" useNativeBasedir="true" inheritAll="false" target="compile" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.properties" description="Downloads and compiles the dependencies.">
+	</target>
+	
+</project>

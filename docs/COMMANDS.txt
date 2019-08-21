@@ -1,0 +1,88 @@
+WadMerge
+........
+
+END
+    Stop interpret. Discard all WadBuffers.
+
+CREATE [symbol]
+    Creates an empty WadBuffer as [symbol].
+
+CLEAR [symbol]
+    Clears the contents of WadBuffer [symbol].
+
+DISCARD [symbol]
+    Discards WadBuffer [symbol]. [symbol] is now invalid.
+
+VALID [symbol]
+    Asserts that [symbol] is a valid WadBuffer.
+    Error out if not.
+
+MARKER [symbol] [name]
+    Add an empty entry to [symbol] called [name].
+
+DATEMARKER [symbol] [name]
+    Add a text entry to [symbol] called [name], containing the current date of build.
+
+MERGE [dest-symbol] [src-symbol]
+    Adds all entries from WadBuffer [src-symbol] into WadBuffer [dest-symbol].
+
+MERGEWAD [symbol] [path]
+    Reads WAD entries from [path] into WadBuffer [symbol].
+    Error out if [path] is not a WAD.
+
+MERGEFILE [symbol] [path]
+    Reads file from [path], 
+        If file is WAD type,
+            MERGEWAD [symbol] [path]
+        Else,
+            Add as-is to [symbol].
+            Name of entry is coerced from [path] file name.
+    Error out on [path] I/O error.
+
+MERGEDIR [symbol] [path]
+    Reads directory from [path]. 
+        For each file:
+            MERGEFILE [symbol] [filepath].
+    Error out on [path] I/O error or [filepath] I/O error.
+
+MERGEDIRSET [symbol] [path]
+    Reads directory from [path].
+        For each FILE in [path], 
+            If FILE is DIR,
+                MARKER [symbol] \[dirname]
+                MERGEDIRSET [symbol] [FILE]
+            Else,
+                MERGEFILE [symbol] [FILE]
+    Error out on [path] I/O error.
+
+MERGESWANTBLS [symbol] [path]
+    Reads file from [path], interprets it as a SWANTBLS file, creates two entries in [symbol]: ANIMATED and SWITCHES.
+    Error out on [path] I/O error or interpretation error.
+
+MERGETEXTUREFILE [symbol] [path]
+    Reads file from [path], interprets it as a texture/patch assembly file, creates TEXTUREx/PNAMES.
+    Error out on [path] I/O error or interpretation error.
+
+MERGETEXTUREDIR [symbol] [path]
+    Reads directory from [path].
+        Calls `MARKER [symbol] pp_start`.
+        For each file in DIR,
+            Add [file name] to PNAMES, add [file name] to TEXTURE1 with only patch [file name].
+        Calls `MARKER [symbol] pp_end`.
+        Export TEXTURE1/PNAMES.
+    Error out on [path] I/O error.
+
+OPEN [symbol] [path]
+    Synonym for:
+        CREATE [symbol]
+        MERGEWAD [symbol] [path]
+
+SAVE [symbol] [path]
+    Saves WadBuffer [symbol] out to a WAD file [path].
+    Error out on I/O error.
+
+FINISH [symbol] [path]
+    Synonym for:
+        SAVE [symbol] [path]
+        DISCARD [symbol]
+
