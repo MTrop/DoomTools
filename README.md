@@ -59,10 +59,6 @@ To clean up everything:
 
 	ant clean
 
-### Javadocs
-
-Online Javadocs can be found at: [https://mtrop.github.io/DoomStruct/javadoc/](https://mtrop.github.io/DoomStruct/javadoc/)
-
 ### Other
 
 This program/library and the accompanying materials
