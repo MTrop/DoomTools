@@ -1,1 +1,0 @@
-package net.mtrop.doom.wadmerge;
