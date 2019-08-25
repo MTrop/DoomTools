@@ -4,7 +4,7 @@ Copyright (c) 2019 Matt Tropiano
 
 ### Required Libraries
 
-[Doom](https://github.com/MTrop/DoomStruct)
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.3.0+
 
 ### Required Modules
 
