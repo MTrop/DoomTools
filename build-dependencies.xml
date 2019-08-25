@@ -73,6 +73,17 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="github-dl">
+		<attribute name="repository" />
+		<attribute name="dest" />
+		<attribute name="tag" />
+		<attribute name="file" />
+		<sequential>
+			<echo message="Fetching https://github.com/@{repository}/releases/download/@{tag}/@{file}..." />
+			<get retries="3" src="https://github.com/@{repository}/releases/download/@{tag}/@{file}" dest="@{dest}"/>
+		</sequential>
+	</macrodef>
+
 	<!-- Targets -->
 
 	<target name="clean.dependencies">

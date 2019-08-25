@@ -13,13 +13,19 @@
 	<!-- Dependencies -->
 	<property name="dev.base" value=".." />
 	<property name="S" value="${path.separator}" />
+	<property name="shell.dir" value="shell" />
 
 	<!-- Project Libs -->
+	<property name="doom.lib.version" value="2.3.0" />
+	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
+	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
+	<property name="doom.jar" value="${doom.project}.jar" />
+	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 	
 	<!-- Project Info -->
 	<property name="project.archive" value="wadmerge" />
 	<property name="project.javadoc.title" value="WadMerge" />
-	<property name="project.classpath" value=""/>
+	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -30,6 +36,27 @@
 	<import file="build-dependencies.xml" />
 	<import file="build-import.xml" />
 
+	<macrodef name="shell">
+		<attribute name="name" />
+		<attribute name="todir" default="." />
+		<attribute name="jarname" />
+		<attribute name="mainclass" />
+		<attribute name="options" default="" />
+		<sequential>
+			<copy file="${shell.dir}/compile/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
+			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_OPTIONS}}" value="@{options}" />
+			<replace file="@{todir}/@{name}.cmd" token="{{JAR_NAME}}" value="@{jarname}" />
+			<replace file="@{todir}/@{name}.cmd" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
+
+			<copy file="${shell.dir}/compile/app-name.sh" tofile="@{todir}/@{name}" />
+			<replace file="@{todir}/@{name}" token="{{JAVA_OPTIONS}}" value="@{options}" />
+			<replace file="@{todir}/@{name}" token="{{JAR_NAME}}" value="@{jarname}" />
+			<replace file="@{todir}/@{name}" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
+			
+			<chmod file="./@{name}" perm="ugo+rx"/>
+		</sequential>
+	</macrodef>
+	
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
         <javadoc access="protected" 
         	additionalparam="-J-Xmx512m  " author="true" 
@@ -52,11 +79,11 @@
     </target>	
 
 	<target name="dependency.doom">
-		<git-export repository="https://github.com/MTrop/DoomStruct.git" dest="${dependencies.dir}/Doom" />
-		<ant antfile="${dependencies.dir}/Doom/build.xml" useNativeBasedir="true" inheritAll="false" target="compile" />
+		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar}" dest="${dependencies.dir}" />
+		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar.src}" dest="${dependencies.dir}" />
 	</target>
 	
 	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
-	
+
 </project>
