@@ -1,8 +1,10 @@
 package net.mtrop.doom.tools.wadmerge;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -15,6 +17,11 @@ import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.io.IOUtils;
+import net.mtrop.doom.texture.CommonTexture;
+import net.mtrop.doom.texture.DoomTextureList;
+import net.mtrop.doom.texture.PatchNames;
+import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
@@ -430,7 +437,7 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param inDirectory the directory to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is valid, or BAD_DIRECTORY if the provided file is not a directory. 
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid, or BAD_DIRECTORY if the provided file is not a directory. 
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response mergeDirectory(String symbol, File inDirectory) throws IOException
@@ -464,9 +471,9 @@ public class WadMergeContext
 	 * If it encounters a directory, a marker is added (directory name prepended with a backslash), 
 	 * and {@link #mergeDirectory(String, File)} is called on it.
 	 * Symbol is case-insensitive.
-	 * @param symbol the buffer to write.
+	 * @param symbol the buffer to write to.
 	 * @param inDirectory the directory to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is valid, or BAD_DIRECTORY if the provided file is not a directory. 
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid, or BAD_DIRECTORY if the provided file is not a directory. 
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response mergeTree(String symbol, File inDirectory) throws IOException
@@ -499,11 +506,57 @@ public class WadMergeContext
 	}
 
 	/**
+	 * Merges a DEUTEX texture file into new TEXTURE1/PNAMES entries in a buffer.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to write to.
+	 * @param textureFile the texture file to parse.
+	 * @param textureEntryName the name of the texture entry name.
+	 * @return OK if the file was found and contents were merged in, 
+	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_PARSE if the file is incorrect,
+	 * 		or BAD_FILE if it does not exist or is a directory.
+	 * @throws IOException if the file could not be read.
+	 */
+	public Response mergeDEUTEXTextureFile(String symbol, File textureFile, String textureEntryName) throws IOException
+	{
+		if (!textureFile.exists() || textureFile.isDirectory())
+			return Response.BAD_FILE;
+
+		symbol = symbol.toLowerCase();
+		WadBuffer buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+
+		Texture currentTexture = null;
+		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(textureFile))))
+		{
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				line = line.trim();
+				if (line.isEmpty() || line.startsWith(";"))
+					continue;
+				
+				// TODO: Finish this.
+			}
+		}
+		
+		PatchNames pout;
+		DoomTextureList tout;
+		textureSet.export(pout = new PatchNames(), tout = new DoomTextureList());
+		buffer.addData("PNAMES", pout);
+		buffer.addData("TEXTURE1", tout);
+
+		return Response.OK;
+	}
+	
+	/**
 	 * Loads the contents of a Wad file into a buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to merge into.
 	 * @param wadFile the file to read from.
-	 * @return OK if the file was found and contents were merged in, false otherwise. 
+	 * @return OK if the file was found and contents were merged in, or BAD_SYMBOL if the symbol is invalid. 
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
@@ -526,7 +579,7 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is valid. 
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response save(String symbol, File outFile) throws IOException
@@ -545,7 +598,7 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is valid. 
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response finish(String symbol, File outFile) throws IOException
@@ -557,10 +610,6 @@ public class WadMergeContext
 	}
 	
 	/*
-
-MERGETEXTUREFILE [symbol] [path]
-    Reads file from [path], interprets it as a DEUTEX texture/patch assembly file, adds TEXTUREx/PNAMES.
-    Error out on [path] I/O error or interpretation error.
 
 MERGETEXTUREDIR [symbol] [path]
     Reads directory from [path].

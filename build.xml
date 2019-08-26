@@ -23,8 +23,8 @@
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 	
 	<!-- Project Info -->
-	<property name="project.archive" value="wadmerge" />
-	<property name="project.javadoc.title" value="WadMerge" />
+	<property name="project.archive" value="wadtools" />
+	<property name="project.javadoc.title" value="WadTools" />
 	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
@@ -60,7 +60,7 @@
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
         <javadoc access="protected" 
         	additionalparam="-J-Xmx512m  " author="true" 
-        	classpath="${bin.dir}" 
+        	classpath="${project.classpath}${path.separator}${bin.dir}" 
         	doctitle="${project.javadoc.title}" 
         	sourcepath="${src.dir}" 
         	packagenames="${project.javadoc.packages}"
@@ -78,12 +78,21 @@
         </javadoc>
     </target>	
 
+	<target name="jar.one" depends="compile">
+		<copy file="${dependencies.dir}/${doom.jar}" tofile="${jar.dir}/${jar.filename}" />
+		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+	</target>
+
 	<target name="dependency.doom">
 		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar}" dest="${dependencies.dir}" />
 		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar.src}" dest="${dependencies.dir}" />
 	</target>
 	
 	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.properties" description="Downloads and compiles the dependencies.">
+	</target>
+
+	<target name="release" depends="imported.release, jar.one" description="Zips together the application and shell scripts.">
+		<!--<shell name="wadmerge" todir="${build.dir}/shell" jarname="${jar.dir}/${jar.filename}" />-->
 	</target>
 
 </project>
