@@ -55,6 +55,10 @@ To compile, JAR, test, and Zip up everything:
 
 	ant release
 
+To create a distribution:
+
+	ant dist
+
 To clean up everything:
 
 	ant clean

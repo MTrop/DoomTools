@@ -35,10 +35,8 @@
 	<!-- Filesets -->
 	
 	<patternset id="pattern.documents">
-		<include name="AUTHORS.txt" />
 		<include name="LICENSE.txt" />
 		<include name="README.md" />
-		<include name="docs/*.*" />
 	</patternset>
 	
 	<fileset id="fileset.documents" dir=".">

@@ -10,6 +10,9 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
@@ -17,10 +20,12 @@ import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.io.IOUtils;
-import net.mtrop.doom.texture.CommonTexture;
+import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
+import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.texture.TextureSet.Patch;
 import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
@@ -28,7 +33,6 @@ import net.mtrop.doom.util.NameUtils;
 /**
  * The main context for WadMerge.
  * @author Matthew Tropiano
- * TODO: Finish
  */
 public class WadMergeContext
 {
@@ -46,7 +50,8 @@ public class WadMergeContext
 		BAD_WAD,
 		BAD_FILE,
 		BAD_DIRECTORY,
-		UNEXPECTED_ERROR;
+		UNEXPECTED_ERROR, 
+		BAD_PARSE;
 	}
 	
 	/** Map of open wads. */
@@ -246,7 +251,9 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 		
 		try {
-			buffer.addMarker(NameUtils.toValidEntryName(name));
+			String marker = NameUtils.toValidEntryName(name);
+			buffer.addMarker(marker);
+			verbosef("Added marker `%s` to buffer `%s`.\n", marker, symbol);
 		} catch (IOException e) {
 			// Shouldn't happen.
 			return Response.UNEXPECTED_ERROR;
@@ -269,7 +276,9 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 		
 		try {
-			buffer.addData(NameUtils.toValidEntryName(name), DATE_FORMAT.get().format(new Date()).getBytes(Charset.forName("ASCII")));
+			String marker = NameUtils.toValidEntryName(name);
+			buffer.addData(marker, DATE_FORMAT.get().format(new Date()).getBytes(Charset.forName("ASCII")));
+			verbosef("Added date marker `%s` to buffer `%s`.\n", marker, symbol);
 		} catch (IOException e) {
 			// Shouldn't happen.
 			return Response.UNEXPECTED_ERROR;
@@ -296,10 +305,16 @@ public class WadMergeContext
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 
-		try {
+		try 
+		{
 			for (WadEntry e : bufferSource)
+			{
 				bufferDest.addData(e.getName(), bufferSource.getData(e));
-		} catch (IOException e) {
+				verbosef("Added entry `%s` to buffer `%s` (from `%s`).\n", e.getName(), destinationSymbol, sourceSymbol);
+			}
+		} 
+		catch (IOException e) 
+		{
 			// Shouldn't happen.
 			return Response.UNEXPECTED_ERROR;
 		}
@@ -330,15 +345,20 @@ public class WadMergeContext
 		
 		try (WadFile wad = new WadFile(wadFile))
 		{
+			verbosef("Reading WAD `%s`...\n", wadFile.getPath());
 			for (WadEntry e : wad)
+			{
 				buffer.addData(e.getName(), wad.getData(e));
+				verbosef("Added entry `%s` to buffer `%s`.\n", e.getName(), symbol);
+			}
+			verbosef("Done reading `%s`.\n", wadFile.getPath());
 		}
 		
 		return Response.OK;
 	}
 
 	// Merge map into buffer, with rename.
-	private static Response mergeMap(WadBuffer buffer, String newHeader, Wad source, String header) throws IOException
+	private static Response mergeMap(WadBuffer buffer, String bufferName, String newHeader, Wad source, String header) throws IOException
 	{
 		WadEntry[] entries = MapUtils.getMapEntries(source, header);
 		if (entries.length == 0)
@@ -378,7 +398,9 @@ public class WadMergeContext
 		
 		try (WadFile wad = new WadFile(wadFile))
 		{
-			return mergeMap(buffer, newHeader, wad, header);
+			Response out = mergeMap(buffer, symbol, newHeader, wad, header);
+			verbosef("Added map `%s` to `%s` as `%s` (from `%s`).\n", header, symbol, newHeader, wadFile.getPath());
+			return out;
 		}		
 	}
 	
@@ -403,7 +425,9 @@ public class WadMergeContext
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 		
-		return mergeMap(bufferDest, newHeader, bufferSource, header);
+		Response out = mergeMap(bufferDest, destinationSymbol, newHeader, bufferSource, header);
+		verbosef("Added map `%s` to `%s` as `%s` (from `%s`).\n", header, destinationSymbol, newHeader, sourceSymbol);
+		return out;
 	}
 		
 	/**
@@ -427,6 +451,7 @@ public class WadMergeContext
 
 		String entryName = NameUtils.toValidEntryName(getFileNameWithoutExtension(inFile));
 		buffer.addData(entryName, IOUtils.getBinaryContents(new FileInputStream(inFile)));
+		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
 		return Response.OK;
 	}
 
@@ -486,9 +511,12 @@ public class WadMergeContext
 			Response resp;
 			if (f.isDirectory())
 			{
+				verbosef("Scan directory `%s`...\n", f.getPath());
 				if ((resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
 					return resp; 
-				continue;
+				if ((resp = mergeTree(symbol, f)) != Response.OK)
+					return resp; 
+				verbosef("Done scanning directory `%s`.\n", f.getPath());
 			}
 			else if (getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
 			{
@@ -506,7 +534,9 @@ public class WadMergeContext
 	}
 
 	/**
-	 * Merges a DEUTEX texture file into new TEXTURE1/PNAMES entries in a buffer.
+	 * Merges a DEUTEX texture file into new TEXTUREX/PNAMES entries in a buffer, 
+	 * using the name of the texture lump is the name of the file.
+	 * Will read in an existing PNAMES lump if it exists in the buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param textureFile the texture file to parse.
@@ -527,27 +557,322 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
+		PatchNames pout;
+		if (buffer.contains("PNAMES"))
+			pout = buffer.getDataAs("PNAMES", PatchNames.class);
+		else
+			pout = new PatchNames();
 		Texture currentTexture = null;
-		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
+		TextureSet textureSet = new TextureSet(pout, new DoomTextureList(128));
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(textureFile))))
 		{
 			String line;
+			int linenum = 0;
+			Pattern whitespacePattern = Pattern.compile("\\s+"); 
 			while ((line = reader.readLine()) != null)
 			{
 				line = line.trim();
+				linenum++;
 				if (line.isEmpty() || line.startsWith(";"))
 					continue;
 				
-				// TODO: Finish this.
+				if (line.startsWith("*")) // is patch.
+				{
+					if (currentTexture == null)
+					{
+						logf("ERROR: %s, line %d: Patch line before texture line.\n", textureFile.getPath(), linenum);
+						return Response.BAD_PARSE;
+					}
+					
+					String elementName = "";
+					try (Scanner scanner = new Scanner(line)) 
+					{
+						scanner.useDelimiter(whitespacePattern);
+						elementName = "star";
+						if (!scanner.next().equals("*"))
+						{
+							logf("ERROR: %s, line %d: Malformed patch: missing star prefix.\n", textureFile.getPath(), linenum);
+							return Response.BAD_PARSE;
+						}
+						elementName = "name";
+						Patch p = currentTexture.createPatch(NameUtils.toValidEntryName(scanner.next()));
+						elementName = "origin X";
+						p.setOriginX(scanner.nextInt());
+						elementName = "origin Y";
+						p.setOriginY(scanner.nextInt());
+						verbosef("    Add patch `%s`.\n", p.getName());
+					} 
+					catch (NoSuchElementException e) 
+					{
+						logf("ERROR: %s, line %d: Malformed patch: missing %s.\n", textureFile.getPath(), linenum, elementName);
+						return Response.BAD_PARSE;
+					}
+				}
+				else // is new texture.
+				{
+					String elementName = "";
+					try (Scanner scanner = new Scanner(line)) 
+					{
+						scanner.useDelimiter(whitespacePattern);
+						elementName = "name";
+						currentTexture = textureSet.createTexture(NameUtils.toValidTextureName(scanner.next()));
+						elementName = "width";
+						currentTexture.setWidth(scanner.nextInt());
+						elementName = "height";
+						currentTexture.setHeight(scanner.nextInt());
+						verbosef("Add texture `%s`...\n", currentTexture.getName());
+					} 
+					catch (NoSuchElementException e) 
+					{
+						logf("ERROR: %s, line %d: Malformed patch: missing %s.\n", textureFile.getPath(), linenum, elementName);
+						return Response.BAD_PARSE;
+					}
+				}
 			}
 		}
 		
+		DoomTextureList tout;
+		textureSet.export(pout = new PatchNames(), tout = new DoomTextureList());
+		if (buffer.contains("PNAMES"))
+			buffer.deleteEntry(buffer.indexOf("PNAMES"));
+		
+		textureEntryName = NameUtils.toValidEntryName(textureEntryName);
+		buffer.addData(textureEntryName, tout);
+		verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
+		buffer.addData("PNAMES", pout);
+		verbosef("Added `PNAMES` to `%s`.\n", symbol);
+
+		return Response.OK;
+	}
+	
+	/**
+	 * Creates TEXTUREX/PNAMES entries in a buffer, using a directory of patches as the only textures,
+	 * and imports all of the patch files between PP_START and PP_END markers.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to write to.
+	 * @param textureDirectory the texture file to parse.
+	 * @param textureEntryName the name of the texture entry name.
+	 * @return OK if the file was found and contents were merged in, 
+	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_DIRECTORY if the provided file is not a directory.
+	 * @throws IOException if the file could not be read.
+	 */
+	public Response mergeTextureDirectory(String symbol, File textureDirectory, String textureEntryName) throws IOException
+	{
+		if (!textureDirectory.exists() || !textureDirectory.isDirectory())
+			return Response.BAD_DIRECTORY;
+
+		symbol = symbol.toLowerCase();
+		WadBuffer buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+
+		Response resp;
+		if ((resp = addMarker(symbol, "PP_START")) != Response.OK)
+			return resp;
+		
+		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
+		for (File f : textureDirectory.listFiles())
+		{
+			if (f.isDirectory())
+			{
+				verbosef("Skipping directory `%s`...\n", f.getPath());
+				continue;
+			}
+			else
+			{
+				if ((resp = mergeFile(symbol, f)) != Response.OK)
+					return resp; 
+				String textureName = NameUtils.toValidTextureName(getFileNameWithoutExtension(f));
+				textureSet.createTexture(textureName).createPatch(textureName);
+				verbosef("Add texture `%s`...\n", textureName);
+			}
+		}
+
+		if ((resp = addMarker(symbol, "PP_END")) != Response.OK)
+			return resp;
+
 		PatchNames pout;
 		DoomTextureList tout;
 		textureSet.export(pout = new PatchNames(), tout = new DoomTextureList());
-		buffer.addData("PNAMES", pout);
-		buffer.addData("TEXTURE1", tout);
 
+		textureEntryName = NameUtils.toValidEntryName(textureEntryName);
+		buffer.addData(textureEntryName, tout);
+		verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
+		buffer.addData("PNAMES", pout);
+		verbosef("Added `PNAMES` to `%s`.\n", symbol);
+		
+		return Response.OK;
+	}
+	
+	/**
+	 * Creates ANIMATED and SWITCHES entries in a buffer using a table file read by SWANTBLS.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to write to.
+	 * @param swantblsFile the texture file to parse.
+	 * @return OK if the file was found and contents were merged in, 
+	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_DIRECTORY if the provided file is not a directory.
+	 * @throws IOException if the file could not be read.
+	 */
+	public Response mergeSwitchAnimatedTables(String symbol, File swantblsFile) throws IOException
+	{
+		if (!swantblsFile.exists() || swantblsFile.isDirectory())
+			return Response.BAD_FILE;
+
+		symbol = symbol.toLowerCase();
+		WadBuffer buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+
+		Animated animated = new Animated();
+		Switches switches = new Switches();
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(swantblsFile))))
+		{
+			final int STATE_NONE = 0;
+			final int STATE_SWITCHES = 1;
+			final int STATE_FLATS = 2;
+			final int STATE_TEXTURES = 3;
+			Pattern whitespacePattern = Pattern.compile("\\s+"); 
+
+			String line;
+			int linenum = 0;
+			int state = STATE_NONE;
+			
+			Switches.Game[] SWITCH_GAMES = Switches.Game.values();
+			
+			while ((line = reader.readLine()) != null)
+			{
+				line = line.trim();
+				linenum++;
+				if (line.isEmpty() || line.startsWith("#"))
+					continue;
+				
+				if (line.startsWith("[") && line.endsWith("]"))
+				{
+					String type = line.substring(1, line.length() - 1);
+					if (type.equals("SWITCHES"))
+						state = STATE_SWITCHES;
+					else if (type.equals("FLATS"))
+						state = STATE_FLATS;
+					else if (type.equals("TEXTURES"))
+						state = STATE_TEXTURES;
+					else
+					{
+						logf("ERROR: %s, line %d: Malformed patch: bad type header: %s. Expected SWITCHES, FLATS, or TEXTURES.\n", swantblsFile.getPath(), linenum, type);
+						return Response.BAD_PARSE;
+					}
+				}
+				else switch (state)
+				{
+					case STATE_NONE:
+					{
+						logf("ERROR: %s, line %d: No type header found. Expected [SWITCHES], [FLATS], or [TEXTURES] before entries.\n", swantblsFile.getPath(), linenum);
+						return Response.BAD_PARSE;
+					}
+					
+					case STATE_SWITCHES:
+					{
+						String elementName = "";
+						try (Scanner scanner = new Scanner(line))
+						{
+							scanner.useDelimiter(whitespacePattern);
+							
+							elementName = "game";
+							int gameId = scanner.nextInt();
+							if (gameId < 1 || gameId >= SWITCH_GAMES.length)
+							{
+								logf("ERROR: %s, line %d: Bad switch game: %d. Expected 1, 2, 3.\n", swantblsFile.getPath(), linenum, gameId);
+								return Response.BAD_PARSE;
+							}
+							
+							elementName = "\"off\" texture";
+							String off = NameUtils.toValidTextureName(scanner.next());
+							
+							elementName = "\"on\" texture";
+							String on = NameUtils.toValidTextureName(scanner.next());
+
+							switches.addEntry(off, on, SWITCH_GAMES[gameId]); 
+						}
+						catch (NoSuchElementException e) 
+						{
+							logf("ERROR: %s, line %d: Malformed switch: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
+							return Response.BAD_PARSE;
+						}
+					}
+					break;
+					
+					case STATE_FLATS:
+					{
+						String elementName = "";
+						try (Scanner scanner = new Scanner(line))
+						{
+							scanner.useDelimiter(whitespacePattern);
+							
+							elementName = "tics";
+							int tics = scanner.nextInt();
+							if (tics < 0)
+							{
+								logf("ERROR: %s, line %d: Bad animated flat. Tic duration is negative.\n", swantblsFile.getPath(), linenum);
+								return Response.BAD_PARSE;
+							}
+							
+							elementName = "ending texture";
+							String lastName = NameUtils.toValidTextureName(scanner.next());
+							
+							elementName = "starting texture";
+							String firstName = NameUtils.toValidTextureName(scanner.next());
+
+							animated.addEntry(Animated.flat(lastName, firstName, tics)); 
+						}
+						catch (NoSuchElementException e) 
+						{
+							logf("ERROR: %s, line %d: Malformed flat: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
+							return Response.BAD_PARSE;
+						}
+					}
+					break;
+					
+					case STATE_TEXTURES:
+					{
+						String elementName = "";
+						try (Scanner scanner = new Scanner(line))
+						{
+							scanner.useDelimiter(whitespacePattern);
+							
+							elementName = "tics";
+							int tics = scanner.nextInt();
+							if (tics < 0)
+							{
+								logf("ERROR: %s, line %d: Bad animated texture. Tic duration is negative.\n", swantblsFile.getPath(), linenum);
+								return Response.BAD_PARSE;
+							}
+							
+							elementName = "ending texture";
+							String lastName = NameUtils.toValidTextureName(scanner.next());
+							
+							elementName = "starting texture";
+							String firstName = NameUtils.toValidTextureName(scanner.next());
+
+							animated.addEntry(Animated.texture(lastName, firstName, tics)); 
+						}
+						catch (NoSuchElementException e) 
+						{
+							logf("ERROR: %s, line %d: Malformed texture: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
+							return Response.BAD_PARSE;
+						}
+					}
+					break;
+				}
+			}
+		}
+		
+		buffer.addData("ANIMATED", animated);
+		verbosef("Added `ANIMATED` to `%s`.\n", symbol);
+		buffer.addData("SWITCHES", switches);
+		verbosef("Added `SWITCHES` to `%s`.\n", symbol);
+		
 		return Response.OK;
 	}
 	
@@ -571,7 +896,9 @@ public class WadMergeContext
 		Response out;
 		if ((out = create(symbol)) != Response.OK)
 			return out;
-		return mergeWad(symbol, wadFile);
+		if ((out = mergeWad(symbol, wadFile)) != Response.OK)
+			return out;
+		return Response.OK;
 	}
 	
 	/**
@@ -590,6 +917,7 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 
 		buffer.writeToFile(outFile);
+		logf("Wrote file `%s`.\n", outFile.getPath());
 		return Response.OK;
 	}
 	
@@ -608,22 +936,5 @@ public class WadMergeContext
 			return out;
 		return discard(symbol);
 	}
-	
-	/*
-
-MERGETEXTUREDIR [symbol] [path]
-    Reads directory from [path].
-        Calls `MARKER [symbol] pp_start`.
-        For each file in DIR,
-            Add [file name] to PNAMES, add [file name] to TEXTURE1 with only patch [file name].
-        Calls `MARKER [symbol] pp_end`.
-        Export TEXTURE1/PNAMES.
-    Error out on [path] I/O error.
-
-MERGESWANTBLS [symbol] [path]
-    Reads file from [path], interprets it as a SWANTBLS file, creates two entries in [symbol]: ANIMATED and SWITCHES.
-    Error out on [path] I/O error or interpretation error.
-
-	 */
 	
 }

@@ -21,7 +21,7 @@
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
-	
+
 	<!-- Project Info -->
 	<property name="project.archive" value="wadtools" />
 	<property name="project.javadoc.title" value="WadTools" />
@@ -36,24 +36,37 @@
 	<import file="build-dependencies.xml" />
 	<import file="build-import.xml" />
 
-	<macrodef name="shell">
+	<!-- Filenames -->
+	<property name="zip.dist.filename" value="${project.archive}-${build.version}.zip" />
+
+	<macrodef name="shell-cmd">
 		<attribute name="name" />
 		<attribute name="todir" default="." />
 		<attribute name="jarname" />
 		<attribute name="mainclass" />
 		<attribute name="options" default="" />
 		<sequential>
-			<copy file="${shell.dir}/compile/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
+			<delete file="@{todir}/@{name}.cmd" failonerror="false" />
+			<copy file="${shell.dir}/jar/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_OPTIONS}}" value="@{options}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAR_NAME}}" value="@{jarname}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
-
-			<copy file="${shell.dir}/compile/app-name.sh" tofile="@{todir}/@{name}" />
+		</sequential>
+	</macrodef>
+	
+	<macrodef name="shell-bash">
+		<attribute name="name" />
+		<attribute name="todir" default="." />
+		<attribute name="jarname" />
+		<attribute name="mainclass" />
+		<attribute name="options" default="" />
+		<sequential>
+			<delete file="@{todir}/@{name}" failonerror="false" />
+			<copy file="${shell.dir}/jar/app-name.sh" tofile="@{todir}/@{name}" />
 			<replace file="@{todir}/@{name}" token="{{JAVA_OPTIONS}}" value="@{options}" />
 			<replace file="@{todir}/@{name}" token="{{JAR_NAME}}" value="@{jarname}" />
 			<replace file="@{todir}/@{name}" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
-			
-			<chmod file="./@{name}" perm="ugo+rx"/>
+			<chmod file="@{todir}/@{name}" perm="ugo+rx"/>
 		</sequential>
 	</macrodef>
 	
@@ -91,8 +104,18 @@
 	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
-	<target name="release" depends="imported.release, jar.one" description="Zips together the application and shell scripts.">
-		<!--<shell name="wadmerge" todir="${build.dir}/shell" jarname="${jar.dir}/${jar.filename}" />-->
+	<target name="scripts" description="Creates application shell scripts.">
+		<shell-cmd name="wadmerge" todir="${build.dir}/shell" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-bash name="wadmerge" todir="${build.dir}/shell" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+	</target>
+
+	<target name="dist" depends="init.jar, jar.one, scripts, init.zip" description="Zips together the application and shell scripts.">
+		<zip destfile="${zip.dir}/${zip.dist.filename}" compress="true">
+			<fileset file="${jar.dir}/${jar.filename}" />
+			<zipfileset dir="${build.dir}/shell" />
+			<zipfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset dir="docs" prefix="docs" />
+		</zip>
 	</target>
 
 </project>
