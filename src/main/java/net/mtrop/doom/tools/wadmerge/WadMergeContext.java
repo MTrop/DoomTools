@@ -41,19 +41,6 @@ public class WadMergeContext
 		()->new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ")
 	);
 
-	public static enum Response
-	{
-		OK,
-		BAD_SYMBOL,
-		BAD_SOURCE_SYMBOL,
-		BAD_MAP,
-		BAD_WAD,
-		BAD_FILE,
-		BAD_DIRECTORY,
-		UNEXPECTED_ERROR, 
-		BAD_PARSE;
-	}
-	
 	/** Map of open wads. */
 	private HashMap<String, WadBuffer> currentWads;
 	/** Log out print stream. */
@@ -81,25 +68,25 @@ public class WadMergeContext
 		this.verbose = verbose;
 	}
 	
-	private void verboseln(String seq)
+	public void verboseln(String seq)
 	{
 		if (verbose)
 			logln(seq);
 	}
 	
-	private void verbosef(String seq, Object... args)
+	public void verbosef(String seq, Object... args)
 	{
 		if (verbose)
 			logf(seq);
 	}
 
-	private void logln(String seq)
+	public void logln(String seq)
 	{
 		if (logout != null)
 			logout.println(seq);
 	}
 	
-	private void logf(String seq, Object... args)
+	public void logf(String seq, Object... args)
 	{
 		if (logout != null)
 			logout.printf(seq, args);
@@ -111,7 +98,7 @@ public class WadMergeContext
 	 * @param extensionSeparator the text or characters that separates file name from extension.
 	 * @return the file's name without extension.
 	 */
-	private static String getFileNameWithoutExtension(String filename, String extensionSeparator)
+	public static String getFileNameWithoutExtension(String filename, String extensionSeparator)
 	{
 		int extindex = filename.lastIndexOf(extensionSeparator);
 		if (extindex >= 0)
@@ -124,7 +111,7 @@ public class WadMergeContext
 	 * @param file the file.
 	 * @return the file's name without extension.
 	 */
-	private static String getFileNameWithoutExtension(File file)
+	public static String getFileNameWithoutExtension(File file)
 	{
 		return getFileNameWithoutExtension(file.getName(), ".");
 	}
@@ -152,6 +139,47 @@ public class WadMergeContext
 	private static String getFileExtension(File file)
 	{
 		return getFileExtension(file.getName(), ".");
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param file	the abstract file path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPathForFile(File file)
+	{
+		return createPathForFile(file.getAbsolutePath());
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param path	the abstract path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPathForFile(String path)
+	{
+		int sindx = -1;
+		
+		if ((sindx = Math.max(
+				path.lastIndexOf(File.separator), 
+				path.lastIndexOf("/"))) != -1)
+		{
+			return createPath(path.substring(0, sindx));
+		}
+		return true;
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param path	the abstract path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPath(String path)
+	{
+		File dir = new File(path);
+		if (dir.exists())
+			return true;
+		return dir.mkdirs();
 	}
 
 	/**
@@ -412,6 +440,8 @@ public class WadMergeContext
 	 * @param sourceSymbol the buffer to read from.
 	 * @param header the map header.
 	 * @return OK if the file was found and contents were merged in, false otherwise. 
+	 * @throws IOException if the file could not be read.
+	 * @throws WadException if the file is not a Wad file.
 	 */
 	public Response mergeMap(String destinationSymbol, String newHeader, String sourceSymbol, String header) throws IOException, WadException
 	{
@@ -916,6 +946,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
+		createPathForFile(outFile);
 		buffer.writeToFile(outFile);
 		logf("Wrote file `%s`.\n", outFile.getPath());
 		return Response.OK;
