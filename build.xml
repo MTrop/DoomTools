@@ -23,8 +23,8 @@
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 
 	<!-- Project Info -->
-	<property name="project.archive" value="wadtools" />
-	<property name="project.javadoc.title" value="WadTools" />
+	<property name="project.archive" value="doomtools" />
+	<property name="project.javadoc.title" value="DoomTools" />
 	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
@@ -38,6 +38,7 @@
 
 	<!-- Filenames -->
 	<property name="zip.dist.filename" value="${project.archive}-${build.version}.zip" />
+	<property name="tar.dist.filename" value="${project.archive}-${build.version}.tar.gz" />
 
 	<macrodef name="shell-cmd">
 		<attribute name="name" />
@@ -105,17 +106,23 @@
 	</target>
 
 	<target name="scripts" description="Creates application shell scripts.">
-		<shell-cmd name="wadmerge" todir="${build.dir}/shell" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
-		<shell-bash name="wadmerge" todir="${build.dir}/shell" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-cmd name="wadmerge" todir="${build.dir}/shell/cmd" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-bash name="wadmerge" todir="${build.dir}/shell/bash" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
 	</target>
 
 	<target name="dist" depends="init.jar, jar.one, scripts, init.zip" description="Zips together the application and shell scripts.">
 		<zip destfile="${zip.dir}/${zip.dist.filename}" compress="true">
 			<fileset file="${jar.dir}/${jar.filename}" />
-			<zipfileset dir="${build.dir}/shell" />
+			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
 		</zip>
+		<tar destfile="${zip.dir}/${tar.dist.filename}" compression="gzip">
+			<fileset file="${jar.dir}/${jar.filename}" />
+			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
+			<tarfileset refid="fileset.documents" prefix="docs" />
+			<tarfileset dir="docs" prefix="docs" />
+		</tar>
 	</target>
 
 </project>
