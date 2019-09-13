@@ -1,4 +1,4 @@
-# WadMerge 1.0.0
+# Doom Tools
 
 Copyright (c) 2019 Matt Tropiano  
 
@@ -19,11 +19,11 @@ The `master` branch contains stable code. Until a release is cut, the `master` b
 
 ### Introduction
 
-A utility for merging all sorts of Doom stuff into one WAD.
+A bunch of command-line utilities for Doom stuff. This time, they're useful.
 
 ### Why?
 
-Because it's super useful.
+Because it's super useful, and can run anywhere (that runs Java).
 
 ### Compiling with Ant
 
@@ -55,7 +55,7 @@ To compile, JAR, test, and Zip up everything:
 
 	ant release
 
-To create a distribution:
+To create a distribution (Bash and CMD):
 
 	ant dist
 
