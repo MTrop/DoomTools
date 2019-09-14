@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.common;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -17,6 +18,35 @@ import net.mtrop.doom.util.NameUtils;
  */
 public final class Common
 {
+	private static final String SWANTBLS_HEADER = (new StringBuilder())
+		.append("#\n")
+		.append("# This file is input for SWANTBLS.EXE, it specifies the switchnames\n")
+		.append("# and animated textures and flats usable with BOOM. The output of\n")
+		.append("# SWANTBLS is two lumps, SWITCHES.LMP and ANIMATED.LMP that should\n")
+		.append("# be inserted in the PWAD as lumps.\n")
+		.append("#\n")
+		.append("# switches usable with each IWAD, 1=SW, 2=registered DOOM, 3=DOOM2\n")			
+	.toString();
+
+	private static final String SWANTBLS_SWITCHES = (new StringBuilder())
+		.append("# switches usable with each IWAD, 1=SW, 2=registered DOOM, 3=DOOM2\n")
+		.append("[SWITCHES]\n")
+		.append("# epi   texture1        texture2\n")
+	.toString();
+
+	private static final String SWANTBLS_ANIMFLATS = (new StringBuilder())
+		.append("# animated flats, spd is number of frames between changes\n")
+		.append("# 65536 = warping, in EE\n")
+		.append("[FLATS]\n")
+		.append("# spd   last        first\n")
+	.toString();
+
+	private static final String SWANTBLS_ANIMTEX = (new StringBuilder())
+		.append("#animated textures, spd is number of frames between changes\n")
+		.append("[TEXTURES]\n")
+		.append("# spd   last        first\n")
+	.toString();
+
 	/**
 	 * Parses a SWANTBLS file for ANIMATED and SWITCHES data.
 	 * @param reader the input reader.
@@ -26,11 +56,7 @@ public final class Common
 	 * @throws FileNotFoundException
 	 * @throws ParseException on bad parse.
 	 */
-	public static void parseSwitchAnimatedTables(
-			BufferedReader reader, 
-			Animated animated, 
-			Switches switches
-	) throws IOException, FileNotFoundException, ParseException
+	public static void parseSwitchAnimatedTables(BufferedReader reader, Animated animated, Switches switches) throws IOException, FileNotFoundException, ParseException
 	{
 		final int STATE_NONE = 0;
 		final int STATE_SWITCHES = 1;
@@ -158,4 +184,18 @@ public final class Common
 		}
 	}
 
+	/**
+	 * Writes SWANTBLS data to a print writer.
+	 * @param switches the switches data.
+	 * @param animated the animated data.
+	 * @param header the header blurb to write first.
+	 * @param writer the writer to write out to.
+	 * @throws IOException if an error occurs uring write.
+	 */
+	public static void writeSwitchAnimatedTables(Switches switches, Animated animated, String header, PrintWriter writer) throws IOException
+	{
+		writer.println(header);
+		// TODO: Finish this.
+	}
+	
 }
