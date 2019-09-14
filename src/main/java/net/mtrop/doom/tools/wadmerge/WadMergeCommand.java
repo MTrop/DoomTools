@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.tools.common.Response;
 
 /**
  * The Wad Merge commands.

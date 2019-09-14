@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.wadmerge;
+package net.mtrop.doom.tools.common;
 
 public enum Response
 {

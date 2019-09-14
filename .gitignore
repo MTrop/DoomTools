@@ -1,6 +1,7 @@
 /bin
 /build
 /deps
+/dist
 /target
 /.idea
 build.properties

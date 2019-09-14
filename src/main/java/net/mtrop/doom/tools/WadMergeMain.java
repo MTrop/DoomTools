@@ -45,6 +45,7 @@ public final class WadMergeMain
 		Options()
 		{
 			this.help = false;
+			this.version = false;
 			this.verbose = false;
 			this.systemIn = false;
 			this.inputFile = new File("wadmerge.txt");
@@ -114,7 +115,7 @@ public final class WadMergeMain
 		out.println("    -v");
 		out.println();
 		out.println("[scriptfile]:");
-		out.println("    <file>        The input script file.");
+		out.println("    <filename>    The input script file.");
 		out.println();
 		out.println("    --            Script input is from Standard In, not a file.");
 		out.println();
@@ -148,7 +149,6 @@ public final class WadMergeMain
 		if (options.version)
 		{
 			splash(System.out);
-			System.out.println();
 			System.exit(ERROR_NONE);
 		}
 		

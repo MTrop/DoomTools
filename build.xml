@@ -14,6 +14,7 @@
 	<property name="dev.base" value=".." />
 	<property name="S" value="${path.separator}" />
 	<property name="shell.dir" value="shell" />
+	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
 	<property name="doom.lib.version" value="2.3.0" />
@@ -71,6 +72,14 @@
 		</sequential>
 	</macrodef>
 	
+	<target name="clean.dist" description="Cleans up the distribution folder.">
+		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+
+	<target name="init.dist" depends="clean.dist" description="Initializes the distribution folders.">
+		<mkdir dir="${dist.dir}" />
+	</target>
+
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
         <javadoc access="protected" 
         	additionalparam="-J-Xmx512m  " author="true" 
@@ -106,19 +115,23 @@
 	</target>
 
 	<target name="scripts" description="Creates application shell scripts.">
-		<shell-cmd name="wadmerge" todir="${build.dir}/shell/cmd" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
-		<shell-bash name="wadmerge" todir="${build.dir}/shell/bash" jarname="${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<!-- WadMerge -->
+		<shell-cmd name="wadmerge" todir="${build.dir}/shell/cmd" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-bash name="wadmerge" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<!-- JSWANTBLS -->
+		<shell-cmd name="jswantbls" todir="${build.dir}/shell/cmd" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.JSwitchAnimatedTablesMain" />
+		<shell-bash name="jswantbls" todir="${build.dir}/shell/bash" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.JSwitchAnimatedTablesMain" />
 	</target>
 
-	<target name="dist" depends="init.jar, jar.one, scripts, init.zip" description="Zips together the application and shell scripts.">
-		<zip destfile="${zip.dir}/${zip.dist.filename}" compress="true">
-			<fileset file="${jar.dir}/${jar.filename}" />
+	<target name="dist" depends="init.jar, jar.one, scripts, init.dist" description="Zips together the application and shell scripts.">
+		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
+			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
 		</zip>
-		<tar destfile="${zip.dir}/${tar.dist.filename}" compression="gzip">
-			<fileset file="${jar.dir}/${jar.filename}" />
+		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
+			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
 			<tarfileset refid="fileset.documents" prefix="docs" />
 			<tarfileset dir="docs" prefix="docs" />

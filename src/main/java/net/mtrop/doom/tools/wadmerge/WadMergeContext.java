@@ -27,6 +27,9 @@ import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Patch;
 import net.mtrop.doom.texture.TextureSet.Texture;
+import net.mtrop.doom.tools.common.Response;
+import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
@@ -737,6 +740,7 @@ public class WadMergeContext
 	
 	/**
 	 * Creates ANIMATED and SWITCHES entries in a buffer using a table file read by SWANTBLS.
+	 * If ANIMATED and SWITCHES exist, they are appended to.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param swantblsFile the texture file to parse.
@@ -755,157 +759,29 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		Animated animated = new Animated();
-		Switches switches = new Switches();
+		Animated animated;
+		if ((animated = buffer.getDataAs("ANIMATED", Animated.class)) == null)
+			animated = new Animated();
+		Switches switches;
+		if ((switches = buffer.getDataAs("SWITCHES", Switches.class)) == null)
+			switches = new Switches();
 		
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(swantblsFile))))
 		{
-			final int STATE_NONE = 0;
-			final int STATE_SWITCHES = 1;
-			final int STATE_FLATS = 2;
-			final int STATE_TEXTURES = 3;
-			Pattern whitespacePattern = Pattern.compile("\\s+"); 
-
-			String line;
-			int linenum = 0;
-			int state = STATE_NONE;
-			
-			Switches.Game[] SWITCH_GAMES = Switches.Game.values();
-			
-			while ((line = reader.readLine()) != null)
-			{
-				line = line.trim();
-				linenum++;
-				if (line.isEmpty() || line.startsWith("#"))
-					continue;
-				
-				if (line.startsWith("[") && line.endsWith("]"))
-				{
-					String type = line.substring(1, line.length() - 1);
-					if (type.equals("SWITCHES"))
-						state = STATE_SWITCHES;
-					else if (type.equals("FLATS"))
-						state = STATE_FLATS;
-					else if (type.equals("TEXTURES"))
-						state = STATE_TEXTURES;
-					else
-					{
-						logf("ERROR: %s, line %d: Malformed patch: bad type header: %s. Expected SWITCHES, FLATS, or TEXTURES.\n", swantblsFile.getPath(), linenum, type);
-						return Response.BAD_PARSE;
-					}
-				}
-				else switch (state)
-				{
-					case STATE_NONE:
-					{
-						logf("ERROR: %s, line %d: No type header found. Expected [SWITCHES], [FLATS], or [TEXTURES] before entries.\n", swantblsFile.getPath(), linenum);
-						return Response.BAD_PARSE;
-					}
-					
-					case STATE_SWITCHES:
-					{
-						String elementName = "";
-						try (Scanner scanner = new Scanner(line))
-						{
-							scanner.useDelimiter(whitespacePattern);
-							
-							elementName = "game";
-							int gameId = scanner.nextInt();
-							if (gameId < 1 || gameId >= SWITCH_GAMES.length)
-							{
-								logf("ERROR: %s, line %d: Bad switch game: %d. Expected 1, 2, 3.\n", swantblsFile.getPath(), linenum, gameId);
-								return Response.BAD_PARSE;
-							}
-							
-							elementName = "\"off\" texture";
-							String off = NameUtils.toValidTextureName(scanner.next());
-							
-							elementName = "\"on\" texture";
-							String on = NameUtils.toValidTextureName(scanner.next());
-
-							switches.addEntry(off, on, SWITCH_GAMES[gameId]); 
-						}
-						catch (NoSuchElementException e) 
-						{
-							logf("ERROR: %s, line %d: Malformed switch: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
-							return Response.BAD_PARSE;
-						}
-					}
-					break;
-					
-					case STATE_FLATS:
-					{
-						String elementName = "";
-						try (Scanner scanner = new Scanner(line))
-						{
-							scanner.useDelimiter(whitespacePattern);
-							
-							elementName = "tics";
-							int tics = scanner.nextInt();
-							if (tics < 0)
-							{
-								logf("ERROR: %s, line %d: Bad animated flat. Tic duration is negative.\n", swantblsFile.getPath(), linenum);
-								return Response.BAD_PARSE;
-							}
-							
-							elementName = "ending texture";
-							String lastName = NameUtils.toValidTextureName(scanner.next());
-							
-							elementName = "starting texture";
-							String firstName = NameUtils.toValidTextureName(scanner.next());
-
-							animated.addEntry(Animated.flat(lastName, firstName, tics)); 
-						}
-						catch (NoSuchElementException e) 
-						{
-							logf("ERROR: %s, line %d: Malformed flat: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
-							return Response.BAD_PARSE;
-						}
-					}
-					break;
-					
-					case STATE_TEXTURES:
-					{
-						String elementName = "";
-						try (Scanner scanner = new Scanner(line))
-						{
-							scanner.useDelimiter(whitespacePattern);
-							
-							elementName = "tics";
-							int tics = scanner.nextInt();
-							if (tics < 0)
-							{
-								logf("ERROR: %s, line %d: Bad animated texture. Tic duration is negative.\n", swantblsFile.getPath(), linenum);
-								return Response.BAD_PARSE;
-							}
-							
-							elementName = "ending texture";
-							String lastName = NameUtils.toValidTextureName(scanner.next());
-							
-							elementName = "starting texture";
-							String firstName = NameUtils.toValidTextureName(scanner.next());
-
-							animated.addEntry(Animated.texture(lastName, firstName, tics)); 
-						}
-						catch (NoSuchElementException e) 
-						{
-							logf("ERROR: %s, line %d: Malformed texture: missing %s.\n", swantblsFile.getPath(), linenum, elementName);
-							return Response.BAD_PARSE;
-						}
-					}
-					break;
-				}
-			}
+			Common.parseSwitchAnimatedTables(reader, animated, switches);
+			buffer.addData("ANIMATED", animated);
+			verbosef("Added `ANIMATED` to `%s`.\n", symbol);
+			buffer.addData("SWITCHES", switches);
+			verbosef("Added `SWITCHES` to `%s`.\n", symbol);
+			return Response.OK;
 		}
-		
-		buffer.addData("ANIMATED", animated);
-		verbosef("Added `ANIMATED` to `%s`.\n", symbol);
-		buffer.addData("SWITCHES", switches);
-		verbosef("Added `SWITCHES` to `%s`.\n", symbol);
-		
-		return Response.OK;
+		catch (ParseException e)
+		{
+			logln("ERROR: "+ swantblsFile + ", " + e.getMessage());
+			return Response.BAD_PARSE;
+		}
 	}
-	
+
 	/**
 	 * Loads the contents of a Wad file into a buffer.
 	 * Symbol is case-insensitive.
