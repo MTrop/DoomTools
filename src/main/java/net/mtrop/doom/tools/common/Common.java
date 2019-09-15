@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -23,28 +24,26 @@ public final class Common
 		.append("# This file is input for SWANTBLS.EXE, it specifies the switchnames\n")
 		.append("# and animated textures and flats usable with BOOM. The output of\n")
 		.append("# SWANTBLS is two lumps, SWITCHES.LMP and ANIMATED.LMP that should\n")
-		.append("# be inserted in the PWAD as lumps.\n")
-		.append("#\n")
-		.append("# switches usable with each IWAD, 1=SW, 2=registered DOOM, 3=DOOM2\n")			
+		.append("# be inserted in the PWAD as lumps.")
 	.toString();
 
 	private static final String SWANTBLS_SWITCHES = (new StringBuilder())
 		.append("# switches usable with each IWAD, 1=SW, 2=registered DOOM, 3=DOOM2\n")
 		.append("[SWITCHES]\n")
-		.append("# epi   texture1        texture2\n")
+		.append("# epi   texture1        texture2")
 	.toString();
 
 	private static final String SWANTBLS_ANIMFLATS = (new StringBuilder())
 		.append("# animated flats, spd is number of frames between changes\n")
 		.append("# 65536 = warping, in EE\n")
 		.append("[FLATS]\n")
-		.append("# spd   last        first\n")
+		.append("# spd   last        first")
 	.toString();
 
 	private static final String SWANTBLS_ANIMTEX = (new StringBuilder())
-		.append("#animated textures, spd is number of frames between changes\n")
+		.append("# animated textures, spd is number of frames between changes\n")
 		.append("[TEXTURES]\n")
-		.append("# spd   last        first\n")
+		.append("# spd   last        first")
 	.toString();
 
 	/**
@@ -56,7 +55,7 @@ public final class Common
 	 * @throws FileNotFoundException
 	 * @throws ParseException on bad parse.
 	 */
-	public static void parseSwitchAnimatedTables(BufferedReader reader, Animated animated, Switches switches) throws IOException, FileNotFoundException, ParseException
+	public static void readSwitchAnimatedTables(BufferedReader reader, Animated animated, Switches switches) throws IOException, FileNotFoundException, ParseException
 	{
 		final int STATE_NONE = 0;
 		final int STATE_SWITCHES = 1;
@@ -195,7 +194,64 @@ public final class Common
 	public static void writeSwitchAnimatedTables(Switches switches, Animated animated, String header, PrintWriter writer) throws IOException
 	{
 		writer.println(header);
-		// TODO: Finish this.
+		writer.println(SWANTBLS_HEADER);
+		
+		Switches.Entry[] swt = new Switches.Entry[switches.getEntryCount()];
+		for (int i = 0; i < swt.length; i++)
+			swt[i] = switches.get(i);
+
+		Animated.Entry[] anm = new Animated.Entry[animated.getEntryCount()];
+		for (int i = 0; i < anm.length; i++)
+			anm[i] = animated.get(i);
+		
+		Arrays.sort(swt, (e1, e2) -> e1.getGame().ordinal() - e2.getGame().ordinal());
+		Arrays.sort(anm, (e1, e2) -> e1.getType().ordinal() - e2.getType().ordinal());
+
+		writer.println();
+		writer.println(SWANTBLS_SWITCHES);
+		Switches.Game game = null;
+		for (Switches.Entry entry : swt)
+		{
+			if (game != entry.getGame())
+			{
+				writer.println();
+				game = entry.getGame();
+				switch (entry.getGame())
+				{
+					case SHAREWARE_DOOM:
+						writer.println("# Shareware Doom");
+						break;
+					case DOOM:
+						writer.println("# Registered Doom");
+						break;
+					case ALL:
+						writer.println("# All Versions");
+						break;
+				}
+			}
+			writer.printf("%-7d %-15s %s\n", entry.getGame().ordinal(), entry.getOffName(), entry.getOnName());
+		}
+
+		Animated.TextureType type = null;
+		for (Animated.Entry entry : anm)
+		{
+			if (type != entry.getType())
+			{
+				type = entry.getType();
+				writer.println();
+				switch (entry.getType())
+				{
+					case FLAT:
+						writer.println(SWANTBLS_ANIMFLATS);
+						break;
+					case TEXTURE:
+						writer.println(SWANTBLS_ANIMTEX);
+						break;
+				}
+			}
+			writer.printf("%-7d %-11s %s\n", entry.getTicks(), entry.getLastName(), entry.getFirstName());
+		}
+
 	}
 	
 }

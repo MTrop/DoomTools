@@ -768,7 +768,7 @@ public class WadMergeContext
 		
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(swantblsFile))))
 		{
-			Common.parseSwitchAnimatedTables(reader, animated, switches);
+			Common.readSwitchAnimatedTables(reader, animated, switches);
 			buffer.addData("ANIMATED", animated);
 			verbosef("Added `ANIMATED` to `%s`.\n", symbol);
 			buffer.addData("SWITCHES", switches);
