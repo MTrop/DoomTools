@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
-import net.mtrop.doom.io.IOUtils;
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
 

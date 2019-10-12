@@ -12,7 +12,7 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
 import net.mtrop.doom.WadFile;
-import net.mtrop.doom.io.IOUtils;
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.tools.common.Common;

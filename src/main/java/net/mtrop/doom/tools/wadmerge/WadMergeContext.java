@@ -19,7 +19,7 @@ import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
-import net.mtrop.doom.io.IOUtils;
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
