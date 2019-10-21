@@ -256,10 +256,12 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEFILE [symbol] [path]"); 
+			out.println("MERGEFILE [symbol] [path] [opt:entryname]"); 
 			out.println("    Reads file from [path] into [symbol].");
-			out.println("    [symbol]: The buffer to add to.");
-			out.println("    [path]:   The file to add.");
+			out.println("    [symbol]:    The buffer to add to.");
+			out.println("    [path]:      The file to add.");
+			out.println("    [entryname]: (Optional) If specified, this is the entry name to use");
+			out.println("                 to import as.");
 		}
 		
 		@Override
@@ -267,8 +269,13 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.next();
 			String file = scanner.next();
+			String entryName = null;
+			if (scanner.hasNext())
+				entryName = scanner.next();
+			
 			try {
-				return context.mergeFile(symbol, new File(file));
+				File f = new File(file);
+				return context.mergeFile(symbol, f, entryName == null ? WadMergeContext.getFileNameWithoutExtension(f) : entryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
@@ -342,7 +349,7 @@ public enum WadMergeCommand
 			else
 				map2 = map1;
 			try {
-				return context.mergeMap(symbol, map2, new File(wadFile), map1);
+				return context.mergeMap(symbol, map1, new File(wadFile), map2);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", wadFile);
 				return Response.BAD_FILE;

@@ -144,13 +144,13 @@
 	<target name="dist" depends="dist.bash, dist.cmd" description="Zips together the application and shell scripts.">
 	</target>
 
-	<target name="deploy.cmd" if="" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
 		<unzip src="${dist.dir}/${zip.dist.filename}" dest="${deploy.dir}" />
 	</target>
 
-	<target name="deploy.bash" if="" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+	<target name="deploy.bash" if="deploy.dir" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
 		<unzip src="${dist.dir}/${tar.dist.filename}" dest="${deploy.dir}" />

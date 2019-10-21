@@ -80,7 +80,7 @@ public class WadMergeContext
 	public void verbosef(String seq, Object... args)
 	{
 		if (verbose)
-			logf(seq);
+			logf(seq, args);
 	}
 
 	public void logln(String seq)
@@ -468,11 +468,12 @@ public class WadMergeContext
 	 * Symbol is case-insensitive. The entry is coerced to a valid name.
 	 * @param symbol the buffer to merge into.
 	 * @param inFile the file to read.
+	 * @param entryName the name of the entry to write as (coerced to a valid name).
 	 * @return OK if the file was found and contents were merged in, false otherwise. 
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
-	public Response mergeFile(String symbol, File inFile) throws IOException, WadException
+	public Response mergeFile(String symbol, File inFile, String entryName) throws IOException, WadException
 	{
 		if (!inFile.exists() || inFile.isDirectory())
 			return Response.BAD_FILE;
@@ -482,7 +483,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		String entryName = NameUtils.toValidEntryName(getFileNameWithoutExtension(inFile));
+		entryName = NameUtils.toValidEntryName(entryName);
 		buffer.addData(entryName, IOUtils.getBinaryContents(new FileInputStream(inFile)));
 		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
 		return Response.OK;
@@ -515,7 +516,7 @@ public class WadMergeContext
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f)) != Response.OK)
+				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
 			}
 		}
@@ -558,7 +559,7 @@ public class WadMergeContext
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f)) != Response.OK)
+				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
 			}
 		}
@@ -714,7 +715,7 @@ public class WadMergeContext
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f)) != Response.OK)
+				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
 				String textureName = NameUtils.toValidTextureName(getFileNameWithoutExtension(f));
 				textureSet.createTexture(textureName).createPatch(textureName);
