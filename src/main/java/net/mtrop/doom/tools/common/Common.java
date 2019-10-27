@@ -3,8 +3,12 @@ package net.mtrop.doom.tools.common;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -46,6 +50,32 @@ public final class Common
 		.append("# spd   last        first")
 	.toString();
 
+	
+	/** Version number. */
+	private static Map<String, String> VERSION_MAP = new HashMap<>();
+	
+	/**
+	 * Gets the embedded version string for a tool name.
+	 * If there is no embedded version, this returns "SNAPSHOT".
+	 * @param name the name of the tool. 
+	 * @return the version string or "SNAPSHOT"
+	 */
+	public static String getVersionString(String name)
+	{
+		if (VERSION_MAP.containsKey(name))
+			return VERSION_MAP.get(name);
+		
+		String out = null;
+		try (InputStream in = openResource("net/mtrop/doom/tools/" + name + ".version")) {
+			if (in != null)
+				VERSION_MAP.put(name, out = getTextualContents(in, "UTF-8").trim());
+		} catch (IOException e) {
+			/* Do nothing. */
+		}
+		
+		return out != null ? out : "SNAPSHOT";
+	}
+	
 	/**
 	 * Parses a SWANTBLS file for ANIMATED and SWITCHES data.
 	 * @param reader the input reader.
@@ -227,6 +257,8 @@ public final class Common
 					case ALL:
 						writer.println("# All Versions");
 						break;
+					default:
+						break;
 				}
 			}
 			writer.printf("%-7d %-15s %s\n", entry.getGame().ordinal(), entry.getOffName(), entry.getOnName());
@@ -254,4 +286,37 @@ public final class Common
 
 	}
 	
+	/**
+	 * Opens an {@link InputStream} to a resource using the current thread's {@link ClassLoader}.
+	 * @param pathString the resource pathname.
+	 * @return an open {@link InputStream} for reading the resource or null if not found.
+	 * @see ClassLoader#getResourceAsStream(String)
+	 */
+	private static InputStream openResource(String pathString)
+	{
+		return Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
+	}
+
+	/**
+	 * Retrieves the textual contents of a stream.
+	 * @param in the input stream to use.
+	 * @param encoding name of the encoding type.
+	 * @return a contiguous string (including newline characters) of the stream's contents.
+	 * @throws IOException if the read cannot be done.
+	 */
+	private static String getTextualContents(InputStream in, String encoding) throws IOException
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding));
+		String line;
+		while ((line = br.readLine()) != null)
+		{
+			sb.append(line);
+			sb.append('\n');
+		}
+		br.close();
+		return sb.toString();
+	}
+
 }

@@ -4,7 +4,7 @@ Copyright (c) 2019 Matt Tropiano
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.3.0+
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.6.0+
 
 ### Required Modules
 
@@ -58,6 +58,11 @@ To compile, JAR, test, and Zip up everything:
 To create a distribution (Bash and CMD):
 
 	ant dist
+
+To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY):
+
+	ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
+	ant deploy.bash -Ddeploy.dir=[TARGETPATH]
 
 To clean up everything:
 

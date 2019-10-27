@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import net.mtrop.doom.struct.io.IOUtils;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
 
@@ -18,7 +19,8 @@ import net.mtrop.doom.tools.wadmerge.WadMergeContext;
  */
 public final class WadMergeMain
 {
-	private static final String VERSION = "1.0";
+	private static final String DOOM_VERSION = Common.getVersionString("doom");
+	private static final String VERSION = Common.getVersionString("wadmerge");
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_INPUT_FILE = 1;
@@ -87,7 +89,7 @@ public final class WadMergeMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("WadMerge v" + VERSION + " by Matt Tropiano");
+		out.println("WadMerge v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
 	}
 
 	/**

@@ -24,7 +24,8 @@ import net.mtrop.doom.tools.common.ParseException;
  */
 public final class JSwAnTablesMain
 {
-	private static final String VERSION = "1.0";
+	private static final String DOOM_VERSION = Common.getVersionString("doom");
+	private static final String VERSION = Common.getVersionString("jswantbls");
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_INPUTOUTPUT_FILE = 1;
@@ -127,7 +128,7 @@ public final class JSwAnTablesMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("JSwAnTbls v" + VERSION + " by Matt Tropiano");
+		out.println("JSwAnTbls v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
 	}
 
 	/**
