@@ -2,10 +2,6 @@
 <!DOCTYPE project>
 <project name="dependencies">
 
-	<!-- Properties -->
-
-	<property name="maven.base.url" value="https://repo1.maven.org/maven2" />
-
 	<!-- Folders and File Names -->
 
 	<property name="dependencies.dir" value="deps" />
@@ -77,6 +73,8 @@
 		</sequential>
 	</macrodef>
 
+	<!-- GitHub Download Macros -->
+
 	<macrodef name="github-dl">
 		<attribute name="repository" />
 		<attribute name="dest" />
@@ -88,37 +86,58 @@
 		</sequential>
 	</macrodef>
 
-	<macrodef name="maven-jar-dl">
+	<!-- Maven Download Macros -->
+
+	<property name="maven.base.url" value="https://repo1.maven.org/maven2" />
+
+	<macrodef name="maven-jar-dl" description="Download a Maven Jar. Does not pull associated dependencies.">
+		<attribute name="base-url" default="${maven.base.url}" description="The base artifact Repository URL." />
 		<attribute name="group-path" description="The artifact group with slashes instead of dots." />
-		<attribute name="artifact" />
-		<attribute name="version" />
+		<attribute name="artifact" description="The artifact name." />
+		<attribute name="version" description="The artifact version (with appendices like -RELEASE, if any)." />
 		<attribute name="extension" default="" description="What to add after the version in the file." />
-		<attribute name="dest" />
+		<attribute name="dest" default="${dependencies.dir}" description="The target download directory." />
 		<sequential>
 			<local name="download.jar.file.url" />
-			<property name="download.jar.file.url" value="${maven.base.url}/@{group-path}/@{artifact}/@{version}/@{artifact}-@{version}@{extension}.jar" />
+			<property name="download.jar.file.url" value="@{base-url}/@{group-path}/@{artifact}/@{version}/@{artifact}-@{version}@{extension}.jar" />
 			<echo message="Fetching ${download.jar.file.url}..." />
 			<get retries="3" src="${download.jar.file.url}" dest="@{dest}"/>
 		</sequential>
 	</macrodef>
 
-	<macrodef name="maven-jar-sources-dl">
+	<macrodef name="maven-jar-sources-dl" description="Download a Maven -sources Jar.">
+		<attribute name="base-url" default="${maven.base.url}" description="The base artifact Repository URL." />
 		<attribute name="group-path" description="The artifact group with slashes instead of dots." />
-		<attribute name="artifact" />
-		<attribute name="version" />
-		<attribute name="dest" />
+		<attribute name="artifact" description="The artifact name." />
+		<attribute name="version" description="The artifact version (with appendices like -RELEASE, if any)." />
+		<attribute name="dest" default="${dependencies.dir}" description="The target download directory." />
 		<sequential>
-			<maven-jar-dl dest="@{dest}" group-path="@{group-path}" artifact="@{artifact}" version="@{version}" extension="-sources" />
+			<maven-jar-dl 
+				dest="@{dest}" 
+				base-url="@{base-url}" 
+				group-path="@{group-path}" 
+				artifact="@{artifact}" 
+				version="@{version}" 
+				extension="-sources" 
+			/>
 		</sequential>
 	</macrodef>
 
-	<macrodef name="maven-jar-javadoc-dl">
+	<macrodef name="maven-jar-javadoc-dl" description="Download a Maven -javadoc Jar.">
+		<attribute name="base-url" default="${maven.base.url}" description="The base artifact Repository URL." />
 		<attribute name="group-path" description="The artifact group with slashes instead of dots." />
-		<attribute name="artifact" />
-		<attribute name="version" />
-		<attribute name="dest" />
+		<attribute name="artifact" description="The artifact name." />
+		<attribute name="version" description="The artifact version (with appendices like -RELEASE, if any)." />
+		<attribute name="dest" default="${dependencies.dir}" description="The target download directory." />
 		<sequential>
-			<maven-jar-dl dest="@{dest}" group-path="@{group-path}" artifact="@{artifact}" version="@{version}" extension="-javadoc" />
+			<maven-jar-dl 
+				dest="@{dest}" 
+				base-url="@{base-url}" 
+				group-path="@{group-path}" 
+				artifact="@{artifact}" 
+				version="@{version}" 
+				extension="-javadoc" 
+			/>
 		</sequential>
 	</macrodef>
 
