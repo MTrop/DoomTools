@@ -287,6 +287,17 @@ public final class Common
 	}
 	
 	/**
+	 * Attempts to close an {@link AutoCloseable} object.
+	 * If the object is null, this does nothing.
+	 * @param c the reference to the AutoCloseable object.
+	 */
+	public static void close(AutoCloseable c)
+	{
+		if (c == null) return;
+		try { c.close(); } catch (Exception e){}
+	}
+
+	/**
 	 * Opens an {@link InputStream} to a resource using the current thread's {@link ClassLoader}.
 	 * @param pathString the resource pathname.
 	 * @return an open {@link InputStream} for reading the resource or null if not found.
