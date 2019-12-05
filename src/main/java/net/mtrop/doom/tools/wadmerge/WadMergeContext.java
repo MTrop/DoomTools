@@ -10,9 +10,6 @@ import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
@@ -21,12 +18,12 @@ import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.texture.Animated;
+import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
+import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
-import net.mtrop.doom.texture.TextureSet.Patch;
-import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
@@ -95,96 +92,6 @@ public class WadMergeContext
 			logout.printf(seq, args);
 	}
 	
-	/**
-	 * Returns the file's name, no extension.
-	 * @param filename the file name.
-	 * @param extensionSeparator the text or characters that separates file name from extension.
-	 * @return the file's name without extension.
-	 */
-	public static String getFileNameWithoutExtension(String filename, String extensionSeparator)
-	{
-		int extindex = filename.lastIndexOf(extensionSeparator);
-		if (extindex >= 0)
-			return filename.substring(0, extindex);
-		return "";
-	}
-
-	/**
-	 * Returns the file's name, no extension.
-	 * @param file the file.
-	 * @return the file's name without extension.
-	 */
-	public static String getFileNameWithoutExtension(File file)
-	{
-		return getFileNameWithoutExtension(file.getName(), ".");
-	}
-
-	/**
-	 * Returns the extension of a filename.
-	 * @param filename the file name.
-	 * @param extensionSeparator the text or characters that separates file name from extension.
-	 * @return the file's extension, or an empty string for no extension.
-	 */
-	private static String getFileExtension(String filename, String extensionSeparator)
-	{
-		int extindex = filename.lastIndexOf(extensionSeparator);
-		if (extindex >= 0)
-			return filename.substring(extindex+1);
-		return "";
-	}
-
-	/**
-	 * Returns the extension of a file's name.
-	 * Assumes the separator to be ".".
-	 * @param file the file.
-	 * @return the file's extension, or an empty string for no extension.
-	 */
-	private static String getFileExtension(File file)
-	{
-		return getFileExtension(file.getName(), ".");
-	}
-
-	/**
-	 * Creates the necessary directories for a file path.
-	 * @param file	the abstract file path.
-	 * @return		true if the paths were made (or exists), false otherwise.
-	 */
-	public static boolean createPathForFile(File file)
-	{
-		return createPathForFile(file.getAbsolutePath());
-	}
-
-	/**
-	 * Creates the necessary directories for a file path.
-	 * @param path	the abstract path.
-	 * @return		true if the paths were made (or exists), false otherwise.
-	 */
-	public static boolean createPathForFile(String path)
-	{
-		int sindx = -1;
-		
-		if ((sindx = Math.max(
-				path.lastIndexOf(File.separator), 
-				path.lastIndexOf("/"))) != -1)
-		{
-			return createPath(path.substring(0, sindx));
-		}
-		return true;
-	}
-
-	/**
-	 * Creates the necessary directories for a file path.
-	 * @param path	the abstract path.
-	 * @return		true if the paths were made (or exists), false otherwise.
-	 */
-	public static boolean createPath(String path)
-	{
-		File dir = new File(path);
-		if (dir.exists())
-			return true;
-		return dir.mkdirs();
-	}
-
 	/**
 	 * Sets verbosity.
 	 * @param verbose the new verbosity flag.
@@ -509,14 +416,14 @@ public class WadMergeContext
 			Response resp;
 			if (f.isDirectory())
 				continue;
-			else if (getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+			else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
 			{
 				if ((resp = mergeWad(symbol, f)) != Response.OK)
 					return resp; 
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
+				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
 			}
 		}
@@ -552,14 +459,14 @@ public class WadMergeContext
 					return resp; 
 				verbosef("Done scanning directory `%s`.\n", f.getPath());
 			}
-			else if (getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+			else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
 			{
 				if ((resp = mergeWad(symbol, f)) != Response.OK)
 					return resp; 
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
+				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
 			}
 		}
@@ -568,12 +475,13 @@ public class WadMergeContext
 	}
 
 	/**
-	 * Merges a DEUTEX texture file into new TEXTUREX/PNAMES entries in a buffer, 
+	 * Merges a DEUTEX texture file into TEXTUREX/PNAMES entries in a buffer, 
 	 * using the name of the texture lump is the name of the file.
-	 * Will read in an existing PNAMES lump if it exists in the buffer.
+	 * Will read in an existing PNAMES lump and/or matching texture lump if it exists in the buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param textureFile the texture file to parse.
+	 * @param strife if true, will read and export in Strife format, false for Doom format. 
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
 	 * 		or BAD_SYMBOL if the symbol is invalid, 
@@ -581,7 +489,8 @@ public class WadMergeContext
 	 * 		or BAD_FILE if it does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
 	 */
-	public Response mergeDEUTEXTextureFile(String symbol, File textureFile, String textureEntryName) throws IOException
+	@SuppressWarnings("unchecked")
+	public Response mergeDEUTEXTextureFile(String symbol, File textureFile, boolean strife, String textureEntryName) throws IOException
 	{
 		if (!textureFile.exists() || textureFile.isDirectory())
 			return Response.BAD_FILE;
@@ -596,77 +505,36 @@ public class WadMergeContext
 			pout = buffer.getDataAs("PNAMES", PatchNames.class);
 		else
 			pout = new PatchNames();
-		Texture currentTexture = null;
-		TextureSet textureSet = new TextureSet(pout, new DoomTextureList(128));
+
+		CommonTextureList<?> tout;
+		if (buffer.contains(textureEntryName))
+		{
+			if (strife)
+				tout = buffer.getDataAs(textureEntryName, StrifeTextureList.class);
+			else
+				tout = buffer.getDataAs(textureEntryName, DoomTextureList.class);
+		}
+		else
+		{
+			tout = strife ? new StrifeTextureList(128) : new DoomTextureList(128);
+		}
+
+		TextureSet textureSet;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(textureFile))))
 		{
-			String line;
-			int linenum = 0;
-			Pattern whitespacePattern = Pattern.compile("\\s+"); 
-			while ((line = reader.readLine()) != null)
-			{
-				line = line.trim();
-				linenum++;
-				if (line.isEmpty() || line.startsWith(";"))
-					continue;
-				
-				if (line.startsWith("*")) // is patch.
-				{
-					if (currentTexture == null)
-					{
-						logf("ERROR: %s, line %d: Patch line before texture line.\n", textureFile.getPath(), linenum);
-						return Response.BAD_PARSE;
-					}
-					
-					String elementName = "";
-					try (Scanner scanner = new Scanner(line)) 
-					{
-						scanner.useDelimiter(whitespacePattern);
-						elementName = "star";
-						if (!scanner.next().equals("*"))
-						{
-							logf("ERROR: %s, line %d: Malformed patch: missing star prefix.\n", textureFile.getPath(), linenum);
-							return Response.BAD_PARSE;
-						}
-						elementName = "name";
-						Patch p = currentTexture.createPatch(NameUtils.toValidEntryName(scanner.next()));
-						elementName = "origin X";
-						p.setOriginX(scanner.nextInt());
-						elementName = "origin Y";
-						p.setOriginY(scanner.nextInt());
-						verbosef("    Add patch `%s`.\n", p.getName());
-					} 
-					catch (NoSuchElementException e) 
-					{
-						logf("ERROR: %s, line %d: Malformed patch: missing %s.\n", textureFile.getPath(), linenum, elementName);
-						return Response.BAD_PARSE;
-					}
-				}
-				else // is new texture.
-				{
-					String elementName = "";
-					try (Scanner scanner = new Scanner(line)) 
-					{
-						scanner.useDelimiter(whitespacePattern);
-						elementName = "name";
-						currentTexture = textureSet.createTexture(NameUtils.toValidTextureName(scanner.next()));
-						elementName = "width";
-						currentTexture.setWidth(scanner.nextInt());
-						elementName = "height";
-						currentTexture.setHeight(scanner.nextInt());
-						verbosef("Add texture `%s`...\n", currentTexture.getName());
-					} 
-					catch (NoSuchElementException e) 
-					{
-						logf("ERROR: %s, line %d: Malformed patch: missing %s.\n", textureFile.getPath(), linenum, elementName);
-						return Response.BAD_PARSE;
-					}
-				}
-			}
+			textureSet = Common.readDEUTEXFile(reader, pout, tout);
+		} 
+		catch (ParseException e) 
+		{
+			logln("ERROR: "+ textureFile + ", " + e.getMessage());
+			return Response.BAD_PARSE;
 		}
 		
-		DoomTextureList tout;
-		textureSet.export(pout = new PatchNames(), tout = new DoomTextureList());
+		if (strife)
+			textureSet.export(pout = new PatchNames(), (CommonTextureList<StrifeTextureList.Texture>)(tout = new StrifeTextureList(128)));
+		else
+			textureSet.export(pout = new PatchNames(), (CommonTextureList<DoomTextureList.Texture>)(tout = new DoomTextureList(128)));
+
 		if (buffer.contains("PNAMES"))
 			buffer.deleteEntry(buffer.indexOf("PNAMES"));
 		
@@ -678,7 +546,7 @@ public class WadMergeContext
 
 		return Response.OK;
 	}
-	
+
 	/**
 	 * Creates TEXTUREX/PNAMES entries in a buffer, using a directory of patches as the only textures,
 	 * and imports all of the patch files between PP_START and PP_END markers.
@@ -715,9 +583,9 @@ public class WadMergeContext
 			}
 			else
 			{
-				if ((resp = mergeFile(symbol, f, getFileNameWithoutExtension(f))) != Response.OK)
+				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
 					return resp; 
-				String textureName = NameUtils.toValidTextureName(getFileNameWithoutExtension(f));
+				String textureName = NameUtils.toValidTextureName(Common.getFileNameWithoutExtension(f));
 				textureSet.createTexture(textureName).createPatch(textureName);
 				verbosef("Add texture `%s`...\n", textureName);
 			}
@@ -823,7 +691,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		createPathForFile(outFile);
+		Common.createPathForFile(outFile);
 		buffer.writeToFile(outFile);
 		logf("Wrote file `%s`.\n", outFile.getPath());
 		return Response.OK;

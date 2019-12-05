@@ -1,7 +1,7 @@
 package net.mtrop.doom.tools.common;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +14,12 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.texture.Animated;
+import net.mtrop.doom.texture.CommonTextureList;
+import net.mtrop.doom.texture.PatchNames;
 import net.mtrop.doom.texture.Switches;
+import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.texture.TextureSet.Patch;
+import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.util.NameUtils;
 
 /**
@@ -77,15 +82,104 @@ public final class Common
 	}
 	
 	/**
+	 * Parses a DEUTEX texture file contents.
+	 * @param reader the reader to read from.
+	 * @param startingPatches the starting PNAMES.
+	 * @param startingTextureList the starting TEXTUREX.
+	 * @return a combined texture set.
+	 * @throws IOException if an I/O Error occurs during read.
+	 * @throws ParseException if an error occurs during parse.
+	 */
+	public static TextureSet readDEUTEXFile(BufferedReader reader, PatchNames startingPatches, CommonTextureList<?> startingTextureList) throws IOException, ParseException
+	{
+		Texture currentTexture = null;
+		TextureSet textureSet = new TextureSet(startingPatches, startingTextureList);
+		String line;
+		int linenum = 0;
+		Pattern whitespacePattern = Pattern.compile("\\s+"); 
+		while ((line = reader.readLine()) != null)
+		{
+			line = line.trim();
+			linenum++;
+			if (line.isEmpty() || line.startsWith(";"))
+				continue;
+			
+			if (line.startsWith("*")) // is patch.
+			{
+				if (currentTexture == null)
+					throw new ParseException("Line " + linenum + ": Patch line before texture line.");
+				
+				String elementName = "";
+				try (Scanner scanner = new Scanner(line)) 
+				{
+					scanner.useDelimiter(whitespacePattern);
+					elementName = "star";
+					if (!scanner.next().equals("*"))
+						throw new ParseException("Line " + linenum + ": Malformed patch: missing star prefix.");
+					elementName = "name";
+					Patch p = currentTexture.createPatch(NameUtils.toValidEntryName(scanner.next()));
+					elementName = "origin X";
+					p.setOriginX(scanner.nextInt());
+					elementName = "origin Y";
+					p.setOriginY(scanner.nextInt());
+				} 
+				catch (NoSuchElementException e) 
+				{
+					throw new ParseException("Line " + linenum + ":  Malformed patch: missing " + elementName + ".");
+				}
+			}
+			else // is new texture.
+			{
+				String elementName = "";
+				try (Scanner scanner = new Scanner(line)) 
+				{
+					scanner.useDelimiter(whitespacePattern);
+					elementName = "name";
+					currentTexture = textureSet.createTexture(NameUtils.toValidTextureName(scanner.next()));
+					elementName = "width";
+					currentTexture.setWidth(scanner.nextInt());
+					elementName = "height";
+					currentTexture.setHeight(scanner.nextInt());
+				} 
+				catch (NoSuchElementException e) 
+				{
+					throw new ParseException("Line " + linenum + ":  Malformed patch: missing " + elementName + ".");
+				}
+			}
+		}
+		return textureSet;
+	}
+	
+	/**
+	 * Writes DEUTEX data to a print writer.
+	 * @param textureSet the texture set to export. 
+	 * @param header the header blurb to write first.
+	 * @param writer the writer to write out to.
+	 * @throws IOException if an I/O Error occurs during write.
+	 */
+	public static void writeDEUTEXFile(TextureSet textureSet, String header, PrintWriter writer) throws IOException
+	{
+		writer.println(header);
+		writer.println();
+
+		for (TextureSet.Texture t : textureSet)
+		{
+			writer.println(t.getName() + " " + t.getWidth() + " " + t.getHeight());
+			for (TextureSet.Patch p : t)
+				writer.println("*\t" + p.getName() + " " + p.getOriginX() + " " + p.getOriginY());
+			writer.println();
+		}
+	}
+	
+	/**
 	 * Parses a SWANTBLS file for ANIMATED and SWITCHES data.
 	 * @param reader the input reader.
 	 * @param animated the output Animated.
 	 * @param switches the output Switches.
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws ParseException on bad parse.
+	 * @throws IOException if an I/O Error occurs during read.
+	 * @throws ParseException if an error occurs during parse.
 	 */
-	public static void readSwitchAnimatedTables(BufferedReader reader, Animated animated, Switches switches) throws IOException, FileNotFoundException, ParseException
+	public static void readSwitchAnimatedTables(BufferedReader reader, Animated animated, Switches switches) throws IOException, ParseException
 	{
 		final int STATE_NONE = 0;
 		final int STATE_SWITCHES = 1;
@@ -219,7 +313,7 @@ public final class Common
 	 * @param animated the animated data.
 	 * @param header the header blurb to write first.
 	 * @param writer the writer to write out to.
-	 * @throws IOException if an error occurs uring write.
+	 * @throws IOException if an error occurs during write.
 	 */
 	public static void writeSwitchAnimatedTables(Switches switches, Animated animated, String header, PrintWriter writer) throws IOException
 	{
@@ -328,6 +422,96 @@ public final class Common
 		}
 		br.close();
 		return sb.toString();
+	}
+
+	/**
+	 * Returns the file's name, no extension.
+	 * @param filename the file name.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @return the file's name without extension.
+	 */
+	public static String getFileNameWithoutExtension(String filename, String extensionSeparator)
+	{
+		int extindex = filename.lastIndexOf(extensionSeparator);
+		if (extindex >= 0)
+			return filename.substring(0, extindex);
+		return "";
+	}
+
+	/**
+	 * Returns the file's name, no extension.
+	 * @param file the file.
+	 * @return the file's name without extension.
+	 */
+	public static String getFileNameWithoutExtension(File file)
+	{
+		return getFileNameWithoutExtension(file.getName(), ".");
+	}
+
+	/**
+	 * Returns the extension of a filename.
+	 * @param filename the file name.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @return the file's extension, or an empty string for no extension.
+	 */
+	private static String getFileExtension(String filename, String extensionSeparator)
+	{
+		int extindex = filename.lastIndexOf(extensionSeparator);
+		if (extindex >= 0)
+			return filename.substring(extindex+1);
+		return "";
+	}
+
+	/**
+	 * Returns the extension of a file's name.
+	 * Assumes the separator to be ".".
+	 * @param file the file.
+	 * @return the file's extension, or an empty string for no extension.
+	 */
+	public static String getFileExtension(File file)
+	{
+		return getFileExtension(file.getName(), ".");
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param file	the abstract file path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPathForFile(File file)
+	{
+		return createPathForFile(file.getAbsolutePath());
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param path	the abstract path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPathForFile(String path)
+	{
+		int sindx = -1;
+		
+		if ((sindx = Math.max(
+				path.lastIndexOf(File.separator), 
+				path.lastIndexOf("/"))) != -1)
+		{
+			return createPath(path.substring(0, sindx));
+		}
+		return true;
+	}
+
+	/**
+	 * Creates the necessary directories for a file path.
+	 * @param path	the abstract path.
+	 * @return		true if the paths were made (or exists), false otherwise.
+	 */
+	public static boolean createPath(String path)
+	{
+		File dir = new File(path);
+		if (dir.exists())
+			return true;
+		return dir.mkdirs();
 	}
 
 }

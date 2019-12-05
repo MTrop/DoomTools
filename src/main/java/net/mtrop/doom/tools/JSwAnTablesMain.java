@@ -155,8 +155,8 @@ public final class JSwAnTablesMain
 		out.println("    <filename>          The WAD file.");
 		out.println();
 		out.println("[mode]:");
-	    out.println("    --export [srcfile]  Export mode.");
-	    out.println("    -x [srcfile]        Exports ANIMATED and SWITCHES from [file] to [srcfile].");
+	    out.println("    --export [dstfile]  Export mode.");
+	    out.println("    -x [dstfile]        Exports ANIMATED and SWITCHES from [file] to [dstfile].");
 		out.println();
 	    out.println("    --import [srcfile]  Import mode.");
 	    out.println("    -i [srcfile]        Imports ANIMATED and SWITCHES from [srcfile] into");
@@ -307,7 +307,7 @@ public final class JSwAnTablesMain
 
 				if (replaceAnimated)
 				{
-					wad.replaceEntry(wad.indexOf("ANIMATED"), animated.toBytes());
+					wad.replaceEntry(wad.indexOf("ANIMATED"), animated);
 					if (options.verbose)
 						System.out.printf("Replaced `ANIMATED` in `%s`.\n", options.wadFile.getPath());
 				}
@@ -320,7 +320,7 @@ public final class JSwAnTablesMain
 				
 				if (replaceSwitches)
 				{
-					wad.replaceEntry(wad.indexOf("SWITCHES"), switches.toBytes());
+					wad.replaceEntry(wad.indexOf("SWITCHES"), switches);
 					if (options.verbose)
 						System.out.printf("Replaced `SWITCHES` in `%s`.\n", options.wadFile.getPath());
 				}

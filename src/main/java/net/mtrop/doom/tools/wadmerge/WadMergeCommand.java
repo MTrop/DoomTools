@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
 
 /**
@@ -275,7 +276,7 @@ public enum WadMergeCommand
 			
 			try {
 				File f = new File(file);
-				return context.mergeFile(symbol, f, entryName == null ? WadMergeContext.getFileNameWithoutExtension(f) : entryName);
+				return context.mergeFile(symbol, f, entryName == null ? Common.getFileNameWithoutExtension(f) : entryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
@@ -457,10 +458,10 @@ public enum WadMergeCommand
 			if (scanner.hasNext())
 				textureEntryName = scanner.next();
 			else
-				textureEntryName = WadMergeContext.getFileNameWithoutExtension(file, ".");
+				textureEntryName = Common.getFileNameWithoutExtension(file, ".");
 			
 			try {
-				return context.mergeDEUTEXTextureFile(symbol, new File(file), textureEntryName);
+				return context.mergeDEUTEXTextureFile(symbol, new File(file), false, textureEntryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;

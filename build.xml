@@ -41,6 +41,7 @@
 	<!-- Versions -->
 	<property name="wadmerge.version" value="${build.version}" />
 	<property name="jswantbls.version" value="${build.version}" />
+	<property name="wadtex.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -65,6 +66,7 @@
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/jswantbls.version" message="${jswantbls.version}" />
+		<echo file="${build.versions.dir}/wadtex.version" message="${jswantbls.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -111,6 +113,9 @@
 		<!-- JSWANTBLS -->
 		<shell-cmd  name="jswantbls" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.JSwAnTablesMain" />
 		<shell-bash name="jswantbls" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.JSwAnTablesMain" />
+		<!-- WADTex -->
+		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<shell-bash name="wadtex" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
