@@ -42,6 +42,7 @@
 	<property name="wadmerge.version" value="${build.version}" />
 	<property name="jswantbls.version" value="${build.version}" />
 	<property name="wadtex.version" value="${build.version}" />
+	<property name="texscan.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -66,7 +67,8 @@
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/jswantbls.version" message="${jswantbls.version}" />
-		<echo file="${build.versions.dir}/wadtex.version" message="${jswantbls.version}" />
+		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
+		<echo file="${build.versions.dir}/texscan.version" message="${texscan.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -116,6 +118,9 @@
 		<!-- WADTex -->
 		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<shell-bash name="wadtex" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<!-- TexScan -->
+		<shell-cmd  name="texscan" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
+		<shell-bash name="texscan" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">

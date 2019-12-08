@@ -25,7 +25,7 @@ import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 
 /**
- * Main class for JSwantbls.
+ * Main class for WADTex.
  * @author Matthew Tropiano
  */
 public final class WADTexMain
