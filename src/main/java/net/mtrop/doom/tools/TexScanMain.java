@@ -418,8 +418,7 @@ public final class TexScanMain
 				case DOOM:
 				case HEXEN:
 				{
-					DoomSector[] sectors = wad.getDataAs("SECTORS", DoomSector.class, DoomSector.LENGTH);
-					inspectSectors(options, sectors);
+					inspectSectors(options, wad.getDataAs("SECTORS", wad.lastIndexOf(mapName), DoomSector.class, DoomSector.LENGTH));
 				}
 				break;
 
