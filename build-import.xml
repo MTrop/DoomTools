@@ -119,7 +119,7 @@
 			destdir="${bin.dir}"
             includeAntRuntime="false"
 			classpath="${project.classpath}"
-			debug="off" 
+			debug="on" 
 			/>
 	</target>
 

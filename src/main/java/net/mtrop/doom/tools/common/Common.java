@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -512,6 +513,63 @@ public final class Common
 		if (dir.exists())
 			return true;
 		return dir.mkdirs();
+	}
+
+	/**
+	 * Convenience method for
+	 * <code>new BufferedReader(new InputStreamReader(in))</code>
+	 * @param in the stream to read.
+	 * @return an open buffered reader for the provided stream.
+	 * @throws IOException if an error occurred opening the stream for reading.
+	 * @throws SecurityException if you do not have permission for opening the stream.
+	 */
+	public static BufferedReader openTextStream(InputStream in) throws IOException
+	{
+		return new BufferedReader(new InputStreamReader(in));
+	}
+
+	/**
+	 * Convenience method for
+	 * <code>new BufferedReader(new InputStreamReader(System.in))</code>
+	 * @return an open buffered reader for {@link System#in}.
+	 * @throws IOException if an error occurred opening Standard IN.
+	 * @throws SecurityException if you do not have permission for opening Standard IN.
+	 */
+	public static BufferedReader openSystemIn() throws IOException
+	{
+		return openTextStream(System.in);
+	}
+
+	/**
+	 * Checks if a value is "empty."
+	 * The following is considered "empty":
+	 * <ul>
+	 * <li><i>Null</i> references.
+	 * <li>{@link Boolean} objects that are false.
+	 * <li>{@link Character} objects that are the null character ('\0', '\u0000').
+	 * <li>{@link Number} objects that are zero.
+	 * <li>{@link String} objects that are the empty string, or are {@link String#trim()}'ed down to the empty string.
+	 * <li>{@link Collection} objects where {@link Collection#isEmpty()} returns true.
+	 * </ul> 
+	 * @param obj the object to check.
+	 * @return true if the provided object is considered "empty", false otherwise.
+	 */
+	public static boolean isEmpty(Object obj)
+	{
+		if (obj == null)
+			return true;
+		else if (obj instanceof Boolean)
+			return !((Boolean)obj);
+		else if (obj instanceof Character)
+			return ((Character)obj) == '\0';
+		else if (obj instanceof Number)
+			return ((Number)obj).doubleValue() == 0.0;
+		else if (obj instanceof String)
+			return ((String)obj).trim().length() == 0;
+		else if (obj instanceof Collection<?>)
+			return ((Collection<?>)obj).isEmpty();
+		else
+			return false;
 	}
 
 }

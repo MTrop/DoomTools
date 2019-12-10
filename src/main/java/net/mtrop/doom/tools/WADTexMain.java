@@ -205,7 +205,6 @@ public final class WADTexMain
 			usage(System.out);
 			System.out.println();
 			help(System.out);
-			System.out.println();
 			System.exit(ERROR_NONE);
 		}
 		

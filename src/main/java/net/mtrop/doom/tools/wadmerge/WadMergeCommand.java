@@ -453,15 +453,15 @@ public enum WadMergeCommand
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
 			String symbol = scanner.next();
-			String file = scanner.next();
+			File file = new File(scanner.next());
 			String textureEntryName = null;
 			if (scanner.hasNext())
 				textureEntryName = scanner.next();
 			else
-				textureEntryName = Common.getFileNameWithoutExtension(file, ".");
+				textureEntryName = Common.getFileNameWithoutExtension(file);
 			
 			try {
-				return context.mergeDEUTEXTextureFile(symbol, new File(file), false, textureEntryName);
+				return context.mergeDEUTEXTextureFile(symbol, file, false, textureEntryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;

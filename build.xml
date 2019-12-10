@@ -42,7 +42,8 @@
 	<property name="wadmerge.version" value="${build.version}" />
 	<property name="jswantbls.version" value="${build.version}" />
 	<property name="wadtex.version" value="${build.version}" />
-	<property name="texscan.version" value="${build.version}" />
+	<property name="wtexscan.version" value="${build.version}" />
+	<property name="wtexport.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -68,7 +69,8 @@
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/jswantbls.version" message="${jswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
-		<echo file="${build.versions.dir}/texscan.version" message="${texscan.version}" />
+		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
+		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -118,9 +120,12 @@
 		<!-- WADTex -->
 		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<shell-bash name="wadtex" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
-		<!-- TexScan -->
-		<shell-cmd  name="texscan" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
-		<shell-bash name="texscan" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
+		<!-- WTexScan -->
+		<shell-cmd  name="wtexscan" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
+		<shell-bash name="wtexscan" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
+		<!-- WTexport -->
+		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TExportMain" />
+		<shell-bash name="wtexport" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TExportMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">

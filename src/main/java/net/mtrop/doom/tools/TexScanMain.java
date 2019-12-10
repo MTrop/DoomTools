@@ -39,7 +39,7 @@ import net.mtrop.doom.util.NameUtils;
 public final class TexScanMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("texscan");
+	private static final String VERSION = Common.getVersionString("wtexscan");
 	private static final String SPLASH_VERSION = "TexScan v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
 
 	private static final int ERROR_NONE = 0;
@@ -164,7 +164,7 @@ public final class TexScanMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: texscan [--help | -h | --version] [files] [switches]");
+		out.println("Usage: wtexscan [--help | -h | --version] [files] [switches]");
 	}
 	
 	/**
@@ -192,7 +192,6 @@ public final class TexScanMain
 		out.println("    -f");
 		out.println();
 		out.println("    --no-skies          Skip adding associated skies per map.");
-		out.println();
 	}
 	
 	public static void main(String[] args)
@@ -205,14 +204,15 @@ public final class TexScanMain
 			usage(System.out);
 			System.out.println();
 			help(System.out);
-			System.out.println();
 			System.exit(ERROR_NONE);
+			return;
 		}
 		
 		if (options.version)
 		{
 			splash(System.out);
 			System.exit(ERROR_NONE);
+			return;
 		}
 
 		if (options.wadFiles.isEmpty())
@@ -220,6 +220,7 @@ public final class TexScanMain
 			splash(System.out);
 			usage(System.out);
 			System.exit(ERROR_NONE);
+			return;
 		}
 
 		options.println("# " + SPLASH_VERSION);
