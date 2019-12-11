@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.texport;
+package net.mtrop.doom.tools.wtexport;
 
 import java.util.HashMap;
 

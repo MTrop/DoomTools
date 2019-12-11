@@ -529,18 +529,6 @@ public final class Common
 	}
 
 	/**
-	 * Convenience method for
-	 * <code>new BufferedReader(new InputStreamReader(System.in))</code>
-	 * @return an open buffered reader for {@link System#in}.
-	 * @throws IOException if an error occurred opening Standard IN.
-	 * @throws SecurityException if you do not have permission for opening Standard IN.
-	 */
-	public static BufferedReader openSystemIn() throws IOException
-	{
-		return openTextStream(System.in);
-	}
-
-	/**
 	 * Checks if a value is "empty."
 	 * The following is considered "empty":
 	 * <ul>

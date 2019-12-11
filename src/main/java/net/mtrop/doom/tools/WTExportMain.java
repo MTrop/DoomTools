@@ -30,7 +30,7 @@ import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.texport.TextureTables;
+import net.mtrop.doom.tools.wtexport.TextureTables;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 
@@ -38,7 +38,7 @@ import net.mtrop.doom.util.TextureUtils;
  * Main class for TexMove.
  * @author Matthew Tropiano
  */
-public final class TExportMain
+public final class WTExportMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String VERSION = Common.getVersionString("wtexport");
@@ -64,9 +64,96 @@ public final class TExportMain
 	private static final String SWITCH_NOSWITCH = "--no-switches";
 
 	/**
-	 * Comparator class for Null Texture name. 
+	 * Context.
 	 */
-	public static class NullComparator implements Comparator<Texture>
+	public static class Options
+	{
+		
+		private PrintStream out;
+		private PrintStream err;
+		private BufferedReader in;
+		private boolean help;
+		private boolean version;
+		/** Path to base wad. */
+		private String baseWad;
+		/** Path to output wad. */
+		private String outWad;
+		/** No animated. */
+		private boolean noAnimated;
+		/** No switches. */
+		private boolean noSwitches;
+		/** Overwrite output. */
+		private boolean additive;
+
+		/** File List. */
+		private List<String> filePaths;
+
+		/** Null comparator. */
+		private NullComparator nullComparator;
+		/** List of texture names. */
+		private List<String> textureList; 
+		/** List of flat names. */
+		private List<String> flatList; 
+		/** Base Unit. */
+		private WadUnit baseUnit;
+		/** WAD priority queue. */
+		private Deque<WadUnit> wadPriority;
+
+		private Options()
+		{
+			this.out = null;
+			this.err = null;
+			this.in = null;
+			this.baseWad = null;
+			this.outWad = null;
+			this.noAnimated = false;
+			this.noSwitches = false;
+			this.additive = false;
+
+			this.filePaths = new ArrayList<>();
+			
+			this.nullComparator = new NullComparator(null);
+			this.textureList = new ArrayList<>();
+			this.flatList = new ArrayList<>();
+			this.baseUnit = null;
+			this.wadPriority = new LinkedList<WadUnit>();
+		}
+		
+		void println(Object msg)
+		{
+			out.println(msg);
+		}
+		
+		void printf(String fmt, Object... args)
+		{
+			out.printf(fmt, args);
+		}
+
+		void errln(Object msg)
+		{
+			err.println(msg);
+		}
+		
+		void errf(String fmt, Object... args)
+		{
+			err.printf(fmt, args);
+		}
+
+		char readChar() throws IOException
+		{
+			return (char)in.read();
+		}
+		
+		String readLine() throws IOException
+		{
+			return in.readLine();
+		}
+	}
+	
+	/**
+	 * Comparator class for Null Texture name (shuffles the null texture to the top). 
+	 */
+	private static class NullComparator implements Comparator<Texture>
 	{
 		/** Null texture set. */
 		private static final Set<String> NULL_NAMES = new HashSet<String>()
@@ -95,92 +182,16 @@ public final class TExportMain
 				return 
 					NULL_NAMES.contains(o1.getName()) ? -1 :
 					NULL_NAMES.contains(o2.getName()) ? 1 :
-					o1.getName().compareTo(o2.getName());
+					0;
 			}
 			else return 
 					o1.getName().equalsIgnoreCase(nullName) ? -1 :
 					o2.getName().equalsIgnoreCase(nullName) ? 1 :
-					o1.getName().compareTo(o2.getName());
+					0;
 		}
 		
 	}
-	
-	/**
-	 * Context.
-	 */
-	public static class Options
-	{
-		
-		private PrintStream out;
-		private PrintStream err;
 
-		private boolean help;
-		private boolean version;
-		/** Path to base wad. */
-		private String baseWad;
-		/** Path to output wad. */
-		private String outWad;
-		/** No animated. */
-		private boolean noAnimated;
-		/** No switches. */
-		private boolean noSwitches;
-		/** Overwrite output. */
-		private boolean additive;
-
-		/** File List. */
-		private List<String> filePaths;
-
-		/** Null comparator. */
-		private NullComparator nullComparator;
-		/** List of texture names. */
-		private Set<String> textureList; 
-		/** List of flat names. */
-		private Set<String> flatList; 
-		/** Base Unit. */
-		private WadUnit baseUnit;
-		/** WAD priority queue. */
-		private Deque<WadUnit> wadPriority;
-
-		private Options()
-		{
-			this.out = System.out;
-			this.err = System.err;
-			this.baseWad = null;
-			this.outWad = null;
-			this.noAnimated = false;
-			this.noSwitches = false;
-			this.additive = false;
-
-			this.filePaths = new ArrayList<>();
-			
-			this.nullComparator = new NullComparator(null);
-			this.textureList = new HashSet<>();
-			this.flatList = new HashSet<>();
-			this.baseUnit = null;
-			this.wadPriority = new LinkedList<WadUnit>();
-		}
-		
-		void println(Object msg)
-		{
-			out.println(msg);
-		}
-		
-		void printf(String fmt, Object... args)
-		{
-			out.printf(fmt, args);
-		}
-
-		void errln(Object msg)
-		{
-			err.println(msg);
-		}
-		
-		void errf(String fmt, Object... args)
-		{
-			err.printf(fmt, args);
-		}
-	}
-	
 	private static class ExportSet
 	{
 		private Set<String> textureHash;
@@ -291,9 +302,12 @@ public final class TExportMain
 	 * Reads command line arguments and sets options.
 	 * @param args the argument args.
 	 */
-	private static Options options(String[] args)
+	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String[] args)
 	{
-		Options out = new Options();
+		Options options = new Options();
+		options.out = out;
+		options.err = err;
+		options.in = in;
 
 		final int STATE_INIT = 0;
 		final int STATE_BASE = 1;
@@ -310,15 +324,15 @@ public final class TExportMain
 				case STATE_INIT:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						out.help = true;
+						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
-						out.version = true;
+						options.version = true;
 					else if (arg.equals(SWITCH_NOANIMATED))
-						out.noAnimated = true;
+						options.noAnimated = true;
 					else if (arg.equals(SWITCH_NOSWITCH))
-						out.noSwitches = true;
+						options.noSwitches = true;
 					else if (arg.equals(SWITCH_ADDITIVE))
-						out.additive = true;
+						options.additive = true;
 					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
 						state = STATE_BASE;
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
@@ -326,27 +340,27 @@ public final class TExportMain
 					else if (arg.equals(SWITCH_NULLTEX))
 						state = STATE_NULLTEX;
 					else
-						out.filePaths.add(arg);
+						options.filePaths.add(arg);
 				}
 				break;
 			
 				case STATE_BASE:
 				{
-					out.baseWad = arg;
+					options.baseWad = arg;
 					state = STATE_INIT;
 				}
 				break;
 				
 				case STATE_OUT:
 				{
-					out.outWad = arg;
+					options.outWad = arg;
 					state = STATE_INIT;
 				}
 				break;
 				
 				case STATE_NULLTEX:
 				{
-					out.nullComparator = new NullComparator(arg);
+					options.nullComparator = new NullComparator(arg);
 					state = STATE_INIT;
 				}
 				break;
@@ -354,7 +368,103 @@ public final class TExportMain
 			i++;
 		}
 		
-		return out;
+		return options;
+	}
+
+	/**
+	 * Calls this program.
+	 * @param options the program options.
+	 * @return the return code.
+	 */
+	public static int call(Options options)
+	{
+		if (options.help)
+		{
+			splash(options.out);
+			usage(options.out);
+			options.out.println();
+			help(options.out);
+			return ERROR_NONE;
+		}
+		
+		if (options.version)
+		{
+			splash(options.out);
+			return ERROR_NONE;
+		}
+	
+		/* STEP 0 : Get yo' shit together. */
+	
+		if (options.filePaths == null || options.filePaths.isEmpty())
+		{
+			options.println("ERROR: No input WAD(s) specified.");
+			usage(options.out);
+			return ERROR_NO_FILES;
+		}
+	
+		if (Common.isEmpty(options.baseWad))
+		{
+			options.println("ERROR: No base WAD specified.");
+			usage(options.out);
+			return ERROR_NO_FILES;
+		}
+	
+		if (Common.isEmpty(options.outWad))
+		{
+			options.println("ERROR: No output WAD specified.");
+			usage(options.out);
+			return ERROR_NO_FILES;
+		}
+	
+		/* STEP 1 : Scan all incoming WADs so we know where crap is. */
+		
+		// scan base.
+		if (!scanWAD(options, options.baseWad, true))
+		{
+			return ERROR_BAD_FILE;
+		}
+		
+		// scan patches. 
+		for (String f : options.filePaths)
+			if (!scanWAD(options, f, false))
+			{
+				return ERROR_BAD_FILE;
+			}
+	
+		/* STEP 2 : Read list of what we want. */
+	
+		options.println("Input texture/flat list:");
+		try
+		{
+			if (!readTexturesAndFlats(options))
+			{
+				return ERROR_BAD_FILE;
+			}
+		} 
+		catch (IOException e) 
+		{
+			// if we reach here, you got PROBLEMS, buddy.
+			options.println("ERROR: Could not read from STDIN.");
+			return ERROR_IO_ERROR;
+		}
+		
+		/* STEP 3 : Extract the junk and put it in the output wad. */
+	
+		if (options.nullComparator.nullName != null)
+			options.println("Using "+ options.nullComparator.nullName.toUpperCase() + " as the null texture in TEXTURE1...");
+		
+		if (!extractToOutputWad(options))
+		{
+			return ERROR_BAD_FILE;
+		}
+		
+		options.println("Done!");
+		return ERROR_NONE;
+	}
+
+	public static void main(String[] args) throws IOException
+	{
+		System.exit(call(options(System.out, System.err, Common.openTextStream(System.in), args)));
 	}
 
 	/**
@@ -731,7 +841,7 @@ public final class TExportMain
 		return true;
 	}
 	
-	private static boolean readTexturesAndFlats(Options context) throws IOException
+	private static boolean readTexturesAndFlats(Options options) throws IOException
 	{
 		final String TEXTURES = "-textures";
 		final String FLATS = "-flats";
@@ -741,12 +851,11 @@ public final class TExportMain
 		final int STATE_TEXTURES = 1;
 		final int STATE_FLATS = 2;
 		
-		BufferedReader br = Common.openSystemIn();
 		String line = null;
 		int state = STATE_NONE;
 		boolean keepGoing = true;
 		
-		while (keepGoing && ((line = br.readLine()) != null))
+		while (keepGoing && ((line = options.readLine()) != null))
 		{
 			line = line.trim();
 			// skip blank lines
@@ -775,19 +884,19 @@ public final class TExportMain
 			switch (state)
 			{
 				case STATE_NONE:
-					context.println("ERROR: Name before '-textures' or '-flats'.");
-					br.close();
+					options.println("ERROR: Name before '-textures' or '-flats'.");
+					options.in.close();
 					return false;
 				case STATE_TEXTURES:
-					readAndAddTextures(context, line.toUpperCase());
+					readAndAddTextures(options, line.toUpperCase());
 					break;
 				case STATE_FLATS:
-					readAndAddFlats(context, line.toUpperCase());
+					readAndAddFlats(options, line.toUpperCase());
 					break;
 			}
 		}
 		
-		br.close();
+		options.in.close();
 		return true;
 	}
 	
@@ -1223,105 +1332,6 @@ public final class TExportMain
 		}
 		
 		return outWad;
-	}
-
-	public static void main(String[] args)
-	{
-		Options context = options(args);
-		
-		if (context.help)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.out.println();
-			help(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-		
-		if (context.version)
-		{
-			splash(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-
-		/* STEP 0 : Get yo' shit together. */
-
-		if (context.filePaths == null || context.filePaths.isEmpty())
-		{
-			context.println("ERROR: No input WAD(s) specified.");
-			usage(System.out);
-			System.exit(ERROR_NO_FILES);
-			return;
-		}
-
-		if (Common.isEmpty(context.baseWad))
-		{
-			context.println("ERROR: No base WAD specified.");
-			usage(System.out);
-			System.exit(ERROR_NO_FILES);
-			return;
-		}
-
-		if (Common.isEmpty(context.outWad))
-		{
-			context.println("ERROR: No output WAD specified.");
-			usage(System.out);
-			System.exit(ERROR_NO_FILES);
-			return;
-		}
-
-		/* STEP 1 : Scan all incoming WADs so we know where crap is. */
-		
-		// scan base.
-		if (!scanWAD(context, context.baseWad, true))
-		{
-			System.exit(ERROR_BAD_FILE);
-			return;
-		}
-		
-		// scan patches. 
-		for (String f : context.filePaths)
-			if (!scanWAD(context, f, false))
-			{
-				System.exit(ERROR_BAD_FILE);
-				return;
-			}
-
-		/* STEP 2 : Read list of what we want. */
-
-		context.println("Input texture/flat list:");
-		try
-		{
-			if (!readTexturesAndFlats(context))
-			{
-				System.exit(ERROR_BAD_FILE);
-				return;
-			}
-		} 
-		catch (IOException e) 
-		{
-			// if we reach here, you got PROBLEMS, buddy.
-			context.println("ERROR: Could not read from STDIN.");
-			System.exit(ERROR_IO_ERROR);
-			return;
-		}
-		
-		/* STEP 3 : Extract the junk and put it in the output wad. */
-
-		if (context.nullComparator.nullName != null)
-			context.println("Using "+ context.nullComparator.nullName.toUpperCase() + " as the null texture in TEXTURE1...");
-		
-		if (!extractToOutputWad(context))
-		{
-			System.exit(ERROR_BAD_FILE);
-			return;
-		}
-		
-		context.println("Done!");
-		
-		System.exit(ERROR_NONE);
 	}
 	
 }

@@ -22,7 +22,7 @@ import net.mtrop.doom.tools.common.ParseException;
  * Main class for JSwantbls.
  * @author Matthew Tropiano
  */
-public final class JSwAnTablesMain
+public final class WSwAnTablesMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String VERSION = Common.getVersionString("jswantbls");
@@ -49,9 +49,12 @@ public final class JSwAnTablesMain
 	/**
 	 * Program options.
 	 */
-	private static class Options
+	public static class Options
 	{
-		boolean help;
+		private PrintStream out;
+		private PrintStream err;
+		private BufferedReader in;
+		private boolean help;
 		boolean version;
 		boolean verbose;
 		Boolean exportMode;
@@ -60,6 +63,9 @@ public final class JSwAnTablesMain
 		
 		Options()
 		{
+			this.out = null;
+			this.err = null;
+			this.in = null;
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
@@ -67,15 +73,44 @@ public final class JSwAnTablesMain
 			this.sourceFile = null;
 			this.wadFile = null;
 		}
+		
+		void println(Object msg)
+		{
+			out.println(msg);
+		}
+		
+		void errln(Object msg)
+		{
+			err.println(msg);
+		}
+		
+		void errf(String fmt, Object... args)
+		{
+			err.printf(fmt, args);
+		}
+
+		char readChar() throws IOException
+		{
+			return (char)in.read();
+		}
+		
+		String readLine() throws IOException
+		{
+			return in.readLine();
+		}	
 	}
 	
 	/**
 	 * Reads command line arguments and sets options.
 	 * @param args the argument args.
 	 */
-	private static Options options(String[] args)
+	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String[] args)
 	{
-		Options out = new Options();
+		Options options = new Options();
+		options.out = out;
+		options.err = err;
+		options.in = in;
+		
 		final int STATE_START = 0;
 		final int STATE_IMPORTEXPORT = 1;
 		int state = STATE_START;
@@ -89,29 +124,29 @@ public final class JSwAnTablesMain
 				case STATE_START:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						out.help = true;
+						options.help = true;
 					else if (arg.equals(SWITCH_VERBOSE) || arg.equals(SWITCH_VERBOSE2))
-						out.verbose = true;
+						options.verbose = true;
 					else if (arg.equals(SWITCH_VERSION))
-						out.version = true;
+						options.version = true;
 					else if (arg.equals(SWITCH_EXPORT) || arg.equals(SWITCH_EXPORT2))
 					{
 						state = STATE_IMPORTEXPORT;
-						out.exportMode = true;
+						options.exportMode = true;
 					}
 					else if (arg.equals(SWITCH_IMPORT) || arg.equals(SWITCH_IMPORT2))
 					{
 						state = STATE_IMPORTEXPORT;
-						out.exportMode = false;
+						options.exportMode = false;
 					}
 					else
-						out.wadFile = new File(arg);
+						options.wadFile = new File(arg);
 				}
 				break;
 
 				case STATE_IMPORTEXPORT:
 				{
-					out.sourceFile = new File(arg);
+					options.sourceFile = new File(arg);
 					state = STATE_START;
 				}
 				break;
@@ -119,16 +154,201 @@ public final class JSwAnTablesMain
 			i++;
 		}
 		
-		return out;
+		return options;
 	}
 	
+	/**
+	 * Calls this program.
+	 * @param options the program options.
+	 * @return the return code.
+	 */
+	public static int call(Options options)
+	{
+		if (options.help)
+		{
+			splash(options.out);
+			usage(options.out);
+			options.out.println();
+			help(options.out);
+			options.out.println();
+			return ERROR_NONE;
+		}
+		
+		if (options.version)
+		{
+			splash(options.out);
+			return ERROR_NONE;
+		}
+		
+		if (options.wadFile == null)
+		{
+			options.out.println("ERROR: No WAD file specified.");
+			usage(options.out);
+			return ERROR_MISSING_DATA;
+		}
+	
+		if (options.exportMode == null)
+		{
+			options.out.println("ERROR: Import or export mode not specified.");
+			usage(options.out);
+			return ERROR_MISSING_DATA;
+		}
+	
+		if (options.sourceFile == null)
+		{
+			options.out.println("ERROR: No source file specified.");
+			usage(options.out);
+			return ERROR_MISSING_DATA;
+		}
+	
+		WadFile wad = null;
+		try 
+		{
+			if (!options.exportMode && !options.wadFile.exists())
+				wad = WadFile.createWadFile(options.wadFile);
+			else
+				wad = new WadFile(options.wadFile);
+		}
+		catch (FileNotFoundException e)
+		{
+			options.out.printf("ERROR: File %s not found.\n", options.wadFile.getPath());
+			return ERROR_BAD_INPUTOUTPUT_FILE;
+		}
+		catch (IOException e)
+		{
+			options.out.printf("ERROR: %s.\n", e.getLocalizedMessage());
+			return ERROR_BAD_INPUTOUTPUT_FILE;
+		}
+		catch (SecurityException e)
+		{
+			options.out.printf("ERROR: File %s not readable (access denied).\n", options.wadFile.getPath());
+			return ERROR_BAD_INPUTOUTPUT_FILE;
+		}
+	
+		String streamName = null;
+		BufferedReader reader = null;
+		PrintWriter writer = null;
+	
+		try
+		{
+			Animated animated;
+			boolean replaceAnimated = true;
+			if ((animated = wad.getDataAs("ANIMATED", Animated.class)) == null)
+			{
+				animated = new Animated();
+				replaceAnimated = false;
+			}
+			
+			Switches switches;
+			boolean replaceSwitches = true;
+			if ((switches = wad.getDataAs("SWITCHES", Switches.class)) == null)
+			{
+				switches = new Switches();
+				replaceSwitches = false;
+			}
+	
+			if (options.exportMode)
+			{
+				try
+				{
+					writer = new PrintWriter(new FileOutputStream(options.sourceFile), true, Charset.forName("ASCII"));
+					streamName = options.sourceFile.getPath();
+				}
+				catch (IOException e)
+				{
+					options.out.printf("ERROR: File %s not writable.\n", options.sourceFile.getPath());
+					return ERROR_BAD_INPUTOUTPUT_FILE;
+				}
+				catch (SecurityException e)
+				{
+					options.out.printf("ERROR: File %s not writable (access denied).\n", options.sourceFile.getPath());
+					return ERROR_BAD_INPUTOUTPUT_FILE;
+				}
+	
+				Common.writeSwitchAnimatedTables(switches, animated, SWANTBLS_OUTPUT_HEADER, writer);
+				options.out.printf("Wrote `%s`.\n", streamName);
+			}
+			else // import mode
+			{
+				try
+				{
+					reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.sourceFile)));
+					streamName = options.sourceFile.getPath();
+				}
+				catch (FileNotFoundException e)
+				{
+					options.out.printf("ERROR: File %s not found.\n", options.sourceFile.getPath());
+					return ERROR_BAD_INPUTOUTPUT_FILE;
+				}
+				catch (SecurityException e)
+				{
+					options.out.printf("ERROR: File %s not readable (access denied).\n", options.sourceFile.getPath());
+					return ERROR_BAD_INPUTOUTPUT_FILE;
+				}
+	
+				Common.readSwitchAnimatedTables(reader, animated, switches);
+	
+				if (replaceAnimated)
+				{
+					wad.replaceEntry(wad.indexOf("ANIMATED"), animated);
+					if (options.verbose)
+						options.out.printf("Replaced `ANIMATED` in `%s`.\n", options.wadFile.getPath());
+				}
+				else
+				{
+					wad.addData("ANIMATED", animated);
+					if (options.verbose)
+						options.out.printf("Added `ANIMATED` to `%s`.\n", options.wadFile.getPath());
+				}
+				
+				if (replaceSwitches)
+				{
+					wad.replaceEntry(wad.indexOf("SWITCHES"), switches);
+					if (options.verbose)
+						options.out.printf("Replaced `SWITCHES` in `%s`.\n", options.wadFile.getPath());
+				}
+				else
+				{
+					wad.addData("SWITCHES", switches);
+					if (options.verbose)
+						options.out.printf("Added `SWITCHES` to `%s`.\n", options.wadFile.getPath());
+				}
+				
+				options.out.printf("Imported into `%s`.\n", options.wadFile.getPath());
+			}
+		}
+		catch (IOException e)
+		{
+			options.out.printf("ERROR: %s\n", e.getLocalizedMessage());
+			return ERROR_BAD_INPUTOUTPUT_FILE;
+		}
+		catch (ParseException e)
+		{
+			options.out.printf("ERROR: %s, %s\n", streamName, e.getLocalizedMessage());
+			return ERROR_BAD_PARSE;
+		}
+		finally
+		{
+			IOUtils.close(reader);
+			IOUtils.close(writer);
+			IOUtils.close(wad);
+		}
+		
+		return ERROR_NONE;
+	}
+
+	public static void main(String[] args) throws IOException
+	{
+		System.exit(call(options(System.out, System.err, Common.openTextStream(System.in), args)));
+	}
+
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("JSwAnTbls v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
+		out.println("WSwAnTbl v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
 	}
 
 	/**
@@ -137,7 +357,7 @@ public final class JSwAnTablesMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: jswantbls [--help | -h | --version] [file] [mode] [switches]");
+		out.println("Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]");
 	}
 	
 	/**
@@ -165,193 +385,6 @@ public final class JSwAnTablesMain
 		out.println("[switches]:");
 		out.println("    --verbose           Prints verbose output.");
 		out.println("    -v");
-	}
-	
-	public static void main(String[] args)
-	{
-		Options options = options(args);
-		
-		if (options.help)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.out.println();
-			help(System.out);
-			System.out.println();
-			System.exit(ERROR_NONE);
-		}
-		
-		if (options.version)
-		{
-			splash(System.out);
-			System.exit(ERROR_NONE);
-		}
-		
-		if (options.wadFile == null)
-		{
-			System.out.println("ERROR: No WAD file specified.");
-			usage(System.out);
-			System.exit(ERROR_MISSING_DATA);
-			return;
-		}
-
-		if (options.exportMode == null)
-		{
-			System.out.println("ERROR: Import or export mode not specified.");
-			usage(System.out);
-			System.exit(ERROR_MISSING_DATA);
-			return;
-		}
-
-		if (options.sourceFile == null)
-		{
-			System.out.println("ERROR: No source file specified.");
-			usage(System.out);
-			System.exit(ERROR_MISSING_DATA);
-			return;
-		}
-
-		WadFile wad = null;
-		try 
-		{
-			if (!options.exportMode && !options.wadFile.exists())
-				wad = WadFile.createWadFile(options.wadFile);
-			else
-				wad = new WadFile(options.wadFile);
-		}
-		catch (FileNotFoundException e)
-		{
-			System.out.printf("ERROR: File %s not found.\n", options.wadFile.getPath());
-			System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-			return;
-		}
-		catch (IOException e)
-		{
-			System.out.printf("ERROR: %s.\n", e.getLocalizedMessage());
-			System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-			return;
-		}
-		catch (SecurityException e)
-		{
-			System.out.printf("ERROR: File %s not readable (access denied).\n", options.wadFile.getPath());
-			System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-			return;
-		}
-
-		String streamName = null;
-		BufferedReader reader = null;
-		PrintWriter writer = null;
-
-		try
-		{
-			Animated animated;
-			boolean replaceAnimated = true;
-			if ((animated = wad.getDataAs("ANIMATED", Animated.class)) == null)
-			{
-				animated = new Animated();
-				replaceAnimated = false;
-			}
-			
-			Switches switches;
-			boolean replaceSwitches = true;
-			if ((switches = wad.getDataAs("SWITCHES", Switches.class)) == null)
-			{
-				switches = new Switches();
-				replaceSwitches = false;
-			}
-
-			if (options.exportMode)
-			{
-				try
-				{
-					writer = new PrintWriter(new FileOutputStream(options.sourceFile), true, Charset.forName("ASCII"));
-					streamName = options.sourceFile.getPath();
-				}
-				catch (IOException e)
-				{
-					System.out.printf("ERROR: File %s not writable.\n", options.sourceFile.getPath());
-					System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-					return;
-				}
-				catch (SecurityException e)
-				{
-					System.out.printf("ERROR: File %s not writable (access denied).\n", options.sourceFile.getPath());
-					System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-					return;
-				}
-
-				Common.writeSwitchAnimatedTables(switches, animated, SWANTBLS_OUTPUT_HEADER, writer);
-				System.out.printf("Wrote `%s`.\n", streamName);
-			}
-			else // import mode
-			{
-				try
-				{
-					reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.sourceFile)));
-					streamName = options.sourceFile.getPath();
-				}
-				catch (FileNotFoundException e)
-				{
-					System.out.printf("ERROR: File %s not found.\n", options.sourceFile.getPath());
-					System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-					return;
-				}
-				catch (SecurityException e)
-				{
-					System.out.printf("ERROR: File %s not readable (access denied).\n", options.sourceFile.getPath());
-					System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-					return;
-				}
-
-				Common.readSwitchAnimatedTables(reader, animated, switches);
-
-				if (replaceAnimated)
-				{
-					wad.replaceEntry(wad.indexOf("ANIMATED"), animated);
-					if (options.verbose)
-						System.out.printf("Replaced `ANIMATED` in `%s`.\n", options.wadFile.getPath());
-				}
-				else
-				{
-					wad.addData("ANIMATED", animated);
-					if (options.verbose)
-						System.out.printf("Added `ANIMATED` to `%s`.\n", options.wadFile.getPath());
-				}
-				
-				if (replaceSwitches)
-				{
-					wad.replaceEntry(wad.indexOf("SWITCHES"), switches);
-					if (options.verbose)
-						System.out.printf("Replaced `SWITCHES` in `%s`.\n", options.wadFile.getPath());
-				}
-				else
-				{
-					wad.addData("SWITCHES", switches);
-					if (options.verbose)
-						System.out.printf("Added `SWITCHES` to `%s`.\n", options.wadFile.getPath());
-				}
-				
-				System.out.printf("Imported into `%s`.\n", options.wadFile.getPath());
-			}
-		}
-		catch (IOException e)
-		{
-			System.out.printf("ERROR: %s\n", e.getLocalizedMessage());
-			System.exit(ERROR_BAD_INPUTOUTPUT_FILE);
-		}
-		catch (ParseException e)
-		{
-			System.out.printf("ERROR: %s, %s\n", streamName, e.getLocalizedMessage());
-			System.exit(ERROR_BAD_PARSE);
-		}
-		finally
-		{
-			IOUtils.close(reader);
-			IOUtils.close(writer);
-			IOUtils.close(wad);
-		}
-		
-		System.exit(ERROR_NONE);
 	}
 
 }

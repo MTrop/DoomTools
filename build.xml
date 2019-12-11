@@ -114,18 +114,18 @@
 		<!-- WadMerge -->
 		<shell-cmd  name="wadmerge"  todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
 		<shell-bash name="wadmerge"  todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
-		<!-- JSWANTBLS -->
-		<shell-cmd  name="jswantbls" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.JSwAnTablesMain" />
-		<shell-bash name="jswantbls" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.JSwAnTablesMain" />
+		<!-- WSWANTBL -->
+		<shell-cmd  name="wswantbl" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
+		<shell-bash name="wswantbl" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
 		<!-- WADTex -->
 		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<shell-bash name="wadtex" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<!-- WTexScan -->
-		<shell-cmd  name="wtexscan" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
-		<shell-bash name="wtexscan" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TexScanMain" />
+		<shell-cmd  name="wtexscan" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<shell-bash name="wtexscan" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
 		<!-- WTexport -->
-		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.TExportMain" />
-		<shell-bash name="wtexport" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.TExportMain" />
+		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-bash name="wtexport" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">

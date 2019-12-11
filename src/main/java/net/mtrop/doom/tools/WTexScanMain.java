@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,7 +37,7 @@ import net.mtrop.doom.util.NameUtils;
  * Main class for TexScan.
  * @author Matthew Tropiano
  */
-public final class TexScanMain
+public final class WTexScanMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String VERSION = Common.getVersionString("wtexscan");
@@ -64,24 +65,26 @@ public final class TexScanMain
 	/**
 	 * Program options.
 	 */
-	private static class Options
+	public static class Options
 	{
-		PrintStream out;
-		PrintStream err;
-		boolean help;
-		boolean version;
-		boolean quiet;
-		boolean outputTextures;
-		boolean outputFlats;
-		boolean skipSkies;
-		List<File> wadFiles;
-		SortedSet<String> textureList;
-		SortedSet<String> flatList;
+		private PrintStream out;
+		private PrintStream err;
+		private BufferedReader in;
+		private boolean help;
+		private boolean version;
+		private boolean quiet;
+		private boolean outputTextures;
+		private boolean outputFlats;
+		private boolean skipSkies;
+		private List<File> wadFiles;
+		private SortedSet<String> textureList;
+		private SortedSet<String> flatList;
 		
 		Options()
 		{
-			this.out = System.out;
-			this.err = System.err;
+			this.out = null;
+			this.err = null;
+			this.in = null;
 			this.help = false;
 			this.version = false;
 			this.quiet = false;
@@ -110,45 +113,152 @@ public final class TexScanMain
 			if (!quiet)
 				err.printf(fmt, args);
 		}
+
+		char readChar() throws IOException
+		{
+			return (char)in.read();
+		}
+		
+		String readLine() throws IOException
+		{
+			return in.readLine();
+		}
 	}
 	
+	private static class Pair
+	{
+		public int x;
+		public int y;
+	}
+
 	/**
 	 * Reads command line arguments and sets options.
 	 * @param args the argument args.
 	 */
-	private static Options options(String[] args)
+	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String[] args)
 	{
-		Options out = new Options();
+		Options options = new Options();
+		options.out = out;
+		options.err = err;
+		options.in = in;
+		
 		int i = 0;
 		while (i < args.length)
 		{
 			String arg = args[i];
 			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				out.help = true;
+				options.help = true;
 			else if (arg.equals(SWITCH_VERSION))
-				out.version = true;
+				options.version = true;
 			else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
-				out.quiet = true;
+				options.quiet = true;
 			else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))
-				out.outputTextures = true;
+				options.outputTextures = true;
 			else if (arg.equals(SWITCH_FLATS) || arg.equals(SWITCH_FLATS2))
-				out.outputFlats = true;
+				options.outputFlats = true;
 			else if (arg.equals(SWITCH_NOSKIES))
-				out.skipSkies = true;
+				options.skipSkies = true;
 			else
-				out.wadFiles.add(new File(arg));
+				options.wadFiles.add(new File(arg));
 			i++;
 		}
 		
-		if (!out.outputFlats && !out.outputTextures)
+		if (!options.outputFlats && !options.outputTextures)
 		{
-			out.outputFlats = true;
-			out.outputTextures = true;
+			options.outputFlats = true;
+			options.outputTextures = true;
 		}
 		
-		return out;
+		return options;
 	}
 	
+	/**
+	 * Calls this program.
+	 * @param options the program options.
+	 * @return the return code.
+	 */
+	public static int call(Options options)
+	{
+		if (options.help)
+		{
+			splash(options.out);
+			usage(options.out);
+			options.out.println();
+			help(options.out);
+			return ERROR_NONE;
+		}
+		
+		if (options.version)
+		{
+			splash(options.out);
+			return ERROR_NONE;
+		}
+	
+		if (options.wadFiles.isEmpty())
+		{
+			splash(options.out);
+			usage(options.out);
+			return ERROR_NONE;
+		}
+	
+		options.println("# " + SPLASH_VERSION);
+	
+		boolean atLeastOneError = false;
+		for (File f : options.wadFiles)
+		{
+			try
+			{
+				if (f.getName().toLowerCase().endsWith(".wad"))
+					processWAD(options, f);
+				else if (f.getName().toLowerCase().endsWith(".pk3"))
+					processPK3(options, f.getPath(), f);
+				else if (f.getName().toLowerCase().endsWith(".zip"))
+					processPK3(options, f.getPath(), f);
+				else
+				{
+					options.errf("ERROR: %s is not a WAD, PK3, or ZIP.\n", f.getPath());
+					atLeastOneError = true;
+				}
+			}
+			catch (IOException e)
+			{
+				options.errf("ERROR: %s: %s\n", e.getClass().getSimpleName(), e.getLocalizedMessage());
+				atLeastOneError = true;
+			}
+		}
+	
+		if (options.textureList.isEmpty())
+		{
+			options.println("# No textures.");
+		}
+		else
+		{
+			options.out.println("-TEXTURES");
+			for (String t : options.textureList)
+				options.out.println(t);
+		}
+	
+		if (options.flatList.isEmpty())
+		{
+			options.println("# No flats.");
+		}
+		else
+		{
+			options.out.println("-FLATS");
+			for (String f : options.flatList)
+				options.out.println(f);
+		}
+	
+		options.out.println("-END");
+	
+		return atLeastOneError ? ERROR_BAD_FILE : ERROR_NONE;
+	}
+
+	public static void main(String[] args) throws IOException
+	{
+		System.exit(call(options(System.out, System.err, Common.openTextStream(System.in), args)));
+	}
+
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
@@ -194,88 +304,6 @@ public final class TexScanMain
 		out.println("    --no-skies          Skip adding associated skies per map.");
 	}
 	
-	public static void main(String[] args)
-	{
-		Options options = options(args);
-		
-		if (options.help)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.out.println();
-			help(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-		
-		if (options.version)
-		{
-			splash(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-
-		if (options.wadFiles.isEmpty())
-		{
-			splash(System.out);
-			usage(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-
-		options.println("# " + SPLASH_VERSION);
-
-		boolean atLeastOneError = false;
-		for (File f : options.wadFiles)
-		{
-			try
-			{
-				if (f.getName().toLowerCase().endsWith(".wad"))
-					processWAD(options, f);
-				else if (f.getName().toLowerCase().endsWith(".pk3"))
-					processPK3(options, f.getPath(), f);
-				else if (f.getName().toLowerCase().endsWith(".zip"))
-					processPK3(options, f.getPath(), f);
-				else
-				{
-					options.errf("ERROR: %s is not a WAD, PK3, or ZIP.\n", f.getPath());
-					atLeastOneError = true;
-				}
-			}
-			catch (IOException e)
-			{
-				options.errf("ERROR: %s: %s\n", e.getClass().getSimpleName(), e.getLocalizedMessage());
-				atLeastOneError = true;
-			}
-		}
-
-		if (options.textureList.isEmpty())
-		{
-			options.println("# No textures.");
-		}
-		else
-		{
-			options.out.println("-TEXTURES");
-			for (String t : options.textureList)
-				options.out.println(t);
-		}
-
-		if (options.flatList.isEmpty())
-		{
-			options.println("# No flats.");
-		}
-		else
-		{
-			options.out.println("-FLATS");
-			for (String f : options.flatList)
-				options.out.println(f);
-		}
-
-		options.out.println("-END");
-
-		System.exit(atLeastOneError ? ERROR_BAD_FILE : ERROR_NONE);
-	}
-
 	// Process PK3/ZIP
 	private static void processPK3(Options options, String fileName, File f) throws ZipException, IOException
 	{
@@ -541,12 +569,6 @@ public final class TexScanMain
 	{
 		if (!options.flatList.contains(texture) && texture != null && !texture.trim().isEmpty())
 			options.flatList.add(texture);
-	}
-
-	private static class Pair
-	{
-		public int x;
-		public int y;
 	}
 	
 }
