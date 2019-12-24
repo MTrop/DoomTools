@@ -2,14 +2,17 @@ package net.mtrop.doom.tools.wadmerge;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
 
@@ -19,7 +22,6 @@ import net.mtrop.doom.tools.common.Response;
  */
 public enum WadMergeCommand
 {
-	/*
 	CALL
 	{
 		@Override
@@ -77,7 +79,6 @@ public enum WadMergeCommand
 			return Response.OK;
 		}
 	},
-	*/
 	
 	END
 	{
