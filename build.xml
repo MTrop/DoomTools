@@ -22,11 +22,16 @@
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
+	<property name="rookscript.lib.version" value="1.2.2" />
+	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
+	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
+	<property name="rookscript.jar" value="${rookscript.project}.jar" />
+	<property name="rookscript.jar.src" value="${rookscript.project}-sources.jar" />
 
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -44,6 +49,7 @@
 	<property name="wadtex.version" value="${build.version}" />
 	<property name="wtexscan.version" value="${build.version}" />
 	<property name="wtexport.version" value="${build.version}" />
+	<property name="wscript.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -66,11 +72,13 @@
 	<target name="init.versions" depends="clean.versions">
 		<mkdir dir="${build.versions.dir}" />
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
+		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/jswantbls.version" message="${jswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
 		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
 		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
+		<echo file="${build.versions.dir}/wscript.version" message="${wscript.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -107,7 +115,12 @@
 		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar.src}" dest="${dependencies.dir}" />
 	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.rookscript">
+		<github-dl repository="BlackRookSoftware/RookScript" tag="${rookscript.tag}" file="${rookscript.jar}" dest="${dependencies.dir}" />
+		<github-dl repository="BlackRookSoftware/RookScript" tag="${rookscript.tag}" file="${rookscript.jar.src}" dest="${dependencies.dir}" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<target name="scripts" description="Creates application shell scripts.">
@@ -126,6 +139,9 @@
 		<!-- WTexport -->
 		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 		<shell-bash name="wtexport" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<!-- WScript -->
+		<shell-cmd  name="wscript" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-bash name="wscript" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
