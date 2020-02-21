@@ -15,7 +15,12 @@ import com.blackrook.rookscript.lang.ScriptFunctionUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
+import net.mtrop.doom.Wad;
+
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Script functions for WAD.
@@ -39,6 +44,7 @@ public enum WadFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.BOOLEAN, "True if so, false if not."),
+					type(Type.ERROR, "Security", "If the OS denied permission to read the file."),
 					type(Type.ERROR, "IOError", "If there was an error reading the file.")
 				)
 			;
@@ -50,7 +56,34 @@ public enum WadFunctions implements ScriptFunctionType
 			ScriptValue temp = CACHEVALUE1.get();
 			try
 			{
-				// TODO: Finish this.
+				scriptInstance.popStackValue(temp);
+				if (temp.isObjectType(Wad.class))
+				{
+					returnValue.set(true);
+					return true;
+				}
+				
+				File file;
+				if (temp.isObjectType(File.class))
+					file = temp.asObjectType(File.class);
+				else if (temp.isNull())
+					file = null;
+				else
+					file = new File(temp.asString());
+				
+				if (file == null)
+				{
+					returnValue.set(false);
+					return true;
+				}
+				
+				try {
+					returnValue.set(Wad.isWAD(file));
+				} catch (SecurityException e) {
+					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
 				return true;
 			}
 			finally
@@ -60,6 +93,8 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 
+	// TODO: Finish this.
+	
 	;
 	
 	private final int parameterCount;
