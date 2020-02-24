@@ -8,7 +8,9 @@
 package net.mtrop.doom.tools.scripting;
 
 import com.blackrook.rookscript.ScriptInstance;
+import com.blackrook.rookscript.ScriptIteratorType;
 import com.blackrook.rookscript.ScriptValue;
+import com.blackrook.rookscript.ScriptIteratorType.IteratorPair;
 import com.blackrook.rookscript.ScriptValue.Type;
 import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionUsage;
@@ -17,6 +19,7 @@ import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
+import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
 
@@ -26,6 +29,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * Script functions for WAD.
@@ -283,6 +287,271 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 
+	WADINFO(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a Wad's info."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to inspect.")
+				)
+				.returns(
+					type(Type.MAP, "{type:STRING, entrycount:INTEGER, listoffset:INTEGER, contentlength:INTEGER, filepath:STRING}", "The fetched WAD information as a map."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue wadValue = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(wadValue);
+				if (!wadValue.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				Wad wad = wadValue.asObjectType(Wad.class);
+				returnValue.setEmptyMap(5);
+				returnValue.mapSet("contentlength", 12);
+				returnValue.mapSet("entrycount", wad.getEntryCount());
+				returnValue.mapSet("filepath", (wad instanceof WadFile) ? ((WadFile)wad).getFilePath() : null);
+				returnValue.mapSet("listoffset", wad.getContentLength() + 12);
+				returnValue.mapSet("type", wad.isIWAD() ? Wad.Type.IWAD.name() : Wad.Type.PWAD.name());
+				return true;
+			}
+			finally
+			{
+				wadValue.setNull();
+			}
+		}
+	},
+	
+	WADENTRY(3)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a Wad's entry data."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("search", 
+					type(Type.NULL, "Fetch nothing."),
+					type(Type.INTEGER, "The entry index (0-based)."),
+					type(Type.STRING, "The entry name (first found). Also use [startFromSearch].")
+				)
+				.parameter("startFromSearch", 
+					type(Type.NULL, "Start from entry 0."),
+					type(Type.INTEGER, "Start from entry index (0-based)."),
+					type(Type.STRING, "Start from entry name (first found).")
+				)
+				.returns(
+					type(Type.NULL, "If not found."),
+					type(Type.MAP, "{name:STRING, offset:INTEGER, size:INTEGER}", "The fetched entry information as a map."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue startSearch = CACHEVALUE1.get();
+			ScriptValue search = CACHEVALUE2.get();
+			ScriptValue wadValue = CACHEVALUE3.get();
+			try
+			{
+				scriptInstance.popStackValue(startSearch);
+				scriptInstance.popStackValue(search);
+				scriptInstance.popStackValue(wadValue);
+				
+				if (!wadValue.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+				
+				WadEntry entry;
+				Wad wad = wadValue.asObjectType(Wad.class);
+				
+				if (search.isNull())
+					entry = null;
+				else if (search.isNumeric())
+					entry = wad.getEntry(search.asInt());
+				else if (search.isString() && startSearch.isNull())
+					entry = wad.getEntry(search.asString());
+				else if (search.isString() && startSearch.isNumeric())
+					entry = wad.getEntry(search.asString(), startSearch.asInt());
+				else if (search.isString() && startSearch.isString())
+					entry = wad.getEntry(search.asString(), startSearch.asString());
+				else
+					entry = null;
+				
+				if (entry != null)
+					setEntry(returnValue, entry);
+				
+				return true;
+			}
+			finally
+			{
+				wadValue.setNull();
+				search.setNull();
+				startSearch.setNull();
+			}
+		}
+	},
+
+	WADENTRYINDEX(3)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches the index of an entry in the Wad."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("search", 
+					type(Type.NULL, "Fetch nothing."),
+					type(Type.STRING, "The entry name (first found). Also use [startFromSearch].")
+				)
+				.parameter("startFromSearch", 
+					type(Type.NULL, "Start from entry 0."),
+					type(Type.INTEGER, "Start from entry index (0-based)."),
+					type(Type.STRING, "Start from entry name (first found).")
+				)
+				.returns(
+					type(Type.NULL, "If not found."),
+					type(Type.INTEGER, "The index of the found entry."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue startSearch = CACHEVALUE1.get();
+			ScriptValue search = CACHEVALUE2.get();
+			ScriptValue wadValue = CACHEVALUE3.get();
+			try
+			{
+				scriptInstance.popStackValue(startSearch);
+				scriptInstance.popStackValue(search);
+				scriptInstance.popStackValue(wadValue);
+				
+				if (!wadValue.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+				
+				Integer foundIndex;
+				Wad wad = wadValue.asObjectType(Wad.class);
+				
+				if (search.isNull())
+					foundIndex = null;
+				else if (search.isString() && startSearch.isNull())
+					foundIndex = wad.indexOf(search.asString());
+				else if (search.isString() && startSearch.isNumeric())
+					foundIndex = wad.indexOf(search.asString(), startSearch.asInt());
+				else if (search.isString() && startSearch.isString())
+					foundIndex = wad.indexOf(search.asString(), startSearch.asString());
+				else
+					foundIndex = null;
+
+				if (foundIndex != null)
+					returnValue.set(foundIndex);
+				else
+					returnValue.setNull();
+				
+				return true;
+			}
+			finally
+			{
+				wadValue.setNull();
+				search.setNull();
+				startSearch.setNull();
+			}
+		}
+	},
+
+	WADENTRIES(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through all of the entries."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "An iterator for each entry - Key: index:INTEGER, value: MAP{name:STRING, offset:INTEGER, size:INTEGER}."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue wadValue = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(wadValue);
+				if (!wadValue.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				final Wad wad = wadValue.asObjectType(Wad.class);
+				returnValue.set(new ScriptIteratorType() 
+				{
+					private final IteratorPair pair = new IteratorPair();
+					private final Iterator<WadEntry> iter = wad.iterator();
+					private int cur = 0;
+					
+					@Override
+					public IteratorPair next() 
+					{
+						pair.set(cur++, null);
+						setEntry(pair.getValue(), iter.next());
+						return pair;
+					}
+					
+					@Override
+					public boolean hasNext()
+					{
+						return iter.hasNext();
+					}
+				});
+				return true;
+			}
+			finally
+			{
+				wadValue.setNull();
+			}
+		}
+	},
+	
 	// TODO: Finish this.
 	
 	;
@@ -339,7 +608,22 @@ public enum WadFunctions implements ScriptFunctionType
 			return new File(temp.asString());
 	}
 	
+	/**
+	 * Sets a script value to an entry map.
+	 * @param value the script value.
+	 * @param entry the entry to use.
+	 */
+	protected void setEntry(ScriptValue value, WadEntry entry) 
+	{
+		value.setEmptyMap(3);
+		value.mapSet("name", entry.getName());
+		value.mapSet("offset", entry.getOffset());
+		value.mapSet("size", entry.getSize());
+	}
+	
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHEVALUE3 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 
 }

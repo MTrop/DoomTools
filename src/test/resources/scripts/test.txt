@@ -1,0 +1,11 @@
+entry main(args)
+{
+	println(iswad("H:\\Doom\\Iwads\\DOOM2.WAD"));
+	wad = wadfile("H:\\Doom\\Iwads\\DOOM2.WAD");
+	println(wad->wadinfo());
+	each (i, e : wad->wadentries())
+		println(i + ": " + e);
+		
+	println(wad->wadentry("vertexes", "map01"));
+	println(wad->wadentry("vertexes", "map99"));
+}
