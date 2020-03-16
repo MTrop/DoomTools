@@ -139,9 +139,9 @@
 		<!-- WTexport -->
 		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 		<shell-bash name="wtexport" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
-		<!-- WScript -->
-		<shell-cmd  name="wscript" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
-		<shell-bash name="wscript" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<!-- WadScript -->
+		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<shell-bash name="wadscript" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">

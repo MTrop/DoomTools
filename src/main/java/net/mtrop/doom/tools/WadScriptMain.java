@@ -51,7 +51,7 @@ import com.blackrook.rookscript.functions.PrintFunctions;
  * Main class for executing scripts.
  * @author Matthew Tropiano
  */
-public final class WScriptMain
+public final class WadScriptMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
@@ -85,7 +85,7 @@ public final class WScriptMain
 	private Integer stackDepth;
 	private List<String> argList;
 	
-	private WScriptMain()
+	private WadScriptMain()
 	{
 		this.mode = Mode.EXECUTE;
 		this.scriptFile = null;
@@ -199,7 +199,7 @@ public final class WScriptMain
 		return -1;
 	}
 
-	private int parseCommandLine(WScriptMain executor, String[] args)
+	private int parseCommandLine(WadScriptMain executor, String[] args)
 	{
 		final int STATE_START = 0;
 		final int STATE_ARGS = 1;
@@ -496,7 +496,7 @@ public final class WScriptMain
 			return;
 		}
 		
-		WScriptMain executor = new WScriptMain();
+		WadScriptMain executor = new WadScriptMain();
 		int out;
 		if ((out = executor.parseCommandLine(executor, args)) > 0)
 			System.exit(out);
