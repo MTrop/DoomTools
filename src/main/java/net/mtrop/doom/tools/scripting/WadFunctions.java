@@ -900,7 +900,7 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 	
-	WADDATAASSTREAM(3)
+	WADDATASTREAM(3)
 	{
 		@Override
 		protected Usage usage()
