@@ -17,7 +17,7 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.6.0" />
+	<property name="doom.lib.version" value="2.6.1" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
@@ -108,6 +108,9 @@
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+		<jar destfile="${jar.dir}/${jar.filename}" update="true">
+			<zipfileset dir="${build.dir}/versions" prefix="net/mtrop/doom/tools/" />
+		</jar>
 	</target>
 
 	<target name="dependency.doom">

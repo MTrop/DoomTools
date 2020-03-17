@@ -23,6 +23,7 @@ import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.util.MapUtils;
+import net.mtrop.doom.util.NameUtils;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
@@ -31,6 +32,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 /**
@@ -925,7 +927,7 @@ public enum WadFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.NULL, "If not found."),
-					type(Type.OBJECTREF, "", "The entry data."),
+					type(Type.OBJECTREF, "DataInputStream", "The entry data as an open stream."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
 					type(Type.ERROR, "BadEntry", "If [entry] is a map and \"offset\" or \"size\" are missing, or not an accepted value type."),
 					type(Type.ERROR, "IOError", "If a read error occurs.")
@@ -1035,6 +1037,86 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 	
+	WADADD(4)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Adds an entry to a Wad."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("name", 
+					type(Type.NULL, "Use \"-\"."),
+					type(Type.STRING, "The new entry name (name is coerced into a valid name).")
+				)
+				.parameter("data", 
+					type(Type.NULL, "Synonymous with empty buffer - no data. Writes a marker."),
+					type(Type.STRING, "The data to add (as UTF-8)."),
+					type(Type.BUFFER, "The data to add."),
+					type(Type.OBJECTREF, "File", "The file contents to add."),
+					type(Type.OBJECTREF, "InputStream", "The data to add.")
+				)
+				.parameter("index",
+					type(Type.NULL, "Add to the end."),
+					type(Type.INTEGER, "Insert at index.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "[wad], if successful."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
+					type(Type.ERROR, "BadData", "If [data] is not an accepted value type."),
+					type(Type.ERROR, "IOError", "If a read error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue data = CACHEVALUE2.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				Integer index = temp.isNull() ? null : temp.asInt();
+				scriptInstance.popStackValue(data);
+				scriptInstance.popStackValue(temp);
+				String name = temp.isNull() ? "-" : temp.asString();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				final Wad wad = temp.asObjectType(Wad.class);
+				name = NameUtils.toValidEntryName(name);
+				
+				if (data.isNull())
+				{
+					addWADData(returnValue, wad, name, Wad.NO_DATA, index);
+					return true;
+				}
+				else if (data.isString())
+				{
+					addWADData(returnValue, wad, name, data.asString().getBytes(UTF_8), index);
+					return true;
+				}
+				
+				// TODO: FINISH!
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				data.setNull();
+			}
+		}
+	},
+	
 	// TODO: Finish this.
 	
 	;
@@ -1136,6 +1218,21 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	}
 
+	protected void addWADData(ScriptValue value, final Wad wad, String name, byte[] data, Integer index)
+	{
+		try {
+			if (index != null)
+				wad.addDataAt(index, name, data);
+			else
+				wad.addData(name, data);
+			value.set(wad);
+		} catch (IOException e) {
+			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+	
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
