@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.TextureException;
 import net.mtrop.doom.exception.WadException;
@@ -1246,7 +1247,7 @@ public final class WTExportMain
 		byte[][] data = new byte[entries.size() + 2][];
 		
 		names[0] = namespace + "_START";
-		data[0] = new byte[0];
+		data[0] = Wad.NO_DATA;
 		
 		for (int i = 0; i < entries.size(); i++)
 		{
@@ -1255,9 +1256,13 @@ public final class WTExportMain
 		}
 
 		names[names.length - 1] = namespace + "_END";
-		data[data.length - 1] = new byte[0];
+		data[data.length - 1] = Wad.NO_DATA;
 		
-		wf.addAllData(names, data);
+		try (WadFile.Adder adder = wf.createAdder())
+		{
+			for (int i = 0; i < names.length; i++)
+				adder.addData(names[i], data[i]);
+		}
 		
 		return true;
 	}
