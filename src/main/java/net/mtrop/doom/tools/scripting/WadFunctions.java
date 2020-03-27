@@ -12,16 +12,19 @@ import com.blackrook.rookscript.ScriptIteratorType;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
+import com.blackrook.rookscript.functions.ZipFunctions;
 import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
+import net.mtrop.doom.DoomPK3;
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
@@ -34,6 +37,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Script functions for WAD.
@@ -792,7 +798,6 @@ public enum WadFunctions implements ScriptFunctionType
 				.returns(
 					type(Type.NULL, "If not found."),
 					type(Type.BUFFER, "The entry data."),
-					type(Type.LIST, "[BUFFER, ...]", "The entry data of more than one provided entry, if [entry] was a list."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
 					type(Type.ERROR, "BadEntry", "If [entry] is a map and \"offset\" or \"size\" are missing, or not an accepted value type."),
 					type(Type.ERROR, "IOError", "If a read error occurs.")
@@ -927,7 +932,7 @@ public enum WadFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.NULL, "If not found."),
-					type(Type.OBJECTREF, "DataInputStream", "The entry data as an open stream."),
+					type(Type.OBJECTREF, "DataInputStream", "The entry data as an open input stream."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
 					type(Type.ERROR, "BadEntry", "If [entry] is a map and \"offset\" or \"size\" are missing, or not an accepted value type."),
 					type(Type.ERROR, "IOError", "If a read error occurs.")
@@ -1068,6 +1073,7 @@ public enum WadFunctions implements ScriptFunctionType
 					type(Type.OBJECTREF, "Wad", "[wad], if successful."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
 					type(Type.ERROR, "BadData", "If [data] is not an accepted value type."),
+					type(Type.ERROR, "BadIndex", "If an [index] was provided and it is less than 0 or greater than the current entry count."),
 					type(Type.ERROR, "IOError", "If a read error occurs.")
 				)
 			;
@@ -1105,9 +1111,23 @@ public enum WadFunctions implements ScriptFunctionType
 					addWADData(returnValue, wad, name, data.asString().getBytes(UTF_8), index);
 					return true;
 				}
-				
-				// TODO: FINISH!
-				return true;
+				else if (data.isObjectRef(File.class))
+				{
+					File file = data.asObjectType(File.class);
+					addWADData(returnValue, wad, name, file, index);
+					return true;
+				}
+				else if (data.isObjectRef(InputStream.class))
+				{
+					InputStream in = data.asObjectType(InputStream.class);
+					addWADData(returnValue, wad, name, in, index);
+					return true;
+				}
+				else
+				{
+					returnValue.setError("BadData", "Data is not an accepted type.");
+					return true;
+				}
 			}
 			finally
 			{
@@ -1117,6 +1137,439 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 	
+	WADREMOVE(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Removes a WAD's entry by index. Does not remove content."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("index",
+					type(Type.INTEGER, "The entry index to remove.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "[wad], if successful."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
+					type(Type.ERROR, "BadIndex", "If the index is less than 0 or greater than or equal to the current entry count."),
+					type(Type.ERROR, "IOError", "If a write error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				Integer index = temp.isNull() ? null : temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+				if (index == null)
+				{
+					returnValue.setError("BadIndex", "Index not provided.");
+					return true;
+				}
+
+				final Wad wad = temp.asObjectType(Wad.class);
+
+				try {
+					wad.removeEntry(index);
+					returnValue.set(wad);
+				} catch (IndexOutOfBoundsException e) {
+					returnValue.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	WADDELETE(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Deletes a WAD's entry by index. Removes content!"
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("index",
+					type(Type.INTEGER, "The entry index to delete.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "[wad], if successful."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
+					type(Type.ERROR, "BadIndex", "If the index is less than 0 or greater than or equal to the current entry count."),
+					type(Type.ERROR, "IOError", "If a write error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				Integer index = temp.isNull() ? null : temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+				if (index == null)
+				{
+					returnValue.setError("BadIndex", "Index not provided.");
+					return true;
+				}
+
+				final Wad wad = temp.asObjectType(Wad.class);
+
+				try {
+					wad.deleteEntry(index);
+					returnValue.set(wad);
+				} catch (IndexOutOfBoundsException e) {
+					returnValue.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	WADIMPORT(4)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Imports data into one Wad from another."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to import into.")
+				)
+				.parameter("srcWad", 
+					type(Type.OBJECTREF, "Wad", "The open source Wad to import from.")
+				)
+				.parameter("srcEntries",
+					type(Type.NULL, "Assume all entries from the source."),
+					type(Type.LIST, "LIST[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]", "The list of entries to import from the source, in the order provided.")
+				)
+				.parameter("index",
+					type(Type.NULL, "Add to the end."),
+					type(Type.INTEGER, "Insert at index.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "[wad], if successful."),
+					type(Type.ERROR, "BadParameter", "If [wad] or [srcWad] are not Wad files."),
+					type(Type.ERROR, "BadEntry", "If one of the entries in the entry list is malformed."),
+					type(Type.ERROR, "BadIndex", "If the index is less than 0 or greater than or equal to the current entry count."),
+					type(Type.ERROR, "IOError", "If a write error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue dest = CACHEVALUE1.get();
+			ScriptValue src = CACHEVALUE2.get();
+			ScriptValue entries = CACHEVALUE3.get();
+			ScriptValue temp = CACHEVALUE4.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				Integer index = temp.isNull() ? null : temp.asInt();
+				scriptInstance.popStackValue(entries);
+				scriptInstance.popStackValue(src);
+				scriptInstance.popStackValue(dest);
+				
+				if (!dest.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+				if (!src.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "Second parameter is not a Wad.");
+					return true;
+				}
+				
+				final Wad srcWad = src.asObjectType(Wad.class);
+				final Wad destWad = dest.asObjectType(Wad.class);
+				
+				if (index == null)
+					index = destWad.getEntryCount();
+				
+				if (entries.isNull())
+				{
+					try {
+						destWad.addFrom(srcWad, srcWad.getAllEntries());
+						returnValue.set(destWad);
+					} catch (IOException e) {
+						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+					} 
+					return true;
+				}
+				else if (!entries.isList())
+				{
+					temp.set(entries);
+					entries.setEmptyList(1);
+					entries.listSetByIndex(0, temp);
+				}
+
+				WadFile.Adder adder = null;
+				if (WadFile.class.isAssignableFrom(destWad.getClass()))
+					adder = ((WadFile)destWad).createAdder();
+				try 
+				{
+					for (int i = 0; i < entries.length(); i++)
+					{
+						entries.listGetByIndex(i, src);
+						WadEntry entry = getEntry(src, temp);
+						if (entry == null)
+						{
+							returnValue.setError("BadEntry", "List index " + i + " describes a bad entry - must be a map, and check name, offset, size.");
+							return true;
+						}
+						
+						try (InputStream in = srcWad.getInputStream(entry))
+						{
+							if (adder != null)
+								adder.addData(entry.getName(), in);
+							else
+								destWad.addData(entry.getName(), in);
+						}
+					}
+					returnValue.set(destWad);
+				} catch (IndexOutOfBoundsException e) {
+					returnValue.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				} finally {
+					IOUtils.close(adder);
+				}
+				
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				dest.setNull();
+				src.setNull();
+				entries.setNull();
+			}
+		}
+	},
+	
+	PK3OPEN(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Opens a Doom PK3. The ZF* functions can work with this - a Doom PK3 is a Zip file! " +
+					"The file, if opened, is registered as a resource, and will be closed when the script terminates."
+				)
+				.parameter("path", 
+					type(Type.STRING, "Path to PK3 file. Relative paths are relative to working directory."),
+					type(Type.OBJECTREF, "File", "Path to PK3 file. Relative paths are relative to working directory.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "DoomPK3", "An open PK3 file."),
+					type(Type.ERROR, "Security", "If the OS denied opening the file for the required permissions."),
+					type(Type.ERROR, "IOError", "If [path] is null or the file is not a PK3 file, or it does could not be opened/found for some reason.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				File file = popFile(scriptInstance, temp);
+				try {
+					if (file == null)
+						returnValue.setError("IOError", "A file was not provided.");
+					else
+					{
+						DoomPK3 pk3 = new DoomPK3(file);
+						scriptInstance.registerCloseable(pk3);
+						returnValue.set(pk3);
+					}
+				} catch (SecurityException e) {
+					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	PK3ENTRY(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Returns a list of all of the entries in an open PK3 file. This is a rebrand of ZFENTRY - same function."
+				)
+				.parameter("zip", 
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+				)
+				.parameter("entry", 
+					type(Type.STRING, "The entry name.")
+				)
+				.returns(
+					type(Type.NULL, "If an entry by that name could not be found."),
+					type(Type.MAP, "{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}", "A map of entry info."),
+					type(Type.ERROR, "BadParameter", "If an open zip file was not provided, or [entry] is null."),
+					type(Type.ERROR, "IOError", "If a read error occurs, or the zip is not open.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			return ZipFunctions.ZFENTRY.execute(scriptInstance, returnValue);
+		}
+	},
+	
+	PK3ENTRIES(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Returns a list of all entries that start with a type of key. The name is treated case-insensitively."
+				)
+				.parameter("pk3", 
+					type(Type.OBJECTREF, "DoomPK3", "An open PK3 file.")
+				)
+				.parameter("prefix", 
+					type(Type.STRING, "The starting prefix for the entries.")
+				)
+				.returns(
+					type(Type.LIST, "[MAP:{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}, ...]", "A list of maps containg Zip entry info."),
+					type(Type.ERROR, "BadParameter", "If an open PK3 file was not provided, or [entry] is null."),
+					type(Type.ERROR, "IOError", "If a read error occurs, or the PK3 is not open.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String prefix = temp.asString();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectType(ZipFile.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not an open PK3 file.");
+					return true;
+				}
+
+				DoomPK3 pk3 = temp.asObjectType(DoomPK3.class);
+				List<String> entries = pk3.getEntriesStartingWith(prefix);
+				if (entries.isEmpty())
+				{
+					returnValue.setEmptyList();
+					return true;
+				}
+				else
+				{
+					for (int i = 0; i < entries.size(); i++)
+					{
+						setEntryInfo(pk3.getEntry(entries.get(i)), temp);
+						returnValue.listAdd(temp);
+					}
+				}
+				
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	PK3EOPEN(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource). " +
+					"This is a rebrand of ZFENTRY - same function."
+				)
+				.parameter("zip", 
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+				)
+				.parameter("entry", 
+					type(Type.STRING, "The entry name."),
+					type(Type.MAP, "{... name:STRING ...}", "A map of zip entry info containing the name of the entry.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "DataInputStream", "An open data input stream to read from."),
+					type(Type.ERROR, "BadParameter", "If an open zip file was not provided, or [entry] is null or [entry].name is null."),
+					type(Type.ERROR, "BadEntry", "If [entry] could not be found in the zip."),
+					type(Type.ERROR, "IOError", "If a read error occurs, or the zip is not open.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			return ZipFunctions.ZFEOPEN.execute(scriptInstance, returnValue);
+		}
+	},
+
 	// TODO: Finish this.
 	
 	;
@@ -1187,6 +1640,36 @@ public enum WadFunctions implements ScriptFunctionType
 	}
 	
 	/**
+	 * Gets an entry from a script value.
+	 * @param value the script value.
+	 * @param temp a temp value.
+	 * @return a WadEntry, or null if information is missing.
+	 * @throws IllegalArgumentException if entry is malformed.
+	 */
+	protected WadEntry getEntry(ScriptValue value, ScriptValue temp) 
+	{
+		if (!value.isMap())
+			return null;
+		
+		int offset, size;
+		String name;
+		
+		if (!value.mapGet("offset", temp))
+			return null;
+		offset = temp.asInt();
+
+		if (!value.mapGet("size", temp))
+			return null;
+		size = temp.asInt();
+
+		if (!value.mapGet("name", temp))
+			return null;
+		name = NameUtils.toValidEntryName(temp.asString());
+
+		return WadEntry.create(name, offset, size);
+	}
+	
+	/**
 	 * Gets byte data from a Wad and sets it on a value.
 	 * @param value the script value.
 	 * @param wad the Wad to read from.
@@ -1218,24 +1701,125 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	}
 
+	/**
+	 * Adds data to an open Wad.
+	 * @param value the return value (wad or error)
+	 * @param wad the open Wad.
+	 * @param name the entry name.
+	 * @param data the raw data.
+	 * @param index the optional index.
+	 */
 	protected void addWADData(ScriptValue value, final Wad wad, String name, byte[] data, Integer index)
 	{
 		try {
-			if (index != null)
-				wad.addDataAt(index, name, data);
-			else
-				wad.addData(name, data);
+			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, data);
 			value.set(wad);
+		} catch (IndexOutOfBoundsException e) {
+			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");
 		} catch (IOException e) {
 			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
 		}
 	}
 
+	/**
+	 * Adds data to an open Wad.
+	 * @param value the return value (wad or error).
+	 * @param wad the open Wad.
+	 * @param name the entry name.
+	 * @param file the file to add.
+	 * @param index the optional index.
+	 */
+	protected void addWADData(ScriptValue value, final Wad wad, String name, File file, Integer index)
+	{
+		try {
+			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, file);
+			value.set(wad);
+		} catch (IndexOutOfBoundsException e) {
+			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+		} catch (IOException e) {
+			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Adds data to an open Wad.
+	 * @param value the return value (wad or error).
+	 * @param wad the open Wad.
+	 * @param name the entry name.
+	 * @param in the stream to read.
+	 * @param index the optional index.
+	 */
+	protected void addWADData(ScriptValue value, final Wad wad, String name, InputStream in, Integer index)
+	{
+		try {
+			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, in);
+			value.set(wad);
+		} catch (IndexOutOfBoundsException e) {
+			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+		} catch (IOException e) {
+			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Adds data to an open Wad.
+	 * @param value the return value (wad or error).
+	 * @param wad the open Wad.
+	 * @param name the entry name.
+	 * @param sourceWad the source Wad to add.
+	 * @param index the optional index.
+	 */
+	protected void addWADData(ScriptValue value, final Wad wad, Wad sourceWad, Integer index)
+	{
+		try {
+			wad.addFromAt(index != null ? index : wad.getEntryCount(), sourceWad, sourceWad.getAllEntries());
+			value.set(wad);
+		} catch (IndexOutOfBoundsException e) {
+			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");
+		} catch (IOException e) {
+			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Sets a script value to a map with zip entry data.
+	 * @param entry the zip entry.
+	 * @param out the value to change.
+	 */
+	protected void setEntryInfo(ZipEntry entry, ScriptValue out) 
+	{
+		out.setEmptyMap(8);
+		
+		if (entry.getComment() != null)
+			out.mapSet("comment", entry.getComment());
+		if (entry.getCompressedSize() >= 0)
+			out.mapSet("compressedsize", entry.getCompressedSize());
+		if (entry.getCrc() >= 0)
+			out.mapSet("crc", entry.getCrc());
+		if (entry.getCreationTime() != null)
+			out.mapSet("creationtime", entry.getCreationTime().toMillis());
+		
+		out.mapSet("dir", entry.isDirectory());
+
+		if (entry.getLastAccessTime() != null)
+			out.mapSet("lastaccesstime", entry.getLastAccessTime().toMillis());
+		if (entry.getLastModifiedTime() != null)
+			out.mapSet("lastmodifiedtime", entry.getLastModifiedTime().toMillis());
+		
+		out.mapSet("name", entry.getName());
+		
+		if (entry.getSize() >= 0)
+			out.mapSet("size", entry.getSize());
+		if (entry.getTime() >= 0)
+			out.mapSet("time", entry.getTime());
+	}
+	
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 	private static final ThreadLocal<ScriptValue> CACHEVALUE3 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHEVALUE4 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 
 }
