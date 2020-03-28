@@ -38,6 +38,8 @@ import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.scripting.DoomMapFunctions;
+import net.mtrop.doom.tools.scripting.PK3Functions;
 import net.mtrop.doom.tools.scripting.WadFunctions;
 
 import com.blackrook.rookscript.functions.CommonFunctions;
@@ -141,6 +143,8 @@ public final class WadScriptMain
 				.andFunctionResolver(ZipFunctions.createResolver())
 				.andFunctionResolver(DigestFunctions.createResolver())
 				.andFunctionResolver(WadFunctions.createResolver())
+				.andFunctionResolver(PK3Functions.createResolver())
+				.andFunctionResolver(DoomMapFunctions.createResolver())
 			.withScriptStack(activationDepth, stackDepth)
 			.withRunawayLimit(runawayLimit)
 			.createInstance();
@@ -464,8 +468,12 @@ public final class WadScriptMain
 		printFunctionUsages(out, DataIOFunctions.createResolver());
 		printFunctionHeader(out, "Digest");
 		printFunctionUsages(out, DigestFunctions.createResolver());
-		printFunctionHeader(out, "WADs / PK3s");
+		printFunctionHeader(out, "WADs");
 		printFunctionUsages(out, WadFunctions.createResolver());
+		printFunctionHeader(out, "PK3s");
+		printFunctionUsages(out, PK3Functions.createResolver());
+		printFunctionHeader(out, "Doom / Hexen / ZDoom / UDMF Maps");
+		printFunctionUsages(out, DoomMapFunctions.createResolver());
 	}
 	
 	/**
