@@ -91,14 +91,19 @@ public final class WTExportMain
 
 		/** Null comparator. */
 		private NullComparator nullComparator;
-		/** List of texture names. */
+		/** List of texture names (need this list because order matters). */
 		private List<String> textureList; 
-		/** List of flat names. */
+		/** List of flat names (need this list because order matters). */
 		private List<String> flatList; 
 		/** Base Unit. */
 		private WadUnit baseUnit;
 		/** WAD priority queue. */
 		private Deque<WadUnit> wadPriority;
+
+		/** Set of texture names (dupe test). */
+		private Set<String> textureSet; 
+		/** Set of flat names (dupe test). */
+		private Set<String> flatSet; 
 
 		private Options()
 		{
@@ -114,6 +119,8 @@ public final class WTExportMain
 			this.filePaths = new ArrayList<>();
 			
 			this.nullComparator = new NullComparator(null);
+			this.textureSet = new HashSet<>();
+			this.flatSet = new HashSet<>();
 			this.textureList = new ArrayList<>();
 			this.flatList = new ArrayList<>();
 			this.baseUnit = null;
@@ -425,16 +432,12 @@ public final class WTExportMain
 		
 		// scan base.
 		if (!scanWAD(options, options.baseWad, true))
-		{
 			return ERROR_BAD_FILE;
-		}
 		
 		// scan patches. 
 		for (String f : options.filePaths)
 			if (!scanWAD(options, f, false))
-			{
 				return ERROR_BAD_FILE;
-			}
 	
 		/* STEP 2 : Read list of what we want. */
 	
@@ -442,9 +445,7 @@ public final class WTExportMain
 		try
 		{
 			if (!readTexturesAndFlats(options))
-			{
 				return ERROR_BAD_FILE;
-			}
 		} 
 		catch (IOException e) 
 		{
@@ -459,9 +460,7 @@ public final class WTExportMain
 			options.println("Using "+ options.nullComparator.nullName.toUpperCase() + " as the null texture in TEXTURE1...");
 		
 		if (!extractToOutputWad(options))
-		{
 			return ERROR_BAD_FILE;
-		}
 		
 		options.println("Done!");
 		return ERROR_NONE;
@@ -905,6 +904,14 @@ public final class WTExportMain
 		return true;
 	}
 	
+	private static void addToLists(Set<String> set, List<String> list, String s)
+	{
+		if (set.contains(s))
+			return;
+		set.add(s);
+		list.add(s);
+	}
+	
 	private static void readAndAddTextures(Options context, String textureName)
 	{
 		if (!NameUtils.isValidTextureName(textureName))
@@ -913,46 +920,44 @@ public final class WTExportMain
 			return;
 		}
 		
-		context.textureList.add(textureName);
-		
+		addToLists(context.textureSet, context.textureList, textureName);
+
 		for (WadUnit unit : context.wadPriority)
 		{
 			if (!context.noAnimated)
 			{
 				if (unit.animatedTexture.containsKey(textureName))
 					for (String s : unit.animatedTexture.get(textureName))
-						context.textureList.add(s);
+						addToLists(context.textureSet, context.textureList, s);
 			}
 		
 			if (!context.noSwitches)
 			{
 				if (unit.switchMap.containsKey(textureName))
 				{
-					context.textureList.add(textureName);
-					context.textureList.add(unit.switchMap.get(textureName));
+					addToLists(context.textureSet, context.textureList, textureName);
+					addToLists(context.textureSet, context.textureList, unit.switchMap.get(textureName));
 				}
 				else if (TextureTables.SWITCH_TABLE.containsKey(textureName))
 				{
-					context.textureList.add(textureName);
-					context.textureList.add(TextureTables.SWITCH_TABLE.get(textureName));
+					addToLists(context.textureSet, context.textureList, textureName);
+					addToLists(context.textureSet, context.textureList, TextureTables.SWITCH_TABLE.get(textureName));
 				}
 			}
 		}
-		
-		
 	}
 
 	private static void readAndAddFlats(Options context, String textureName)
 	{
-		context.flatList.add(textureName);
-		
+		addToLists(context.flatSet, context.flatList, textureName);
+
 		if (!context.noAnimated)
 		{
 			for (WadUnit unit : context.wadPriority)
 			{
 				if (unit.animatedFlat.containsKey(textureName))
 					for (String s : unit.animatedFlat.get(textureName))
-						context.flatList.add(s);
+						addToLists(context.flatSet, context.flatList, s);
 			}
 		}
 	}

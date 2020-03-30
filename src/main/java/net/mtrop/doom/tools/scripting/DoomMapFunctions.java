@@ -44,9 +44,11 @@ import net.mtrop.doom.map.udmf.attributes.UDMFCommonVertexAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFHexenLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFHexenThingAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFMBFThingAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFStrifeLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFStrifeThingAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFZDoomLinedefAttributes;
+import net.mtrop.doom.util.NameUtils;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
@@ -201,14 +203,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			out.mapSet("time", entry.getTime());
 	}
 	
-	protected void setUDMFInfo(UDMFObject object, ScriptValue out)
+	protected void udmfToMap(UDMFObject object, ScriptValue out)
 	{
 		out.setEmptyMap(16);
 		for (Map.Entry<String, Object> entry : object)
 			out.mapSet(entry.getKey(), entry.getValue());
 	}
 
-	protected boolean getUDMFInfo(ScriptValue out, UDMFObject object)
+	protected boolean mapToUDMF(ScriptValue out, UDMFObject object)
 	{
 		if (!out.isMap())
 			return false;
@@ -217,9 +219,18 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		while (mapIt.hasNext())
 		{
 			IteratorPair pair = mapIt.next();
-			if (pair.getValue().isNull())
+			String key = pair.getKey().asString();
+			Object value = pair.getValue().asObject();
+			if (value == null)
 				continue;
-			// TODO: Finish this.
+			else if (value instanceof Boolean)
+				object.setBoolean(key, (Boolean)value);
+			else if (value instanceof Double)
+				object.setFloat(key, ((Double)value).floatValue());
+			else if (value instanceof Long)
+				object.setInteger(key, ((Long)value).intValue());
+			else
+				object.setString(key, String.valueOf(value));
 		}
 		
 		out.setEmptyMap(16);
@@ -228,14 +239,31 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void setVertexInfo(DoomVertex vertex, ScriptValue out)
+	protected void vertexToMap(DoomVertex vertex, ScriptValue out)
 	{
 		out.setEmptyMap(2);
 		out.mapSet(UDMFCommonVertexAttributes.ATTRIB_POSITION_X, vertex.getX());
 		out.mapSet(UDMFCommonVertexAttributes.ATTRIB_POSITION_Y, vertex.getY());
 	}
 
-	protected void setSidedefInfo(DoomSidedef sidedef, ScriptValue out)
+	protected boolean mapToVertex(ScriptValue in, DoomVertex vertex)
+	{
+		if (!in.isMap())
+			return false;
+		
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			in.mapGet(UDMFCommonVertexAttributes.ATTRIB_POSITION_X, temp);
+			vertex.setX(temp.asInt());
+			in.mapGet(UDMFCommonVertexAttributes.ATTRIB_POSITION_Y, temp);
+			vertex.setY(temp.asInt());
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+
+	protected void sidedefToMap(DoomSidedef sidedef, ScriptValue out)
 	{
 		out.setEmptyMap(6);
 		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_X, sidedef.getOffsetX());
@@ -245,8 +273,33 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, sidedef.getTextureMiddle());
 		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_SECTOR_INDEX, sidedef.getSectorIndex());
 	}
+	
+	protected boolean mapToSidedef(ScriptValue in, DoomSidedef sidedef)
+	{
+		if (!in.isMap())
+			return false;
+		
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_X, temp);
+			sidedef.setOffsetX(temp.asInt());
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_Y, temp);
+			sidedef.setOffsetY(temp.asInt());
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_TOP, temp);
+			sidedef.setTextureTop(NameUtils.toValidTextureName(temp.asString()));
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, temp);
+			sidedef.setTextureBottom(NameUtils.toValidTextureName(temp.asString()));
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, temp);
+			sidedef.setTextureMiddle(NameUtils.toValidTextureName(temp.asString()));
+			in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_SECTOR_INDEX, temp);
+			sidedef.setSectorIndex(temp.asInt());
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
 
-	protected void setSectorInfo(DoomSector sector, ScriptValue out)
+	protected void sectorToMap(DoomSector sector, ScriptValue out)
 	{
 		out.setEmptyMap(8);
 		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_FLOOR, sector.getFloorHeight());
@@ -255,11 +308,37 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_CEILING, sector.getCeilingTexture());
 		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_LIGHT_LEVEL, sector.getLightLevel());
 		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_SPECIAL, sector.getSpecial());
-		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ID, sector.getTag());
-		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ARG0, sector.getTag());
+		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_TAG, sector.getTag());
 	}
 
-	protected void setThingInfo(DoomThing thing, boolean strife, ScriptValue out)
+	protected boolean mapToSector(ScriptValue in, DoomSector sector)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_FLOOR, temp);
+			sector.setFloorHeight(temp.asInt());
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_CEILING, temp);
+			sector.setCeilingHeight(temp.asInt());
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_FLOOR, temp);
+			sector.setFloorTexture(NameUtils.toValidTextureName(temp.asString()));
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_CEILING, temp);
+			sector.setCeilingTexture(NameUtils.toValidTextureName(temp.asString()));
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_LIGHT_LEVEL, temp);
+			sector.setLightLevel(temp.asInt());
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_SPECIAL, temp);
+			sector.setSpecial(temp.asInt());
+			in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TAG, temp);
+			sector.setTag(temp.asInt());
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+	
+	protected void thingToMap(DoomThing thing, boolean strife, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFCommonThingAttributes.ATTRIB_POSITION_X, thing.getX());
@@ -267,19 +346,23 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFCommonThingAttributes.ATTRIB_ANGLE, thing.getAngle());
 		out.mapSet(UDMFCommonThingAttributes.ATTRIB_TYPE, thing.getType());
 		
+		boolean easy = thing.isFlagSet(DoomThingFlags.EASY);
+		boolean medium = thing.isFlagSet(DoomThingFlags.MEDIUM);
+		boolean hard = thing.isFlagSet(DoomThingFlags.HARD);
+
+		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL1, easy);
+		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL2, easy);
+		out.mapSet("easy", easy);
+
+		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL3, medium);
+		out.mapSet("medium", medium);
+
+		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL4, hard);
+		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL5, hard);
+		out.mapSet("hard", hard);
+
 		if (strife)
 		{
-			if (thing.isFlagSet(StrifeThingFlags.EASY))
-			{
-				out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SKILL1, true);
-				out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SKILL2, true);
-			}
-			out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SKILL3, thing.isFlagSet(StrifeThingFlags.MEDIUM));
-			if (thing.isFlagSet(StrifeThingFlags.HARD))
-			{
-				out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SKILL4, true);
-				out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SKILL5, true);
-			}
 			out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(StrifeThingFlags.AMBUSH));
 			out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, !thing.isFlagSet(StrifeThingFlags.MULTIPLAYER));
 			out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_COOPERATIVE, true);
@@ -291,26 +374,72 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 		else
 		{
-			if (thing.isFlagSet(DoomThingFlags.EASY))
-			{
-				out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL1, true);
-				out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL2, true);
-			}
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL3, thing.isFlagSet(DoomThingFlags.MEDIUM));
-			if (thing.isFlagSet(DoomThingFlags.HARD))
-			{
-				out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL4, true);
-				out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL5, true);
-			}
 			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(DoomThingFlags.AMBUSH));
 			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, !thing.isFlagSet(DoomThingFlags.NOT_SINGLEPLAYER));
 			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_COOPERATIVE, !thing.isFlagSet(BoomThingFlags.NOT_COOPERATIVE));
 			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_DEATHMATCH, !thing.isFlagSet(BoomThingFlags.NOT_DEATHMATCH));
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(MBFThingFlags.FRIENDLY));
+			out.mapSet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(MBFThingFlags.FRIENDLY));
 		}
 	}
 	
-	protected void setThingInfo(HexenThing thing, ScriptValue out)
+	protected boolean mapToThing(ScriptValue in, DoomThing thing, boolean strife)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_X, temp);
+			thing.setX(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_Y, temp);
+			thing.setY(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_ANGLE, temp);
+			thing.setAngle(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_TYPE, temp);
+			thing.setType(temp.asInt());
+
+			in.mapGet("easy", temp);
+			thing.setFlag(DoomThingFlags.EASY, temp.asBoolean());
+			in.mapGet("medium", temp);
+			thing.setFlag(DoomThingFlags.MEDIUM, temp.asBoolean());
+			in.mapGet("hard", temp);
+			thing.setFlag(DoomThingFlags.HARD, temp.asBoolean());
+
+			if (strife)
+			{
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_AMBUSH, temp);
+				thing.setFlag(StrifeThingFlags.AMBUSH, temp.asBoolean());
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, temp);
+				thing.setFlag(StrifeThingFlags.MULTIPLAYER, temp.asBoolean());
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_STANDING, temp);
+				thing.setFlag(StrifeThingFlags.STANDING, temp.asBoolean());
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_ALLY, temp);
+				thing.setFlag(StrifeThingFlags.ALLY, temp.asBoolean());
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_TRANSLUCENT, temp);
+				thing.setFlag(StrifeThingFlags.TRANSLUCENT_25, temp.asBoolean());
+				in.mapGet(UDMFStrifeThingAttributes.ATTRIB_FLAG_INVISIBLE, temp);
+				thing.setFlag(StrifeThingFlags.INVISIBLE, temp.asBoolean());
+			}
+			else
+			{
+				in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_AMBUSH, temp);
+				thing.setFlag(DoomThingFlags.AMBUSH, temp.asBoolean());
+				in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, temp);
+				thing.setFlag(DoomThingFlags.NOT_SINGLEPLAYER, !temp.asBoolean());
+				in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_COOPERATIVE, temp);
+				thing.setFlag(BoomThingFlags.NOT_COOPERATIVE, !temp.asBoolean());
+				in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_DEATHMATCH, temp);
+				thing.setFlag(BoomThingFlags.NOT_DEATHMATCH, !temp.asBoolean());
+				in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_FRIENDLY, temp);
+				thing.setFlag(MBFThingFlags.FRIENDLY, temp.asBoolean());
+			}
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+	
+	protected void thingToMap(HexenThing thing, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_POSITION_X, thing.getX());
@@ -327,17 +456,21 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_ARG3, thing.getArgument(3));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_ARG4, thing.getArgument(4));
 		
-		if (thing.isFlagSet(HexenThingFlags.EASY))
-		{
-			out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL1, true);
-			out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL2, true);
-		}
-		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL3, thing.isFlagSet(HexenThingFlags.MEDIUM));
-		if (thing.isFlagSet(HexenThingFlags.HARD))
-		{
-			out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL4, true);
-			out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL5, true);
-		}
+		boolean easy = thing.isFlagSet(HexenThingFlags.EASY);
+		boolean medium = thing.isFlagSet(HexenThingFlags.MEDIUM);
+		boolean hard = thing.isFlagSet(HexenThingFlags.HARD);
+
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL1, easy);
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL2, easy);
+		out.mapSet("easy", easy);
+
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL3, medium);
+		out.mapSet("medium", medium);
+
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL4, hard);
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SKILL5, hard);
+		out.mapSet("hard", hard);
+
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(HexenThingFlags.AMBUSH));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, thing.isFlagSet(HexenThingFlags.SINGLEPLAYER));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_COOPERATIVE, thing.isFlagSet(HexenThingFlags.COOPERATIVE));
@@ -348,7 +481,29 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(ZDoomThingFlags.FRIENDLY));
 	}
 	
-	protected void setLinedefInfo(DoomLinedef linedef, ScriptValue out)
+	protected boolean mapToThing(ScriptValue in, HexenThing thing)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_X, temp);
+			thing.setX(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_Y, temp);
+			thing.setY(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_ANGLE, temp);
+			thing.setAngle(temp.asInt());
+			in.mapGet(UDMFCommonThingAttributes.ATTRIB_TYPE, temp);
+			thing.setType(temp.asInt());
+			// TODO: Finish this.
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+	
+	protected void linedefToMap(DoomLinedef linedef, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
@@ -377,7 +532,21 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, linedef.isFlagSet(StrifeLinedefFlags.TRANSLUCENT));
 	}
 
-	protected void setLinedefInfo(HexenLinedef linedef, ScriptValue out)
+	protected boolean mapToLinedef(ScriptValue in, DoomLinedef linedef)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			// TODO: Finish this.
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+	
+	protected void linedefToMap(HexenLinedef linedef, ScriptValue out)
 	{
 		out.setEmptyMap(24);
 		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
@@ -434,8 +603,23 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	}
 	
+	protected boolean mapToLinedef(ScriptValue in, HexenLinedef linedef)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			// TODO: Finish this.
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+	
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHETEMP = ThreadLocal.withInitial(()->ScriptValue.create(null));
 
 }
