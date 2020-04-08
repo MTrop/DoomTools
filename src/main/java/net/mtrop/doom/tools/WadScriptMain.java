@@ -57,7 +57,7 @@ public final class WadScriptMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
-	private static final String VERSION = Common.getVersionString("wscript");
+	private static final String VERSION = Common.getVersionString("wadscript");
 
 	private static final String SWITCH_HELP1 = "--help";
 	private static final String SWITCH_HELP2 = "-h";

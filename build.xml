@@ -22,7 +22,7 @@
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
-	<property name="rookscript.lib.version" value="1.3.0" />
+	<property name="rookscript.lib.version" value="1.3.1" />
 	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
 	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
@@ -45,11 +45,11 @@
 	
 	<!-- Versions -->
 	<property name="wadmerge.version" value="${build.version}" />
-	<property name="jswantbls.version" value="${build.version}" />
+	<property name="wswantbls.version" value="${build.version}" />
 	<property name="wadtex.version" value="${build.version}" />
 	<property name="wtexscan.version" value="${build.version}" />
 	<property name="wtexport.version" value="${build.version}" />
-	<property name="wscript.version" value="${build.version}" />
+	<property name="wadscript.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -74,11 +74,11 @@
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
-		<echo file="${build.versions.dir}/jswantbls.version" message="${jswantbls.version}" />
+		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
 		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
 		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
-		<echo file="${build.versions.dir}/wscript.version" message="${wscript.version}" />
+		<echo file="${build.versions.dir}/wadscript.version" message="${wadscript.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">

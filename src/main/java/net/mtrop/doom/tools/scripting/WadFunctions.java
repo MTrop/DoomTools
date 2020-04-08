@@ -173,7 +173,7 @@ public enum WadFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Opens a WAD into an in-memory WAD buffer."
+					"Opens a WAD into an in-memory WAD buffer (not a resource - does not require closing)."
 				)
 				.parameter("file", 
 					type(Type.NULL, "Make empty buffer."),
@@ -564,10 +564,13 @@ public enum WadFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Creates an iterator that iterates through all of the entries in a WAD."
+					"Creates an iterator that iterates through all of the entries in a WAD. " +
+					"The value that this produces can be used in an each(...) loop. The keys are entry indices, and " +
+					"values are maps of entry info (a la WADENTRY). If you need to scan through a Wad with many " +
+					"entries, this may be a less memory-intense way to do it."
 				)
 				.parameter("wad", 
-					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+					type(Type.OBJECTREF, "Wad", "The open WAD to iterate through.")
 				)
 				.returns(
 					type(Type.OBJECTREF, "ScriptIteratorType", "An iterator for each entry - Key: index:INTEGER, value: MAP{name:STRING, offset:INTEGER, size:INTEGER}."),
@@ -626,7 +629,9 @@ public enum WadFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Fetches all map headers in a WAD."
+					"Fetches all map headers in a WAD. This algorithm scans for known map " +
+					"data entries (e.g. THINGS, VERTEXES, etc.). " +
+					"If it finds one, the previous entry is the probably the header."
 				)
 				.parameter("wad", 
 					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
