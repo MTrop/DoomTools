@@ -1,4 +1,4 @@
-entry main(args)
+check entry main(args)
 {
 	println(iswad("H:\\Doom\\Iwads\\DOOM2.WAD"));
 	wad = wadfile("H:\\Doom\\Iwads\\DOOM2.WAD");
@@ -8,4 +8,16 @@ entry main(args)
 		
 	println(wad->wadentry("vertexes", "map01"));
 	println(wad->wadentry("vertexes", "map99"));
+	println(wad->wadmapheaders());
+	println(wad->wadmapentries("map01"));
+	println(wad->wadmapentrycount("map01"));
+
+	println(wad->waddata("things", "map01"));
+	println(wad->waddata({"name": "THINGS", "offset": 54224, "size": 690}));
+	
+	datain = wad->waddatastream("things", "map01");
+	println(datain);
+	close(datain);
+	
+	close(wad);
 }

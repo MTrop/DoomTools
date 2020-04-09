@@ -26,8 +26,8 @@ import net.mtrop.doom.map.data.DoomSidedef;
 import net.mtrop.doom.map.udmf.UDMFObject;
 import net.mtrop.doom.map.udmf.UDMFReader;
 import net.mtrop.doom.map.udmf.UDMFTable;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonSectorAttributes;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonSidedefAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.util.MapUtils;
@@ -537,9 +537,9 @@ public final class WTexScanMain
 	{
 		for (UDMFObject s : sidedefs)
 		{
-			addTexture(options, s.getString(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_TOP, NameUtils.EMPTY_TEXTURE_NAME));
-			addTexture(options, s.getString(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, NameUtils.EMPTY_TEXTURE_NAME));
-			addTexture(options, s.getString(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, NameUtils.EMPTY_TEXTURE_NAME));
+			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_TOP, NameUtils.EMPTY_TEXTURE_NAME));
+			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, NameUtils.EMPTY_TEXTURE_NAME));
+			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, NameUtils.EMPTY_TEXTURE_NAME));
 		}
 	}
 	
@@ -548,8 +548,8 @@ public final class WTexScanMain
 	{
 		for (DoomSector s : sectors)
 		{
-			addFlat(options, s.getFloorTexture());
-			addFlat(options, s.getCeilingTexture());
+			addFlat(options, s.getTextureFloor());
+			addFlat(options, s.getTextureCeiling());
 		}
 	}
 	
@@ -558,8 +558,8 @@ public final class WTexScanMain
 	{
 		for (UDMFObject s : sectors)
 		{
-			addFlat(options, s.getString(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_FLOOR));
-			addFlat(options, s.getString(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_CEILING));
+			addFlat(options, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR));
+			addFlat(options, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING));
 		}
 	}
 	

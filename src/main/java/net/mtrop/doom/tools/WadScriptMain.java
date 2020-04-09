@@ -18,6 +18,7 @@ import java.util.List;
 import com.blackrook.rookscript.ScriptAssembler;
 import com.blackrook.rookscript.ScriptEnvironment;
 import com.blackrook.rookscript.ScriptInstance;
+import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.exception.ScriptExecutionException;
 import com.blackrook.rookscript.functions.MathFunctions;
 import com.blackrook.rookscript.functions.RegexFunctions;
@@ -188,13 +189,21 @@ public final class WadScriptMain
 			Object[] args = new Object[argList.size()];
 			argList.toArray(args);
 			try {
-				Integer ret = instance.callAndReturnAs(Integer.class, entryPoint, new Object[]{args});
-				return ret != null ? ret : 0;
+				ScriptValue retval = ScriptValue.create(null);
+				instance.call(entryPoint, new Object[]{args});
+				instance.popStackValue(retval);
+				
+				if (retval.isError())
+				{
+					System.err.println("ERROR: " + retval);
+					return 7;
+				}
+				return retval.asInt();
 			} catch (ScriptExecutionException e) {
 				System.err.println("Script ERROR: " + e.getLocalizedMessage());
 				return 6;
 			} catch (ClassCastException e) {
-				System.err.println("Script return ERROR: Could not " + e.getLocalizedMessage());
+				System.err.println("Script return ERROR: " + e.getLocalizedMessage());
 				return 6;
 			}
 		}

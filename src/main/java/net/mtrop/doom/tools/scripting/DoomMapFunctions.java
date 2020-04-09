@@ -18,6 +18,7 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.Wad;
+import net.mtrop.doom.exception.MapException;
 import net.mtrop.doom.map.data.DoomLinedef;
 import net.mtrop.doom.map.data.DoomSector;
 import net.mtrop.doom.map.data.DoomSidedef;
@@ -37,21 +38,23 @@ import net.mtrop.doom.map.data.flags.StrifeThingFlags;
 import net.mtrop.doom.map.data.flags.ZDoomLinedefFlags;
 import net.mtrop.doom.map.data.flags.ZDoomThingFlags;
 import net.mtrop.doom.map.udmf.UDMFObject;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonSectorAttributes;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonSidedefAttributes;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonThingAttributes;
-import net.mtrop.doom.map.udmf.attributes.UDMFCommonVertexAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomLinedefAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomThingAttributes;
+import net.mtrop.doom.map.udmf.attributes.UDMFDoomVertexAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFHexenLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFHexenThingAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFMBFThingAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFStrifeLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFStrifeThingAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFZDoomLinedefAttributes;
+import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 
@@ -109,16 +112,66 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				}
 				else if (entry.isNumeric())
 				{
+					Wad wad = temp.asObjectType(Wad.class);
 					int index = entry.asInt();
-					
-					// TODO: Finish this.
+					try
+					{
+						switch (MapUtils.getMapFormat(wad, index))
+						{
+							default:
+								returnValue.setNull();
+								break;
+							case DOOM:
+								returnValue.set(MapUtils.createDoomMap(wad, index));
+								break;
+							case HEXEN:
+								returnValue.set(MapUtils.createHexenMap(wad, index));
+								break;
+							case UDMF:
+								returnValue.set(MapUtils.createUDMFMap(wad, index));
+								break;
+						}
+					} 
+					catch (MapException e) 
+					{
+						returnValue.setError("BadMap", "Map information is malformed.");
+					} 
+					catch (IOException e)
+					{
+						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+					}
 					return true;
 				}
 				else
 				{
+					Wad wad = temp.asObjectType(Wad.class);
 					String name = entry.asString();
-					
-					// TODO: Finish this.
+					try
+					{
+						switch (MapUtils.getMapFormat(wad, name))
+						{
+							default:
+								returnValue.setNull();
+								break;
+							case DOOM:
+								returnValue.set(MapUtils.createDoomMap(wad, name));
+								break;
+							case HEXEN:
+								returnValue.set(MapUtils.createHexenMap(wad, name));
+								break;
+							case UDMF:
+								returnValue.set(MapUtils.createUDMFMap(wad, name));
+								break;
+						}
+					} 
+					catch (MapException e) 
+					{
+						returnValue.setError("BadMap", "Map information is malformed.");
+					} 
+					catch (IOException e)
+					{
+						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+					}
 					return true;
 				}
 			}
@@ -129,9 +182,6 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			}
 		}
 	},
-
-	
-	
 	
 	// TODO: Finish this.
 	
@@ -205,6 +255,28 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			out.mapSet("time", entry.getTime());
 	}
 	
+	protected void mapElementToMap(Object object, ScriptValue out)
+	{
+		if (object instanceof UDMFObject)
+			udmfToMap((UDMFObject)object, out);
+		else if (object instanceof DoomVertex)
+			vertexToMap((DoomVertex)object, out);
+		else if (object instanceof DoomSector)
+			sectorToMap((DoomSector)object, out);
+		else if (object instanceof DoomSidedef)
+			sidedefToMap((DoomSidedef)object, out);
+		else if (object instanceof DoomLinedef)
+			linedefToMap((DoomLinedef)object, out);
+		else if (object instanceof HexenLinedef)
+			linedefToMap((HexenLinedef)object, out);
+		else if (object instanceof DoomThing)
+			thingToMap((DoomThing)object, false, out);
+		else if (object instanceof HexenThing)
+			thingToMap((HexenThing)object, out);
+		else
+			out.setEmptyMap();
+	}
+	
 	protected void udmfToMap(UDMFObject object, ScriptValue out)
 	{
 		out.setEmptyMap(16);
@@ -244,8 +316,8 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	protected void vertexToMap(DoomVertex vertex, ScriptValue out)
 	{
 		out.setEmptyMap(2);
-		out.mapSet(UDMFCommonVertexAttributes.ATTRIB_POSITION_X, vertex.getX());
-		out.mapSet(UDMFCommonVertexAttributes.ATTRIB_POSITION_Y, vertex.getY());
+		out.mapSet(UDMFDoomVertexAttributes.ATTRIB_POSITION_X, vertex.getX());
+		out.mapSet(UDMFDoomVertexAttributes.ATTRIB_POSITION_Y, vertex.getY());
 	}
 
 	protected boolean mapToVertex(ScriptValue in, DoomVertex vertex)
@@ -255,9 +327,9 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		
 		ScriptValue temp = CACHETEMP.get();
 		try {
-			if (in.mapGet(UDMFCommonVertexAttributes.ATTRIB_POSITION_X, temp))
+			if (in.mapGet(UDMFDoomVertexAttributes.ATTRIB_POSITION_X, temp))
 				vertex.setX(temp.asInt());
-			if (in.mapGet(UDMFCommonVertexAttributes.ATTRIB_POSITION_Y, temp))
+			if (in.mapGet(UDMFDoomVertexAttributes.ATTRIB_POSITION_Y, temp))
 				vertex.setY(temp.asInt());
 		} finally {
 			temp.setNull();
@@ -268,12 +340,12 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	protected void sidedefToMap(DoomSidedef sidedef, ScriptValue out)
 	{
 		out.setEmptyMap(6);
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_X, sidedef.getOffsetX());
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_Y, sidedef.getOffsetY());
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_TOP, sidedef.getTextureTop());
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, sidedef.getTextureBottom());
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, sidedef.getTextureMiddle());
-		out.mapSet(UDMFCommonSidedefAttributes.ATTRIB_SECTOR_INDEX, sidedef.getSectorIndex());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_OFFSET_X, sidedef.getOffsetX());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_OFFSET_Y, sidedef.getOffsetY());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_TOP, sidedef.getTextureTop());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, sidedef.getTextureBottom());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, sidedef.getTextureMiddle());
+		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_SECTOR_INDEX, sidedef.getSectorIndex());
 	}
 	
 	protected boolean mapToSidedef(ScriptValue in, DoomSidedef sidedef)
@@ -283,17 +355,17 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		
 		ScriptValue temp = CACHETEMP.get();
 		try {
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_X, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_OFFSET_X, temp))
 				sidedef.setOffsetX(temp.asInt());
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_OFFSET_Y, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_OFFSET_Y, temp))
 				sidedef.setOffsetY(temp.asInt());
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_TOP, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_TOP, temp))
 				sidedef.setTextureTop(NameUtils.toValidTextureName(temp.asString()));
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, temp))
 				sidedef.setTextureBottom(NameUtils.toValidTextureName(temp.asString()));
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, temp))
 				sidedef.setTextureMiddle(NameUtils.toValidTextureName(temp.asString()));
-			if (in.mapGet(UDMFCommonSidedefAttributes.ATTRIB_SECTOR_INDEX, temp))
+			if (in.mapGet(UDMFDoomSidedefAttributes.ATTRIB_SECTOR_INDEX, temp))
 				sidedef.setSectorIndex(temp.asInt());
 		} finally {
 			temp.setNull();
@@ -304,13 +376,13 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	protected void sectorToMap(DoomSector sector, ScriptValue out)
 	{
 		out.setEmptyMap(8);
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_FLOOR, sector.getFloorHeight());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_CEILING, sector.getCeilingHeight());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_FLOOR, sector.getFloorTexture());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_CEILING, sector.getCeilingTexture());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_LIGHT_LEVEL, sector.getLightLevel());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_SPECIAL, sector.getSpecial());
-		out.mapSet(UDMFCommonSectorAttributes.ATTRIB_TAG, sector.getTag());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_HEIGHT_FLOOR, sector.getHeightFloor());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_HEIGHT_CEILING, sector.getHeightCeiling());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR, sector.getTextureFloor());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING, sector.getTextureCeiling());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_LIGHT_LEVEL, sector.getLightLevel());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_SPECIAL, sector.getSpecial());
+		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_ID, sector.getTag());
 	}
 
 	protected boolean mapToSector(ScriptValue in, DoomSector sector)
@@ -320,19 +392,19 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	
 		ScriptValue temp = CACHETEMP.get();
 		try {
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_FLOOR, temp))
-				sector.setFloorHeight(temp.asInt());
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_HEIGHT_CEILING, temp))
-				sector.setCeilingHeight(temp.asInt());
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_FLOOR, temp))
-				sector.setFloorTexture(NameUtils.toValidTextureName(temp.asString()));
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TEXTURE_CEILING, temp))
-				sector.setCeilingTexture(NameUtils.toValidTextureName(temp.asString()));
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_LIGHT_LEVEL, temp))
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_HEIGHT_FLOOR, temp))
+				sector.setHeightFloor(temp.asInt());
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_HEIGHT_CEILING, temp))
+				sector.setHeightCeiling(temp.asInt());
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR, temp))
+				sector.setTextureFloor(NameUtils.toValidTextureName(temp.asString()));
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING, temp))
+				sector.setTextureCeiling(NameUtils.toValidTextureName(temp.asString()));
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_LIGHT_LEVEL, temp))
 				sector.setLightLevel(temp.asInt());
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_SPECIAL, temp))
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_SPECIAL, temp))
 				sector.setSpecial(temp.asInt());
-			if (in.mapGet(UDMFCommonSectorAttributes.ATTRIB_TAG, temp))
+			if (in.mapGet(UDMFDoomSectorAttributes.ATTRIB_ID, temp))
 				sector.setTag(temp.asInt());
 		} finally {
 			temp.setNull();
@@ -340,29 +412,261 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 	
+	protected void linedefToMap(DoomLinedef linedef, ScriptValue out)
+	{
+		out.setEmptyMap(20);
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_END, linedef.getVertexEndIndex());
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SPECIAL, linedef.getSpecial());
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_FRONT, linedef.getSidedefFrontIndex());
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_BACK, linedef.getSidedefBackIndex());
+	
+		// Common to Both Doom/Hexen
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_ID, linedef.getTag());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, linedef.getTag());
+		
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCKING, linedef.isFlagSet(DoomLinedefFlags.IMPASSABLE));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, linedef.isFlagSet(DoomLinedefFlags.TWO_SIDED));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_BOTTOM, linedef.isFlagSet(DoomLinedefFlags.UNPEG_BOTTOM));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, linedef.isFlagSet(DoomLinedefFlags.UNPEG_BOTTOM));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, linedef.isFlagSet(DoomLinedefFlags.BLOCK_MONSTERS));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, linedef.isFlagSet(DoomLinedefFlags.BLOCK_SOUND));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, linedef.isFlagSet(DoomLinedefFlags.NOT_DRAWN));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_MAPPED, linedef.isFlagSet(DoomLinedefFlags.MAPPED));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_SECRET, linedef.isFlagSet(DoomLinedefFlags.SECRET));
+		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_PASSTHRU, linedef.isFlagSet(BoomLinedefFlags.PASSTHRU));
+	
+		// Strife Extensions
+		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_BLOCK_FLOAT, linedef.isFlagSet(StrifeLinedefFlags.BLOCK_FLOATERS));
+		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_JUMPOVER, linedef.isFlagSet(StrifeLinedefFlags.RAILING));
+		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, linedef.isFlagSet(StrifeLinedefFlags.TRANSLUCENT));
+	}
+
+	protected boolean mapToLinedef(ScriptValue in, DoomLinedef linedef)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, temp))
+				linedef.setVertexStartIndex(temp.asInt()); 
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_END, temp))
+				linedef.setVertexEndIndex(temp.asInt()); 
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SPECIAL, temp))
+				linedef.setSpecial(temp.asInt()); 
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_FRONT, temp))
+				linedef.setSidedefFrontIndex(temp.asInt()); 
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_BACK, temp))
+				linedef.setSidedefBackIndex(temp.asInt()); 
+	
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_ID, temp))
+				linedef.setTag(temp.asInt());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, temp))
+				linedef.setTag(temp.asInt()); 
+	
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCKING, temp))
+				linedef.setFlag(DoomLinedefFlags.IMPASSABLE, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, temp))
+				linedef.setFlag(DoomLinedefFlags.TWO_SIDED, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_BOTTOM, temp))
+				linedef.setFlag(DoomLinedefFlags.UNPEG_BOTTOM, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, temp))
+				linedef.setFlag(DoomLinedefFlags.UNPEG_TOP, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, temp))
+				linedef.setFlag(DoomLinedefFlags.BLOCK_MONSTERS, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, temp))
+				linedef.setFlag(DoomLinedefFlags.BLOCK_SOUND, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, temp))
+				linedef.setFlag(DoomLinedefFlags.NOT_DRAWN, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_MAPPED, temp))
+				linedef.setFlag(DoomLinedefFlags.MAPPED, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_SECRET, temp))
+				linedef.setFlag(DoomLinedefFlags.SECRET, temp.asBoolean());
+			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_PASSTHRU, temp))
+				linedef.setFlag(BoomLinedefFlags.PASSTHRU, temp.asBoolean());
+			
+			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_BLOCK_FLOAT, temp))
+				linedef.setFlag(StrifeLinedefFlags.BLOCK_FLOATERS, temp.asBoolean());
+			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_JUMPOVER, temp))
+				linedef.setFlag(StrifeLinedefFlags.RAILING, temp.asBoolean());
+			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, temp))
+				linedef.setFlag(StrifeLinedefFlags.TRANSLUCENT, temp.asBoolean());
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+
+	protected void linedefToMap(HexenLinedef linedef, ScriptValue out)
+	{
+		out.setEmptyMap(24);
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_END, linedef.getVertexEndIndex());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SPECIAL, linedef.getSpecial());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_FRONT, linedef.getSidedefFrontIndex());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_BACK, linedef.getSidedefBackIndex());
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCKING, linedef.isFlagSet(HexenLinedefFlags.IMPASSABLE));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, linedef.isFlagSet(HexenLinedefFlags.TWO_SIDED));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_BOTTOM, linedef.isFlagSet(HexenLinedefFlags.UNPEG_BOTTOM));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, linedef.isFlagSet(HexenLinedefFlags.UNPEG_TOP));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, linedef.isFlagSet(HexenLinedefFlags.BLOCK_MONSTERS));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, linedef.isFlagSet(HexenLinedefFlags.BLOCK_SOUND));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, linedef.isFlagSet(HexenLinedefFlags.NOT_DRAWN));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_MAPPED, linedef.isFlagSet(HexenLinedefFlags.MAPPED));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_SECRET, linedef.isFlagSet(HexenLinedefFlags.SECRET));
+	
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, linedef.getArgument(0));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG1, linedef.getArgument(1));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG2, linedef.getArgument(2));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG3, linedef.getArgument(3));
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG4, linedef.getArgument(4));
+	
+		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_REPEATABLE, linedef.isFlagSet(HexenLinedefFlags.REPEATABLE));
+		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_PLAYERS, linedef.isFlagSet(ZDoomLinedefFlags.BLOCK_PLAYERS));
+		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_EVERYTHING, linedef.isFlagSet(ZDoomLinedefFlags.BLOCK_EVERYTHING));
+		out.mapSet("monsteractivate", linedef.isFlagSet(ZDoomLinedefFlags.ACTIVATED_BY_MONSTERS));
+		
+		switch (linedef.getActivationType())
+		{
+			case HexenLinedef.ACTIVATION_PLAYER_CROSSES:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_CROSS, true);
+				break;
+			case HexenLinedef.ACTIVATION_PLAYER_USES:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_USE, true);
+				break;
+			case HexenLinedef.ACTIVATION_MONSTER_CROSSES:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_MONSTER_CROSS, true);
+				break;
+			case HexenLinedef.ACTIVATION_PROJECTILE_HITS:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_IMPACT, true);
+				break;
+			case HexenLinedef.ACTIVATION_PLAYER_BUMPS:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_PUSH, true);
+				break;
+			case HexenLinedef.ACTIVATION_PROJECTILE_CROSSES:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PROJECTILE_CROSS, true);
+				break;
+			case HexenLinedef.ACTIVATION_PLAYER_USES_PASSTHRU:
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_USE, true);
+				out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_PASSTHRU, true);
+				break;
+			default:
+				break;
+		}
+	}
+
+	protected boolean mapToLinedef(ScriptValue in, HexenLinedef linedef)
+	{
+		if (!in.isMap())
+			return false;
+	
+		ScriptValue temp = CACHETEMP.get();
+		try {
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_START, temp))
+				linedef.setVertexStartIndex(temp.asInt()); 
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_END, temp))
+				linedef.setVertexEndIndex(temp.asInt()); 
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_SPECIAL, temp))
+				linedef.setSpecial(temp.asInt()); 
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_FRONT, temp))
+				linedef.setSidedefFrontIndex(temp.asInt()); 
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_BACK, temp))
+				linedef.setSidedefBackIndex(temp.asInt()); 
+	
+			int arg0 = linedef.getArgument(0);
+			int arg1 = linedef.getArgument(1);
+			int arg2 = linedef.getArgument(2);
+			int arg3 = linedef.getArgument(3);
+			int arg4 = linedef.getArgument(4);
+
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, temp))
+				arg0 = temp.asInt();
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG1, temp))
+				arg1 = temp.asInt();
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG2, temp))
+				arg2 = temp.asInt();
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG3, temp))
+				arg3 = temp.asInt();
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG4, temp))
+				arg4 = temp.asInt();
+			linedef.setArguments(arg0, arg1, arg2, arg3, arg4);
+	
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCKING, temp))
+				linedef.setFlag(HexenLinedefFlags.IMPASSABLE, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, temp))
+				linedef.setFlag(HexenLinedefFlags.TWO_SIDED, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_BOTTOM, temp))
+				linedef.setFlag(HexenLinedefFlags.UNPEG_BOTTOM, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, temp))
+				linedef.setFlag(HexenLinedefFlags.UNPEG_TOP, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, temp))
+				linedef.setFlag(HexenLinedefFlags.BLOCK_MONSTERS, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, temp))
+				linedef.setFlag(HexenLinedefFlags.BLOCK_SOUND, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, temp))
+				linedef.setFlag(HexenLinedefFlags.NOT_DRAWN, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_MAPPED, temp))
+				linedef.setFlag(HexenLinedefFlags.MAPPED, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_SECRET, temp))
+				linedef.setFlag(HexenLinedefFlags.SECRET, temp.asBoolean());
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_REPEATABLE, temp))
+				linedef.setFlag(HexenLinedefFlags.REPEATABLE, temp.asBoolean());
+			if (in.mapGet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_PLAYERS, temp))
+				linedef.setFlag(ZDoomLinedefFlags.BLOCK_PLAYERS, temp.asBoolean());
+			if (in.mapGet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_EVERYTHING, temp))
+				linedef.setFlag(ZDoomLinedefFlags.BLOCK_EVERYTHING, temp.asBoolean());
+			if (in.mapGet("monsteractivate", temp))
+				linedef.setFlag(ZDoomLinedefFlags.ACTIVATED_BY_MONSTERS, temp.asBoolean());
+			
+			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_CROSS, temp) && temp.asBoolean())
+				linedef.setActivationType(HexenLinedef.ACTIVATION_PLAYER_CROSSES);
+			else if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_USE, temp) && temp.asBoolean())
+			{
+				if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_PASSTHRU, temp) && temp.asBoolean())
+					linedef.setActivationType(HexenLinedef.ACTIVATION_PLAYER_USES_PASSTHRU);
+				else
+					linedef.setActivationType(HexenLinedef.ACTIVATION_PLAYER_USES);
+			}
+			else if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_MONSTER_CROSS, temp) && temp.asBoolean())
+				linedef.setActivationType(HexenLinedef.ACTIVATION_MONSTER_CROSSES);
+			else if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_IMPACT, temp) && temp.asBoolean())
+				linedef.setActivationType(HexenLinedef.ACTIVATION_PROJECTILE_HITS);
+			else if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_PUSH, temp) && temp.asBoolean())
+				linedef.setActivationType(HexenLinedef.ACTIVATION_PLAYER_BUMPS);
+			else if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ACTIVATE_PROJECTILE_CROSS, temp) && temp.asBoolean())
+				linedef.setActivationType(HexenLinedef.ACTIVATION_PROJECTILE_CROSSES);
+			else 
+				linedef.setActivationType(0);
+		} finally {
+			temp.setNull();
+		}
+		return true;
+	}
+
 	protected void thingToMap(DoomThing thing, boolean strife, ScriptValue out)
 	{
 		out.setEmptyMap(20);
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_POSITION_X, thing.getX());
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_POSITION_Y, thing.getY());
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_ANGLE, thing.getAngle());
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_TYPE, thing.getType());
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_POSITION_X, thing.getX());
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_POSITION_Y, thing.getY());
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_ANGLE, thing.getAngle());
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_TYPE, thing.getType());
 		
 		boolean easy = thing.isFlagSet(DoomThingFlags.EASY);
 		boolean medium = thing.isFlagSet(DoomThingFlags.MEDIUM);
 		boolean hard = thing.isFlagSet(DoomThingFlags.HARD);
-
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL1, easy);
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL2, easy);
+	
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SKILL1, easy);
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SKILL2, easy);
 		out.mapSet("easy", easy);
-
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL3, medium);
+	
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SKILL3, medium);
 		out.mapSet("medium", medium);
-
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL4, hard);
-		out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SKILL5, hard);
+	
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SKILL4, hard);
+		out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SKILL5, hard);
 		out.mapSet("hard", hard);
-
+	
 		if (strife)
 		{
 			out.mapSet(UDMFStrifeThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(StrifeThingFlags.AMBUSH));
@@ -376,14 +680,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 		else
 		{
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(DoomThingFlags.AMBUSH));
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, !thing.isFlagSet(DoomThingFlags.NOT_SINGLEPLAYER));
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_COOPERATIVE, !thing.isFlagSet(BoomThingFlags.NOT_COOPERATIVE));
-			out.mapSet(UDMFCommonThingAttributes.ATTRIB_FLAG_DEATHMATCH, !thing.isFlagSet(BoomThingFlags.NOT_DEATHMATCH));
+			out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(DoomThingFlags.AMBUSH));
+			out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, !thing.isFlagSet(DoomThingFlags.NOT_SINGLEPLAYER));
+			out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_COOPERATIVE, !thing.isFlagSet(BoomThingFlags.NOT_COOPERATIVE));
+			out.mapSet(UDMFDoomThingAttributes.ATTRIB_FLAG_DEATHMATCH, !thing.isFlagSet(BoomThingFlags.NOT_DEATHMATCH));
 			out.mapSet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(MBFThingFlags.FRIENDLY));
 		}
 	}
-	
+
 	protected boolean mapToThing(ScriptValue in, DoomThing thing, boolean strife)
 	{
 		if (!in.isMap())
@@ -391,13 +695,13 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	
 		ScriptValue temp = CACHETEMP.get();
 		try {
-			if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_X, temp))
+			if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_POSITION_X, temp))
 				thing.setX(temp.asInt());
-			if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_POSITION_Y, temp))
+			if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_POSITION_Y, temp))
 				thing.setY(temp.asInt());
-			if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_ANGLE, temp))
+			if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_ANGLE, temp))
 				thing.setAngle(temp.asInt());
-			if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_TYPE, temp))
+			if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_TYPE, temp))
 				thing.setType(temp.asInt());
 
 			thing.setFlags(0);
@@ -426,15 +730,15 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			}
 			else
 			{
-				if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_AMBUSH, temp))
+				if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_FLAG_AMBUSH, temp))
 					thing.setFlag(DoomThingFlags.AMBUSH, temp.asBoolean());
-				if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, temp))
+				if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, temp))
 					thing.setFlag(DoomThingFlags.NOT_SINGLEPLAYER, !temp.asBoolean());
-				if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_COOPERATIVE, temp))
+				if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_FLAG_COOPERATIVE, temp))
 					thing.setFlag(BoomThingFlags.NOT_COOPERATIVE, !temp.asBoolean());
-				if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_DEATHMATCH, temp))
+				if (in.mapGet(UDMFDoomThingAttributes.ATTRIB_FLAG_DEATHMATCH, temp))
 					thing.setFlag(BoomThingFlags.NOT_DEATHMATCH, !temp.asBoolean());
-				if (in.mapGet(UDMFCommonThingAttributes.ATTRIB_FLAG_FRIENDLY, temp))
+				if (in.mapGet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, temp))
 					thing.setFlag(MBFThingFlags.FRIENDLY, temp.asBoolean());
 			}
 		} finally {
@@ -450,7 +754,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_POSITION_Y, thing.getY());
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_ANGLE, thing.getAngle());
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_TYPE, thing.getType());
-		out.mapSet(UDMFHexenThingAttributes.ATTRIB_HEIGHT, thing.getZ());
+		out.mapSet(UDMFHexenThingAttributes.ATTRIB_HEIGHT, thing.getHeight());
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_ID, thing.getId());
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_SPECIAL, thing.getSpecial());
 
@@ -482,7 +786,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_CLASS1, thing.isFlagSet(HexenThingFlags.FIGHTER));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_CLASS2, thing.isFlagSet(HexenThingFlags.CLERIC));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_CLASS3, thing.isFlagSet(HexenThingFlags.MAGE));
-		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(ZDoomThingFlags.FRIENDLY));
+		out.mapSet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(ZDoomThingFlags.FRIENDLY));
 	}
 	
 	protected boolean mapToThing(ScriptValue in, HexenThing thing)
@@ -501,7 +805,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_TYPE, temp))
 				thing.setType(temp.asInt());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_HEIGHT, temp))
-				thing.setZ(temp.asInt());
+				thing.setHeight(temp.asInt());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_ID, temp))
 				thing.setId(temp.asInt());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_SPECIAL, temp))
@@ -546,165 +850,8 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				thing.setFlag(HexenThingFlags.CLERIC, temp.asBoolean());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_FLAG_CLASS3, temp))
 				thing.setFlag(HexenThingFlags.MAGE, temp.asBoolean());
-			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_FLAG_FRIENDLY, temp))
+			if (in.mapGet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, temp))
 				thing.setFlag(ZDoomThingFlags.FRIENDLY, temp.asBoolean());
-		} finally {
-			temp.setNull();
-		}
-		return true;
-	}
-	
-	protected void linedefToMap(DoomLinedef linedef, ScriptValue out)
-	{
-		out.setEmptyMap(20);
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_END, linedef.getVertexEndIndex());
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SPECIAL, linedef.getSpecial());
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_FRONT, linedef.getSidedefFrontIndex());
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_BACK, linedef.getSidedefBackIndex());
-	
-		// Common to Both Doom/Hexen
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_ID, linedef.getTag());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, linedef.getTag());
-		
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCKING, linedef.isFlagSet(DoomLinedefFlags.IMPASSABLE));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, linedef.isFlagSet(DoomLinedefFlags.TWO_SIDED));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_LOWER, linedef.isFlagSet(DoomLinedefFlags.UNPEG_LOWER));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, linedef.isFlagSet(DoomLinedefFlags.UNPEG_UPPER));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, linedef.isFlagSet(DoomLinedefFlags.BLOCK_MONSTERS));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, linedef.isFlagSet(DoomLinedefFlags.BLOCK_SOUND));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, linedef.isFlagSet(DoomLinedefFlags.NOT_DRAWN));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_MAPPED, linedef.isFlagSet(DoomLinedefFlags.MAPPED));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_SECRET, linedef.isFlagSet(DoomLinedefFlags.SECRET));
-		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_PASSTHRU, linedef.isFlagSet(BoomLinedefFlags.PASSTHRU));
-	
-		// Strife Extensions
-		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_BLOCK_FLOAT, linedef.isFlagSet(StrifeLinedefFlags.BLOCK_FLOATERS));
-		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_JUMPOVER, linedef.isFlagSet(StrifeLinedefFlags.RAILING));
-		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, linedef.isFlagSet(StrifeLinedefFlags.TRANSLUCENT));
-	}
-
-	protected boolean mapToLinedef(ScriptValue in, DoomLinedef linedef)
-	{
-		if (!in.isMap())
-			return false;
-	
-		ScriptValue temp = CACHETEMP.get();
-		try {
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, temp))
-				linedef.setVertexStartIndex(temp.asInt()); 
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_END, temp))
-				linedef.setVertexEndIndex(temp.asInt()); 
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SPECIAL, temp))
-				linedef.setSpecial(temp.asInt()); 
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_FRONT, temp))
-				linedef.setSidedefFrontIndex(temp.asInt()); 
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_SIDEDEF_BACK, temp))
-				linedef.setSidedefBackIndex(temp.asInt()); 
-
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_ID, temp))
-				linedef.setTag(temp.asInt());
-			if (in.mapGet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, temp))
-				linedef.setTag(temp.asInt()); 
-
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCKING, temp))
-				linedef.setFlag(DoomLinedefFlags.IMPASSABLE, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, temp))
-				linedef.setFlag(DoomLinedefFlags.TWO_SIDED, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_LOWER, temp))
-				linedef.setFlag(DoomLinedefFlags.UNPEG_LOWER, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, temp))
-				linedef.setFlag(DoomLinedefFlags.UNPEG_UPPER, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, temp))
-				linedef.setFlag(DoomLinedefFlags.BLOCK_MONSTERS, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, temp))
-				linedef.setFlag(DoomLinedefFlags.BLOCK_SOUND, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, temp))
-				linedef.setFlag(DoomLinedefFlags.NOT_DRAWN, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_MAPPED, temp))
-				linedef.setFlag(DoomLinedefFlags.MAPPED, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_SECRET, temp))
-				linedef.setFlag(DoomLinedefFlags.SECRET, temp.asBoolean());
-			if (in.mapGet(UDMFDoomLinedefAttributes.ATTRIB_FLAG_PASSTHRU, temp))
-				linedef.setFlag(BoomLinedefFlags.PASSTHRU, temp.asBoolean());
-			
-			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_BLOCK_FLOAT, temp))
-				linedef.setFlag(StrifeLinedefFlags.BLOCK_FLOATERS, temp.asBoolean());
-			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_JUMPOVER, temp))
-				linedef.setFlag(StrifeLinedefFlags.RAILING, temp.asBoolean());
-			if (in.mapGet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, temp))
-				linedef.setFlag(StrifeLinedefFlags.TRANSLUCENT, temp.asBoolean());
-		} finally {
-			temp.setNull();
-		}
-		return true;
-	}
-	
-	protected void linedefToMap(HexenLinedef linedef, ScriptValue out)
-	{
-		out.setEmptyMap(24);
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_END, linedef.getVertexEndIndex());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SPECIAL, linedef.getSpecial());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_FRONT, linedef.getSidedefFrontIndex());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_SIDEDEF_BACK, linedef.getSidedefBackIndex());
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCKING, linedef.isFlagSet(HexenLinedefFlags.IMPASSABLE));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_TWO_SIDED, linedef.isFlagSet(HexenLinedefFlags.TWO_SIDED));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_LOWER, linedef.isFlagSet(HexenLinedefFlags.UNPEG_LOWER));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_UNPEG_TOP, linedef.isFlagSet(HexenLinedefFlags.UNPEG_UPPER));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_MONSTERS, linedef.isFlagSet(HexenLinedefFlags.BLOCK_MONSTERS));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_BLOCK_SOUND, linedef.isFlagSet(HexenLinedefFlags.BLOCK_SOUND));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_DONT_DRAW, linedef.isFlagSet(HexenLinedefFlags.NOT_DRAWN));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_MAPPED, linedef.isFlagSet(HexenLinedefFlags.MAPPED));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_SECRET, linedef.isFlagSet(HexenLinedefFlags.SECRET));
-	
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG0, linedef.getArgument(0));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG1, linedef.getArgument(1));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG2, linedef.getArgument(2));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG3, linedef.getArgument(3));
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_ARG4, linedef.getArgument(4));
-	
-		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_FLAG_REPEATABLE, linedef.isFlagSet(HexenLinedefFlags.REPEATABLE));
-		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_PLAYERS, linedef.isFlagSet(ZDoomLinedefFlags.BLOCK_PLAYERS));
-		out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_BLOCK_EVERYTHING, linedef.isFlagSet(ZDoomLinedefFlags.BLOCK_EVERYTHING));
-		
-		switch (linedef.getActivationType())
-		{
-			case HexenLinedef.ACTIVATION_PLAYER_CROSSES:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_CROSS, true);
-				break;
-			case HexenLinedef.ACTIVATION_PLAYER_USES:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_USE, true);
-				break;
-			case HexenLinedef.ACTIVATION_MONSTER_CROSSES:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_MONSTER_CROSS, true);
-				break;
-			case HexenLinedef.ACTIVATION_PROJECTILE_HITS:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_IMPACT, true);
-				break;
-			case HexenLinedef.ACTIVATION_PLAYER_BUMPS:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_PUSH, true);
-				break;
-			case HexenLinedef.ACTIVATION_PROJECTILE_CROSSES:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_PROJECTILE_CROSS, true);
-				break;
-			case HexenLinedef.ACTIVATION_PLAYER_USES_PASSTHRU:
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_ACTIVATE_PLAYER_USE, true);
-				out.mapSet(UDMFZDoomLinedefAttributes.ATTRIB_FLAG_PASSTHRU, true);
-				break;
-			default:
-				break;
-		}
-	}
-	
-	protected boolean mapToLinedef(ScriptValue in, HexenLinedef linedef)
-	{
-		if (!in.isMap())
-			return false;
-	
-		ScriptValue temp = CACHETEMP.get();
-		try {
-			// TODO: Finish this.
 		} finally {
 			temp.setNull();
 		}

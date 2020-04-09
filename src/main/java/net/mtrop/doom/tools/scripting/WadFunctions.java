@@ -495,7 +495,7 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 
-	WADENTRIES(1)
+	WADENTRIES(3)
 	{
 		@Override
 		protected Usage usage()
@@ -508,9 +508,11 @@ public enum WadFunctions implements ScriptFunctionType
 					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
 				)
 				.parameter("start", 
+					type(Type.NULL, "Use 0."),
 					type(Type.INTEGER, "The starting entry index.")
 				)
 				.parameter("length", 
+					type(Type.NULL, "Use [wad's entry count] - [start]."),
 					type(Type.INTEGER, "The maximum amount of entries to return.")
 				)
 				.returns(
@@ -527,7 +529,7 @@ public enum WadFunctions implements ScriptFunctionType
 			try
 			{
 				scriptInstance.popStackValue(temp);
-				int length = temp.asInt();
+				Integer length = temp.isNull() ? null : temp.asInt();
 				scriptInstance.popStackValue(temp);
 				int start = temp.asInt();
 				scriptInstance.popStackValue(temp);
@@ -537,10 +539,14 @@ public enum WadFunctions implements ScriptFunctionType
 					return true;
 				}
 				
-				start = Math.max(start, 0);
-				length = Math.max(length, 0);
-
 				final Wad wad = temp.asObjectType(Wad.class);
+
+				start = Math.min(Math.max(start, 0), wad.getEntryCount());
+				if (length == null)
+					length = wad.getEntryCount() - start;
+				else
+					length = Math.max(length, 0);
+
 				WadEntry[] entries = wad.mapEntries(start, length);
 				returnValue.setEmptyList(entries.length);
 				for (int i = 0; i < entries.length; i++)
@@ -885,7 +891,7 @@ public enum WadFunctions implements ScriptFunctionType
 						size = temp.asInt();
 
 					try {
-						WadEntry we = WadEntry.create("temp", offset, size);
+						WadEntry we = WadEntry.create("TEMP", offset, size);
 						setWADData(returnValue, wad, we);
 						return true;
 					} catch (IllegalArgumentException e) {

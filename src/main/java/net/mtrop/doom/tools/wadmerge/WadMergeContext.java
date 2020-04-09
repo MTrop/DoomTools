@@ -16,7 +16,6 @@ import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
@@ -391,7 +390,7 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 
 		entryName = NameUtils.toValidEntryName(entryName);
-		buffer.addData(entryName, IOUtils.getBinaryContents(new FileInputStream(inFile)));
+		buffer.addData(entryName, inFile);
 		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
 		return Response.OK;
 	}
