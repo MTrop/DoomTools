@@ -226,7 +226,7 @@ public enum PK3Functions implements ScriptFunctionType
 	 */
 	public static final ScriptFunctionResolver createResolver()
 	{
-		return new EnumFunctionResolver(WadFunctions.values());
+		return new EnumFunctionResolver(PK3Functions.values());
 	}
 
 	@Override

@@ -1,0 +1,10 @@
+
+check entry main(args)
+{
+	wad = wadfile(args[0]);
+	mapview = getmapview(wad, "e1m1");
+	close(wad);
+	
+	each (i, t : mapview->things()) 
+		println(i + ": " + t); 
+}

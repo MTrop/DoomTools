@@ -1,3 +1,27 @@
+
+check function wadtest(wad, outwad)
+{
+	outwad->wadimport(wad, wad->wadmapentries("map29"));
+	println(outwad->wadentries());
+	outwad
+		->wadadd("ENTRY1")
+		->wadadd("ENTRY2", "Hello, Wad file!")
+		->wadadd("ENTRY3", bufnew(512))
+		->wadadd("ENTRY4", file("build.xml"))
+	;
+	println(outwad->wadentries());
+		
+	outwad
+		->wadremove(outwad->wadentryindex("NODES"))
+		->waddelete(outwad->wadentryindex("SSECTORS"))
+		->wadremove(outwad->wadentryindex("REJECT"))
+		->waddelete(outwad->wadentryindex("SEGS"))
+		->wadremove(outwad->wadentryindex("BLOCKMAP"))
+	;
+	println(outwad->wadentries());
+}
+
+
 check entry main(args)
 {
 	println(iswad("H:\\Doom\\Iwads\\DOOM2.WAD"));
@@ -18,6 +42,15 @@ check entry main(args)
 	datain = wad->waddatastream("things", "map01");
 	println(datain);
 	close(datain);
+	
+	// test file
+	outwad = wadfilecreate("junk.wad");
+	wadtest(wad, outwad);
+	close(outwad);
+	filedelete("junk.wad");
+	
+	// test buffer
+	wadtest(wad, wadbuffer());
 	
 	close(wad);
 }

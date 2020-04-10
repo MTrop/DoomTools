@@ -1067,7 +1067,7 @@ public enum WadFunctions implements ScriptFunctionType
 				.parameter("data", 
 					type(Type.NULL, "Synonymous with empty buffer - no data. Writes a marker."),
 					type(Type.STRING, "The data to add (as UTF-8)."),
-					type(Type.BUFFER, "The data to add."),
+					type(Type.BUFFER, "The data to add (read from current cursor position to the end)."),
 					type(Type.OBJECTREF, "File", "The file contents to add."),
 					type(Type.OBJECTREF, "InputStream", "The data to add.")
 				)
@@ -1115,6 +1115,12 @@ public enum WadFunctions implements ScriptFunctionType
 				else if (data.isString())
 				{
 					addWADData(returnValue, wad, name, data.asString().getBytes(UTF_8), index);
+					return true;
+				}
+				else if (data.isBuffer())
+				{
+					BufferType buffer = data.asObjectType(BufferType.class);
+					addWADData(returnValue, wad, name, buffer.getInputStream(), index);
 					return true;
 				}
 				else if (data.isObjectRef(File.class))
@@ -1578,26 +1584,6 @@ public enum WadFunctions implements ScriptFunctionType
 	{
 		try {
 			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, in);
-			value.set(wad);
-		} catch (IndexOutOfBoundsException e) {
-			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");
-		} catch (IOException e) {
-			value.setError("IOError", e.getMessage(), e.getLocalizedMessage());
-		}
-	}
-
-	/**
-	 * Adds data to an open Wad.
-	 * @param value the return value (wad or error).
-	 * @param wad the open Wad.
-	 * @param name the entry name.
-	 * @param sourceWad the source Wad to add.
-	 * @param index the optional index.
-	 */
-	protected void addWADData(ScriptValue value, final Wad wad, Wad sourceWad, Integer index)
-	{
-		try {
-			wad.addFromAt(index != null ? index : wad.getEntryCount(), sourceWad, sourceWad.getAllEntries());
 			value.set(wad);
 		} catch (IndexOutOfBoundsException e) {
 			value.setError("BadIndex", "Index " + index + " is out of acceptable range.");

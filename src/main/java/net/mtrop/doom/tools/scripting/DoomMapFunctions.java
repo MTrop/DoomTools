@@ -19,6 +19,11 @@ import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.exception.MapException;
+import net.mtrop.doom.map.DoomMap;
+import net.mtrop.doom.map.HexenMap;
+import net.mtrop.doom.map.MapFormat;
+import net.mtrop.doom.map.MapView;
+import net.mtrop.doom.map.UDMFMap;
 import net.mtrop.doom.map.data.DoomLinedef;
 import net.mtrop.doom.map.data.DoomSector;
 import net.mtrop.doom.map.data.DoomSidedef;
@@ -64,15 +69,15 @@ import java.util.zip.ZipEntry;
  */
 public enum DoomMapFunctions implements ScriptFunctionType
 {
-	WADGETMAP(2)
+	GETMAPVIEW(2)
 	{
 		@Override
 		protected Usage usage()
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Loads a Doom Map into memory for inspection. The map header in the Wad can be " +
-					"a Doom or Hexen or UDMF format."
+					"Loads a Doom Map into memory for inspection as a MapView. The map in the Wad can be " +
+					"in Doom or Hexen or UDMF format."
 				)
 				.parameter("wad", 
 					type(Type.OBJECTREF, "Wad", "An open Wad.")
@@ -84,7 +89,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				.returns(
 					type(Type.OBJECTREF, "MapView", "An open map."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a valid open Wad file."),
-					type(Type.ERROR, "BadMap", "If a map could not be read."),
+					type(Type.ERROR, "BadMap", "If a map could not be read from the data."),
 					type(Type.ERROR, "IOError", "If [wad] could not be read or the map data could not be read.")
 				)
 			;
@@ -116,10 +121,16 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					int index = entry.asInt();
 					try
 					{
-						switch (MapUtils.getMapFormat(wad, index))
+						MapFormat format = MapUtils.getMapFormat(wad, index);
+						if (format == null)
+						{
+							returnValue.setNull();
+							return true;
+						}
+
+						switch (format)
 						{
 							default:
-								returnValue.setNull();
 								break;
 							case DOOM:
 								returnValue.set(MapUtils.createDoomMap(wad, index));
@@ -148,10 +159,16 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					String name = entry.asString();
 					try
 					{
-						switch (MapUtils.getMapFormat(wad, name))
+						MapFormat format = MapUtils.getMapFormat(wad, name);
+						if (format == null)
+						{
+							returnValue.setNull();
+							return true;
+						}
+
+						switch (format)
 						{
 							default:
-								returnValue.setNull();
 								break;
 							case DOOM:
 								returnValue.set(MapUtils.createDoomMap(wad, name));
@@ -183,6 +200,399 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
+	GETMAPVIEWINFO(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Returns a map of info about a MapView."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.returns(
+					type(Type.MAP, "{type:STRING, thingcount:INTEGER, vertexcount:INTEGER, linedefcount:INTEGER, sidedefcount:INTEGER, sectorcount:INTEGER}", "Information on the provided map."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				
+				returnValue.setEmptyMap();
+				if (mapView instanceof DoomMap)
+					returnValue.mapSet("type", MapFormat.DOOM.name().toLowerCase());
+				else if (mapView instanceof HexenMap)
+					returnValue.mapSet("type", MapFormat.HEXEN.name().toLowerCase());
+				else if (mapView instanceof UDMFMap)
+					returnValue.mapSet("type", MapFormat.UDMF.name().toLowerCase());
+				else
+				{
+					returnValue.setNull();
+					return true;
+				}
+				
+				returnValue.mapSet("linedefcount", mapView.getLinedefCount());
+				returnValue.mapSet("sectorcount", mapView.getSectorCount());
+				returnValue.mapSet("sidedefcount", mapView.getSidedefCount());
+				returnValue.mapSet("thingcount", mapView.getThingCount());
+				returnValue.mapSet("vertexcount", mapView.getVertexCount());
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	THING(3)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a thing from a MapView and returns it as a map."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("index", 
+					type(Type.INTEGER, "The index of the thing to retrieve.")
+				)
+				.parameter("strife", 
+					type(Type.BOOLEAN, "If true, interpret this thing as a Strife thing (different flags).")
+				)
+				.returns(
+					type(Type.NULL, "If [index] is less than 0 or greater than or equal to the amount of things in the MapView."),
+					type(Type.MAP, "A map with Thing data."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				boolean strife = temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				int index = temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				Object thing = mapView.getThing(index);
+				if (thing instanceof DoomThing)
+					thingToMap((DoomThing)thing, strife, returnValue);
+				else
+					mapElementToMap(thing, returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	THINGS(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through each thing in the provided MapView. " +
+					"The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and " +
+					"values are maps (see THING())."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("strife", 
+					type(Type.BOOLEAN, "If true, interpret each thing as a Strife thing (different flags).")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				final boolean strife = temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				final MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				
+				ScriptIteratorType out = new ScriptIteratorType()
+				{
+					private final int count = mapView.getThingCount();
+					private final boolean isStrife = strife;
+					private final IteratorPair pair = new IteratorPair();
+					private int cur = 0;
+					
+					@Override
+					public boolean hasNext()
+					{
+						return cur < count;
+					}
+
+					@Override
+					public IteratorPair next() 
+					{
+						pair.getKey().set(cur);
+						Object thing = mapView.getThing(cur);
+						if (thing instanceof DoomThing)
+							thingToMap((DoomThing)thing, isStrife, pair.getValue());
+						else
+							mapElementToMap(thing, pair.getValue());
+						cur++;
+						return pair;
+					}
+				};
+				
+				returnValue.set(out);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	VERTEX(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a vertex from a MapView and returns it as a map."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("index", 
+					type(Type.INTEGER, "The index of the vertex to retrieve.")
+				)
+				.returns(
+					type(Type.NULL, "If [index] is less than 0 or greater than or equal to the amount of vertices in the MapView."),
+					type(Type.MAP, "A map with Vertex data."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				int index = temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				mapElementToMap(mapView.getVertex(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	LINEDEF(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a linedef from a MapView and returns it as a map."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("index", 
+					type(Type.INTEGER, "The index of the linedef to retrieve.")
+				)
+				.returns(
+					type(Type.NULL, "If [index] is less than 0 or greater than or equal to the amount of linedef in the MapView."),
+					type(Type.MAP, "A map with Linedef data."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				int index = temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				mapElementToMap(mapView.getLinedef(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	SIDEDEF(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a sidedef from a MapView and returns it as a map."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("index", 
+					type(Type.INTEGER, "The index of the sidedef to retrieve.")
+				)
+				.returns(
+					type(Type.NULL, "If [index] is less than 0 or greater than or equal to the amount of sidedef in the MapView."),
+					type(Type.MAP, "A map with Sidedef data."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				int index = temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				mapElementToMap(mapView.getSidedef(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	SECTOR(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches a sector from a MapView and returns it as a map."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to open.")
+				)
+				.parameter("index", 
+					type(Type.INTEGER, "The index of the sector to retrieve.")
+				)
+				.returns(
+					type(Type.NULL, "If [index] is less than 0 or greater than or equal to the amount of sector in the MapView."),
+					type(Type.MAP, "A map with Sector data."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				int index = temp.asInt();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
+				mapElementToMap(mapView.getSector(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
 	// TODO: Finish this.
 	
 	;
@@ -200,7 +610,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	 */
 	public static final ScriptFunctionResolver createResolver()
 	{
-		return new EnumFunctionResolver(WadFunctions.values());
+		return new EnumFunctionResolver(DoomMapFunctions.values());
 	}
 
 	@Override
@@ -257,7 +667,9 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	
 	protected void mapElementToMap(Object object, ScriptValue out)
 	{
-		if (object instanceof UDMFObject)
+		if (object == null)
+			out.setNull();
+		else if (object instanceof UDMFObject)
 			udmfToMap((UDMFObject)object, out);
 		else if (object instanceof DoomVertex)
 			vertexToMap((DoomVertex)object, out);
