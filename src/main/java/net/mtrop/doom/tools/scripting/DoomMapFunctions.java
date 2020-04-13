@@ -210,7 +210,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Returns a map of info about a MapView."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.returns(
 					type(Type.MAP, "{type:STRING, thingcount:INTEGER, vertexcount:INTEGER, linedefcount:INTEGER, sidedefcount:INTEGER, sectorcount:INTEGER}", "Information on the provided map."),
@@ -271,7 +271,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Fetches a thing from a MapView and returns it as a map."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("index", 
 					type(Type.INTEGER, "The index of the thing to retrieve.")
@@ -304,8 +304,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				Object thing = mapView.getThing(index);
+				Object thing = temp.asObjectType(MapView.class).getThing(index);
 				if (thing instanceof DoomThing)
 					thingToMap((DoomThing)thing, strife, returnValue);
 				else
@@ -331,7 +330,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"values are maps (see THING())."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("strife", 
 					type(Type.BOOLEAN, "If true, interpret each thing as a Strife thing (different flags).")
@@ -358,36 +357,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				final MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				
-				ScriptIteratorType out = new ScriptIteratorType()
-				{
-					private final int count = mapView.getThingCount();
-					private final boolean isStrife = strife;
-					private final IteratorPair pair = new IteratorPair();
-					private int cur = 0;
-					
-					@Override
-					public boolean hasNext()
-					{
-						return cur < count;
-					}
-
-					@Override
-					public IteratorPair next() 
-					{
-						pair.getKey().set(cur);
-						Object thing = mapView.getThing(cur);
-						if (thing instanceof DoomThing)
-							thingToMap((DoomThing)thing, isStrife, pair.getValue());
-						else
-							mapElementToMap(thing, pair.getValue());
-						cur++;
-						return pair;
-					}
-				};
-				
-				returnValue.set(out);
+				returnValue.set(new ThingIterator(temp.asObjectType(MapView.class), strife));
 				return true;
 			}
 			finally
@@ -407,7 +377,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Fetches a vertex from a MapView and returns it as a map."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("index", 
 					type(Type.INTEGER, "The index of the vertex to retrieve.")
@@ -435,8 +405,51 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				mapElementToMap(mapView.getVertex(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getVertex(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	VERTICES(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through each vertex in the provided MapView. " +
+					"The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and " +
+					"values are maps (see VERTEX())."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				returnValue.set(new VertexIterator(temp.asObjectType(MapView.class)));
 				return true;
 			}
 			finally
@@ -456,7 +469,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Fetches a linedef from a MapView and returns it as a map."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("index", 
 					type(Type.INTEGER, "The index of the linedef to retrieve.")
@@ -484,8 +497,51 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				mapElementToMap(mapView.getLinedef(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getLinedef(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	LINEDEFS(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through each linedef in the provided MapView. " +
+					"The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and " +
+					"values are maps (see LINEDEF())."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				returnValue.set(new LinedefIterator(temp.asObjectType(MapView.class)));
 				return true;
 			}
 			finally
@@ -505,7 +561,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Fetches a sidedef from a MapView and returns it as a map."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("index", 
 					type(Type.INTEGER, "The index of the sidedef to retrieve.")
@@ -533,8 +589,51 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				mapElementToMap(mapView.getSidedef(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getSidedef(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	SIDEDEFS(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through each sidedef in the provided MapView. " +
+					"The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and " +
+					"values are maps (see SIDEDEF())."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				returnValue.set(new SidedefIterator(temp.asObjectType(MapView.class)));
 				return true;
 			}
 			finally
@@ -554,7 +653,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					"Fetches a sector from a MapView and returns it as a map."
 				)
 				.parameter("mapview", 
-					type(Type.OBJECTREF, "MapView", "The map view to open.")
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
 				)
 				.parameter("index", 
 					type(Type.INTEGER, "The index of the sector to retrieve.")
@@ -582,8 +681,51 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				MapView<?,?,?,?,?> mapView = temp.asObjectType(MapView.class);
-				mapElementToMap(mapView.getSector(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getSector(index), returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	SECTORS(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator that iterates through each sector in the provided MapView. " +
+					"The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and " +
+					"values are maps (see SECTOR())."
+				)
+				.parameter("mapview", 
+					type(Type.OBJECTREF, "MapView", "The map view to use.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [mapview] is not a valid MapView.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(MapView.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a MapView.");
+					return true;
+				}
+
+				returnValue.set(new SectorIterator(temp.asObjectType(MapView.class)));
 				return true;
 			}
 			finally
@@ -632,40 +774,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 
 	protected abstract Usage usage();
 
-	/**
-	 * Sets a script value to a map with zip entry data.
-	 * @param entry the zip entry.
-	 * @param out the value to change.
-	 */
-	protected void setEntryInfo(ZipEntry entry, ScriptValue out) 
-	{
-		out.setEmptyMap(8);
-		
-		if (entry.getComment() != null)
-			out.mapSet("comment", entry.getComment());
-		if (entry.getCompressedSize() >= 0)
-			out.mapSet("compressedsize", entry.getCompressedSize());
-		if (entry.getCrc() >= 0)
-			out.mapSet("crc", entry.getCrc());
-		if (entry.getCreationTime() != null)
-			out.mapSet("creationtime", entry.getCreationTime().toMillis());
-		
-		out.mapSet("dir", entry.isDirectory());
-
-		if (entry.getLastAccessTime() != null)
-			out.mapSet("lastaccesstime", entry.getLastAccessTime().toMillis());
-		if (entry.getLastModifiedTime() != null)
-			out.mapSet("lastmodifiedtime", entry.getLastModifiedTime().toMillis());
-		
-		out.mapSet("name", entry.getName());
-		
-		if (entry.getSize() >= 0)
-			out.mapSet("size", entry.getSize());
-		if (entry.getTime() >= 0)
-			out.mapSet("time", entry.getTime());
-	}
-	
-	protected void mapElementToMap(Object object, ScriptValue out)
+	private static void mapElementToMap(Object object, ScriptValue out)
 	{
 		if (object == null)
 			out.setNull();
@@ -689,14 +798,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			out.setEmptyMap();
 	}
 	
-	protected void udmfToMap(UDMFObject object, ScriptValue out)
+	private static void udmfToMap(UDMFObject object, ScriptValue out)
 	{
 		out.setEmptyMap(16);
 		for (Map.Entry<String, Object> entry : object)
 			out.mapSet(entry.getKey(), entry.getValue());
 	}
 
-	protected boolean mapToUDMF(ScriptValue out, UDMFObject object)
+	private static boolean mapToUDMF(ScriptValue out, UDMFObject object)
 	{
 		if (!out.isMap())
 			return false;
@@ -725,14 +834,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void vertexToMap(DoomVertex vertex, ScriptValue out)
+	private static void vertexToMap(DoomVertex vertex, ScriptValue out)
 	{
 		out.setEmptyMap(2);
 		out.mapSet(UDMFDoomVertexAttributes.ATTRIB_POSITION_X, vertex.getX());
 		out.mapSet(UDMFDoomVertexAttributes.ATTRIB_POSITION_Y, vertex.getY());
 	}
 
-	protected boolean mapToVertex(ScriptValue in, DoomVertex vertex)
+	private static boolean mapToVertex(ScriptValue in, DoomVertex vertex)
 	{
 		if (!in.isMap())
 			return false;
@@ -749,7 +858,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void sidedefToMap(DoomSidedef sidedef, ScriptValue out)
+	private static void sidedefToMap(DoomSidedef sidedef, ScriptValue out)
 	{
 		out.setEmptyMap(6);
 		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_OFFSET_X, sidedef.getOffsetX());
@@ -760,7 +869,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFDoomSidedefAttributes.ATTRIB_SECTOR_INDEX, sidedef.getSectorIndex());
 	}
 	
-	protected boolean mapToSidedef(ScriptValue in, DoomSidedef sidedef)
+	private static boolean mapToSidedef(ScriptValue in, DoomSidedef sidedef)
 	{
 		if (!in.isMap())
 			return false;
@@ -785,7 +894,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void sectorToMap(DoomSector sector, ScriptValue out)
+	private static void sectorToMap(DoomSector sector, ScriptValue out)
 	{
 		out.setEmptyMap(8);
 		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_HEIGHT_FLOOR, sector.getHeightFloor());
@@ -797,7 +906,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFDoomSectorAttributes.ATTRIB_ID, sector.getTag());
 	}
 
-	protected boolean mapToSector(ScriptValue in, DoomSector sector)
+	private static boolean mapToSector(ScriptValue in, DoomSector sector)
 	{
 		if (!in.isMap())
 			return false;
@@ -824,7 +933,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 	
-	protected void linedefToMap(DoomLinedef linedef, ScriptValue out)
+	private static void linedefToMap(DoomLinedef linedef, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFDoomLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
@@ -854,7 +963,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFStrifeLinedefAttributes.ATTRIB_FLAG_TRANSLUCENT, linedef.isFlagSet(StrifeLinedefFlags.TRANSLUCENT));
 	}
 
-	protected boolean mapToLinedef(ScriptValue in, DoomLinedef linedef)
+	private static boolean mapToLinedef(ScriptValue in, DoomLinedef linedef)
 	{
 		if (!in.isMap())
 			return false;
@@ -910,7 +1019,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void linedefToMap(HexenLinedef linedef, ScriptValue out)
+	private static void linedefToMap(HexenLinedef linedef, ScriptValue out)
 	{
 		out.setEmptyMap(24);
 		out.mapSet(UDMFHexenLinedefAttributes.ATTRIB_VERTEX_START, linedef.getVertexStartIndex());
@@ -968,7 +1077,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	}
 
-	protected boolean mapToLinedef(ScriptValue in, HexenLinedef linedef)
+	private static boolean mapToLinedef(ScriptValue in, HexenLinedef linedef)
 	{
 		if (!in.isMap())
 			return false;
@@ -1056,7 +1165,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 
-	protected void thingToMap(DoomThing thing, boolean strife, ScriptValue out)
+	private static void thingToMap(DoomThing thing, boolean strife, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFDoomThingAttributes.ATTRIB_POSITION_X, thing.getX());
@@ -1100,7 +1209,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	}
 
-	protected boolean mapToThing(ScriptValue in, DoomThing thing, boolean strife)
+	private static boolean mapToThing(ScriptValue in, DoomThing thing, boolean strife)
 	{
 		if (!in.isMap())
 			return false;
@@ -1159,7 +1268,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		return true;
 	}
 	
-	protected void thingToMap(HexenThing thing, ScriptValue out)
+	private static void thingToMap(HexenThing thing, ScriptValue out)
 	{
 		out.setEmptyMap(20);
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_POSITION_X, thing.getX());
@@ -1192,6 +1301,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet("hard", hard);
 
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_AMBUSH, thing.isFlagSet(HexenThingFlags.AMBUSH));
+		out.mapSet("dormant", thing.isFlagSet(HexenThingFlags.DORMANT));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, thing.isFlagSet(HexenThingFlags.SINGLEPLAYER));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_COOPERATIVE, thing.isFlagSet(HexenThingFlags.COOPERATIVE));
 		out.mapSet(UDMFHexenThingAttributes.ATTRIB_FLAG_DEATHMATCH, thing.isFlagSet(HexenThingFlags.DEATHMATCH));
@@ -1201,7 +1311,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		out.mapSet(UDMFMBFThingAttributes.ATTRIB_FLAG_FRIENDLY, thing.isFlagSet(ZDoomThingFlags.FRIENDLY));
 	}
 	
-	protected boolean mapToThing(ScriptValue in, HexenThing thing)
+	private static boolean mapToThing(ScriptValue in, HexenThing thing)
 	{
 		if (!in.isMap())
 			return false;
@@ -1250,6 +1360,8 @@ public enum DoomMapFunctions implements ScriptFunctionType
 
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_FLAG_AMBUSH, temp))
 				thing.setFlag(HexenThingFlags.AMBUSH, temp.asBoolean());
+			if (in.mapGet("dormant", temp))
+				thing.setFlag(HexenThingFlags.DORMANT, temp.asBoolean());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_FLAG_SINGLE_PLAYER, temp))
 				thing.setFlag(HexenThingFlags.SINGLEPLAYER, temp.asBoolean());
 			if (in.mapGet(UDMFHexenThingAttributes.ATTRIB_FLAG_COOPERATIVE, temp))
@@ -1268,6 +1380,126 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			temp.setNull();
 		}
 		return true;
+	}
+	
+	private static abstract class MapViewObjectIterator implements ScriptIteratorType
+	{
+		protected MapView<?,?,?,?,?> mapView;
+		protected IteratorPair pair;
+		protected int count;
+		protected int cur;
+
+		protected MapViewObjectIterator(MapView<?,?,?,?,?> mapView, int count) 
+		{
+			this.mapView = mapView;
+			this.pair = new IteratorPair();
+			this.count = count;
+			this.cur = 0;
+		}
+		
+		@Override
+		public boolean hasNext()
+		{
+			return cur < count;
+		}
+
+		@Override
+		public IteratorPair next() 
+		{
+			pair.getKey().set(cur);
+			mapElementToMap(nextObject(cur), pair.getValue());
+			cur++;
+			return pair;
+		}
+		
+		protected abstract Object nextObject(int seq);
+		
+	}
+	
+	private static class ThingIterator extends MapViewObjectIterator
+	{
+		private boolean strife;
+
+		private ThingIterator(MapView<?,?,?,?,?> mapView, boolean strife)
+		{
+			super(mapView, mapView.getThingCount());
+			this.strife = strife;
+		}
+
+		@Override
+		public IteratorPair next() 
+		{
+			pair.getKey().set(cur);
+			Object thing = mapView.getThing(cur);
+			if (thing instanceof DoomThing)
+				thingToMap((DoomThing)thing, strife, pair.getValue());
+			else
+				mapElementToMap(thing, pair.getValue());
+			cur++;
+			return pair;
+		}
+
+		@Override
+		protected Object nextObject(int seq)
+		{
+			return mapView.getThing(seq);
+		}
+	}
+	
+	private static class VertexIterator extends MapViewObjectIterator
+	{
+		private VertexIterator(MapView<?,?,?,?,?> mapView)
+		{
+			super(mapView, mapView.getVertexCount());
+		}
+	
+		@Override
+		protected Object nextObject(int seq)
+		{
+			return mapView.getVertex(seq);
+		}
+	}
+
+	private static class LinedefIterator extends MapViewObjectIterator
+	{
+		private LinedefIterator(MapView<?,?,?,?,?> mapView)
+		{
+			super(mapView, mapView.getLinedefCount());
+		}
+
+		@Override
+		protected Object nextObject(int seq)
+		{
+			return mapView.getLinedef(seq);
+		}
+	}
+	
+	private static class SidedefIterator extends MapViewObjectIterator
+	{
+		private SidedefIterator(MapView<?,?,?,?,?> mapView)
+		{
+			super(mapView, mapView.getSidedefCount());
+		}
+
+		@Override
+		protected Object nextObject(int seq)
+		{
+			return mapView.getSidedef(seq);
+		}
+	}
+	
+	private static class SectorIterator extends MapViewObjectIterator
+	{
+		private SectorIterator(MapView<?,?,?,?,?> mapView)
+		{
+			super(mapView, mapView.getSectorCount());
+		}
+
+		@Override
+		protected Object nextObject(int seq)
+		{
+			return mapView.getSector(seq);
+		}
 	}
 	
 	// Threadlocal "stack" values.

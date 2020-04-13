@@ -8,7 +8,6 @@
 package net.mtrop.doom.tools.scripting;
 
 import com.blackrook.rookscript.ScriptInstance;
-import com.blackrook.rookscript.ScriptIteratorType;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
@@ -34,7 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
 /**
  * Script functions for WAD.
@@ -579,7 +577,7 @@ public enum WadFunctions implements ScriptFunctionType
 					type(Type.OBJECTREF, "Wad", "The open WAD to iterate through.")
 				)
 				.returns(
-					type(Type.OBJECTREF, "ScriptIteratorType", "An iterator for each entry - Key: index:INTEGER, value: MAP{name:STRING, offset:INTEGER, size:INTEGER}."),
+					type(Type.OBJECTREF, "Iterator", "An iterator for each entry - Key: index:INTEGER, value: MAP{name:STRING, offset:INTEGER, size:INTEGER}."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
 				)
 			;
@@ -599,26 +597,7 @@ public enum WadFunctions implements ScriptFunctionType
 				}
 
 				final Wad wad = wadValue.asObjectType(Wad.class);
-				returnValue.set(new ScriptIteratorType() 
-				{
-					private final IteratorPair pair = new IteratorPair();
-					private final Iterator<WadEntry> iter = wad.iterator();
-					private int cur = 0;
-					
-					@Override
-					public IteratorPair next() 
-					{
-						pair.set(cur++, null);
-						setEntry(pair.getValue(), iter.next());
-						return pair;
-					}
-					
-					@Override
-					public boolean hasNext()
-					{
-						return iter.hasNext();
-					}
-				});
+				returnValue.set(wad.iterator());
 				return true;
 			}
 			finally
@@ -1446,7 +1425,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param temp the temporary script value.
 	 * @return a File object.
 	 */
-	protected File popFile(ScriptInstance scriptInstance, ScriptValue temp) 
+	private static File popFile(ScriptInstance scriptInstance, ScriptValue temp) 
 	{
 		scriptInstance.popStackValue(temp);
 		if (temp.isNull())
@@ -1462,7 +1441,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param value the script value.
 	 * @param entry the entry to use.
 	 */
-	protected void setEntry(ScriptValue value, WadEntry entry) 
+	private static void setEntry(ScriptValue value, WadEntry entry) 
 	{
 		value.setEmptyMap(3);
 		value.mapSet("name", entry.getName());
@@ -1477,7 +1456,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @return a WadEntry, or null if information is missing.
 	 * @throws IllegalArgumentException if entry is malformed.
 	 */
-	protected WadEntry getEntry(ScriptValue value, ScriptValue temp) 
+	private static WadEntry getEntry(ScriptValue value, ScriptValue temp) 
 	{
 		if (!value.isMap())
 			return null;
@@ -1506,7 +1485,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param wad the Wad to read from.
 	 * @param entry the entry.
 	 */
-	protected void setWADData(ScriptValue value, final Wad wad, WadEntry entry)
+	private static void setWADData(ScriptValue value, final Wad wad, WadEntry entry)
 	{
 		try {
 			byte[] b = wad.getData(entry);
@@ -1523,7 +1502,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param wad the Wad to read from.
 	 * @param entry the entry.
 	 */
-	protected void setWADDataStream(ScriptValue value, final Wad wad, WadEntry entry)
+	private static void setWADDataStream(ScriptValue value, final Wad wad, WadEntry entry)
 	{
 		try {
 			value.set(new DataInputStream(wad.getInputStream(entry)));
@@ -1540,7 +1519,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param data the raw data.
 	 * @param index the optional index.
 	 */
-	protected void addWADData(ScriptValue value, final Wad wad, String name, byte[] data, Integer index)
+	private static void addWADData(ScriptValue value, final Wad wad, String name, byte[] data, Integer index)
 	{
 		try {
 			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, data);
@@ -1560,7 +1539,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param file the file to add.
 	 * @param index the optional index.
 	 */
-	protected void addWADData(ScriptValue value, final Wad wad, String name, File file, Integer index)
+	private static void addWADData(ScriptValue value, final Wad wad, String name, File file, Integer index)
 	{
 		try {
 			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, file);
@@ -1580,7 +1559,7 @@ public enum WadFunctions implements ScriptFunctionType
 	 * @param in the stream to read.
 	 * @param index the optional index.
 	 */
-	protected void addWADData(ScriptValue value, final Wad wad, String name, InputStream in, Integer index)
+	private static void addWADData(ScriptValue value, final Wad wad, String name, InputStream in, Integer index)
 	{
 		try {
 			wad.addDataAt(index != null ? index : wad.getEntryCount(), name, in);

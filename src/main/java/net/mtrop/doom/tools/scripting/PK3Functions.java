@@ -254,7 +254,7 @@ public enum PK3Functions implements ScriptFunctionType
 	 * @param temp the temporary script value.
 	 * @return a File object.
 	 */
-	protected File popFile(ScriptInstance scriptInstance, ScriptValue temp) 
+	private static File popFile(ScriptInstance scriptInstance, ScriptValue temp) 
 	{
 		scriptInstance.popStackValue(temp);
 		if (temp.isNull())
@@ -270,7 +270,7 @@ public enum PK3Functions implements ScriptFunctionType
 	 * @param entry the zip entry.
 	 * @param out the value to change.
 	 */
-	protected void setEntryInfo(ZipEntry entry, ScriptValue out) 
+	private static void setEntryInfo(ZipEntry entry, ScriptValue out) 
 	{
 		out.setEmptyMap(8);
 		
