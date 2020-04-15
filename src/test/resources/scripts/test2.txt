@@ -2,7 +2,7 @@
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	mapview = getmapview(wad, args[1]);
+	mapview = mapview(wad, args[1]);
 	close(wad);
 	
 	println("THINGS");

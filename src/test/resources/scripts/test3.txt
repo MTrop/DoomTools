@@ -1,0 +1,89 @@
+
+function eqlbuf(bufa, bufb)
+{
+	len = length(bufa);
+	i = 0;
+	while (i < len)
+	{
+		if (bufa->bufgetbyte(i) != bufb->bufgetbyte(i))
+		{
+			println(bufa);
+			println(bufb);
+			return error("Failure", "NOT EQUAL at byte " + i);
+		}
+		i += 1;
+	}
+	return true;  
+}
+
+check entry main(args)
+{
+	wad = wadfile(args[0]);
+	
+	println("THINGS");
+	buf = waddata(wad, "things", args[1]);
+	outbuf = bufnew(length(buf));
+	in = bisopen(buf); out = bosopen(outbuf);
+	while (bufgetpos(buf) < length(buf))
+	{
+		x = in->readhexenthing();
+		println(x);
+		out->writehexenthing(x);
+	}
+	eqlbuf(buf, outbuf);
+	close([in, out]);
+	
+	println("VERTICES");
+	buf = waddata(wad, "vertexes", args[1]);
+	outbuf = bufnew(length(buf));
+	in = bisopen(buf); out = bosopen(outbuf);
+	while (bufgetpos(buf) < length(buf))
+	{
+		x = in->readvertex();
+		println(x);
+		out->writevertex(x);
+	}
+	eqlbuf(buf, outbuf);
+	close([in, out]);
+
+	println("LINEDEFS");
+	buf = waddata(wad, "linedefs", args[1]);
+	outbuf = bufnew(length(buf));
+	in = bisopen(buf); out = bosopen(outbuf);
+	while (bufgetpos(buf) < length(buf))
+	{
+		x = in->readhexenlinedef();
+		println(x);
+		out->writehexenlinedef(x);
+	}
+	eqlbuf(buf, outbuf);
+	close([in, out]);
+
+	println("SECTORS");
+	buf = waddata(wad, "sectors", args[1]);
+	outbuf = bufnew(length(buf));
+	in = bisopen(buf); out = bosopen(outbuf);
+	while (bufgetpos(buf) < length(buf))
+	{
+		x = in->readsector();
+		println(x);
+		out->writesector(x);
+	}
+	eqlbuf(buf, outbuf);
+	close([in, out]);
+
+	println("SIDEDEFS");
+	buf = waddata(wad, "sidedefs", args[1]);
+	outbuf = bufnew(length(buf));
+	in = bisopen(buf); out = bosopen(outbuf);
+	while (bufgetpos(buf) < length(buf))
+	{
+		x = in->readsidedef();
+		println(x);
+		out->writesidedef(x);
+	}
+	eqlbuf(buf, outbuf);
+	close([in, out]);
+
+	close(wad);
+}
