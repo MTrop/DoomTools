@@ -1,0 +1,28 @@
+
+check entry main(args)
+{
+	wad = wadfile(args[0]);
+	map = mapview(wad, args[1]);
+	close(wad);
+	
+	data = {
+		thing: [],
+		vertex: [],
+		linedef: [],
+		sidedef: [],
+		sector: []
+	};
+	
+	each (k, v : map->elements())
+	{
+		if (mapget(data, k.type) != null)
+			mapget(data, k.type)->listadd(v);
+	}
+	
+	println(data.thing->length());
+	println(data.vertex->length());
+	println(data.linedef->length());
+	println(data.sidedef->length());
+	println(data.sector->length());
+	
+}

@@ -11,6 +11,7 @@ import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptIteratorType;
 import com.blackrook.rookscript.ScriptIteratorType.IteratorPair;
 import com.blackrook.rookscript.ScriptValue;
+import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
 import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionUsage;
@@ -44,6 +45,8 @@ import net.mtrop.doom.map.data.flags.StrifeThingFlags;
 import net.mtrop.doom.map.data.flags.ZDoomLinedefFlags;
 import net.mtrop.doom.map.data.flags.ZDoomThingFlags;
 import net.mtrop.doom.map.udmf.UDMFObject;
+import net.mtrop.doom.map.udmf.UDMFScanner;
+import net.mtrop.doom.map.udmf.UDMFScanner.ElementType;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
@@ -63,6 +66,7 @@ import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.util.Map;
 
 /**
@@ -385,7 +389,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				if (thing instanceof DoomThing)
 					thingToMap((DoomThing)thing, strife, returnValue);
 				else
-					mapElementToMap(thing, returnValue);
+					mapElementToMap(thing, returnValue, false);
 				return true;
 			}
 			finally
@@ -482,7 +486,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				mapElementToMap(temp.asObjectType(MapView.class).getVertex(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getVertex(index), returnValue, false);
 				return true;
 			}
 			finally
@@ -574,7 +578,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				mapElementToMap(temp.asObjectType(MapView.class).getLinedef(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getLinedef(index), returnValue, false);
 				return true;
 			}
 			finally
@@ -666,7 +670,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				mapElementToMap(temp.asObjectType(MapView.class).getSidedef(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getSidedef(index), returnValue, false);
 				return true;
 			}
 			finally
@@ -758,7 +762,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					return true;
 				}
 
-				mapElementToMap(temp.asObjectType(MapView.class).getSector(index), returnValue);
+				mapElementToMap(temp.asObjectType(MapView.class).getSector(index), returnValue, false);
 				return true;
 			}
 			finally
@@ -811,6 +815,73 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			}
 		}
 	},
+
+	ELEMENTS(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates an iterator for iterating through map elements as though they were a contiguous UDMF map. " +
+					"The value that this produces can be used in an each(...) loop. The key is a map with {type:STRING, index:INTEGER}, and " +
+					"values are also maps containing info of either one of the map geometry types or a UDMF global attribute (if " +
+					"\"type\" on the key map is \"attribute\")."
+				)
+				.parameter("data", 
+					type(Type.STRING, "The UDMF data."),
+					type(Type.BUFFER, "The data in the UDMF Map entry (TEXTMAP)."),
+					type(Type.OBJECTREF, "MapView", "A MapView to iterate through."),
+					type(Type.OBJECTREF, "InputStream", "An input stream for reading a UDMF Map entry (TEXTMAP)."),
+					type(Type.OBJECTREF, "Reader", "An open reader for reading a UDMF Map entry (TEXTMAP).")
+				)
+				.parameter("strife", 
+					type(Type.BOOLEAN, "If true, interpret the things as Strife things (different flags). Only necessary for MapViews.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "ScriptIteratorType", "The iterator returned."),
+					type(Type.ERROR, "BadParameter", "If [input] is not a MapView or an input stream to a UDMF map lump."),
+					type(Type.ERROR, "IOError", "If a read error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				boolean strife = temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				try 
+				{
+					if (temp.isString())
+						returnValue.set(new UDMFScannerIterator(UDMFScanner.createScanner(temp.asString())));
+					else if (temp.isBuffer())
+						returnValue.set(new UDMFScannerIterator(UDMFScanner.createScanner(temp.asObjectType(BufferType.class).getInputStream())));
+					else if (temp.isObjectRef(MapView.class))
+						returnValue.set(new MapViewIterator(temp.asObjectType(MapView.class), strife));
+					else if (temp.isObjectRef(InputStream.class))
+						returnValue.set(new UDMFScannerIterator(UDMFScanner.createScanner(temp.asObjectType(InputStream.class))));
+					else if (temp.isObjectRef(Reader.class))
+						returnValue.set(new UDMFScannerIterator(UDMFScanner.createScanner(temp.asObjectType(Reader.class))));
+					else
+						returnValue.setError("BadParameter", "First parameter is not a valid data type.");
+				} 
+				catch (IOException e) 
+				{
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	}, 
 	
 	READTHING(2)
 	{
@@ -1674,8 +1745,8 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				map.setNull();
 			}
 		}
-	},
-
+	}
+	
 	// TODO: Finish this.
 	
 	;
@@ -1715,7 +1786,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 
 	protected abstract Usage usage();
 
-	private static void mapElementToMap(Object object, ScriptValue out)
+	private static void mapElementToMap(Object object, ScriptValue out, boolean strifeThings)
 	{
 		if (object == null)
 			out.setNull();
@@ -1732,7 +1803,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		else if (object instanceof HexenLinedef)
 			linedefToMap((HexenLinedef)object, out);
 		else if (object instanceof DoomThing)
-			thingToMap((DoomThing)object, false, out);
+			thingToMap((DoomThing)object, strifeThings, out);
 		else if (object instanceof HexenThing)
 			thingToMap((HexenThing)object, out);
 		else
@@ -2347,15 +2418,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		public IteratorPair next() 
 		{
 			pair.getKey().set(cur);
-			mapElementToMap(nextObject(cur), pair.getValue());
+			mapElementToMap(nextObject(cur), pair.getValue(), false);
 			cur++;
 			return pair;
 		}
 		
 		protected abstract Object nextObject(int seq);
-		
 	}
-	
+
 	private static class ThingIterator extends MapViewObjectIterator
 	{
 		private boolean strife;
@@ -2374,7 +2444,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			if (thing instanceof DoomThing)
 				thingToMap((DoomThing)thing, strife, pair.getValue());
 			else
-				mapElementToMap(thing, pair.getValue());
+				mapElementToMap(thing, pair.getValue(), false);
 			cur++;
 			return pair;
 		}
@@ -2442,6 +2512,236 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	}
 	
+	private static class MapViewIterator implements ScriptIteratorType
+	{
+		private static final int STATE_PROPERTIES = 0;
+		private static final int STATE_THINGS = 1;
+		private static final int STATE_VERTICES = 2;
+		private static final int STATE_LINEDEFS = 3;
+		private static final int STATE_SIDEDEFS = 4;
+		private static final int STATE_SECTORS = 5;
+	
+		private MapView<?,?,?,?,?> mapView;
+		private IteratorPair pair;
+		private boolean strifeThings;
+		private int state;
+		private int count;
+		private int cur;
+	
+		private MapViewIterator(MapView<?,?,?,?,?> mapView, boolean strifeThings) 
+		{
+			this.mapView = mapView;
+			this.pair = new IteratorPair();
+			this.strifeThings = strifeThings;
+			this.state = -1;
+			this.count = 0;
+			this.cur = 0;
+			advance();
+		}
+
+		private void advance()
+		{
+			while (cur == count && state != STATE_SECTORS)
+			{
+				if (state == -1)
+				{
+					if (mapView instanceof UDMFMap)
+					{
+						state = STATE_PROPERTIES;
+						count = 1;
+						cur = 0;
+					}
+					else
+					{
+						state = STATE_THINGS;
+						count = mapView.getThingCount();
+						cur = 0;
+					}
+				}
+				else if (state == STATE_PROPERTIES)
+				{
+					state = STATE_THINGS;
+					count = mapView.getThingCount();
+					cur = 0;
+				}
+				else if (state == STATE_THINGS)
+				{
+					state = STATE_VERTICES;
+					count = mapView.getVertexCount();
+					cur = 0;
+				}
+				else if (state == STATE_VERTICES)
+				{
+					state = STATE_LINEDEFS;
+					count = mapView.getLinedefCount();
+					cur = 0;
+				}
+				else if (state == STATE_LINEDEFS)
+				{
+					state = STATE_SIDEDEFS;
+					count = mapView.getSidedefCount();
+					cur = 0;
+				}
+				else if (state == STATE_SIDEDEFS)
+				{
+					state = STATE_SECTORS;
+					count = mapView.getSectorCount();
+					cur = 0;
+				}
+			}
+		}
+		
+		@Override
+		public boolean hasNext()
+		{
+			return state != STATE_SECTORS || cur < count;
+		}
+	
+		@Override
+		public IteratorPair next() 
+		{
+			ScriptValue key = pair.getKey();
+			ScriptValue value = pair.getValue();
+			
+			switch (state)
+			{
+				default:
+				{
+					key.setNull();
+					value.setNull();
+				}
+				break;
+				
+				case STATE_PROPERTIES:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "attribute");
+					value.setEmptyMap(1);
+					value.mapSet("namespace", ((UDMFMap)mapView).getNamespace());
+					cur++;
+					advance();
+				}
+				break;
+				
+				case STATE_THINGS:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "thing");
+					mapElementToMap(mapView.getThing(cur), value, strifeThings);
+					if (++cur == count)
+						advance();
+				}
+				break;
+
+				case STATE_VERTICES:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "vertex");
+					mapElementToMap(mapView.getVertex(cur), value, false);
+					if (++cur == count)
+						advance();
+				}
+				break;
+
+				case STATE_LINEDEFS:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "linedef");
+					mapElementToMap(mapView.getLinedef(cur), value, false);
+					if (++cur == count)
+						advance();
+				}
+				break;
+
+				case STATE_SIDEDEFS:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "sidedef");
+					mapElementToMap(mapView.getSidedef(cur), value, false);
+					if (++cur == count)
+						advance();
+				}
+				break;
+
+				case STATE_SECTORS:
+				{
+					key.setEmptyMap(2);
+					key.mapSet("index", cur);
+					key.mapSet("type", "sector");
+					mapElementToMap(mapView.getSector(cur), value, false);
+					if (++cur == count)
+						advance();
+				}
+				break;
+			}
+			
+			return pair;
+		}
+	}
+	
+	private static class UDMFScannerIterator implements ScriptIteratorType
+	{
+		private UDMFScanner scanner;
+		private IteratorPair pair;
+		private String lastType;
+		private int count;
+
+		private UDMFScannerIterator(UDMFScanner scanner) 
+		{
+			this.scanner = scanner;
+			this.pair = new IteratorPair();
+			this.lastType = null;
+			this.count = 0;
+		}
+
+		@Override
+		public boolean hasNext()
+		{
+			return scanner.hasNext();
+		}
+
+		@Override
+		public IteratorPair next()
+		{
+			ScriptValue key = pair.getKey();
+			ScriptValue value = pair.getValue();
+			
+			UDMFScanner.Element element = scanner.next();
+			String type = null;
+			
+			if (element.isType(ElementType.GLOBAL_ATTRIBUTE))
+				type = "attribute";
+			else if (element.isType(ElementType.OBJECT))
+				type = element.getName();
+			
+			if (!type.equals(lastType))
+				count = 0;
+			
+			key.setEmptyMap(2);
+			key.mapSet("index", count);
+			key.mapSet("type", type);
+
+			if (element.isType(ElementType.GLOBAL_ATTRIBUTE))
+			{
+				value.setEmptyMap(1);
+				value.mapSet("namespace", element.getValue());
+			}
+			else if (element.isType(ElementType.OBJECT))
+			{
+				mapElementToMap(element.getUDMFObject(), value, false);
+			}
+			
+			count++;
+			return pair;
+		}
+
+	}
+
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
