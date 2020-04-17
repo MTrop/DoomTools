@@ -26,8 +26,7 @@ function udmfjunk(map)
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	e = wad->wadentry(0);
-	map = mapview(wad, e.name);
+	map = mapview(wad, wad->wadentry(0).name);
 	udmfjunk(map);
 	
 	buf = waddata(wad, "TEXTMAP");

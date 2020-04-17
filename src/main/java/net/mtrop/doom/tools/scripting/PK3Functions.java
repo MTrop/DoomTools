@@ -17,11 +17,15 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.DoomPK3;
+import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadBuffer;
+import net.mtrop.doom.exception.WadException;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -149,7 +153,7 @@ public enum PK3Functions implements ScriptFunctionType
 				scriptInstance.popStackValue(temp);
 				if (!temp.isObjectType(ZipFile.class))
 				{
-					returnValue.setError("BadParameter", "First parameter is not an open PK3 file.");
+					returnValue.setError("BadParameter", "First parameter is not an open Zip/PK3 file.");
 					return true;
 				}
 
@@ -208,6 +212,94 @@ public enum PK3Functions implements ScriptFunctionType
 		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
 		{
 			return ZipFunctions.ZFEOPEN.execute(scriptInstance, returnValue);
+		}
+	},
+
+	PK3WAD(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Reads a PK3 entry as though it were a WAD file and returns an in-memory Wad buffer (not a resource - does not require closing)."
+				)
+				.parameter("zip", 
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+				)
+				.parameter("entry", 
+					type(Type.STRING, "The entry name."),
+					type(Type.MAP, "{... name:STRING ...}", "A map of zip entry info containing the name of the entry.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "An open data input stream to read from."),
+					type(Type.ERROR, "BadParameter", "If an open zip file was not provided, or [entry] is null or [entry].name is null."),
+					type(Type.ERROR, "BadEntry", "If [entry] could not be found in the zip."),
+					type(Type.ERROR, "BadWad", "If [entry] is not a WAD file."),
+					type(Type.ERROR, "IOError", "If a read error occurs, or the zip is not open.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue temp2 = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String name;
+				if (temp.isNull())
+					name = null;
+				else if (temp.isMap())
+				{
+					temp.mapGet("name", temp2);
+					name = temp2.isNull() ? null : temp2.asString();
+				}
+				else
+					name = temp.asString();
+				
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectType(ZipFile.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not an open zip file.");
+					return true;
+				}
+				if (name == null)
+				{
+					returnValue.setError("BadParameter", "No entry name provided.");
+					return true;
+				}
+
+				ZipFile zf = temp.asObjectType(ZipFile.class);
+				
+				ZipEntry entry;
+				try {
+					entry = zf.getEntry(name);
+					if (entry == null)
+					{
+						returnValue.setError("BadEntry", "Entry named \"" + name + "\" could not be found.");
+					}
+					else
+					{
+						try (InputStream in = zf.getInputStream(entry))
+						{
+							returnValue.set((Wad)(new WadBuffer(in)));
+						}
+					}
+				} catch (WadException e) {
+					returnValue.setError("BadWad", e.getMessage(), e.getLocalizedMessage());
+				} catch (IllegalStateException | IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				temp2.setNull();
+			}
 		}
 	},
 
@@ -300,5 +392,6 @@ public enum PK3Functions implements ScriptFunctionType
 	
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 
 }

@@ -15,6 +15,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.blackrook.rookscript.Script;
 import com.blackrook.rookscript.ScriptAssembler;
 import com.blackrook.rookscript.ScriptEnvironment;
 import com.blackrook.rookscript.ScriptInstance;
@@ -82,7 +83,7 @@ public final class WadScriptMain
 	
 	private Mode mode;
 	private File scriptFile;
-	private String entryPoint;
+	private String entryPointName;
 	private Integer runawayLimit;
 	private Integer activationDepth;
 	private Integer stackDepth;
@@ -92,7 +93,7 @@ public final class WadScriptMain
 	{
 		this.mode = Mode.EXECUTE;
 		this.scriptFile = null;
-		this.entryPoint = "main";
+		this.entryPointName = "main";
 		this.runawayLimit = 0;
 		this.activationDepth = 256;
 		this.stackDepth = 2048;
@@ -159,7 +160,7 @@ public final class WadScriptMain
 	
 		if (mode == Mode.EXECUTE)
 		{
-			if (entryPoint == null)
+			if (entryPointName == null)
 			{
 				System.err.println("ERROR: Bad entry point.");
 				return 4;
@@ -180,9 +181,11 @@ public final class WadScriptMain
 				return 4;
 			}
 			
-			if (instance.getScript().getScriptEntry(entryPoint) == null)
+			Script.Entry entryPoint;
+			
+			if ((entryPoint = instance.getScript().getScriptEntry(entryPointName)) == null)
 			{
-				System.err.println("ERROR: Entry point not found: " + entryPoint);
+				System.err.println("ERROR: Entry point not found: " + entryPointName);
 				return 5;
 			}
 			
@@ -190,7 +193,12 @@ public final class WadScriptMain
 			argList.toArray(args);
 			try {
 				ScriptValue retval = ScriptValue.create(null);
-				instance.call(entryPoint, new Object[]{args});
+
+				if (entryPoint.getParameterCount() > 0)
+					instance.call(entryPointName, new Object[]{args});
+				else
+					instance.call(entryPointName);
+
 				instance.popStackValue(retval);
 				
 				if (retval.isError())
@@ -260,7 +268,7 @@ public final class WadScriptMain
 				case STATE_SWITCHES_ENTRY:
 				{
 					arg = arg.trim();
-					entryPoint = arg.length() > 0 ? arg : null;
+					entryPointName = arg.length() > 0 ? arg : null;
 				}
 				break;
 				
@@ -419,7 +427,9 @@ public final class WadScriptMain
 		}
 		out.append(')').print('\n');
 		
-		out.append("    ").println(usage.getInstructions());
+		final String NEWLINE_INDENT = "\n            ";
+		
+		out.append("    ").println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 		if (!pul.isEmpty())
 		{
 			for (ParameterUsage pu : pul)
@@ -430,7 +440,7 @@ public final class WadScriptMain
 					out.append("        (").append(tu.getType() != null 
 						? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
 						: "ANY"
-					).append(") ").println(tu.getDescription());
+					).append(") ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
 				}
 			}
 		}
@@ -440,7 +450,7 @@ public final class WadScriptMain
 			out.append("        (").append(tu.getType() != null 
 				? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
 				: "ANY"
-			).append(") ").println(tu.getDescription());
+			).append(") ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
 			
 		}
 	}

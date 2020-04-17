@@ -1273,7 +1273,7 @@ public enum WadFunctions implements ScriptFunctionType
 				)
 				.parameter("srcEntries",
 					type(Type.NULL, "Assume all entries from the source."),
-					type(Type.LIST, "LIST[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]", "The list of entries to import from the source, in the order provided.")
+					type(Type.LIST, "[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]", "The list of entries to import from the source, in the order provided.")
 				)
 				.parameter("index",
 					type(Type.NULL, "Add to the end."),
