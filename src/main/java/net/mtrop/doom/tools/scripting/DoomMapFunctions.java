@@ -47,6 +47,7 @@ import net.mtrop.doom.map.data.flags.ZDoomThingFlags;
 import net.mtrop.doom.map.udmf.UDMFObject;
 import net.mtrop.doom.map.udmf.UDMFScanner;
 import net.mtrop.doom.map.udmf.UDMFScanner.ElementType;
+import net.mtrop.doom.map.udmf.UDMFWriter;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomLinedefAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
@@ -67,6 +68,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -881,7 +884,101 @@ public enum DoomMapFunctions implements ScriptFunctionType
 				temp.setNull();
 			}
 		}
-	}, 
+	},
+	
+	WRITEUDMFELEMENT(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Writes a UDMF element out to a Writer stream. Note that depending on the value type, some UDMF data may be " +
+					"truncated or rounded."
+				)
+				.parameter("writer", 
+					type(Type.OBJECTREF, "Writer", "An open writer to write the UDMF data to.")
+				)
+				.parameter("type", 
+					type(Type.STRING, "The UDMF element type (\"attribute\", \"thing\", \"linedef\", \"sidedef\", \"sector\", \"vertex\").")
+				)
+				.parameter("data", 
+					type(Type.MAP, "The UDMF data as a map. If attribute, all keys and values are written as global attributes, else it writes the map like a UDMF structure.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Writer", "[writer]."),
+					type(Type.ERROR, "BadParameter", "If [writer] is not a Writer, or [data] is not a map type."),
+					type(Type.ERROR, "BadType", "If [type] is not a valid type name."),
+					type(Type.ERROR, "IOError", "If a write error occurs.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue data = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(data);
+				scriptInstance.popStackValue(temp);
+				String type = temp.asString().toLowerCase();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Writer.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Writer.");
+					return true;
+				}
+				if (Arrays.binarySearch(ACCEPTED_TYPES, type) < 0)
+				{
+					returnValue.setError("BadType", "Second parameter is not a valid type. Expected one of (\"attribute\", \"linedef\", \"sector\", \"sidedef\", \"thing\", \"vertex\").");
+					return true;
+				}
+				if (!data.isMap())
+				{
+					returnValue.setError("BadParameter", "Third parameter is not a map.");
+					return true;
+				}
+				
+				try 
+				{
+					if (type.equals("attribute"))
+					{
+						for (IteratorPair p : data)
+							UDMFWriter.writeField(p.getKey().asString(), p.getValue().asObject(), temp.asObjectType(Writer.class));
+					}
+					else
+					{
+						UDMFObject object;
+						mapToUDMF(data, object = CACHEUDMFOBJECT.get());
+						UDMFWriter.writeObject(object, temp.asObjectType(Writer.class), type);
+					}
+					returnValue.set(temp);
+				} 
+				catch (IOException e) 
+				{
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				data.setNull();
+			}
+		}
+		
+		final String[] ACCEPTED_TYPES = 
+		{
+			"attribute",
+			"linedef",
+			"sector",
+			"sidedef",
+			"thing",
+			"vertex"
+		};
+	},
 	
 	READTHING(2)
 	{
@@ -1817,15 +1914,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			out.mapSet(entry.getKey(), entry.getValue());
 	}
 
-	private static boolean mapToUDMF(ScriptValue out, UDMFObject object)
+	private static boolean mapToUDMF(ScriptValue in, UDMFObject object)
 	{
-		if (!out.isMap())
+		if (!in.isMap())
 			return false;
 		
-		ScriptIteratorType mapIt = out.iterator();
-		while (mapIt.hasNext())
+		object.clear();
+		for (IteratorPair pair : in)
 		{
-			IteratorPair pair = mapIt.next();
 			String key = pair.getKey().asString();
 			ScriptValue value = pair.getValue();
 			if (value.isNull())
@@ -1837,12 +1933,9 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			else if (value.isFloat())
 				object.setFloat(key, value.asFloat());
 			else
-				object.setString(key, String.valueOf(value));
+				object.setString(key, value.asString());
 		}
 		
-		out.setEmptyMap(16);
-		for (Map.Entry<String, Object> entry : object)
-			out.mapSet(entry.getKey(), entry.getValue());
 		return true;
 	}
 
@@ -2753,6 +2846,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 	private static final ThreadLocal<DoomSidedef> CACHEDOOMSIDEDEF = ThreadLocal.withInitial(()->new DoomSidedef());
 	private static final ThreadLocal<DoomVertex> CACHEDOOMVERTEX = ThreadLocal.withInitial(()->new DoomVertex());
 	private static final ThreadLocal<DoomSector> CACHEDOOMSECTOR = ThreadLocal.withInitial(()->new DoomSector());
+	private static final ThreadLocal<UDMFObject> CACHEUDMFOBJECT = ThreadLocal.withInitial(()->new UDMFObject());
 	
 	private static final ThreadLocal<ScriptValue> CACHETEMP = ThreadLocal.withInitial(()->ScriptValue.create(null));
 

@@ -1,0 +1,13 @@
+
+check entry main(args)
+{
+	wad = wadfile(args[0]);
+	map = mapview(wad, wad->wadentry(0).name);
+	close(wad);
+	
+	writer = cswopen(STDOUT());
+	each (element, data : map->elements())
+		writer->writeudmfelement(element.type, data)->flush();
+	
+	close(writer);
+}

@@ -40,5 +40,5 @@ check entry main(args)
 	udmfjunk(reader);
 	close(reader);
 	
-	close(wad);		
+	close(wad);
 }
