@@ -38,11 +38,14 @@ public final class WadMergeMain
 	 */
 	private static class Options
 	{
-		boolean help;
-		boolean version;
-		boolean verbose;
-		boolean systemIn;
-		File inputFile;
+		private PrintStream out;
+		private PrintStream err;
+		private BufferedReader in;
+		private boolean help;
+		private boolean version;
+		private boolean verbose;
+		private boolean systemIn;
+		private File inputFile;
 		
 		Options()
 		{
@@ -56,11 +59,18 @@ public final class WadMergeMain
 	
 	/**
 	 * Reads command line arguments and sets options.
+	 * @param out the standard output print stream.
+	 * @param err the standard error print stream. 
+	 * @param in the standard input buffered reader.
 	 * @param args the argument args.
+	 * @return the parsed options.
 	 */
-	private static Options options(String[] args)
+	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String[] args)
 	{
-		Options out = new Options();
+		Options options = new Options();
+		options.out = out;
+		options.err = err;
+		options.in = in;
 		
 		int i = 0;
 		while (i < args.length)
@@ -68,21 +78,93 @@ public final class WadMergeMain
 			String arg = args[i];
 			
 			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				out.help = true;
+				options.help = true;
 			else if (arg.equals(SWITCH_VERBOSE) || arg.equals(SWITCH_VERBOSE2))
-				out.verbose = true;
+				options.verbose = true;
 			else if (arg.equals(SWITCH_VERSION))
-				out.version = true;
+				options.version = true;
 			else if (arg.equals(SWITCH_SYSTEMIN))
-				out.systemIn = true;
+				options.systemIn = true;
 			else
-				out.inputFile = new File(arg);
+				options.inputFile = new File(arg);
 			i++;
 		}
 		
-		return out;
+		return options;
 	}
 	
+	/**
+	 * Calls this program.
+	 * @param options the program options.
+	 * @return the return code.
+	 */
+	public static int call(Options options)
+	{
+		if (options.help)
+		{
+			splash(options.out);
+			usage(options.out);
+			options.out.println();
+			help(options.out);
+			options.out.println();
+			return ERROR_NONE;
+		}
+		
+		if (options.version)
+		{
+			splash(System.out);
+			return ERROR_NONE;
+		}
+		
+		String streamName;
+		BufferedReader reader;
+		if (options.systemIn)
+		{
+			streamName = "STDIN";
+			reader = options.in;
+		}
+		else
+		{
+			try
+			{
+				reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.inputFile)));
+				streamName = options.inputFile.getPath();
+			}
+			catch (FileNotFoundException e)
+			{
+				options.err.printf("ERROR: File %s not found.\n", options.inputFile.getPath());
+				return ERROR_BAD_INPUT_FILE;
+			}
+			catch (SecurityException e)
+			{
+				options.err.printf("ERROR: File %s not readable (access denied).\n", options.inputFile.getPath());
+				return ERROR_BAD_INPUT_FILE;
+			}
+		}
+	
+		try 
+		{
+			if (!WadMergeCommand.callScript(streamName, reader, new WadMergeContext(options.out, options.verbose)))
+				return ERROR_BAD_SCRIPT;
+		}
+		catch (IOException e)
+		{
+			options.err.printf("ERROR: File %s not found.\n", options.inputFile.getPath());
+			return ERROR_BAD_INPUT_FILE;
+		}
+		finally
+		{
+			IOUtils.close(reader);
+		}
+		
+		return ERROR_NONE;
+	}
+
+	public static void main(String[] args)
+	{
+		System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+	}
+
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
@@ -132,72 +214,6 @@ public final class WadMergeMain
 			command.help(out);
 			out.println();
 		}
-	}
-	
-	public static void main(String[] args)
-	{
-		Options options = options(args);
-		
-		if (options.help)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.out.println();
-			help(System.out);
-			System.out.println();
-			System.exit(ERROR_NONE);
-		}
-		
-		if (options.version)
-		{
-			splash(System.out);
-			System.exit(ERROR_NONE);
-		}
-		
-		String streamName;
-		BufferedReader reader;
-		if (options.systemIn)
-		{
-			streamName = "STDIN";
-			reader = new BufferedReader(new InputStreamReader(System.in));
-		}
-		else
-		{
-			try
-			{
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.inputFile)));
-				streamName = options.inputFile.getPath();
-			}
-			catch (FileNotFoundException e)
-			{
-				System.out.printf("ERROR: File %s not found.\n", options.inputFile.getPath());
-				System.exit(ERROR_BAD_INPUT_FILE);
-				return;
-			}
-			catch (SecurityException e)
-			{
-				System.out.printf("ERROR: File %s not readable (access denied).\n", options.inputFile.getPath());
-				System.exit(ERROR_BAD_INPUT_FILE);
-				return;
-			}
-		}
-
-		try 
-		{
-			if (!WadMergeCommand.callScript(streamName, reader, new WadMergeContext(System.out, options.verbose)))
-				System.exit(ERROR_BAD_SCRIPT);
-		}
-		catch (IOException e)
-		{
-			System.out.printf("ERROR: File %s not found.\n", options.inputFile.getPath());
-			System.exit(ERROR_BAD_INPUT_FILE);
-		}
-		finally
-		{
-			IOUtils.close(reader);
-		}
-		
-		System.exit(ERROR_NONE);
 	}
 
 }

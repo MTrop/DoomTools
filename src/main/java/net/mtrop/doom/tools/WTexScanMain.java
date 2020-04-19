@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +71,7 @@ public final class WTexScanMain
 		private PrintStream out;
 		private PrintStream err;
 		private BufferedReader in;
+		
 		private boolean help;
 		private boolean version;
 		private boolean quiet;
@@ -77,14 +79,13 @@ public final class WTexScanMain
 		private boolean outputFlats;
 		private boolean skipSkies;
 		private List<File> wadFiles;
-		private SortedSet<String> textureList;
-		private SortedSet<String> flatList;
 		
-		Options()
+		public Options(PrintStream out, PrintStream err, Reader in)
 		{
-			this.out = null;
-			this.err = null;
-			this.in = null;
+			this.out = out;
+			this.err = err;
+			this.in = new BufferedReader(in);
+
 			this.help = false;
 			this.version = false;
 			this.quiet = false;
@@ -92,8 +93,6 @@ public final class WTexScanMain
 			this.outputFlats = false;
 			this.skipSkies = false;
 			this.wadFiles = new LinkedList<>();
-			this.textureList = new TreeSet<>();
-			this.flatList = new TreeSet<>();
 		}
 		
 		void println(Object msg)
@@ -123,6 +122,68 @@ public final class WTexScanMain
 		{
 			return in.readLine();
 		}
+		
+		public void setHelp(boolean help) 
+		{
+			this.help = help;
+		}
+		
+		public void setVersion(boolean version) 
+		{
+			this.version = version;
+		}
+		
+		public void setQuiet(boolean quiet) 
+		{
+			this.quiet = quiet;
+		}
+		
+		public void setOutputTextures(boolean outputTextures) 
+		{
+			this.outputTextures = outputTextures;
+		}
+		
+		public void setOutputFlats(boolean outputFlats) 
+		{
+			this.outputFlats = outputFlats;
+		}
+		
+		public void setSkipSkies(boolean skipSkies) 
+		{
+			this.skipSkies = skipSkies;
+		}
+		
+		public void addWadFile(File file)
+		{
+			this.wadFiles.add(file);
+		}
+
+	}
+	
+	/**
+	 * Program context.
+	 */
+	public static class Context
+	{
+		private SortedSet<String> textureList;
+		private SortedSet<String> flatList;
+
+		Context()
+		{
+			this.textureList = new TreeSet<>();
+			this.flatList = new TreeSet<>();
+		}
+		
+		public void addTexture(String texture)
+		{
+			this.textureList.add(texture);
+		}
+
+		public void addFlat(String flat)
+		{
+			this.flatList.add(flat);
+		}
+
 	}
 	
 	private static class Pair
@@ -132,56 +193,359 @@ public final class WTexScanMain
 	}
 
 	/**
-	 * Reads command line arguments and sets options.
-	 * @param out the standard output print stream.
-	 * @param err the standard error print stream. 
-	 * @param in the standard input buffered reader.
-	 * @param args the argument args.
-	 * @return the parsed options.
+	 * Prints the splash.
+	 * @param out the print stream to print to.
 	 */
-	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String[] args)
+	private static void splash(PrintStream out)
 	{
-		Options options = new Options();
-		options.out = out;
-		options.err = err;
-		options.in = in;
+		out.println(SPLASH_VERSION);
+	}
+
+	/**
+	 * Prints the usage.
+	 * @param out the print stream to print to.
+	 */
+	private static void usage(PrintStream out)
+	{
+		out.println("Usage: wtexscan [--help | -h | --version] [files] [switches]");
+	}
+
+	/**
+	 * Prints the help.
+	 * @param out the print stream to print to.
+	 */
+	private static void help(PrintStream out)
+	{
+		out.println("    --help              Prints help and exits.");
+		out.println("    -h");
+		out.println();
+		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("[files]:");
+		out.println("    <filename>          The files to inspect (WAD/PK3, accepts wildcards).");
+		out.println();
+		out.println("[switches]:");
+		out.println("    --quiet             Output no messages.");
+		out.println("    -q");
+		out.println();
+		out.println("    --textures          Output textures.");
+		out.println("    -t");
+		out.println();
+		out.println("    --flats             Output flats.");
+		out.println("    -f");
+		out.println();
+		out.println("    --no-skies          Skip adding associated skies per map.");
+	}
+
+	// Process PK3/ZIP
+	private static void processPK3(Options options, Context context, String fileName, File f) throws ZipException, IOException
+	{
+		options.println("# Inspecting " + fileName + "...");
+		ZipFile zf = new ZipFile(f);
 		
+		@SuppressWarnings("unchecked")
+		Enumeration<ZipEntry> en = (Enumeration<ZipEntry>)zf.entries();
+		while (en.hasMoreElements())
+		{
+			ZipEntry ze = en.nextElement();
+			if (ze.isDirectory())
+				continue;
+			if (ze.getName().toLowerCase().endsWith(".wad"))
+			{
+				WadBuffer wm = null;
+				try (InputStream zin = zf.getInputStream(ze)) 
+				{
+					wm = new WadBuffer(zin);
+					inspectWAD(options, context, wm);
+				} 
+				catch (IOException e) 
+				{
+					options.errln("ERROR: Could not read entry "+ze.getName()+".");
+				}
+			}
+			else if (ze.getName().toLowerCase().endsWith(".pk3"))
+			{
+				File pk3 = File.createTempFile("texspy", "pk3tmp");
+				try (InputStream zin = zf.getInputStream(ze); FileOutputStream fos = new FileOutputStream(pk3)) 
+				{
+					IOUtils.relay(zin, fos);
+					IOUtils.close(fos);
+					processPK3(options, context, fileName + File.separator + ze.getName(), pk3);
+				} 
+				catch (IOException e) 
+				{
+					options.errln("ERROR: Could not read entry "+ze.getName()+".");
+				} 
+				pk3.deleteOnExit();
+			}
+		}
+		
+		zf.close();
+	}
+
+	// Process WAD
+	private static void processWAD(Options options, Context context, File f) throws WadException, IOException
+	{
+		options.println("# Inspecting " + f.getPath() + "...");
+		WadFile wf = new WadFile(f);
+		inspectWAD(options, context, wf);
+		wf.close();
+	}
+
+	// Inspect WAD contents.
+	private static void inspectWAD(Options options, Context context, Wad wad) throws IOException
+	{
+		String[] mapHeaders = MapUtils.getAllMapHeaders(wad);
+		for (String mapName : mapHeaders)
+			inspectMap(options, context, wad, mapName);
+	}
+
+	/**
+	 * Returns the episode and map as (x,y) in the provided pair.
+	 * If p.x and p.y = -1, the episode and map was not detected.
+	 * Map only lumps have p.x = 0.
+	 * @param mapName the map lump
+	 * @param p the output Pair.
+	 */
+	private static void getEpisodeAndMap(String mapName, Pair p)
+	{
+		if (EPISODE_PATTERN.matcher(mapName).matches())
+		{
+			p.x = Integer.parseInt(mapName.substring(1, 2));;
+			p.y = Integer.parseInt(mapName.substring(3));			
+		}
+		else if (MAP_PATTERN.matcher(mapName).matches())
+		{
+			p.x = 0;
+			p.y = Integer.parseInt(mapName.substring(3));
+		}
+	}
+
+	// Inspect a map in a WAD.
+	private static void inspectMap(Options options, Context context, Wad wad, String mapName) throws IOException
+	{
+		options.println("#    Opening map "+mapName+"...");
+		
+		MapFormat format = MapUtils.getMapFormat(wad, mapName);
+		
+		if (format == null)
+		{
+			options.println("#    ERROR: NOT A MAP!");
+			return;
+		}
+	
+		options.println("#    Format is "+format.name()+"...");
+	
+		// filled in if UDMF.
+		UDMFTable udmf = null;
+		
+		if (format == MapFormat.UDMF)
+		{
+			try (InputStream in = wad.getInputStream("TEXTMAP", wad.lastIndexOf(mapName)))
+			{
+				udmf = UDMFReader.readData(in);
+			}
+		}
+				
+		if (options.outputTextures)
+		{
+			options.println("#        Reading SIDEDEFS...");
+	
+			switch (format)
+			{
+				default:
+				case DOOM:
+				case HEXEN:
+				{
+					inspectSidedefs(context, wad.getDataAs("SIDEDEFS", wad.lastIndexOf(mapName), DoomSidedef.class, DoomSidedef.LENGTH));
+				}
+				break;
+	
+				case UDMF:
+				{
+					inspectSidedefs(context, udmf.getObjects("sidedef"));
+				}
+				break;
+			}
+		}
+	
+		if (options.outputFlats)
+		{
+			options.println("#        Reading SECTORS...");
+	
+			switch (format)
+			{
+				default:
+				case DOOM:
+				case HEXEN:
+				{
+					inspectSectors(context, wad.getDataAs("SECTORS", wad.lastIndexOf(mapName), DoomSector.class, DoomSector.LENGTH));
+				}
+				break;
+	
+				case UDMF:
+				{
+					inspectSectors(context, udmf.getObjects("sector"));
+				}
+				break;
+					
+			}
+		}
+		
+		if (!options.skipSkies)
+		{
+			inspectMap(context, mapName);
+		}
+		
+	}
+
+	private static void inspectMap(Context context, String mapName)
+	{
+		Pair p = new Pair();
+		getEpisodeAndMap(mapName, p);
+		if (p.x == 0)
+		{
+			if (p.y >= 21)
+			{
+				if (!context.textureList.contains("SKY3"))
+					context.textureList.add("SKY3");
+			}
+			else if (p.y >= 12)
+			{
+				if (!context.textureList.contains("SKY2"))
+					context.textureList.add("SKY2");
+			}
+			else
+			{
+				if (!context.textureList.contains("SKY1"))
+					context.textureList.add("SKY1");
+			}
+		}
+		else if (p.x == 1)
+		{
+			if (!context.textureList.contains("SKY1"))
+				context.textureList.add("SKY1");
+		}
+		else if (p.x == 2)
+		{
+			if (!context.textureList.contains("SKY2"))
+				context.textureList.add("SKY2");
+		}
+		else if (p.x == 3)
+		{
+			if (!context.textureList.contains("SKY3"))
+				context.textureList.add("SKY3");
+		}
+		else if (p.x == 4)
+		{
+			if (!context.textureList.contains("SKY4"))
+				context.textureList.add("SKY4");
+			if (!context.textureList.contains("SKY1"))
+				context.textureList.add("SKY1");
+		}
+		else if (p.x == 5)
+		{
+			if (!context.textureList.contains("SKY3"))
+				context.textureList.add("SKY3");
+		}
+	}
+
+	// Adds sidedef textures to the list.
+	private static void inspectSidedefs(Context context, DoomSidedef[] sidedefs)
+	{
+		for (DoomSidedef s : sidedefs)
+		{
+			addTexture(context, s.getTextureTop());
+			addTexture(context, s.getTextureMiddle());
+			addTexture(context, s.getTextureBottom());
+		}
+	}
+
+	// Adds sidedef textures to the list.
+	private static void inspectSidedefs(Context context, UDMFObject[] sidedefs)
+	{
+		for (UDMFObject s : sidedefs)
+		{
+			addTexture(context, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_TOP, NameUtils.EMPTY_TEXTURE_NAME));
+			addTexture(context, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, NameUtils.EMPTY_TEXTURE_NAME));
+			addTexture(context, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, NameUtils.EMPTY_TEXTURE_NAME));
+		}
+	}
+
+	// Adds sector textures to the list.
+	private static void inspectSectors(Context context, DoomSector[] sectors)
+	{
+		for (DoomSector s : sectors)
+		{
+			addFlat(context, s.getTextureFloor());
+			addFlat(context, s.getTextureCeiling());
+		}
+	}
+
+	// Adds sector textures to the list.
+	private static void inspectSectors(Context context, UDMFObject[] sectors)
+	{
+		for (UDMFObject s : sectors)
+		{
+			addFlat(context, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR));
+			addFlat(context, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING));
+		}
+	}
+
+	private static void addTexture(Context context, String texture)
+	{
+		if (!context.textureList.contains(texture) && texture != null && !texture.trim().isEmpty() && !texture.equals("-"))
+			context.textureList.add(texture);
+	}
+
+	private static void addFlat(Context context, String texture)
+	{
+		if (!context.flatList.contains(texture) && texture != null && !texture.trim().isEmpty())
+			context.flatList.add(texture);
+	}
+
+	/**
+	 * Reads command line arguments and sets options.
+	 * @param options the options to alter. 
+	 * @param args the argument args.
+	 */
+	public static void scanOptions(Options options, String[] args)
+	{
 		int i = 0;
 		while (i < args.length)
 		{
 			String arg = args[i];
 			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.help = true;
+				options.setHelp(true);
 			else if (arg.equals(SWITCH_VERSION))
-				options.version = true;
+				options.setVersion(true);
 			else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
-				options.quiet = true;
+				options.setQuiet(true);
 			else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))
-				options.outputTextures = true;
+				options.setOutputTextures(true);
 			else if (arg.equals(SWITCH_FLATS) || arg.equals(SWITCH_FLATS2))
-				options.outputFlats = true;
+				options.setOutputFlats(true);
 			else if (arg.equals(SWITCH_NOSKIES))
-				options.skipSkies = true;
+				options.setSkipSkies(true);
 			else
-				options.wadFiles.add(new File(arg));
+				options.addWadFile(new File(arg));
 			i++;
 		}
 		
 		if (!options.outputFlats && !options.outputTextures)
 		{
-			options.outputFlats = true;
-			options.outputTextures = true;
-		}
-		
-		return options;
+			options.setOutputFlats(true);
+			options.setOutputTextures(true);
+		}		
 	}
 	
 	/**
 	 * Calls this program.
 	 * @param options the program options.
+	 * @param context the program context.
 	 * @return the return code.
 	 */
-	public static int call(Options options)
+	public static int call(Options options, Context context)
 	{
 		if (options.help)
 		{
@@ -213,11 +577,11 @@ public final class WTexScanMain
 			try
 			{
 				if (f.getName().toLowerCase().endsWith(".wad"))
-					processWAD(options, f);
+					processWAD(options, context, f);
 				else if (f.getName().toLowerCase().endsWith(".pk3"))
-					processPK3(options, f.getPath(), f);
+					processPK3(options, context, f.getPath(), f);
 				else if (f.getName().toLowerCase().endsWith(".zip"))
-					processPK3(options, f.getPath(), f);
+					processPK3(options, context, f.getPath(), f);
 				else
 				{
 					options.errf("ERROR: %s is not a WAD, PK3, or ZIP.\n", f.getPath());
@@ -230,349 +594,46 @@ public final class WTexScanMain
 				atLeastOneError = true;
 			}
 		}
-	
-		if (options.textureList.isEmpty())
+		
+		return atLeastOneError ? ERROR_BAD_FILE : ERROR_NONE;
+	}
+
+	public static void main(String[] args) throws IOException
+	{
+		Options options = new Options(System.out, System.err, Common.openTextStream(System.in));
+		scanOptions(options, args);
+
+		Context context = new Context();
+
+		int ret;
+		if ((ret = call(options, context)) != 0)
+			System.exit(ret);
+		
+		if (context.textureList.isEmpty())
 		{
-			options.println("# No textures.");
+			options.out.println("# No textures.");
 		}
 		else
 		{
 			options.out.println("-TEXTURES");
-			for (String t : options.textureList)
+			for (String t : context.textureList)
 				options.out.println(t);
 		}
 	
-		if (options.flatList.isEmpty())
+		if (context.flatList.isEmpty())
 		{
 			options.println("# No flats.");
 		}
 		else
 		{
 			options.out.println("-FLATS");
-			for (String f : options.flatList)
+			for (String f : context.flatList)
 				options.out.println(f);
 		}
 	
 		options.out.println("-END");
-	
-		return atLeastOneError ? ERROR_BAD_FILE : ERROR_NONE;
-	}
-
-	public static void main(String[] args) throws IOException
-	{
-		System.exit(call(options(System.out, System.err, Common.openTextStream(System.in), args)));
-	}
-
-	/**
-	 * Prints the splash.
-	 * @param out the print stream to print to.
-	 */
-	private static void splash(PrintStream out)
-	{
-		out.println(SPLASH_VERSION);
-	}
-
-	/**
-	 * Prints the usage.
-	 * @param out the print stream to print to.
-	 */
-	private static void usage(PrintStream out)
-	{
-		out.println("Usage: wtexscan [--help | -h | --version] [files] [switches]");
-	}
-	
-	/**
-	 * Prints the help.
-	 * @param out the print stream to print to.
-	 */
-	private static void help(PrintStream out)
-	{
-		out.println("    --help              Prints help and exits.");
-		out.println("    -h");
-		out.println();
-		out.println("    --version           Prints version, and exits.");
-		out.println();
-		out.println("[files]:");
-		out.println("    <filename>          The files to inspect (WAD/PK3, accepts wildcards).");
-		out.println();
-		out.println("[switches]:");
-		out.println("    --quiet             Output no messages.");
-		out.println("    -q");
-		out.println();
-		out.println("    --textures          Output textures.");
-		out.println("    -t");
-		out.println();
-		out.println("    --flats             Output flats.");
-		out.println("    -f");
-		out.println();
-		out.println("    --no-skies          Skip adding associated skies per map.");
-	}
-	
-	// Process PK3/ZIP
-	private static void processPK3(Options options, String fileName, File f) throws ZipException, IOException
-	{
-		options.println("# Inspecting " + fileName + "...");
-		ZipFile zf = new ZipFile(f);
 		
-		@SuppressWarnings("unchecked")
-		Enumeration<ZipEntry> en = (Enumeration<ZipEntry>)zf.entries();
-		while (en.hasMoreElements())
-		{
-			ZipEntry ze = en.nextElement();
-			if (ze.isDirectory())
-				continue;
-			if (ze.getName().toLowerCase().endsWith(".wad"))
-			{
-				InputStream zin = zf.getInputStream(ze);
-				WadBuffer wm = null;
-				try {
-					wm = new WadBuffer(zin);
-					inspectWAD(options, wm);
-				} catch (IOException e) {
-					options.errln("ERROR: Could not read entry "+ze.getName()+".");
-				}
-				IOUtils.close(zin);
-			}
-			else if (ze.getName().toLowerCase().endsWith(".pk3"))
-			{
-				File pk3 = File.createTempFile("texspy", "pk3tmp");
-				InputStream zin = zf.getInputStream(ze);
-				FileOutputStream fos = new FileOutputStream(pk3);
-				try {
-					IOUtils.relay(zin, fos);
-					IOUtils.close(fos);
-					processPK3(options, fileName + File.separator + ze.getName(), pk3);
-				} catch (IOException e) {
-					options.errln("ERROR: Could not read entry "+ze.getName()+".");
-				} finally {
-					IOUtils.close(fos);
-					IOUtils.close(zin);
-				}
-				pk3.deleteOnExit();
-			}
-		}
-		
-		zf.close();
-	}
-
-	// Process WAD
-	private static void processWAD(Options options, File f) throws WadException, IOException
-	{
-		options.println("# Inspecting " + f.getPath() + "...");
-		WadFile wf = new WadFile(f);
-		inspectWAD(options, wf);
-		wf.close();
-	}
-	
-	// Inspect WAD contents.
-	private static void inspectWAD(Options options, Wad wad) throws IOException
-	{
-		String[] mapHeaders = MapUtils.getAllMapHeaders(wad);
-		for (String mapName : mapHeaders)
-			inspectMap(options, wad, mapName);
-	}
-
-	/**
-	 * Returns the episode and map as (x,y) in the provided pair.
-	 * If p.x and p.y = -1, the episode and map was not detected.
-	 * Map only lumps have p.x = 0.
-	 * @param mapName the map lump
-	 * @param p the output Pair.
-	 */
-	private static void getEpisodeAndMap(String mapName, Pair p)
-	{
-		if (EPISODE_PATTERN.matcher(mapName).matches())
-		{
-			p.x = Integer.parseInt(mapName.substring(1, 2));;
-			p.y = Integer.parseInt(mapName.substring(3));			
-		}
-		else if (MAP_PATTERN.matcher(mapName).matches())
-		{
-			p.x = 0;
-			p.y = Integer.parseInt(mapName.substring(3));
-		}
-	}
-	
-	// Inspect a map in a WAD.
-	private static void inspectMap(Options options, Wad wad, String mapName) throws IOException
-	{
-		options.println("#    Opening map "+mapName+"...");
-		
-		MapFormat format = MapUtils.getMapFormat(wad, mapName);
-		
-		if (format == null)
-		{
-			options.println("#    ERROR: NOT A MAP!");
-			return;
-		}
-
-		options.println("#    Format is "+format.name()+"...");
-
-		// filled in if UDMF.
-		UDMFTable udmf = null;
-		
-		if (format == MapFormat.UDMF)
-		{
-			InputStream in = wad.getInputStream("TEXTMAP", wad.lastIndexOf(mapName));
-			udmf = UDMFReader.readData(in);
-			Common.close(in);
-		}
-				
-		if (options.outputTextures)
-		{
-			options.println("#        Reading SIDEDEFS...");
-
-			switch (format)
-			{
-				default:
-				case DOOM:
-				case HEXEN:
-				{
-					inspectSidedefs(options, wad.getDataAs("SIDEDEFS", wad.lastIndexOf(mapName), DoomSidedef.class, DoomSidedef.LENGTH));
-				}
-				break;
-
-				case UDMF:
-				{
-					inspectSidedefs(options, udmf.getObjects("sidedef"));
-				}
-				break;
-			}
-		}
-
-		if (options.outputFlats)
-		{
-			options.println("#        Reading SECTORS...");
-
-			switch (format)
-			{
-				default:
-				case DOOM:
-				case HEXEN:
-				{
-					inspectSectors(options, wad.getDataAs("SECTORS", wad.lastIndexOf(mapName), DoomSector.class, DoomSector.LENGTH));
-				}
-				break;
-
-				case UDMF:
-				{
-					inspectSectors(options, udmf.getObjects("sector"));
-				}
-				break;
-					
-			}
-		}
-		
-		if (!options.skipSkies)
-		{
-			inspectMap(options, mapName);
-		}
-		
-	}
-	
-	private static void inspectMap(Options options, String mapName)
-	{
-		Pair p = new Pair();
-		getEpisodeAndMap(mapName, p);
-		if (p.x == 0)
-		{
-			if (p.y >= 21)
-			{
-				if (!options.textureList.contains("SKY3"))
-					options.textureList.add("SKY3");
-			}
-			else if (p.y >= 12)
-			{
-				if (!options.textureList.contains("SKY2"))
-					options.textureList.add("SKY2");
-			}
-			else
-			{
-				if (!options.textureList.contains("SKY1"))
-					options.textureList.add("SKY1");
-			}
-		}
-		else if (p.x == 1)
-		{
-			if (!options.textureList.contains("SKY1"))
-				options.textureList.add("SKY1");
-		}
-		else if (p.x == 2)
-		{
-			if (!options.textureList.contains("SKY2"))
-				options.textureList.add("SKY2");
-		}
-		else if (p.x == 3)
-		{
-			if (!options.textureList.contains("SKY3"))
-				options.textureList.add("SKY3");
-		}
-		else if (p.x == 4)
-		{
-			if (!options.textureList.contains("SKY4"))
-				options.textureList.add("SKY4");
-			if (!options.textureList.contains("SKY1"))
-				options.textureList.add("SKY1");
-		}
-		else if (p.x == 5)
-		{
-			if (!options.textureList.contains("SKY3"))
-				options.textureList.add("SKY3");
-		}
-	}
-	
-	// Adds sidedef textures to the list.
-	private static void inspectSidedefs(Options options, DoomSidedef[] sidedefs)
-	{
-		for (DoomSidedef s : sidedefs)
-		{
-			addTexture(options, s.getTextureTop());
-			addTexture(options, s.getTextureMiddle());
-			addTexture(options, s.getTextureBottom());
-		}
-	}
-	
-	// Adds sidedef textures to the list.
-	private static void inspectSidedefs(Options options, UDMFObject[] sidedefs)
-	{
-		for (UDMFObject s : sidedefs)
-		{
-			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_TOP, NameUtils.EMPTY_TEXTURE_NAME));
-			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_MIDDLE, NameUtils.EMPTY_TEXTURE_NAME));
-			addTexture(options, s.getString(UDMFDoomSidedefAttributes.ATTRIB_TEXTURE_BOTTOM, NameUtils.EMPTY_TEXTURE_NAME));
-		}
-	}
-	
-	// Adds sector textures to the list.
-	private static void inspectSectors(Options options, DoomSector[] sectors)
-	{
-		for (DoomSector s : sectors)
-		{
-			addFlat(options, s.getTextureFloor());
-			addFlat(options, s.getTextureCeiling());
-		}
-	}
-	
-	// Adds sector textures to the list.
-	private static void inspectSectors(Options options, UDMFObject[] sectors)
-	{
-		for (UDMFObject s : sectors)
-		{
-			addFlat(options, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR));
-			addFlat(options, s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING));
-		}
-	}
-	
-	private static void addTexture(Options options, String texture)
-	{
-		if (!options.textureList.contains(texture) && texture != null && !texture.trim().isEmpty() && !texture.equals("-"))
-			options.textureList.add(texture);
-	}
-
-	private static void addFlat(Options options, String texture)
-	{
-		if (!options.flatList.contains(texture) && texture != null && !texture.trim().isEmpty())
-			options.flatList.add(texture);
+		System.exit(0);
 	}
 	
 }
