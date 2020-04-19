@@ -19,8 +19,10 @@ import com.blackrook.rookscript.Script;
 import com.blackrook.rookscript.ScriptAssembler;
 import com.blackrook.rookscript.ScriptEnvironment;
 import com.blackrook.rookscript.ScriptInstance;
+import com.blackrook.rookscript.ScriptInstanceBuilder;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.exception.ScriptExecutionException;
+import com.blackrook.rookscript.exception.ScriptParseException;
 import com.blackrook.rookscript.functions.MathFunctions;
 import com.blackrook.rookscript.functions.RegexFunctions;
 import com.blackrook.rookscript.functions.ZipFunctions;
@@ -275,24 +277,43 @@ public final class WadScriptMain
 			return 4;
 		}
 	
-		ScriptInstance instance = ScriptInstance.createBuilder()
-			.withSource(scriptFile)
-			.withEnvironment(ScriptEnvironment.createStandardEnvironment())
-			.withFunctionResolver(CommonFunctions.createResolver())
-				.andFunctionResolver(IOFunctions.createResolver())
-				.andFunctionResolver(DateFunctions.createResolver())
-				.andFunctionResolver(FileSystemFunctions.createResolver())
-				.andFunctionResolver(MathFunctions.createResolver())
-				.andFunctionResolver(PrintFunctions.createResolver())
-				.andFunctionResolver(RegexFunctions.createResolver())
-				.andFunctionResolver(ZipFunctions.createResolver())
-				.andFunctionResolver(DigestFunctions.createResolver())
-				.andFunctionResolver(WadFunctions.createResolver())
-				.andFunctionResolver(PK3Functions.createResolver())
-				.andFunctionResolver(DoomMapFunctions.createResolver())
-			.withScriptStack(activationDepth, stackDepth)
-			.withRunawayLimit(runawayLimit)
-			.createInstance();
+		ScriptInstance instance;
+		
+		try 
+		{
+			instance = ScriptInstance.createBuilder()
+				.withSource(scriptFile)
+				.withEnvironment(ScriptEnvironment.createStandardEnvironment())
+				.withFunctionResolver(CommonFunctions.createResolver())
+					.andFunctionResolver(IOFunctions.createResolver())
+					.andFunctionResolver(DateFunctions.createResolver())
+					.andFunctionResolver(FileSystemFunctions.createResolver())
+					.andFunctionResolver(MathFunctions.createResolver())
+					.andFunctionResolver(PrintFunctions.createResolver())
+					.andFunctionResolver(RegexFunctions.createResolver())
+					.andFunctionResolver(ZipFunctions.createResolver())
+					.andFunctionResolver(DigestFunctions.createResolver())
+					.andFunctionResolver(WadFunctions.createResolver())
+					.andFunctionResolver(PK3Functions.createResolver())
+					.andFunctionResolver(DoomMapFunctions.createResolver())
+				.withScriptStack(activationDepth, stackDepth)
+				.withRunawayLimit(runawayLimit)
+				.createInstance();
+		} 
+		catch (ScriptInstanceBuilder.BuilderException e) 
+		{
+			Throwable cause = e.getCause();
+			if (cause instanceof ScriptParseException)
+			{
+				System.err.println("Script ERROR: " + cause.getLocalizedMessage());
+				return 8;
+			}
+			else
+			{
+				System.err.println("ERROR: " + e.getLocalizedMessage());
+				return 9;
+			}
+		}
 		
 		if (mode == Mode.DISASSEMBLE)
 		{
