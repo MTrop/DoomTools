@@ -12,6 +12,7 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.exception.MapException;
 import net.mtrop.doom.map.DoomMap;
 import net.mtrop.doom.map.HexenMap;
@@ -71,7 +72,157 @@ import java.util.Map;
  */
 public enum DoomMapFunctions implements ScriptFunctionType
 {
-	MAPVIEW(2)
+	HEADERS(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches all map headers in a WAD. This algorithm scans for known map " +
+					"data entries (e.g. THINGS, VERTEXES, etc.). " +
+					"If it finds one, the previous entry is the probably the header."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.returns(
+					type(Type.LIST, "[STRING, ...]", "The header names of all found maps. Can be empty."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue wadValue = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(wadValue);
+				if (!wadValue.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				final Wad wad = wadValue.asObjectType(Wad.class);
+				String[] headers = MapUtils.getAllMapHeaders(wad);
+				returnValue.setEmptyList(headers.length);
+				for (int i = 0; i < headers.length; i++)
+					returnValue.listAdd(headers[i]);
+				return true;
+			}
+			finally
+			{
+				wadValue.setNull();
+			}
+		}
+	},
+	
+	ENTRIES(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Fetches all map headers in a WAD."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("header", 
+					type(Type.STRING, "The map header entry name.")
+				)
+				.returns(
+					type(Type.LIST, "[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]", "The entries that make up the map, including the header, or an empty list if it couldn't be found."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				String header = temp.asString();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				final Wad wad = temp.asObjectType(Wad.class);
+				WadEntry[] entries = MapUtils.getMapEntries(wad, header);
+				returnValue.setEmptyList(entries.length);
+				for (int i = 0; i < entries.length; i++)
+				{
+					setEntry(temp, entries[i]);
+					returnValue.listAdd(temp);
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	ENTRYCOUNT(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Returns the amount of entries that make up a map."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
+				)
+				.parameter("header", 
+					type(Type.STRING, "The map header entry name.")
+				)
+				.returns(
+					type(Type.INTEGER, "The amount of entries from the header entry that comprises the whole map (including the header)."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				String header = temp.asString();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				final Wad wad = temp.asObjectType(Wad.class);
+				returnValue.set(MapUtils.getMapEntryCount(wad, header));
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	VIEW(2)
 	{
 		@Override
 		protected Usage usage()
@@ -202,7 +353,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
-	MAPINFO(2)
+	INFO(2)
 	{
 		@Override
 		protected Usage usage()
@@ -277,7 +428,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
-	MAPVIEWINFO(1)
+	VIEWINFO(1)
 	{
 		@Override
 		protected Usage usage()
@@ -879,7 +1030,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
-	WRITEUDMFELEMENT(2)
+	WRITEUDMFELEMENT(3)
 	{
 		@Override
 		protected Usage usage()
@@ -1876,6 +2027,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 
 	protected abstract Usage usage();
 
+	private static void setEntry(ScriptValue value, WadEntry entry) 
+	{
+		value.setEmptyMap(3);
+		value.mapSet("name", entry.getName());
+		value.mapSet("offset", entry.getOffset());
+		value.mapSet("size", entry.getSize());
+	}
+	
 	private static void mapElementToMap(Object object, ScriptValue out, boolean strifeThings)
 	{
 		if (object == null)

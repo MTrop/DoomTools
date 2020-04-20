@@ -1,7 +1,7 @@
 
 check function wadtest(wad, outwad)
 {
-	outwad->wadimport(wad, wad->wadmapentries("map29"));
+	outwad->wadimport(wad, wad->map::entries("map29"));
 	println(outwad->wadentries());
 	outwad
 		->wadadd("ENTRY1")
@@ -32,9 +32,9 @@ check entry main(args)
 		
 	println(wad->wadentry("vertexes", "map01"));
 	println(wad->wadentry("vertexes", "map99"));
-	println(wad->wadmapheaders());
-	println(wad->wadmapentries("map01"));
-	println(wad->wadmapentrycount("map01"));
+	println(wad->map::headers());
+	println(wad->map::entries("map01"));
+	println(wad->map::entrycount("map01"));
 
 	println(wad->waddata("things", "map01"));
 	println(wad->waddata({"name": "THINGS", "offset": 54224, "size": 690}));

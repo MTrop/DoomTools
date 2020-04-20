@@ -26,9 +26,9 @@ check entry main(args)
 	in = bisopen(buf); out = bosopen(outbuf);
 	while (bufgetpos(buf) < length(buf))
 	{
-		x = in->readhexenthing();
+		x = in->map::readhexenthing();
 		println(x);
-		out->writehexenthing(x);
+		out->map::writehexenthing(x);
 	}
 	eqlbuf(buf, outbuf);
 	close([in, out]);
@@ -39,9 +39,9 @@ check entry main(args)
 	in = bisopen(buf); out = bosopen(outbuf);
 	while (bufgetpos(buf) < length(buf))
 	{
-		x = in->readvertex();
+		x = in->map::readvertex();
 		println(x);
-		out->writevertex(x);
+		out->map::writevertex(x);
 	}
 	eqlbuf(buf, outbuf);
 	close([in, out]);
@@ -52,9 +52,9 @@ check entry main(args)
 	in = bisopen(buf); out = bosopen(outbuf);
 	while (bufgetpos(buf) < length(buf))
 	{
-		x = in->readhexenlinedef();
+		x = in->map::readhexenlinedef();
 		println(x);
-		out->writehexenlinedef(x);
+		out->map::writehexenlinedef(x);
 	}
 	eqlbuf(buf, outbuf);
 	close([in, out]);
@@ -65,9 +65,9 @@ check entry main(args)
 	in = bisopen(buf); out = bosopen(outbuf);
 	while (bufgetpos(buf) < length(buf))
 	{
-		x = in->readsector();
+		x = in->map::readsector();
 		println(x);
-		out->writesector(x);
+		out->map::writesector(x);
 	}
 	eqlbuf(buf, outbuf);
 	close([in, out]);
@@ -78,9 +78,9 @@ check entry main(args)
 	in = bisopen(buf); out = bosopen(outbuf);
 	while (bufgetpos(buf) < length(buf))
 	{
-		x = in->readsidedef();
+		x = in->map::readsidedef();
 		println(x);
-		out->writesidedef(x);
+		out->map::writesidedef(x);
 	}
 	eqlbuf(buf, outbuf);
 	close([in, out]);

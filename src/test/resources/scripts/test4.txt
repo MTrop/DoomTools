@@ -2,7 +2,7 @@
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	map = mapview(wad, args[1]);
+	map = map::view(wad, args[1]);
 	close(wad);
 	
 	data = {
@@ -13,7 +13,7 @@ check entry main(args)
 		sector: []
 	};
 	
-	each (k, v : map->elements())
+	each (k, v : map->map::elements())
 	{
 		if (mapget(data, k.type) != null)
 			mapget(data, k.type)->listadd(v);

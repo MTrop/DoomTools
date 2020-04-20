@@ -8,7 +8,7 @@ function udmfjunk(map)
 		sector: []
 	};
 	
-	each (k, v : map->elements())
+	each (k, v : map->map::elements())
 	{
 		if (mapget(data, k.type) != null)
 			mapget(data, k.type)->listadd(v);
@@ -26,7 +26,7 @@ function udmfjunk(map)
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	map = mapview(wad, wad->wadentry(0).name);
+	map = map::view(wad, wad->wadentry(0).name);
 	udmfjunk(map);
 	
 	buf = waddata(wad, "TEXTMAP");

@@ -322,7 +322,7 @@ public final class WTExportMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("TEXport v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
+		out.println("WTEXport v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
 	}
 
 	/**
@@ -554,7 +554,7 @@ public final class WTExportMain
 			if (wf.contains("ANIMATED"))
 			{
 				context.println("    Scanning ANIMATED...");
-				unit.animated.readBytes(wf.getInputStream("ANIMATED"));
+				unit.animated = wf.getDataAs("ANIMATED", Animated.class);
 				processAnimated(unit, unit.animated);
 			}
 			
@@ -566,7 +566,7 @@ public final class WTExportMain
 			if (wf.contains("SWITCHES"))
 			{
 				context.println("    Scanning SWITCHES...");
-				unit.switches.readBytes(wf.getInputStream("SWITCHES"));
+				unit.switches = wf.getDataAs("SWITCHES", Switches.class);
 				
 				for (Switches.Entry entry : unit.switches)
 				{
@@ -1305,9 +1305,20 @@ public final class WTExportMain
 			return ERROR_NO_FILES;
 		}
 	
-		/* STEP 1 : Read list of what we want. */
-		
 		Context context = new Context();
+
+		/* STEP 1 : Scan all incoming WADs so we know where crap is. */
+		
+		// scan base.
+		if (!scanWAD(options, context, options.baseWad, true))
+			return ERROR_BAD_FILE;
+		
+		// scan patches. 
+		for (String f : options.filePaths)
+			if (!scanWAD(options, context, f, false))
+				return ERROR_BAD_FILE;
+	
+		/* STEP 2 : Read list of what we want. */
 		
 		options.println("Input texture/flat list:");
 		try
@@ -1322,17 +1333,6 @@ public final class WTExportMain
 			return ERROR_IO_ERROR;
 		}
 		
-		/* STEP 2 : Scan all incoming WADs so we know where crap is. */
-		
-		// scan base.
-		if (!scanWAD(options, context, options.baseWad, true))
-			return ERROR_BAD_FILE;
-		
-		// scan patches. 
-		for (String f : options.filePaths)
-			if (!scanWAD(options, context, f, false))
-				return ERROR_BAD_FILE;
-	
 		/* STEP 3 : Extract the junk and put it in the output wad. */
 	
 		if (options.nullComparator.nullName != null)

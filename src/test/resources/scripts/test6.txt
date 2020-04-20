@@ -2,12 +2,12 @@
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	map = mapview(wad, wad->wadentry(0).name);
+	map = map::view(wad, wad->wadentry(0).name);
 	close(wad);
 	
 	writer = cswopen(STDOUT());
-	each (element, data : map->elements())
-		writer->writeudmfelement(element.type, data)->flush();
+	each (element, data : map->map::elements())
+		writer->map::writeudmfelement(element.type, data)->flush();
 	
 	close(writer);
 }

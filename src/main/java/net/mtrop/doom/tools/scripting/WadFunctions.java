@@ -14,12 +14,14 @@ import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.object.BinaryObject;
+import net.mtrop.doom.object.TextObject;
 import net.mtrop.doom.struct.io.IOUtils;
-import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -157,6 +159,59 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 
+	WADFILECREATE(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates a new, empty, open WAD file. Overwrites existing files! Registered as an open resource."
+				)
+				.parameter("file", 
+					type(Type.STRING, "Path to WAD file."),
+					type(Type.OBJECTREF, "File", "Path to WAD file.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "A newly created WAD file."),
+					type(Type.ERROR, "BadParameter", "If [file] is null."),
+					type(Type.ERROR, "Security", "If the OS denied permission to create the file."),
+					type(Type.ERROR, "IOError", "If there was an error creating the file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				File file = popFile(scriptInstance, temp);
+				if (file == null)
+				{
+					returnValue.setError("BadParameter", "No file provided.");
+					return true;
+				}
+				
+				try {
+					Wad wad = WadFile.createWadFile(file);
+					scriptInstance.registerCloseable((WadFile)wad);
+					returnValue.set(wad);
+				} catch (SecurityException e) {
+					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+
 	WADBUFFER(1)
 	{
 		@Override
@@ -218,59 +273,6 @@ public enum WadFunctions implements ScriptFunctionType
 					returnValue.setError("BadWad", e.getMessage(), e.getLocalizedMessage());
 				} catch (FileNotFoundException e) {
 					returnValue.setError("BadFile", e.getMessage(), e.getLocalizedMessage());
-				} catch (IOException e) {
-					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
-				}
-				return true;
-			}
-			finally
-			{
-				temp.setNull();
-			}
-		}
-	},
-
-	WADFILECREATE(1)
-	{
-		@Override
-		protected Usage usage()
-		{
-			return ScriptFunctionUsage.create()
-				.instructions(
-					"Creates a new, empty, open WAD file. Overwrites existing files! Registered as an open resource."
-				)
-				.parameter("file", 
-					type(Type.STRING, "Path to WAD file."),
-					type(Type.OBJECTREF, "File", "Path to WAD file.")
-				)
-				.returns(
-					type(Type.OBJECTREF, "Wad", "A newly created WAD file."),
-					type(Type.ERROR, "BadParameter", "If [file] is null."),
-					type(Type.ERROR, "Security", "If the OS denied permission to create the file."),
-					type(Type.ERROR, "IOError", "If there was an error creating the file.")
-				)
-			;
-		}
-		
-		@Override
-		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
-		{
-			ScriptValue temp = CACHEVALUE1.get();
-			try
-			{
-				File file = popFile(scriptInstance, temp);
-				if (file == null)
-				{
-					returnValue.setError("BadParameter", "No file provided.");
-					return true;
-				}
-				
-				try {
-					Wad wad = WadFile.createWadFile(file);
-					scriptInstance.registerCloseable((WadFile)wad);
-					returnValue.set(wad);
-				} catch (SecurityException e) {
-					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
 				} catch (IOException e) {
 					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
 				}
@@ -600,156 +602,6 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 	
-	WADMAPHEADERS(1)
-	{
-		@Override
-		protected Usage usage()
-		{
-			return ScriptFunctionUsage.create()
-				.instructions(
-					"Fetches all map headers in a WAD. This algorithm scans for known map " +
-					"data entries (e.g. THINGS, VERTEXES, etc.). " +
-					"If it finds one, the previous entry is the probably the header."
-				)
-				.parameter("wad", 
-					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
-				)
-				.returns(
-					type(Type.LIST, "[STRING, ...]", "The header names of all found maps. Can be empty."),
-					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
-				)
-			;
-		}
-		
-		@Override
-		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
-		{
-			ScriptValue wadValue = CACHEVALUE1.get();
-			try
-			{
-				scriptInstance.popStackValue(wadValue);
-				if (!wadValue.isObjectRef(Wad.class))
-				{
-					returnValue.setError("BadParameter", "First parameter is not a Wad.");
-					return true;
-				}
-
-				final Wad wad = wadValue.asObjectType(Wad.class);
-				String[] headers = MapUtils.getAllMapHeaders(wad);
-				returnValue.setEmptyList(headers.length);
-				for (int i = 0; i < headers.length; i++)
-					returnValue.listAdd(headers[i]);
-				return true;
-			}
-			finally
-			{
-				wadValue.setNull();
-			}
-		}
-	},
-	
-	WADMAPENTRIES(2)
-	{
-		@Override
-		protected Usage usage()
-		{
-			return ScriptFunctionUsage.create()
-				.instructions(
-					"Fetches all map headers in a WAD."
-				)
-				.parameter("wad", 
-					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
-				)
-				.parameter("header", 
-					type(Type.STRING, "The map header entry name.")
-				)
-				.returns(
-					type(Type.LIST, "[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]", "The entries that make up the map, including the header, or an empty list if it couldn't be found."),
-					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
-				)
-			;
-		}
-		
-		@Override
-		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
-		{
-			ScriptValue temp = CACHEVALUE1.get();
-			try
-			{
-				scriptInstance.popStackValue(temp);
-				String header = temp.asString();
-				scriptInstance.popStackValue(temp);
-				if (!temp.isObjectRef(Wad.class))
-				{
-					returnValue.setError("BadParameter", "First parameter is not a Wad.");
-					return true;
-				}
-
-				final Wad wad = temp.asObjectType(Wad.class);
-				WadEntry[] entries = MapUtils.getMapEntries(wad, header);
-				returnValue.setEmptyList(entries.length);
-				for (int i = 0; i < entries.length; i++)
-				{
-					setEntry(temp, entries[i]);
-					returnValue.listAdd(temp);
-				}
-				return true;
-			}
-			finally
-			{
-				temp.setNull();
-			}
-		}
-	},
-	
-	WADMAPENTRYCOUNT(2)
-	{
-		@Override
-		protected Usage usage()
-		{
-			return ScriptFunctionUsage.create()
-				.instructions(
-					"Returns the amount of entries that make up a map."
-				)
-				.parameter("wad", 
-					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
-				)
-				.parameter("header", 
-					type(Type.STRING, "The map header entry name.")
-				)
-				.returns(
-					type(Type.INTEGER, "The amount of entries from the header entry that comprises the whole map (including the header)."),
-					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file.")
-				)
-			;
-		}
-		
-		@Override
-		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
-		{
-			ScriptValue temp = CACHEVALUE1.get();
-			try
-			{
-				scriptInstance.popStackValue(temp);
-				String header = temp.asString();
-				scriptInstance.popStackValue(temp);
-				if (!temp.isObjectRef(Wad.class))
-				{
-					returnValue.setError("BadParameter", "First parameter is not a Wad.");
-					return true;
-				}
-
-				final Wad wad = temp.asObjectType(Wad.class);
-				returnValue.set(MapUtils.getMapEntryCount(wad, header));
-				return true;
-			}
-			finally
-			{
-				temp.setNull();
-			}
-		}
-	},
-	
 	WADDATA(3)
 	{
 		@Override
@@ -1041,7 +893,9 @@ public enum WadFunctions implements ScriptFunctionType
 					type(Type.STRING, "The data to add (as UTF-8)."),
 					type(Type.BUFFER, "The data to add (read from current cursor position to the end)."),
 					type(Type.OBJECTREF, "File", "The file contents to add."),
-					type(Type.OBJECTREF, "InputStream", "The data to add.")
+					type(Type.OBJECTREF, "InputStream", "The data to add."),
+					type(Type.OBJECTREF, "BinaryObject", "The data to add."),
+					type(Type.OBJECTREF, "TextObject", "The data to add.")
 				)
 				.parameter("index",
 					type(Type.NULL, "Add to the end."),
@@ -1105,6 +959,30 @@ public enum WadFunctions implements ScriptFunctionType
 				{
 					InputStream in = data.asObjectType(InputStream.class);
 					addWADData(returnValue, wad, name, in, index);
+					return true;
+				}
+				else if (data.isObjectRef(BinaryObject.class))
+				{
+					try (InputStream in = new ByteArrayInputStream(data.asObjectType(BinaryObject.class).toBytes()))
+					{
+						addWADData(returnValue, wad, name, in, index);
+					}
+					catch (IOException e)
+					{
+						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+					}
+					return true;
+				}
+				else if (data.isObjectRef(TextObject.class))
+				{
+					try (InputStream in = new ByteArrayInputStream(data.asObjectType(TextObject.class).toText().getBytes(UTF_8)))
+					{
+						addWADData(returnValue, wad, name, in, index);
+					}
+					catch (IOException e)
+					{
+						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+					}
 					return true;
 				}
 				else

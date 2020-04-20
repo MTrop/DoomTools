@@ -2,22 +2,22 @@
 check entry main(args)
 {
 	wad = wadfile(args[0]);
-	mapview = mapview(wad, args[1]);
+	doommap = map::view(wad, args[1]);
 	close(wad);
 	
 	println("THINGS");
-	each (i, t : mapview->things()) 
+	each (i, t : doommap->map::things()) 
 		println(i + ": " + t); 
 	println("VERTICES");
-	each (i, t : mapview->vertices()) 
+	each (i, t : doommap->map::vertices()) 
 		println(i + ": " + t); 
 	println("LINEDEFS");
-	each (i, t : mapview->linedefs()) 
+	each (i, t : doommap->map::linedefs()) 
 		println(i + ": " + t); 
 	println("SIDEDEFS");
-	each (i, t : mapview->sidedefs()) 
+	each (i, t : doommap->map::sidedefs()) 
 		println(i + ": " + t); 
 	println("SECTORS");
-	each (i, t : mapview->sectors()) 
+	each (i, t : doommap->map::sectors()) 
 		println(i + ": " + t); 
 }

@@ -109,16 +109,16 @@ public final class WadScriptMain
 			}
 	
 			@Override
-			protected void renderUsage(PrintStream out, String functionName, Usage usage)
+			protected void renderUsage(PrintStream out, String namespace, String functionName, Usage usage)
 			{
 				if (usage == null)
 				{
-					out.println(functionName + "(...)");
+					out.println((namespace != null ? namespace + "::" : "") + functionName + "(...)");
 					out.println();
 					return;
 				}
 				
-				out.append(functionName).append('(');
+				out.append(namespace != null ? namespace + "::" : "").append(functionName).append('(');
 				List<ParameterUsage> pul = usage.getParameterInstructions();
 				for (int i = 0; i < pul.size(); i++)
 				{
@@ -164,7 +164,7 @@ public final class WadScriptMain
 			}
 			
 			@Override
-			protected void renderUsage(PrintStream out, String functionName, Usage usage)
+			protected void renderUsage(PrintStream out, String namespace, String functionName, Usage usage)
 			{
 				out.append("## ").append(functionName).append('(');
 				List<ParameterUsage> pul = usage.getParameterInstructions();
@@ -214,10 +214,11 @@ public final class WadScriptMain
 		/**
 		 * Renders a single function usage doc.
 		 * @param out the output stream.
+		 * @param namespace the function namespace.
 		 * @param functionName the function name.
 		 * @param usage the usage to render (can be null).
 		 */
-		protected abstract void renderUsage(PrintStream out, String functionName, Usage usage);
+		protected abstract void renderUsage(PrintStream out, String namespace, String functionName, Usage usage);
 	}
 
 	private Mode mode;
@@ -295,7 +296,7 @@ public final class WadScriptMain
 					.andFunctionResolver(DigestFunctions.createResolver())
 					.andFunctionResolver(WadFunctions.createResolver())
 					.andFunctionResolver(PK3Functions.createResolver())
-					.andFunctionResolver(DoomMapFunctions.createResolver())
+					.andFunctionResolver("map", DoomMapFunctions.createResolver())
 				.withScriptStack(activationDepth, stackDepth)
 				.withRunawayLimit(runawayLimit)
 				.createInstance();
@@ -561,8 +562,13 @@ public final class WadScriptMain
 
 	private static void printFunctionUsages(PrintStream out, UsageRenderer renderer, ScriptFunctionResolver resolver)
 	{
+		printFunctionUsages(out, renderer, null, resolver);
+	}
+	
+	private static void printFunctionUsages(PrintStream out, UsageRenderer renderer, String namespace, ScriptFunctionResolver resolver)
+	{
 		for (ScriptFunctionType sft : resolver.getFunctions())
-			renderer.renderUsage(out, sft.name(), sft.getUsage());
+			renderer.renderUsage(out, namespace, sft.name(), sft.getUsage());
 		out.println();
 	}
 	
@@ -603,7 +609,7 @@ public final class WadScriptMain
 		renderer.renderSection(out, "PK3s");
 		printFunctionUsages(out, renderer, PK3Functions.createResolver());
 		renderer.renderSection(out, "Doom / Hexen / ZDoom / UDMF Maps");
-		printFunctionUsages(out, renderer, DoomMapFunctions.createResolver());
+		printFunctionUsages(out, renderer, "map", DoomMapFunctions.createResolver());
 	}
 	
 	/**
