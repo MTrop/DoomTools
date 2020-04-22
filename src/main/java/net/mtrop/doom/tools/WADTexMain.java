@@ -21,6 +21,7 @@ import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
+import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 
@@ -334,7 +335,7 @@ public final class WADTexMain
 					return;
 				}
 
-				Common.writeDEUTEXFile(textureSet, WADTEX_OUTPUT_HEADER, writer);
+				Utility.writeDEUTEXFile(textureSet, WADTEX_OUTPUT_HEADER, writer);
 				System.out.printf("Wrote `%s`.\n", streamName);
 			}
 			else // import mode
@@ -357,7 +358,7 @@ public final class WADTexMain
 					return;
 				}
 
-				textureSet = Common.readDEUTEXFile(reader, patchNames, textures);
+				textureSet = Utility.readDEUTEXFile(reader, patchNames, textures);
 				if (strife)
 					textureSet.export(patchNames = new PatchNames(), (CommonTextureList<StrifeTextureList.Texture>)(textures = new StrifeTextureList(128)));
 				else

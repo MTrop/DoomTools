@@ -24,7 +24,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Script functions for WAD.
+ * Script functions for PK3.
  * @author Matthew Tropiano
  */
 public enum PK3Functions implements ScriptFunctionType

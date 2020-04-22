@@ -24,6 +24,7 @@ import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.tools.common.Response;
+import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.util.MapUtils;
@@ -521,7 +522,7 @@ public class WadMergeContext
 		TextureSet textureSet;
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(textureFile))))
 		{
-			textureSet = Common.readDEUTEXFile(reader, pout, tout);
+			textureSet = Utility.readDEUTEXFile(reader, pout, tout);
 		} 
 		catch (ParseException e) 
 		{
@@ -636,7 +637,7 @@ public class WadMergeContext
 		
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(swantblsFile))))
 		{
-			Common.readSwitchAnimatedTables(reader, animated, switches);
+			Utility.readSwitchAnimatedTables(reader, animated, switches);
 			buffer.addData("ANIMATED", animated);
 			verbosef("Added `ANIMATED` to `%s`.\n", symbol);
 			buffer.addData("SWITCHES", switches);

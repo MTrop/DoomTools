@@ -17,6 +17,7 @@ import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
+import net.mtrop.doom.tools.common.Utility;
 
 /**
  * Main class for JSwantbls.
@@ -306,7 +307,7 @@ public final class WSwAnTablesMain
 					return ERROR_BAD_INPUTOUTPUT_FILE;
 				}
 	
-				Common.writeSwitchAnimatedTables(switches, animated, SWANTBLS_OUTPUT_HEADER, writer);
+				Utility.writeSwitchAnimatedTables(switches, animated, SWANTBLS_OUTPUT_HEADER, writer);
 				options.out.printf("Wrote `%s`.\n", streamName);
 			}
 			else // import mode
@@ -327,7 +328,7 @@ public final class WSwAnTablesMain
 					return ERROR_BAD_INPUTOUTPUT_FILE;
 				}
 	
-				Common.readSwitchAnimatedTables(reader, animated, switches);
+				Utility.readSwitchAnimatedTables(reader, animated, switches);
 	
 				if (replaceAnimated)
 				{

@@ -67,7 +67,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Script functions for WAD.
+ * Script functions for Doom Maps.
  * @author Matthew Tropiano
  */
 public enum DoomMapFunctions implements ScriptFunctionType
@@ -1987,8 +1987,6 @@ public enum DoomMapFunctions implements ScriptFunctionType
 			}
 		}
 	}
-	
-	// TODO: Finish this.
 	
 	;
 	

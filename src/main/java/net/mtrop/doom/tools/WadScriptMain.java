@@ -44,6 +44,7 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.scripting.DoomMapFunctions;
 import net.mtrop.doom.tools.scripting.PK3Functions;
+import net.mtrop.doom.tools.scripting.UtilityFunctions;
 import net.mtrop.doom.tools.scripting.WadFunctions;
 
 import com.blackrook.rookscript.functions.CommonFunctions;
@@ -166,7 +167,14 @@ public final class WadScriptMain
 			@Override
 			protected void renderUsage(PrintStream out, String namespace, String functionName, Usage usage)
 			{
-				out.append("## ").append(functionName).append('(');
+				if (usage == null)
+				{
+					out.println((namespace != null ? namespace + "::" : "") + functionName + "(...)");
+					out.println();
+					return;
+				}
+				
+				out.append("## ").append(namespace != null ? namespace + "::" : "").append(functionName).append('(');
 				List<ParameterUsage> pul = usage.getParameterInstructions();
 				for (int i = 0; i < pul.size(); i++)
 				{
@@ -297,6 +305,7 @@ public final class WadScriptMain
 					.andFunctionResolver(WadFunctions.createResolver())
 					.andFunctionResolver(PK3Functions.createResolver())
 					.andFunctionResolver("map", DoomMapFunctions.createResolver())
+					.andFunctionResolver("util", UtilityFunctions.createResolver())
 				.withScriptStack(activationDepth, stackDepth)
 				.withRunawayLimit(runawayLimit)
 				.createInstance();
@@ -609,7 +618,9 @@ public final class WadScriptMain
 		renderer.renderSection(out, "PK3s");
 		printFunctionUsages(out, renderer, PK3Functions.createResolver());
 		renderer.renderSection(out, "Doom / Hexen / ZDoom / UDMF Maps");
-		printFunctionUsages(out, renderer, "map", DoomMapFunctions.createResolver());
+		printFunctionUsages(out, renderer, "MAP", DoomMapFunctions.createResolver());
+		renderer.renderSection(out, "Utilities");
+		printFunctionUsages(out, renderer, "UTIL", UtilityFunctions.createResolver());
 	}
 	
 	/**

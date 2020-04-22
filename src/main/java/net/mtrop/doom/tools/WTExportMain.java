@@ -89,6 +89,10 @@ public final class WTExportMain
 		private NullComparator nullComparator;
 		/** File List. */
 		private List<String> filePaths;
+		/** List of texture names. */
+		private List<String> textureList; 
+		/** List of flat names. */
+		private List<String> flatList; 
 
 		public Options(PrintStream out, PrintStream err, BufferedReader in)
 		{
@@ -103,6 +107,8 @@ public final class WTExportMain
 			this.additive = false;
 			this.nullComparator = new NullComparator(null);
 			this.filePaths = new ArrayList<>();
+			this.textureList = new ArrayList<>();
+			this.flatList = new ArrayList<>();
 		}
 		
 		void println(Object msg)
@@ -690,65 +696,6 @@ public final class WTExportMain
 		return true;
 	}
 
-	private static boolean readTexturesAndFlats(Options options, Context context) throws IOException
-	{
-		final String TEXTURES = "-textures";
-		final String FLATS = "-flats";
-		final String END = "-end";
-		
-		final int STATE_NONE = 0;
-		final int STATE_TEXTURES = 1;
-		final int STATE_FLATS = 2;
-		
-		String line = null;
-		int state = STATE_NONE;
-		boolean keepGoing = true;
-		
-		while (keepGoing && ((line = options.readLine()) != null))
-		{
-			line = line.trim();
-			// skip blank lines
-			if (line.length() == 0)
-				continue;
-			// skip commented lines.
-			if (line.charAt(0) == '#')
-				continue;
-			
-			if (line.equalsIgnoreCase(TEXTURES))
-			{
-				state = STATE_TEXTURES;
-				continue;
-			}
-			else if (line.equalsIgnoreCase(FLATS))
-			{
-				state = STATE_FLATS;
-				continue;
-			}
-			else if (line.equalsIgnoreCase(END))
-			{
-				keepGoing = false;
-				continue;
-			}
-			
-			switch (state)
-			{
-				case STATE_NONE:
-					options.println("ERROR: Name before '-textures' or '-flats'.");
-					options.in.close();
-					return false;
-				case STATE_TEXTURES:
-					readAndAddTextures(options, context, line.toUpperCase());
-					break;
-				case STATE_FLATS:
-					readAndAddFlats(options, context, line.toUpperCase());
-					break;
-			}
-		}
-		
-		options.in.close();
-		return true;
-	}
-
 	private static void addToLists(Set<String> set, List<String> list, String s)
 	{
 		if (set.contains(s))
@@ -1197,8 +1144,9 @@ public final class WTExportMain
 	 * Reads command line arguments and sets options.
 	 * @param options the program options. 
 	 * @param args the argument args.
+	 * @throws IOException if a read error occurs.
 	 */
-	public static void scanOptions(Options options, String[] args)
+	public static void scanOptions(Options options, String[] args) throws IOException
 	{
 		final int STATE_INIT = 0;
 		final int STATE_BASE = 1;
@@ -1258,6 +1206,69 @@ public final class WTExportMain
 			}
 			i++;
 		}
+		
+		// Read list from Standard In		
+		options.println("Input texture/flat list:");
+		readList(options);
+	}
+
+	private static boolean readList(Options options) throws IOException
+	{
+		final String TEXTURES = "-textures";
+		final String FLATS = "-flats";
+		final String END = "-end";
+		
+		final int STATE_NONE = 0;
+		final int STATE_TEXTURES = 1;
+		final int STATE_FLATS = 2;
+		
+		String line = null;
+		int state = STATE_NONE;
+		boolean keepGoing = true;
+		
+		while (keepGoing && ((line = options.readLine()) != null))
+		{
+			line = line.trim();
+			// skip blank lines
+			if (line.length() == 0)
+				continue;
+			// skip commented lines.
+			if (line.charAt(0) == '#')
+				continue;
+			
+			if (line.equalsIgnoreCase(TEXTURES))
+			{
+				state = STATE_TEXTURES;
+				continue;
+			}
+			else if (line.equalsIgnoreCase(FLATS))
+			{
+				state = STATE_FLATS;
+				continue;
+			}
+			else if (line.equalsIgnoreCase(END))
+			{
+				keepGoing = false;
+				continue;
+			}
+			
+			switch (state)
+			{
+				case STATE_NONE:
+					options.err.println("ERROR: Name before '-textures' or '-flats'.");
+					options.in.close();
+					return false;
+				case STATE_TEXTURES:
+					options.textureList.add(line.toUpperCase());
+					break;
+				case STATE_FLATS:
+					options.flatList.add(line.toUpperCase());
+					break;
+			}
+		}
+		
+		options.in.close();
+		return true;
 	}
 
 	/**
@@ -1318,20 +1329,12 @@ public final class WTExportMain
 			if (!scanWAD(options, context, f, false))
 				return ERROR_BAD_FILE;
 	
-		/* STEP 2 : Read list of what we want. */
-		
-		options.println("Input texture/flat list:");
-		try
-		{
-			if (!readTexturesAndFlats(options, context))
-				return ERROR_BAD_FILE;
-		} 
-		catch (IOException e) 
-		{
-			// if we reach here, you got PROBLEMS, buddy.
-			options.println("ERROR: Could not read from STDIN.");
-			return ERROR_IO_ERROR;
-		}
+		/* STEP 2 : Compile list of what we want. */
+
+		for (String t : options.textureList)
+			readAndAddTextures(options, context, t);
+		for (String f : options.flatList)
+			readAndAddFlats(options, context, f);
 		
 		/* STEP 3 : Extract the junk and put it in the output wad. */
 	
@@ -1345,11 +1348,17 @@ public final class WTExportMain
 		return ERROR_NONE;
 	}
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args)
 	{
-		Options options = new Options(System.out, System.err, Common.openTextStream(System.in));
-		scanOptions(options, args);
-		System.exit(call(options));
+		try {
+			Options options = new Options(System.out, System.err, Common.openTextStream(System.in));
+			scanOptions(options, args);
+			System.exit(call(options));
+		} catch (IOException e) {
+			// if we reach here, you got PROBLEMS, buddy.
+			System.err.println("ERROR: Could not read from STDIN.");
+			System.exit(ERROR_IO_ERROR);
+		}
 	}
 	
 }
