@@ -75,6 +75,8 @@ public final class WTExportMain
 		
 		private boolean help;
 		private boolean version;
+		private boolean quiet;
+
 		/** Path to base wad. */
 		private String baseWad;
 		/** Path to output wad. */
@@ -100,6 +102,7 @@ public final class WTExportMain
 			this.err = err;
 			this.in = in;
 			
+			this.quiet = false;
 			this.baseWad = null;
 			this.outWad = null;
 			this.noAnimated = false;
@@ -113,22 +116,26 @@ public final class WTExportMain
 		
 		void println(Object msg)
 		{
-			out.println(msg);
+			if (!quiet)
+				out.println(msg);
 		}
 		
 		void printf(String fmt, Object... args)
 		{
-			out.printf(fmt, args);
+			if (!quiet)
+				out.printf(fmt, args);
 		}
 
 		void errln(Object msg)
 		{
-			err.println(msg);
+			if (!quiet)
+				err.println(msg);
 		}
 		
 		void errf(String fmt, Object... args)
 		{
-			err.printf(fmt, args);
+			if (!quiet)
+				err.printf(fmt, args);
 		}
 
 		char readChar() throws IOException
@@ -140,7 +147,51 @@ public final class WTExportMain
 		{
 			return in.readLine();
 		}
+
+		public void setBaseWad(String baseWad) 
+		{
+			this.baseWad = baseWad;
+		}
 		
+		public void setOutWad(String outWad) 
+		{
+			this.outWad = outWad;
+		}
+		
+		public void setNoAnimated(boolean noAnimated) 
+		{
+			this.noAnimated = noAnimated;
+		}
+		
+		public void setNoSwitches(boolean noSwitches) 
+		{
+			this.noSwitches = noSwitches;
+		}
+		
+		public void setAdditive(boolean additive) 
+		{
+			this.additive = additive;
+		}
+		
+		public void setNullTexture(String texture) 
+		{
+			this.nullComparator = new NullComparator(texture);
+		}
+		
+		public void addFilePath(String path)
+		{
+			filePaths.add(path);
+		}
+	
+		public void addTexture(String name)
+		{
+			textureList.add(name.toUpperCase());
+		}
+
+		public void addFlat(String name)
+		{
+			flatList.add(name.toUpperCase());
+		}
 	}
 
 	public static class Context
@@ -161,12 +212,804 @@ public final class WTExportMain
 
 		Context()
 		{
+			this.baseUnit = null;
+			this.wadPriority = new LinkedList<WadUnit>();
 			this.textureSet = new HashSet<>();
 			this.flatSet = new HashSet<>();
 			this.textureList = new ArrayList<>();
 			this.flatList = new ArrayList<>();
-			this.baseUnit = null;
-			this.wadPriority = new LinkedList<WadUnit>();
+		}
+
+		private <T extends Comparable<T>> void sortSwap(List<T> list, int i)
+		{
+			T temp = list.get(i - 1);
+			list.set(i - 1, list.get(i));
+			list.set(i, temp);
+		}
+
+		private <T extends Comparable<T>> void insertAndSort(List<T> list, T obj)
+		{
+			int n = list.size();
+			list.add(obj);
+			while (n > 0)
+			{
+				if (list.get(n - 1).compareTo(list.get(n)) < 0)
+					break;
+				sortSwap(list, n);
+				n--;
+			}
+		}
+
+		// Scan WAD file.
+		private boolean scanWAD(Options options, String path, boolean isBase)
+		{
+			options.printf("Scanning %s...\n", path);
+			File f = new File(path);
+			WadFile wf = openWadFile(options, f, false);
+			if (wf == null)
+				return false;
+			
+			WadUnit unit = new WadUnit(wf);
+			
+			try {
+				if (!scanTexturesAndPNames(options, unit, wf))
+					return false;
+			} catch (IOException e) {
+				options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
+				return false;
+			}
+			
+			options.println("    Scanning patch entries...");
+			if (!scanNamespace(options, "P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices))
+				return false;
+			if (!scanNamespace(options, "PP", "P", null, unit, wf, unit.patchIndices))
+				return false;
+			options.printf("        %d patches.\n", unit.patchIndices.size());
+			options.println("    Scanning flat entries...");
+			if (!scanNamespace(options, "F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices))
+				return false;
+			if (!scanNamespace(options, "FF", "F", null, unit, wf, unit.flatIndices))
+				return false;
+			options.printf("        %d flats.\n", unit.flatIndices.size());
+			options.println("    Scanning texture namespace entries...");
+			if (!scanNamespace(options, "TX", null, null, unit, wf, unit.texNamespaceIndices))
+				return false;
+			options.printf("        %d namespace textures.\n", unit.texNamespaceIndices.size());
+			
+			for (Map.Entry<String, Integer> entry : unit.flatIndices.entrySet())
+				insertAndSort(unit.flatList, entry.getKey());
+		
+			for (Map.Entry<String, Integer> entry : unit.texNamespaceIndices.entrySet())
+			{
+				String s = entry.getKey();
+				if (!unit.textureList.contains(s))
+					insertAndSort(unit.textureList, s);
+			}
+		
+			for (TextureSet.Texture tex : unit.textureSet)
+				if (!unit.textureList.contains(tex.getName()))
+					insertAndSort(unit.textureList, tex.getName());
+		
+			try {
+				if (!scanAnimated(options, unit, wf))
+					return false;
+			} catch (IOException e) {
+				options.printf("ERROR: \"%s\" could not be read: an ANIMATED or SWITCHES lump may be corrupt.\n", f.getPath());
+				return false;
+			}
+			
+			if (!isBase)
+				wadPriority.add(unit);
+			else
+				baseUnit = unit;
+			
+			return true;
+		}
+
+		// Scan for TEXTUREx and PNAMES.
+		private boolean scanTexturesAndPNames(Options options, WadUnit unit, WadFile wf) throws IOException
+		{
+			if (!wf.contains("TEXTURE1"))
+				return true;
+			options.println("    Scanning TEXTUREx/PNAMES...");
+			
+			
+			PatchNames patchNames = null;
+			CommonTextureList<?> textureList1 = null;
+			CommonTextureList<?> textureList2 = null;
+			byte[] textureData = null;
+			
+			try {
+				textureData = wf.getData("TEXTURE1");
+			} catch (WadException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			} catch (IOException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			}
+		
+			// figure out if Strife or Doom Texture Lump.
+			if (TextureUtils.isStrifeTextureData(textureData))
+			{
+				textureList1 = BinaryObject.create(StrifeTextureList.class, textureData);
+				unit.strife = true;
+			}
+			else
+			{
+				textureList1 = BinaryObject.create(DoomTextureList.class, textureData);
+				unit.strife = false;
+			}
+		
+			unit.tex1names = new HashSet<String>(textureList1.size());
+			for (CommonTexture<?> ct : textureList1)
+				unit.tex1names.add(ct.getName());
+		
+			options.printf("        %d entries in TEXTURE1.\n", textureList1.size());
+		
+			try {
+				textureData = wf.getData("TEXTURE2");
+			} catch (WadException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			} catch (IOException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			}
+		
+			if (textureData != null)
+			{
+				// figure out if Strife or Doom Texture Lump.
+				if (TextureUtils.isStrifeTextureData(textureData))
+					textureList2 = BinaryObject.create(StrifeTextureList.class, textureData);
+				else
+					textureList2 = BinaryObject.create(DoomTextureList.class, textureData);
+				
+				options.printf("        %d entries in TEXTURE2.\n", textureList2.size());
+				unit.tex2exists = true;
+			}
+			
+			try {
+				if (!wf.contains("PNAMES"))
+				{
+					options.printf("ERROR: %s: TEXTUREx without PNAMES!\n", wf.getFilePath());
+					return false;
+				}
+				patchNames = wf.getDataAs("PNAMES", PatchNames.class);
+			} catch (WadException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			} catch (IOException e) {
+				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
+				return false;
+			}
+			
+			options.printf("        %d entries in PNAMES.\n", patchNames.size());
+		
+			if (textureList2 != null)
+				unit.textureSet = new TextureSet(patchNames, textureList1, textureList2);
+			else
+				unit.textureSet = new TextureSet(patchNames, textureList1);
+			
+			return true;
+		}
+
+		// Scan for ANIMATED. Add combinations of textures to animated mapping.
+		private boolean scanAnimated(Options options, WadUnit unit, WadFile wf) throws IOException
+		{
+			if (!options.noAnimated)
+			{
+				if (wf.contains("ANIMATED"))
+				{
+					options.println("    Scanning ANIMATED...");
+					unit.animated = wf.getDataAs("ANIMATED", Animated.class);
+					processAnimated(unit, unit.animated);
+				}
+				
+				processAnimated(unit, TextureTables.ALL_ANIMATED);
+			}
+		
+			if (!options.noSwitches)
+			{
+				if (wf.contains("SWITCHES"))
+				{
+					options.println("    Scanning SWITCHES...");
+					unit.switches = wf.getDataAs("SWITCHES", Switches.class);
+					
+					for (Switches.Entry entry : unit.switches)
+					{
+						unit.switchMap.put(entry.getOffName(), entry.getOnName());
+						unit.switchMap.put(entry.getOnName(), entry.getOffName());
+					}
+				}
+			}
+			
+			return true;
+		}
+
+		private void processAnimated(WadUnit unit, Animated animated)
+		{
+			for (Animated.Entry entry : animated)
+			{
+				if (entry.isTexture())
+				{
+					String[] seq = getTextureSequence(unit, entry.getFirstName(), entry.getLastName());
+					if (seq != null) for (String s : seq)
+						unit.animatedTexture.put(s, seq);
+				}
+				else
+				{
+					String[] seq = getFlatSequence(unit, entry.getFirstName(), entry.getLastName());
+					if (seq != null) for (String s : seq)
+						unit.animatedFlat.put(s, seq);
+				}
+			}
+		}
+
+		// Get animated texture sequence.
+		private String[] getTextureSequence(WadUnit unit, String firstName, String lastName)
+		{
+			Deque<String> out = new LinkedList<>();
+			int index = unit.textureList.indexOf(firstName);
+			if (index >= 0)
+			{
+				int index2 = unit.textureList.indexOf(lastName);
+				if (index2 >= 0)
+				{
+					int min = Math.min(index, index2);
+					int max = Math.max(index, index2);
+					for (int i = min; i <= max; i++)
+						out.add(unit.textureList.get(i));
+				}
+				else
+					return null;
+			}
+			else
+				return null;
+			
+			String[] outList = new String[out.size()];
+			out.toArray(outList);
+			return outList;
+		}
+
+		// Get animated flat sequence.
+		private String[] getFlatSequence(WadUnit unit, String firstName, String lastName)
+		{
+			Deque<String> out = new LinkedList<String>();
+			int index = unit.flatList.indexOf(firstName);
+			if (index >= 0)
+			{
+				int index2 = unit.flatList.indexOf(lastName);
+				if (index2 >= 0)
+				{
+					int min = Math.min(index, index2);
+					int max = Math.max(index, index2);
+					for (int i = min; i <= max; i++)
+						out.add(unit.flatList.get(i));
+				}
+				else
+					return null;
+			}
+			else
+				return null;
+			
+			String[] outList = new String[out.size()];
+			out.toArray(outList);
+			return outList;
+		}
+
+		// Scans namespace entries.
+		private boolean scanNamespace(Options options, String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
+		{
+			// scan patch namespace
+			int start = wf.indexOf(name+"_START");
+			if (start < 0)
+				start = wf.indexOf(equivName+"_START");
+			
+			if (start >= 0)
+			{
+				int end = wf.indexOf(name+"_END");
+				if (end < 0)
+					end = wf.indexOf(equivName+"_END");
+				
+				if (end >= 0)
+				{
+					for (int i = start + 1; i < end; i++)
+					{
+						String ename = wf.getEntry(i).getName();
+						if (ignorePattern != null && ignorePattern.matcher(ename).matches())
+							continue;
+						map.put(ename, i);
+					}
+				}
+				else
+				{
+					options.printf("ERROR: %s: %s_START without %s_END!\n", unit.wad, name.toUpperCase(), name.toUpperCase());
+					return false;
+				}
+			}		
+			
+			return true;
+		}
+
+		private void addToLists(Set<String> set, List<String> list, String s)
+		{
+			if (set.contains(s))
+				return;
+			set.add(s);
+			list.add(s);
+		}
+
+		private void readAndAddTextures(Options options, String textureName)
+		{
+			if (!NameUtils.isValidTextureName(textureName))
+			{
+				options.println("ERROR: Texture \""+textureName+"\" has an invalid name. Skipping.");
+				return;
+			}
+			
+			addToLists(textureSet, textureList, textureName);
+		
+			for (WadUnit unit : wadPriority)
+			{
+				if (!options.noAnimated)
+				{
+					if (unit.animatedTexture.containsKey(textureName))
+						for (String s : unit.animatedTexture.get(textureName))
+							addToLists(textureSet, textureList, s);
+				}
+			
+				if (!options.noSwitches)
+				{
+					if (unit.switchMap.containsKey(textureName))
+					{
+						addToLists(textureSet, textureList, textureName);
+						addToLists(textureSet, textureList, unit.switchMap.get(textureName));
+					}
+					else if (TextureTables.SWITCH_TABLE.containsKey(textureName))
+					{
+						addToLists(textureSet, textureList, textureName);
+						addToLists(textureSet, textureList, TextureTables.SWITCH_TABLE.get(textureName));
+					}
+				}
+			}
+		}
+
+		private void readAndAddFlats(Options options, String textureName)
+		{
+			addToLists(flatSet, flatList, textureName);
+		
+			if (!options.noAnimated)
+			{
+				for (WadUnit unit : wadPriority)
+				{
+					if (unit.animatedFlat.containsKey(textureName))
+						for (String s : unit.animatedFlat.get(textureName))
+							addToLists(flatSet, flatList, s);
+				}
+			}
+		}
+
+		/** Searches for the flat to extract. */
+		private WadUnit searchForFlat(Deque<WadUnit> unitQueue, String flatName)
+		{
+			for (WadUnit unit : unitQueue)
+			{
+				if (unit.flatIndices.containsKey(flatName))
+					return unit;
+			}
+			
+			return null;
+		}
+
+		/** Searches for the texture to extract. */
+		private WadUnit searchForTexture(Deque<WadUnit> unitQueue, String textureName)
+		{
+			for (WadUnit unit : unitQueue)
+			{
+				if (unit.textureSet.contains(textureName))
+					return unit;
+			}
+			
+			return null;
+		}
+
+		/** Searches for the texture to extract. */
+		private WadUnit searchForNamespaceTexture(Deque<WadUnit> unitQueue, String textureName)
+		{
+			for (WadUnit unit : unitQueue)
+			{
+				if (unit.texNamespaceIndices.containsKey(textureName))
+					return unit;
+			}
+			
+			return null;
+		}
+
+		private boolean extractFlats(Options options, ExportSet exportSet)
+		{
+			options.println("    Extracting flats...");
+			for (String flat : flatList)
+			{
+				WadUnit unit = null;
+				
+				if ((unit = searchForFlat(wadPriority, flat)) != null)
+				{
+					// does a matching texture entry exist?
+					if (unit.flatIndices.containsKey(flat))
+					{
+						Integer pidx = unit.flatIndices.get(flat);
+						if (pidx != null)
+						{
+							try {
+								options.printf("        Extracting flat %s...\n", flat);
+								EntryData data = new EntryData(flat, unit.wad.getData(pidx));
+								exportSet.flatData.add(data);
+								exportSet.flatHash.add(flat);
+							} catch (IOException e) {
+								options.printf("ERROR: %s: Could not read entry %s.", unit.wad.getFilePath(), flat);
+								return false;
+							}
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		private boolean extractTextures(Options options, ExportSet exportSet)
+		{
+			options.println("    Extracting textures...");
+			for (String textureName : textureList)
+			{
+				WadUnit unit = null;
+				
+				// found texture.
+				if ((unit = searchForTexture(wadPriority, textureName)) != null)
+				{
+					// for figuring out if we've found a replaced/added patch.
+					boolean foundPatches = false;
+					
+					TextureSet.Texture entry = unit.textureSet.getTextureByName(textureName);
+					
+					for (int i = 0; i < entry.getPatchCount(); i++)
+					{
+						TextureSet.Patch p = entry.getPatch(i);
+						String pname = p.getName();
+						
+						// does a matching patch exist?
+						if (unit.patchIndices.containsKey(pname))
+						{
+							foundPatches = true;
+							Integer pidx = unit.patchIndices.get(pname);
+							if (pidx != null && !exportSet.patchHash.contains(pname))
+							{
+								try {
+									options.printf("        Extracting patch %s...\n", pname);
+									EntryData data = new EntryData(pname, unit.wad.getData(pidx));
+									exportSet.patchData.add(data);
+									exportSet.patchHash.add(pname);
+								} catch (IOException e) {
+									options.printf("ERROR: %s: Could not read entry %s.\n", unit.wad.getFilePath(), pname);
+									return false;
+								}
+							}
+						}
+					}
+		
+					// if we've found patches or the texture is new, better extract the texture.
+					if (foundPatches || !exportSet.textureSet.contains(textureName))
+					{
+						options.printf("        Copying texture %s...\n", textureName);
+						
+						// check if potential overwrite.
+						if (exportSet.textureSet.contains(textureName))
+							exportSet.textureSet.removeTextureByName(textureName);
+						
+						TextureSet.Texture newtex = exportSet.textureSet.createTexture(textureName);
+						newtex.setHeight(entry.getHeight());
+						newtex.setWidth(entry.getWidth());
+						for (TextureSet.Patch p : entry)
+						{
+							TextureSet.Patch newpatch = newtex.createPatch(p.getName());
+							newpatch.setOriginX(p.getOriginX());
+							newpatch.setOriginY(p.getOriginY());
+						}
+						
+						exportSet.textureHash.add(textureName);
+					}
+					
+				}
+				// unit not found
+				else if ((unit = searchForNamespaceTexture(wadPriority, textureName)) != null)
+				{
+					// does a matching texture entry exist?
+					if (unit.texNamespaceIndices.containsKey(textureName))
+					{
+						Integer pidx = unit.texNamespaceIndices.get(textureName);
+						if (pidx != null)
+						{
+							try {
+								options.printf("        Extracting namespace texture %s...\n", textureName);
+								EntryData data = new EntryData(textureName, unit.wad.getData(pidx));
+								exportSet.textureData.add(data);
+							} catch (IOException e) {
+								options.printf("ERROR: %s: Could not read entry %s.\n", unit.wad.getFilePath(), textureName);
+								return false;
+							}
+						}
+					}
+				}
+			}
+			
+			return true;
+		}
+
+		// Merges ANIMATED and SWITCHES from inputs.
+		private boolean mergeAnimatedAndSwitches(Options options, ExportSet exportSet)
+		{
+			if (!options.noAnimated)
+			{
+				options.println("    Merging ANIMATED...");
+				for (WadUnit unit : wadPriority)
+				{
+					// did we pull any animated textures? if so, copy the entries.
+					
+					for (Animated.Entry entry : unit.animated)
+					{
+						if (entry.isTexture())
+						{
+							if (exportSet.textureSet.contains(entry.getFirstName()))
+								exportSet.animatedData.addEntry(Animated.texture(entry.getLastName(), entry.getFirstName(), entry.getTicks(), entry.getAllowsDecals()));
+						}
+						else
+						{
+							if (exportSet.flatHash.contains(entry.getFirstName()))
+								exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
+							else if (baseUnit.flatIndices.containsKey(entry.getFirstName()))
+								exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
+						}
+					}
+				}
+			}
+			
+			if (!options.noSwitches)
+			{
+				options.println("    Merging SWITCHES...");
+				for (WadUnit unit : wadPriority)
+				{
+					// did we pull any animated textures? if so, copy the entries.
+					for (Switches.Entry e : unit.switches)
+					{
+						if (exportSet.textureSet.contains(e.getOffName()))
+							exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
+						else if (exportSet.textureSet.contains(e.getOnName()))
+							exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
+					}
+				}
+			}
+			
+			return true;
+		}
+
+		private boolean dumpToOutputWad(Options options, ExportSet exportSet, WadFile wf) throws IOException
+		{
+			options.println("Sorting entries...");
+			exportSet.textureSet.sort(options.nullComparator);
+			Collections.sort(exportSet.patchData);
+			Collections.sort(exportSet.flatData);
+			Collections.sort(exportSet.textureData);
+			
+			options.println("Dumping entries...");
+		
+			List<CommonTextureList<?>> tlist = new ArrayList<>();
+			PatchNames pnames;
+			
+			// if Strife-formatted source, export to Strife.
+			if (baseUnit.strife)
+			{
+				pnames = new PatchNames();
+				StrifeTextureList tex1 = new StrifeTextureList();
+				StrifeTextureList tex2 = baseUnit.tex2exists ? new StrifeTextureList() : null;
+				Set<String> tex1names = baseUnit.tex2exists ? baseUnit.tex1names : null;
+				exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
+				tlist.add(tex1);
+				if (tex2 != null)
+					tlist.add(tex2);
+			}
+			// if not, Doom format.
+			else
+			{
+				pnames = new PatchNames();
+				DoomTextureList tex1 = new DoomTextureList();
+				DoomTextureList tex2 = baseUnit.tex2exists ? new DoomTextureList() : null;
+				Set<String> tex1names = baseUnit.tex2exists ? baseUnit.tex1names : null;
+				exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
+				tlist.add(tex1);
+				if (tex2 != null)
+					tlist.add(tex2);
+			}
+			
+			for (int i = 0; i < tlist.size(); i++)
+			{
+				String tentry = String.format("TEXTURE%01d", i+1);
+				int idx = wf.indexOf(tentry);
+				if (idx >= 0)
+					wf.replaceEntry(idx, tlist.get(i).toBytes());
+				else
+					wf.addData(tentry, tlist.get(i).toBytes());
+			}
+			
+			int idx = wf.indexOf("PNAMES");
+			if (idx >= 0)
+				wf.replaceEntry(idx, pnames.toBytes());
+			else
+				wf.addData("PNAMES", pnames.toBytes());
+			
+			if (!options.noAnimated && !exportSet.animatedData.isEmpty())
+			{
+				idx = wf.indexOf("ANIMATED");
+				if (idx >= 0)
+					wf.replaceEntry(idx, exportSet.animatedData.toBytes());
+				else
+					wf.addData("ANIMATED", exportSet.animatedData.toBytes());
+			}
+		
+			if (!options.noSwitches && exportSet.switchesData.getEntryCount() > 0)
+			{
+				idx = wf.indexOf("SWITCHES");
+				if (idx >= 0)
+					wf.replaceEntry(idx, exportSet.switchesData.toBytes());
+				else
+					wf.addData("SWITCHES", exportSet.switchesData.toBytes());
+			}
+			
+			dumpListToOutputWad(exportSet.patchData, "PP", wf);
+			dumpListToOutputWad(exportSet.flatData, "FF", wf);
+			dumpListToOutputWad(exportSet.textureData, "TX", wf);
+			
+			return true;
+		}
+
+		private boolean dumpListToOutputWad(List<EntryData> entries, String namespace, WadFile wf) throws IOException
+		{
+			if (entries.size() == 0)
+				return true;
+			
+			String[] names = new String[entries.size() + 2];
+			byte[][] data = new byte[entries.size() + 2][];
+			
+			names[0] = namespace + "_START";
+			data[0] = Wad.NO_DATA;
+			
+			for (int i = 0; i < entries.size(); i++)
+			{
+				names[1 + i] = entries.get(i).key;
+				data[1 + i] = entries.get(i).value;
+			}
+		
+			names[names.length - 1] = namespace + "_END";
+			data[data.length - 1] = Wad.NO_DATA;
+			
+			try (WadFile.Adder adder = wf.createAdder())
+			{
+				for (int i = 0; i < names.length; i++)
+					adder.addData(names[i], data[i]);
+			}
+			
+			return true;
+		}
+
+		/** Extracts the necessary stuff for output. */
+		private boolean extractToOutputWad(Options options)
+		{
+			File outFile = new File(options.outWad);
+			WadFile outWadFile = options.additive ? openWadFile(options, outFile, true) : newWadFile(options, outFile);
+			if (outWadFile == null)
+				return false;
+		
+			File baseFile = new File(options.baseWad);
+			WadFile baseWadFile = openWadFile(options, baseFile, false);
+			if (baseWadFile == null)
+			{
+				Common.close(outWadFile);
+				return false;
+			}
+		
+			ExportSet exportSet = new ExportSet();
+			try {
+				exportSet.textureSet = TextureUtils.importTextureSet(baseWadFile);
+				extractTextures(options, exportSet);
+				extractFlats(options, exportSet);
+				mergeAnimatedAndSwitches(options, exportSet);
+				dumpToOutputWad(options, exportSet, outWadFile);
+			} catch (TextureException | IOException e) {
+				options.printf("ERROR: %s: %s\n", baseWadFile.getFilePath(), e.getMessage());
+				return false;
+			} finally {
+				Common.close(baseWadFile);
+				Common.close(outWadFile);
+			}
+			
+			return true;
+		}
+
+		// Attempts to make a new WAD file.
+		private WadFile newWadFile(Options options, File f)
+		{
+			WadFile outWad = null;
+			try {
+				outWad = WadFile.createWadFile(f);
+			} catch (SecurityException e) {
+				options.printf("ERROR: \"%s\" could not be created. Access denied.\n", f.getPath());
+				return null;
+			} catch (IOException e) {
+				options.printf("ERROR: \"%s\" could not be created.\n", f.getPath());
+				return null;
+			}
+			
+			return outWad;
+		}
+
+		// Attempts to open a WAD file.
+		private WadFile openWadFile(Options options, File f, boolean create)
+		{
+			WadFile outWad = null;
+			try {
+				if (f.exists())
+					outWad = new WadFile(f);
+				else if (create)
+					outWad = WadFile.createWadFile(f);
+				else
+					options.printf("ERROR: \"%s\" could not be opened.\n", f.getPath());
+			} catch (SecurityException e) {
+				options.printf("ERROR: \"%s\" could not be read. Access denied.\n", f.getPath());
+				return null;
+			} catch (WadException e) {
+				options.printf("ERROR: \"%s\" is not a WAD file.\n", f.getPath());
+				return null;
+			} catch (IOException e) {
+				options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
+				return null;
+			}
+			
+			return outWad;
+		}
+
+		/**
+		 * Starts texture extraction.
+		 * @param options
+		 * @return the return code.
+		 */
+		public int doTextureExtraction(Options options) 
+		{
+			/* STEP 1 : Scan all incoming WADs so we know where crap is. */
+			
+			// scan base.
+			if (!scanWAD(options, options.baseWad, true))
+				return ERROR_BAD_FILE;
+			
+			// scan patches. 
+			for (String f : options.filePaths)
+				if (!scanWAD(options, f, false))
+					return ERROR_BAD_FILE;
+		
+			/* STEP 2 : Compile list of what we want. */
+		
+			for (String t : options.textureList)
+				readAndAddTextures(options, t);
+			for (String f : options.flatList)
+				readAndAddFlats(options, f);
+			
+			/* STEP 3 : Extract the junk and put it in the output wad. */
+		
+			if (options.nullComparator.nullName != null)
+				options.println("Using "+ options.nullComparator.nullName.toUpperCase() + " as the null texture in TEXTURE1...");
+			
+			if (!extractToOutputWad(options))
+				return ERROR_BAD_FILE;
+			
+			return ERROR_NONE;
 		}
 		
 	}
@@ -378,768 +1221,6 @@ public final class WTExportMain
 		out.println("                          lumps.");
 	}
 
-	private static <T extends Comparable<T>> void sortSwap(List<T> list, int i)
-	{
-		T temp = list.get(i - 1);
-		list.set(i - 1, list.get(i));
-		list.set(i, temp);
-	}
-
-	private static <T extends Comparable<T>> void insertAndSort(List<T> list, T obj)
-	{
-		int n = list.size();
-		list.add(obj);
-		while (n > 0)
-		{
-			if (list.get(n - 1).compareTo(list.get(n)) < 0)
-				break;
-			sortSwap(list, n);
-			n--;
-		}
-	}
-
-	// Scan WAD file.
-	private static boolean scanWAD(Options options, Context context, String path, boolean isBase)
-	{
-		options.printf("Scanning %s...\n", path);
-		File f = new File(path);
-		WadFile wf = openWadFile(options, f, false);
-		if (wf == null)
-			return false;
-		
-		WadUnit unit = new WadUnit(wf);
-		
-		try {
-			if (!scanTexturesAndPNames(options, unit, wf))
-				return false;
-		} catch (IOException e) {
-			options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
-			return false;
-		}
-		
-		options.println("    Scanning patch entries...");
-		if (!scanNamespace(options, "P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices))
-			return false;
-		if (!scanNamespace(options, "PP", "P", null, unit, wf, unit.patchIndices))
-			return false;
-		options.printf("        %d patches.\n", unit.patchIndices.size());
-		options.println("    Scanning flat entries...");
-		if (!scanNamespace(options, "F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices))
-			return false;
-		if (!scanNamespace(options, "FF", "F", null, unit, wf, unit.flatIndices))
-			return false;
-		options.printf("        %d flats.\n", unit.flatIndices.size());
-		options.println("    Scanning texture namespace entries...");
-		if (!scanNamespace(options, "TX", null, unit, wf, unit.texNamespaceIndices))
-			return false;
-		options.printf("        %d namespace textures.\n", unit.texNamespaceIndices.size());
-		
-		for (Map.Entry<String, Integer> entry : unit.flatIndices.entrySet())
-			insertAndSort(unit.flatList, entry.getKey());
-	
-		for (Map.Entry<String, Integer> entry : unit.texNamespaceIndices.entrySet())
-		{
-			String s = entry.getKey();
-			if (!unit.textureList.contains(s))
-				insertAndSort(unit.textureList, s);
-		}
-	
-		for (TextureSet.Texture tex : unit.textureSet)
-			if (!unit.textureList.contains(tex.getName()))
-				insertAndSort(unit.textureList, tex.getName());
-	
-		try {
-			if (!scanAnimated(options, unit, wf))
-				return false;
-		} catch (IOException e) {
-			options.printf("ERROR: \"%s\" could not be read: an ANIMATED or SWITCHES lump may be corrupt.\n", f.getPath());
-			return false;
-		}
-		
-		if (!isBase)
-			context.wadPriority.add(unit);
-		else
-			context.baseUnit = unit;
-		
-		return true;
-	}
-
-	// Scan for TEXTUREx and PNAMES.
-	private static boolean scanTexturesAndPNames(Options options, WadUnit unit, WadFile wf) throws IOException
-	{
-		if (!wf.contains("TEXTURE1"))
-			return true;
-		options.println("    Scanning TEXTUREx/PNAMES...");
-		
-		
-		PatchNames patchNames = null;
-		CommonTextureList<?> textureList1 = null;
-		CommonTextureList<?> textureList2 = null;
-		byte[] textureData = null;
-		
-		try {
-			textureData = wf.getData("TEXTURE1");
-		} catch (WadException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		} catch (IOException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		}
-	
-		// figure out if Strife or Doom Texture Lump.
-		if (TextureUtils.isStrifeTextureData(textureData))
-		{
-			textureList1 = BinaryObject.create(StrifeTextureList.class, textureData);
-			unit.strife = true;
-		}
-		else
-		{
-			textureList1 = BinaryObject.create(DoomTextureList.class, textureData);
-			unit.strife = false;
-		}
-	
-		unit.tex1names = new HashSet<String>(textureList1.size());
-		for (CommonTexture<?> ct : textureList1)
-			unit.tex1names.add(ct.getName());
-	
-		options.printf("        %d entries in TEXTURE1.\n", textureList1.size());
-	
-		try {
-			textureData = wf.getData("TEXTURE2");
-		} catch (WadException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		} catch (IOException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		}
-	
-		if (textureData != null)
-		{
-			// figure out if Strife or Doom Texture Lump.
-			if (TextureUtils.isStrifeTextureData(textureData))
-				textureList2 = BinaryObject.create(StrifeTextureList.class, textureData);
-			else
-				textureList2 = BinaryObject.create(DoomTextureList.class, textureData);
-			
-			options.printf("        %d entries in TEXTURE2.\n", textureList2.size());
-			unit.tex2exists = true;
-		}
-		
-		try {
-			if (!wf.contains("PNAMES"))
-			{
-				options.printf("ERROR: %s: TEXTUREx without PNAMES!\n", wf.getFilePath());
-				return false;
-			}
-			patchNames = wf.getDataAs("PNAMES", PatchNames.class);
-		} catch (WadException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		} catch (IOException e) {
-			options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
-			return false;
-		}
-		
-		options.printf("        %d entries in PNAMES.\n", patchNames.size());
-	
-		if (textureList2 != null)
-			unit.textureSet = new TextureSet(patchNames, textureList1, textureList2);
-		else
-			unit.textureSet = new TextureSet(patchNames, textureList1);
-		
-		return true;
-	}
-
-	// Scan for ANIMATED. Add combinations of textures to animated mapping.
-	private static boolean scanAnimated(Options context, WadUnit unit, WadFile wf) throws IOException
-	{
-		if (!context.noAnimated)
-		{
-			if (wf.contains("ANIMATED"))
-			{
-				context.println("    Scanning ANIMATED...");
-				unit.animated = wf.getDataAs("ANIMATED", Animated.class);
-				processAnimated(unit, unit.animated);
-			}
-			
-			processAnimated(unit, TextureTables.ALL_ANIMATED);
-		}
-	
-		if (!context.noSwitches)
-		{
-			if (wf.contains("SWITCHES"))
-			{
-				context.println("    Scanning SWITCHES...");
-				unit.switches = wf.getDataAs("SWITCHES", Switches.class);
-				
-				for (Switches.Entry entry : unit.switches)
-				{
-					unit.switchMap.put(entry.getOffName(), entry.getOnName());
-					unit.switchMap.put(entry.getOnName(), entry.getOffName());
-				}
-			}
-		}
-		
-		return true;
-	}
-
-	private static void processAnimated(WadUnit unit, Animated animated)
-	{
-		for (Animated.Entry entry : animated)
-		{
-			if (entry.isTexture())
-			{
-				String[] seq = getTextureSequence(unit, entry.getFirstName(), entry.getLastName());
-				if (seq != null) for (String s : seq)
-					unit.animatedTexture.put(s, seq);
-			}
-			else
-			{
-				String[] seq = getFlatSequence(unit, entry.getFirstName(), entry.getLastName());
-				if (seq != null) for (String s : seq)
-					unit.animatedFlat.put(s, seq);
-			}
-		}
-	}
-
-	// Get animated texture sequence.
-	private static String[] getTextureSequence(WadUnit unit, String firstName, String lastName)
-	{
-		Deque<String> out = new LinkedList<>();
-		int index = unit.textureList.indexOf(firstName);
-		if (index >= 0)
-		{
-			int index2 = unit.textureList.indexOf(lastName);
-			if (index2 >= 0)
-			{
-				int min = Math.min(index, index2);
-				int max = Math.max(index, index2);
-				for (int i = min; i <= max; i++)
-					out.add(unit.textureList.get(i));
-			}
-			else
-				return null;
-		}
-		else
-			return null;
-		
-		String[] outList = new String[out.size()];
-		out.toArray(outList);
-		return outList;
-	}
-
-	// Get animated flat sequence.
-	private static String[] getFlatSequence(WadUnit unit, String firstName, String lastName)
-	{
-		Deque<String> out = new LinkedList<String>();
-		int index = unit.flatList.indexOf(firstName);
-		if (index >= 0)
-		{
-			int index2 = unit.flatList.indexOf(lastName);
-			if (index2 >= 0)
-			{
-				int min = Math.min(index, index2);
-				int max = Math.max(index, index2);
-				for (int i = min; i <= max; i++)
-					out.add(unit.flatList.get(i));
-			}
-			else
-				return null;
-		}
-		else
-			return null;
-		
-		String[] outList = new String[out.size()];
-		out.toArray(outList);
-		return outList;
-	}
-
-	// Scans namespace entries.
-	private static boolean scanNamespace(Options context, String name, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
-	{
-		return scanNamespace(context, name, null, ignorePattern, unit, wf, map);
-	}
-
-	// Scans namespace entries.
-	private static boolean scanNamespace(Options context, String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
-	{
-		// scan patch namespace
-		int start = wf.indexOf(name+"_START");
-		if (start < 0)
-			start = wf.indexOf(equivName+"_START");
-		
-		if (start >= 0)
-		{
-			int end = wf.indexOf(name+"_END");
-			if (end < 0)
-				end = wf.indexOf(equivName+"_END");
-			
-			if (end >= 0)
-			{
-				for (int i = start + 1; i < end; i++)
-				{
-					String ename = wf.getEntry(i).getName();
-					if (ignorePattern != null && ignorePattern.matcher(ename).matches())
-						continue;
-					map.put(ename, i);
-				}
-			}
-			else
-			{
-				context.printf("ERROR: %s: %s_START without %s_END!\n", unit.wad, name.toUpperCase(), name.toUpperCase());
-				return false;
-			}
-		}		
-		
-		return true;
-	}
-
-	private static void addToLists(Set<String> set, List<String> list, String s)
-	{
-		if (set.contains(s))
-			return;
-		set.add(s);
-		list.add(s);
-	}
-
-	private static void readAndAddTextures(Options options, Context context, String textureName)
-	{
-		if (!NameUtils.isValidTextureName(textureName))
-		{
-			options.println("ERROR: Texture \""+textureName+"\" has an invalid name. Skipping.");
-			return;
-		}
-		
-		addToLists(context.textureSet, context.textureList, textureName);
-	
-		for (WadUnit unit : context.wadPriority)
-		{
-			if (!options.noAnimated)
-			{
-				if (unit.animatedTexture.containsKey(textureName))
-					for (String s : unit.animatedTexture.get(textureName))
-						addToLists(context.textureSet, context.textureList, s);
-			}
-		
-			if (!options.noSwitches)
-			{
-				if (unit.switchMap.containsKey(textureName))
-				{
-					addToLists(context.textureSet, context.textureList, textureName);
-					addToLists(context.textureSet, context.textureList, unit.switchMap.get(textureName));
-				}
-				else if (TextureTables.SWITCH_TABLE.containsKey(textureName))
-				{
-					addToLists(context.textureSet, context.textureList, textureName);
-					addToLists(context.textureSet, context.textureList, TextureTables.SWITCH_TABLE.get(textureName));
-				}
-			}
-		}
-	}
-
-	private static void readAndAddFlats(Options options, Context context, String textureName)
-	{
-		addToLists(context.flatSet, context.flatList, textureName);
-	
-		if (!options.noAnimated)
-		{
-			for (WadUnit unit : context.wadPriority)
-			{
-				if (unit.animatedFlat.containsKey(textureName))
-					for (String s : unit.animatedFlat.get(textureName))
-						addToLists(context.flatSet, context.flatList, s);
-			}
-		}
-	}
-
-	/** Searches for the flat to extract. */
-	private static WadUnit searchForFlat(Deque<WadUnit> unitQueue, String flatName)
-	{
-		for (WadUnit unit : unitQueue)
-		{
-			if (unit.flatIndices.containsKey(flatName))
-				return unit;
-		}
-		
-		return null;
-	}
-
-	/** Searches for the texture to extract. */
-	private static WadUnit searchForTexture(Deque<WadUnit> unitQueue, String textureName)
-	{
-		for (WadUnit unit : unitQueue)
-		{
-			if (unit.textureSet.contains(textureName))
-				return unit;
-		}
-		
-		return null;
-	}
-
-	/** Searches for the texture to extract. */
-	private static WadUnit searchForNamespaceTexture(Deque<WadUnit> unitQueue, String textureName)
-	{
-		for (WadUnit unit : unitQueue)
-		{
-			if (unit.texNamespaceIndices.containsKey(textureName))
-				return unit;
-		}
-		
-		return null;
-	}
-
-	private static boolean extractFlats(Options options, Context context, ExportSet exportSet)
-	{
-		options.println("    Extracting flats...");
-		for (String flat : context.flatList)
-		{
-			WadUnit unit = null;
-			
-			if ((unit = searchForFlat(context.wadPriority, flat)) != null)
-			{
-				// does a matching texture entry exist?
-				if (unit.flatIndices.containsKey(flat))
-				{
-					Integer pidx = unit.flatIndices.get(flat);
-					if (pidx != null)
-					{
-						try {
-							options.printf("        Extracting flat %s...\n", flat);
-							EntryData data = new EntryData(flat, unit.wad.getData(pidx));
-							exportSet.flatData.add(data);
-							exportSet.flatHash.add(flat);
-						} catch (IOException e) {
-							options.printf("ERROR: %s: Could not read entry %s.", unit.wad.getFilePath(), flat);
-							return false;
-						}
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	private static boolean extractTextures(Options options, Context context, ExportSet exportSet)
-	{
-		options.println("    Extracting textures...");
-		for (String textureName : context.textureList)
-		{
-			WadUnit unit = null;
-			
-			// found texture.
-			if ((unit = searchForTexture(context.wadPriority, textureName)) != null)
-			{
-				// for figuring out if we've found a replaced/added patch.
-				boolean foundPatches = false;
-				
-				TextureSet.Texture entry = unit.textureSet.getTextureByName(textureName);
-				
-				for (int i = 0; i < entry.getPatchCount(); i++)
-				{
-					TextureSet.Patch p = entry.getPatch(i);
-					String pname = p.getName();
-					
-					// does a matching patch exist?
-					if (unit.patchIndices.containsKey(pname))
-					{
-						foundPatches = true;
-						Integer pidx = unit.patchIndices.get(pname);
-						if (pidx != null && !exportSet.patchHash.contains(pname))
-						{
-							try {
-								options.printf("        Extracting patch %s...\n", pname);
-								EntryData data = new EntryData(pname, unit.wad.getData(pidx));
-								exportSet.patchData.add(data);
-								exportSet.patchHash.add(pname);
-							} catch (IOException e) {
-								options.printf("ERROR: %s: Could not read entry %s.\n", unit.wad.getFilePath(), pname);
-								return false;
-							}
-						}
-					}
-				}
-	
-				// if we've found patches or the texture is new, better extract the texture.
-				if (foundPatches || !exportSet.textureSet.contains(textureName))
-				{
-					options.printf("        Copying texture %s...\n", textureName);
-					
-					// check if potential overwrite.
-					if (exportSet.textureSet.contains(textureName))
-						exportSet.textureSet.removeTextureByName(textureName);
-					
-					TextureSet.Texture newtex = exportSet.textureSet.createTexture(textureName);
-					newtex.setHeight(entry.getHeight());
-					newtex.setWidth(entry.getWidth());
-					for (TextureSet.Patch p : entry)
-					{
-						TextureSet.Patch newpatch = newtex.createPatch(p.getName());
-						newpatch.setOriginX(p.getOriginX());
-						newpatch.setOriginY(p.getOriginY());
-					}
-					
-					exportSet.textureHash.add(textureName);
-				}
-				
-			}
-			// unit not found
-			else if ((unit = searchForNamespaceTexture(context.wadPriority, textureName)) != null)
-			{
-				// does a matching texture entry exist?
-				if (unit.texNamespaceIndices.containsKey(textureName))
-				{
-					Integer pidx = unit.texNamespaceIndices.get(textureName);
-					if (pidx != null)
-					{
-						try {
-							options.printf("        Extracting namespace texture %s...\n", textureName);
-							EntryData data = new EntryData(textureName, unit.wad.getData(pidx));
-							exportSet.textureData.add(data);
-						} catch (IOException e) {
-							options.printf("ERROR: %s: Could not read entry %s.\n", unit.wad.getFilePath(), textureName);
-							return false;
-						}
-					}
-				}
-			}
-		}
-		
-		return true;
-	}
-
-	// Merges ANIMATED and SWITCHES from inputs.
-	private static boolean mergeAnimatedAndSwitches(Options options, Context context, ExportSet exportSet)
-	{
-		if (!options.noAnimated)
-		{
-			options.println("    Merging ANIMATED...");
-			for (WadUnit unit : context.wadPriority)
-			{
-				// did we pull any animated textures? if so, copy the entries.
-				
-				for (Animated.Entry entry : unit.animated)
-				{
-					if (entry.isTexture())
-					{
-						if (exportSet.textureSet.contains(entry.getFirstName()))
-							exportSet.animatedData.addEntry(Animated.texture(entry.getLastName(), entry.getFirstName(), entry.getTicks(), entry.getAllowsDecals()));
-					}
-					else
-					{
-						if (exportSet.flatHash.contains(entry.getFirstName()))
-							exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
-						else if (context.baseUnit.flatIndices.containsKey(entry.getFirstName()))
-							exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
-					}
-				}
-			}
-		}
-		
-		if (!options.noSwitches)
-		{
-			options.println("    Merging SWITCHES...");
-			for (WadUnit unit : context.wadPriority)
-			{
-				// did we pull any animated textures? if so, copy the entries.
-				for (Switches.Entry e : unit.switches)
-				{
-					if (exportSet.textureSet.contains(e.getOffName()))
-						exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
-					else if (exportSet.textureSet.contains(e.getOnName()))
-						exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
-				}
-			}
-		}
-		
-		return true;
-	}
-
-	private static boolean dumpToOutputWad(Options options, Context context, ExportSet exportSet, WadFile wf) throws IOException
-	{
-		options.println("Sorting entries...");
-		exportSet.textureSet.sort(options.nullComparator);
-		Collections.sort(exportSet.patchData);
-		Collections.sort(exportSet.flatData);
-		Collections.sort(exportSet.textureData);
-		
-		options.println("Dumping entries...");
-	
-		List<CommonTextureList<?>> tlist = new ArrayList<>();
-		PatchNames pnames;
-		
-		// if Strife-formatted source, export to Strife.
-		if (context.baseUnit.strife)
-		{
-			pnames = new PatchNames();
-			StrifeTextureList tex1 = new StrifeTextureList();
-			StrifeTextureList tex2 = context.baseUnit.tex2exists ? new StrifeTextureList() : null;
-			Set<String> tex1names = context.baseUnit.tex2exists ? context.baseUnit.tex1names : null;
-			exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
-			tlist.add(tex1);
-			if (tex2 != null)
-				tlist.add(tex2);
-		}
-		// if not, Doom format.
-		else
-		{
-			pnames = new PatchNames();
-			DoomTextureList tex1 = new DoomTextureList();
-			DoomTextureList tex2 = context.baseUnit.tex2exists ? new DoomTextureList() : null;
-			Set<String> tex1names = context.baseUnit.tex2exists ? context.baseUnit.tex1names : null;
-			exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
-			tlist.add(tex1);
-			if (tex2 != null)
-				tlist.add(tex2);
-		}
-		
-		for (int i = 0; i < tlist.size(); i++)
-		{
-			String tentry = String.format("TEXTURE%01d", i+1);
-			int idx = wf.indexOf(tentry);
-			if (idx >= 0)
-				wf.replaceEntry(idx, tlist.get(i).toBytes());
-			else
-				wf.addData(tentry, tlist.get(i).toBytes());
-		}
-		
-		int idx = wf.indexOf("PNAMES");
-		if (idx >= 0)
-			wf.replaceEntry(idx, pnames.toBytes());
-		else
-			wf.addData("PNAMES", pnames.toBytes());
-		
-		if (!options.noAnimated && !exportSet.animatedData.isEmpty())
-		{
-			idx = wf.indexOf("ANIMATED");
-			if (idx >= 0)
-				wf.replaceEntry(idx, exportSet.animatedData.toBytes());
-			else
-				wf.addData("ANIMATED", exportSet.animatedData.toBytes());
-		}
-	
-		if (!options.noSwitches && exportSet.switchesData.getEntryCount() > 0)
-		{
-			idx = wf.indexOf("SWITCHES");
-			if (idx >= 0)
-				wf.replaceEntry(idx, exportSet.switchesData.toBytes());
-			else
-				wf.addData("SWITCHES", exportSet.switchesData.toBytes());
-		}
-		
-		dumpListToOutputWad(exportSet.patchData, "PP", wf);
-		dumpListToOutputWad(exportSet.flatData, "FF", wf);
-		dumpListToOutputWad(exportSet.textureData, "TX", wf);
-		
-		return true;
-	}
-
-	private static boolean dumpListToOutputWad(List<EntryData> entries, String namespace, WadFile wf) throws IOException
-	{
-		if (entries.size() == 0)
-			return true;
-		
-		String[] names = new String[entries.size() + 2];
-		byte[][] data = new byte[entries.size() + 2][];
-		
-		names[0] = namespace + "_START";
-		data[0] = Wad.NO_DATA;
-		
-		for (int i = 0; i < entries.size(); i++)
-		{
-			names[1 + i] = entries.get(i).key;
-			data[1 + i] = entries.get(i).value;
-		}
-	
-		names[names.length - 1] = namespace + "_END";
-		data[data.length - 1] = Wad.NO_DATA;
-		
-		try (WadFile.Adder adder = wf.createAdder())
-		{
-			for (int i = 0; i < names.length; i++)
-				adder.addData(names[i], data[i]);
-		}
-		
-		return true;
-	}
-
-	/** Extracts the necessary stuff for output. */
-	private static boolean extractToOutputWad(Options options, Context context)
-	{
-		File outFile = new File(options.outWad);
-		WadFile outWadFile = options.additive ? openWadFile(options, outFile, true) : newWadFile(options, outFile);
-		if (outWadFile == null)
-			return false;
-	
-		File baseFile = new File(options.baseWad);
-		WadFile baseWadFile = openWadFile(options, baseFile, false);
-		if (baseWadFile == null)
-		{
-			Common.close(outWadFile);
-			return false;
-		}
-	
-		ExportSet exportSet = new ExportSet();
-		try {
-			exportSet.textureSet = TextureUtils.importTextureSet(baseWadFile);
-			extractTextures(options, context, exportSet);
-			extractFlats(options, context, exportSet);
-			mergeAnimatedAndSwitches(options, context, exportSet);
-			dumpToOutputWad(options, context, exportSet, outWadFile);
-		} catch (TextureException | IOException e) {
-			options.printf("ERROR: %s: %s\n", baseWadFile.getFilePath(), e.getMessage());
-			return false;
-		} finally {
-			Common.close(baseWadFile);
-			Common.close(outWadFile);
-		}
-		
-		return true;
-	}
-
-	// Attempts to make a new WAD file.
-	private static WadFile newWadFile(Options options, File f)
-	{
-		WadFile outWad = null;
-		try {
-			outWad = WadFile.createWadFile(f);
-		} catch (SecurityException e) {
-			options.printf("ERROR: \"%s\" could not be created. Access denied.\n", f.getPath());
-			return null;
-		} catch (IOException e) {
-			options.printf("ERROR: \"%s\" could not be created.\n", f.getPath());
-			return null;
-		}
-		
-		return outWad;
-	}
-
-	// Attempts to open a WAD file.
-	private static WadFile openWadFile(Options options, File f, boolean create)
-	{
-		WadFile outWad = null;
-		try {
-			if (f.exists())
-				outWad = new WadFile(f);
-			else if (create)
-				outWad = WadFile.createWadFile(f);
-			else
-				options.printf("ERROR: \"%s\" could not be opened.\n", f.getPath());
-		} catch (SecurityException e) {
-			options.printf("ERROR: \"%s\" could not be read. Access denied.\n", f.getPath());
-			return null;
-		} catch (WadException e) {
-			options.printf("ERROR: \"%s\" is not a WAD file.\n", f.getPath());
-			return null;
-		} catch (IOException e) {
-			options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
-			return null;
-		}
-		
-		return outWad;
-	}
-
 	/**
 	 * Reads command line arguments and sets options.
 	 * @param options the program options. 
@@ -1167,11 +1248,11 @@ public final class WTExportMain
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
 					else if (arg.equals(SWITCH_NOANIMATED))
-						options.noAnimated = true;
+						options.setNoAnimated(true);
 					else if (arg.equals(SWITCH_NOSWITCH))
-						options.noSwitches = true;
+						options.setNoSwitches(true);
 					else if (arg.equals(SWITCH_ADDITIVE))
-						options.additive = true;
+						options.setAdditive(true);
 					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
 						state = STATE_BASE;
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
@@ -1179,27 +1260,27 @@ public final class WTExportMain
 					else if (arg.equals(SWITCH_NULLTEX))
 						state = STATE_NULLTEX;
 					else
-						options.filePaths.add(arg);
+						options.addFilePath(arg);
 				}
 				break;
 			
 				case STATE_BASE:
 				{
-					options.baseWad = arg;
+					options.setBaseWad(arg);
 					state = STATE_INIT;
 				}
 				break;
 				
 				case STATE_OUT:
 				{
-					options.outWad = arg;
+					options.setOutWad(arg);
 					state = STATE_INIT;
 				}
 				break;
 				
 				case STATE_NULLTEX:
 				{
-					options.nullComparator = new NullComparator(arg);
+					options.setNullTexture(arg);
 					state = STATE_INIT;
 				}
 				break;
@@ -1259,10 +1340,10 @@ public final class WTExportMain
 					options.in.close();
 					return false;
 				case STATE_TEXTURES:
-					options.textureList.add(line.toUpperCase());
+					options.addTexture(line);
 					break;
 				case STATE_FLATS:
-					options.flatList.add(line.toUpperCase());
+					options.addFlat(line);
 					break;
 			}
 		}
@@ -1293,8 +1374,6 @@ public final class WTExportMain
 			return ERROR_NONE;
 		}
 	
-		/* STEP 0 : Get yo' shit together. */
-	
 		if (options.filePaths == null || options.filePaths.isEmpty())
 		{
 			options.println("ERROR: No input WAD(s) specified.");
@@ -1316,36 +1395,11 @@ public final class WTExportMain
 			return ERROR_NO_FILES;
 		}
 	
-		Context context = new Context();
-
-		/* STEP 1 : Scan all incoming WADs so we know where crap is. */
+		int out;
+		if ((out = (new Context()).doTextureExtraction(options)) == ERROR_NONE)
+			options.println("Done!");
 		
-		// scan base.
-		if (!scanWAD(options, context, options.baseWad, true))
-			return ERROR_BAD_FILE;
-		
-		// scan patches. 
-		for (String f : options.filePaths)
-			if (!scanWAD(options, context, f, false))
-				return ERROR_BAD_FILE;
-	
-		/* STEP 2 : Compile list of what we want. */
-
-		for (String t : options.textureList)
-			readAndAddTextures(options, context, t);
-		for (String f : options.flatList)
-			readAndAddFlats(options, context, f);
-		
-		/* STEP 3 : Extract the junk and put it in the output wad. */
-	
-		if (options.nullComparator.nullName != null)
-			options.println("Using "+ options.nullComparator.nullName.toUpperCase() + " as the null texture in TEXTURE1...");
-		
-		if (!extractToOutputWad(options, context))
-			return ERROR_BAD_FILE;
-		
-		options.println("Done!");
-		return ERROR_NONE;
+		return out;
 	}
 
 	public static void main(String[] args)
