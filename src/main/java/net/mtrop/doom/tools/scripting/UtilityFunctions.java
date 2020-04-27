@@ -217,7 +217,7 @@ public enum UtilityFunctions implements ScriptFunctionType
 					type(Type.OBJECTREF, "Wad", "An open Wad file.")
 				)
 				.parameter("output", 
-					type(Type.OBJECTREF, "File", "The file to write the texture definition info to (encoding is UTF-8, file is overwritten)."),
+					type(Type.OBJECTREF, "File", "The file to write the texture definition info to (encoding is UTF-8, file is overwritten, and then closed)."),
 					type(Type.OBJECTREF, "OutputStream", "The output stream to write the texture definition info to (encoding is UTF-8)."),
 					type(Type.OBJECTREF, "Writer", "The Writer to write the texture definition info to.")
 				)
@@ -480,7 +480,7 @@ public enum UtilityFunctions implements ScriptFunctionType
 					type(Type.OBJECTREF, "Wad", "An open Wad file.")
 				)
 				.parameter("output", 
-					type(Type.OBJECTREF, "File", "The file to write the info to (encoding is UTF-8, file is overwritten)."),
+					type(Type.OBJECTREF, "File", "The file to write the info to (encoding is UTF-8, file is overwritten, and then closed)."),
 					type(Type.OBJECTREF, "OutputStream", "The output stream to write the info to (encoding is UTF-8)."),
 					type(Type.OBJECTREF, "Writer", "The Writer to write the info to.")
 				)
