@@ -1288,9 +1288,12 @@ public final class WTExportMain
 			i++;
 		}
 		
-		// Read list from Standard In		
-		options.println("Input texture/flat list:");
-		readList(options);
+		if (!options.help && !options.version)
+		{
+			// Read list from Standard In		
+			options.println("Input texture/flat list:");
+			readList(options);
+		}
 	}
 
 	private static boolean readList(Options options) throws IOException
