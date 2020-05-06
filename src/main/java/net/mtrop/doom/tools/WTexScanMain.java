@@ -609,6 +609,12 @@ public final class WTexScanMain
 		if ((ret = call(options, context)) != 0)
 			System.exit(ret);
 		
+		if (options.help || options.version)
+		{
+			System.exit(0);
+			return;
+		}
+		
 		if (context.textureList.isEmpty())
 		{
 			options.out.println("# No textures.");
