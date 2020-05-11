@@ -25,6 +25,7 @@ import com.blackrook.rookscript.exception.ScriptExecutionException;
 import com.blackrook.rookscript.exception.ScriptParseException;
 import com.blackrook.rookscript.functions.MathFunctions;
 import com.blackrook.rookscript.functions.RegexFunctions;
+import com.blackrook.rookscript.functions.SystemFunctions;
 import com.blackrook.rookscript.functions.ZipFunctions;
 import com.blackrook.rookscript.functions.common.BufferFunctions;
 import com.blackrook.rookscript.functions.common.ErrorFunctions;
@@ -47,11 +48,9 @@ import net.mtrop.doom.tools.scripting.PK3Functions;
 import net.mtrop.doom.tools.scripting.UtilityFunctions;
 import net.mtrop.doom.tools.scripting.WadFunctions;
 
-import com.blackrook.rookscript.functions.CommonFunctions;
 import com.blackrook.rookscript.functions.DateFunctions;
 import com.blackrook.rookscript.functions.DigestFunctions;
 import com.blackrook.rookscript.functions.FileSystemFunctions;
-import com.blackrook.rookscript.functions.IOFunctions;
 import com.blackrook.rookscript.functions.JSONFunctions;
 import com.blackrook.rookscript.functions.PrintFunctions;
 
@@ -96,6 +95,7 @@ public final class WadScriptMain
 		new Resolver("Data I/O", DataIOFunctions.createResolver()),
 		new Resolver("Digest", DigestFunctions.createResolver()),
 		new Resolver("JSON", JSONFunctions.createResolver()),
+		new Resolver("System", SystemFunctions.createResolver()),
 		new Resolver("WADs", WadFunctions.createResolver()),
 		new Resolver("PK3s", PK3Functions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
@@ -319,105 +319,6 @@ public final class WadScriptMain
 		public void finishRender() 
 		{
 			// Do nothing
-		}
-
-	}
-	
-	private static class UsageHTMLRenderer implements UsageRendererType
-	{
-		private PrintStream out;
-		private List<String> sections;
-		private List<StringBuilder> functions; 
-		
-		private UsageHTMLRenderer(PrintStream out)
-		{
-			this.out = out;
-		}
-		
-		@Override
-		public void startRender()
-		{
-			out.println("<html>");
-			out.println("<head><title>Script Functions</title></head>");
-			out.println("<body class=\"content\">");
-		}
-
-		@Override
-		public void renderSection(String title) 
-		{
-			/*
-			out.append("# ").println(title);
-			out.println();
-			*/
-		}
-		
-		private void renderTypeUsage(TypeUsage tu)
-		{
-			/*
-			out.append("- `").append(tu.getType() != null ? tu.getType().name() : "ANY").append("` ");
-			out.append((tu.getSubType() != null ? "*" + tu.getSubType() + "*" : ""));
-			out.println();
-			out.append("    - ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
-			*/
-		}
-		
-		@Override
-		public void renderUsage(String namespace, String functionName, Usage usage)
-		{
-			/*
-			if (usage == null)
-			{
-				out.append("## ");
-				if (namespace != null)
-					out.append(namespace + "::");
-				out.append(functionName).append("(...)").println();
-				out.println();
-				return;
-			}
-			
-			if (namespace != null)
-				out.append(namespace + "::");
-
-			out.append("## ").append(functionName).append('(');
-			List<ParameterUsage> pul = usage.getParameterInstructions();
-			for (int i = 0; i < pul.size(); i++)
-			{
-				out.append(pul.get(i).getParameterName());
-				if (i < pul.size() - 1)
-					out.append(", ");
-			}
-			out.append(')').print('\n');
-			out.println();
-			
-			out.println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
-			out.println();
-			if (!pul.isEmpty())
-			{
-				for (ParameterUsage pu : pul)
-				{
-					out.append("**").append(pu.getParameterName()).append("**").println(":");
-					out.println();
-					for (TypeUsage tu : pu.getTypes())
-						renderTypeUsage(tu);
-					out.println();
-				}
-				out.println();
-			}
-
-			out.append("**Returns**").println(":");
-			out.println();
-			for (TypeUsage tu : usage.getReturnTypes())
-				renderTypeUsage(tu);
-			out.println();
-			out.println();
-			*/
-		}
-
-		@Override
-		public void finishRender() 
-		{
-			out.println("</body>");
-			out.println("</html>");
 		}
 
 	}
