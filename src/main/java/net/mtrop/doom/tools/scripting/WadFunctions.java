@@ -472,7 +472,7 @@ public enum WadFunctions implements ScriptFunctionType
 				else
 					foundIndex = null;
 
-				if (foundIndex != null)
+				if (foundIndex != null && foundIndex >= 0)
 					returnValue.set(foundIndex);
 				else
 					returnValue.setNull();
