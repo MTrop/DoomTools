@@ -21,6 +21,7 @@ import com.blackrook.rookscript.ScriptEnvironment;
 import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptInstanceBuilder;
 import com.blackrook.rookscript.ScriptValue;
+import com.blackrook.rookscript.ScriptValue.ErrorType;
 import com.blackrook.rookscript.exception.ScriptExecutionException;
 import com.blackrook.rookscript.exception.ScriptParseException;
 import com.blackrook.rookscript.functions.MathFunctions;
@@ -382,6 +383,11 @@ public final class WadScriptMain
 			System.err.println("ERROR: Script file does not exist: " + scriptFile);
 			return 4;
 		}
+		if (scriptFile.isDirectory())
+		{
+			System.err.println("ERROR: Bad script file. Is directory.");
+			return 4;
+		}
 	
 		ScriptInstance instance;
 		
@@ -424,6 +430,11 @@ public final class WadScriptMain
 			if (cause instanceof ScriptParseException)
 			{
 				System.err.println("Script ERROR: " + cause.getLocalizedMessage());
+				return 8;
+			}
+			else if (cause != null)
+			{
+				System.err.println("ERROR: Script could not be started: " + cause.getLocalizedMessage());
 				return 8;
 			}
 			else
@@ -485,7 +496,8 @@ public final class WadScriptMain
 				
 				if (retval.isError())
 				{
-					System.err.println("ERROR: " + retval);
+					ErrorType error = retval.asObjectType(ErrorType.class);
+					System.err.println("ERROR: [" + error.getType() + "]: " + error.getLocalizedMessage());
 					return 7;
 				}
 				return retval.asInt();
@@ -544,8 +556,10 @@ public final class WadScriptMain
 						state = STATE_ARGS;
 					else if (SWITCH_SEPARATORBASH.equalsIgnoreCase(arg))
 						state = STATE_BASH_FILE;
-					else
+					else if (scriptFile == null)
 						scriptFile = new File(arg);
+					else
+						argList.add(arg);
 				}
 				break;
 				
@@ -669,8 +683,8 @@ public final class WadScriptMain
 		out.println("                                     Default: 256");
 		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
 		out.println("                                     Default: 2048");
-		out.println("    --                           Pass parameters as-is after this token");
-		out.println("                                     to the script.");
+		out.println("    --                           All tokens after this one are interpreted");
+		out.println("                                     as args for the script.");
 		out.println("    --X                          Bash script special: First argument after");
 		out.println("                                     this is the script file, and every");
 		out.println("                                     argument after are args to pass to the");
@@ -709,10 +723,10 @@ public final class WadScriptMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: wscript [filename] [switches] -- [scriptargs]");
-		out.println("               [--help | -h | --version]");
-		out.println("               [--function-help | --function-help-markdown]");
-		out.println("               [--disassemble] [filename]");
+		out.println("Usage: wadscript [filename] [switches | scriptargs]");
+		out.println("                 [--help | -h | --version]");
+		out.println("                 [--function-help | --function-help-markdown]");
+		out.println("                 [--disassemble] [filename]");
 	}
 	
 	public static void main(String[] args) throws Exception
