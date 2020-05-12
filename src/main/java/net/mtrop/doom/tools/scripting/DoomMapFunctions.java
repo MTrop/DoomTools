@@ -353,15 +353,14 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
-	INFO(2)
+	FORMAT(2)
 	{
 		@Override
 		protected Usage usage()
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Loads a Doom Map into memory for inspection as a MapView. The map in the Wad can be " +
-					"in Doom or Hexen or UDMF format."
+					"Inspects a single map in a Wad and returns its format type."
 				)
 				.parameter("wad", 
 					type(Type.OBJECTREF, "Wad", "An open Wad.")
@@ -371,7 +370,8 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					type(Type.STRING, "The name of the map entry to read.")
 				)
 				.returns(
-					type(Type.STRING, "The map type."),
+					type(Type.NULL, "If the map could not be found."),
+					type(Type.STRING, "The map type (one of: \"doom\", \"hexen\", \"udmf\")."),
 					type(Type.ERROR, "BadParameter", "If [wad] is not a valid open Wad file.")
 				)
 			;
