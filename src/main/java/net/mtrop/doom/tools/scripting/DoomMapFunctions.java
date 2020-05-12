@@ -1189,7 +1189,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Doom-formatted Thing to an output stream of some kind ("+DoomThing.LENGTH+" bytes)." +
+					"Writes a single Doom-formatted Thing to an output stream of some kind ("+DoomThing.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READTHING()."
 				)
 				.parameter("output", 
@@ -1316,7 +1316,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Hexen/ZDoom-formatted Thing to an output stream of some kind ("+DoomThing.LENGTH+" bytes)." +
+					"Writes a single Hexen/ZDoom-formatted Thing to an output stream of some kind ("+DoomThing.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READHEXENTHING()."
 				)
 				.parameter("output", 
@@ -1438,7 +1438,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Vertex to an output stream of some kind ("+DoomVertex.LENGTH+" bytes)." +
+					"Writes a single Vertex to an output stream of some kind ("+DoomVertex.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READVERTEX()."
 				)
 				.parameter("output", 
@@ -1560,7 +1560,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Doom-formatted Linedef to an output stream of some kind ("+DoomLinedef.LENGTH+" bytes)." +
+					"Writes a single Doom-formatted Linedef to an output stream of some kind ("+DoomLinedef.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READLINEDEF()."
 				)
 				.parameter("output", 
@@ -1682,7 +1682,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Hexen/ZDoom-formatted Linedef to an output stream of some kind ("+HexenLinedef.LENGTH+" bytes)." +
+					"Writes a single Hexen/ZDoom-formatted Linedef to an output stream of some kind ("+HexenLinedef.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READHEXENLINEDEF()."
 				)
 				.parameter("output", 
@@ -1804,7 +1804,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Sidedef to an output stream of some kind ("+DoomSidedef.LENGTH+" bytes)." +
+					"Writes a single Sidedef to an output stream of some kind ("+DoomSidedef.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READSIDEDEF()."
 				)
 				.parameter("output", 
@@ -1926,7 +1926,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Writes a single Sector to an output stream of some kind ("+DoomSector.LENGTH+" bytes)." +
+					"Writes a single Sector to an output stream of some kind ("+DoomSector.LENGTH+" bytes). " +
 					"Input map requires the fields that would be returned by READSECTOR()."
 				)
 				.parameter("output", 
