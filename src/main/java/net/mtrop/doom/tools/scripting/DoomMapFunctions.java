@@ -222,6 +222,81 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		}
 	},
 	
+	FORMAT(2)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Inspects a single map in a Wad and returns its format type."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "An open Wad.")
+				)
+				.parameter("header", 
+					type(Type.INTEGER, "The entry index of the map's header."),
+					type(Type.STRING, "The name of the map entry to read.")
+				)
+				.returns(
+					type(Type.NULL, "If the map could not be found."),
+					type(Type.STRING, "The map type (one of: \"doom\", \"hexen\", \"udmf\")."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a valid open Wad file.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue entry = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(entry);
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				if (entry.isNull())
+				{
+					returnValue.setNull();
+					return true;
+				}
+				else if (entry.isNumeric())
+				{
+					Wad wad = temp.asObjectType(Wad.class);
+					int index = entry.asInt();
+					MapFormat format = MapUtils.getMapFormat(wad, index);
+					if (format == null)
+						returnValue.setNull();
+					else
+						returnValue.set(format.name().toLowerCase());
+					return true;
+				}
+				else
+				{
+					Wad wad = temp.asObjectType(Wad.class);
+					String name = entry.asString();
+					MapFormat format = MapUtils.getMapFormat(wad, name);
+					if (format == null)
+						returnValue.setNull();
+					else
+						returnValue.set(format.name().toLowerCase());
+					return true;
+				}
+			}
+			finally
+			{
+				temp.setNull();
+				entry.setNull();
+			}
+		}
+	},
+	
 	VIEW(2)
 	{
 		@Override
@@ -342,81 +417,6 @@ public enum DoomMapFunctions implements ScriptFunctionType
 					{
 						returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
 					}
-					return true;
-				}
-			}
-			finally
-			{
-				temp.setNull();
-				entry.setNull();
-			}
-		}
-	},
-	
-	FORMAT(2)
-	{
-		@Override
-		protected Usage usage()
-		{
-			return ScriptFunctionUsage.create()
-				.instructions(
-					"Inspects a single map in a Wad and returns its format type."
-				)
-				.parameter("wad", 
-					type(Type.OBJECTREF, "Wad", "An open Wad.")
-				)
-				.parameter("header", 
-					type(Type.INTEGER, "The entry index of the map's header."),
-					type(Type.STRING, "The name of the map entry to read.")
-				)
-				.returns(
-					type(Type.NULL, "If the map could not be found."),
-					type(Type.STRING, "The map type (one of: \"doom\", \"hexen\", \"udmf\")."),
-					type(Type.ERROR, "BadParameter", "If [wad] is not a valid open Wad file.")
-				)
-			;
-		}
-		
-		@Override
-		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
-		{
-			ScriptValue temp = CACHEVALUE1.get();
-			ScriptValue entry = CACHEVALUE2.get();
-			try 
-			{
-				scriptInstance.popStackValue(entry);
-				scriptInstance.popStackValue(temp);
-				if (!temp.isObjectRef(Wad.class))
-				{
-					returnValue.setError("BadParameter", "First parameter is not a Wad.");
-					return true;
-				}
-
-				if (entry.isNull())
-				{
-					returnValue.setNull();
-					return true;
-				}
-				else if (entry.isNumeric())
-				{
-					Wad wad = temp.asObjectType(Wad.class);
-					int index = entry.asInt();
-					MapFormat format = MapUtils.getMapFormat(wad, index);
-					if (format == null)
-						returnValue.setNull();
-					else
-						returnValue.set(format.name().toLowerCase());
-					return true;
-				}
-				else
-				{
-					Wad wad = temp.asObjectType(Wad.class);
-					String name = entry.asString();
-					MapFormat format = MapUtils.getMapFormat(wad, name);
-					if (format == null)
-						returnValue.setNull();
-					else
-						returnValue.set(format.name().toLowerCase());
 					return true;
 				}
 			}
