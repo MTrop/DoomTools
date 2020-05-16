@@ -1,6 +1,6 @@
 # Doom Tools
 
-Copyright (c) 2019 Matt Tropiano  
+Copyright (c) 2019-2020 Matt Tropiano  
 
 ### Required Libraries
 

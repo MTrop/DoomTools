@@ -2,17 +2,14 @@ package net.mtrop.doom.tools.wadmerge;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.exception.WadException;
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
 
@@ -22,64 +19,6 @@ import net.mtrop.doom.tools.common.Response;
  */
 public enum WadMergeCommand
 {
-	CALL
-	{
-		@Override
-		public void help(PrintStream out)
-		{
-			out.println("CALL [script]");
-			out.println("    Calls another merge script. The working directory will be the parent");
-			out.println("    directory of the script file.");
-			out.println("    [script]: The file name of the script.");
-		}
-		
-		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
-		{
-			String oldWorkingDirectory = System.getProperty("user.dir");
-			
-			String streamName;
-			BufferedReader reader = null;
-			String fileName = scanner.next();
-			File inputFile = new File(fileName);
-			
-			System.setProperty("user.dir", inputFile.getParent());
-			
-			try
-			{
-				if (!inputFile.exists() || inputFile.isDirectory())
-					return Response.BAD_FILE;
-
-				streamName = inputFile.getPath();
-				reader = new BufferedReader(new InputStreamReader(new FileInputStream(inputFile)));
-				if (!callScript(streamName, reader, context))
-					return Response.BAD_PARSE;
-			}
-			catch (FileNotFoundException e)
-			{
-				context.logf("ERROR: File %s not found.\n", inputFile.getPath());
-				return Response.BAD_FILE;
-			}
-			catch (SecurityException e)
-			{
-				context.logf("ERROR: File %s not readable (access denied).\n", inputFile.getPath());
-				return Response.BAD_FILE;
-			}
-			catch (IOException e)
-			{
-				context.logf("ERROR: File %s not readable.\n", inputFile.getPath());
-				return Response.BAD_FILE;
-			}
-			finally
-			{
-				IOUtils.close(reader);
-				System.setProperty("user.dir", oldWorkingDirectory);
-			}
-			
-			return Response.OK;
-		}
-	},
-	
 	END
 	{
 		@Override
