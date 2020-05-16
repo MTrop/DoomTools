@@ -9,6 +9,7 @@
 	<description>Doom Struct</description>
 
 	<property file="build.properties" />
+	<property file="versions.properties" />
 
 	<!-- Dependencies -->
 	<property name="dev.base" value=".." />

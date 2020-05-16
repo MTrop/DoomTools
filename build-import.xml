@@ -64,6 +64,7 @@
 	</target>
 
 	<target name="clean" depends="clean.jar, clean.docs, clean.zip, clean.compile"  description="Cleans up everything.">
+		<delete dir="${build.dir}" includeemptydirs="true" casesensitive="false" /> 
 	</target>
 	
 	<!-- Javadocs -->
