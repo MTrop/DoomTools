@@ -37,6 +37,11 @@
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
 	<property name="project.javadoc.packages" value="
+		net.mtrop.doom.tools,
+		net.mtrop.doom.tools.common,
+		net.mtrop.doom.tools.scripting,
+		net.mtrop.doom.tools.wadmerge,
+		net.mtrop.doom.tools.wtexport
 		"
 	/>
 	
