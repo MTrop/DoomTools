@@ -1,0 +1,3009 @@
+=================================================================
+====              WADScript Function Reference               ====
+=================================================================
+
+If you suspect this file is out of date, you can get this info by typing:
+
+wadscript --function-help
+
+=================================================================
+====           Function Category Table of Contents           ====
+=================================================================
+
+RookScript Base:
+
+* [CMMN] Common
+* [PRNT] Printing/Logging
+* [STRN] String
+* [LIST] List / Set
+* [MAPS] Map
+* [BUFR] Buffer
+* [ERRS] Error
+* [MATH] Math
+* [REGX] RegEx
+* [DATE] Date / Time
+* [FILE] File System
+* [FLIO] File I/O
+* [ZIPS] Zip Files / GZIP Streams
+* [STIO] Stream I/O
+* [DAIO] Data I/O
+* [HASH] Digest
+* [JSON] JSON
+* [SYST] System
+
+Doom-specific:
+
+* [WADS] WADs
+* [PK3S] PK3s
+* [DMAP] Doom / Hexen / ZDoom / UDMF Maps
+* [UTIL] Utilities
+
+
+=================================================================
+==== [CMMN] Common
+=================================================================
+
+TYPEOF(value)
+    Returns the type name of a value.
+    value:
+        (ANY) The provided value.
+    Returns:
+        (STRING) The type name. Can be "null", "boolean", "integer", "float", "string", "list", "map", "buffer", "error", or an "objectref" string.
+
+LENGTH(value)
+    Returns the "length" of a value.
+    value:
+        (ANY) The value.
+    Returns:
+        (INTEGER) If value is:
+            STRING, the length in characters.
+            LIST, the length in elements.
+            MAP, the amount of keys.
+            BUFFER, the size in bytes.
+            OBJECTREF, if Collection, returns size().
+            Others, 1.
+
+EMPTY(value)
+    Returns if a value is "empty".
+    value:
+        (ANY) The value.
+    Returns:
+        (INTEGER) Returns true if:
+            NULL.
+            OBJECTREF: is a Collection and isEmpty() returns true.
+            BOOLEAN: is false.
+            INTEGER or FLOAT: is 0 or NaN.
+            STRING: length = 0.
+            BUFFER: length = 0.
+            LIST: length = 0.
+            MAP: length = 0.
+
+CLOSE(value)
+    Attempts to close one or more closeable resources. The resource is deregistered on this instance. If the object passed is not an AutoCloseable, nothing happens.
+    value:
+        (NULL) Do nothing.
+        (OBJECTREF:AutoCloseable) A closeable resource.
+        (LIST:[OBJECTREF:AutoCloseable, ...]) A list of closeable resources.
+    Returns:
+        (BOOLEAN) True.
+        (ERROR:BadClose) If an Error occurs on close.
+
+DONOTCLOSE(value)
+    Deregisters an open resource on this instance. BE VERY CAREFUL ABOUT USING THIS! This is intended for scripts that return an open resource to the host after execution.
+    value:
+        (NULL) Do nothing.
+        (OBJECTREF:AutoCloseable) A closeable resource.
+    Returns:
+        (BOOLEAN) True.
+        (ERROR:BadParameter) If an AutoCloseable was not provided.
+
+TOBOOLEAN(value)
+    Converts a value to its boolean value.
+    value:
+        (ANY) The value to convert.
+    Returns:
+        (BOOLEAN) The boolean-equivalent value.
+
+TOINT(value)
+    Converts a value to an integer value.
+    value:
+        (ANY) The value to convert.
+    Returns:
+        (INTEGER) The integer-equivalent value.
+
+TOFLOAT(value)
+    Converts a value to a float value.
+    value:
+        (ANY) The value to convert.
+    Returns:
+        (FLOAT) The float-equivalent value.
+
+TOSTRING(value)
+    Converts a value to a string value.
+    value:
+        (ANY) The value to convert.
+    Returns:
+        (STRING) The string-equivalent value.
+
+
+=================================================================
+==== [PRNT] Printing/Logging
+=================================================================
+
+PRINT(message)
+    Prints something to standard out.
+    message:
+        (STRING) Value to print.
+    Returns:
+        (NULL) Returns nothing.
+
+PRINTLN(message)
+    Prints something to standard out, appending a newline.
+    message:
+        (STRING) Value to print.
+    Returns:
+        (NULL) Returns nothing.
+
+PRINTERR(message)
+    Prints something to standard error.
+    message:
+        (STRING) Value to print.
+    Returns:
+        (NULL) Returns nothing.
+
+PRINTERRLN(message)
+    Prints something to standard error, appending a newline.
+    message:
+        (STRING) Value to print.
+    Returns:
+        (NULL) Returns nothing.
+
+
+=================================================================
+==== [STRN] String
+=================================================================
+
+STRUPPER(string)
+    Returns a string in full uppercase.
+    string:
+        (ANY) The string (if not STRING, will be converted).
+    Returns:
+        (STRING) The same string converted to uppercase.
+
+STRLOWER(string)
+    Returns a string in full lowercase.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    Returns:
+        (STRING) The same string converted to lowercase.
+
+STRTRIM(string)
+    Returns a string trimmed of whitespace (0x00 - 0x20, ASCII) at both ends.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    Returns:
+        (STRING) The trimmed string.
+
+STRCHAR(string, index)
+    Returns a single character from a string.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    index:
+        (INTEGER) The index (0-based).
+    Returns:
+        (NULL) If the index is out-of-bounds.
+        (STRING) The character returned.
+
+SUBSTR(string, start, end)
+    Returns a substring of another string.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    start:
+        (INTEGER) The starting index (0-based), inclusive.
+    end:
+        (NULL) Use string length.
+        (INTEGER) The ending index (0-based), exclusive. If negative, stop at that many characters from the end.
+    Returns:
+        (NULL) If either index is out-of-bounds or the end index is less than the start index.
+        (STRING) The substring returned.
+
+STRINDEX(string, search)
+    Returns the starting index of a string inside another string.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    search:
+        (STRING) The string to search for (if not STRING, will be converted).
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The starting index.
+
+STRLASTINDEX(string, search)
+    Returns the starting index of a string inside another string, searching from the end.
+    string:
+        (STRING) The string (if not STRING, will be converted).
+    search:
+        (STRING) The string to search for (if not STRING, will be converted).
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The starting index.
+
+STRSPLIT(string, splitstring)
+    Splits a string into many substrings using a delimiting string of characters.
+    string:
+        (STRING) The string to split (converted to string if not a string).
+    splitstring:
+        (STRING) The target substring for delimiting splits (converted to string if not a string).
+    Returns:
+        (LIST:[STRING, ...]) The resultant list of strings.
+
+STRJOIN(strings, joiner)
+    Joins a list of strings together into one string.
+    strings:
+        (LIST:[STRING, ...]) The list of items to convert to strings and join.
+        (ANY) Returns this as a string.
+    joiner:
+        (NULL) Use the empty string.
+        (STRING) The joiner string to use between list items.
+    Returns:
+        (STRING) The resultant string after the join.
+
+STRSTARTSWITH(string, prefix, offset)
+    Checks if a string starts with another substring (case sensitive).
+    string:
+        (STRING) The string to test (converted to string if not a string).
+    prefix:
+        (STRING) The substring to test with (converted to string if not a string).
+    offset:
+        (NULL) Use 0.
+        (INTEGER) The starting offset in characters from the beginning to test from.
+    Returns:
+        (BOOLEAN) True, if [string] (after the first [offset] characters) starts with [prefix], false otherwise.
+
+STRENDSWITH(string, suffix)
+    Checks if a string ends with another substring (case sensitive).
+    string:
+        (STRING) The string to test (converted to string if not a string).
+    suffix:
+        (STRING) The substring to test with (converted to string if not a string).
+    Returns:
+        (BOOLEAN) True, if [string] ends with [suffix], false otherwise.
+
+STRREPLACEALL(string, target, replacement)
+    Replaces all occurrances of a string in a string with another string.
+    string:
+        (STRING) The string to perform replacement on (converted to string if not a string).
+    target:
+        (STRING) The target substring to replace (converted to string if not a string).
+    replacement:
+        (STRING) The replacement string (converted to string if not a string).
+    Returns:
+        (STRING) The resultant string, after replacement.
+
+
+=================================================================
+==== [LIST] List / Set
+=================================================================
+
+LIST(list)
+    Creates a new list by copying an existing list into a new reference, or encapsulating a non-list value as a list.
+    list:
+        (ANY) The list to copy.
+    Returns:
+        (LIST) The resultant list.
+
+LISTNEW(length, value)
+    Creates a new list of a specific length, optionally with all values initialized to a specified value.
+    length:
+        (INTEGER) The new list length.
+    value:
+        (ANY) The fill value. Copies are not made for each element.
+    Returns:
+        (LIST) The resultant new list.
+
+LISTADD(list, value, index)
+    Adds a value to a list. If the "list" argument is not a list or not added, this returns false, else true.
+    list:
+        (LIST) The list.
+    value:
+        (ANY) The value to add.
+    index:
+        (NULL) Adds it to the end.
+        (INTEGER) The index to add the value at (shifts the others).
+    Returns:
+        (BOOLEAN) True if added. False if not a list.
+
+LISTREMOVE(list, value)
+    Removes the first value from a list that matches the item. Finds list/map-typed items by reference and objects by equals().
+    list:
+        (LIST) The list.
+    value:
+        (ANY) The value to remove.
+    Returns:
+        (BOOLEAN) True if removed. False if not found or not a list.
+
+LISTREMOVEAT(list, index)
+    Removes the first value from a list at a specific index.
+    list:
+        (LIST) The list.
+    index:
+        (INTEGER) The index.
+    Returns:
+        (ANY) The value removed, NULL if index is out-of-bounds or a list was not provided.
+
+LISTSORT(list)
+    Sorts a list in place.
+    list:
+        (LIST) The list to sort.
+    Returns:
+        (LIST) The list that was sorted (not a new copy).
+
+LISTCONTAINS(list, value)
+    Checks if a list contains a specific value, sequential search. Finds list/map-typed items by reference and objects by equals().
+    list:
+        (LIST) The list to search.
+    value:
+        (ANY) The value to search for.
+    Returns:
+        (BOOLEAN) True if it contains the value, false if not.
+
+LISTINDEX(list, value)
+    Gets the index of the first occurrence of a value in a list. Finds list/map-typed items by reference and objects by equals().
+    list:
+        (LIST) The list to search.
+    value:
+        (ANY) The value to search for.
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The index of the found element.
+
+LISTLASTINDEX(list, value)
+    Gets the index of the last occurrence of a value in a list. Finds list/map-typed items by reference and objects by equals().
+    list:
+        (LIST) The list to search.
+    value:
+        (ANY) The value to search for.
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The index of the found element.
+
+SUBLIST(list, start, end)
+    Creates a new list from a larger list using a range of contiguous list indices.
+    list:
+        (LIST) The list to use.
+    start:
+        (INTEGER) The starting index (0-based), inclusive.
+    end:
+        (NULL) Use list length.
+        (INTEGER) The ending index (0-based), exclusive. If negative, stop at that many elements from the end.
+    Returns:
+        (NULL) If either index is out-of-bounds or the end index is less than the start index.
+        (LIST) The substring returned.
+
+SET(list)
+    Creates a new list from another list, such that the contents of the list are discrete and sorted, its contents now suitable for set operations.
+    list:
+        (LIST) The list to prepare.
+    Returns:
+        (LIST) The new list, set-ified.
+
+SETADD(list, value)
+    Adds a value to a list, expected to be set up like a set (sorted, discrete).
+    list:
+        (LIST) The set (list).
+    value:
+        (ANY) The value to add.
+    Returns:
+        (BOOLEAN) True if value was added (and is not already in the list), false otherwise.
+
+SETREMOVE(list, value)
+    Removes a value from a list, expected to be set up like a set (sorted, discrete). This is more performant than a list - search is binary search.
+    list:
+        (LIST) The set (list).
+    value:
+        (ANY) The value to remove.
+    Returns:
+        (BOOLEAN) True if the value was removed, false otherwise.
+
+SETCONTAINS(list, value)
+    Checks if a value exists in a list, expected to be set up like a set (sorted, discrete). This is more performant than a list - search is binary search.
+    list:
+        (LIST) The set (list).
+    value:
+        (ANY) The value to look for.
+    Returns:
+        (BOOLEAN) True if the value was found, false otherwise.
+
+SETSEARCH(list, value)
+    Gets the index of a value in a list, expected to be set up like a set (sorted, discrete). This is more performant than a list - search is binary search.
+    list:
+        (LIST) The set (list).
+    value:
+        (ANY) The value to look for.
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The index in the list that it was found.
+
+SETUNION(list1, list2)
+    Gets the union of two sets, returning a new set with values in both.
+    list1:
+        (LIST) The first set (list).
+        (ANY) A value to encapsulate into a set.
+    list2:
+        (LIST) The second set (list).
+        (ANY) A value to encapsulate into a set.
+    Returns:
+        (LIST) The new set that is the union of both sets.
+
+SETINTERSECT(list1, list2)
+    Gets the intersection of two sets, returning a new set with values in both.
+    list1:
+        (LIST) The first set (list).
+        (ANY) A value to encapsulate into a set.
+    list2:
+        (LIST) The second set (list).
+        (ANY) A value to encapsulate into a set.
+    Returns:
+        (LIST) The new set that is the intersection of both sets.
+
+SETXOR(list1, list2)
+    Gets the exclusive-or of two sets, returning the union of both sets minus the intersection.
+    list1:
+        (LIST) The first set (list).
+        (ANY) A value to encapsulate into a set.
+    list2:
+        (LIST) The second set (list).
+        (ANY) A value to encapsulate into a set.
+    Returns:
+        (LIST) The new set that is the XOr of both sets.
+
+SETDIFF(list1, list2)
+    Gets a new set that is the first set minus the values in the second set.
+    list1:
+        (LIST) The first set (list).
+        (ANY) A value to encapsulate into a set.
+    list2:
+        (LIST) The second set (list).
+        (ANY) A value to encapsulate into a set.
+    Returns:
+        (LIST) The new set that is the difference of both sets.
+
+
+=================================================================
+==== [MAPS] Map
+=================================================================
+
+MAPKEYS(map)
+    Gets a list of all of the keys in a map. The returned list is suitable for set operations (sorted, discrete).
+    map:
+        (MAP) The map.
+    Returns:
+        (NULL) If not a map.
+        (LIST:[STRING, ...]) A new list of the map's keys.
+
+MAPGET(map, key)
+    Returns a value that corresponds to a key in the map, or null if not found. Keys are resolved case-insensitively.
+    map:
+        (MAP) The map.
+    key:
+        (STRING) The key (converted to string).
+    Returns:
+        (ANY) The corresponding value, if found, or null, if no value for that key.
+
+MAPSET(map, key, value)
+    Sets a value that corresponds to a key in the map. If the first parameter is not a map, nothing happens. Keys are resolved case-insensitively.
+    map:
+        (MAP) The map.
+    key:
+        (NULL) Do nothing.
+        (STRING) The key (converted to string).
+    value:
+        (ANY) The corresponding value to assign.
+    Returns:
+        (ANY) map.
+
+MAPVALUE(map, key, default)
+    Returns a value that corresponds to a key in the map, or a default value if not found. Keys are resolved case-insensitively.
+    map:
+        (MAP) The map.
+    key:
+        (STRING) The key (converted to string).
+    default:
+        (ANY) The value to return if not found.
+    Returns:
+        (ANY) The corresponding value, if found, or [default], if no value for that key.
+
+MAPMERGE(map1, map2)
+    Returns a new map that is the result of taking the first map and adding all of the keys of the second, replacing the keys that exist in the first. The copies are shallow - references are preserved. Keys are matched/resolved case-insensitively.
+    map1:
+        (MAP) The first map.
+        (ANY) An empty map.
+    map2:
+        (MAP) The second map.
+        (ANY) An empty map.
+    Returns:
+        (MAP) A new map.
+
+
+=================================================================
+==== [BUFR] Buffer
+=================================================================
+
+BUFNEW(size, order)
+    Creates a new, blank buffer.
+    size:
+        (INTEGER) The size of the buffer.
+    order:
+        (NULL) Use native byte order/endian mode.
+        (BOOLEAN) True = big endian, false = little endian.
+    Returns:
+        (BUFFER) A new allocated buffer of [size] bytes.
+        (ERROR:BadParameter) If size is < 0.
+        (ERROR:OutOfMemory) If not allocated.
+
+BUFSETSIZE(buffer, size)
+    Resizes a buffer (without creating a new one). The values of the data are kept, except for what would be discarded on a buffer shrink, and the data in an expanded part is set to 0.
+    buffer:
+        (BUFFER) The buffer to resize.
+    size:
+        (INTEGER) The new size of the buffer.
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) Size is < 0.
+        (ERROR:OutOfMemory) If not allocated.
+
+BUFWRAP(list, endian)
+    Wraps a list as a buffer.
+    list:
+        (LIST:[INTEGER, ...]) The list of values to interpret as (clamped) byte values from [0, 255].
+    endian:
+        (NULL) Use native endian.
+        (BOOLEAN) True = big, false = little.
+    Returns:
+        (BUFFER) A new allocated buffer of [length(list)] bytes.
+        (ERROR:OutOfMemory) If not allocated.
+
+BUFUNWRAP(buffer)
+    Unwraps a buffer into a list.
+    buffer:
+        (BUFFER) The buffer to unwrap.
+    Returns:
+        (LIST) A new list where each element is a value from 0 to 255, representing all of the values in the buffer in order.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+
+BUFSLICE(buffer, length, index)
+    Creates a new buffer that is a subset of bytes from another buffer.
+    buffer:
+        (BUFFER) The source buffer to use.
+    length:
+        (NULL) Use length(buffer) - index.
+        (INTEGER) The amount of bytes to copy to the new buffer.
+    index:
+        (NULL) Use current position as the starting index.
+        (INTEGER) The starting index.
+    Returns:
+        (BUFFER) New allocated buffer of [length] bytes, copied from source (same byte order).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If index or index + length is out of bounds.
+
+BUFSETPOS(buffer, position)
+    Sets the current cursor position for a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    position:
+        (NULL) Use 0.
+        (INTEGER) The new current buffer cursor position (0-based).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If the position is out of bounds.
+
+BUFGETPOS(buffer)
+    Gets the current cursor position for a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    Returns:
+        (INTEGER) The buffer's current cursor position (0-based).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+
+BUFSETORDER(buffer, order)
+    Sets the current byte order for a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    order:
+        (NULL) Use native byte order/endian mode.
+        (BOOLEAN) True = big endian, false = little endian.
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If the position is out of bounds.
+
+BUFGETORDER(buffer)
+    Gets the current byte order for a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    Returns:
+        (BOOLEAN) The buffer's current byte order - true if big endian, false if little endian.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+
+BUFREAD(destbuf, srcbuf, maxlength, destindex, srcindex)
+    Read bulk bytes from another buffer. Will stop if the end of this buffer is reached.
+    destbuf:
+        (BUFFER) The destination buffer to fill.
+    srcbuf:
+        (BUFFER) The source buffer to read from.
+        (LIST:[INTEGER, ...]) The list of integers to use as bytes.
+    maxlength:
+        (NULL) Read as much as possible to fill the destination or read the rest of source.
+        (INTEGER) The maximum amount of bytes to read/set.
+    destindex:
+        (NULL) Use the destination buffer's current position (cursor position will be advanced).
+        (INTEGER) The index into the destination buffer (cursor position will NOT be advanced).
+    srcindex:
+        (NULL) Use the source buffer's current position (cursor position will be advanced).
+        (INTEGER) The index into the source buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The amount of the bytes read, or -1 if the end of the source was already reached at call.
+        (ERROR:BadParameter) If either destbuf or srcbuf are not buffers.
+        (ERROR:OutOfBounds) If index or index + length is out of bounds.
+
+BUFFILL(buffer, data, amount, index)
+    Fills a buffer with a single value.
+    buffer:
+        (BUFFER) The destination buffer to use.
+    data:
+        (NULL) Use 0.
+        (INTEGER) The byte value to fill.
+    amount:
+        (NULL) Use length(buffer) - index.
+        (INTEGER) The amount of bytes to set.
+    index:
+        (NULL) Use buffer's current cursor position (cursor position will be advanced).
+        (INTEGER) The starting index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+
+BUFPUTBYTE(buffer, value, index)
+    Sets a byte in a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The byte value to set (0 - 255)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index] is out of the buffer's bounds.
+
+BUFGETBYTE(buffer, index)
+    Gets a byte in a buffer (returned unsigned).
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (0 - 255).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index] is out of the buffer's bounds.
+
+BUFPUTSHORT(buffer, value, index)
+    Sets a short value in a buffer (16-bit, signed). The buffer's current byte order affects how the bytes are written.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The short value to set (-32768 - 32767)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+2) is out of the buffer's bounds.
+
+BUFGETSHORT(buffer, index)
+    Gets a short in a buffer (16-bit, signed). The buffer's current byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (-32768 - 32767).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+2) is out of the buffer's bounds.
+
+BUFPUTUSHORT(buffer, value, index)
+    Sets a short value in a buffer (16-bit, unsigned). The buffer's current byte order affects how the bytes are written.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The short value to set (0 - 65535)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+2) is out of the buffer's bounds.
+
+BUFGETUSHORT(buffer, index)
+    Gets a short in a buffer (16-bit, unsigned). The buffer's current byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (0 - 65535).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+2) is out of the buffer's bounds.
+
+BUFPUTINT(buffer, value, index)
+    Sets an integer value in a buffer (32-bit, signed). The buffer's current byte order affects how the bytes are written.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The integer value to set (-2^31 - 2^31-1)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFGETINT(buffer, index)
+    Gets an integer in a buffer (32-bit, signed). The buffer's current byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (-2^31 - 2^31-1).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFPUTUINT(buffer, value, index)
+    Sets an integer value in a buffer (32-bit, unsigned). The buffer's current byte order affects how the bytes are written.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The integer value to set (0 - 2^32-1)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFGETUINT(buffer, index)
+    Gets an integer in a buffer (32-bit, unsigned). The buffer's current byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (0 - 2^32-1).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFPUTFLOAT(buffer, value, index)
+    Sets a floating-point value in a buffer (32-bit). The buffer's current byte order affects how the bytes are written. NOTE: Floating-point values are stored in memory as double-precision - some precision may be lost on write!
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The float value to set.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFGETFLOAT(buffer, index)
+    Gets a float in a buffer (32-bit). The buffer's current byte order affects how the bytes are read.NOTE: Floating-point values are stored in memory as double-precision - some data may be extrapolated on read!
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (FLOAT) The value at the index.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+4) is out of the buffer's bounds.
+
+BUFPUTLONG(buffer, value, index)
+    Sets a long integer value in a buffer (64-bit, signed). The buffer's current byte order affects how the bytes are written.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The integer value to set (-2^63 - 2^63-1)
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
+
+BUFGETLONG(buffer, index)
+    Gets a long integer in a buffer (64-bit, signed). The buffer's current byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (INTEGER) The value at the index (-2^63 - 2^63-1).
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
+
+BUFPUTDOUBLE(buffer, value, index)
+    Sets a double-precision floating-point value in a buffer (64-bit). Buffer's byte order affects how the bytes are written. 
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (INTEGER) The float value to set.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
+
+BUFGETDOUBLE(buffer, index)
+    Gets a double-precision float in a buffer (64-bit). Buffer's byte order affects how the bytes are read.
+    buffer:
+        (BUFFER) The buffer to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (FLOAT) The value at the index.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
+
+BUFPUTSTR(buffer, value, encoding, index)
+    Writes a string to a buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    value:
+        (STRING) The string to write.
+    encoding:
+        (NULL) Use native encoding.
+        (STRING) The name of the encoding to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (BUFFER) buffer.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:BadEncoding) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If not enough room to write the string.
+
+BUFGETSTR(buffer, length, encoding, index)
+    Gets a string from the buffer.
+    buffer:
+        (BUFFER) The buffer to use.
+    length:
+        (INTEGER) The amount of bytes to read and decode into a string.
+    encoding:
+        (NULL) Use native encoding.
+        (STRING) The name of the encoding to use.
+    index:
+        (NULL) Use the current position (cursor position will be advanced).
+        (INTEGER) The index into the buffer (cursor position will NOT be advanced).
+    Returns:
+        (STRING) The string read and decoded.
+        (ERROR:BadParameter) If [buffer] is not a buffer.
+        (ERROR:BadEncoding) If [buffer] is not a buffer.
+        (ERROR:OutOfBounds) If not enough room to write the string.
+
+BUFSTR(buffer)
+    Outputs a buffer's contents as a string of hexadecimal digits, from first byte to last byte.
+    buffer:
+        (BUFFER) The buffer.
+    Returns:
+        (NULL) If the input is not a buffer.
+        (STRING) A contiguous string of hexadecimal characters representing the buffer's contents, two characters per byte.
+
+
+=================================================================
+==== [ERRS] Error
+=================================================================
+
+ISERROR(value)
+    Checks if the provided value is an error type.
+    value:
+        (ANY) The provided value.
+    Returns:
+        (BOOLEAN) True if so, false if not.
+
+ERROR(type, message, messageLocalized)
+    Creates an error type.
+    type:
+        (STRING) The error type.
+    message:
+        (STRING) The error message.
+    messageLocalized:
+        (NULL) Use the error message.
+        (STRING) The error localized message.
+    Returns:
+        (ERROR) The created error.
+
+ERRORTYPE(error)
+    Returns the error type. If not an error, this returns null.
+    error:
+        (ERROR) The error.
+    Returns:
+        (NULL) If not an error.
+        (STRING) The error type.
+
+ERRORMSG(error)
+    Returns the error message. If not an error, this returns null.
+    error:
+        (ERROR) The error.
+    Returns:
+        (NULL) If not an error.
+        (STRING) The error message.
+
+ERRORLOCALMSG(error)
+    Returns the localized error message. If not an error, this returns null.
+    error:
+        (ERROR) The error.
+    Returns:
+        (NULL) If not an error.
+        (STRING) The localized error message.
+
+ERRORMAP(error)
+    Returns an error type as a map. If not an error, this returns null.
+    error:
+        (ERROR) The error.
+    Returns:
+        (NULL) If not an error.
+        (MAP) A map of {type:STRING, message:STRING, localizedmessage:STRING}.
+
+
+=================================================================
+==== [MATH] Math
+=================================================================
+
+MIN(value1, value2)
+    Returns the minimum of two values.
+    value1:
+        (ANY) The first value.
+    value2:
+        (ANY) The second value.
+    Returns:
+        (ANY) The value that is less than the other value.
+
+MAX(value1, value2)
+    Returns the maximum of two values.
+    value1:
+        (ANY) The first value.
+    value2:
+        (ANY) The second value.
+    Returns:
+        (ANY) The value that is greater than the other value.
+
+POW(value, power)
+    Raises a number to another mathematical power.
+    value:
+        (FLOAT) The first value.
+    power:
+        (FLOAT) The second value.
+    Returns:
+        (FLOAT) The value raised to the provided power.
+
+ROUND(value)
+    Rounds a number to the nearest whole number.
+    value:
+        (FLOAT) The value to round.
+    Returns:
+        (INTEGER) The value rounded to the nearest integer value.
+
+FLOOR(value)
+    Returns the mathematical floor of a number.
+    value:
+        (FLOAT) The value.
+    Returns:
+        (FLOAT) The floor of the provided value.
+
+CEILING(value)
+    Returns the mathematical ceiling of a number.
+    value:
+        (FLOAT) The value.
+    Returns:
+        (FLOAT) The ceiling of the provided value.
+
+FIX(value, place)
+    Rounds a number to the nearest arbitrary digit place. The "place" is a power of 10. FIX(n, 0) = ROUND(n)
+    value:
+        (FLOAT) The value.
+    place:
+        (INTEGER) The place.
+    Returns:
+        (FLOAT) The rounded value.
+
+E()
+    Returns Euler's constant.
+    Returns:
+        (FLOAT) 2.718281828459045
+
+LOGE(value)
+    Returns the Natural Log (base e) of a value.
+    value:
+        (FLOAT) The value.
+    Returns:
+        (FLOAT) Log (base e) of the provided value.
+
+LOG10(value)
+    Returns the Base 10 Log of a value.
+    value:
+        (FLOAT) The value.
+    Returns:
+        (FLOAT) Base 10 Log of the provided value.
+
+SQRT(value)
+    Returns the square root of a value.
+    value:
+        (FLOAT) The value.
+    Returns:
+        (FLOAT) The square root of the provided value.
+
+PI()
+    Returns Pi.
+    Returns:
+        (FLOAT) 3.141592653589793
+
+DEG2RAD(value)
+    Converts degrees to radians.
+    value:
+        (FLOAT) The value in degrees.
+    Returns:
+        (FLOAT) The value in radians.
+
+RAD2DEG(value)
+    Converts radians to degrees.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) The value in degrees.
+
+SIN(value)
+    Mathematical sine.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) SIN(value)
+
+COS(value)
+    Mathematical cosine.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) COS(value)
+
+TAN(value)
+    Mathematical tangent.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) TAN(value)
+
+ASIN(value)
+    Mathematical arc sine.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) ASIN(value)
+
+ACOS(value)
+    Mathematical arc cosine.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) ACOS(value)
+
+ATAN(value)
+    Mathematical arc tangent.
+    value:
+        (FLOAT) The value in radians.
+    Returns:
+        (FLOAT) ATAN(value)
+
+CLAMP(value, lo, hi)
+    Clamps a value between two values.
+    value:
+        (FLOAT) The value.
+    lo:
+        (FLOAT) The lower bound.
+    hi:
+        (FLOAT) The higher bound.
+    Returns:
+        (FLOAT) The value clamped to the provided range.
+
+WRAP(value, lo, hi)
+    Wraps a value around a value range. The higher bound is never returned.
+    value:
+        (FLOAT) The value.
+    lo:
+        (FLOAT) The lower bound.
+    hi:
+        (FLOAT) The higher bound.
+    Returns:
+        (FLOAT) The value wrapped around the provided range.
+
+LERP(scalar, value1, value2)
+    Linearly interpolates from the first value to the second.
+    scalar:
+        (FLOAT) The unit scalar between the first and second value. 0.0 is first, 1.0 is the second.
+    value1:
+        (FLOAT) The first value.
+    value2:
+        (FLOAT) The second value.
+    Returns:
+        (FLOAT) A value scaled between the provided range. If the scalar is beyond the range of 0.0 to 1.0, this will return a value outside the range.
+
+PARSEINT(value, radix)
+    Parses a string to an integer with an optional radix.
+    value:
+        (STRING) The value to parse.
+    radix:
+        (NULL) Radix 10.
+        (INTEGER) An optional radix.
+    Returns:
+        (INTEGER) The parsed value.
+        (FLOAT) NaN, if not parsable.
+
+COLOR(red, green, blue, alpha)
+    Converts color (byte, 0 to 255) components to an ARGB integer.
+    red:
+        (INTEGER) Red component byte.
+    green:
+        (INTEGER) Green component byte.
+    blue:
+        (INTEGER) Blue component byte.
+    alpha:
+        (INTEGER) Alpha component byte.
+    Returns:
+        (INTEGER) The output ARGB color value.
+
+COLORF(red, green, blue, alpha)
+    Converts color (float, 0.0 to 1.0) components to an ARGB integer.
+    red:
+        (FLOAT) Red component float.
+    green:
+        (FLOAT) Green component float.
+    blue:
+        (FLOAT) Blue component float.
+    alpha:
+        (FLOAT) Alpha component float.
+    Returns:
+        (INTEGER) The output ARGB color value.
+
+
+=================================================================
+==== [REGX] RegEx
+=================================================================
+
+ISREGEX(pattern)
+    Checks if a string is a valid RegEx pattern.
+    pattern:
+        (STRING) The string to test.
+    Returns:
+        (BOOLEAN) True if the pattern is malformed, false otherwise.
+
+REGEXSPLIT(pattern, string)
+    Splits a string by a RegEx pattern.
+    pattern:
+        (STRING) The RegEx pattern to use.
+    string:
+        (STRING) The string to split.
+    Returns:
+        (LIST:[STRING, ...]) A list of strings.
+        (ERROR:BadPattern) If the pattern is malformed.
+
+REGEXCONTAINS(pattern, string)
+    Checks if a string contains a set of characters that matches the provided RegEx.
+    pattern:
+        (STRING) The RegEx pattern to use.
+    string:
+        (STRING) The string to inspect.
+    Returns:
+        (BOOLEAN) True if so, false if not.
+        (ERROR:BadPattern) If the pattern is malformed.
+
+REGEXMATCHES(pattern, string)
+    Checks if a string completely matches a set of characters using the provided RegEx.
+    pattern:
+        (STRING) The RegEx pattern to use.
+    string:
+        (STRING) The string to inspect.
+    Returns:
+        (BOOLEAN) True if so, false if not.
+        (ERROR:BadPattern) If the pattern is malformed.
+
+REGEXFIND(pattern, string)
+    Finds a substring in a set of characters that matches the provided RegEx.
+    pattern:
+        (STRING) The RegEx pattern to use.
+    string:
+        (STRING) The string to inspect.
+    Returns:
+        (NULL) If no matched substrings/groups.
+        (MAP:{start:INTEGER, end:INTEGER, group:STRING}) A map of details of the first matched group.
+        (ERROR:BadPattern) If the pattern is malformed.
+
+REGEXFINDALL(pattern, string)
+    Finds every substring in a set of characters that matches a provided RegEx.
+    pattern:
+        (STRING) The RegEx pattern to use.
+    string:
+        (STRING) The string to inspect.
+    Returns:
+        (LIST:[MAP:{start:INTEGER, end:INTEGER, group:STRING}, ...]) A list of maps of details of each matched group in the order found.
+        (ERROR:BadPattern) If the pattern is malformed.
+
+
+=================================================================
+==== [DATE] Date / Time
+=================================================================
+
+DATE()
+    Returns current date/time as milliseconds since Epoch (January 1, 1970 UTC).
+    Returns:
+        (INTEGER) The current date/time in milliseconds since Epoch.
+
+DATEFORMAT(timemillis, formatstring)
+    Formats a date using milliseconds since Epoch.
+    timemillis:
+        (INTEGER) Milliseconds since Epoch.
+    formatstring:
+        (STRING) A SimpleDateFormat formatting string.
+    Returns:
+        (STRING) The formatted time string.
+        (ERROR:BadFormat) If bad format string.
+
+
+=================================================================
+==== [FILE] File System
+=================================================================
+
+FILE(path)
+    Wraps a path into an OBJECTREF:File. Useful for functions that expect file objects specifically.
+    path:
+        (STRING) Path to file.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If nothing was provided.
+        (OBJECTREF:File) A file object that represents the path.
+
+FILEEXISTS(path)
+    Checks if a file exists.
+    path:
+        (STRING) Path to file.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (BOOLEAN) True if the file exists, false otherwise.
+        (ERROR:Security) If the OS is preventing the search.
+
+FILEISDIR(path)
+    Checks if a file is a directory path.
+    path:
+        (STRING) Path to file.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (BOOLEAN) True if the file is a directory, false otherwise.
+        (ERROR:Security) If the OS is preventing the read.
+
+FILEISHIDDEN(path)
+    Checks if a file is hidden.
+    path:
+        (STRING) Path to file.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (BOOLEAN) True if the file is hidden, false otherwise.
+        (ERROR:Security) If the OS is preventing the read.
+
+FILEPATH(path)
+    Returns the path used to open the file.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's path.
+
+FILENAME(path)
+    Returns the name of a file.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's name only.
+
+FILENAMENOEXT(path, extension)
+    Returns the name of a file, without extension.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    extension:
+        (NULL) Use "."
+        (STRING) The file extension separator string.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's name without its extension.
+
+FILEEXT(path)
+    Returns a file's extension.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's extension only. Empty string if no extension.
+
+FILELEN(path)
+    Returns a file's length in bytes.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (INTEGER) The file's length.
+        (ERROR:BadFile) If the file could not be found.
+        (ERROR:Security) If the OS is preventing the read.
+
+FILEDATE(path)
+    Returns a file's modified date in milliseconds since Epoch (Jan. 1, 1970 UTC).
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (INTEGER) The file's modified date in milliseconds since Epoch.
+        (ERROR:BadFile) If the file could not be found.
+        (ERROR:Security) If the OS is preventing the read.
+
+FILEPARENT(path)
+    Returns a file's parent path.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's parent path (if parameter was string).
+        (OBJECTREF:File) The file's parent path (if parameter was file).
+        (ERROR:Security) If the OS is preventing the search.
+
+FILEABSOLUTEPATH(path)
+    Returns the absolute path of a file.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's absolute path (if parameter was string).
+        (OBJECTREF:File) The file's absolute path (if parameter was file).
+        (ERROR:Security) If the OS is preventing the search.
+
+FILECANONPATH(path)
+    Returns the canonical path of a file.
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If [file] is null.
+        (STRING) The file's canonical path (if parameter was string).
+        (OBJECTREF:File) The file's canonical path (if parameter was file).
+        (ERROR:Security) If the OS is preventing the search.
+        (ERROR:IOError) If an error occurred during search.
+
+FILELIST(path)
+    Returns all files in a directory (and optionally, whose name fits a RegEx pattern).
+    path:
+        (STRING) A file path to inspect.
+        (OBJECTREF:File) A file path to inspect.
+    Returns:
+        (NULL) If not a directory or [path] is null.
+        (LIST:[STRING, ...]) A list of file paths in the directory (if parameter was string).
+        (LIST:[OBJECTREF:File, ...]) A list of file paths in the directory (if parameter was file).
+        (ERROR:Security) If the OS is preventing the search.
+
+FILEDELETE(path)
+    Attempts to delete a file.
+    path:
+        (STRING) The file to delete.
+        (OBJECTREF:File) The file to delete.
+    Returns:
+        (NULL) If [path] is null.
+        (BOOLEAN) True if the file existed and was deleted, false otherwise.
+        (ERROR:Security) If the OS is preventing the delete.
+
+FILERENAME(path, newname)
+    Attempts to rename/move a file.
+    path:
+        (STRING) The file to rename.
+        (OBJECTREF:File) The file to rename.
+    newname:
+        (STRING) The new path.
+        (OBJECTREF:File) The new path.
+    Returns:
+        (NULL) If [path] or [newname] is null.
+        (BOOLEAN) True if renamed/moved, false if not.
+        (ERROR:Security) If the OS is preventing the rename/move.
+
+CREATEDIR(path)
+    Attempts to create a directory using an abstract pathname.
+    path:
+        (STRING) The directory to create.
+        (OBJECTREF:File) The directory to create.
+    Returns:
+        (BOOLEAN) True if and only if the directory did not exist and was created, false if not.
+        (ERROR:Security) If the OS is preventing the creation.
+
+CREATEDIRS(path)
+    Attempts to create a directory using an abstract pathname and all of directories in between, if they also don't exist. NOTE: A failure may still involve some directories being created!
+    path:
+        (STRING) The directory or directories to create.
+        (OBJECTREF:File) The directory or directories to create.
+    Returns:
+        (BOOLEAN) True if and only if one or more directories did not exist before and were then created, and false if not.
+        (ERROR:Security) If the OS is preventing the creation.
+
+VERIFYDIRS(path)
+    Attempts to create a directory using an abstract pathname and all of the directories in between, if they also don't exist, OR verify that the directory path that was specified already exists. NOTE: A failure due to path creation may still involve some directories being created!
+    path:
+        (STRING) The directory or directories to create.
+        (OBJECTREF:File) The directory or directories to create.
+    Returns:
+        (BOOLEAN) True if ALL of the directories did not exist and were created or if the path is a directory and already exists, and false otherwise.
+        (ERROR:Security) If the OS is preventing the creation.
+
+
+=================================================================
+==== [FLIO] File I/O
+=================================================================
+
+FOPEN(path, mode)
+    Returns an open handle to a file. The file, if opened, is registered as a resource, and will be closed when the script terminates.
+    path:
+        (STRING) Path to file. Relative paths are relative to working directory.
+        (OBJECTREF:File) Path to file. Relative paths are relative to working directory.
+    mode:
+        (NULL) Use "r", read-only mode.
+        (STRING) Mode string.
+            "r" = readonly,
+            "rw" = read/write/create buffered
+            "rwd" = read/write/create/synchronous data
+            "rws" = read/write/create/synchronous data/metadata
+    Returns:
+        (OBJECTREF:RandomAccessFile) If successfully open/created (NOTE: This is also a DataInput/DataOutput).
+        (ERROR:BadMode) If [mode] is an unexpected value.
+        (ERROR:Security) If the OS denied opening the file for the required permissions.
+        (ERROR:IOError) If [path] is null or the file could not be opened/found for some reason.
+
+FGETLEN(rafile)
+    Returns an open file's length in bytes.
+    rafile:
+        (OBJECTREF:RandomAccessFile) An open file handle.
+    Returns:
+        (INTEGER) The file's current length in bytes.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+FSETLEN(rafile, length)
+    Sets an open file's length in bytes. A [length] less than current will truncate the file, and a greater [length] will expand the file with undefined contents.
+    rafile:
+        (OBJECTREF:RandomAccessFile) An open file handle.
+    length:
+        (INTEGER) The new length of the file.
+    Returns:
+        (OBJECTREF:RandomAccessFile) rafile.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read/write error occurs.
+
+FGETPOS(rafile)
+    Returns an open file's current cursor position.
+    rafile:
+        (OBJECTREF:RandomAccessFile) An open file handle.
+    Returns:
+        (INTEGER) The file's current cursor position.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+FSETPOS(rafile, position)
+    Sets an open file's current cursor position.
+    rafile:
+        (OBJECTREF:RandomAccessFile) An open file handle.
+    position:
+        (INTEGER) The new position.
+    Returns:
+        (INTEGER) The file's current cursor position.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If the position could not be set ( < 0 ).
+
+
+=================================================================
+==== [ZIPS] Zip Files / GZIP Streams
+=================================================================
+
+ZFOPEN(path)
+    Opens a Zip file. The file, if opened, is registered as a resource, and will be closed when the script terminates.
+    path:
+        (STRING) Path to zip file. Relative paths are relative to working directory.
+        (OBJECTREF:File) Path to zip file. Relative paths are relative to working directory.
+    Returns:
+        (OBJECTREF:ZipFile) An open Zip file.
+        (ERROR:Security) If the OS denied opening the file for the required permissions.
+        (ERROR:IOError) If [path] is null or the file is not a Zip file, or it does could not be opened/found for some reason.
+
+ZFENTRY(zip, entry)
+    Returns a list of all of the entries in an open Zip File.
+    zip:
+        (OBJECTREF:ZipFile) The open zip file.
+    entry:
+        (STRING) The entry name.
+    Returns:
+        (NULL) If an entry by that name could not be found.
+        (MAP:{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}) A map of entry info.
+        (ERROR:BadParameter) If an open zip file was not provided, or [entry] is null.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+ZFENTRIES(zip)
+    Returns a list of all of the entries in an open Zip File.
+    zip:
+        (OBJECTREF:ZipFile) The open zip file.
+    Returns:
+        (LIST:[MAP:{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}, ...]) A list of maps of entry info.
+        (ERROR:BadParameter) If an open zip file was not provided.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+ZFITERATE(zip)
+    Returns a list of all of the entries in an open Zip File. The value that this produces can be used in an each(...) loop. The keys are entry names, and values are maps of entry info (a la ZFENTRY). If you need to scan through a Zip with many entries, this may be a less memory-intense way to do it.
+    zip:
+        (OBJECTREF:Script) The open zip file.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) An iterator for each entry - Key: name:STRING, value: MAP{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}.
+        (ERROR:BadParameter) If an open zip file was not provided.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+ZFEOPEN(zip, entry)
+    Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource).
+    zip:
+        (OBJECTREF:ZipFile) The open zip file.
+    entry:
+        (STRING) The entry name.
+        (MAP:{... name:STRING ...}) A map of zip entry info containing at least the name of the entry.
+    Returns:
+        (OBJECTREF:DataInputStream) An open data input stream to read from.
+        (ERROR:BadParameter) If an open zip file was not provided, or [entry] is null or [entry].name is null.
+        (ERROR:BadEntry) If [entry] could not be found in the zip.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+GZISOPEN(instream)
+    Wraps a data input stream for reading a GZIP stream (and registers this resource as an open resource, but only if the underlying stream is registered - it is deregistered before registering this one).
+    instream:
+        (OBJECTREF:InputStream) A valid open input stream.
+    Returns:
+        (OBJECTREF:DataInputStream) An open data input stream to read from.
+        (ERROR:BadParameter) If an open input stream was not provided.
+        (ERROR:BadStream) If the provided input stream is not a GZIPped stream of data.
+        (ERROR:IOError) If a read error occurs, or the provided stream is not open.
+
+GZOSOPEN(outstream)
+    Wraps a data output stream for writing a GZIP stream (and registers this resource as an open resource, but only if the underlying stream is registered - it is deregistered before registering this one).
+    outstream:
+        (OBJECTREF:OutputStream) A valid open output stream.
+    Returns:
+        (OBJECTREF:DataOutputStream) An open data output stream to write to.
+        (ERROR:BadParameter) If an open output stream was not provided.
+        (ERROR:IOError) If a write error occurs, or the provided stream is not open.
+
+
+=================================================================
+==== [STIO] Stream I/O
+=================================================================
+
+SKIP(input, length)
+    Skips reading [length] amount of bytes from a readable data input, from the file's current cursor position. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+        (OBJECTREF:InputStream) An input stream.
+    length:
+        (NULL) Use 0.
+        (INTEGER) The amount of bytes to skip.
+    Returns:
+        (INTEGER) The amount of bytes actually skipped.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+FLUSH(flushable)
+    Flushes an output stream or other flushable stream - anything buffered is written immediately.
+    flushable:
+        (OBJECTREF:Flushable) An open, flushable stream (usually an output stream).
+    Returns:
+        (OBJECTREF) flushable.
+        (ERROR:BadParameter) If the provided object is not flushable.
+        (ERROR:IOError) If an I/O error occurs.
+
+RELAY(input, output, buffersize, maxlength)
+    Reads from a data input and writes the data read from it to the data output until the end of the input is reached.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    buffersize:
+        (NULL) Use 8192 (8 KB).
+        (STRING) The size of the intermediate buffer (in bytes) to use for transfer.
+    maxlength:
+        (NULL) Unlimited.
+        (INTEGER) The maximum amount of bytes to transfer.
+    Returns:
+        (INTEGER) The actual amount of bytes moved.
+        (ERROR:BadParameter) If a valid stream was not provided for [input] or [output].
+        (ERROR:IOError) If a read or write error occurs.
+
+READ(input, buffer, offset, length)
+    Reads [length] amount of bytes from a readable data input, from the file's current cursor position. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    buffer:
+        (BUFFER) The buffer object to read into.
+    offset:
+        (NULL) Use current buffer cursor position (buffer cursor will be advanced).
+        (INTEGER) The offset into the buffer object to put the bytes (buffer cursor will NOT be advanced).
+    length:
+        (NULL) Use length(buffer) - offset.
+        (INTEGER) The maximum amount of bytes to read.
+    Returns:
+        (INTEGER) The actual amount of bytes read, or -1 if end-of-file was reached at time of read.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+WRITE(output, buffer, offset, length)
+    Writes [length] amount of bytes to the file, from the file's current cursor position using the bytes in a buffer. The file's cursor will be advanced.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    buffer:
+        (BUFFER) The buffer object to read from.
+    offset:
+        (NULL) Use current buffer cursor position (buffer cursor will be advanced).
+        (INTEGER) The offset into the buffer object to get the bytes to write (buffer cursor will NOT be advanced).
+    length:
+        (NULL) Use length(buffer) - offset.
+        (INTEGER) The maximum amount of bytes to write.
+    Returns:
+        (INTEGER) The actual amount of bytes written.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+STDIN()
+    Opens a data input stream for reading from STDIN (resource is not registered).
+    Returns:
+        (OBJECTREF:DataInputStream) An open input stream for reading STDIN.
+        (ERROR:Unavailable) If STDIN was not provided to the script's environment.
+
+STDOUT()
+    Opens a data output stream for writing to STDOUT (resource is not registered).
+    Returns:
+        (OBJECTREF:DataOutputStream) An open output stream for writing to STDOUT.
+        (ERROR:Unavailable) If STDOUT was not provided to the script's environment.
+
+STDERR()
+    Opens a data output stream for writing to STDERR (resource is not registered).
+    Returns:
+        (OBJECTREF:DataOutputStream) An open output stream for writing to STDERR.
+        (ERROR:Unavailable) If STDERR was not provided to the script's environment.
+
+FISOPEN(file)
+    Opens a data input stream for reading from a file (and registers this resource as an open resource).
+    file:
+        (STRING) A path to a file.
+        (OBJECTREF:File) A path to a file.
+    Returns:
+        (OBJECTREF:DataInputStream) An open data input stream to read from.
+        (ERROR:BadParameter) If [file] is null.
+        (ERROR:BadFile) If [file] could not be found.
+        (ERROR:Security) If the OS denied opening the file for reading.
+
+FOSOPEN(file, append)
+    Opens a data output stream for writing to a file (and registers this resource as an open resource).
+    file:
+        (STRING) A path to a file.
+        (OBJECTREF:File) A path to a file.
+    append:
+        (BOOLEAN) If true, appends to the file instead of overwriting it.
+    Returns:
+        (OBJECTREF:DataOutputStream) An open data output stream to write to.
+        (ERROR:BadParameter) If [file] is null.
+        (ERROR:BadFile) If [file] is null, a directory, or the file could not be made.
+        (ERROR:Security) If the OS denied opening the file for reading.
+
+BISOPEN(buffer)
+    Opens a data input stream for reading from a buffer from its current cursor position (cursor advances with reading). This is NOT registered as a closeable resource.
+    buffer:
+        (BUFFER) The buffer to use.
+    Returns:
+        (OBJECTREF:DataInputStream) An open data input stream to read from.
+        (ERROR:BadParameter) If [buffer] is null or not a buffer.
+
+BOSOPEN(buffer)
+    Opens a data output stream for writing from a buffer from its current cursor position (cursor advances with writing). This is NOT registered as a closeable resource.
+    buffer:
+        (BUFFER) The buffer to use.
+    Returns:
+        (OBJECTREF:DataOutputStream) An open data output stream to write to.
+        (ERROR:BadParameter) If [buffer] is null or not a buffer.
+
+CSROPEN(instream, encoding)
+    Creates a "character stream" reader around an input stream (and registers this resource as an open resource, but only if the underlying stream is registered - it is deregistered before registering this one). Closing this Reader will also close the underlying stream.
+    instream:
+        (OBJECTREF:InputStream) A valid open input stream.
+    encoding:
+        (NULL) Use platform encoding.
+        (STRING) A charset name.
+    Returns:
+        (NULL) If [instream] is null.
+        (OBJECTREF:Reader) The Reader to use for reading characters from.
+        (ERROR:BadParameter) If [instream] is not a data input stream object type.
+        (ERROR:BadEncoding) If [encoding] is not a valid charset name.
+
+CSWOPEN(outstream, encoding)
+    Creates a "character stream" writer around an output stream (and registers this resource as an open resource, but only if the underlying stream is registered - it is deregistered before registering this one). Closing this Writer will also close the underlying stream.
+    outstream:
+        (OBJECTREF:OutputStream) A valid open output stream.
+    encoding:
+        (NULL) Use platform encoding.
+        (STRING) A charset name.
+    Returns:
+        (NULL) If [outstream] is null.
+        (OBJECTREF:Writer) The Writer to use for writing characters to.
+        (ERROR:BadParameter) If [outstream] is not a data output stream object type.
+        (ERROR:BadEncoding) If [encoding] is not a valid charset name.
+
+SROPEN(string)
+    Creates a "character stream" reader around a string (not registered as an open resource).
+    string:
+        (STRING) The string to read from (value is converted to a string).
+    Returns:
+        (OBJECTREF:Reader) The Reader to use for reading characters from.
+
+SWOPEN()
+    Creates a "character stream" writer for writing into a string (not registered as an open resource). The string can then be fetched by calling TOSTRING() on this Writer.
+    Returns:
+        (OBJECTREF:Writer) The Writer to use for writing characters to.
+
+CSREAD(reader, charlen)
+    Reads characters from a reader and returns a string of all of the read characters.
+    reader:
+        (OBJECTREF:Reader) A valid open Reader.
+    charlen:
+        (NULL) Use 1.
+        (INTEGER) The maximum amount of characters to read.
+    Returns:
+        (NULL) If the Reader is at End-Of-Stream at the time of read.
+        (STRING) The read characters.
+        (ERROR:BadParameter) If a valid Reader was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+CSREADLN(reader)
+    Reads characters from a reader until an end-of-line (or stream) is reached and returns a string of all of the read characters (minus the newline).
+    reader:
+        (OBJECTREF:Reader) A valid open Reader.
+    Returns:
+        (NULL) If the Reader is at End-Of-Stream at the time of read.
+        (STRING) The read characters (without the newline).
+        (ERROR:BadParameter) If a valid Reader was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+CSITERATE(reader)
+    Creates an iterator that reads lines from a Reader until it reaches the end of the stream. The value that this produces can be used in an each(...) loop. The keys are line numbers (starts at 1), and values are the lines read (without newline). If an error occurs at any point, the value is an Error.
+    reader:
+        (OBJECTREF:Reader) A valid open Reader.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The stream iterator.
+        (ERROR:BadParameter) If a valid Reader was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+CSWRITE(writer, str)
+    Writes characters to a writer.
+    writer:
+        (OBJECTREF:Writer) A valid open Writer.
+    str:
+        (STRING) The string of characters to write (if not a string, it is converted to one).
+    Returns:
+        (OBJECTREF:Writer) writer.
+        (ERROR:BadParameter) If a valid Writer was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+CSWRITELN(writer, str)
+    Writes characters to a writer.
+    writer:
+        (OBJECTREF:Writer) A valid open Writer.
+    str:
+        (STRING) The string of characters to write (if not a string, it is converted to one).
+    Returns:
+        (OBJECTREF:Writer) writer.
+        (ERROR:BadParameter) If a valid Writer was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+
+=================================================================
+==== [DAIO] Data I/O
+=================================================================
+
+READBYTE(input)
+    Reads a byte from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    Returns:
+        (INTEGER) The read byte (0 - 255), or -1 if at the end of the stream.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a read error occurs.
+
+READSHORT(input, endianmode)
+    Reads a short (2 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (INTEGER) The read short (-32768 - 32767).
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READUSHORT(input, endianmode)
+    Reads an unsigned short (2 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (INTEGER) The read short (0 - 65535).
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READINT(input, endianmode)
+    Reads an integer (4 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (INTEGER) The read integer (-2^31 - 2^31-1).
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READUINT(input, endianmode)
+    Reads an unsigned integer (4 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (INTEGER) The read integer (0 - 2^32-1).
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READFLOAT(input, endianmode)
+    Reads a 32-bit float (4 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (FLOAT) The read float.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READLONG(input, endianmode)
+    Reads a long integer (8 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (INTEGER) The read integer (-2^63 - 2^63-1).
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READDOUBLE(input, endianmode)
+    Reads a 64-bit float (8 bytes) from a readable data input. The file's cursor will be advanced.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (FLOAT) The read double.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+READSTR(input, length, encoding)
+    Reads a set of bytes from a readable data input, and converts it into a string.
+    input:
+        (OBJECTREF:DataInput) A readable data input.
+    length:
+        (INTEGER) The number of bytes to read.
+    encoding:
+        (NULL) Use platform encoding.
+        (STRING) A charset name.
+    Returns:
+        (STRING) The read string.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:BadEncoding) If an unknown encoding was provided.
+        (ERROR:DataUnderflow) If not enough bytes for the value, or end-of-stream was reached at the time of read.
+        (ERROR:IOError) If a read error occurs.
+
+WRITEBYTE(output, value)
+    Writes a byte to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The byte to write (first 8 bits used).
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITESHORT(output, value, endianmode)
+    Writes a short (2 bytes) to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The short to write (-32768 - 32767).
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITEUSHORT(output, value, endianmode)
+    Writes an unsigned short (2 bytes) to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The short to write (0 - 65535).
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITEINT(output, value, endianmode)
+    Writes an integer (4 bytes) to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The integer to write (-2^31 - 2^31-1).
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITEUINT(output, value, endianmode)
+    Writes an unsigned integer (4 bytes) to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The integer to write (0 - 2^32-1).
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITEFLOAT(output, value, endianmode)
+    Writes a 32-bit floating-point number to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (FLOAT) The float to write.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITELONG(output, value, endianmode)
+    Writes a long integer (8 bytes) to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (INTEGER) The integer to write (-2^63 - 2^63-1).
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITEDOUBLE(output, value, endianmode)
+    Writes a 64-bit floating-point number to a writeable data output.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (FLOAT) The double to write.
+    endianmode:
+        (NULL) Use native.
+        (BOOLEAN) True - big endian, false - little endian.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:IOError) If a write error occurs.
+
+WRITESTR(output, value, encoding)
+    Writes a string to a writeable data output, converting it into a set of bytes.
+    output:
+        (OBJECTREF:DataOutput) A writeable data output.
+    value:
+        (NULL) Write nothing.
+        (STRING) The string to write.
+    encoding:
+        (NULL) Use platform encoding.
+        (STRING) A charset name.
+    Returns:
+        (OBJECTREF:DataOutput) output.
+        (ERROR:BadParameter) If a file handle was not provided.
+        (ERROR:BadEncoding) If an unknown encoding was provided.
+        (ERROR:IOError) If a write error occurs.
+
+
+=================================================================
+==== [HASH] Digest
+=================================================================
+
+DIGESTSTART(algorithm)
+    Starts a message digest calculator.
+    algorithm:
+        (STRING) The name of the algorithm to use.
+    Returns:
+        (OBJECTREF:MessageDigest) A digest calculator for the hash.
+        (ERROR:BadAlgorithm) If [algorithm] is not supported by the host.
+
+DIGESTUPDATE(digest, data, length)
+    Updates a message digest calculator with a set of bytes to digest.
+    digest:
+        (OBJECTREF:MessageDigest) The digest calculator to use.
+    data:
+        (BUFFER) The buffer to read from (starting from the buffer's cursor).
+        (OBJECTREF:File) The file read from (until end-of-file).
+        (OBJECTREF:InputStream) The input stream to read from (until end-of-stream).
+    length:
+        (NULL) Use full length.
+        (INTEGER) The amount of bytes to read, maximum.
+    Returns:
+        (OBJECTREF:MessageDigest) digest.
+        (ERROR:BadParameter) If [data] is not one of the required types.
+        (ERROR:BadFile) If [data] is a file, and it does not exist.
+        (ERROR:Security) If the OS is preventing opening a file for reading, or the file is a directory.
+        (ERROR:IOError) If a read error occurs.
+
+DIGESTEND(digest)
+    Returns a buffer containing the bytes of the digest, resetting the calculator for reuse.
+    digest:
+        (OBJECTREF:MessageDigest) The digest calculator to use.
+    Returns:
+        (BUFFER) A buffer containing the resultant hash digest.
+
+HASH(data, algorithm)
+    Takes a buffer or input stream and outputs a buffer containing bytes in the desired hash digest. This is meant to be a pure convenience function - use the other digest functions for greater hash calculation control. Input streams are not closed after this completes.
+    data:
+        (BUFFER) The buffer to read (until the end is reached).
+        (OBJECTREF:File) The file read from (until end-of-file).
+        (OBJECTREF:InputStream) The input stream to read from (until end-of-stream).
+    algorithm:
+        (STRING) The name of the algorithm to use.
+    Returns:
+        (BUFFER) A buffer containing the resultant hash digest.
+        (ERROR:BadParameter) If [data] is not one of the required types.
+        (ERROR:BadFile) If [data] is a file, and it does not exist.
+        (ERROR:BadAlgorithm) If [algorithm] is not supported by the host.
+        (ERROR:Security) If the OS is preventing opening a file for reading, or the file is a directory.
+        (ERROR:IOError) If a read error occurs.
+
+MD5(data)
+    Takes a buffer or input stream and outputs a buffer containing bytes using the MD5 hash digest. This is meant to be a pure convenience function - use the other digest functions for greater hash calculation control. Input streams are not closed after this completes.
+    data:
+        (BUFFER) The buffer to read fully (from index 0).
+        (OBJECTREF:File) The file read from (until end-of-file).
+        (OBJECTREF:InputStream) The input stream to read from (until end-of-stream).
+    Returns:
+        (BUFFER) A buffer containing the resultant hash digest.
+        (ERROR:BadParameter) If [data] is not one of the required types.
+        (ERROR:BadFile) If [data] is a file, and it does not exist.
+        (ERROR:Security) If the OS is preventing opening a file for reading, or the file is a directory.
+        (ERROR:IOError) If a read error occurs.
+
+SHA1(data)
+    Takes a buffer or input stream and outputs a buffer containing bytes using the SHA1 hash digest. This is meant to be a pure convenience function - use the other digest functions for greater hash calculation control. Input streams are not closed after this completes.
+    data:
+        (BUFFER) The buffer to read fully (from index 0).
+        (OBJECTREF:File) The file read from (until end-of-file).
+        (OBJECTREF:InputStream) The input stream to read from (until end-of-stream).
+    Returns:
+        (BUFFER) A buffer containing the resultant hash digest.
+        (ERROR:BadParameter) If [data] is not one of the required types.
+        (ERROR:BadFile) If [data] is a file, and it does not exist.
+        (ERROR:Security) If the OS is preventing opening a file for reading, or the file is a directory.
+        (ERROR:IOError) If a read error occurs.
+
+SHA256(data)
+    Takes a buffer or input stream and outputs a buffer containing bytes using the SHA256 hash digest. This is meant to be a pure convenience function - use the other digest functions for greater hash calculation control. Input streams are not closed after this completes.
+    data:
+        (BUFFER) The buffer to read fully (from index 0).
+        (OBJECTREF:File) The file read from (until end-of-file).
+        (OBJECTREF:InputStream) The input stream to read from (until end-of-stream).
+    Returns:
+        (BUFFER) A buffer containing the resultant hash digest.
+        (ERROR:BadParameter) If [data] is not one of the required types.
+        (ERROR:BadFile) If [data] is a file, and it does not exist.
+        (ERROR:Security) If the OS is preventing opening a file for reading, or the file is a directory.
+        (ERROR:IOError) If a read error occurs.
+
+
+=================================================================
+==== [JSON] JSON
+=================================================================
+
+READJSON(jsoninput)
+    Converts JSON data to a script value. The provided stream is read until a full JSON value is parsed. NOTE: While RookScript structures are compatible with the JSON spec, RookScript map key names are NOT case-sensitive, and may result in members of the same name being overwritten.
+    jsoninput:
+        (STRING) The JSON string to convert.
+        (OBJECTREF:File) The file to read JSON from (assumes UTF-8 encoding).
+        (OBJECTREF:InputStream) The input stream to read JSON from (assumes UTF-8 encoding).
+        (OBJECTREF:Reader) The reader to read JSON from.
+    Returns:
+        (ANY) The resultant value read.
+        (ERROR:BadParameter) If [json] is not a valid input type.
+        (ERROR:BadFile) If [json] is a file and is not found.
+        (ERROR:BadParse) If a JSON parse error occurs.
+        (ERROR:Security) If [json] is a file and the OS is preventing the read.
+        (ERROR:IOError) If a read or write error occurs.
+
+WRITEJSON(output, value)
+    Converts a script value to JSON and writes it to a provided output. Objects will be reflection-exported as JS objects, and buffers as arrays of unsigned byte values.
+    output:
+        (OBJECTREF:File) The file to write the JSON to (encoding is UTF-8, file is overwritten, and then closed).
+        (OBJECTREF:OutputStream) The output stream to write the JSON to (encoding is UTF-8).
+        (OBJECTREF:Writer) The Writer to write the JSON to.
+    value:
+        (ANY) The value to export as JSON. Objects will be reflection-exported as maps, and buffers as arrays of unsigned byte values.
+    Returns:
+        (OBJECTREF) output.
+        (ERROR:Security) If [output] is a file and the OS is preventing the creation/write.
+        (ERROR:IOError) If a write error occurs.
+
+JSONSTR(value)
+    Converts a script value to JSON and returns it as a string. Objects will be reflection-exported as maps, and buffers as arrays of unsigned byte values.
+    value:
+        (ANY) The value to export as JSON.
+    Returns:
+        (STRING) The resultant string.
+        (ERROR:IOError) If a write error occurs.
+
+
+=================================================================
+==== [SYST] System
+=================================================================
+
+PROPERTIES(key)
+    Returns a map of JVM properties. Best to read this once and re-query the returned map.
+    key:
+        (NULL) Get all properties as a map.
+        (STRING) Get a single property as a string value.
+        (LIST) Get all provided properties as a map.
+    Returns:
+        (STRING) The corresponding property, if [key] is a string. Can be null.
+        (MAP) The corresponding map of properties, if [key] is null or a list.
+        (ERROR:Security) If a property cannot be queried.
+
+ENVVARS(variable)
+    Gets one or more system environment variables.
+    variable:
+        (NULL) Get all variables as a map.
+        (STRING) Get a single variable as a string value.
+        (LIST) Get all provided variables as a map.
+    Returns:
+        (STRING) The corresponding value, if [variable] is a string.
+        (MAP) The corresponding map of values, if [variable] is null or a list.
+        (ERROR:Security) If a value cannot be queried.
+
+EXEC(command, args, env, workdir, output, errout, input)
+    Spawns a process instance. A set of daemon threads are created that assist the streams on the process. The process, if created successfully, is registered as an open resource, and is closeable like any other resource. The script may end before the process does, so you may want to wait for its end via EXECRESULT().
+    command:
+        (STRING) Process name or path to execute.
+    args:
+        (LIST:[STRING, ...]) Argument list to pass to the process.
+    env:
+        (MAP) Map of key-value pairs for environment values.
+    workdir:
+        (NULL) Current working directory.
+        (STRING) Path to working directory.
+        (OBJECTREF:File) Path to working directory.
+    output:
+        (NULL) Consume all output.
+        (OBJECTREF:File) The file to write the process output to (closed on process end, native encoding).
+        (OBJECTREF:OutputStream) The output stream to write the process output to (encoding is native).
+    errout:
+        (NULL) Consume all output.
+        (OBJECTREF:File) The file to write the process error output to (closed on process end, native encoding).
+        (OBJECTREF:OutputStream) The output stream to write the process error output to (encoding is native).
+    input:
+        (NULL) No input, first read is end-of-stream.
+        (OBJECTREF:File) The file to read process input from (assumes native encoding).
+        (OBJECTREF:InputStream) The input stream to read process input from (assumes native encoding).
+    Returns:
+        (OBJECTREF:ProcessInstance) An encapsulated, spawned process.
+        (ERROR:BadParameter) A type of a parameter is unexpected.
+        (ERROR:BadFile) If a stream is a file and it is an invalid file.
+        (ERROR:Security) If a stream is denied access or the process can't be instantiated due to OS denial.
+        (ERROR:IOError) If an I/O error occurs.
+
+EXECRESULT(command, waitmillis)
+    Waits for a process to complete and returns its result.
+    command:
+        (OBJECTREF:ProcessInstance) The process instance.
+    waitmillis:
+        (NULL) Wait indefinitely.
+        (INTEGER) The amount of time to wait for a result, in milliseconds. If 0 or less, wait forever.
+    Returns:
+        (INTEGER) The process return result.
+        (ERROR:BadParameter) A type of a parameter is unexpected.
+        (ERROR:Timeout) If the wait timed out.
+
+
+=================================================================
+==== [WADS] WADs
+=================================================================
+
+ISWAD(file)
+    Checks if a file exists and is a Wad file.
+    file:
+        (STRING) Path to WAD file.
+        (OBJECTREF:File) Path to WAD file.
+        (OBJECTREF:Wad) Returns true.
+    Returns:
+        (BOOLEAN) True if so, false if not.
+        (ERROR:Security) If the OS denied permission to read the file.
+        (ERROR:IOError) If there was an error reading the file.
+
+WADFILE(file)
+    Opens a WAD File. Registered as an open resource.
+    file:
+        (STRING) Path to WAD file.
+        (OBJECTREF:File) Path to WAD file.
+    Returns:
+        (OBJECTREF:Wad) An open Wad.
+        (ERROR:BadParameter) If [file] is null.
+        (ERROR:BadFile) If [file] could not be found.
+        (ERROR:BadWad) If [file] is not a WAD file.
+        (ERROR:Security) If the OS denied permission to read the file.
+        (ERROR:IOError) If there was an error reading the file.
+
+WADFILECREATE(file)
+    Creates a new, empty, open WAD file. Overwrites existing files! Registered as an open resource.
+    file:
+        (STRING) Path to WAD file.
+        (OBJECTREF:File) Path to WAD file.
+    Returns:
+        (OBJECTREF:Wad) A newly created WAD file.
+        (ERROR:BadParameter) If [file] is null.
+        (ERROR:Security) If the OS denied permission to create the file.
+        (ERROR:IOError) If there was an error creating the file.
+
+WADBUFFER(file)
+    Opens a WAD into an in-memory WAD buffer (not a resource - does not require closing).
+    file:
+        (NULL) Make empty buffer.
+        (STRING) Path to WAD file.
+        (OBJECTREF:File) Path to WAD file.
+        (OBJECTREF:InputStream) An open input stream.
+    Returns:
+        (OBJECTREF:Wad) A loaded buffer.
+        (ERROR:BadFile) If [file] could not be found.
+        (ERROR:BadWad) If [file] is not a WAD file.
+        (ERROR:Security) If the OS denied permission to read the file.
+        (ERROR:IOError) If there was an error reading the file.
+
+WADINFO(wad)
+    Fetches a Wad's info.
+    wad:
+        (OBJECTREF:Wad) The open WAD to inspect.
+    Returns:
+        (MAP:{type:STRING, entrycount:INTEGER, listoffset:INTEGER, contentlength:INTEGER, filepath:STRING}) The fetched WAD information as a map.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+WADENTRY(wad, search, startFromSearch)
+    Fetches a Wad's entry info.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    search:
+        (NULL) Fetch nothing.
+        (INTEGER) The entry index (0-based).
+        (STRING) The entry name (first found). Also use [startFromSearch].
+    startFromSearch:
+        (NULL) Start from entry 0.
+        (INTEGER) Start from entry index (0-based).
+        (STRING) Start from entry name (first found).
+    Returns:
+        (NULL) If not found.
+        (MAP:{name:STRING, offset:INTEGER, size:INTEGER}) The fetched entry information as a map.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+WADENTRYINDEX(wad, search, startFromSearch)
+    Fetches the index of an entry in the Wad.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    search:
+        (NULL) Fetch nothing.
+        (STRING) The entry name (first found). Also use [startFromSearch].
+    startFromSearch:
+        (NULL) Start from entry 0.
+        (INTEGER) Start from entry index (0-based).
+        (STRING) Start from entry name (first found).
+    Returns:
+        (NULL) If not found.
+        (INTEGER) The index of the found entry.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+WADENTRIES(wad, start, length)
+    Retrieves a contiguous set of entries from a WAD, starting from a desired index.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    start:
+        (NULL) Use 0.
+        (INTEGER) The starting entry index.
+    length:
+        (NULL) Use [wad's entry count] - [start].
+        (INTEGER) The maximum amount of entries to return.
+    Returns:
+        (LIST:[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]) The entry info returned.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+WADITERATE(wad)
+    Creates an iterator that iterates through all of the entries in a WAD. The value that this produces can be used in an each(...) loop. The keys are entry indices, and values are maps of entry info (a la WADENTRY). If you need to scan through a Wad with many entries, this may be a less memory-intense way to do it.
+    wad:
+        (OBJECTREF:Wad) The open WAD to iterate through.
+    Returns:
+        (OBJECTREF:Iterator) An iterator for each entry - Key: index:INTEGER, value: MAP{name:STRING, offset:INTEGER, size:INTEGER}.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+WADDATA(wad, entry, startFromSearch)
+    Gets WAD data using an entry descriptor, returning it as buffers of data.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    entry:
+        (NULL) Fetch nothing.
+        (INTEGER) The entry index.
+        (STRING) The entry name (first found). Also use [startFromSearch].
+        (MAP:{..., offset:INTEGER, size:INTEGER}) The entry descriptor.
+    startFromSearch:
+        (NULL) Start from entry 0.
+        (INTEGER) Start from entry index (0-based).
+        (STRING) Start from entry name (first found).
+    Returns:
+        (NULL) If not found.
+        (BUFFER) The entry data.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+        (ERROR:BadEntry) If [entry] is a map and "offset" or "size" are missing, or not an accepted value type.
+        (ERROR:IOError) If a read error occurs.
+
+WADDATASTREAM(wad, entry, startFromSearch)
+    Gets an input stream for WAD data using an entry descriptor.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    entry:
+        (NULL) Fetch nothing.
+        (INTEGER) The entry index.
+        (STRING) The entry name (first found). Also use [startFromSearch].
+        (MAP:{..., offset:INTEGER, size:INTEGER}) The entry descriptor.
+    startFromSearch:
+        (NULL) Start from entry 0.
+        (INTEGER) Start from entry index (0-based).
+        (STRING) Start from entry name (first found).
+    Returns:
+        (NULL) If not found.
+        (OBJECTREF:DataInputStream) The entry data as an open input stream.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+        (ERROR:BadEntry) If [entry] is a map and "offset" or "size" are missing, or not an accepted value type.
+        (ERROR:IOError) If a read error occurs.
+
+WADADD(wad, name, data, index)
+    Adds an entry to a Wad.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    name:
+        (NULL) Use "-".
+        (STRING) The new entry name (name is coerced into a valid name).
+    data:
+        (NULL) Synonymous with empty buffer - no data. Writes a marker.
+        (STRING) The data to add (as UTF-8).
+        (BUFFER) The data to add (read from current cursor position to the end).
+        (OBJECTREF:File) The file contents to add.
+        (OBJECTREF:InputStream) The data to add.
+        (OBJECTREF:BinaryObject) The data to add.
+        (OBJECTREF:TextObject) The data to add.
+    index:
+        (NULL) Add to the end.
+        (INTEGER) Insert at index.
+    Returns:
+        (OBJECTREF:Wad) [wad], if successful.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+        (ERROR:BadData) If [data] is not an accepted value type.
+        (ERROR:BadIndex) If an [index] was provided and it is less than 0 or greater than the current entry count.
+        (ERROR:IOError) If a read error occurs.
+
+WADREMOVE(wad, index)
+    Removes a WAD's entry by index. Does not remove content.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    index:
+        (INTEGER) The entry index to remove.
+    Returns:
+        (OBJECTREF:Wad) [wad], if successful.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+        (ERROR:BadIndex) If the index is less than 0 or greater than or equal to the current entry count.
+        (ERROR:IOError) If a write error occurs.
+
+WADDELETE(wad, index)
+    Deletes a WAD's entry by index. Removes content!
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    index:
+        (INTEGER) The entry index to delete.
+    Returns:
+        (OBJECTREF:Wad) [wad], if successful.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+        (ERROR:BadIndex) If the index is less than 0 or greater than or equal to the current entry count.
+        (ERROR:IOError) If a write error occurs.
+
+WADIMPORT(wad, srcWad, srcEntries, index)
+    Imports data into one Wad from another.
+    wad:
+        (OBJECTREF:Wad) The open WAD to import into.
+    srcWad:
+        (OBJECTREF:Wad) The open source Wad to import from.
+    srcEntries:
+        (NULL) Assume all entries from the source.
+        (LIST:[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]) The list of entries to import from the source, in the order provided.
+    index:
+        (NULL) Add to the end.
+        (INTEGER) Insert at index.
+    Returns:
+        (OBJECTREF:Wad) [wad], if successful.
+        (ERROR:BadParameter) If [wad] or [srcWad] are not Wad files.
+        (ERROR:BadEntry) If one of the entries in the entry list is malformed.
+        (ERROR:BadIndex) If the index is less than 0 or greater than or equal to the current entry count.
+        (ERROR:IOError) If a write error occurs.
+
+
+=================================================================
+==== [PK3S] PK3s
+=================================================================
+
+PK3OPEN(path)
+    Opens a Doom PK3. The ZF* functions can work with this - a Doom PK3 is a Zip file! The file, if opened, is registered as a resource, and will be closed when the script terminates.
+    path:
+        (STRING) Path to PK3 file. Relative paths are relative to working directory.
+        (OBJECTREF:File) Path to PK3 file. Relative paths are relative to working directory.
+    Returns:
+        (OBJECTREF:DoomPK3) An open PK3 file.
+        (ERROR:Security) If the OS denied opening the file for the required permissions.
+        (ERROR:IOError) If [path] is null or the file is not a PK3 file, or it does could not be opened/found for some reason.
+
+PK3ENTRY(zip, entry)
+    Returns a list of all of the entries in an open PK3 file. This is a rebrand of ZFENTRY - same function.
+    zip:
+        (OBJECTREF:ZipFile) The open zip/PK3 file.
+    entry:
+        (STRING) The entry name.
+    Returns:
+        (NULL) If an entry by that name could not be found.
+        (MAP:{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}) A map of entry info.
+        (ERROR:BadParameter) If an open zip file was not provided, or [entry] is null.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+PK3ENTRIES(pk3, prefix)
+    Returns a list of all entries that start with a type of key. The name is treated case-insensitively.
+    pk3:
+        (OBJECTREF:DoomPK3) An open PK3 file.
+    prefix:
+        (STRING) The starting prefix for the entries.
+    Returns:
+        (LIST:[MAP:{name:STRING, dir:BOOLEAN, size:INTEGER, time:INTEGER, comment:STRING, compressedsize:INTEGER, crc:INTEGER, creationtime:INTEGER, lastaccesstime:INTEGER, lastmodifiedtime:INTEGER}, ...]) A list of maps containg Zip entry info.
+        (ERROR:BadParameter) If an open PK3 file was not provided, or [entry] is null.
+        (ERROR:IOError) If a read error occurs, or the PK3 is not open.
+
+PK3EOPEN(zip, entry)
+    Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource). This is a rebrand of ZFENTRY - same function.
+    zip:
+        (OBJECTREF:ZipFile) The open zip/PK3 file.
+    entry:
+        (STRING) The entry name.
+        (MAP:{... name:STRING ...}) A map of zip entry info containing the name of the entry.
+    Returns:
+        (OBJECTREF:DataInputStream) An open data input stream to read from.
+        (ERROR:BadParameter) If an open zip file was not provided, or [entry] is null or [entry].name is null.
+        (ERROR:BadEntry) If [entry] could not be found in the zip.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+PK3WAD(zip, entry)
+    Reads a PK3 entry as though it were a WAD file and returns an in-memory Wad buffer (not a resource - does not require closing).
+    zip:
+        (OBJECTREF:ZipFile) The open zip/PK3 file.
+    entry:
+        (STRING) The entry name.
+        (MAP:{... name:STRING ...}) A map of zip entry info containing the name of the entry.
+    Returns:
+        (OBJECTREF:Wad) An open data input stream to read from.
+        (ERROR:BadParameter) If an open zip file was not provided, or [entry] is null or [entry].name is null.
+        (ERROR:BadEntry) If [entry] could not be found in the zip.
+        (ERROR:BadWad) If [entry] is not a WAD file.
+        (ERROR:IOError) If a read error occurs, or the zip is not open.
+
+
+=================================================================
+==== [DMAP] Doom / Hexen / ZDoom / UDMF Maps
+=================================================================
+
+MAP::HEADERS(wad)
+    Fetches all map headers in a WAD. This algorithm scans for known map data entries (e.g. THINGS, VERTEXES, etc.). If it finds one, the previous entry is the probably the header.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    Returns:
+        (LIST:[STRING, ...]) The header names of all found maps. Can be empty.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+MAP::ENTRIES(wad, header)
+    Fetches all map headers in a WAD.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    header:
+        (STRING) The map header entry name.
+    Returns:
+        (LIST:[MAP:{name:STRING, offset:INTEGER, size:INTEGER}, ...]) The entries that make up the map, including the header, or an empty list if it couldn't be found.
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+MAP::ENTRYCOUNT(wad, header)
+    Returns the amount of entries that make up a map.
+    wad:
+        (OBJECTREF:Wad) The open WAD to use.
+    header:
+        (STRING) The map header entry name.
+    Returns:
+        (INTEGER) The amount of entries from the header entry that comprises the whole map (including the header).
+        (ERROR:BadParameter) If [wad] is not a Wad file.
+
+MAP::FORMAT(wad, header)
+    Inspects a single map in a Wad and returns its format type.
+    wad:
+        (OBJECTREF:Wad) An open Wad.
+    header:
+        (INTEGER) The entry index of the map's header.
+        (STRING) The name of the map entry to read.
+    Returns:
+        (NULL) If the map could not be found.
+        (STRING) The map type (one of: "doom", "hexen", "udmf").
+        (ERROR:BadParameter) If [wad] is not a valid open Wad file.
+
+MAP::VIEW(wad, header)
+    Loads a Doom Map into memory for inspection as a MapView. The map in the Wad can be in Doom or Hexen or UDMF format.
+    wad:
+        (OBJECTREF:Wad) An open Wad.
+    header:
+        (INTEGER) The entry index of the map's header.
+        (STRING) The name of the map entry to read.
+    Returns:
+        (OBJECTREF:MapView) An open map.
+        (ERROR:BadParameter) If [wad] is not a valid open Wad file.
+        (ERROR:BadMap) If a map could not be read from the data.
+        (ERROR:IOError) If [wad] could not be read or the map data could not be read.
+
+MAP::VIEWINFO(mapview)
+    Returns a map of info about a MapView.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    Returns:
+        (MAP:{type:STRING, thingcount:INTEGER, vertexcount:INTEGER, linedefcount:INTEGER, sidedefcount:INTEGER, sectorcount:INTEGER}) Information on the provided map.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::THING(mapview, index, strife)
+    Fetches a thing from a MapView and returns it as a map.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    index:
+        (INTEGER) The index of the thing to retrieve.
+    strife:
+        (BOOLEAN) If true, interpret this thing as a Strife thing (different flags).
+    Returns:
+        (NULL) If [index] is less than 0 or greater than or equal to the amount of things in the MapView.
+        (MAP) A map with Thing data.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::THINGS(mapview, strife)
+    Creates an iterator that iterates through each thing in the provided MapView. The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and values are maps (see THING()).
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    strife:
+        (BOOLEAN) If true, interpret each thing as a Strife thing (different flags).
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::VERTEX(mapview, index)
+    Fetches a vertex from a MapView and returns it as a map.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    index:
+        (INTEGER) The index of the vertex to retrieve.
+    Returns:
+        (NULL) If [index] is less than 0 or greater than or equal to the amount of vertices in the MapView.
+        (MAP) A map with Vertex data.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::VERTICES(mapview)
+    Creates an iterator that iterates through each vertex in the provided MapView. The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and values are maps (see VERTEX()).
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::LINEDEF(mapview, index)
+    Fetches a linedef from a MapView and returns it as a map.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    index:
+        (INTEGER) The index of the linedef to retrieve.
+    Returns:
+        (NULL) If [index] is less than 0 or greater than or equal to the amount of linedef in the MapView.
+        (MAP) A map with Linedef data.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::LINEDEFS(mapview)
+    Creates an iterator that iterates through each linedef in the provided MapView. The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and values are maps (see LINEDEF()).
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::SIDEDEF(mapview, index)
+    Fetches a sidedef from a MapView and returns it as a map.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    index:
+        (INTEGER) The index of the sidedef to retrieve.
+    Returns:
+        (NULL) If [index] is less than 0 or greater than or equal to the amount of sidedef in the MapView.
+        (MAP) A map with Sidedef data.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::SIDEDEFS(mapview)
+    Creates an iterator that iterates through each sidedef in the provided MapView. The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and values are maps (see SIDEDEF()).
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::SECTOR(mapview, index)
+    Fetches a sector from a MapView and returns it as a map.
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    index:
+        (INTEGER) The index of the sector to retrieve.
+    Returns:
+        (NULL) If [index] is less than 0 or greater than or equal to the amount of sector in the MapView.
+        (MAP) A map with Sector data.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::SECTORS(mapview)
+    Creates an iterator that iterates through each sector in the provided MapView. The value that this produces can be used in an each(...) loop. The key is the index (starts at 0), and values are maps (see SECTOR()).
+    mapview:
+        (OBJECTREF:MapView) The map view to use.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [mapview] is not a valid MapView.
+
+MAP::ELEMENTS(data, strife)
+    Creates an iterator for iterating through map elements as though they were a contiguous UDMF map. The value that this produces can be used in an each(...) loop. The key is a map with {type:STRING, index:INTEGER}, and values are also maps containing info of either one of the map geometry types or a UDMF global attribute (if "type" on the key map is "attribute").
+    data:
+        (STRING) The UDMF data.
+        (BUFFER) The data in the UDMF Map entry (TEXTMAP).
+        (OBJECTREF:MapView) A MapView to iterate through.
+        (OBJECTREF:InputStream) An input stream for reading a UDMF Map entry (TEXTMAP).
+        (OBJECTREF:Reader) An open reader for reading a UDMF Map entry (TEXTMAP).
+    strife:
+        (BOOLEAN) If true, interpret the things as Strife things (different flags). Only necessary for MapViews.
+    Returns:
+        (OBJECTREF:ScriptIteratorType) The iterator returned.
+        (ERROR:BadParameter) If [input] is not a MapView or an input stream to a UDMF map lump.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITEUDMFELEMENT(writer, type, data)
+    Writes a UDMF element out to a Writer stream. Note that depending on the value type, some UDMF data may be truncated or rounded.
+    writer:
+        (OBJECTREF:Writer) An open writer to write the UDMF data to.
+    type:
+        (STRING) The UDMF element type ("attribute", "thing", "linedef", "sidedef", "sector", "vertex").
+    data:
+        (MAP) The UDMF data as a map. If attribute, all keys and values are written as global attributes, else it writes the map like a UDMF structure.
+    Returns:
+        (OBJECTREF:Writer) [writer].
+        (ERROR:BadParameter) If [writer] is not a Writer, or [data] is not a map type.
+        (ERROR:BadType) If [type] is not a valid type name.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READTHING(input, strife)
+    Reads a single Doom-formatted Thing from an input stream of some kind (10 bytes) and returns the information as a map (like THING()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    strife:
+        (BOOLEAN) If true, interpret the thing as a Strife thing (different flags).
+    Returns:
+        (MAP) A map with Thing data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITETHING(output, data, strife)
+    Writes a single Doom-formatted Thing to an output stream of some kind (10 bytes). Input map requires the fields that would be returned by READTHING().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    strife:
+        (BOOLEAN) If true, interpret the thing map as a Strife thing (different flags).
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READHEXENTHING(input)
+    Reads a single Hexen/ZDoom-formatted Thing from an input stream of some kind (20 bytes) and returns the information as a map (like THING()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Thing data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITEHEXENTHING(output, data)
+    Writes a single Hexen/ZDoom-formatted Thing to an output stream of some kind (10 bytes). Input map requires the fields that would be returned by READHEXENTHING().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READVERTEX(input)
+    Reads a single Vertex from an input stream of some kind (4 bytes) and returns the information as a map (like VERTEX()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Vertex data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITEVERTEX(output, data)
+    Writes a single Vertex to an output stream of some kind (4 bytes). Input map requires the fields that would be returned by READVERTEX().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READLINEDEF(input)
+    Reads a single Doom-formatted Linedef from an input stream of some kind (14 bytes) and returns the information as a map (like LINEDEF()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Linedef data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITELINEDEF(output, data)
+    Writes a single Doom-formatted Linedef to an output stream of some kind (14 bytes). Input map requires the fields that would be returned by READLINEDEF().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READHEXENLINEDEF(input)
+    Reads a single Hexen/ZDoom-formatted Linedef from an input stream of some kind (16 bytes) and returns the information as a map (like LINEDEF()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Linedef data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITEHEXENLINEDEF(output, data)
+    Writes a single Hexen/ZDoom-formatted Linedef to an output stream of some kind (16 bytes). Input map requires the fields that would be returned by READHEXENLINEDEF().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READSIDEDEF(input)
+    Reads a single Sidedef from an input stream of some kind (30 bytes) and returns the information as a map (like SIDEDEF()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Sidedef data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITESIDEDEF(output, data)
+    Writes a single Sidedef to an output stream of some kind (30 bytes). Input map requires the fields that would be returned by READSIDEDEF().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+MAP::READSECTOR(input)
+    Reads a single Sector from an input stream of some kind (26 bytes) and returns the information as a map (like SECTOR()).
+    input:
+        (OBJECTREF:InputStream) A readable input stream (also DataInputStream).
+    Returns:
+        (MAP) A map with Sector data.
+        (ERROR:BadParameter) If [input] is not a valid input stream.
+        (ERROR:IOError) If a read error occurs.
+
+MAP::WRITESECTOR(output, data)
+    Writes a single Sector to an output stream of some kind (26 bytes). Input map requires the fields that would be returned by READSECTOR().
+    output:
+        (OBJECTREF:OutputStream) A readable output stream (also DataOutputStream).
+    data:
+        (MAP) The map of thing data/fields. If any field is missing or null, a default value is used.
+    Returns:
+        (OBJECTREF:OutputStream) [output].
+        (ERROR:BadParameter) If [output] is not a valid output stream, or [data] is not a map.
+        (ERROR:BadData) If the [data] has a field that does not fit a required range or format.
+        (ERROR:IOError) If a write error occurs.
+
+
+=================================================================
+==== [UTIL] Utilities
+=================================================================
+
+UTIL::IMPORTDEUTEX(wad, input, entryName, append, strife)
+    Imports a DEUTEX-style texture file, adding a TEXTUREX and PNAMES entry to a Wad.
+    wad:
+        (OBJECTREF:Wad) An open Wad file.
+    input:
+        (OBJECTREF:File) Path to texture definition file.
+        (OBJECTREF:InputStream) Input stream for reading texture definition info (assumes UTF-8 encoding).
+        (OBJECTREF:Reader) The reader to read the texture definition info from.
+    entryName:
+        (NULL) Use "TEXTURE1".
+        (STRING) The target entry name.
+    append:
+        (BOOLEAN) If true, search for the existing entry and add to it (and PNAMES).
+    strife:
+        (BOOLEAN) If true, use Strife texture set format on write (if append is true, use existing format).
+    Returns:
+        (OBJECTREF:Wad) [wad].
+        (ERROR:BadParameter) If [wad] is not a Wad, or [input] is not a valid input type.
+        (ERROR:BadFile) If [input] is a file and it can't be found.
+        (ERROR:Parse) If the texture data cannot be parsed.
+        (ERROR:Security) If [input] is a file and the OS is preventing the read.
+        (ERROR:IOError) If a read or write error occurs.
+
+UTIL::EXPORTDEUTEX(wad, output, entryName, header)
+    Exports a DEUTEX-style texture file from a TEXTUREx entry (and corresponding PNAMES entry).
+    wad:
+        (OBJECTREF:Wad) An open Wad file.
+    output:
+        (OBJECTREF:File) The file to write the texture definition info to (encoding is UTF-8, file is overwritten, and then closed).
+        (OBJECTREF:OutputStream) The output stream to write the texture definition info to (encoding is UTF-8).
+        (OBJECTREF:Writer) The Writer to write the texture definition info to.
+    entryName:
+        (STRING) The texture entry name (PNAMES is automatically picked up).
+    header:
+        (NULL) Use default.
+        (STRING) The header line to write first.
+    Returns:
+        (OBJECTREF:Wad) [wad].
+        (ERROR:BadParameter) If [wad] is not a Wad, or [output] is not a valid output type.
+        (ERROR:BadFile) If [output] is a file and is a directory.
+        (ERROR:BadData) If the texture entry does not exist or the entry "PNAMES" does not exist, or the entries have bad data.
+        (ERROR:Security) If [output] is a file and the OS is preventing the read.
+        (ERROR:IOError) If a read or write error occurs.
+
+UTIL::IMPORTSWANTBLS(wad, input, append)
+    Imports a SWANTBLS-style (SWitch and ANimated TaBLeS) file, adding a Boom Engine SWITCHES and ANIMATED entry to a Wad.
+    wad:
+        (OBJECTREF:Wad) An open Wad file.
+    input:
+        (OBJECTREF:File) Path to table file.
+        (OBJECTREF:InputStream) Input stream for reading Switch/Animated info (assumes UTF-8 encoding).
+        (OBJECTREF:Reader) The reader to read the Switch/Animated info from.
+    append:
+        (BOOLEAN) If true, search for the existing entries and add to them (SWITCHES and ANIMATED).
+    Returns:
+        (OBJECTREF:Wad) [wad].
+        (ERROR:BadParameter) If [wad] is not a Wad, or [input] is not a valid input type.
+        (ERROR:BadFile) If [input] is a file and it can't be found.
+        (ERROR:Parse) If the table data cannot be parsed.
+        (ERROR:Security) If [input] is a file and the OS is preventing the read.
+        (ERROR:IOError) If a read or write error occurs.
+
+UTIL::EXPORTSWANTBLS(wad, output, header)
+    Exports a SWANTBLS-style (SWitch and ANimated TaBLeS) file, from Boom Engine SWITCHES and ANIMATED entries.
+    wad:
+        (OBJECTREF:Wad) An open Wad file.
+    output:
+        (OBJECTREF:File) The file to write the info to (encoding is UTF-8, file is overwritten, and then closed).
+        (OBJECTREF:OutputStream) The output stream to write the info to (encoding is UTF-8).
+        (OBJECTREF:Writer) The Writer to write the info to.
+    header:
+        (NULL) Use default.
+        (STRING) The header line to write first.
+    Returns:
+        (OBJECTREF:Wad) [wad].
+        (ERROR:BadParameter) If [wad] is not a Wad, or [output] is not a valid output type.
+        (ERROR:BadFile) If [output] is a file and is a directory.
+        (ERROR:Security) If [output] is a file and the OS is preventing the read.
+        (ERROR:IOError) If a read or write error occurs.

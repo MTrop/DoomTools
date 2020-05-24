@@ -151,6 +151,9 @@
 		<!-- WadScript -->
 		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<shell-bash name="wadscript" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<!-- RookScript -->
+		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
