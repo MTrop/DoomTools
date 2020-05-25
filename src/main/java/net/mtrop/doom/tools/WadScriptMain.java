@@ -63,6 +63,7 @@ public final class WadScriptMain
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
 	private static final String VERSION = Common.getVersionString("wadscript");
 
+	private static final String SWITCH_VERSION1 = "--version";
 	private static final String SWITCH_HELP1 = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_FUNCHELP1 = "--function-help";
@@ -324,6 +325,7 @@ public final class WadScriptMain
 	
 	private enum Mode
 	{
+		VERSION,
 		HELP,
 		FUNCTIONHELP,
 		FUNCTIONHELP_MARKDOWN,
@@ -352,6 +354,12 @@ public final class WadScriptMain
 
 	private int execute()
 	{
+		if (mode == Mode.VERSION)
+		{
+			splash(System.out);
+			return 0;
+		}
+
 		if (mode == Mode.HELP)
 		{
 			usage(System.out);
@@ -536,6 +544,8 @@ public final class WadScriptMain
 						mode = Mode.HELP;
 						return 0;
 					}
+					else if (SWITCH_VERSION1.equalsIgnoreCase(arg))
+						mode = Mode.VERSION;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
 						mode = Mode.DISASSEMBLE;
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
