@@ -47,7 +47,7 @@ public final class WTexScanMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String VERSION = Common.getVersionString("wtexscan");
-	private static final String SPLASH_VERSION = "TexScan v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String SPLASH_VERSION = "WTexScan v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
