@@ -69,13 +69,41 @@ To clean up everything:
 
 	ant clean
 
+
+### Utilities
+
+#### WadMerge
+
+A utility that performs Script-based WAD compilation and merging. 
+
+#### WSwAnTbls
+
+A utility that reads DEFSWANI/SWANTBLS data files and compiles it into ANIMATED and SWITCHES lumps.
+Can also export a set of ANIMATED and SWITCHES lumps to a definition file.
+
+#### WadTex
+
+A utility that reads a DEUTEX-style texture file and imports it into a WAD file as TEXTUREx and PNAMES lumps.
+Can also export TEXTUREx/PNAMES in the same way. 
+
+#### WTexScan
+
+A utility that scans maps in a WAD and outputs a list of found textures and flats, suitable for import into the next program...
+
+#### WTEXport
+
+A utility that exports textures from one WAD into another, including associated ANIMATED and SWITCHES textures.
+
+#### WadScript
+
+A scripting system for doing practically anything with Doom stuff.
+
+
 ### Other
 
-This program/library and the accompanying materials
-are made available under the terms of the GNU Lesser Public License v2.1
-which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+These programs and the accompanying materials are made available under the 
+terms of the MIT License, which accompanies this distribution.
 
-A copy of the LGPL should have been included in this release (LICENSE.txt).
-If it was not, please contact me for a copy, or to notify me of a distribution
+A copy of the MIT License should have been included in this release (LICENSE.txt).
+If it was not, please contact us for a copy, or to notify us of a distribution
 that has not included it. 
