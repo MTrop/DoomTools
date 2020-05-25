@@ -1303,9 +1303,9 @@ public final class WTExportMain
 
 	private static boolean readList(Options options) throws IOException
 	{
-		final String TEXTURES = "-textures";
-		final String FLATS = "-flats";
-		final String END = "-end";
+		final String TEXTURES = ":textures";
+		final String FLATS = ":flats";
+		final String END = ":end";
 		
 		final int STATE_NONE = 0;
 		final int STATE_TEXTURES = 1;

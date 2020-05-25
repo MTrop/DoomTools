@@ -574,8 +574,6 @@ public final class WTexScanMain
 			return ERROR_NONE;
 		}
 	
-		options.println("# " + SPLASH_VERSION);
-	
 		boolean atLeastOneError = false;
 		for (File f : options.wadFiles)
 		{
@@ -620,29 +618,32 @@ public final class WTexScanMain
 			return;
 		}
 		
-		if (context.textureList.isEmpty())
+		if (!options.wadFiles.isEmpty())
 		{
-			options.out.println("# No textures.");
+			if (context.textureList.isEmpty())
+			{
+				options.out.println("# No textures.");
+			}
+			else
+			{
+				options.out.println(":TEXTURES");
+				for (String t : context.textureList)
+					options.out.println(t);
+			}
+		
+			if (context.flatList.isEmpty())
+			{
+				options.println("# No flats.");
+			}
+			else
+			{
+				options.out.println(":FLATS");
+				for (String f : context.flatList)
+					options.out.println(f);
+			}
+		
+			options.out.println(":END");
 		}
-		else
-		{
-			options.out.println("-TEXTURES");
-			for (String t : context.textureList)
-				options.out.println(t);
-		}
-	
-		if (context.flatList.isEmpty())
-		{
-			options.println("# No flats.");
-		}
-		else
-		{
-			options.out.println("-FLATS");
-			for (String f : context.flatList)
-				options.out.println(f);
-		}
-	
-		options.out.println("-END");
 		
 		System.exit(0);
 	}
