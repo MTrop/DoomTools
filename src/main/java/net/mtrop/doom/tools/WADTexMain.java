@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -324,7 +325,7 @@ public final class WADTexMain
 
 				try
 				{
-					writer = new PrintWriter(new FileOutputStream(options.sourceFile), true, Charset.forName("ASCII"));
+					writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.sourceFile), Charset.forName("ASCII")), true);
 					streamName = options.sourceFile.getPath();
 				}
 				catch (IOException e)
