@@ -187,7 +187,7 @@
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
 		<!-- Untar does not preserve file permissions for some dumb reason, so call TAR itself. -->
-		<exec command="tar" failonerror="true">
+		<exec executable="tar" failonerror="true">
 			<arg line="-zxf" />
 			<arg line="${dist.dir}/${tar.dist.filename}" />
 			<arg line="-C ${deploy.dir}" />
