@@ -132,7 +132,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Fetches all map headers in a WAD."
+					"Fetches all entries pertaining to a single map in a WAD."
 				)
 				.parameter("wad", 
 					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
@@ -186,7 +186,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Returns the amount of entries that make up a map."
+					"Returns the amount of contiguous entries that make up a map."
 				)
 				.parameter("wad", 
 					type(Type.OBJECTREF, "Wad", "The open WAD to use.")
@@ -309,7 +309,7 @@ public enum DoomMapFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Loads a Doom Map into memory for inspection as a MapView. The map in the Wad can be " +
+					"Loads a Doom Map fully into memory for inspection as a MapView. The map in the Wad can be " +
 					"in Doom or Hexen or UDMF format."
 				)
 				.parameter("wad", 

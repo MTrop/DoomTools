@@ -1,46 +1,5 @@
 =================================================================
-====              WADScript Function Reference               ====
-=================================================================
-
-If you suspect this file is out of date, you can get this info by typing:
-
-wadscript --function-help
-
-=================================================================
-====           Function Category Table of Contents           ====
-=================================================================
-
-RookScript Base:
-
-* [CMMN] Common
-* [PRNT] Printing/Logging
-* [STRN] String
-* [LIST] List / Set
-* [MAPS] Map
-* [BUFR] Buffer
-* [ERRS] Error
-* [MATH] Math
-* [REGX] RegEx
-* [DATE] Date / Time
-* [FILE] File System
-* [FLIO] File I/O
-* [ZIPS] Zip Files / GZIP Streams
-* [STIO] Stream I/O
-* [DAIO] Data I/O
-* [HASH] Digest
-* [JSON] JSON
-* [SYST] System
-
-Doom-specific:
-
-* [WADS] WADs
-* [PK3S] PK3s
-* [DMAP] Doom / Hexen / ZDoom / UDMF Maps
-* [UTIL] Utilities
-
-
-=================================================================
-==== [CMMN] Common
+==== Common
 =================================================================
 
 TYPEOF(value)
@@ -127,7 +86,7 @@ TOSTRING(value)
 
 
 =================================================================
-==== [PRNT] Printing/Logging
+==== Printing/Logging
 =================================================================
 
 PRINT(message)
@@ -160,7 +119,7 @@ PRINTERRLN(message)
 
 
 =================================================================
-==== [STRN] String
+==== String
 =================================================================
 
 STRUPPER(string)
@@ -281,7 +240,7 @@ STRREPLACEALL(string, target, replacement)
 
 
 =================================================================
-==== [LIST] List / Set
+==== List / Set
 =================================================================
 
 LIST(list)
@@ -469,7 +428,7 @@ SETDIFF(list1, list2)
 
 
 =================================================================
-==== [MAPS] Map
+==== Map
 =================================================================
 
 MAPKEYS(map)
@@ -525,7 +484,7 @@ MAPMERGE(map1, map2)
 
 
 =================================================================
-==== [BUFR] Buffer
+==== Buffer
 =================================================================
 
 BUFNEW(size, order)
@@ -846,7 +805,7 @@ BUFGETLONG(buffer, index)
         (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
 
 BUFPUTDOUBLE(buffer, value, index)
-    Sets a double-precision floating-point value in a buffer (64-bit). Buffer's byte order affects how the bytes are written. 
+    Sets a double-precision floating-point value in a buffer (64-bit). BufferType byte order affects how the bytes are written. 
     buffer:
         (BUFFER) The buffer to use.
     value:
@@ -860,7 +819,7 @@ BUFPUTDOUBLE(buffer, value, index)
         (ERROR:OutOfBounds) If [index, index+8) is out of the buffer's bounds.
 
 BUFGETDOUBLE(buffer, index)
-    Gets a double-precision float in a buffer (64-bit). Buffer's byte order affects how the bytes are read.
+    Gets a double-precision float in a buffer (64-bit). BufferType byte order affects how the bytes are read.
     buffer:
         (BUFFER) The buffer to use.
     index:
@@ -917,7 +876,7 @@ BUFSTR(buffer)
 
 
 =================================================================
-==== [ERRS] Error
+==== Error
 =================================================================
 
 ISERROR(value)
@@ -973,7 +932,7 @@ ERRORMAP(error)
 
 
 =================================================================
-==== [MATH] Math
+==== Math
 =================================================================
 
 MIN(value1, value2)
@@ -1192,7 +1151,7 @@ COLORF(red, green, blue, alpha)
 
 
 =================================================================
-==== [REGX] RegEx
+==== RegEx
 =================================================================
 
 ISREGEX(pattern)
@@ -1255,7 +1214,7 @@ REGEXFINDALL(pattern, string)
 
 
 =================================================================
-==== [DATE] Date / Time
+==== Date / Time
 =================================================================
 
 DATE()
@@ -1275,7 +1234,7 @@ DATEFORMAT(timemillis, formatstring)
 
 
 =================================================================
-==== [FILE] File System
+==== File System
 =================================================================
 
 FILE(path)
@@ -1472,7 +1431,7 @@ VERIFYDIRS(path)
 
 
 =================================================================
-==== [FLIO] File I/O
+==== File I/O
 =================================================================
 
 FOPEN(path, mode)
@@ -1535,7 +1494,7 @@ FSETPOS(rafile, position)
 
 
 =================================================================
-==== [ZIPS] Zip Files / GZIP Streams
+==== Zip Files / GZIP Streams
 =================================================================
 
 ZFOPEN(path)
@@ -1612,7 +1571,7 @@ GZOSOPEN(outstream)
 
 
 =================================================================
-==== [STIO] Stream I/O
+==== Stream I/O
 =================================================================
 
 SKIP(input, length)
@@ -1840,7 +1799,7 @@ CSWRITELN(writer, str)
 
 
 =================================================================
-==== [DAIO] Data I/O
+==== Data I/O
 =================================================================
 
 READBYTE(input)
@@ -2086,7 +2045,7 @@ WRITESTR(output, value, encoding)
 
 
 =================================================================
-==== [HASH] Digest
+==== Digest
 =================================================================
 
 DIGESTSTART(algorithm)
@@ -2179,7 +2138,7 @@ SHA256(data)
 
 
 =================================================================
-==== [JSON] JSON
+==== JSON
 =================================================================
 
 READJSON(jsoninput)
@@ -2220,7 +2179,7 @@ JSONSTR(value)
 
 
 =================================================================
-==== [SYST] System
+==== System
 =================================================================
 
 PROPERTIES(key)
@@ -2290,7 +2249,7 @@ EXECRESULT(command, waitmillis)
 
 
 =================================================================
-==== [WADS] WADs
+==== WADs
 =================================================================
 
 ISWAD(file)
@@ -2515,7 +2474,7 @@ WADIMPORT(wad, srcWad, srcEntries, index)
 
 
 =================================================================
-==== [PK3S] PK3s
+==== PK3s
 =================================================================
 
 PK3OPEN(path)
@@ -2580,7 +2539,7 @@ PK3WAD(zip, entry)
 
 
 =================================================================
-==== [DMAP] Doom / Hexen / ZDoom / UDMF Maps
+==== Doom / Hexen / ZDoom / UDMF Maps
 =================================================================
 
 MAP::HEADERS(wad)
@@ -2592,7 +2551,7 @@ MAP::HEADERS(wad)
         (ERROR:BadParameter) If [wad] is not a Wad file.
 
 MAP::ENTRIES(wad, header)
-    Fetches all map headers in a WAD.
+    Fetches all entries pertaining to a single map in a WAD.
     wad:
         (OBJECTREF:Wad) The open WAD to use.
     header:
@@ -2602,7 +2561,7 @@ MAP::ENTRIES(wad, header)
         (ERROR:BadParameter) If [wad] is not a Wad file.
 
 MAP::ENTRYCOUNT(wad, header)
-    Returns the amount of entries that make up a map.
+    Returns the amount of contiguous entries that make up a map.
     wad:
         (OBJECTREF:Wad) The open WAD to use.
     header:
@@ -2624,7 +2583,7 @@ MAP::FORMAT(wad, header)
         (ERROR:BadParameter) If [wad] is not a valid open Wad file.
 
 MAP::VIEW(wad, header)
-    Loads a Doom Map into memory for inspection as a MapView. The map in the Wad can be in Doom or Hexen or UDMF format.
+    Loads a Doom Map fully into memory for inspection as a MapView. The map in the Wad can be in Doom or Hexen or UDMF format.
     wad:
         (OBJECTREF:Wad) An open Wad.
     header:
@@ -2925,7 +2884,7 @@ MAP::WRITESECTOR(output, data)
 
 
 =================================================================
-==== [UTIL] Utilities
+==== Utilities
 =================================================================
 
 UTIL::IMPORTDEUTEX(wad, input, entryName, append, strife)
@@ -3007,3 +2966,5 @@ UTIL::EXPORTSWANTBLS(wad, output, header)
         (ERROR:BadFile) If [output] is a file and is a directory.
         (ERROR:Security) If [output] is a file and the OS is preventing the read.
         (ERROR:IOError) If a read or write error occurs.
+
+
