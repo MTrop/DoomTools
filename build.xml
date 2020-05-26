@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <!-- ====================================================================== 
-     Doom Struct Build File    
+     Doom Tools Build File    
      Matt Tropiano                                                                
      ====================================================================== -->
 <project name="build" default="compile">
@@ -186,7 +186,12 @@
 	<target name="deploy.bash" if="deploy.dir" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
-		<unzip src="${dist.dir}/${tar.dist.filename}" dest="${deploy.dir}" />
+		<!-- Untar does not preserve file permissions for some dumb reason, so call TAR itself. -->
+		<exec command="tar" failonerror="true">
+			<arg line="-zxf" />
+			<arg line="${dist.dir}/${tar.dist.filename}" />
+			<arg line="-C ${deploy.dir}" />
+		</exec>
 	</target>
 	
 </project>
