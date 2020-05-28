@@ -1185,7 +1185,8 @@ public final class WTExportMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: wtexport [--help | -h | --version] [files] [options] [switches]");
+		out.println("Usage: wtexport [--help | -h | --version]");
+		out.println("                [files] --base-wad [base] --output [target] [switches]");
 	}
 
 	// Prints the usage message.
@@ -1200,7 +1201,6 @@ public final class WTExportMain
 		out.println("    <filenames>           A valid WAD file (that contains the textures to");
 		out.println("                          extract). Accepts wildcards for multiple WAD files.");
 		out.println();
-		out.println("[options]:");
 		out.println("    --base-wad [base]     The WAD file to use for reference for extraction.");
 		out.println("    -b [base]             Any texture resources found in this file are NOT");
 		out.println("                          extracted, except for the TEXTUREx and PNAMES lumps");
@@ -1293,7 +1293,7 @@ public final class WTExportMain
 			i++;
 		}
 		
-		if (!options.help && !options.version)
+		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad))
 		{
 			// Read list from Standard In		
 			options.println("Input texture/flat list:");
