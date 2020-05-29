@@ -60,8 +60,8 @@
 	
 	<!-- Filenames -->
 	<property name="build.versions.dir" value="${build.dir}/versions" />
-	<property name="zip.dist.filename" value="${project.archive}-${build.version}.zip" />
-	<property name="tar.dist.filename" value="${project.archive}-${build.version}.tar.gz" />
+	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version}.zip" />
+	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version}.tar.gz" />
 
 	<target name="clean.dist">
 		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
