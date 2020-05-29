@@ -76,7 +76,7 @@ To clean up everything:
 
 A utility that performs Script-based WAD compilation and merging. 
 
-#### WSwAnTbls
+#### WSwAnTbl
 
 A utility that reads DEFSWANI/SWANTBLS data files and compiles it into ANIMATED and SWITCHES lumps.
 Can also export a set of ANIMATED and SWITCHES lumps to a definition file.
@@ -96,7 +96,7 @@ A utility that exports textures from one WAD into another, including associated 
 
 #### WadScript
 
-A scripting system for doing practically anything with Doom stuff.
+A scripting system for doing practically anything with Doom stuff. Also includes Rookscript, a subset script. 
 
 
 ### Other
