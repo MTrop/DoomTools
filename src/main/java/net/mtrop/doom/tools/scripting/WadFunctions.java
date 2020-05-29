@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.scripting;
 
 import com.blackrook.rookscript.ScriptInstance;
+import com.blackrook.rookscript.ScriptIteratorType;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
@@ -597,7 +598,7 @@ public enum WadFunctions implements ScriptFunctionType
 				}
 
 				final Wad wad = wadValue.asObjectType(Wad.class);
-				returnValue.set(wad.iterator());
+				returnValue.set(new WadEntryIterator(wad));
 				return true;
 			}
 			finally
@@ -1447,6 +1448,36 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	}
 
+	private static class WadEntryIterator implements ScriptIteratorType
+	{
+		private IteratorPair pair;
+		private Wad wad;
+		private int cur;
+
+		protected WadEntryIterator(Wad wad) 
+		{
+			this.pair = new IteratorPair();
+			this.wad = wad;
+			this.cur = 0;
+		}
+		
+		@Override
+		public boolean hasNext()
+		{
+			return cur < wad.getEntryCount();
+		}
+
+		@Override
+		public IteratorPair next() 
+		{
+			pair.getKey().set(cur);
+			setEntry(pair.getValue(), wad.getEntry(cur));
+			cur++;
+			return pair;
+		}
+	}
+
+	
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 	
 	// Threadlocal "stack" values.
