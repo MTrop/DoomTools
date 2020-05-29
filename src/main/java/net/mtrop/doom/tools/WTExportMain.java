@@ -53,6 +53,7 @@ public final class WTExportMain
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_NO_FILES = 2;
 	private static final int ERROR_IO_ERROR = 3;
+	private static final int ERROR_BAD_OPTIONS = 4;
 	
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
 	private static final Pattern FLAT_MARKER = Pattern.compile("F[0-9]*_(START|END)");
@@ -64,7 +65,10 @@ public final class WTExportMain
 	private static final String SWITCH_BASE2 = "-b";
 	private static final String SWITCH_OUTPUT = "--output";
 	private static final String SWITCH_OUTPUT2 = "-o";
-	private static final String SWITCH_ADDITIVE = "--additive";
+	private static final String SWITCH_CREATE = "--create";
+	private static final String SWITCH_CREATE2 = "-c";
+	private static final String SWITCH_ADDITIVE = "--add";
+	private static final String SWITCH_ADDITIVE2 = "-a";
 	private static final String SWITCH_NULLTEX = "--null-texture";
 	private static final String SWITCH_NOANIMATED = "--no-animated";
 	private static final String SWITCH_NOSWITCH = "--no-switches";
@@ -90,8 +94,8 @@ public final class WTExportMain
 		private boolean noAnimated;
 		/** No switches. */
 		private boolean noSwitches;
-		/** Overwrite output. */
-		private boolean additive;
+		/** Additive output? */
+		private Boolean additive;
 		/** Null comparator. */
 		private NullComparator nullComparator;
 		/** File List. */
@@ -112,7 +116,7 @@ public final class WTExportMain
 			this.outWad = null;
 			this.noAnimated = false;
 			this.noSwitches = false;
-			this.additive = false;
+			this.additive = null;
 			this.nullComparator = new NullComparator(null);
 			this.filePaths = new ArrayList<>();
 			this.textureList = new ArrayList<>();
@@ -173,7 +177,7 @@ public final class WTExportMain
 			this.noSwitches = noSwitches;
 		}
 		
-		public void setAdditive(boolean additive) 
+		public void setAdditive(Boolean additive) 
 		{
 			this.additive = additive;
 		}
@@ -1186,7 +1190,7 @@ public final class WTExportMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: wtexport [--help | -h | --version]");
-		out.println("                [files] --base-wad [base] --output [target] [switches]");
+		out.println("                [files] --base-wad [base] --output [target] [--create | --add] [switches]");
 	}
 
 	// Prints the usage message.
@@ -1210,8 +1214,12 @@ public final class WTExportMain
 		out.println("    -o [wad]              COMPLETELY (be careful)!");
 		out.println();
 		out.println("[switches]:");
-		out.println("    --additive            If specified, if the output WAD exists, the target's");
-		out.println("                          TEXTUREx and PNAMES lumps are overwritten, and the");
+		out.println("    --create              If specified, the specified output WAD file is");
+		out.println("    -c                    created, TEXTUREx and PNAMES lumps are overwritten, and the");
+		out.println("                          extracted contents are APPENDED to it.");
+		out.println();
+		out.println("    --add                 If specified, if the output WAD exists, the target's");
+		out.println("    -a                    TEXTUREx and PNAMES lumps are overwritten, and the");
 		out.println("                          extracted contents are APPENDED to it.");
 		out.println();
 		out.println("    --null-texture [tex]  If specified, the next argument is the null");
@@ -1230,9 +1238,10 @@ public final class WTExportMain
 	 * Reads command line arguments and sets options.
 	 * @param options the program options. 
 	 * @param args the argument args.
+	 * @return true if parse successful, false if not.
 	 * @throws IOException if a read error occurs.
 	 */
-	public static void scanOptions(Options options, String[] args) throws IOException
+	public static boolean scanOptions(Options options, String[] args) throws IOException
 	{
 		final int STATE_INIT = 0;
 		final int STATE_BASE = 1;
@@ -1256,7 +1265,9 @@ public final class WTExportMain
 						options.setNoAnimated(true);
 					else if (arg.equals(SWITCH_NOSWITCH))
 						options.setNoSwitches(true);
-					else if (arg.equals(SWITCH_ADDITIVE))
+					else if (arg.equals(SWITCH_CREATE) || arg.equals(SWITCH_CREATE2))
+						options.setAdditive(false);
+					else if (arg.equals(SWITCH_ADDITIVE) || arg.equals(SWITCH_ADDITIVE2))
 						options.setAdditive(true);
 					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
 						state = STATE_BASE;
@@ -1293,12 +1304,14 @@ public final class WTExportMain
 			i++;
 		}
 		
-		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad))
+		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
 		{
 			// Read list from Standard In		
 			options.println("Input texture/flat list:");
-			readList(options);
+			if (!readList(options))
+				return false;
 		}
+		return true;
 	}
 
 	private static boolean readList(Options options) throws IOException
@@ -1403,6 +1416,13 @@ public final class WTExportMain
 			return ERROR_NO_FILES;
 		}
 	
+		if (options.additive == null)
+		{
+			options.println("ERROR: Must specify --create or --add for output.");
+			usage(options.out);
+			return ERROR_NO_FILES;
+		}
+	
 		int out;
 		if ((out = (new Context()).doTextureExtraction(options)) == ERROR_NONE)
 			options.println("Done!");
@@ -1414,7 +1434,11 @@ public final class WTExportMain
 	{
 		try {
 			Options options = new Options(System.out, System.err, Common.openTextStream(System.in));
-			scanOptions(options, args);
+			if (!scanOptions(options, args))
+			{
+				System.exit(ERROR_BAD_OPTIONS);
+				return;
+			}
 			System.exit(call(options));
 		} catch (IOException e) {
 			// if we reach here, you got PROBLEMS, buddy.
