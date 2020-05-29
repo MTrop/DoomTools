@@ -758,3 +758,98 @@ In this situation, either the `fileContents` function call will return a buffer 
 The `check` functionality does not have a way to automatically free resources (like how some languages have `finally`) - you will have to ensure that happens given your program's flow.
 
 Checking for errors also adds a little overhead to a script (roughly +7% throughput). A check is made each function call and entering/leaving a `check` block pushes/pops some more objects in/out of the stack. Use discretion with your automatic error detection, especially in real-time applications that call a script constantly!
+
+
+### The Preprocessor
+
+RookScript has a C-like preprocessor for affecting the token parser stream. All of the directives are below:
+
+Preprocessor directives must occupy a line - the directive plus parameters are terminated by a newline.
+
+
+#### #include
+
+The #include directive includes the contents of the specified file. The filename is provided as a string parameter, and can either be a relative file path from the file that contains the directive or an absolute path. Files can be included more than once - use this with caution!
+
+NOTE: The Java implementation of the compiler can also resolve resources off of the classpath by prefixing the path string with classpath:. The include behavior can also be replaced entirely in the Java implementation.
+
+
+	#include "util.rscript"
+	#include "stuff/junk.rscript"
+
+
+#### #define
+
+The #define directive defines a single-token macro that expands to a series of other tokens. This is also useful for creating defines and testing if they were defined later. They may also expand to zero tokens. All macro tokens are CASE SENSITIVE!
+
+NOTE: Unlike the C-language preprocessor, this does not create macro functions.
+
+
+	#define GREETING_TEXT "Hello."
+	#define TWO_PI ( PI() * 2 )
+	#define FILE_WAS_INCLUDED
+
+
+#### #undefine
+
+The #undefine directive removes a previously defined macro. All subsequent uses of that macro are treated as though they were never defined.
+
+
+	#define GREETING_TEXT "Hello."
+	#undefine GREETING_TEXT
+	println(GREETING_TEXT);   // compiler thinks GREETING_TEXT is a variable
+
+
+#### #ifdef
+
+The #ifdef directive includes the next series of lines if the following macro was defined, until it reaches an #endif directive.
+
+
+	#define LINES
+	#ifdef LINES
+	println("LINES was defined.");
+	#endif
+
+
+#### #ifndef
+
+The #ifdef directive includes the next series of lines if the following macro was NOT defined, until it reaches an #endif directive.
+
+
+	#define STUFF
+	#ifndef LINES
+	println("LINES was not defined.");
+	#endif
+	
+
+#### #else
+
+The #else directive ends the most recently started "if" directive block and provides an alternate section if the first "if" is not processed.
+
+
+	#define LINES
+	#ifdef LINES
+	println("LINES was defined.");
+	#else
+	println("LINES was NOT defined.");
+	#endif
+
+
+#### #endif
+
+The #endif directive ends the most recently started "if" or "else" directive block.
+
+
+	#define LINES
+	#ifdef LINES
+	println("LINES was defined.");
+	#endif
+
+	#define LINES
+	#ifdef LINES
+	println("LINES was defined.");
+	#else
+	println("LINES was NOT defined.");
+	#endif
+
+
