@@ -629,9 +629,10 @@ public enum WadMergeCommand
 					mergeCommand.help(System.out);
 					return false;
 				}
-				catch (IllegalArgumentException e)
+				catch (Exception e)
 				{
-					context.logf("ERROR: %s, line %d: Bad command: %s.\n", streamName, linenum, command);
+					context.logf("ERROR: %s, line %d: Bad command call: %s. Internal error.\n", streamName, linenum, command);
+					context.logf("    Caused by: %s: %s\n", e.getClass().getSimpleName(), e.getLocalizedMessage());
 					return false;
 				}
 			}
