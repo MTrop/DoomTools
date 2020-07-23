@@ -23,6 +23,7 @@
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
+
 	<property name="rookscript.lib.version" value="1.8.0" />
 	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
 	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
@@ -60,8 +61,8 @@
 	
 	<!-- Filenames -->
 	<property name="build.versions.dir" value="${build.dir}/versions" />
-	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version}.zip" />
-	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version}.tar.gz" />
+	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version.number}.zip" />
+	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version.number}.tar.gz" />
 
 	<target name="clean.dist">
 		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
