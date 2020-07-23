@@ -13,8 +13,10 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
@@ -45,9 +47,28 @@ public class WadMergeContext
 	private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = ThreadLocal.withInitial(
 		()->new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ")
 	);
+	
+	/** Comparator for MERGEDIR file sorting. */
+	private static final Comparator<File> DIR_FILESORT = (a, b) -> 
+	{
+		if (a.isFile())
+		{
+			if (b.isDirectory())
+				return -1;
+			else
+				return a.getPath().compareTo(b.getPath());
+		}
+		else
+		{
+			if (b.isFile())
+				return 1;
+			else
+				return a.getPath().compareTo(b.getPath());
+		}
+	};
 
 	/** Map of open wads. */
-	private HashMap<String, WadBuffer> currentWads;
+	private TreeMap<String, Wad> currentWads;
 	/** Log out print stream. */
 	private PrintStream logout;
 	/** If verbosity is enabled. */
@@ -68,7 +89,7 @@ public class WadMergeContext
 	 */
 	public WadMergeContext(PrintStream log, boolean verbose)
 	{
-		this.currentWads = new HashMap<String, WadBuffer>();
+		this.currentWads = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.logout = log;
 		this.verbose = verbose;
 	}
@@ -119,11 +140,28 @@ public class WadMergeContext
 	 */
 	public Response create(String symbol)
 	{
-		symbol = symbol.toLowerCase();
 		if (currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
 		
 		currentWads.put(symbol, new WadBuffer());
+		verbosef("Created buffer `%s`.\n", symbol);
+		return Response.OK;
+	}
+
+	/**
+	 * Creates a blank Wad file.
+	 * Symbol is case-insensitive.
+	 * @param symbol the symbol to associate with the Wad.
+	 * @param wadFile the file name for the WAD to initialize.
+	 * @return OK if the Wad does not exist and it was created, BAD_SYMBOL otherwise.
+	 * @throws IOException if an error occurs attempting to create the file.
+	 */
+	public Response createFile(String symbol, File wadFile) throws IOException
+	{
+		if (currentWads.containsKey(symbol))
+			return Response.BAD_SYMBOL;
+		
+		currentWads.put(symbol, WadFile.createWadFile(wadFile));
 		verbosef("Created buffer `%s`.\n", symbol);
 		return Response.OK;
 	}
@@ -136,7 +174,6 @@ public class WadMergeContext
 	 */
 	public Response isValid(String symbol)
 	{
-		symbol = symbol.toLowerCase();
 		Response out = currentWads.containsKey(symbol) ? Response.OK : Response.BAD_SYMBOL;
 		if (out == Response.OK)
 			verbosef("Symbol `%s` is valid.\n", symbol);
@@ -150,16 +187,22 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to clear.
 	 * @return OK if the buffer exists and it was cleared, BAD_SYMBOL otherwise.
+	 * @throws IOException 
 	 */
-	public Response clear(String symbol)
+	public Response clear(String symbol) throws IOException
 	{
-		symbol = symbol.toLowerCase();
 		if (!currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
 		
-		currentWads.put(symbol, new WadBuffer());
+		Wad buffer = currentWads.remove(symbol);
 		verbosef("Cleared buffer `%s`.\n", symbol);
-		return Response.OK;
+		buffer.close();
+		if (buffer instanceof WadBuffer)
+			return create(symbol);
+		else if (buffer instanceof WadFile)
+			return createFile(symbol, new File(((WadFile)buffer).getFilePath()));
+		else
+			return Response.UNEXPECTED_ERROR;
 	}
 
 	/**
@@ -167,16 +210,89 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to discard.
 	 * @return OK if the buffer exists and it was discarded, BAD_SYMBOL otherwise.
+	 * @throws IOException if the Wad could not be closed.
 	 */
-	public Response discard(String symbol)
+	public Response discard(String symbol) throws IOException
 	{
-		symbol = symbol.toLowerCase();
 		if (!currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
-		
-		currentWads.remove(symbol);
+
+		currentWads.remove(symbol).close();
 		verbosef("Discarded buffer `%s`.\n", symbol);
 		return Response.OK;
+	}
+
+	/**
+	 * Loads the contents of a Wad file into a buffer.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to merge into.
+	 * @param wadFile the file to read from.
+	 * @return OK if the file was found and contents were merged in, or BAD_SYMBOL if the symbol is invalid. 
+	 * @throws IOException if the file could not be read.
+	 * @throws WadException if the file is not a Wad file.
+	 */
+	public Response load(String symbol, File wadFile) throws IOException, WadException
+	{
+		if (!wadFile.exists() || wadFile.isDirectory())
+			return Response.BAD_FILE;
+	
+		if (!Wad.isWAD(wadFile))
+			return Response.BAD_WAD;
+	
+		Response out;
+		if ((out = create(symbol)) != Response.OK)
+			return out;
+		if ((out = mergeWad(symbol, wadFile)) != Response.OK)
+			return out;
+		return Response.OK;
+	}
+
+	/**
+	 * Saves the contents of a Wad buffer into a file.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to write.
+	 * @param outFile the file to read from.
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
+	 * @throws IOException if the file could not be written.
+	 */
+	public Response save(String symbol, File outFile) throws IOException
+	{
+		Wad buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+	
+		Common.createPathForFile(outFile);
+		
+		if (buffer instanceof WadBuffer)
+			((WadBuffer)buffer).writeToFile(outFile);
+		else if (buffer instanceof WadFile)
+		{
+			File wadFile = new File(((WadFile)buffer).getFilePath());
+			if (!wadFile.equals(outFile))
+				WadFile.extract(outFile, buffer, 0, buffer.getEntryCount());
+			// Do nothing if same file.
+		}
+		else
+			return Response.UNEXPECTED_ERROR;
+
+		logf("Wrote file `%s`.\n", outFile.getPath());
+		return Response.OK;
+	}
+
+	/**
+	 * Saves the contents of a Wad buffer into a file, and discards the buffer at the symbol.
+	 * Symbol is case-insensitive.
+	 * @param symbol the buffer to write.
+	 * @param outFile the file to read from.
+	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
+	 * @throws IOException if the file could not be written.
+	 */
+	public Response finish(String symbol, File outFile) throws IOException
+	{
+		Response out;
+		if ((out = save(symbol, outFile)) != Response.OK)
+			return out;
+		return discard(symbol);
 	}
 
 	/**
@@ -188,8 +304,7 @@ public class WadMergeContext
 	 */
 	public Response addMarker(String symbol, String name)
 	{
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
@@ -213,8 +328,7 @@ public class WadMergeContext
 	 */
 	public Response addDateMarker(String symbol, String name)
 	{
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
@@ -239,12 +353,12 @@ public class WadMergeContext
 	public Response mergeBuffer(String destinationSymbol, String sourceSymbol)
 	{
 		destinationSymbol = destinationSymbol.toLowerCase();
-		WadBuffer bufferDest;
+		Wad bufferDest;
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
 			return Response.BAD_SYMBOL;
 		
 		sourceSymbol = sourceSymbol.toLowerCase();
-		WadBuffer bufferSource;
+		Wad bufferSource;
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 
@@ -281,27 +395,33 @@ public class WadMergeContext
 		if (!Wad.isWAD(wadFile))
 			return Response.BAD_WAD;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
+		
+		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
 		
 		try (WadFile wad = new WadFile(wadFile))
 		{
 			verbosef("Reading WAD `%s`...\n", wadFile.getPath());
 			for (WadEntry e : wad)
 			{
-				buffer.addData(e.getName(), wad.getData(e));
+				if (adder != null)
+					adder.addData(e.getName(), wad.getData(e));
+				else
+					buffer.addData(e.getName(), wad.getData(e));
 				verbosef("Added entry `%s` to buffer `%s`.\n", e.getName(), symbol);
 			}
 			verbosef("Done reading `%s`.\n", wadFile.getPath());
+		} finally {
+			Common.close(adder);
 		}
 		
 		return Response.OK;
 	}
 
 	// Merge map into buffer, with rename.
-	private static Response mergeMap(WadBuffer buffer, String bufferName, String newHeader, Wad source, String header) throws IOException
+	private static Response mergeMap(Wad buffer, String bufferName, String newHeader, Wad source, String header) throws IOException
 	{
 		WadEntry[] entries = MapUtils.getMapEntries(source, header);
 		if (entries.length == 0)
@@ -318,6 +438,22 @@ public class WadMergeContext
 		return Response.OK;
 	}
 	
+	private Response mergeFileData(String symbol, File inFile, String entryName, Wad buffer) throws IOException
+	{
+		entryName = NameUtils.toValidEntryName(entryName);
+		buffer.addData(entryName, inFile);
+		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
+		return Response.OK;
+	}
+
+	private Response mergeFileData(String symbol, File inFile, String entryName, WadFile.Adder adder) throws IOException
+	{
+		entryName = NameUtils.toValidEntryName(entryName);
+		adder.addData(entryName, inFile);
+		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
+		return Response.OK;
+	}
+
 	/**
 	 * Merges a single map from a Wad file into a buffer.
 	 * Symbol is case-insensitive, as well as entry. The new entry is coerced to a valid name.
@@ -334,8 +470,7 @@ public class WadMergeContext
 		if (!wadFile.exists() || wadFile.isDirectory())
 			return Response.BAD_FILE;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
@@ -361,12 +496,12 @@ public class WadMergeContext
 	public Response mergeMap(String destinationSymbol, String newHeader, String sourceSymbol, String header) throws IOException, WadException
 	{
 		destinationSymbol = destinationSymbol.toLowerCase();
-		WadBuffer bufferDest;
+		Wad bufferDest;
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
 			return Response.BAD_SYMBOL;
 		
 		sourceSymbol = sourceSymbol.toLowerCase();
-		WadBuffer bufferSource;
+		Wad bufferSource;
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 		
@@ -390,15 +525,11 @@ public class WadMergeContext
 		if (!inFile.exists() || inFile.isDirectory())
 			return Response.BAD_FILE;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		entryName = NameUtils.toValidEntryName(entryName);
-		buffer.addData(entryName, inFile);
-		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
-		return Response.OK;
+		return mergeFileData(symbol, inFile, entryName, buffer);
 	}
 
 	/**
@@ -416,23 +547,48 @@ public class WadMergeContext
 		if (!inDirectory.exists() || !inDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
 
-		for (File f : inDirectory.listFiles())
-		{
-			Response resp;
-			if (f.isDirectory())
-				continue;
-			else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
-			{
-				if ((resp = mergeWad(symbol, f)) != Response.OK)
-					return resp; 
-			}
-			else
-			{
-				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-					return resp; 
-			}
-		}
+		Wad buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+
+		File[] files;
 		
+		// Sort files first, directories last, alphabetical order.
+		Arrays.sort(files = inDirectory.listFiles(), DIR_FILESORT);
+		
+		WadFile.Adder adder = null;
+		try {
+			for (File f : files)
+			{
+				Response resp;
+				if (f.isDirectory())
+					continue;
+				else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+				{
+					if (adder != null)
+					{
+						adder.close();
+						adder = null;
+					}
+					if ((resp = mergeWad(symbol, f)) != Response.OK)
+						return resp; 
+				}
+				else if (buffer instanceof WadFile)
+				{
+					if (adder == null)
+						adder = ((WadFile)buffer).createAdder();
+					if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+						return resp; 
+				}
+				else
+				{
+					if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+						return resp; 
+				}
+			}
+		} finally {
+			Common.close(adder);
+		}
 		return Response.OK;
 	}
 
@@ -452,28 +608,54 @@ public class WadMergeContext
 		if (!inDirectory.exists() || !inDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
 
-		for (File f : inDirectory.listFiles())
-		{
-			Response resp;
-			if (f.isDirectory())
+		Wad buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+
+		WadFile.Adder adder = null;
+		try {
+			for (File f : inDirectory.listFiles())
 			{
-				verbosef("Scan directory `%s`...\n", f.getPath());
-				if ((resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
-					return resp; 
-				if ((resp = mergeTree(symbol, f)) != Response.OK)
-					return resp; 
-				verbosef("Done scanning directory `%s`.\n", f.getPath());
+				Response resp;
+				if (f.isDirectory())
+				{
+					if (adder != null)
+					{
+						adder.close();
+						adder = null;
+					}
+					verbosef("Scan directory `%s`...\n", f.getPath());
+					if ((resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
+						return resp; 
+					if ((resp = mergeTree(symbol, f)) != Response.OK)
+						return resp; 
+					verbosef("Done scanning directory `%s`.\n", f.getPath());
+				}
+				else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+				{
+					if (adder != null)
+					{
+						adder.close();
+						adder = null;
+					}
+					if ((resp = mergeWad(symbol, f)) != Response.OK)
+						return resp; 
+				}
+				else if (buffer instanceof WadFile)
+				{
+					if (adder == null)
+						adder = ((WadFile)buffer).createAdder();
+					if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+						return resp; 
+				}
+				else
+				{
+					if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+						return resp; 
+				}
 			}
-			else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
-			{
-				if ((resp = mergeWad(symbol, f)) != Response.OK)
-					return resp; 
-			}
-			else
-			{
-				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-					return resp; 
-			}
+		} finally {
+			Common.close(adder);
 		}
 		
 		return Response.OK;
@@ -500,8 +682,7 @@ public class WadMergeContext
 		if (!textureFile.exists() || textureFile.isDirectory())
 			return Response.BAD_FILE;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
@@ -569,8 +750,7 @@ public class WadMergeContext
 		if (!textureDirectory.exists() || !textureDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
@@ -579,21 +759,34 @@ public class WadMergeContext
 			return resp;
 		
 		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
-		for (File f : textureDirectory.listFiles())
-		{
-			if (f.isDirectory())
+		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
+		try {
+			for (File f : textureDirectory.listFiles())
 			{
-				verbosef("Skipping directory `%s`...\n", f.getPath());
-				continue;
+				if (f.isDirectory())
+				{
+					verbosef("Skipping directory `%s`...\n", f.getPath());
+					continue;
+				}
+				else
+				{
+					if (adder != null)
+					{
+						if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+							return resp;
+					}
+					else
+					{
+						if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), buffer)) != Response.OK)
+							return resp;
+					}
+					String textureName = NameUtils.toValidTextureName(Common.getFileNameWithoutExtension(f));
+					textureSet.createTexture(textureName).createPatch(textureName);
+					verbosef("Add texture `%s`...\n", textureName);
+				}
 			}
-			else
-			{
-				if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-					return resp; 
-				String textureName = NameUtils.toValidTextureName(Common.getFileNameWithoutExtension(f));
-				textureSet.createTexture(textureName).createPatch(textureName);
-				verbosef("Add texture `%s`...\n", textureName);
-			}
+		} finally {
+			Common.close(adder);
 		}
 
 		if ((resp = addMarker(symbol, "PP_END")) != Response.OK)
@@ -628,8 +821,7 @@ public class WadMergeContext
 		if (!swantblsFile.exists() || swantblsFile.isDirectory())
 			return Response.BAD_FILE;
 
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
+		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
@@ -654,68 +846,6 @@ public class WadMergeContext
 			logln("ERROR: "+ swantblsFile + ", " + e.getMessage());
 			return Response.BAD_PARSE;
 		}
-	}
-
-	/**
-	 * Loads the contents of a Wad file into a buffer.
-	 * Symbol is case-insensitive.
-	 * @param symbol the buffer to merge into.
-	 * @param wadFile the file to read from.
-	 * @return OK if the file was found and contents were merged in, or BAD_SYMBOL if the symbol is invalid. 
-	 * @throws IOException if the file could not be read.
-	 * @throws WadException if the file is not a Wad file.
-	 */
-	public Response load(String symbol, File wadFile) throws IOException, WadException
-	{
-		if (!wadFile.exists() || wadFile.isDirectory())
-			return Response.BAD_FILE;
-
-		if (!Wad.isWAD(wadFile))
-			return Response.BAD_WAD;
-
-		Response out;
-		if ((out = create(symbol)) != Response.OK)
-			return out;
-		if ((out = mergeWad(symbol, wadFile)) != Response.OK)
-			return out;
-		return Response.OK;
-	}
-	
-	/**
-	 * Saves the contents of a Wad buffer into a file.
-	 * Symbol is case-insensitive.
-	 * @param symbol the buffer to write.
-	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
-	 * @throws IOException if the file could not be written.
-	 */
-	public Response save(String symbol, File outFile) throws IOException
-	{
-		symbol = symbol.toLowerCase();
-		WadBuffer buffer;
-		if ((buffer = currentWads.get(symbol)) == null)
-			return Response.BAD_SYMBOL;
-
-		Common.createPathForFile(outFile);
-		buffer.writeToFile(outFile);
-		logf("Wrote file `%s`.\n", outFile.getPath());
-		return Response.OK;
-	}
-	
-	/**
-	 * Saves the contents of a Wad buffer into a file, and discards the buffer at the symbol.
-	 * Symbol is case-insensitive.
-	 * @param symbol the buffer to write.
-	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
-	 * @throws IOException if the file could not be written.
-	 */
-	public Response finish(String symbol, File outFile) throws IOException
-	{
-		Response out;
-		if ((out = save(symbol, outFile)) != Response.OK)
-			return out;
-		return discard(symbol);
 	}
 	
 }

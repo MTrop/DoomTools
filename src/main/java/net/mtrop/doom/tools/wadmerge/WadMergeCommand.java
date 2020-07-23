@@ -47,7 +47,9 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println("CREATE [symbol]"); 
-			out.println("    Creates a new buffer, errors out if the symbol exists."); 
+			out.println("    Creates a new in-memory buffer, errors out if the symbol exists."); 
+			out.println("    Buffers are best used for speed, but large merges will consume"); 
+			out.println("    lots of memory during merge."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
 		}
 		
@@ -58,6 +60,39 @@ public enum WadMergeCommand
 		}
 	},
 	
+	CREATEFILE
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("CREATEFILE [symbol] [path]"); 
+			out.println("    Creates a new WAD file (on disk - not in memory), errors out if ");
+			out.println("    the symbol exists or the new file could not be created."); 
+			out.println("    WARNING: If the file already exists, it is OVERWRITTEN!"); 
+			out.println("    Files are best used for memory efficiency, but large merges will"); 
+			out.println("    incur lots of overhead as the output file grows."); 
+			out.println("    See: CREATE for the in-memory version."); 
+			out.println("    [symbol]: The symbol for the new buffer.");
+			out.println("    [path]: The file to create.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			String symbol = scanner.next();
+			String path = scanner.next();
+			try {
+				return context.createFile(symbol, new File(path));
+			} catch (IOException e) {
+				context.logf("ERROR: File %s could not be created.\n", path);
+				return Response.BAD_FILE;
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s could not be created. Access denied.\n", path);
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
 	CLEAR
 	{
 		@Override
@@ -65,13 +100,20 @@ public enum WadMergeCommand
 		{
 			out.println("CLEAR [symbol]"); 
 			out.println("    Clears an existing buffer, errors out if the symbol does not exist."); 
+			out.println("    If the symbol is a file, it is deleted and rebuilt."); 
 			out.println("    [symbol]: The symbol for the existing buffer to clear.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
-			return context.clear(scanner.next());
+			String symbol = scanner.next();
+			try {
+				return context.clear(symbol);
+			} catch (IOException e) {
+				context.logf("ERROR: Symbol %s could not be cleared (file not closed).\n", symbol);
+				return Response.BAD_WAD;
+			}
 		}
 	},
 	
@@ -81,14 +123,126 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println("DISCARD [symbol]"); 
-			out.println("    Discards an existing buffer."); 
+			out.println("    Discards an existing buffer, errors out if the symbol does not exist."); 
+			out.println("    If the symbol is a file, it is closed."); 
 			out.println("    [symbol]: The symbol for the existing buffer to discard.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
-			return context.discard(scanner.next());
+			String symbol = scanner.next();
+			try {
+				return context.discard(symbol);
+			} catch (IOException e) {
+				context.logf("ERROR: Symbol %s could not be discarded (file not closed).\n", symbol);
+				return Response.BAD_WAD;
+			}
+		}
+	},
+	
+	SAVE
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("SAVE [symbol] [file]");
+			out.println("    Exports the content of a symbol to a WAD file. Directories are created for");
+			out.println("    the file, if they don't exist. If the symbol is a WAD file (not buffer)");
+			out.println("    and the destination is the same file, nothing happens.");
+			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
+			out.println("    [symbol]: The symbol to export.");
+			out.println("    [file]:   The file to create and export to.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			String symbol = scanner.next();
+			String file = scanner.next();
+			
+			try {
+				return context.save(symbol, new File(file));
+			} catch (FileNotFoundException e) {
+				context.logf("ERROR: File %s not found.\n", file);
+				return Response.BAD_FILE;
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s not readable (access denied).\n", file);
+				return Response.BAD_FILE;
+			} catch (WadException e) {
+				context.logf("ERROR: File %s is not a WAD.\n", file);
+				return Response.BAD_FILE;
+			} catch (IOException e) {
+				context.logf("ERROR: File %s not readable.\n", file);
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	LOAD
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("LOAD [symbol] [file]");
+			out.println("    Creates a new in-memory buffer by loading an existing WAD file");
+			out.println("    into memory. The symbol must not already exist.");
+			out.println("    [symbol]: The buffer to create.");
+			out.println("    [file]:   The WAD file to read.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			String symbol = scanner.next();
+			String file = scanner.next();
+			try {
+				return context.load(symbol, new File(file));
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s not readable (access denied).\n", file);
+				return Response.BAD_FILE;
+			} catch (IOException e) {
+				context.logf("ERROR: File %s not writeable.\n", file);
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	FINISH
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("FINISH [symbol] [file]");
+			out.println("    Exports the content of a symbol to a WAD file. Directories are created for");
+			out.println("    the file, if they don't exist. If the symbol is a WAD file (not buffer) and");
+			out.println("    the destination is the same file, nothing happens. The symbol is discarded.");
+			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
+			out.println("    [symbol]: The symbol to export.");
+			out.println("    [file]:   The file to create and export to.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			String symbol = scanner.next();
+			String file = scanner.next();
+			
+			try {
+				return context.finish(symbol, new File(file));
+			} catch (FileNotFoundException e) {
+				context.logf("ERROR: File %s not found.\n", file);
+				return Response.BAD_FILE;
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s not readable (access denied).\n", file);
+				return Response.BAD_FILE;
+			} catch (WadException e) {
+				context.logf("ERROR: File %s is not a WAD.\n", file);
+				return Response.BAD_FILE;
+			} catch (IOException e) {
+				context.logf("ERROR: File %s not readable.\n", file);
+				return Response.BAD_FILE;
+			}
 		}
 	},
 	
@@ -170,7 +324,7 @@ public enum WadMergeCommand
 		{
 			out.println("MERGEWAD [symbol] [path]"); 
 			out.println("    Reads WAD entries from [path] into buffer [symbol].");
-			out.println("    [symbol]: The buffer to add to.");
+			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The WAD contents to add.");
 		}
 		
@@ -204,7 +358,7 @@ public enum WadMergeCommand
 		{
 			out.println("MERGEFILE [symbol] [path] [opt:entryname]"); 
 			out.println("    Reads file from [path] into [symbol].");
-			out.println("    [symbol]:    The buffer to add to.");
+			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [path]:      The file to add.");
 			out.println("    [entryname]: (Optional) If specified, this is the entry name to use");
 			out.println("                 to import as.");
@@ -241,12 +395,13 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println("MERGEMAP [dest-symbol] [targetmap] [src-symbol] [opt:sourcemap]"); 
-			out.println("    Reads file from [path] into [symbol].");
-			out.println("    [dest-symbol]: The buffer to add to.");
+			out.println("    Reads a single map from the source, appending it to the destination.");
+			out.println("    [dest-symbol]: The symbol to add to.");
 			out.println("    [targetmap]:   The map to add (map header).");
 			out.println("    [src-symbol]:  The buffer to read from.");
-			out.println("    [sourcemap]:   (Optional) If specified, the map to read from the WAD,");
-			out.println("                   and the target is the new header name.");
+			out.println("    [sourcemap]:   (Optional) If specified, this is map to read");
+			out.println("                   from the source symbol, and the target is the");
+			out.println("                   new header name. If not, [targetmap] is read.");
 		}
 		
 		@Override
@@ -275,12 +430,13 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println("MERGEMAPFILE [symbol] [targetmap] [path] [opt:sourcemap]"); 
-			out.println("    Reads file from [path] into [symbol].");
-			out.println("    [symbol]:    The buffer to add to.");
+			out.println("    Reads a single map from the source WAD, appending it to the destination.");
+			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [targetmap]: The map to add (target header).");
 			out.println("    [path]:      The source WAD file to read from.");
-			out.println("    [sourcemap]: (Optional) If specified, the map to read from the WAD,");
-			out.println("                 and the target is the new header name.");
+			out.println("    [sourcemap]: (Optional) If specified, this is map to read");
+			out.println("                 from the source WAD, and the target is the");
+			out.println("                 new header name. If not, [targetmap] is read.");
 		}
 		
 		@Override
@@ -356,7 +512,7 @@ public enum WadMergeCommand
 			out.println("MERGESWANTBLS [symbol] [path]");
 			out.println("    Reads file from [path], interprets it as a SWANTBLS file, creates two");
 			out.println("    entries in [symbol]: ANIMATED and SWITCHES.");
-			out.println("    [symbol]: The buffer to add to.");
+			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 		}
 		
@@ -389,7 +545,7 @@ public enum WadMergeCommand
 			out.println("    Reads file from [path], interprets it as a DEUTeX texture/patch assembly");
 			out.println("    file, creates TEXTUREx/PNAMES. The name of the file is the name of the");
 			out.println("    texture lump.");
-			out.println("    [symbol]: The buffer to add to.");
+			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  (Optional) If specified, the name of the entry to write.");
 		}
@@ -432,7 +588,7 @@ public enum WadMergeCommand
 		    out.println("        Add file name to PNAMES, add [file] to TEXTURE1 with only patch [file].");
 		    out.println("    Calls `MARKER [symbol] pp_end`.");
 		    out.println("    Export [entry]/PNAMES.");
-			out.println("    [symbol]: The buffer to add to.");
+			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  The name of the texture entry to write.");
 		}
@@ -451,107 +607,6 @@ public enum WadMergeCommand
 				return Response.BAD_FILE;
 			} catch (SecurityException e) {
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
-				return Response.BAD_FILE;
-			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
-				return Response.BAD_FILE;
-			}
-		}
-	},
-	
-	SAVE
-	{
-		@Override
-		public void help(PrintStream out)
-		{
-			out.println("SAVE [symbol] [file]");
-			out.println("    Exports the content of a buffer to a WAD file. Directories are created for");
-			out.println("    the file, if they don't exist.");
-			out.println("    [symbol]: The buffer to export.");
-			out.println("    [file]:   The file to output.");
-		}
-		
-		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
-		{
-			String symbol = scanner.next();
-			String file = scanner.next();
-			
-			try {
-				return context.save(symbol, new File(file));
-			} catch (FileNotFoundException e) {
-				context.logf("ERROR: File %s not found.\n", file);
-				return Response.BAD_FILE;
-			} catch (SecurityException e) {
-				context.logf("ERROR: File %s not readable (access denied).\n", file);
-				return Response.BAD_FILE;
-			} catch (WadException e) {
-				context.logf("ERROR: File %s is not a WAD.\n", file);
-				return Response.BAD_FILE;
-			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
-				return Response.BAD_FILE;
-			}
-		}
-	},
-	
-	LOAD
-	{
-		@Override
-		public void help(PrintStream out)
-		{
-			out.println("LOAD [symbol] [file]");
-			out.println("    Creates a new buffer by loading an existing WAD file into memory.");
-			out.println("    The symbol must not already exist.");
-			out.println("    [symbol]: The buffer to create.");
-			out.println("    [file]:   The file to read.");
-		}
-		
-		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
-		{
-			String symbol = scanner.next();
-			String file = scanner.next();
-			try {
-				return context.load(symbol, new File(file));
-			} catch (SecurityException e) {
-				context.logf("ERROR: File %s not readable (access denied).\n", file);
-				return Response.BAD_FILE;
-			} catch (IOException e) {
-				context.logf("ERROR: File %s not writeable.\n", file);
-				return Response.BAD_FILE;
-			}
-		}
-	},
-	
-	FINISH
-	{
-		@Override
-		public void help(PrintStream out)
-		{
-			out.println("FINISH [symbol] [file]");
-			out.println("    Exports the content of a buffer to a WAD file, and disacrds the buffer.");
-			out.println("     Directories are created for the file, if they don't exist.");
-			out.println("    [symbol]: The buffer to export.");
-			out.println("    [file]:   The file to output.");
-		}
-		
-		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
-		{
-			String symbol = scanner.next();
-			String file = scanner.next();
-			
-			try {
-				return context.finish(symbol, new File(file));
-			} catch (FileNotFoundException e) {
-				context.logf("ERROR: File %s not found.\n", file);
-				return Response.BAD_FILE;
-			} catch (SecurityException e) {
-				context.logf("ERROR: File %s not readable (access denied).\n", file);
-				return Response.BAD_FILE;
-			} catch (WadException e) {
-				context.logf("ERROR: File %s is not a WAD.\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
 				context.logf("ERROR: File %s not readable.\n", file);

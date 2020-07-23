@@ -281,7 +281,10 @@ public final class WadScriptMain
 			if (namespace != null)
 				out.append(namespace + "::");
 
-			out.append("## ").append(functionName).append('(');
+			out.append("## ");
+			if (namespace != null)
+				out.append(namespace + "::");
+			out.append(functionName).append('(');
 			List<ParameterUsage> pul = usage.getParameterInstructions();
 			for (int i = 0; i < pul.size(); i++)
 			{

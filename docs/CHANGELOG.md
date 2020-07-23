@@ -6,9 +6,16 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 WadMerge
 --------
 
-### Changed for 1.0.1
+### Changed for 1.1.0
 
+* `Added` The `CREATEFILE` command for creating a File instead of a Buffer.
 * `Changed` If a problem occurs in any command execution, a better error message is output.
+* `Changed` The `MERGEDIR` command sorts files alphabetically, files first, then directories.
+
+
+### Changed for 1.0.0
+
+* Initial Release.
 
 
 WSwAnTbl
@@ -45,6 +52,11 @@ WTEXport
 
 WadScript
 ---------
+
+### Changed for 1.0.1
+
+* `Fixed` Markdown documentation output.
+
 
 ### Changed for 1.0.0
 
