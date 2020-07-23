@@ -278,9 +278,6 @@ public final class WadScriptMain
 				return;
 			}
 			
-			if (namespace != null)
-				out.append(namespace + "::");
-
 			out.append("## ");
 			if (namespace != null)
 				out.append(namespace + "::");
@@ -695,11 +692,14 @@ public final class WadScriptMain
 		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
 		out.println("                                     Default: 2048");
 		out.println("    --                           All tokens after this one are interpreted");
-		out.println("                                     as args for the script.");
-		out.println("    --X                          Bash script special: First argument after");
-		out.println("                                     this is the script file, and every");
-		out.println("                                     argument after are args to pass to the");
-		out.println("                                     script.");
+		out.println("                                     literally as args for the script.");
+		out.println("                                     Normally, all unrecognized switches");
+		out.println("                                     become arguments to the script. This");
+		out.println("                                     forces the alternate interpretation.");
+		out.println("    --X                          Bash script special: [DEPRECATED]");
+		out.println("                                     First argument after this is the script");
+		out.println("                                     file, and every argument after are args");
+		out.println("                                     to pass to the script.");
 	}
 
 	private static void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver)
