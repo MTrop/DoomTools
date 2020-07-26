@@ -1203,7 +1203,7 @@ public final class WTExportMain
 		out.println("    --create              If specified, the specified output WAD file is");
 		out.println("    -c                    created, TEXTUREx and PNAMES lumps are overwritten, and the");
 		out.println("                          extracted contents are APPENDED to it. If the output");
-		out.println("                          file already  exists, it is replaced COMPLETELY");
+		out.println("                          file already exists, it is replaced COMPLETELY");
 		out.println("                          (be careful)!");
 		out.println();
 		out.println("    --add                 If specified, if the output WAD exists, the target's");
