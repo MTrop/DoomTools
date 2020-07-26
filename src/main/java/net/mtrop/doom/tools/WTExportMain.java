@@ -229,26 +229,6 @@ public final class WTExportMain
 			this.flatList = new ArrayList<>();
 		}
 
-		private <T extends Comparable<T>> void sortSwap(List<T> list, int i)
-		{
-			T temp = list.get(i - 1);
-			list.set(i - 1, list.get(i));
-			list.set(i, temp);
-		}
-
-		private <T extends Comparable<T>> void insertAndSort(List<T> list, T obj)
-		{
-			int n = list.size();
-			list.add(obj);
-			while (n > 0)
-			{
-				if (list.get(n - 1).compareTo(list.get(n)) < 0)
-					break;
-				sortSwap(list, n);
-				n--;
-			}
-		}
-
 		// Scan WAD file.
 		private boolean scanWAD(Options options, String path, boolean isBase)
 		{
@@ -286,18 +266,18 @@ public final class WTExportMain
 			options.printf("        %d namespace textures.\n", unit.texNamespaceIndices.size());
 			
 			for (Map.Entry<String, Integer> entry : unit.flatIndices.entrySet())
-				insertAndSort(unit.flatList, entry.getKey());
+				unit.flatList.add(entry.getKey());
 		
 			for (Map.Entry<String, Integer> entry : unit.texNamespaceIndices.entrySet())
 			{
 				String s = entry.getKey();
 				if (!unit.textureList.contains(s))
-					insertAndSort(unit.textureList, s);
+					unit.textureList.add(s);
 			}
 		
 			for (TextureSet.Texture tex : unit.textureSet)
 				if (!unit.textureList.contains(tex.getName()))
-					insertAndSort(unit.textureList, tex.getName());
+					unit.textureList.add(tex.getName());
 		
 			try {
 				if (!scanAnimated(options, unit, wf))
@@ -1147,9 +1127,16 @@ public final class WTExportMain
 		/** Switches map. */
 		HashMap<String, String> switchMap;
 
-		/** Sorted texture names. */
+		// NOTE: The following lists are NOT sorted for a reason.
+		// In order to grab the correct textures between the indices of the Animated
+		// textures, the order must be preserved ALWAYS!
+
+		// In the future, there should maybe be a better type of check to speed some things
+		// up, but I'm leaving it for now since I'm really f'in tired and it works. -MTrop
+		
+		/** Texture names. */
 		List<String> textureList;
-		/** Sorted flat names. */
+		/** Flat names. */
 		List<String> flatList;
 		
 		Animated animated;
@@ -1210,18 +1197,21 @@ public final class WTExportMain
 		out.println("                          extracted, except for the TEXTUREx and PNAMES lumps");
 		out.println("                          to use as a base. (Usually an IWAD)");
 		out.println();
-		out.println("    --output [wad]        The output WAD file. If it exists, it is replaced");
-		out.println("    -o [wad]              COMPLETELY (be careful)!");
+		out.println("    --output [wad]        The output WAD file.");
+		out.println("    -o [wad]");
 		out.println();
-		out.println("[switches]:");
 		out.println("    --create              If specified, the specified output WAD file is");
 		out.println("    -c                    created, TEXTUREx and PNAMES lumps are overwritten, and the");
-		out.println("                          extracted contents are APPENDED to it.");
+		out.println("                          extracted contents are APPENDED to it. If the output");
+		out.println("                          file already  exists, it is replaced COMPLETELY");
+		out.println("                          (be careful)!");
 		out.println();
 		out.println("    --add                 If specified, if the output WAD exists, the target's");
 		out.println("    -a                    TEXTUREx and PNAMES lumps are overwritten, and the");
-		out.println("                          extracted contents are APPENDED to it.");
+		out.println("                          extracted contents are APPENDED to it. If the WAD");
+		out.println("                          does not exist, it is created.");
 		out.println();
+		out.println("[switches]:");
 		out.println("    --null-texture [tex]  If specified, the next argument is the null");
 		out.println("                          texture that is always sorted first.");
 		out.println();
@@ -1232,6 +1222,36 @@ public final class WTExportMain
 		out.println("    --no-switches         If specified, do not include other textures in");
 		out.println("                          a texture's switch sequence, and ignore SWITCHES");
 		out.println("                          lumps.");
+		out.println();
+		out.println("Input List");
+		out.println("==========");
+		out.println();
+		out.println("The input list of textures and flats are a newline-separated list read from");
+		out.println("STDIN, with the texture and flat list separated by \":textures\" and \":flats\"");
+		out.println("entries, terminated by \":end\". Blank lines and lines prefixed with \"#\"");
+		out.println("are ignored.");
+		out.println();
+		out.println("Example:");
+		out.println();
+		out.println(":textures");
+		out.println("GRENWAL1");
+		out.println("GRENWAL2");
+		out.println("GRENWAL3");
+		out.println("GRENWAL4");
+		out.println("RAILING");
+		out.println("XXMETL02");
+		out.println("XXMETL03");
+		out.println();
+		out.println(":flats");
+		out.println("# This is a comment.");
+		out.println("ICHOR01");
+		out.println("ICHOR02");
+		out.println("ICHOR03");
+		out.println("ICHOR04");
+		out.println();
+		out.println(":end");
+		out.println();
+		out.println("The utility WTEXSCAN already produces a list formatted this way.");
 	}
 
 	/**

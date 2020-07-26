@@ -45,6 +45,12 @@ WTexScan
 WTEXport
 --------
 
+### Changed for 1.1.0
+
+* `Changed` Removed an unnecessary sort step that butchered that Animation handling in flats and textures.
+* `Changed` Added some needed help.
+
+
 ### Changed for 1.0.0
 
 * Initial Release.
