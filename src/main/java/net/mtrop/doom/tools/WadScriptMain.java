@@ -42,6 +42,7 @@ import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.scripting.DoomMapFunctions;
 import net.mtrop.doom.tools.scripting.PK3Functions;
 import net.mtrop.doom.tools.scripting.UtilityFunctions;
@@ -62,6 +63,14 @@ public final class WadScriptMain
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
 	private static final String VERSION = Common.getVersionString("wadscript");
+
+	private static final int ERROR_NONE = 0;
+	private static final int ERROR_BAD_SCRIPT = 4;
+	private static final int ERROR_BAD_SCRIPT_ENTRY = 5;
+	private static final int ERROR_SCRIPT_EXECUTION_ERROR = 6;
+	private static final int ERROR_SCRIPT_RETURNED_ERROR = 7;
+	private static final int ERROR_SCRIPT_INSTANCE_EXECUTION = 8;
+	private static final int ERROR_SCRIPT_NOT_STARTED = 9;
 
 	private static final String SWITCH_VERSION1 = "--version";
 	private static final String SWITCH_HELP1 = "--help";
@@ -332,196 +341,328 @@ public final class WadScriptMain
 		DISASSEMBLE,
 		EXECUTE;
 	}
-
-	private Mode mode;
-	private File scriptFile;
-	private String entryPointName;
-	private Integer runawayLimit;
-	private Integer activationDepth;
-	private Integer stackDepth;
-	private List<String> argList;
 	
-	private WadScriptMain()
+	public static class Options
 	{
-		this.mode = Mode.EXECUTE;
-		this.scriptFile = null;
-		this.entryPointName = "main";
-		this.runawayLimit = 0;
-		this.activationDepth = 256;
-		this.stackDepth = 2048;
-		this.argList = new LinkedList<>();
+		private PrintStream stdout;
+		private PrintStream stderr;
+		private Mode mode;
+		private File scriptFile;
+		private String entryPointName;
+		private Integer runawayLimit;
+		private Integer activationDepth;
+		private Integer stackDepth;
+		private List<String> argList;
+		
+		public Options()
+		{
+			this.stdout = null;
+			this.stderr = null;
+			this.mode = Mode.EXECUTE;
+			this.scriptFile = null;
+			this.entryPointName = "main";
+			this.runawayLimit = 0;
+			this.activationDepth = 256;
+			this.stackDepth = 2048;
+			this.argList = new LinkedList<>();
+		}
+
+		public Options setMode(Mode mode) 
+		{
+			this.mode = mode;
+			return this;
+		}
+
+		public Options setScriptFile(File scriptFile) 
+		{
+			this.scriptFile = scriptFile;
+			return this;
+		}
+		
+		public Options setEntryPointName(String entryPointName) 
+		{
+			this.entryPointName = entryPointName;
+			return this;
+		}
+		
+		public Options setRunawayLimit(Integer runawayLimit)
+		{
+			this.runawayLimit = runawayLimit;
+			return this;
+		}
+		
+		public Options setActivationDepth(Integer activationDepth)
+		{
+			this.activationDepth = activationDepth;
+			return this;
+		}
+		
+		public Options setStackDepth(Integer stackDepth)
+		{
+			this.stackDepth = stackDepth;
+			return this;
+		}
+		
+		public Options setArgList(List<String> argList)
+		{
+			this.argList = argList;
+			return this;
+		}
+		
 	}
 
-	private int execute()
+	private static class Context
 	{
-		if (mode == Mode.VERSION)
+		private Options options;
+		
+		private Context(Options options)
 		{
-			splash(System.out);
-			return 0;
-		}
-
-		if (mode == Mode.HELP)
-		{
-			usage(System.out);
-			printHelp(System.out);
-			return 0;
+			this.options = options;
 		}
 		
-		if (mode == Mode.FUNCTIONHELP)
+		private int call()
 		{
-			printFunctionHelp(new UsageTextRenderer(System.out));
-			return 0;
-		}
-		
-		if (mode == Mode.FUNCTIONHELP_MARKDOWN)
-		{
-			printFunctionHelp(new UsageMarkdownRenderer(System.out));
-			return 0;
-		}
-		
-		if (scriptFile == null)
-		{
-			System.err.println("ERROR: Bad script file.");
-			return 4;
-		}
-		if (!scriptFile.exists())
-		{
-			System.err.println("ERROR: Script file does not exist: " + scriptFile);
-			return 4;
-		}
-		if (scriptFile.isDirectory())
-		{
-			System.err.println("ERROR: Bad script file. Is directory.");
-			return 4;
-		}
-	
-		ScriptInstance instance;
-		
-		try 
-		{
-			ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
-				.withSource(scriptFile)
-				.withEnvironment(ScriptEnvironment.createStandardEnvironment())
-				.withScriptStack(activationDepth, stackDepth)
-				.withRunawayLimit(runawayLimit);
+			if (options.mode == Mode.VERSION)
+			{
+				splash(options.stdout);
+				return ERROR_NONE;
+			}
 
-			// ============ Add Functions =============
-			
-			for (int i = 0; i < RESOLVERS.length; i++)
+			if (options.mode == Mode.HELP)
 			{
-				if (i == 0)
-				{
-					if (RESOLVERS[i].namespace != null)
-						builder.withFunctionResolver(RESOLVERS[i].namespace, RESOLVERS[i].resolver);
-					else
-						builder.withFunctionResolver(RESOLVERS[i].resolver);
-				}
-				else 
-				{
-					if (RESOLVERS[i].namespace != null)
-						builder.andFunctionResolver(RESOLVERS[i].namespace, RESOLVERS[i].resolver);
-					else
-						builder.andFunctionResolver(RESOLVERS[i].resolver);
-				} 
+				usage(options.stdout);
+				printHelp(options.stdout);
+				return ERROR_NONE;
 			}
 			
-			// ========================================
-
-			instance = builder.createInstance();
+			if (options.mode == Mode.FUNCTIONHELP)
+			{
+				printFunctionHelp(new UsageTextRenderer(options.stdout));
+				return ERROR_NONE;
+			}
 			
-		} 
-		catch (ScriptInstanceBuilder.BuilderException e) 
-		{
-			Throwable cause = e.getCause();
-			if (cause instanceof ScriptParseException)
+			if (options.mode == Mode.FUNCTIONHELP_MARKDOWN)
 			{
-				System.err.println("Script ERROR: " + cause.getLocalizedMessage());
-				return 8;
+				printFunctionHelp(new UsageMarkdownRenderer(options.stdout));
+				return ERROR_NONE;
 			}
-			else if (cause != null)
+			
+			if (options.scriptFile == null)
 			{
-				System.err.println("ERROR: Script could not be started: " + cause.getLocalizedMessage());
-				return 8;
+				options.stderr.println("ERROR: Bad script file.");
+				return ERROR_BAD_SCRIPT;
 			}
-			else
+			if (!options.scriptFile.exists())
 			{
-				System.err.println("ERROR: " + e.getLocalizedMessage());
-				return 9;
+				options.stderr.println("ERROR: Script file does not exist: " + options.scriptFile);
+				return ERROR_BAD_SCRIPT;
 			}
-		}
+			if (options.scriptFile.isDirectory())
+			{
+				options.stderr.println("ERROR: Bad script file. Is directory.");
+				return ERROR_BAD_SCRIPT;
+			}
 		
-		if (mode == Mode.DISASSEMBLE)
-		{
-			System.out.println("Disassembly of \"" + scriptFile + "\":");
-			doDisassemble(System.out, instance);
-			return 0;
-		}
-	
-		if (mode == Mode.EXECUTE)
-		{
-			if (entryPointName == null)
-			{
-				System.err.println("ERROR: Bad entry point.");
-				return 4;
-			}
-			if (activationDepth == null)
-			{
-				System.err.println("ERROR: Bad activation depth.");
-				return 4;
-			}
-			if (stackDepth == null)
-			{
-				System.err.println("ERROR: Bad stack depth.");
-				return 4;
-			}
-			if (runawayLimit == null)
-			{
-				System.err.println("ERROR: Bad runaway limit.");
-				return 4;
-			}
+			ScriptInstance instance;
 			
-			Script.Entry entryPoint;
-			
-			if ((entryPoint = instance.getScript().getScriptEntry(entryPointName)) == null)
+			try 
 			{
-				System.err.println("ERROR: Entry point not found: " + entryPointName);
-				return 5;
-			}
-			
-			Object[] args = new Object[argList.size()];
-			argList.toArray(args);
-			try {
-				ScriptValue retval = ScriptValue.create(null);
+				ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
+					.withSource(options.scriptFile)
+					.withEnvironment(ScriptEnvironment.createStandardEnvironment())
+					.withScriptStack(options.activationDepth, options.stackDepth)
+					.withRunawayLimit(options.runawayLimit);
 
-				if (entryPoint.getParameterCount() > 0)
-					instance.call(entryPointName, new Object[]{args});
-				else
-					instance.call(entryPointName);
-
-				instance.popStackValue(retval);
+				// ============ Add Functions =============
 				
-				if (retval.isError())
+				for (int i = 0; i < RESOLVERS.length; i++)
 				{
-					ErrorType error = retval.asObjectType(ErrorType.class);
-					System.err.println("ERROR: [" + error.getType() + "]: " + error.getLocalizedMessage());
-					return 7;
+					if (i == 0)
+					{
+						if (RESOLVERS[i].namespace != null)
+							builder.withFunctionResolver(RESOLVERS[i].namespace, RESOLVERS[i].resolver);
+						else
+							builder.withFunctionResolver(RESOLVERS[i].resolver);
+					}
+					else 
+					{
+						if (RESOLVERS[i].namespace != null)
+							builder.andFunctionResolver(RESOLVERS[i].namespace, RESOLVERS[i].resolver);
+						else
+							builder.andFunctionResolver(RESOLVERS[i].resolver);
+					} 
 				}
-				return retval.asInt();
-			} catch (ScriptExecutionException e) {
-				System.err.println("Script ERROR: " + e.getLocalizedMessage());
-				return 6;
-			} catch (ClassCastException e) {
-				System.err.println("Script return ERROR: " + e.getLocalizedMessage());
-				return 6;
+				
+				// ========================================
+
+				instance = builder.createInstance();
+				
+			} 
+			catch (ScriptInstanceBuilder.BuilderException e) 
+			{
+				Throwable cause = e.getCause();
+				if (cause instanceof ScriptParseException)
+				{
+					options.stderr.println("Script ERROR: " + cause.getLocalizedMessage());
+					return ERROR_SCRIPT_INSTANCE_EXECUTION;
+				}
+				else if (cause != null)
+				{
+					options.stderr.println("ERROR: Script could not be started: " + cause.getLocalizedMessage());
+					return ERROR_SCRIPT_INSTANCE_EXECUTION;
+				}
+				else
+				{
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_SCRIPT_NOT_STARTED;
+				}
 			}
+			
+			if (options.mode == Mode.DISASSEMBLE)
+			{
+				options.stdout.println("Disassembly of \"" + options.scriptFile + "\":");
+				doDisassemble(options.stdout, instance);
+				return ERROR_NONE;
+			}
+		
+			if (options.mode == Mode.EXECUTE)
+			{
+				if (options.entryPointName == null)
+				{
+					options.stderr.println("ERROR: Bad entry point.");
+					return ERROR_BAD_SCRIPT;
+				}
+				if (options.activationDepth == null)
+				{
+					options.stderr.println("ERROR: Bad activation depth.");
+					return ERROR_BAD_SCRIPT;
+				}
+				if (options.stackDepth == null)
+				{
+					options.stderr.println("ERROR: Bad stack depth.");
+					return ERROR_BAD_SCRIPT;
+				}
+				if (options.runawayLimit == null)
+				{
+					options.stderr.println("ERROR: Bad runaway limit.");
+					return ERROR_BAD_SCRIPT;
+				}
+				
+				Script.Entry entryPoint;
+				
+				if ((entryPoint = instance.getScript().getScriptEntry(options.entryPointName)) == null)
+				{
+					options.stderr.println("ERROR: Entry point not found: " + options.entryPointName);
+					return ERROR_BAD_SCRIPT_ENTRY;
+				}
+				
+				Object[] args = new Object[options.argList.size()];
+				options.argList.toArray(args);
+				try {
+					ScriptValue retval = ScriptValue.create(null);
+
+					if (entryPoint.getParameterCount() > 0)
+						instance.call(options.entryPointName, new Object[]{args});
+					else
+						instance.call(options.entryPointName);
+
+					instance.popStackValue(retval);
+					
+					if (retval.isError())
+					{
+						ErrorType error = retval.asObjectType(ErrorType.class);
+						options.stderr.println("ERROR: [" + error.getType() + "]: " + error.getLocalizedMessage());
+						return ERROR_SCRIPT_RETURNED_ERROR;
+					}
+					return retval.asInt();
+				} catch (ScriptExecutionException e) {
+					options.stderr.println("Script ERROR: " + e.getLocalizedMessage());
+					return ERROR_SCRIPT_EXECUTION_ERROR;
+				} catch (ClassCastException e) {
+					options.stderr.println("Script return ERROR: " + e.getLocalizedMessage());
+					return ERROR_SCRIPT_EXECUTION_ERROR;
+				}
+			}
+			
+			options.stderr.println("ERROR: Bad mode - INTERNAL ERROR.");
+			return -1;
+		}
+
+		private void doDisassemble(PrintStream out, ScriptInstance instance)
+		{
+			StringWriter sw = new StringWriter();
+			try {
+				ScriptAssembler.disassemble(instance.getScript(), new PrintWriter(sw));
+			} catch (IOException e) {
+				// Do nothing.
+			}
+			out.print(sw);
+		}
+
+		private void printHelp(PrintStream out)
+		{
+			out.println("[filename]:");
+			out.println("    The script filename.");
+			out.println();
+			out.println("[switches]:");
+			out.println("    --help, -h                   Prints this help.");
+			out.println("    --version                    Prints the version of this utility.");
+			out.println("    --function-help              Prints all available function usages.");
+			out.println("    --disassemble                Prints the disassembly for this script");
+			out.println("                                     and exits.");
+			out.println("    --entry [name]               Use a different entry point named [name].");
+			out.println("                                     Default: \"main\"");
+			out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
+			out.println("                                     before the soft protection on infinite");
+			out.println("                                     loops triggers. 0 is no limit.");
+			out.println("                                     Default: 0");
+			out.println("    --activation-depth [num]     Sets the activation depth to [num].");
+			out.println("                                     Default: 256");
+			out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
+			out.println("                                     Default: 2048");
+			out.println("    --                           All tokens after this one are interpreted");
+			out.println("                                     literally as args for the script.");
+			out.println("                                     Normally, all unrecognized switches");
+			out.println("                                     become arguments to the script. This");
+			out.println("                                     forces the alternate interpretation.");
+			out.println("    --X                          Bash script special: [DEPRECATED]");
+			out.println("                                     First argument after this is the script");
+			out.println("                                     file, and every argument after are args");
+			out.println("                                     to pass to the script.");
+		}
+
+		private void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver)
+		{
+			renderer.renderSection(sectionName);
+			for (ScriptFunctionType sft : resolver.getFunctions())
+				renderer.renderUsage(namespace, sft.name(), sft.getUsage());
+			options.stdout.println();
+		}
+
+		private void printFunctionHelp(UsageRendererType renderer)
+		{
+			renderer.startRender();
+			for (int i = 0; i < RESOLVERS.length; i++)
+				printFunctionUsages(renderer, RESOLVERS[i].sectionName, RESOLVERS[i].namespace, RESOLVERS[i].resolver);		
+			renderer.finishRender();
 		}
 		
-		System.err.println("ERROR: Bad mode - INTERNAL ERROR.");
-		return -1;
 	}
-
-	private int parseCommandLine(WadScriptMain executor, String[] args)
+	
+	/**
+	 * Reads command line arguments and sets options.
+	 * @param out the standard output print stream.
+	 * @param err the standard error print stream. 
+	 * @param args the argument args.
+	 * @return the parsed options.
+	 * @throws OptionParseException if a parse exception occurs.
+	 */
+	public static Options options(PrintStream out, PrintStream err, String ... args) throws OptionParseException
 	{
+		Options options = new Options();
+		options.stdout = out;
+		options.stderr = err;
+		
 		final int STATE_START = 0;
 		final int STATE_ARGS = 1;
 		final int STATE_BASH_FILE = 2;
@@ -541,17 +682,17 @@ public final class WadScriptMain
 				{
 					if (SWITCH_HELP1.equalsIgnoreCase(arg) || SWITCH_HELP2.equalsIgnoreCase(arg))
 					{
-						mode = Mode.HELP;
-						return 0;
+						options.mode = Mode.HELP;
+						return options;
 					}
 					else if (SWITCH_VERSION1.equalsIgnoreCase(arg))
-						mode = Mode.VERSION;
+						options.mode = Mode.VERSION;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
-						mode = Mode.DISASSEMBLE;
+						options.mode = Mode.DISASSEMBLE;
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
-						mode = Mode.FUNCTIONHELP;
+						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
-						mode = Mode.FUNCTIONHELP_MARKDOWN;
+						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
 					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_ENTRY;
 					else if (SWITCH_RUNAWAYLIMIT1.equalsIgnoreCase(arg))
@@ -564,17 +705,17 @@ public final class WadScriptMain
 						state = STATE_ARGS;
 					else if (SWITCH_SEPARATORBASH.equalsIgnoreCase(arg))
 						state = STATE_BASH_FILE;
-					else if (scriptFile == null)
-						scriptFile = new File(arg);
+					else if (options.scriptFile == null)
+						options.scriptFile = new File(arg);
 					else
-						argList.add(arg);
+						options.argList.add(arg);
 				}
 				break;
 				
 				case STATE_SWITCHES_ENTRY:
 				{
 					arg = arg.trim();
-					entryPointName = arg.length() > 0 ? arg : null;
+					options.entryPointName = arg.length() > 0 ? arg : null;
 				}
 				break;
 				
@@ -583,10 +724,10 @@ public final class WadScriptMain
 					int n;
 					try {
 						n = Integer.parseInt(arg);
-						activationDepth = n > 0 ? n : null;
+						options.activationDepth = n > 0 ? n : null;
 					} catch (NumberFormatException e) {
-						activationDepth = null;
-						return 2;
+						options.activationDepth = null;
+						throw new OptionParseException("Activation depth needs to be a number greater than 0.");
 					}
 					state = STATE_START;
 				}
@@ -597,10 +738,10 @@ public final class WadScriptMain
 					int n;
 					try {
 						n = Integer.parseInt(arg);
-						stackDepth = n > 0 ? n : null;
+						options.stackDepth = n > 0 ? n : null;
 					} catch (NumberFormatException e) {
-						stackDepth = null;
-						return 2;
+						options.stackDepth = null;
+						throw new OptionParseException("Stack depth needs to be a number greater than 0.");
 					}
 					state = STATE_START;
 				}
@@ -611,10 +752,10 @@ public final class WadScriptMain
 					int n;
 					try {
 						n = Integer.parseInt(arg);
-						runawayLimit = n > 0 ? n : null;
+						options.runawayLimit = n > 0 ? n : null;
 					} catch (NumberFormatException e) {
-						runawayLimit = null;
-						return 2;
+						options.runawayLimit = null;
+						throw new OptionParseException("Runaway limit needs to be a number greater than 0.");
 					}
 					state = STATE_START;
 				}
@@ -622,13 +763,13 @@ public final class WadScriptMain
 				
 				case STATE_ARGS:
 				{
-					argList.add(arg);
+					options.argList.add(arg);
 				}
 				break;
 
 				case STATE_BASH_FILE:
 				{
-					scriptFile = new File(arg);
+					options.scriptFile = new File(arg);
 					state = STATE_ARGS;
 				}
 				break;			
@@ -636,88 +777,45 @@ public final class WadScriptMain
 		}
 		
 		if (state == STATE_SWITCHES_ENTRY)
-		{
-			System.err.println("ERROR: Expected entry point name after switches.");
-			return 3;
-		}
+			throw new OptionParseException("ERROR: Expected entry point name after switches.");
 		if (state == STATE_SWITCHES_ACTIVATION)
-		{
-			System.err.println("ERROR: Expected number after activation depth switch.");
-			return 3;
-		}
+			throw new OptionParseException("ERROR: Expected number after activation depth switch.");
 		if (state == STATE_SWITCHES_STACK)
-		{
-			System.err.println("ERROR: Expected number after stack depth switch.");
-			return 3;
-		}
+			throw new OptionParseException("ERROR: Expected number after stack depth switch.");
 		if (state == STATE_SWITCHES_RUNAWAY)
-		{
-			System.err.println("ERROR: Expected number after runaway limit switch.");
-			return 3;
-		}
+			throw new OptionParseException("ERROR: Expected number after runaway limit switch.");
 		
-		return 0;
+		return options;
 	}
 
-	private static void doDisassemble(PrintStream out, ScriptInstance instance)
+	/**
+	 * Calls the utility using a set of options.
+	 * @param options the options to call with.
+	 * @return the error code.
+	 */
+	public static int call(Options options)
 	{
-		StringWriter sw = new StringWriter();
-		try {
-			ScriptAssembler.disassemble(instance.getScript(), new PrintWriter(sw));
-		} catch (IOException e) {
-			// Do nothing.
+		return (new Context(options)).call();
+	}
+	
+	public static void main(String[] args)
+	{
+		if (args.length == 0)
+		{
+			splash(System.out);
+			usage(System.out);
+			System.exit(-1);
+			return;
 		}
-		out.print(sw);
+
+		try {
+			System.exit(call(options(System.out, System.err, args)));
+		} catch (OptionParseException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		}
 	}
 
-	private static void printHelp(PrintStream out)
-	{
-		out.println("[filename]:");
-		out.println("    The script filename.");
-		out.println();
-		out.println("[switches]:");
-		out.println("    --help, -h                   Prints this help.");
-		out.println("    --version                    Prints the version of this utility.");
-		out.println("    --function-help              Prints all available function usages.");
-		out.println("    --disassemble                Prints the disassembly for this script");
-		out.println("                                     and exits.");
-		out.println("    --entry [name]               Use a different entry point named [name].");
-		out.println("                                     Default: \"main\"");
-		out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
-		out.println("                                     before the soft protection on infinite");
-		out.println("                                     loops triggers. 0 is no limit.");
-		out.println("                                     Default: 0");
-		out.println("    --activation-depth [num]     Sets the activation depth to [num].");
-		out.println("                                     Default: 256");
-		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
-		out.println("                                     Default: 2048");
-		out.println("    --                           All tokens after this one are interpreted");
-		out.println("                                     literally as args for the script.");
-		out.println("                                     Normally, all unrecognized switches");
-		out.println("                                     become arguments to the script. This");
-		out.println("                                     forces the alternate interpretation.");
-		out.println("    --X                          Bash script special: [DEPRECATED]");
-		out.println("                                     First argument after this is the script");
-		out.println("                                     file, and every argument after are args");
-		out.println("                                     to pass to the script.");
-	}
-
-	private static void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver)
-	{
-		renderer.renderSection(sectionName);
-		for (ScriptFunctionType sft : resolver.getFunctions())
-			renderer.renderUsage(namespace, sft.name(), sft.getUsage());
-		System.out.println();
-	}
-	
-	private static void printFunctionHelp(UsageRendererType renderer)
-	{
-		renderer.startRender();
-		for (int i = 0; i < RESOLVERS.length; i++)
-			printFunctionUsages(renderer, RESOLVERS[i].sectionName, RESOLVERS[i].namespace, RESOLVERS[i].resolver);		
-		renderer.finishRender();
-	}
-	
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
@@ -738,24 +836,6 @@ public final class WadScriptMain
 		out.println("                 [--help | -h | --version]");
 		out.println("                 [--function-help | --function-help-markdown]");
 		out.println("                 [--disassemble] [filename]");
-	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		if (args.length == 0)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.exit(-1);
-			return;
-		}
-		
-		WadScriptMain executor = new WadScriptMain();
-		int out;
-		if ((out = executor.parseCommandLine(executor, args)) > 0)
-			System.exit(out);
-		else
-			System.exit(executor.execute());
 	}
 	
 }

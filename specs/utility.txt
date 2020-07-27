@@ -1,0 +1,8 @@
+Utility Pattern
+
+Create Options <- STDOUT, STDERR, STDIN, Args[]
+Create Context(options)
+Call Context Entry -> int errorcode
+Exit errorcode.
+
+Keeping each of these separate adds to portability outside of the command line.

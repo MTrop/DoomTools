@@ -8,6 +8,7 @@ package net.mtrop.doom.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.wtexport.TextureTables;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
@@ -52,7 +54,6 @@ public final class WTExportMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_NO_FILES = 2;
-	private static final int ERROR_IO_ERROR = 3;
 	private static final int ERROR_BAD_OPTIONS = 4;
 	
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
@@ -78,9 +79,9 @@ public final class WTExportMain
 	 */
 	public static class Options
 	{
-		private PrintStream out;
-		private PrintStream err;
-		private BufferedReader in;
+		private PrintStream stdout;
+		private PrintStream stderr;
+		private BufferedReader stdin;
 		
 		private boolean help;
 		private boolean version;
@@ -105,12 +106,11 @@ public final class WTExportMain
 		/** List of flat names. */
 		private List<String> flatList; 
 
-		public Options(PrintStream out, PrintStream err, BufferedReader in)
+		public Options()
 		{
-			this.out = out;
-			this.err = err;
-			this.in = in;
-			
+			this.stdout = null;
+			this.stderr = null;
+			this.stdin = null;
 			this.quiet = false;
 			this.baseWad = null;
 			this.outWad = null;
@@ -126,85 +126,97 @@ public final class WTExportMain
 		void println(Object msg)
 		{
 			if (!quiet)
-				out.println(msg);
+				stdout.println(msg);
 		}
 		
 		void printf(String fmt, Object... args)
 		{
 			if (!quiet)
-				out.printf(fmt, args);
+				stdout.printf(fmt, args);
 		}
 
 		void errln(Object msg)
 		{
 			if (!quiet)
-				err.println(msg);
+				stderr.println(msg);
 		}
 		
 		void errf(String fmt, Object... args)
 		{
 			if (!quiet)
-				err.printf(fmt, args);
+				stderr.printf(fmt, args);
 		}
 
 		char readChar() throws IOException
 		{
-			return (char)in.read();
+			return (char)stdin.read();
 		}
 		
 		String readLine() throws IOException
 		{
-			return in.readLine();
+			return stdin.readLine();
 		}
 
-		public void setBaseWad(String baseWad) 
+		public Options setBaseWad(String baseWad) 
 		{
 			this.baseWad = baseWad;
+			return this;
 		}
 		
-		public void setOutWad(String outWad) 
+		public Options setOutWad(String outWad) 
 		{
 			this.outWad = outWad;
+			return this;
 		}
 		
-		public void setNoAnimated(boolean noAnimated) 
+		public Options setNoAnimated(boolean noAnimated) 
 		{
 			this.noAnimated = noAnimated;
+			return this;
 		}
 		
-		public void setNoSwitches(boolean noSwitches) 
+		public Options setNoSwitches(boolean noSwitches) 
 		{
 			this.noSwitches = noSwitches;
+			return this;
 		}
 		
-		public void setAdditive(Boolean additive) 
+		public Options setAdditive(Boolean additive) 
 		{
 			this.additive = additive;
+			return this;
 		}
 		
-		public void setNullTexture(String texture) 
+		public Options setNullTexture(String texture) 
 		{
 			this.nullComparator = new NullComparator(texture);
+			return this;
 		}
 		
-		public void addFilePath(String path)
+		public Options addFilePath(String path)
 		{
 			filePaths.add(path);
+			return this;
 		}
 	
-		public void addTexture(String name)
+		public Options addTexture(String name)
 		{
 			textureList.add(name.toUpperCase());
+			return this;
 		}
 
-		public void addFlat(String name)
+		public Options addFlat(String name)
 		{
 			flatList.add(name.toUpperCase());
+			return this;
 		}
 	}
 
-	public static class Context
+	private static class Context
 	{
+		/** Options. */
+		private Options options;
+
 		/** Base Unit. */
 		private WadUnit baseUnit;
 		/** WAD priority queue. */
@@ -219,8 +231,9 @@ public final class WTExportMain
 		/** Set of flat names (dupe test). */
 		private Set<String> flatSet; 
 
-		Context()
+		private Context(Options options)
 		{
+			this.options = options;
 			this.baseUnit = null;
 			this.wadPriority = new LinkedList<WadUnit>();
 			this.textureSet = new HashSet<>();
@@ -230,18 +243,18 @@ public final class WTExportMain
 		}
 
 		// Scan WAD file.
-		private boolean scanWAD(Options options, String path, boolean isBase)
+		private boolean scanWAD(String path, boolean isBase)
 		{
 			options.printf("Scanning %s...\n", path);
 			File f = new File(path);
-			WadFile wf = openWadFile(options, f, false);
+			WadFile wf = openWadFile(f, false);
 			if (wf == null)
 				return false;
 			
 			WadUnit unit = new WadUnit(wf);
 			
 			try {
-				if (!scanTexturesAndPNames(options, unit, wf))
+				if (!scanTexturesAndPNames(unit, wf))
 					return false;
 			} catch (IOException e) {
 				options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
@@ -249,19 +262,19 @@ public final class WTExportMain
 			}
 			
 			options.println("    Scanning patch entries...");
-			if (!scanNamespace(options, "P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices))
+			if (!scanNamespace("P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices))
 				return false;
-			if (!scanNamespace(options, "PP", "P", null, unit, wf, unit.patchIndices))
+			if (!scanNamespace("PP", "P", null, unit, wf, unit.patchIndices))
 				return false;
 			options.printf("        %d patches.\n", unit.patchIndices.size());
 			options.println("    Scanning flat entries...");
-			if (!scanNamespace(options, "F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices))
+			if (!scanNamespace("F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices))
 				return false;
-			if (!scanNamespace(options, "FF", "F", null, unit, wf, unit.flatIndices))
+			if (!scanNamespace("FF", "F", null, unit, wf, unit.flatIndices))
 				return false;
 			options.printf("        %d flats.\n", unit.flatIndices.size());
 			options.println("    Scanning texture namespace entries...");
-			if (!scanNamespace(options, "TX", null, null, unit, wf, unit.texNamespaceIndices))
+			if (!scanNamespace("TX", null, null, unit, wf, unit.texNamespaceIndices))
 				return false;
 			options.printf("        %d namespace textures.\n", unit.texNamespaceIndices.size());
 			
@@ -280,7 +293,7 @@ public final class WTExportMain
 					unit.textureList.add(tex.getName());
 		
 			try {
-				if (!scanAnimated(options, unit, wf))
+				if (!scanAnimated(unit, wf))
 					return false;
 			} catch (IOException e) {
 				options.printf("ERROR: \"%s\" could not be read: an ANIMATED or SWITCHES lump may be corrupt.\n", f.getPath());
@@ -296,7 +309,7 @@ public final class WTExportMain
 		}
 
 		// Scan for TEXTUREx and PNAMES.
-		private boolean scanTexturesAndPNames(Options options, WadUnit unit, WadFile wf) throws IOException
+		private boolean scanTexturesAndPNames(WadUnit unit, WadFile wf) throws IOException
 		{
 			if (!wf.contains("TEXTURE1"))
 				return true;
@@ -384,7 +397,7 @@ public final class WTExportMain
 		}
 
 		// Scan for ANIMATED. Add combinations of textures to animated mapping.
-		private boolean scanAnimated(Options options, WadUnit unit, WadFile wf) throws IOException
+		private boolean scanAnimated(WadUnit unit, WadFile wf) throws IOException
 		{
 			if (!options.noAnimated)
 			{
@@ -488,7 +501,7 @@ public final class WTExportMain
 		}
 
 		// Scans namespace entries.
-		private boolean scanNamespace(Options options, String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
+		private boolean scanNamespace(String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
 		{
 			// scan patch namespace
 			int start = wf.indexOf(name+"_START");
@@ -529,11 +542,11 @@ public final class WTExportMain
 			list.add(s);
 		}
 
-		private void readAndAddTextures(Options options, String textureName)
+		private void readAndAddTextures(String textureName)
 		{
 			if (!NameUtils.isValidTextureName(textureName))
 			{
-				options.println("ERROR: Texture \""+textureName+"\" has an invalid name. Skipping.");
+				options.errln("ERROR: Texture \""+textureName+"\" has an invalid name. Skipping.");
 				return;
 			}
 			
@@ -564,7 +577,7 @@ public final class WTExportMain
 			}
 		}
 
-		private void readAndAddFlats(Options options, String textureName)
+		private void readAndAddFlats(String textureName)
 		{
 			addToLists(flatSet, flatList, textureName);
 		
@@ -615,7 +628,7 @@ public final class WTExportMain
 			return null;
 		}
 
-		private boolean extractFlats(Options options, ExportSet exportSet)
+		private boolean extractFlats(ExportSet exportSet)
 		{
 			options.println("    Extracting flats...");
 			for (String flat : flatList)
@@ -646,7 +659,7 @@ public final class WTExportMain
 			return true;
 		}
 
-		private boolean extractTextures(Options options, ExportSet exportSet)
+		private boolean extractTextures(ExportSet exportSet)
 		{
 			options.println("    Extracting textures...");
 			for (String textureName : textureList)
@@ -735,7 +748,7 @@ public final class WTExportMain
 		}
 
 		// Merges ANIMATED and SWITCHES from inputs.
-		private boolean mergeAnimatedAndSwitches(Options options, ExportSet exportSet)
+		private boolean mergeAnimatedAndSwitches(ExportSet exportSet)
 		{
 			if (!options.noAnimated)
 			{
@@ -781,7 +794,7 @@ public final class WTExportMain
 			return true;
 		}
 
-		private boolean dumpToOutputWad(Options options, ExportSet exportSet, WadFile wf) throws IOException
+		private boolean dumpToOutputWad(ExportSet exportSet, WadFile wf) throws IOException
 		{
 			options.println("Sorting entries...");
 			exportSet.textureSet.sort(options.nullComparator);
@@ -893,12 +906,12 @@ public final class WTExportMain
 		private boolean extractToOutputWad(Options options)
 		{
 			File outFile = new File(options.outWad);
-			WadFile outWadFile = options.additive ? openWadFile(options, outFile, true) : newWadFile(options, outFile);
+			WadFile outWadFile = options.additive ? openWadFile(outFile, true) : newWadFile(outFile);
 			if (outWadFile == null)
 				return false;
 		
 			File baseFile = new File(options.baseWad);
-			WadFile baseWadFile = openWadFile(options, baseFile, false);
+			WadFile baseWadFile = openWadFile(baseFile, false);
 			if (baseWadFile == null)
 			{
 				Common.close(outWadFile);
@@ -908,10 +921,10 @@ public final class WTExportMain
 			ExportSet exportSet = new ExportSet();
 			try {
 				exportSet.textureSet = TextureUtils.importTextureSet(baseWadFile);
-				extractTextures(options, exportSet);
-				extractFlats(options, exportSet);
-				mergeAnimatedAndSwitches(options, exportSet);
-				dumpToOutputWad(options, exportSet, outWadFile);
+				extractTextures(exportSet);
+				extractFlats(exportSet);
+				mergeAnimatedAndSwitches(exportSet);
+				dumpToOutputWad(exportSet, outWadFile);
 			} catch (TextureException | IOException e) {
 				options.printf("ERROR: %s: %s\n", baseWadFile.getFilePath(), e.getMessage());
 				return false;
@@ -924,7 +937,7 @@ public final class WTExportMain
 		}
 
 		// Attempts to make a new WAD file.
-		private WadFile newWadFile(Options options, File f)
+		private WadFile newWadFile(File f)
 		{
 			WadFile outWad = null;
 			try {
@@ -941,7 +954,7 @@ public final class WTExportMain
 		}
 
 		// Attempts to open a WAD file.
-		private WadFile openWadFile(Options options, File f, boolean create)
+		private WadFile openWadFile(File f, boolean create)
 		{
 			WadFile outWad = null;
 			try {
@@ -970,25 +983,68 @@ public final class WTExportMain
 		 * @param options
 		 * @return the return code.
 		 */
-		public int doTextureExtraction(Options options) 
+		public int call() 
 		{
+			if (options.help)
+			{
+				splash(options.stdout);
+				usage(options.stdout);
+				options.stdout.println();
+				help(options.stdout);
+				return ERROR_NONE;
+			}
+			
+			if (options.version)
+			{
+				splash(options.stdout);
+				return ERROR_NONE;
+			}
+		
+			if (options.filePaths == null || options.filePaths.isEmpty())
+			{
+				options.errln("ERROR: No input WAD(s) specified.");
+				usage(options.stdout);
+				return ERROR_NO_FILES;
+			}
+		
+			if (Common.isEmpty(options.baseWad))
+			{
+				options.errln("ERROR: No base WAD specified.");
+				usage(options.stdout);
+				return ERROR_NO_FILES;
+			}
+		
+			if (Common.isEmpty(options.outWad))
+			{
+				options.errln("ERROR: No output WAD specified.");
+				usage(options.stdout);
+				return ERROR_NO_FILES;
+			}
+		
+			if (options.additive == null)
+			{
+				options.errln("ERROR: Must specify --create or --add for output.");
+				usage(options.stdout);
+				return ERROR_NO_FILES;
+			}
+		
 			/* STEP 1 : Scan all incoming WADs so we know where crap is. */
 			
 			// scan base.
-			if (!scanWAD(options, options.baseWad, true))
+			if (!scanWAD(options.baseWad, true))
 				return ERROR_BAD_FILE;
 			
 			// scan patches. 
 			for (String f : options.filePaths)
-				if (!scanWAD(options, f, false))
+				if (!scanWAD(f, false))
 					return ERROR_BAD_FILE;
 		
 			/* STEP 2 : Compile list of what we want. */
 		
 			for (String t : options.textureList)
-				readAndAddTextures(options, t);
+				readAndAddTextures(t);
 			for (String f : options.flatList)
-				readAndAddFlats(options, f);
+				readAndAddFlats(f);
 			
 			/* STEP 3 : Extract the junk and put it in the output wad. */
 		
@@ -998,6 +1054,7 @@ public final class WTExportMain
 			if (!extractToOutputWad(options))
 				return ERROR_BAD_FILE;
 			
+			options.println("Done!");
 			return ERROR_NONE;
 		}
 		
@@ -1162,6 +1219,124 @@ public final class WTExportMain
 	}
 	
 	/**
+	 * Reads command line arguments and sets options.
+	 * @param out the standard output print stream.
+	 * @param err the standard error print stream. 
+	 * @param in the standard input buffered reader.
+	 * @param args the arguments.
+	 * @return the parsed options.
+	 * @throws OptionParseException if an error happens parsing the arguments.
+	 */
+	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String ... args) throws OptionParseException
+	{
+		Options options = new Options();
+		options.stdout = out;
+		options.stderr = err;
+		options.stdin = in;
+	
+		final int STATE_INIT = 0;
+		final int STATE_BASE = 1;
+		final int STATE_OUT = 2;
+		final int STATE_NULLTEX = 3;
+		
+		int state = STATE_INIT;
+		int i = 0;
+		while (i < args.length)
+		{
+			String arg = args[i];
+			switch (state)
+			{
+				case STATE_INIT:
+				{
+					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+						options.help = true;
+					else if (arg.equals(SWITCH_VERSION))
+						options.version = true;
+					else if (arg.equals(SWITCH_NOANIMATED))
+						options.setNoAnimated(true);
+					else if (arg.equals(SWITCH_NOSWITCH))
+						options.setNoSwitches(true);
+					else if (arg.equals(SWITCH_CREATE) || arg.equals(SWITCH_CREATE2))
+						options.setAdditive(false);
+					else if (arg.equals(SWITCH_ADDITIVE) || arg.equals(SWITCH_ADDITIVE2))
+						options.setAdditive(true);
+					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
+						state = STATE_BASE;
+					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
+						state = STATE_OUT;
+					else if (arg.equals(SWITCH_NULLTEX))
+						state = STATE_NULLTEX;
+					else
+						options.addFilePath(arg);
+				}
+				break;
+			
+				case STATE_BASE:
+				{
+					options.setBaseWad(arg);
+					state = STATE_INIT;
+				}
+				break;
+				
+				case STATE_OUT:
+				{
+					options.setOutWad(arg);
+					state = STATE_INIT;
+				}
+				break;
+				
+				case STATE_NULLTEX:
+				{
+					options.setNullTexture(arg);
+					state = STATE_INIT;
+				}
+				break;
+			}
+			i++;
+		}
+		
+		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
+		{
+			// Read list from Standard In		
+			options.println("Input texture/flat list:");
+			try {
+				readList(options);
+			} catch (IOException e) {
+				throw new OptionParseException(e.getMessage());
+			}
+		}
+		return options;
+	}
+
+	/**
+	 * Calls the utility using a set of options.
+	 * @param options the options to call with.
+	 * @return the error code.
+	 */
+	public static int call(Options options)
+	{
+		return (new Context(options)).call();
+	}
+	
+	public static void main(String[] args)
+	{
+		if (args.length == 0)
+		{
+			splash(System.out);
+			usage(System.out);
+			System.exit(-1);
+			return;
+		}
+	
+		try {
+			System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+		} catch (OptionParseException e) {
+			System.err.println(e.getMessage());
+			System.exit(ERROR_BAD_OPTIONS);
+		}
+	}
+
+	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
 	 */
@@ -1254,87 +1429,7 @@ public final class WTExportMain
 		out.println("The utility WTEXSCAN already produces a list formatted this way.");
 	}
 
-	/**
-	 * Reads command line arguments and sets options.
-	 * @param options the program options. 
-	 * @param args the argument args.
-	 * @return true if parse successful, false if not.
-	 * @throws IOException if a read error occurs.
-	 */
-	public static boolean scanOptions(Options options, String[] args) throws IOException
-	{
-		final int STATE_INIT = 0;
-		final int STATE_BASE = 1;
-		final int STATE_OUT = 2;
-		final int STATE_NULLTEX = 3;
-		
-		int state = STATE_INIT;
-		int i = 0;
-		while (i < args.length)
-		{
-			String arg = args[i];
-			switch (state)
-			{
-				case STATE_INIT:
-				{
-					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						options.help = true;
-					else if (arg.equals(SWITCH_VERSION))
-						options.version = true;
-					else if (arg.equals(SWITCH_NOANIMATED))
-						options.setNoAnimated(true);
-					else if (arg.equals(SWITCH_NOSWITCH))
-						options.setNoSwitches(true);
-					else if (arg.equals(SWITCH_CREATE) || arg.equals(SWITCH_CREATE2))
-						options.setAdditive(false);
-					else if (arg.equals(SWITCH_ADDITIVE) || arg.equals(SWITCH_ADDITIVE2))
-						options.setAdditive(true);
-					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
-						state = STATE_BASE;
-					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
-						state = STATE_OUT;
-					else if (arg.equals(SWITCH_NULLTEX))
-						state = STATE_NULLTEX;
-					else
-						options.addFilePath(arg);
-				}
-				break;
-			
-				case STATE_BASE:
-				{
-					options.setBaseWad(arg);
-					state = STATE_INIT;
-				}
-				break;
-				
-				case STATE_OUT:
-				{
-					options.setOutWad(arg);
-					state = STATE_INIT;
-				}
-				break;
-				
-				case STATE_NULLTEX:
-				{
-					options.setNullTexture(arg);
-					state = STATE_INIT;
-				}
-				break;
-			}
-			i++;
-		}
-		
-		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
-		{
-			// Read list from Standard In		
-			options.println("Input texture/flat list:");
-			if (!readList(options))
-				return false;
-		}
-		return true;
-	}
-
-	private static boolean readList(Options options) throws IOException
+	private static void readList(Options options) throws OptionParseException, IOException
 	{
 		final String TEXTURES = ":textures";
 		final String FLATS = ":flats";
@@ -1377,9 +1472,8 @@ public final class WTExportMain
 			switch (state)
 			{
 				case STATE_NONE:
-					options.err.println("ERROR: Name before '-textures' or '-flats'.");
-					options.in.close();
-					return false;
+					options.stdin.close();
+					throw new OptionParseException("ERROR: Name before '-textures' or '-flats'.");
 				case STATE_TEXTURES:
 					options.addTexture(line);
 					break;
@@ -1389,82 +1483,7 @@ public final class WTExportMain
 			}
 		}
 		
-		options.in.close();
-		return true;
-	}
-
-	/**
-	 * Calls this program.
-	 * @param options the program options.
-	 * @return the return code.
-	 */
-	public static int call(Options options)
-	{
-		if (options.help)
-		{
-			splash(options.out);
-			usage(options.out);
-			options.out.println();
-			help(options.out);
-			return ERROR_NONE;
-		}
-		
-		if (options.version)
-		{
-			splash(options.out);
-			return ERROR_NONE;
-		}
-	
-		if (options.filePaths == null || options.filePaths.isEmpty())
-		{
-			options.println("ERROR: No input WAD(s) specified.");
-			usage(options.out);
-			return ERROR_NO_FILES;
-		}
-	
-		if (Common.isEmpty(options.baseWad))
-		{
-			options.println("ERROR: No base WAD specified.");
-			usage(options.out);
-			return ERROR_NO_FILES;
-		}
-	
-		if (Common.isEmpty(options.outWad))
-		{
-			options.println("ERROR: No output WAD specified.");
-			usage(options.out);
-			return ERROR_NO_FILES;
-		}
-	
-		if (options.additive == null)
-		{
-			options.println("ERROR: Must specify --create or --add for output.");
-			usage(options.out);
-			return ERROR_NO_FILES;
-		}
-	
-		int out;
-		if ((out = (new Context()).doTextureExtraction(options)) == ERROR_NONE)
-			options.println("Done!");
-		
-		return out;
-	}
-
-	public static void main(String[] args)
-	{
-		try {
-			Options options = new Options(System.out, System.err, Common.openTextStream(System.in));
-			if (!scanOptions(options, args))
-			{
-				System.exit(ERROR_BAD_OPTIONS);
-				return;
-			}
-			System.exit(call(options));
-		} catch (IOException e) {
-			// if we reach here, you got PROBLEMS, buddy.
-			System.err.println("ERROR: Could not read from STDIN.");
-			System.exit(ERROR_IO_ERROR);
-		}
+		options.stdin.close();
 	}
 	
 }
