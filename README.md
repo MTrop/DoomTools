@@ -98,6 +98,10 @@ A utility that exports textures from one WAD into another, including associated 
 
 A scripting system for doing practically anything with Doom stuff. Also includes Rookscript, a subset script. 
 
+#### DecoHack
+
+A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.
+
 
 ### Other
 
@@ -107,3 +111,5 @@ terms of the MIT License, which accompanies this distribution.
 A copy of the MIT License should have been included in this release (LICENSE.txt).
 If it was not, please contact us for a copy, or to notify us of a distribution
 that has not included it. 
+
+This contains code copied from Black Rook Base, under the terms of the MIT License (docs/LICENSE-BlackRookBase.txt).

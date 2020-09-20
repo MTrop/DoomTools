@@ -40,6 +40,7 @@
 	<property name="project.javadoc.packages" value="
 		net.mtrop.doom.tools,
 		net.mtrop.doom.tools.common,
+		net.mtrop.doom.tools.struct,
 		net.mtrop.doom.tools.scripting,
 		net.mtrop.doom.tools.wadmerge,
 		net.mtrop.doom.tools.wtexport
@@ -57,6 +58,7 @@
 	<property name="wtexscan.version" value="${build.version}" />
 	<property name="wtexport.version" value="${build.version}" />
 	<property name="wadscript.version" value="${build.version}" />
+	<property name="decohack.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -86,6 +88,7 @@
 		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
 		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
 		<echo file="${build.versions.dir}/wadscript.version" message="${wadscript.version}" />
+		<echo file="${build.versions.dir}/decohack.version" message="${decohack.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -152,6 +155,9 @@
 		<!-- WadScript -->
 		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<shell-bash name="wadscript" todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<!-- DecoHack -->
+		<shell-cmd  name="decohack" todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-bash name="decohack" todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
 		<!-- RookScript -->
 		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
 		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />

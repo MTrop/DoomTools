@@ -1,0 +1,107 @@
+Frame Hardcodings in Doom/Boom
+==============================
+
+Frame 0:
+	NULL Frame. Reserved.
+
+Frame 1:
+	STOP Frame. Reserved.
+
+Frame 154:
+	The player's firing frame.
+
+Frame 155:
+	The player's firing frame if a muzzle flash is available for the fired weapon.
+
+Frame 266:
+	An actor that calls A_VileChase and encounters a dead object with a Raise frame jumps to this frame on "heal".
+
+Frame 895:
+	All actors jump to this when crushed.
+
+Plasma Muzzle Flash:
+	The plasma rifle's muzzle flash is called at random between the [flash frame] and [flash frame] + 1 on a call to A_FirePlasma.
+
+
+Thing Slot Hardcoded Nonsense
+=============================
+
+Trooper (Slot 2)
+	On Death, creates an Ammo Clip (Slot 64) with a DROPPED flag. 
+
+Sergeant (Slot 3)
+	On Death, creates a Shotgun (Slot 78) with a DROPPED flag. 
+
+Arch-Vile (Slot 4)
+	Has a shortened missile attack range (2048 units).
+	Is ignored by other monsters for infighting (others will not fight it).
+
+Revenant (Slot 6) 
+	Has a longer melee range check.
+	Has an increased chance to do a missile attack at longer ranges.
+
+Revenant Rocket Trail (Slot 8)
+ 	Spawned on a seeking A_Tracer call.
+
+Mancubus (Slot 9)
+	When this calls A_BossDeath:
+		On MAP07, Floor_LowerToLowest all sectors tagged 666. 
+
+Chaingun Sergeant (Slot 11)
+	On Death, creates a Chaingun (Slot 74) with a DROPPED flag. 
+
+Baron (Slot 16) 
+	Shares a "species" with Hell Knights (Slot 18) to prevent infighting.
+	When this calls A_BossDeath:
+		On E1M8, Floor_LowerToLowest all sectors tagged 666. 
+
+Hell Knight (Slot 18)
+	Shares a "species" with Barons (Slot 16) to prevent infighting.
+
+Lost Soul (Slot 19)
+	Doubled missile attack chance.
+	Spawned by A_PainAttack and A_PainDie.
+
+Spider Mastermind (Slot 20)
+	Sight and Death sounds are played at full volume always.
+	Immune to radius damage.
+	Has an increased chance to do a missile attack at longer ranges.
+	When this calls A_BossDeath:
+		On E3M8, end the map.
+		On E4M8, Floor_LowerToLowest all sectors tagged 666. 
+
+Arachnotron (Slot 21)
+	When this calls A_BossDeath:
+		On MAP07, Raise all sectors tagged 667 by the height of their linedefs' highest lower texture. 
+
+Cyberdemon (Slot 22)
+	Sight and Death sounds are played at full volume always.
+	Immune to radius damage.
+	Has an increased chance to do a missile attack at longer ranges.
+	When this calls A_BossDeath:
+		On E2M8, end the map.
+
+SS Nazi (Slot 24)
+	On Death, creates an Ammo Clip (Slot 64) with a DROPPED flag.
+
+Bullet Puff (Slot 38)
+	Spawned on hitscan attacks.
+	
+Blood (Slot 39) 
+	Spawned on hitscan attacks and other damaging things.
+
+Ammo Clip (Slot 64)
+	Created on Trooper's (Slot 2) death with a DROPPED flag. 
+	Created on SS Nazi's (Slot 24) death with a DROPPED flag. 
+
+Chaingun (Slot 74)
+	Created on Chaingun Sergeant's (Slot 11) death with a DROPPED flag. 
+
+Shotgun (Slot 78)
+	Created on Sergeant's (Slot 3) death with a DROPPED flag. 
+
+
+On Crush
+========
+
+All objects with the DEAD flag jump to Frame 895 when crushed by a lowering ceiling, and get SOLID removed from them.
