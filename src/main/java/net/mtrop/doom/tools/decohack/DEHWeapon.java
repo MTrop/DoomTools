@@ -3,6 +3,8 @@ package net.mtrop.doom.tools.decohack;
 import java.io.IOException;
 import java.io.Writer;
 
+import net.mtrop.doom.util.RangeUtils;
+
 /**
  * A single weapon entry.
  * @author Matthew Tropiano
@@ -86,6 +88,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	 */
 	public void setRaiseFrameIndex(int raiseFrameIndex) 
 	{
+		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		this.raiseFrameIndex = raiseFrameIndex;
 	}
 	
@@ -103,6 +106,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	 */
 	public void setLowerFrameIndex(int lowerFrameIndex) 
 	{
+		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
 		this.lowerFrameIndex = lowerFrameIndex;
 	}
 	
@@ -120,6 +124,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	 */
 	public void setReadyFrameIndex(int readyFrameIndex) 
 	{
+		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
 		this.readyFrameIndex = readyFrameIndex;
 	}
 	
@@ -137,6 +142,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	 */
 	public void setFireFrameIndex(int fireFrameIndex) 
 	{
+		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
 		this.fireFrameIndex = fireFrameIndex;
 	}
 	
@@ -154,6 +160,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	 */
 	public void setFlashFrameIndex(int flashFrameIndex) 
 	{
+		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
 		this.flashFrameIndex = flashFrameIndex;
 	}
 	

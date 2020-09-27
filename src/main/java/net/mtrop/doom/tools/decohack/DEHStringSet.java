@@ -21,4 +21,11 @@ public interface DEHStringSet<K>
 	 */
 	String getOriginalString(K key);
 
+	/**
+	 * Gets the key that corresponds to a string.
+	 * @param value the string value for lookup.
+	 * @return the corresponding key, or null if not found.
+	 */
+	K getKey(String value);
+
 }

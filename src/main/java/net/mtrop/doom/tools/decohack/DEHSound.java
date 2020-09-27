@@ -43,7 +43,8 @@ public class DEHSound implements DEHObject
 	 */
 	public void setPriority(int priority) 
 	{
-		RangeUtils.checkByteUnsigned("Sound priority", this.priority = priority);
+		RangeUtils.checkByteUnsigned("Sound priority", priority);
+		this.priority = priority;
 	}
 	
 	/**
