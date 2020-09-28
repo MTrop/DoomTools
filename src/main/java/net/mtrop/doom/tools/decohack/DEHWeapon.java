@@ -173,6 +173,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 		writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append('\n');
 		writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append('\n');
 		writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append('\n');
+		writer.flush();
 	}
 
 }

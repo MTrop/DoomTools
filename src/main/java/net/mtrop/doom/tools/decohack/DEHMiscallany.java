@@ -286,6 +286,7 @@ public class DEHMiscallany implements DEHObject
 			writer.append("Max Health = ").append(String.valueOf(maxHealth)).append('\n');
 		if (maxArmor != 200)
 			writer.append("Max Armor = ").append(String.valueOf(maxArmor)).append('\n');
+		writer.flush();
 	}
 	
 }

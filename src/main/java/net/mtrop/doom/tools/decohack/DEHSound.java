@@ -69,6 +69,7 @@ public class DEHSound implements DEHObject
 	{
 		writer.append("Value = ").append(String.valueOf(priority)).append('\n');
 		writer.append("Zero/One = ").append(String.valueOf(singular ? 1 : 0)).append('\n');
+		writer.flush();
 	}
 	
 }

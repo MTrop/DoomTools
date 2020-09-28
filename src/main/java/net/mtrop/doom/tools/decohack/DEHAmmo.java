@@ -91,6 +91,7 @@ public class DEHAmmo implements DEHObject
 	{
 		writer.append("Max ammo = ").append(String.valueOf(max)).append('\n');
 		writer.append("Per ammo = ").append(String.valueOf(pickup)).append('\n');
+		writer.flush();
 	}
 	
 }
