@@ -9,7 +9,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single thing entry.
  * @author Matthew Tropiano
  */
-public class DEHThing implements DEHObject
+public class DEHThing implements DEHObject<DEHThing>
 {
 	public static final int EDITORNUMBER_NONE = -1;
 	public static final int SOUND_NONE = 0;
@@ -331,32 +331,54 @@ public class DEHThing implements DEHObject
 	}
 
 	@Override
-	public void writeObject(Writer writer) throws IOException
+	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
-		writer.append("ID # = ").append(String.valueOf(editorNumber)).append('\n');
-		writer.append("Hit points = ").append(String.valueOf(health)).append('\n');
-		writer.append("Speed = ").append(String.valueOf(speed)).append('\n');
-		writer.append("Width = ").append(String.valueOf(radius << 16)).append('\n');
-		writer.append("Height = ").append(String.valueOf(height << 16)).append('\n');
-		writer.append("Missile damage = ").append(String.valueOf(damage)).append('\n');
-		writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append('\n');
-		writer.append("Pain chance = ").append(String.valueOf(painChance)).append('\n');
-		writer.append("Mass = ").append(String.valueOf(mass)).append('\n');
+		if (editorNumber != thing.editorNumber)
+			writer.append("ID # = ").append(String.valueOf(editorNumber)).append('\n');
+		if (health != thing.health)
+			writer.append("Hit points = ").append(String.valueOf(health)).append('\n');
+		if (speed != thing.speed)
+			writer.append("Speed = ").append(String.valueOf(speed)).append('\n');
+		if (radius != thing.radius)
+			writer.append("Width = ").append(String.valueOf(radius << 16)).append('\n');
+		if (height != thing.height)
+			writer.append("Height = ").append(String.valueOf(height << 16)).append('\n');
+		if (damage != thing.damage)
+			writer.append("Missile damage = ").append(String.valueOf(damage)).append('\n');
+		if (reactionTime != thing.reactionTime)
+			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append('\n');
+		if (painChance != thing.painChance)
+			writer.append("Pain chance = ").append(String.valueOf(painChance)).append('\n');
+		if (mass != thing.mass)
+			writer.append("Mass = ").append(String.valueOf(mass)).append('\n');
 
-		writer.append("Initial frame = ").append(String.valueOf(spawnFrameIndex)).append('\n');
-		writer.append("First moving frame = ").append(String.valueOf(walkFrameIndex)).append('\n');
-		writer.append("Injury frame = ").append(String.valueOf(painFrameIndex)).append('\n');
-		writer.append("Close attack frame = ").append(String.valueOf(meleeFrameIndex)).append('\n');
-		writer.append("Far attack frame = ").append(String.valueOf(missileFrameIndex)).append('\n');
-		writer.append("Death frame = ").append(String.valueOf(deathFrameIndex)).append('\n');
-		writer.append("Exploding frame = ").append(String.valueOf(extremeDeathFrameIndex)).append('\n');
-		writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
+		if (spawnFrameIndex != thing.spawnFrameIndex)
+			writer.append("Initial frame = ").append(String.valueOf(spawnFrameIndex)).append('\n');
+		if (walkFrameIndex != thing.walkFrameIndex)
+			writer.append("First moving frame = ").append(String.valueOf(walkFrameIndex)).append('\n');
+		if (painFrameIndex != thing.painFrameIndex)
+			writer.append("Injury frame = ").append(String.valueOf(painFrameIndex)).append('\n');
+		if (meleeFrameIndex != thing.meleeFrameIndex)
+			writer.append("Close attack frame = ").append(String.valueOf(meleeFrameIndex)).append('\n');
+		if (missileFrameIndex != thing.missileFrameIndex)
+			writer.append("Far attack frame = ").append(String.valueOf(missileFrameIndex)).append('\n');
+		if (deathFrameIndex != thing.deathFrameIndex)
+			writer.append("Death frame = ").append(String.valueOf(deathFrameIndex)).append('\n');
+		if (extremeDeathFrameIndex != thing.extremeDeathFrameIndex)
+			writer.append("Exploding frame = ").append(String.valueOf(extremeDeathFrameIndex)).append('\n');
+		if (raiseFrameIndex != thing.raiseFrameIndex)
+			writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
 
-		writer.append("Pain sound = ").append(String.valueOf(painSoundIndex)).append('\n');
-		writer.append("Death sound = ").append(String.valueOf(deathSoundIndex)).append('\n');
-		writer.append("Alert sound = ").append(String.valueOf(seeSoundIndex)).append('\n');
-		writer.append("Action sound = ").append(String.valueOf(activeSoundIndex)).append('\n');
-		writer.append("Attack sound = ").append(String.valueOf(attackSoundIndex)).append('\n');
+		if (painSoundIndex != thing.painSoundIndex)
+			writer.append("Pain sound = ").append(String.valueOf(painSoundIndex)).append('\n');
+		if (deathSoundIndex != thing.deathSoundIndex)
+			writer.append("Death sound = ").append(String.valueOf(deathSoundIndex)).append('\n');
+		if (seeSoundIndex != thing.seeSoundIndex)
+			writer.append("Alert sound = ").append(String.valueOf(seeSoundIndex)).append('\n');
+		if (activeSoundIndex != thing.activeSoundIndex)
+			writer.append("Action sound = ").append(String.valueOf(activeSoundIndex)).append('\n');
+		if (attackSoundIndex != thing.attackSoundIndex)
+			writer.append("Attack sound = ").append(String.valueOf(attackSoundIndex)).append('\n');
 		
 		writer.flush();
 	}

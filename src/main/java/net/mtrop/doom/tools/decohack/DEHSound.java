@@ -9,7 +9,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single sound entry.
  * @author Matthew Tropiano
  */
-public class DEHSound implements DEHObject
+public class DEHSound implements DEHObject<DEHSound>
 {
 	/** Sound priority (unsigned byte). */
 	private int priority;
@@ -65,10 +65,12 @@ public class DEHSound implements DEHObject
 	}
 	
 	@Override
-	public void writeObject(Writer writer) throws IOException
+	public void writeObject(Writer writer, DEHSound sound) throws IOException
 	{
-		writer.append("Value = ").append(String.valueOf(priority)).append('\n');
-		writer.append("Zero/One = ").append(String.valueOf(singular ? 1 : 0)).append('\n');
+		if (priority != sound.priority)
+			writer.append("Value = ").append(String.valueOf(priority)).append('\n');
+		if (singular != sound.singular)
+			writer.append("Zero/One = ").append(String.valueOf(singular ? 1 : 0)).append('\n');
 		writer.flush();
 	}
 	

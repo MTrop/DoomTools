@@ -9,7 +9,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single ammo entry.
  * @author Matthew Tropiano
  */
-public class DEHAmmo implements DEHObject
+public class DEHAmmo implements DEHObject<DEHAmmo>
 {
 	/** Ammo name. */
 	private String name;
@@ -87,10 +87,12 @@ public class DEHAmmo implements DEHObject
 	}
 	
 	@Override
-	public void writeObject(Writer writer) throws IOException
+	public void writeObject(Writer writer, DEHAmmo ammo) throws IOException
 	{
-		writer.append("Max ammo = ").append(String.valueOf(max)).append('\n');
-		writer.append("Per ammo = ").append(String.valueOf(pickup)).append('\n');
+		if (max != ammo.max)
+			writer.append("Max ammo = ").append(String.valueOf(max)).append('\n');
+		if (pickup != ammo.pickup)
+			writer.append("Per ammo = ").append(String.valueOf(pickup)).append('\n');
 		writer.flush();
 	}
 	

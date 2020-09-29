@@ -10,7 +10,7 @@ import net.mtrop.doom.util.RangeUtils;
  * @author Matthew Tropiano
  * @param <A> the ammo type enum.
  */
-public class DEHWeapon<A extends Enum<A>> implements DEHObject
+public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 {
 	/** Weapon name. */
 	private String name;
@@ -165,14 +165,20 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject
 	}
 	
 	@Override
-	public void writeObject(Writer writer) throws IOException 
+	public void writeObject(Writer writer, DEHWeapon<A> weapon) throws IOException 
 	{
-		writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append('\n');
-		writer.append("Select frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
-		writer.append("Deselect frame = ").append(String.valueOf(lowerFrameIndex)).append('\n');
-		writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append('\n');
-		writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append('\n');
-		writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append('\n');
+		if (ammoType != weapon.ammoType)
+			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append('\n');
+		if (raiseFrameIndex != weapon.raiseFrameIndex)
+			writer.append("Select frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
+		if (raiseFrameIndex != weapon.raiseFrameIndex)
+			writer.append("Deselect frame = ").append(String.valueOf(lowerFrameIndex)).append('\n');
+		if (raiseFrameIndex != weapon.raiseFrameIndex)
+			writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append('\n');
+		if (raiseFrameIndex != weapon.raiseFrameIndex)
+			writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append('\n');
+		if (raiseFrameIndex != weapon.raiseFrameIndex)
+			writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append('\n');
 		writer.flush();
 	}
 

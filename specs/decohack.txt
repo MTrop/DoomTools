@@ -28,7 +28,7 @@ Frame 895:
 	All actors jump to this when crushed.
 
 Plasma Muzzle Flash:
-	The plasma rifle's muzzle flash is called at random between the [flash frame] and [flash frame] + 1 on a call to A_FirePlasma.
+	The plasma rifle's muzzle flash is called at random between the [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
 
 
 Thing Slot Hardcoding
@@ -188,6 +188,37 @@ Shotgun (Slot 78)
 Strings
 =======
 
+---Doom 1.9
+
+String table entries 132 to 140 (inclusive) are intermission texts.
+
+132 - After E1M8
+133 - After E2M8
+134 - After E3M8
+135 - After MAP06
+136 - After MAP11
+137 - After MAP20
+138 - After MAP30
+139 - After MAP15 (Secret)
+140 - After MAP31 (Secret)
+
+String table entries 141 to 149 (inclusive) are background flats for
+intermissions.
+
+141 - After MAP06
+142 - After MAP11
+143 - After MAP20
+144 - After MAP30
+145 - After MAP15 (Secret)
+146 - After MAP31 (Secret)
+147 - After E1M8
+148 - After E2M8
+149 - After E3M8
+
+String table entries 649 to 675 (inclusive) are level names for E1M1 to E3M9.
+
+String table entries 677 to 708 (inclusive) are level names for MAP01 to MAP32.
+
 String table entries 760 to 791 (inclusive) are music names for Doom 1.
 Some are reused for E4 maps. 
 
@@ -200,47 +231,94 @@ The relevant string on sound indices is [index] + 827.
 String table entries 939 to 1076 (inclusive) are sprite names. 
 The relevant string on sprite index is [index] + 939.
 
+
+---Ultimate Doom 1.9
+
+String table entries 132 to 141 (inclusive) are intermission texts.
+
+132 - After E1M8
+133 - After E2M8
+134 - After E3M8
+135 - After E4M8
+136 - After MAP06
+137 - After MAP11
+138 - After MAP20
+139 - After MAP30
+140 - After MAP15 (Secret)
+141 - After MAP31 (Secret)
+
+String table entries 142 to 151 (inclusive) are background flats for
+intermissions.
+
+142 - After MAP06
+143 - After MAP11
+144 - After MAP20
+145 - After MAP30
+146 - After MAP15 (Secret)
+147 - After MAP31 (Secret)
+148 - After E1M8
+149 - After E2M8
+150 - After E3M8
+151 - After E4M8
+
+String table entries 655 to 690 (inclusive) are level names for E1M1 to E4M9.
+
+String table entries 692 to 723 (inclusive) are level names for MAP01 to MAP32.
+
+String table entries 775 to 806 (inclusive) are music names for Doom 1.
+Some are reused for E4 maps. 
+
+String table entries 807 to 841 (inclusive) are music names for Doom 2.
+MAP31's music is reused for roll call. 
+
+String table entries 842 to 949 (inclusive) are sound names. 
+The relevant string on sound indices is [index] + 842.
+
+String table entries 954 to 1091 (inclusive) are sprite names. 
+The relevant string on sprite index is [index] + 954.
+
+
 Items
 =====
 
 Item Pickups are performed when the player collides with an object that is flagged as "pickup," but the sprite's names dictate what is given:
 
-Sprite Index 55 (String 994) -> Green Armor 
-Sprite Index 56 (String 995) -> Blue Armor 
-Sprite Index 60 (String 999) -> Health Bonus 
-Sprite Index 61 (String 1000) -> Armor Bonus 
-Sprite Index 62 (String 1001) -> Blue Keycard 
-Sprite Index 63 (String 1002) -> Red Keycard 
-Sprite Index 64 (String 1003) -> Yellow Keycard 
-Sprite Index 65 (String 1004) -> Blue Skull 
-Sprite Index 66 (String 1005) -> Red Skull 
-Sprite Index 67 (String 1006) -> Yellow Skull 
-Sprite Index 68 (String 1007) -> Stimpak 
-Sprite Index 69 (String 1008) -> Medikit 
-Sprite Index 70 (String 1009) -> Soulsphere 
-Sprite Index 71 (String 1010) -> Invulnerability 
-Sprite Index 72 (String 1011) -> Berserk 
-Sprite Index 73 (String 1012) -> Partial Invisibility 
-Sprite Index 74 (String 1013) -> Megasphere 
-Sprite Index 75 (String 1014) -> RadSuit 
-Sprite Index 76 (String 1015) -> Computer Map 
-Sprite Index 77 (String 1016) -> Lite Amp 
-Sprite Index 78 (String 1017) -> Ammo Clip 
-Sprite Index 79 (String 1018) -> Ammo Box 
-Sprite Index 80 (String 1019) -> Rocket 
-Sprite Index 81 (String 1020) -> Rocket Box 
-Sprite Index 82 (String 1021) -> Cells 
-Sprite Index 83 (String 1022) -> Bulk Cell 
-Sprite Index 84 (String 1023) -> Shells 
-Sprite Index 85 (String 1024) -> Shell Box 
-Sprite Index 86 (String 1025) -> Backpack 
-Sprite Index 87 (String 1026) -> BFG9000 
-Sprite Index 88 (String 1027) -> Chaingun 
-Sprite Index 89 (String 1028) -> Chainsaw 
-Sprite Index 90 (String 1029) -> Rocket Launcher 
-Sprite Index 91 (String 1030) -> Plasma Rifle 
-Sprite Index 92 (String 1031) -> Shotgun 
-Sprite Index 93 (String 1032) -> Super Shotgun 
+Sprite Index 55 -> Green Armor 
+Sprite Index 56 -> Blue Armor 
+Sprite Index 60 -> Health Bonus 
+Sprite Index 61 -> Armor Bonus 
+Sprite Index 62 -> Blue Keycard 
+Sprite Index 63 -> Red Keycard 
+Sprite Index 64 -> Yellow Keycard 
+Sprite Index 65 -> Blue Skull 
+Sprite Index 66 -> Red Skull 
+Sprite Index 67 -> Yellow Skull 
+Sprite Index 68 -> Stimpak 
+Sprite Index 69 -> Medikit 
+Sprite Index 70 -> Soulsphere 
+Sprite Index 71 -> Invulnerability 
+Sprite Index 72 -> Berserk 
+Sprite Index 73 -> Partial Invisibility 
+Sprite Index 74 -> Megasphere 
+Sprite Index 75 -> RadSuit 
+Sprite Index 76 -> Computer Map 
+Sprite Index 77 -> Lite Amp 
+Sprite Index 78 -> Ammo Clip 
+Sprite Index 79 -> Ammo Box 
+Sprite Index 80 -> Rocket 
+Sprite Index 81 -> Rocket Box 
+Sprite Index 82 -> Cells 
+Sprite Index 83 -> Bulk Cell 
+Sprite Index 84 -> Shells 
+Sprite Index 85 -> Shell Box 
+Sprite Index 86 -> Backpack 
+Sprite Index 87 -> BFG9000 
+Sprite Index 88 -> Chaingun 
+Sprite Index 89 -> Chainsaw 
+Sprite Index 90 -> Rocket Launcher 
+Sprite Index 91 -> Plasma Rifle 
+Sprite Index 92 -> Shotgun 
+Sprite Index 93 -> Super Shotgun 
 
 
 On Crush

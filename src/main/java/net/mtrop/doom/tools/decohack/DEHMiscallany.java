@@ -9,7 +9,7 @@ import net.mtrop.doom.util.RangeUtils;
  * All other miscellaneous DeHackEd stuff.
  * @author Matthew Tropiano
  */
-public class DEHMiscallany implements DEHObject
+public class DEHMiscallany implements DEHObject<DEHMiscallany>
 {
 	private boolean monsterInfightingEnabled;
 	private int initialBullets;
@@ -252,39 +252,39 @@ public class DEHMiscallany implements DEHObject
 	}
 	
 	@Override
-	public void writeObject(Writer writer) throws IOException
+	public void writeObject(Writer writer, DEHMiscallany misc) throws IOException
 	{
-		if (monsterInfightingEnabled)
+		if (monsterInfightingEnabled != misc.monsterInfightingEnabled)
 			writer.append("Monsters Infight = ").append(String.valueOf(221)).append('\n');
-		if (initialBullets != 50)
+		if (initialBullets != misc.initialBullets)
 			writer.append("Initial Bullets = ").append(String.valueOf(initialBullets)).append('\n');
-		if (initialHealth != 100)
+		if (initialHealth != misc.initialHealth)
 			writer.append("Initial Health = ").append(String.valueOf(initialHealth)).append('\n');
-		if (greenArmorClass != 1)
+		if (greenArmorClass != misc.greenArmorClass)
 			writer.append("Green Armor Class = ").append(String.valueOf(greenArmorClass)).append('\n');
-		if (blueArmorClass != 2)
+		if (blueArmorClass != misc.blueArmorClass)
 			writer.append("Blue Armor Class = ").append(String.valueOf(blueArmorClass)).append('\n');
-		if (soulsphereHealth != 100)
+		if (soulsphereHealth != misc.soulsphereHealth)
 			writer.append("Soulsphere Health = ").append(String.valueOf(soulsphereHealth)).append('\n');
-		if (maxSoulsphereHealth != 200)
+		if (maxSoulsphereHealth != misc.maxSoulsphereHealth)
 			writer.append("Max Soulsphere = ").append(String.valueOf(maxSoulsphereHealth)).append('\n');
-		if (megasphereHealth != 200)
+		if (megasphereHealth != misc.megasphereHealth)
 			writer.append("Megasphere Health = ").append(String.valueOf(megasphereHealth)).append('\n');
-		if (godModeHealth != 100)
+		if (godModeHealth != misc.godModeHealth)
 			writer.append("God Mode Health = ").append(String.valueOf(godModeHealth)).append('\n');
-		if (idfaArmor != 200)
+		if (idfaArmor != misc.idfaArmor)
 			writer.append("IDFA Armor = ").append(String.valueOf(idfaArmor)).append('\n');
-		if (idfaArmorClass != 2)
+		if (idfaArmorClass != misc.idfaArmorClass)
 			writer.append("IDFA Armor Class = ").append(String.valueOf(idfaArmorClass)).append('\n');
-		if (idkfaArmor != 200)
+		if (idkfaArmor != misc.idkfaArmor)
 			writer.append("IDKFA Armor = ").append(String.valueOf(idkfaArmor)).append('\n');
-		if (idkfaArmorClass != 2)
+		if (idkfaArmorClass != misc.idkfaArmorClass)
 			writer.append("IDKFA Armor Class = ").append(String.valueOf(idkfaArmorClass)).append('\n');
-		if (bfgCellsPerShot != 40)
+		if (bfgCellsPerShot != misc.bfgCellsPerShot)
 			writer.append("BFG Cells/Shot = ").append(String.valueOf(bfgCellsPerShot)).append('\n');
-		if (maxHealth != 200)
+		if (maxHealth != misc.maxHealth)
 			writer.append("Max Health = ").append(String.valueOf(maxHealth)).append('\n');
-		if (maxArmor != 200)
+		if (maxArmor != misc.maxArmor)
 			writer.append("Max Armor = ").append(String.valueOf(maxArmor)).append('\n');
 		writer.flush();
 	}
