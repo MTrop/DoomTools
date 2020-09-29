@@ -64,6 +64,8 @@ public class DEHSound implements DEHObject<DEHSound>
 		this.singular = singular;
 	}
 	
+	// TODO: Add equals.
+	
 	@Override
 	public void writeObject(Writer writer, DEHSound sound) throws IOException
 	{

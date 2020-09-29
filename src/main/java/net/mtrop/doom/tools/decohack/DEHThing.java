@@ -15,6 +15,8 @@ public class DEHThing implements DEHObject<DEHThing>
 	public static final int SOUND_NONE = 0;
 	public static final int FRAME_NULL = 0;
 	
+	private String name;
+	
 	private int editorNumber;
 	
 	private int health;
@@ -59,6 +61,7 @@ public class DEHThing implements DEHObject<DEHThing>
 	 */
 	public DEHThing()
 	{
+		this.name = "";
 		this.editorNumber = EDITORNUMBER_NONE;
 		
 		this.health = 0;
@@ -86,6 +89,16 @@ public class DEHThing implements DEHObject<DEHThing>
 		this.activeSoundIndex = SOUND_NONE;
 	}
 
+	public String getName() 
+	{
+		return name;
+	}
+	
+	public void setName(String name) 
+	{
+		this.name = name;
+	}
+	
 	public int getEditorNumber() 
 	{
 		return editorNumber;
@@ -331,6 +344,41 @@ public class DEHThing implements DEHObject<DEHThing>
 	}
 
 	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj instanceof DEHThing)
+			return equals((DEHThing)obj);
+		return super.equals(obj);
+	}
+	
+	public boolean equals(DEHThing obj) 
+	{
+		return editorNumber == obj.editorNumber
+			&& health == obj.health
+			&& speed == obj.speed
+			&& radius == obj.radius
+			&& height == obj.height
+			&& damage == obj.damage
+			&& reactionTime == obj.reactionTime
+			&& painChance == obj.painChance
+			&& mass == obj.mass
+			&& spawnFrameIndex == obj.spawnFrameIndex
+			&& walkFrameIndex == obj.walkFrameIndex
+			&& painFrameIndex == obj.painFrameIndex
+			&& meleeFrameIndex == obj.meleeFrameIndex
+			&& missileFrameIndex == obj.missileFrameIndex
+			&& deathFrameIndex == obj.deathFrameIndex
+			&& extremeDeathFrameIndex == obj.extremeDeathFrameIndex
+			&& raiseFrameIndex == obj.raiseFrameIndex
+			&& seeSoundIndex == obj.seeSoundIndex
+			&& activeSoundIndex == obj.activeSoundIndex
+			&& attackSoundIndex == obj.attackSoundIndex
+			&& painSoundIndex == obj.painSoundIndex
+			&& deathSoundIndex == obj.deathSoundIndex
+		;
+	}	
+	
+	@Override
 	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
 		if (editorNumber != thing.editorNumber)
@@ -369,16 +417,16 @@ public class DEHThing implements DEHObject<DEHThing>
 		if (raiseFrameIndex != thing.raiseFrameIndex)
 			writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
 
-		if (painSoundIndex != thing.painSoundIndex)
-			writer.append("Pain sound = ").append(String.valueOf(painSoundIndex)).append('\n');
-		if (deathSoundIndex != thing.deathSoundIndex)
-			writer.append("Death sound = ").append(String.valueOf(deathSoundIndex)).append('\n');
 		if (seeSoundIndex != thing.seeSoundIndex)
 			writer.append("Alert sound = ").append(String.valueOf(seeSoundIndex)).append('\n');
 		if (activeSoundIndex != thing.activeSoundIndex)
 			writer.append("Action sound = ").append(String.valueOf(activeSoundIndex)).append('\n');
 		if (attackSoundIndex != thing.attackSoundIndex)
 			writer.append("Attack sound = ").append(String.valueOf(attackSoundIndex)).append('\n');
+		if (painSoundIndex != thing.painSoundIndex)
+			writer.append("Pain sound = ").append(String.valueOf(painSoundIndex)).append('\n');
+		if (deathSoundIndex != thing.deathSoundIndex)
+			writer.append("Death sound = ").append(String.valueOf(deathSoundIndex)).append('\n');
 		
 		writer.flush();
 	}

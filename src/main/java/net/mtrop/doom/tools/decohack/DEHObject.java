@@ -16,6 +16,6 @@ public interface DEHObject<SELF>
 	 * @param original the original object to compare to for writing changed fields.
 	 * @throws IOException if a write error occurs.
 	 */
-	public void writeObject(Writer writer, SELF original) throws IOException;
+	void writeObject(Writer writer, SELF original) throws IOException;
 	
 }

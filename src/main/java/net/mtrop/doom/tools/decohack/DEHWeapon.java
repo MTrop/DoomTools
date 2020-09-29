@@ -31,7 +31,6 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	public DEHWeapon(String name) 
 	{
 		this.name = name;
-		
 		this.ammoType = null;
 		this.raiseFrameIndex = 0;
 		this.lowerFrameIndex = 0;
@@ -165,19 +164,38 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	}
 	
 	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj instanceof DEHWeapon)
+			return equals((DEHWeapon<?>)obj);
+		return super.equals(obj);
+	}
+	
+	public boolean equals(DEHWeapon<?> obj) 
+	{
+		return ammoType == obj.ammoType
+			&& raiseFrameIndex == obj.raiseFrameIndex
+			&& lowerFrameIndex == obj.lowerFrameIndex
+			&& readyFrameIndex == obj.readyFrameIndex
+			&& fireFrameIndex == obj.fireFrameIndex
+			&& flashFrameIndex == obj.flashFrameIndex
+		;
+	}	
+	
+	@Override
 	public void writeObject(Writer writer, DEHWeapon<A> weapon) throws IOException 
 	{
 		if (ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append('\n');
 		if (raiseFrameIndex != weapon.raiseFrameIndex)
 			writer.append("Select frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
-		if (raiseFrameIndex != weapon.raiseFrameIndex)
+		if (lowerFrameIndex != weapon.lowerFrameIndex)
 			writer.append("Deselect frame = ").append(String.valueOf(lowerFrameIndex)).append('\n');
-		if (raiseFrameIndex != weapon.raiseFrameIndex)
+		if (readyFrameIndex != weapon.readyFrameIndex)
 			writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append('\n');
-		if (raiseFrameIndex != weapon.raiseFrameIndex)
+		if (fireFrameIndex != weapon.fireFrameIndex)
 			writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append('\n');
-		if (raiseFrameIndex != weapon.raiseFrameIndex)
+		if (flashFrameIndex != weapon.flashFrameIndex)
 			writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append('\n');
 		writer.flush();
 	}

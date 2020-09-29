@@ -251,6 +251,8 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		this.maxHealth = maxHealth;
 	}
 	
+	// TODO: Add equals.
+	
 	@Override
 	public void writeObject(Writer writer, DEHMiscallany misc) throws IOException
 	{

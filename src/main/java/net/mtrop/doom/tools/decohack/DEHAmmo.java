@@ -86,6 +86,8 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 		RangeUtils.checkRange("Ammo pickup", 0, 999999, this.pickup = pickup);
 	}
 	
+	// TODO: Add equals.
+
 	@Override
 	public void writeObject(Writer writer, DEHAmmo ammo) throws IOException
 	{
