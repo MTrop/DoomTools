@@ -8,15 +8,24 @@ import net.mtrop.doom.util.RangeUtils;
 /**
  * A single weapon entry.
  * @author Matthew Tropiano
- * @param <A> the ammo type enum.
  */
-public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
+public class DEHWeapon implements DEHObject<DEHWeapon>
 {
+	public static enum Ammo
+	{
+		BULLETS,
+		SHELLS,
+		CELLS,
+		ROCKETS,
+		UNUSED,
+		INFINITE;
+	}
+	
 	/** Weapon name. */
 	private String name;
 	
 	/** Ammo type. */
-	private A ammoType;
+	private Ammo ammoType;
 	/** Raise frame index. */
 	private int raiseFrameIndex;
 	/** Lower frame index. */
@@ -28,15 +37,52 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/** Muzzle flash index. */
 	private int flashFrameIndex;
 	
-	public DEHWeapon(String name) 
+	public DEHWeapon()
 	{
-		this.name = name;
-		this.ammoType = null;
-		this.raiseFrameIndex = 0;
-		this.lowerFrameIndex = 0;
-		this.readyFrameIndex = 0;
-		this.fireFrameIndex = 0;
-		this.flashFrameIndex = 0;
+		setName("");
+		setAmmoType(null);
+		setRaiseFrameIndex(0);
+		setLowerFrameIndex(0);
+		setReadyFrameIndex(0);
+		setFireFrameIndex(0);
+		setFlashFrameIndex(0);
+	}
+	
+	/**
+	 * Creates a weapon entry.
+	 * @param name the name.
+	 * @param ammo the ammo type.
+	 * @param raise the raise frame index
+	 * @param lower the lower frame index
+	 * @param ready the ready frame index.
+	 * @param fire the fire frame index.
+	 * @param flash the muzzle flash index.
+	 * @return a weapon entry.
+	 */
+	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash)
+	{
+		DEHWeapon out = new DEHWeapon(); 
+		out.setName(name);
+		out.setAmmoType(ammo);
+		out.setRaiseFrameIndex(raise);
+		out.setLowerFrameIndex(lower);
+		out.setReadyFrameIndex(ready);
+		out.setFireFrameIndex(fire);
+		out.setFlashFrameIndex(flash);
+		return out;
+	}
+	
+	@Override
+	public DEHWeapon copyFrom(DEHWeapon source) 
+	{
+		setName(source.name);
+		setAmmoType(source.ammoType);
+		setRaiseFrameIndex(source.raiseFrameIndex);
+		setLowerFrameIndex(source.lowerFrameIndex);
+		setReadyFrameIndex(source.readyFrameIndex);
+		setFireFrameIndex(source.fireFrameIndex);
+		setFlashFrameIndex(source.flashFrameIndex);
+		return this;
 	}
 	
 	/**
@@ -50,16 +96,18 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the weapon name (not used ingame).
 	 * @param name the name.
+	 * @return this object.
 	 */
-	public void setName(String name) 
+	public DEHWeapon setName(String name) 
 	{
 		this.name = name;
+		return this;
 	}
 	
 	/**
 	 * @return the ammo type.
 	 */
-	public A getAmmoType() 
+	public Ammo getAmmoType() 
 	{
 		return ammoType;
 	}
@@ -67,10 +115,12 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the ammo type.
 	 * @param ammoType the type.
+	 * @return this object.
 	 */
-	public void setAmmoType(A ammoType) 
+	public DEHWeapon setAmmoType(Ammo ammoType) 
 	{
 		this.ammoType = ammoType;
+		return this;
 	}
 	
 	/**
@@ -84,11 +134,13 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the raise frame index.
 	 * @param raiseFrameIndex the index.
+	 * @return this object.
 	 */
-	public void setRaiseFrameIndex(int raiseFrameIndex) 
+	public DEHWeapon setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		this.raiseFrameIndex = raiseFrameIndex;
+		return this;
 	}
 	
 	/**
@@ -102,11 +154,13 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the lower frame index.
 	 * @param lowerFrameIndex the index.
+	 * @return this object.
 	 */
-	public void setLowerFrameIndex(int lowerFrameIndex) 
+	public DEHWeapon setLowerFrameIndex(int lowerFrameIndex) 
 	{
 		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
 		this.lowerFrameIndex = lowerFrameIndex;
+		return this;
 	}
 	
 	/**
@@ -120,11 +174,13 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the ready frame index.
 	 * @param readyFrameIndex the index.
+	 * @return this object.
 	 */
-	public void setReadyFrameIndex(int readyFrameIndex) 
+	public DEHWeapon setReadyFrameIndex(int readyFrameIndex) 
 	{
 		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
 		this.readyFrameIndex = readyFrameIndex;
+		return this;
 	}
 	
 	/**
@@ -138,11 +194,13 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the fire frame index.
 	 * @param fireFrameIndex the index.
+	 * @return this object.
 	 */
-	public void setFireFrameIndex(int fireFrameIndex) 
+	public DEHWeapon setFireFrameIndex(int fireFrameIndex) 
 	{
 		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
 		this.fireFrameIndex = fireFrameIndex;
+		return this;
 	}
 	
 	/**
@@ -156,22 +214,24 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	/**
 	 * Sets the flash frame index.
 	 * @param flashFrameIndex the index.
+	 * @return this object.
 	 */
-	public void setFlashFrameIndex(int flashFrameIndex) 
+	public DEHWeapon setFlashFrameIndex(int flashFrameIndex) 
 	{
 		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
 		this.flashFrameIndex = flashFrameIndex;
+		return this;
 	}
 	
 	@Override
 	public boolean equals(Object obj) 
 	{
 		if (obj instanceof DEHWeapon)
-			return equals((DEHWeapon<?>)obj);
+			return equals((DEHWeapon)obj);
 		return super.equals(obj);
 	}
 	
-	public boolean equals(DEHWeapon<?> obj) 
+	public boolean equals(DEHWeapon obj) 
 	{
 		return ammoType == obj.ammoType
 			&& raiseFrameIndex == obj.raiseFrameIndex
@@ -183,7 +243,7 @@ public class DEHWeapon<A extends Enum<A>> implements DEHObject<DEHWeapon<A>>
 	}	
 	
 	@Override
-	public void writeObject(Writer writer, DEHWeapon<A> weapon) throws IOException 
+	public void writeObject(Writer writer, DEHWeapon weapon) throws IOException 
 	{
 		if (ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append('\n');

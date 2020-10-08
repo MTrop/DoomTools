@@ -11,6 +11,13 @@ import java.io.Writer;
 public interface DEHObject<SELF>
 {
 	/**
+	 * Copies this object's values.
+	 * @param source the source object.
+	 * @return this object.
+	 */
+	SELF copyFrom(SELF source);
+	
+	/**
 	 * Writes this object to a DeHackEd file stream.
 	 * @param writer the writer to write to.
 	 * @param original the original object to compare to for writing changed fields.

@@ -19,20 +19,22 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	/** Pickup amount. */
 	private int pickup;
 	
-	/**
-	 * Creates a new Ammo.
-	 * @param name the name.
-	 * @param max the max ammo.
-	 * @param pickup the pickup amount.
-	 * @throws IllegalArgumentException if a provided value is out of range.
-	 */
-	public DEHAmmo(String name, int max, int pickup)
+	public DEHAmmo()
 	{
-		setName(name);
-		setMax(max);
-		setPickup(pickup);
+		setName("");
+		setMax(1);
+		setPickup(1);
 	}
 	
+	@Override
+	public DEHAmmo copyFrom(DEHAmmo source) 
+	{
+		setName(source.name);
+		setMax(source.max);
+		setPickup(source.pickup);
+		return this;
+	}
+
 	/**
 	 * @return the weapon name (not used ingame).
 	 */
@@ -44,10 +46,12 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	/**
 	 * Sets the weapon name (not used ingame).
 	 * @param name the name.
+	 * @return this object.
 	 */
-	public void setName(String name) 
+	public DEHAmmo setName(String name) 
 	{
 		this.name = name;
+		return this;
 	}
 	
 	/**
@@ -61,11 +65,14 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	/**
 	 * Sets the max ammo.
 	 * @param max the max ammo.
+	 * @return this object.
 	 * @throws IllegalArgumentException if a provided value is out of range.
 	 */
-	public void setMax(int max) 
+	public DEHAmmo setMax(int max) 
 	{
-		RangeUtils.checkRange("Ammo maximum", 0, 999999, this.max = max);
+		RangeUtils.checkRange("Ammo maximum", 0, 999999, max);
+		this.max = max;
+		return this;
 	}
 	
 	/**
@@ -79,15 +86,31 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	/**
 	 * Sets the pickup ammo.
 	 * @param pickup the pickup ammo.
+	 * @return this object.
 	 * @throws IllegalArgumentException if a provided value is out of range.
 	 */
-	public void setPickup(int pickup) 
+	public DEHAmmo setPickup(int pickup) 
 	{
-		RangeUtils.checkRange("Ammo pickup", 0, 999999, this.pickup = pickup);
+		RangeUtils.checkRange("Ammo pickup", 0, 999999, pickup);
+		this.pickup = pickup;
+		return this;
 	}
 	
-	// TODO: Add equals.
-
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj instanceof DEHAmmo)
+			return equals((DEHAmmo)obj);
+		return super.equals(obj);
+	}
+	
+	public boolean equals(DEHAmmo obj) 
+	{
+		return max == obj.max
+			&& pickup == obj.pickup
+		;
+	}	
+		
 	@Override
 	public void writeObject(Writer writer, DEHAmmo ammo) throws IOException
 	{
@@ -97,5 +120,5 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 			writer.append("Per ammo = ").append(String.valueOf(pickup)).append('\n');
 		writer.flush();
 	}
-	
+
 }

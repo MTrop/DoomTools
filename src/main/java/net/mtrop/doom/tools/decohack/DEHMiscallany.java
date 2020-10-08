@@ -50,6 +50,27 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		setMaxHealth(200);
 	}
 	
+	@Override
+	public DEHMiscallany copyFrom(DEHMiscallany source) 
+	{
+		setMonsterInfightingEnabled(source.monsterInfightingEnabled);
+		setInitialBullets(source.initialBullets);
+		setInitialHealth(source.initialHealth);
+		setGreenArmorClass(source.greenArmorClass);
+		setBlueArmorClass(source.blueArmorClass);
+		setSoulsphereHealth(source.soulsphereHealth);
+		setMaxSoulsphereHealth(source.maxSoulsphereHealth);
+		setGodModeHealth(source.godModeHealth);
+		setBFGCellsPerShot(source.bfgCellsPerShot);
+		setIDFAArmor(source.idfaArmor);
+		setIDFAArmorClass(source.idfaArmorClass);
+		setIDKFAArmor(source.idkfaArmor);
+		setIDKFAArmorClass(source.idkfaArmorClass);
+		setMaxArmor(source.maxArmor);
+		setMaxHealth(source.maxHealth);
+		return this;
+	}
+	
 	/**
 	 * Gets if monster infighting is enabled.
 	 * @return true if so, false if not.
@@ -62,10 +83,12 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	/**
 	 * Sets if monster infighting is enabled.
 	 * @param monsterInfightingEnabled true if so, false if not.
+	 * @return this object.
 	 */
-	public void setMonsterInfightingEnabled(boolean monsterInfightingEnabled) 
+	public DEHMiscallany setMonsterInfightingEnabled(boolean monsterInfightingEnabled) 
 	{
 		this.monsterInfightingEnabled = monsterInfightingEnabled;
+		return this;
 	}
 	
 	/**
@@ -79,12 +102,14 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	/**
 	 * Sets the initial amount of player bullets.
 	 * @param initialBullets the value.
+	 * @return this object.
 	 * @throws IllegalArgumentException if the value is in an invalid range.
 	 */
-	public void setInitialBullets(int initialBullets) 
+	public DEHMiscallany setInitialBullets(int initialBullets) 
 	{
 		RangeUtils.checkRange("Initial bullets", 0, Integer.MAX_VALUE, initialBullets);
 		this.initialBullets = initialBullets;
+		return this;
 	}
 	
 	/**
@@ -98,11 +123,13 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	/**
 	 * Sets the initial amount of player health.
 	 * @param initialHealth the value.
+	 * @return this object.
 	 */
-	public void setInitialHealth(int initialHealth) 
+	public DEHMiscallany setInitialHealth(int initialHealth) 
 	{
 		RangeUtils.checkRange("Initial health", 0, Integer.MAX_VALUE, initialHealth);
 		this.initialHealth = initialHealth;
+		return this;
 	}
 	
 	/**
@@ -113,10 +140,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return greenArmorClass;
 	}
 	
-	public void setGreenArmorClass(int greenArmorClass)
+	public DEHMiscallany setGreenArmorClass(int greenArmorClass)
 	{
 		RangeUtils.checkRange("Green armor class", 0, Integer.MAX_VALUE, greenArmorClass);
 		this.greenArmorClass = greenArmorClass;
+		return this;
 	}
 	
 	public int getBlueArmorClass() 
@@ -124,10 +152,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return blueArmorClass;
 	}
 	
-	public void setBlueArmorClass(int blueArmorClass) 
+	public DEHMiscallany setBlueArmorClass(int blueArmorClass) 
 	{
 		RangeUtils.checkRange("Blue armor class", 0, Integer.MAX_VALUE, blueArmorClass);
 		this.blueArmorClass = blueArmorClass;
+		return this;
 	}
 	
 	public int getSoulsphereHealth()
@@ -135,10 +164,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return soulsphereHealth;
 	}
 	
-	public void setSoulsphereHealth(int soulsphereHealth)
+	public DEHMiscallany setSoulsphereHealth(int soulsphereHealth)
 	{
 		RangeUtils.checkRange("Soulsphere health", 0, 255, blueArmorClass);
 		this.soulsphereHealth = soulsphereHealth;
+		return this;
 	}
 	
 	public int getMaxSoulsphereHealth() 
@@ -146,10 +176,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxSoulsphereHealth;
 	}
 	
-	public void setMaxSoulsphereHealth(int maxSoulsphereHealth) 
+	public DEHMiscallany setMaxSoulsphereHealth(int maxSoulsphereHealth) 
 	{
 		RangeUtils.checkRange("Max soulsphere health", 0, Integer.MAX_VALUE, maxSoulsphereHealth);
 		this.maxSoulsphereHealth = maxSoulsphereHealth;
+		return this;
 	}
 	
 	public int getMegasphereHealth() 
@@ -157,10 +188,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return megasphereHealth;
 	}
 	
-	public void setMegasphereHealth(int megasphereHealth) 
+	public DEHMiscallany setMegasphereHealth(int megasphereHealth) 
 	{
 		RangeUtils.checkRange("Megasphere health", 0, Integer.MAX_VALUE, megasphereHealth);
 		this.megasphereHealth = megasphereHealth;
+		return this;
 	}
 	
 	public int getGodModeHealth() 
@@ -168,10 +200,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return godModeHealth;
 	}
 	
-	public void setGodModeHealth(int godModeHealth) 
+	public DEHMiscallany setGodModeHealth(int godModeHealth) 
 	{
 		RangeUtils.checkRange("God mode health", 0, Integer.MAX_VALUE, godModeHealth);
 		this.godModeHealth = godModeHealth;
+		return this;
 	}
 	
 	public int getBFGCellsPerShot() 
@@ -179,10 +212,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return bfgCellsPerShot;
 	}
 	
-	public void setBFGCellsPerShot(int bfgCellsPerShot) 
+	public DEHMiscallany setBFGCellsPerShot(int bfgCellsPerShot) 
 	{
 		RangeUtils.checkRange("BFG Cells Per Shot", 0, 255, bfgCellsPerShot);
 		this.bfgCellsPerShot = bfgCellsPerShot;
+		return this;
 	}
 	
 	public int getIDFAArmor()
@@ -190,10 +224,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idfaArmor;
 	}
 	
-	public void setIDFAArmor(int idfaArmor)
+	public DEHMiscallany setIDFAArmor(int idfaArmor)
 	{
 		RangeUtils.checkRange("IDFA Armor", 0, Integer.MAX_VALUE, idfaArmor);
 		this.idfaArmor = idfaArmor;
+		return this;
 	}
 	
 	public int getIDFAArmorClass() 
@@ -201,10 +236,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idfaArmorClass;
 	}
 	
-	public void setIDFAArmorClass(int idfaArmorClass) 
+	public DEHMiscallany setIDFAArmorClass(int idfaArmorClass) 
 	{
 		RangeUtils.checkRange("IDFA Armor Class", 0, Integer.MAX_VALUE, idfaArmorClass);
 		this.idfaArmorClass = idfaArmorClass;
+		return this;
 	}
 	
 	public int getIDKFAArmor() 
@@ -212,10 +248,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idkfaArmor;
 	}
 	
-	public void setIDKFAArmor(int idkfaArmor) 
+	public DEHMiscallany setIDKFAArmor(int idkfaArmor) 
 	{
 		RangeUtils.checkRange("IDKFA Armor", 0, Integer.MAX_VALUE, idkfaArmor);
 		this.idkfaArmor = idkfaArmor;
+		return this;
 	}
 	
 	public int getIDKFAArmorClass()
@@ -223,10 +260,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idkfaArmorClass;
 	}
 	
-	public void setIDKFAArmorClass(int idkfaArmorClass)
+	public DEHMiscallany setIDKFAArmorClass(int idkfaArmorClass)
 	{
 		RangeUtils.checkRange("IDKFA Armor Class", 0, Integer.MAX_VALUE, idkfaArmorClass);
 		this.idkfaArmorClass = idkfaArmorClass;
+		return this;
 	}
 	
 	public int getMaxArmor() 
@@ -234,10 +272,11 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxArmor;
 	}
 	
-	public void setMaxArmor(int maxArmor) 
+	public DEHMiscallany setMaxArmor(int maxArmor) 
 	{
 		RangeUtils.checkRange("Max Armor", 0, Integer.MAX_VALUE, maxArmor);
 		this.maxArmor = maxArmor;
+		return this;
 	}
 	
 	public int getMaxHealth() 
@@ -245,14 +284,42 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxHealth;
 	}
 	
-	public void setMaxHealth(int maxHealth) 
+	public DEHMiscallany setMaxHealth(int maxHealth) 
 	{
 		RangeUtils.checkRange("Max health", 0, Integer.MAX_VALUE, maxHealth);
 		this.maxHealth = maxHealth;
+		return this;
 	}
 	
-	// TODO: Add equals.
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj instanceof DEHMiscallany)
+			return equals((DEHMiscallany)obj);
+		return super.equals(obj);
+	}
 	
+	public boolean equals(DEHMiscallany obj) 
+	{
+		return monsterInfightingEnabled == obj.monsterInfightingEnabled
+			&& initialBullets == obj.initialBullets
+			&& initialHealth == obj.initialHealth
+			&& greenArmorClass == obj.greenArmorClass
+			&& blueArmorClass == obj.blueArmorClass
+			&& soulsphereHealth == obj.soulsphereHealth
+			&& maxSoulsphereHealth == obj.maxSoulsphereHealth
+			&& megasphereHealth == obj.megasphereHealth
+			&& godModeHealth == obj.godModeHealth
+			&& idfaArmor == obj.idfaArmor
+			&& idfaArmorClass == obj.idfaArmorClass
+			&& idkfaArmor == obj.idkfaArmor
+			&& idkfaArmorClass == obj.idkfaArmorClass
+			&& bfgCellsPerShot == obj.bfgCellsPerShot
+			&& maxHealth == obj.maxHealth
+			&& maxArmor == obj.maxArmor
+		;
+	}	
+		
 	@Override
 	public void writeObject(Writer writer, DEHMiscallany misc) throws IOException
 	{

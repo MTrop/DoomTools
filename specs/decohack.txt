@@ -30,6 +30,10 @@ Frame 895:
 Plasma Muzzle Flash:
 	The plasma rifle's muzzle flash is called at random between the [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
 
+Final Frame:
+	If replaced in a DEH patch, using DeHackEd to patch an original EXE will overwrite the weapon table, due to a bug in DeHackEd 3.0
+	(this is fine in source ports).
+
 
 Thing Slot Hardcoding
 =====================
@@ -55,6 +59,7 @@ Revenant (Slot 6)
 
 Revenant Rocket (Slot 7) 
 	Spawned by A_SkelMissile.
+	Only slot that can use A_Tracer, since A_SkelMissile sets tracer parameters.
 
 Revenant Rocket Trail (Slot 8)
  	Spawned on a seeking A_Tracer call.
@@ -281,7 +286,8 @@ The relevant string on sprite index is [index] + 954.
 Items
 =====
 
-Item Pickups are performed when the player collides with an object that is flagged as "pickup," but the sprite's names dictate what is given:
+Item Pickups are performed when the player collides with an object that is flagged as "pickup," but the sprite's 
+names dictate what is given (refer to actual string data at the index for the detected name):
 
 Sprite Index 55 -> Green Armor 
 Sprite Index 56 -> Blue Armor 

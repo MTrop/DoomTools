@@ -22,10 +22,33 @@ public class DEHSound implements DEHObject<DEHSound>
 	 * @param singular if the sound is singularly played and at full volume.
 	 * @throws IllegalArgumentException if a provided value is out of range.
 	 */
-	public DEHSound(int priority, boolean singular)
+	public DEHSound()
 	{
-		setPriority(priority);
-		this.singular = singular;
+		setPriority(0);
+		setSingular(false);
+	}
+
+	/**
+	 * Creates a new DEHSound.
+	 * @param priority the sound priority.
+	 * @param singular if the sound is singularly played and at full volume.
+	 * @return a new sound.
+	 * @throws IllegalArgumentException if a provided value is out of range.
+	 */
+	public static DEHSound create(int priority, boolean singular)
+	{
+		DEHSound out = new DEHSound();
+		out.setPriority(priority);
+		out.setSingular(singular);
+		return out;
+	}
+	
+	@Override
+	public DEHSound copyFrom(DEHSound source) 
+	{
+		setPriority(source.priority);
+		setSingular(source.singular);
+		return this;
 	}
 	
 	/**
@@ -39,12 +62,14 @@ public class DEHSound implements DEHObject<DEHSound>
 	/**
 	 * Sets the sound priority.
 	 * @param priority the sound priority.
+	 * @return this object.
 	 * @throws IllegalArgumentException if a provided value is out of range.
 	 */
-	public void setPriority(int priority) 
+	public DEHSound setPriority(int priority) 
 	{
 		RangeUtils.checkByteUnsigned("Sound priority", priority);
 		this.priority = priority;
+		return this;
 	}
 	
 	/**
@@ -58,14 +83,29 @@ public class DEHSound implements DEHObject<DEHSound>
 	/**
 	 * Sets sound singularity.
 	 * @param singular true if so, false if not.
+	 * @return this object.
 	 */
-	public void setSingular(boolean singular) 
+	public DEHSound setSingular(boolean singular) 
 	{
 		this.singular = singular;
+		return this;
 	}
 	
-	// TODO: Add equals.
+	@Override
+	public boolean equals(Object obj) 
+	{
+		if (obj instanceof DEHSound)
+			return equals((DEHSound)obj);
+		return super.equals(obj);
+	}
 	
+	public boolean equals(DEHSound obj) 
+	{
+		return priority == obj.priority
+			&& singular == obj.singular
+		;
+	}	
+		
 	@Override
 	public void writeObject(Writer writer, DEHSound sound) throws IOException
 	{

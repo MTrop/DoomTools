@@ -61,42 +61,75 @@ public class DEHThing implements DEHObject<DEHThing>
 	 */
 	public DEHThing()
 	{
-		this.name = "";
-		this.editorNumber = EDITORNUMBER_NONE;
+		setName("");
+		setEditorNumber(EDITORNUMBER_NONE);
 		
-		this.health = 0;
-		this.speed = 0;
-		this.radius = 0;
-		this.height = 0;
-		this.damage = 0;
-		this.reactionTime = 0;
-		this.painChance = 0;
-		this.mass = 0;
+		setHealth(0);
+		setSpeed(0);
+		setRadius(0);
+		setHeight(0);
+		setDamage(0);
+		setReactionTime(0);
+		setPainChance(0);
+		setMass(0);
 		
-		this.spawnFrameIndex = FRAME_NULL;
-		this.walkFrameIndex = FRAME_NULL;
-		this.painFrameIndex = FRAME_NULL;
-		this.meleeFrameIndex = FRAME_NULL;
-		this.missileFrameIndex = FRAME_NULL;
-		this.deathFrameIndex = FRAME_NULL;
-		this.extremeDeathFrameIndex = FRAME_NULL;
-		this.raiseFrameIndex = FRAME_NULL;
+		setSpawnFrameIndex(FRAME_NULL);
+		setWalkFrameIndex(FRAME_NULL);
+		setPainFrameIndex(FRAME_NULL);
+		setMeleeFrameIndex(FRAME_NULL);
+		setMissileFrameIndex(FRAME_NULL);
+		setDeathFrameIndex(FRAME_NULL);
+		setExtremeDeathFrameIndex(FRAME_NULL);
+		setRaiseFrameIndex(FRAME_NULL);
 		
-		this.seeSoundIndex = SOUND_NONE;
-		this.attackSoundIndex = SOUND_NONE;
-		this.painSoundIndex = SOUND_NONE;
-		this.deathSoundIndex = SOUND_NONE;
-		this.activeSoundIndex = SOUND_NONE;
+		setSeeSoundIndex(SOUND_NONE);
+		setAttackSoundIndex(SOUND_NONE);
+		setPainSoundIndex(SOUND_NONE);
+		setDeathSoundIndex(SOUND_NONE);
+		setActiveSoundIndex(SOUND_NONE);
 	}
 
+	@Override
+	public DEHThing copyFrom(DEHThing source) 
+	{
+		setName(source.name);
+		setEditorNumber(source.editorNumber);
+		
+		setHealth(source.health);
+		setSpeed(source.speed);
+		setRadius(source.radius);
+		setHeight(source.height);
+		setDamage(source.damage);
+		setReactionTime(source.reactionTime);
+		setPainChance(source.painChance);
+		setMass(source.mass);
+		
+		setSpawnFrameIndex(source.spawnFrameIndex);
+		setWalkFrameIndex(source.walkFrameIndex);
+		setPainFrameIndex(source.painFrameIndex);
+		setMeleeFrameIndex(source.meleeFrameIndex);
+		setMissileFrameIndex(source.missileFrameIndex);
+		setDeathFrameIndex(source.deathFrameIndex);
+		setExtremeDeathFrameIndex(source.extremeDeathFrameIndex);
+		setRaiseFrameIndex(source.raiseFrameIndex);
+		
+		setSeeSoundIndex(source.seeSoundIndex);
+		setAttackSoundIndex(source.attackSoundIndex);
+		setPainSoundIndex(source.painSoundIndex);
+		setDeathSoundIndex(source.deathSoundIndex);
+		setActiveSoundIndex(source.activeSoundIndex);
+		return this;
+	}
+	
 	public String getName() 
 	{
 		return name;
 	}
 	
-	public void setName(String name) 
+	public DEHThing setName(String name) 
 	{
 		this.name = name;
+		return this;
 	}
 	
 	public int getEditorNumber() 
@@ -104,12 +137,13 @@ public class DEHThing implements DEHObject<DEHThing>
 		return editorNumber;
 	}
 
-	public void setEditorNumber(int editorNumber)
+	public DEHThing setEditorNumber(int editorNumber)
 	{
 		if (editorNumber == 0)
 			throw new IllegalArgumentException("Editor number can not be 0.");
 		RangeUtils.checkRange("Editor number", -1, 0x10000, editorNumber);
 		this.editorNumber = editorNumber;
+		return this;
 	}
 
 	public int getHealth() 
@@ -117,10 +151,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return health;
 	}
 
-	public void setHealth(int health)
+	public DEHThing setHealth(int health)
 	{
 		RangeUtils.checkRange("Health", 0, 999999, health);
 		this.health = health;
+		return this;
 	}
 
 	public int getSpeed()
@@ -128,10 +163,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return speed;
 	}
 
-	public void setSpeed(int speed) 
+	public DEHThing setSpeed(int speed) 
 	{
 		RangeUtils.checkRange("Speed", 0, 999999, speed);
 		this.speed = speed;
+		return this;
 	}
 
 	public int getRadius() 
@@ -139,10 +175,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return radius;
 	}
 
-	public void setRadius(int radius) 
+	public DEHThing setRadius(int radius) 
 	{
 		RangeUtils.checkRange("Radius", 0, 65535, radius);
 		this.radius = radius;
+		return this;
 	}
 
 	public int getHeight() 
@@ -150,10 +187,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return height;
 	}
 
-	public void setHeight(int height) 
+	public DEHThing setHeight(int height) 
 	{
 		RangeUtils.checkRange("Height", 0, 65535, height);
 		this.height = height;
+		return this;
 	}
 
 	public int getDamage() 
@@ -161,10 +199,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return damage;
 	}
 
-	public void setDamage(int damage) 
+	public DEHThing setDamage(int damage) 
 	{
 		RangeUtils.checkRange("Damage", 0, 999999, damage);
 		this.damage = damage;
+		return this;
 	}
 
 	public int getReactionTime()
@@ -172,10 +211,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return reactionTime;
 	}
 
-	public void setReactionTime(int reactionTime)
+	public DEHThing setReactionTime(int reactionTime)
 	{
 		RangeUtils.checkRange("Reaction time", 0, Integer.MAX_VALUE, reactionTime);
 		this.reactionTime = reactionTime;
+		return this;
 	}
 
 	public int getPainChance()
@@ -183,10 +223,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return painChance;
 	}
 
-	public void setPainChance(int painChance)
+	public DEHThing setPainChance(int painChance)
 	{
 		RangeUtils.checkRange("Pain chance", 0, 255, painChance);
 		this.painChance = painChance;
+		return this;
 	}
 
 	public int getMass() 
@@ -194,10 +235,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return mass;
 	}
 
-	public void setMass(int mass) 
+	public DEHThing setMass(int mass) 
 	{
 		RangeUtils.checkRange("Mass", 0, 255, mass);
 		this.mass = mass;
+		return this;
 	}
 
 	public int getSpawnFrameIndex()
@@ -205,10 +247,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return spawnFrameIndex;
 	}
 
-	public void setSpawnFrameIndex(int spawnFrameIndex)
+	public DEHThing setSpawnFrameIndex(int spawnFrameIndex)
 	{
 		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
 		this.spawnFrameIndex = spawnFrameIndex;
+		return this;
 	}
 
 	public int getWalkFrameIndex() 
@@ -216,10 +259,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return walkFrameIndex;
 	}
 
-	public void setWalkFrameIndex(int walkFrameIndex) 
+	public DEHThing setWalkFrameIndex(int walkFrameIndex) 
 	{
 		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
 		this.walkFrameIndex = walkFrameIndex;
+		return this;
 	}
 
 	public int getPainFrameIndex()
@@ -227,10 +271,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return painFrameIndex;
 	}
 
-	public void setPainFrameIndex(int painFrameIndex) 
+	public DEHThing setPainFrameIndex(int painFrameIndex) 
 	{
 		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
 		this.painFrameIndex = painFrameIndex;
+		return this;
 	}
 
 	public int getMeleeFrameIndex() 
@@ -238,10 +283,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return meleeFrameIndex;
 	}
 
-	public void setMeleeFrameIndex(int meleeFrameIndex)
+	public DEHThing setMeleeFrameIndex(int meleeFrameIndex)
 	{
 		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
 		this.meleeFrameIndex = meleeFrameIndex;
+		return this;
 	}
 
 	public int getMissileFrameIndex() 
@@ -249,10 +295,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return missileFrameIndex;
 	}
 
-	public void setMissileFrameIndex(int missileFrameIndex) 
+	public DEHThing setMissileFrameIndex(int missileFrameIndex) 
 	{
 		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
 		this.missileFrameIndex = missileFrameIndex;
+		return this;
 	}
 
 	public int getDeathFrameIndex() 
@@ -260,10 +307,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return deathFrameIndex;
 	}
 
-	public void setDeathFrameIndex(int deathFrameIndex) 
+	public DEHThing setDeathFrameIndex(int deathFrameIndex) 
 	{
 		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
 		this.deathFrameIndex = deathFrameIndex;
+		return this;
 	}
 
 	public int getExtremeDeathFrameIndex() 
@@ -271,10 +319,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return extremeDeathFrameIndex;
 	}
 
-	public void setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
+	public DEHThing setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
 		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
 		this.extremeDeathFrameIndex = extremeDeathFrameIndex;
+		return this;
 	}
 
 	public int getRaiseFrameIndex()
@@ -282,10 +331,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return raiseFrameIndex;
 	}
 
-	public void setRaiseFrameIndex(int raiseFrameIndex) 
+	public DEHThing setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		this.raiseFrameIndex = raiseFrameIndex;
+		return this;
 	}
 
 	public int getSeeSoundIndex() 
@@ -293,10 +343,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return seeSoundIndex;
 	}
 
-	public void setSeeSoundIndex(int alertSoundIndex)
+	public DEHThing setSeeSoundIndex(int alertSoundIndex)
 	{
 		RangeUtils.checkRange("Alert sound index", 0, Integer.MAX_VALUE, alertSoundIndex);
 		this.seeSoundIndex = alertSoundIndex;
+		return this;
 	}
 
 	public int getAttackSoundIndex()
@@ -304,10 +355,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return attackSoundIndex;
 	}
 
-	public void setAttackSoundIndex(int attackSoundIndex)
+	public DEHThing setAttackSoundIndex(int attackSoundIndex)
 	{
 		RangeUtils.checkRange("Attack sound index", 0, Integer.MAX_VALUE, attackSoundIndex);
 		this.attackSoundIndex = attackSoundIndex;
+		return this;
 	}
 
 	public int getPainSoundIndex()
@@ -315,10 +367,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return painSoundIndex;
 	}
 
-	public void setPainSoundIndex(int painSoundIndex) 
+	public DEHThing setPainSoundIndex(int painSoundIndex) 
 	{
 		RangeUtils.checkRange("Pain sound index", 0, Integer.MAX_VALUE, painSoundIndex);
 		this.painSoundIndex = painSoundIndex;
+		return this;
 	}
 
 	public int getDeathSoundIndex()
@@ -326,10 +379,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return deathSoundIndex;
 	}
 
-	public void setDeathSoundIndex(int deathSoundIndex) 
+	public DEHThing setDeathSoundIndex(int deathSoundIndex) 
 	{
 		RangeUtils.checkRange("Death sound index", 0, Integer.MAX_VALUE, deathSoundIndex);
 		this.deathSoundIndex = deathSoundIndex;
+		return this;
 	}
 
 	public int getActiveSoundIndex()
@@ -337,10 +391,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		return activeSoundIndex;
 	}
 
-	public void setActiveSoundIndex(int activeSoundIndex)
+	public DEHThing setActiveSoundIndex(int activeSoundIndex)
 	{
 		RangeUtils.checkRange("Active sound index", 0, Integer.MAX_VALUE, activeSoundIndex);
 		this.activeSoundIndex = activeSoundIndex;
+		return this;
 	}
 
 	@Override
