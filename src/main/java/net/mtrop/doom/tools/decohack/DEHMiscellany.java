@@ -9,7 +9,7 @@ import net.mtrop.doom.util.RangeUtils;
  * All other miscellaneous DeHackEd stuff.
  * @author Matthew Tropiano
  */
-public class DEHMiscallany implements DEHObject<DEHMiscallany>
+public class DEHMiscellany implements DEHObject<DEHMiscellany>
 {
 	private boolean monsterInfightingEnabled;
 	private int initialBullets;
@@ -31,7 +31,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	/**
 	 * Creates a new DEHMiscellany with default values.
 	 */
-	public DEHMiscallany()
+	public DEHMiscellany()
 	{
 		setMonsterInfightingEnabled(false);
 		setInitialBullets(50);
@@ -51,7 +51,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	}
 	
 	@Override
-	public DEHMiscallany copyFrom(DEHMiscallany source) 
+	public DEHMiscellany copyFrom(DEHMiscellany source) 
 	{
 		setMonsterInfightingEnabled(source.monsterInfightingEnabled);
 		setInitialBullets(source.initialBullets);
@@ -85,7 +85,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	 * @param monsterInfightingEnabled true if so, false if not.
 	 * @return this object.
 	 */
-	public DEHMiscallany setMonsterInfightingEnabled(boolean monsterInfightingEnabled) 
+	public DEHMiscellany setMonsterInfightingEnabled(boolean monsterInfightingEnabled) 
 	{
 		this.monsterInfightingEnabled = monsterInfightingEnabled;
 		return this;
@@ -105,7 +105,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	 * @return this object.
 	 * @throws IllegalArgumentException if the value is in an invalid range.
 	 */
-	public DEHMiscallany setInitialBullets(int initialBullets) 
+	public DEHMiscellany setInitialBullets(int initialBullets) 
 	{
 		RangeUtils.checkRange("Initial bullets", 0, Integer.MAX_VALUE, initialBullets);
 		this.initialBullets = initialBullets;
@@ -125,7 +125,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	 * @param initialHealth the value.
 	 * @return this object.
 	 */
-	public DEHMiscallany setInitialHealth(int initialHealth) 
+	public DEHMiscellany setInitialHealth(int initialHealth) 
 	{
 		RangeUtils.checkRange("Initial health", 0, Integer.MAX_VALUE, initialHealth);
 		this.initialHealth = initialHealth;
@@ -140,7 +140,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return greenArmorClass;
 	}
 	
-	public DEHMiscallany setGreenArmorClass(int greenArmorClass)
+	public DEHMiscellany setGreenArmorClass(int greenArmorClass)
 	{
 		RangeUtils.checkRange("Green armor class", 0, Integer.MAX_VALUE, greenArmorClass);
 		this.greenArmorClass = greenArmorClass;
@@ -152,7 +152,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return blueArmorClass;
 	}
 	
-	public DEHMiscallany setBlueArmorClass(int blueArmorClass) 
+	public DEHMiscellany setBlueArmorClass(int blueArmorClass) 
 	{
 		RangeUtils.checkRange("Blue armor class", 0, Integer.MAX_VALUE, blueArmorClass);
 		this.blueArmorClass = blueArmorClass;
@@ -164,7 +164,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return soulsphereHealth;
 	}
 	
-	public DEHMiscallany setSoulsphereHealth(int soulsphereHealth)
+	public DEHMiscellany setSoulsphereHealth(int soulsphereHealth)
 	{
 		RangeUtils.checkRange("Soulsphere health", 0, 255, blueArmorClass);
 		this.soulsphereHealth = soulsphereHealth;
@@ -176,7 +176,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxSoulsphereHealth;
 	}
 	
-	public DEHMiscallany setMaxSoulsphereHealth(int maxSoulsphereHealth) 
+	public DEHMiscellany setMaxSoulsphereHealth(int maxSoulsphereHealth) 
 	{
 		RangeUtils.checkRange("Max soulsphere health", 0, Integer.MAX_VALUE, maxSoulsphereHealth);
 		this.maxSoulsphereHealth = maxSoulsphereHealth;
@@ -188,7 +188,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return megasphereHealth;
 	}
 	
-	public DEHMiscallany setMegasphereHealth(int megasphereHealth) 
+	public DEHMiscellany setMegasphereHealth(int megasphereHealth) 
 	{
 		RangeUtils.checkRange("Megasphere health", 0, Integer.MAX_VALUE, megasphereHealth);
 		this.megasphereHealth = megasphereHealth;
@@ -200,7 +200,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return godModeHealth;
 	}
 	
-	public DEHMiscallany setGodModeHealth(int godModeHealth) 
+	public DEHMiscellany setGodModeHealth(int godModeHealth) 
 	{
 		RangeUtils.checkRange("God mode health", 0, Integer.MAX_VALUE, godModeHealth);
 		this.godModeHealth = godModeHealth;
@@ -212,7 +212,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return bfgCellsPerShot;
 	}
 	
-	public DEHMiscallany setBFGCellsPerShot(int bfgCellsPerShot) 
+	public DEHMiscellany setBFGCellsPerShot(int bfgCellsPerShot) 
 	{
 		RangeUtils.checkRange("BFG Cells Per Shot", 0, 255, bfgCellsPerShot);
 		this.bfgCellsPerShot = bfgCellsPerShot;
@@ -224,7 +224,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idfaArmor;
 	}
 	
-	public DEHMiscallany setIDFAArmor(int idfaArmor)
+	public DEHMiscellany setIDFAArmor(int idfaArmor)
 	{
 		RangeUtils.checkRange("IDFA Armor", 0, Integer.MAX_VALUE, idfaArmor);
 		this.idfaArmor = idfaArmor;
@@ -236,7 +236,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idfaArmorClass;
 	}
 	
-	public DEHMiscallany setIDFAArmorClass(int idfaArmorClass) 
+	public DEHMiscellany setIDFAArmorClass(int idfaArmorClass) 
 	{
 		RangeUtils.checkRange("IDFA Armor Class", 0, Integer.MAX_VALUE, idfaArmorClass);
 		this.idfaArmorClass = idfaArmorClass;
@@ -248,7 +248,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idkfaArmor;
 	}
 	
-	public DEHMiscallany setIDKFAArmor(int idkfaArmor) 
+	public DEHMiscellany setIDKFAArmor(int idkfaArmor) 
 	{
 		RangeUtils.checkRange("IDKFA Armor", 0, Integer.MAX_VALUE, idkfaArmor);
 		this.idkfaArmor = idkfaArmor;
@@ -260,7 +260,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return idkfaArmorClass;
 	}
 	
-	public DEHMiscallany setIDKFAArmorClass(int idkfaArmorClass)
+	public DEHMiscellany setIDKFAArmorClass(int idkfaArmorClass)
 	{
 		RangeUtils.checkRange("IDKFA Armor Class", 0, Integer.MAX_VALUE, idkfaArmorClass);
 		this.idkfaArmorClass = idkfaArmorClass;
@@ -272,7 +272,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxArmor;
 	}
 	
-	public DEHMiscallany setMaxArmor(int maxArmor) 
+	public DEHMiscellany setMaxArmor(int maxArmor) 
 	{
 		RangeUtils.checkRange("Max Armor", 0, Integer.MAX_VALUE, maxArmor);
 		this.maxArmor = maxArmor;
@@ -284,7 +284,7 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 		return maxHealth;
 	}
 	
-	public DEHMiscallany setMaxHealth(int maxHealth) 
+	public DEHMiscellany setMaxHealth(int maxHealth) 
 	{
 		RangeUtils.checkRange("Max health", 0, Integer.MAX_VALUE, maxHealth);
 		this.maxHealth = maxHealth;
@@ -294,12 +294,12 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	@Override
 	public boolean equals(Object obj) 
 	{
-		if (obj instanceof DEHMiscallany)
-			return equals((DEHMiscallany)obj);
+		if (obj instanceof DEHMiscellany)
+			return equals((DEHMiscellany)obj);
 		return super.equals(obj);
 	}
 	
-	public boolean equals(DEHMiscallany obj) 
+	public boolean equals(DEHMiscellany obj) 
 	{
 		return monsterInfightingEnabled == obj.monsterInfightingEnabled
 			&& initialBullets == obj.initialBullets
@@ -321,40 +321,40 @@ public class DEHMiscallany implements DEHObject<DEHMiscallany>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHMiscallany misc) throws IOException
+	public void writeObject(Writer writer, DEHMiscellany misc) throws IOException
 	{
 		if (monsterInfightingEnabled != misc.monsterInfightingEnabled)
-			writer.append("Monsters Infight = ").append(String.valueOf(221)).append('\n');
+			writer.append("Monsters Infight = ").append(String.valueOf(221)).append("\r\n");
 		if (initialBullets != misc.initialBullets)
-			writer.append("Initial Bullets = ").append(String.valueOf(initialBullets)).append('\n');
+			writer.append("Initial Bullets = ").append(String.valueOf(initialBullets)).append("\r\n");
 		if (initialHealth != misc.initialHealth)
-			writer.append("Initial Health = ").append(String.valueOf(initialHealth)).append('\n');
+			writer.append("Initial Health = ").append(String.valueOf(initialHealth)).append("\r\n");
 		if (greenArmorClass != misc.greenArmorClass)
-			writer.append("Green Armor Class = ").append(String.valueOf(greenArmorClass)).append('\n');
+			writer.append("Green Armor Class = ").append(String.valueOf(greenArmorClass)).append("\r\n");
 		if (blueArmorClass != misc.blueArmorClass)
-			writer.append("Blue Armor Class = ").append(String.valueOf(blueArmorClass)).append('\n');
+			writer.append("Blue Armor Class = ").append(String.valueOf(blueArmorClass)).append("\r\n");
 		if (soulsphereHealth != misc.soulsphereHealth)
-			writer.append("Soulsphere Health = ").append(String.valueOf(soulsphereHealth)).append('\n');
+			writer.append("Soulsphere Health = ").append(String.valueOf(soulsphereHealth)).append("\r\n");
 		if (maxSoulsphereHealth != misc.maxSoulsphereHealth)
-			writer.append("Max Soulsphere = ").append(String.valueOf(maxSoulsphereHealth)).append('\n');
+			writer.append("Max Soulsphere = ").append(String.valueOf(maxSoulsphereHealth)).append("\r\n");
 		if (megasphereHealth != misc.megasphereHealth)
-			writer.append("Megasphere Health = ").append(String.valueOf(megasphereHealth)).append('\n');
+			writer.append("Megasphere Health = ").append(String.valueOf(megasphereHealth)).append("\r\n");
 		if (godModeHealth != misc.godModeHealth)
-			writer.append("God Mode Health = ").append(String.valueOf(godModeHealth)).append('\n');
+			writer.append("God Mode Health = ").append(String.valueOf(godModeHealth)).append("\r\n");
 		if (idfaArmor != misc.idfaArmor)
-			writer.append("IDFA Armor = ").append(String.valueOf(idfaArmor)).append('\n');
+			writer.append("IDFA Armor = ").append(String.valueOf(idfaArmor)).append("\r\n");
 		if (idfaArmorClass != misc.idfaArmorClass)
-			writer.append("IDFA Armor Class = ").append(String.valueOf(idfaArmorClass)).append('\n');
+			writer.append("IDFA Armor Class = ").append(String.valueOf(idfaArmorClass)).append("\r\n");
 		if (idkfaArmor != misc.idkfaArmor)
-			writer.append("IDKFA Armor = ").append(String.valueOf(idkfaArmor)).append('\n');
+			writer.append("IDKFA Armor = ").append(String.valueOf(idkfaArmor)).append("\r\n");
 		if (idkfaArmorClass != misc.idkfaArmorClass)
-			writer.append("IDKFA Armor Class = ").append(String.valueOf(idkfaArmorClass)).append('\n');
+			writer.append("IDKFA Armor Class = ").append(String.valueOf(idkfaArmorClass)).append("\r\n");
 		if (bfgCellsPerShot != misc.bfgCellsPerShot)
-			writer.append("BFG Cells/Shot = ").append(String.valueOf(bfgCellsPerShot)).append('\n');
+			writer.append("BFG Cells/Shot = ").append(String.valueOf(bfgCellsPerShot)).append("\r\n");
 		if (maxHealth != misc.maxHealth)
-			writer.append("Max Health = ").append(String.valueOf(maxHealth)).append('\n');
+			writer.append("Max Health = ").append(String.valueOf(maxHealth)).append("\r\n");
 		if (maxArmor != misc.maxArmor)
-			writer.append("Max Armor = ").append(String.valueOf(maxArmor)).append('\n');
+			writer.append("Max Armor = ").append(String.valueOf(maxArmor)).append("\r\n");
 		writer.flush();
 	}
 	

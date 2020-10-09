@@ -118,7 +118,7 @@ public class DEHState implements DEHObject<DEHState>
 	
 	public DEHState setDuration(int duration) 
 	{
-		RangeUtils.checkRange("Duration", 0, 9999, duration);
+		RangeUtils.checkRange("Duration", -1, 9999, duration);
 		this.duration = duration;
 		return this;
 	}
@@ -169,17 +169,17 @@ public class DEHState implements DEHObject<DEHState>
 	public void writeObject(Writer writer, DEHState frame) throws IOException
 	{
 		if (spriteIndex != frame.spriteIndex)
-			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append('\n');
+			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append("\r\n");
 		if (frameIndex != frame.frameIndex)
-			writer.append("Sprite subnumber = ").append(String.valueOf(frameIndex)).append('\n');
+			writer.append("Sprite subnumber = ").append(String.valueOf(frameIndex | (bright ? 0x08000 : 0x00000))).append("\r\n");
 		if (nextStateIndex != frame.nextStateIndex)
-			writer.append("Next frame = ").append(String.valueOf(frameIndex)).append('\n');
+			writer.append("Next frame = ").append(String.valueOf(frameIndex)).append("\r\n");
 		if (duration != frame.duration || bright != frame.bright)
-			writer.append("Duration = ").append(String.valueOf(duration | (bright ? 0x8000 : 0x0000))).append('\n');
+			writer.append("Duration = ").append(String.valueOf(duration)).append("\r\n");
 		if (parameter0 != frame.parameter0)
-			writer.append("Unknown 1 = ").append(String.valueOf(parameter0)).append('\n');
+			writer.append("Unknown 1 = ").append(String.valueOf(parameter0)).append("\r\n");
 		if (parameter1 != frame.parameter1)
-			writer.append("Unknown 2 = ").append(String.valueOf(parameter1)).append('\n');
+			writer.append("Unknown 2 = ").append(String.valueOf(parameter1)).append("\r\n");
 		writer.flush();
 	}
 

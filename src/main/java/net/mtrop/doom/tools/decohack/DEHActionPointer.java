@@ -81,7 +81,7 @@ public enum DEHActionPointer
 	BRAINDIE     (783, "BrainDie"),
 	BRAINAWAKE   (785, "BrainAwake"),
 	BRAINSPIT    (786, "BrainSpit"),
-	SPWANSOUND   (787, "SpawnSound"),
+	SPAWNSOUND   (787, "SpawnSound"),
 	SPAWNFLY     (788, "SpawnFly"),
 	BRAINEXPLODE (801, "BrainExplode"),
 	;

@@ -7,6 +7,7 @@ import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single thing entry.
+ * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
  * @author Matthew Tropiano
  */
 public class DEHThing implements DEHObject<DEHThing>
@@ -45,16 +46,16 @@ public class DEHThing implements DEHObject<DEHThing>
 	/** Raise frame index. */
 	private int raiseFrameIndex;
 
-	/** Alert sound index. */
-	private int seeSoundIndex;
-	/** Attack sound index. */
-	private int attackSoundIndex;
-	/** Pain sound index. */
-	private int painSoundIndex;
-	/** Death sound index. */
-	private int deathSoundIndex;
-	/** Active sound index. */
-	private int activeSoundIndex;
+	/** Alert sound position. */
+	private int seeSoundPosition;
+	/** Attack sound position. */
+	private int attackSoundPosition;
+	/** Pain sound position. */
+	private int painSoundPosition;
+	/** Death sound position. */
+	private int deathSoundPosition;
+	/** Active sound position. */
+	private int activeSoundPosition;
 
 	/**
 	 * Creates a new blank thing.
@@ -82,11 +83,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		setExtremeDeathFrameIndex(FRAME_NULL);
 		setRaiseFrameIndex(FRAME_NULL);
 		
-		setSeeSoundIndex(SOUND_NONE);
-		setAttackSoundIndex(SOUND_NONE);
-		setPainSoundIndex(SOUND_NONE);
-		setDeathSoundIndex(SOUND_NONE);
-		setActiveSoundIndex(SOUND_NONE);
+		setSeeSoundPosition(SOUND_NONE);
+		setAttackSoundPosition(SOUND_NONE);
+		setPainSoundPosition(SOUND_NONE);
+		setDeathSoundPosition(SOUND_NONE);
+		setActiveSoundPosition(SOUND_NONE);
 	}
 
 	@Override
@@ -113,11 +114,11 @@ public class DEHThing implements DEHObject<DEHThing>
 		setExtremeDeathFrameIndex(source.extremeDeathFrameIndex);
 		setRaiseFrameIndex(source.raiseFrameIndex);
 		
-		setSeeSoundIndex(source.seeSoundIndex);
-		setAttackSoundIndex(source.attackSoundIndex);
-		setPainSoundIndex(source.painSoundIndex);
-		setDeathSoundIndex(source.deathSoundIndex);
-		setActiveSoundIndex(source.activeSoundIndex);
+		setSeeSoundPosition(source.seeSoundPosition);
+		setAttackSoundPosition(source.attackSoundPosition);
+		setPainSoundPosition(source.painSoundPosition);
+		setDeathSoundPosition(source.deathSoundPosition);
+		setActiveSoundPosition(source.activeSoundPosition);
 		return this;
 	}
 	
@@ -338,63 +339,63 @@ public class DEHThing implements DEHObject<DEHThing>
 		return this;
 	}
 
-	public int getSeeSoundIndex() 
+	public int getSeeSoundPosition() 
 	{
-		return seeSoundIndex;
+		return seeSoundPosition;
 	}
 
-	public DEHThing setSeeSoundIndex(int alertSoundIndex)
+	public DEHThing setSeeSoundPosition(int seeSoundPosition)
 	{
-		RangeUtils.checkRange("Alert sound index", 0, Integer.MAX_VALUE, alertSoundIndex);
-		this.seeSoundIndex = alertSoundIndex;
+		RangeUtils.checkRange("Alert sound position", 0, Integer.MAX_VALUE, seeSoundPosition);
+		this.seeSoundPosition = seeSoundPosition;
 		return this;
 	}
 
-	public int getAttackSoundIndex()
+	public int getAttackSoundPosition()
 	{
-		return attackSoundIndex;
+		return attackSoundPosition;
 	}
 
-	public DEHThing setAttackSoundIndex(int attackSoundIndex)
+	public DEHThing setAttackSoundPosition(int attackSoundPosition)
 	{
-		RangeUtils.checkRange("Attack sound index", 0, Integer.MAX_VALUE, attackSoundIndex);
-		this.attackSoundIndex = attackSoundIndex;
+		RangeUtils.checkRange("Attack sound position", 0, Integer.MAX_VALUE, attackSoundPosition);
+		this.attackSoundPosition = attackSoundPosition;
 		return this;
 	}
 
-	public int getPainSoundIndex()
+	public int getPainSoundPosition()
 	{
-		return painSoundIndex;
+		return painSoundPosition;
 	}
 
-	public DEHThing setPainSoundIndex(int painSoundIndex) 
+	public DEHThing setPainSoundPosition(int painSoundPosition) 
 	{
-		RangeUtils.checkRange("Pain sound index", 0, Integer.MAX_VALUE, painSoundIndex);
-		this.painSoundIndex = painSoundIndex;
+		RangeUtils.checkRange("Pain sound position", 0, Integer.MAX_VALUE, painSoundPosition);
+		this.painSoundPosition = painSoundPosition;
 		return this;
 	}
 
-	public int getDeathSoundIndex()
+	public int getDeathSoundPosition()
 	{
-		return deathSoundIndex;
+		return deathSoundPosition;
 	}
 
-	public DEHThing setDeathSoundIndex(int deathSoundIndex) 
+	public DEHThing setDeathSoundPosition(int deathSoundPosition) 
 	{
-		RangeUtils.checkRange("Death sound index", 0, Integer.MAX_VALUE, deathSoundIndex);
-		this.deathSoundIndex = deathSoundIndex;
+		RangeUtils.checkRange("Death sound position", 0, Integer.MAX_VALUE, deathSoundPosition);
+		this.deathSoundPosition = deathSoundPosition;
 		return this;
 	}
 
-	public int getActiveSoundIndex()
+	public int getActiveSoundPosition()
 	{
-		return activeSoundIndex;
+		return activeSoundPosition;
 	}
 
-	public DEHThing setActiveSoundIndex(int activeSoundIndex)
+	public DEHThing setActiveSoundPosition(int activeSoundPosition)
 	{
-		RangeUtils.checkRange("Active sound index", 0, Integer.MAX_VALUE, activeSoundIndex);
-		this.activeSoundIndex = activeSoundIndex;
+		RangeUtils.checkRange("Active sound position", 0, Integer.MAX_VALUE, activeSoundPosition);
+		this.activeSoundPosition = activeSoundPosition;
 		return this;
 	}
 
@@ -425,11 +426,11 @@ public class DEHThing implements DEHObject<DEHThing>
 			&& deathFrameIndex == obj.deathFrameIndex
 			&& extremeDeathFrameIndex == obj.extremeDeathFrameIndex
 			&& raiseFrameIndex == obj.raiseFrameIndex
-			&& seeSoundIndex == obj.seeSoundIndex
-			&& activeSoundIndex == obj.activeSoundIndex
-			&& attackSoundIndex == obj.attackSoundIndex
-			&& painSoundIndex == obj.painSoundIndex
-			&& deathSoundIndex == obj.deathSoundIndex
+			&& seeSoundPosition == obj.seeSoundPosition
+			&& activeSoundPosition == obj.activeSoundPosition
+			&& attackSoundPosition == obj.attackSoundPosition
+			&& painSoundPosition == obj.painSoundPosition
+			&& deathSoundPosition == obj.deathSoundPosition
 		;
 	}	
 	
@@ -437,51 +438,51 @@ public class DEHThing implements DEHObject<DEHThing>
 	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
 		if (editorNumber != thing.editorNumber)
-			writer.append("ID # = ").append(String.valueOf(editorNumber)).append('\n');
+			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		if (health != thing.health)
-			writer.append("Hit points = ").append(String.valueOf(health)).append('\n');
+			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");
 		if (speed != thing.speed)
-			writer.append("Speed = ").append(String.valueOf(speed)).append('\n');
+			writer.append("Speed = ").append(String.valueOf(speed)).append("\r\n");
 		if (radius != thing.radius)
-			writer.append("Width = ").append(String.valueOf(radius << 16)).append('\n');
+			writer.append("Width = ").append(String.valueOf(radius << 16)).append("\r\n");
 		if (height != thing.height)
-			writer.append("Height = ").append(String.valueOf(height << 16)).append('\n');
+			writer.append("Height = ").append(String.valueOf(height << 16)).append("\r\n");
 		if (damage != thing.damage)
-			writer.append("Missile damage = ").append(String.valueOf(damage)).append('\n');
+			writer.append("Missile damage = ").append(String.valueOf(damage)).append("\r\n");
 		if (reactionTime != thing.reactionTime)
-			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append('\n');
+			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append("\r\n");
 		if (painChance != thing.painChance)
-			writer.append("Pain chance = ").append(String.valueOf(painChance)).append('\n');
+			writer.append("Pain chance = ").append(String.valueOf(painChance)).append("\r\n");
 		if (mass != thing.mass)
-			writer.append("Mass = ").append(String.valueOf(mass)).append('\n');
+			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 
 		if (spawnFrameIndex != thing.spawnFrameIndex)
-			writer.append("Initial frame = ").append(String.valueOf(spawnFrameIndex)).append('\n');
+			writer.append("Initial frame = ").append(String.valueOf(spawnFrameIndex)).append("\r\n");
 		if (walkFrameIndex != thing.walkFrameIndex)
-			writer.append("First moving frame = ").append(String.valueOf(walkFrameIndex)).append('\n');
+			writer.append("First moving frame = ").append(String.valueOf(walkFrameIndex)).append("\r\n");
 		if (painFrameIndex != thing.painFrameIndex)
-			writer.append("Injury frame = ").append(String.valueOf(painFrameIndex)).append('\n');
+			writer.append("Injury frame = ").append(String.valueOf(painFrameIndex)).append("\r\n");
 		if (meleeFrameIndex != thing.meleeFrameIndex)
-			writer.append("Close attack frame = ").append(String.valueOf(meleeFrameIndex)).append('\n');
+			writer.append("Close attack frame = ").append(String.valueOf(meleeFrameIndex)).append("\r\n");
 		if (missileFrameIndex != thing.missileFrameIndex)
-			writer.append("Far attack frame = ").append(String.valueOf(missileFrameIndex)).append('\n');
+			writer.append("Far attack frame = ").append(String.valueOf(missileFrameIndex)).append("\r\n");
 		if (deathFrameIndex != thing.deathFrameIndex)
-			writer.append("Death frame = ").append(String.valueOf(deathFrameIndex)).append('\n');
+			writer.append("Death frame = ").append(String.valueOf(deathFrameIndex)).append("\r\n");
 		if (extremeDeathFrameIndex != thing.extremeDeathFrameIndex)
-			writer.append("Exploding frame = ").append(String.valueOf(extremeDeathFrameIndex)).append('\n');
+			writer.append("Exploding frame = ").append(String.valueOf(extremeDeathFrameIndex)).append("\r\n");
 		if (raiseFrameIndex != thing.raiseFrameIndex)
-			writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
+			writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append("\r\n");
 
-		if (seeSoundIndex != thing.seeSoundIndex)
-			writer.append("Alert sound = ").append(String.valueOf(seeSoundIndex)).append('\n');
-		if (activeSoundIndex != thing.activeSoundIndex)
-			writer.append("Action sound = ").append(String.valueOf(activeSoundIndex)).append('\n');
-		if (attackSoundIndex != thing.attackSoundIndex)
-			writer.append("Attack sound = ").append(String.valueOf(attackSoundIndex)).append('\n');
-		if (painSoundIndex != thing.painSoundIndex)
-			writer.append("Pain sound = ").append(String.valueOf(painSoundIndex)).append('\n');
-		if (deathSoundIndex != thing.deathSoundIndex)
-			writer.append("Death sound = ").append(String.valueOf(deathSoundIndex)).append('\n');
+		if (seeSoundPosition != thing.seeSoundPosition)
+			writer.append("Alert sound = ").append(String.valueOf(seeSoundPosition)).append("\r\n");
+		if (activeSoundPosition != thing.activeSoundPosition)
+			writer.append("Action sound = ").append(String.valueOf(activeSoundPosition)).append("\r\n");
+		if (attackSoundPosition != thing.attackSoundPosition)
+			writer.append("Attack sound = ").append(String.valueOf(attackSoundPosition)).append("\r\n");
+		if (painSoundPosition != thing.painSoundPosition)
+			writer.append("Pain sound = ").append(String.valueOf(painSoundPosition)).append("\r\n");
+		if (deathSoundPosition != thing.deathSoundPosition)
+			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
 		
 		writer.flush();
 	}

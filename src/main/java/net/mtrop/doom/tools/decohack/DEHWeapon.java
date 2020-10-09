@@ -246,17 +246,17 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public void writeObject(Writer writer, DEHWeapon weapon) throws IOException 
 	{
 		if (ammoType != weapon.ammoType)
-			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append('\n');
+			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append("\r\n");
 		if (raiseFrameIndex != weapon.raiseFrameIndex)
-			writer.append("Select frame = ").append(String.valueOf(raiseFrameIndex)).append('\n');
+			writer.append("Select frame = ").append(String.valueOf(raiseFrameIndex)).append("\r\n");
 		if (lowerFrameIndex != weapon.lowerFrameIndex)
-			writer.append("Deselect frame = ").append(String.valueOf(lowerFrameIndex)).append('\n');
+			writer.append("Deselect frame = ").append(String.valueOf(lowerFrameIndex)).append("\r\n");
 		if (readyFrameIndex != weapon.readyFrameIndex)
-			writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append('\n');
+			writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append("\r\n");
 		if (fireFrameIndex != weapon.fireFrameIndex)
-			writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append('\n');
+			writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append("\r\n");
 		if (flashFrameIndex != weapon.flashFrameIndex)
-			writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append('\n');
+			writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append("\r\n");
 		writer.flush();
 	}
 

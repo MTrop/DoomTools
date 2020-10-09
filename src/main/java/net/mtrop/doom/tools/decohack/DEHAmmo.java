@@ -115,9 +115,9 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	public void writeObject(Writer writer, DEHAmmo ammo) throws IOException
 	{
 		if (max != ammo.max)
-			writer.append("Max ammo = ").append(String.valueOf(max)).append('\n');
+			writer.append("Max ammo = ").append(String.valueOf(max)).append("\r\n");
 		if (pickup != ammo.pickup)
-			writer.append("Per ammo = ").append(String.valueOf(pickup)).append('\n');
+			writer.append("Per ammo = ").append(String.valueOf(pickup)).append("\r\n");
 		writer.flush();
 	}
 

@@ -6,10 +6,25 @@ package net.mtrop.doom.tools.decohack;
  */
 public interface DEHPatch
 {
+	public static final int AMMO_BULLETS = 0;
+	public static final int AMMO_SHELLS  = 1;
+	public static final int AMMO_CELLS   = 2;
+	public static final int AMMO_ROCKETS = 3;
+
+	public static final int WEAPON_FIST           = 0;
+	public static final int WEAPON_PISTOL         = 1;
+	public static final int WEAPON_SHOTGUN        = 2;
+	public static final int WEAPON_CHAINGUN       = 3;
+	public static final int WEAPON_ROCKETLAUNCHER = 4;
+	public static final int WEAPON_PLASMA         = 5;
+	public static final int WEAPON_BFG            = 6;
+	public static final int WEAPON_CHAINSAW       = 7;
+	public static final int WEAPON_SUPERSHOTGUN   = 8;
+	
 	/**
 	 * @return the miscellaneous object.
 	 */
-	DEHMiscallany getMiscellany();
+	DEHMiscellany getMiscellany();
 
 	/**
 	 * @return the amount of ammo definitions.
@@ -64,12 +79,12 @@ public interface DEHPatch
 	Integer getSpriteIndex(String name);
 	
 	/**
-	 * @return the amount of sounds in the patch.
+	 * @return the amount of sound entries.
 	 */
 	int getSoundCount();
 
 	/**
-	 * Gets a sound by a sound index.
+	 * Gets a sound by a sound index (0-based).
 	 * @param index the index.
 	 * @return the corresponding sound.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.

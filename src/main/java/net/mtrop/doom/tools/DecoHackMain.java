@@ -8,6 +8,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 
 /**
  * Main class for DECOHack.
+ * Special thanks to Esselfortium and Exl (for WhackEd4)
  * @author Matthew Tropiano
  */
 public final class DecoHackMain 
