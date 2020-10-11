@@ -22,11 +22,12 @@ public class DEHThing implements DEHObject<DEHThing>
 	
 	private int health;
 	private int speed;
-	private int radius; // stored as fixed point 16.16
-	private int height; // stored as fixed point 16.16
+	private int radius; // written as fixed point 16.16
+	private int height; // written as fixed point 16.16
 	private int damage;
 	private int reactionTime;
 	private int painChance;
+	private int flags;
 	private int mass;
 
 	/** Spawn frame index. */
@@ -72,6 +73,7 @@ public class DEHThing implements DEHObject<DEHThing>
 		setDamage(0);
 		setReactionTime(0);
 		setPainChance(0);
+		setFlags(0x00000000);
 		setMass(0);
 		
 		setSpawnFrameIndex(FRAME_NULL);
@@ -103,6 +105,7 @@ public class DEHThing implements DEHObject<DEHThing>
 		setDamage(source.damage);
 		setReactionTime(source.reactionTime);
 		setPainChance(source.painChance);
+		setFlags(source.flags);
 		setMass(source.mass);
 		
 		setSpawnFrameIndex(source.spawnFrameIndex);
@@ -228,6 +231,17 @@ public class DEHThing implements DEHObject<DEHThing>
 	{
 		RangeUtils.checkRange("Pain chance", 0, 255, painChance);
 		this.painChance = painChance;
+		return this;
+	}
+
+	public int getFlags() 
+	{
+		return flags;
+	}
+
+	public DEHThing setFlags(int bits) 
+	{
+		this.flags = bits;
 		return this;
 	}
 
@@ -417,6 +431,7 @@ public class DEHThing implements DEHObject<DEHThing>
 			&& damage == obj.damage
 			&& reactionTime == obj.reactionTime
 			&& painChance == obj.painChance
+			&& flags == obj.flags
 			&& mass == obj.mass
 			&& spawnFrameIndex == obj.spawnFrameIndex
 			&& walkFrameIndex == obj.walkFrameIndex
@@ -453,6 +468,8 @@ public class DEHThing implements DEHObject<DEHThing>
 			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append("\r\n");
 		if (painChance != thing.painChance)
 			writer.append("Pain chance = ").append(String.valueOf(painChance)).append("\r\n");
+		if (flags != thing.flags)
+			writer.append("Bits = ").append(String.valueOf(flags)).append("\r\n");
 		if (mass != thing.mass)
 			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 

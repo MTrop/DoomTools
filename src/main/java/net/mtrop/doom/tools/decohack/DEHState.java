@@ -24,13 +24,15 @@ public class DEHState implements DEHObject<DEHState>
 	 */
 	public DEHState()
 	{
-		setSpriteIndex(0);
-		setFrameIndex(0);
-		setBright(false);
-		setNextStateIndex(0);
-		setDuration(0);
-		setParameter0(0);
-		setParameter1(0);
+		set(
+			0,
+			0, 
+			false,
+			0, 
+			-1,
+			0,
+			0
+		);
 	}
 	
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
@@ -40,27 +42,45 @@ public class DEHState implements DEHObject<DEHState>
 
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int parameter0, int parameter1)
 	{
-		DEHState out = new DEHState();
-		out.setSpriteIndex(spriteIndex);
-		out.setFrameIndex(frameIndex);
-		out.setBright(bright);
-		out.setNextStateIndex(nextStateIndex);
-		out.setDuration(duration);
-		out.setParameter0(parameter0);
-		out.setParameter1(parameter1);
-		return out;
+		return (new DEHState()).set(
+			spriteIndex,
+			frameIndex, 
+			bright,
+			nextStateIndex, 
+			duration,
+			parameter0,
+			parameter1
+		);
 	}
 
 	@Override
 	public DEHState copyFrom(DEHState source) 
 	{
-		setSpriteIndex(source.spriteIndex);
-		setFrameIndex(source.frameIndex);
-		setBright(source.bright);
-		setNextStateIndex(source.nextStateIndex);
-		setDuration(source.duration);
-		setParameter0(source.parameter0);
-		setParameter1(source.parameter1);
+		return set(
+			source.spriteIndex,
+			source.frameIndex, 
+			source.bright, 
+			source.nextStateIndex, 
+			source.duration, 
+			source.parameter0, 
+			source.parameter1
+		);
+	}
+	
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
+	{
+		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0);
+	}
+	
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int parameter0, int parameter1)
+	{
+		setSpriteIndex(spriteIndex);
+		setFrameIndex(frameIndex);
+		setBright(bright);
+		setNextStateIndex(nextStateIndex);
+		setDuration(duration);
+		setParameter0(parameter0);
+		setParameter1(parameter1);
 		return this;
 	}
 	

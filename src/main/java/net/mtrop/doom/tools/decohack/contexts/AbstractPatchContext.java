@@ -1,0 +1,454 @@
+package net.mtrop.doom.tools.decohack.contexts;
+
+import net.mtrop.doom.tools.decohack.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.DEHAmmo;
+import net.mtrop.doom.tools.decohack.DEHExporter;
+import net.mtrop.doom.tools.decohack.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.DEHPatch;
+import net.mtrop.doom.tools.decohack.DEHSound;
+import net.mtrop.doom.tools.decohack.DEHState;
+import net.mtrop.doom.tools.decohack.DEHThing;
+import net.mtrop.doom.tools.decohack.DEHWeapon;
+
+import java.io.IOException;
+import java.io.Writer;
+
+/**
+ * Patch context for Doom 1.9.
+ * @author Matthew Tropiano
+ * @param <P> DEH patch type.
+ */
+public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPatch, DEHExporter
+{
+	private DEHAmmo[] ammo;
+	private DEHSound[] sounds;
+	private DEHWeapon[] weapons;
+	private DEHThing[] things;
+	private DEHState[] states;
+	private DEHActionPointer[] pointers;
+	private DEHMiscellany miscellany;
+
+	private boolean[] freeStates;
+	private boolean[] protectedStates;
+	
+	/**
+	 * Creates a new Doom v1.9 patch context.
+	 */
+	public AbstractPatchContext()
+	{
+		DEHPatch source = getSourcePatch();
+		
+		this.ammo = new DEHAmmo[source.getAmmoCount()];
+		for (int i = 0; i < this.ammo.length; i++)
+			this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i));
+		
+		this.sounds = new DEHSound[source.getSoundCount()];
+		for (int i = 0; i < this.sounds.length; i++)
+			this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
+		
+		this.weapons = new DEHWeapon[source.getWeaponCount()];
+		for (int i = 0; i < this.sounds.length; i++)
+			this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
+		
+		this.things = new DEHThing[source.getThingCount()];
+		for (int i = 0; i < this.things.length; i++)
+			this.things[i] = (new DEHThing()).copyFrom(source.getThing(i));
+		
+		this.states = new DEHState[source.getStateCount()];
+		for (int i = 0; i < this.states.length; i++)
+			this.states[i] = (new DEHState()).copyFrom(source.getState(i));
+		
+		this.pointers = new DEHActionPointer[source.getActionPointerCount()];
+		for (int i = 0; i < this.pointers.length; i++)
+			this.pointers[i] = source.getActionPointer(i);		
+		
+		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
+		
+		this.freeStates = new boolean[states.length];
+		this.protectedStates = new boolean[states.length];
+		
+		// Protect first two states from clear.
+		setProtectedState(0, true); // NULL state. 
+		setProtectedState(1, true); // Gunflash Light0.
+	}
+	
+	/**
+	 * Gets the original source patch state (for restoration or reference).
+	 * <p><b>DO NOT ALTER THE CONTENTS OF THIS PATCH. THIS IS A REFERENCE STATE.</b> 
+	 * @return the original source patch.
+	 */
+	public abstract P getSourcePatch();
+	
+	@Override
+	public DEHMiscellany getMiscellany() 
+	{
+		return miscellany;
+	}
+
+	@Override
+	public int getAmmoCount() 
+	{
+		return ammo.length;
+	}
+
+	@Override
+	public DEHAmmo getAmmo(int index) 
+	{
+		return ammo[index];
+	}
+
+	@Override
+	public int getSoundCount() 
+	{
+		return sounds.length;
+	}
+
+	@Override
+	public DEHSound getSound(int index)
+	{
+		return sounds[index];
+	}
+
+	@Override
+	public int getThingCount() 
+	{
+		return things.length;
+	}
+
+	@Override
+	public DEHThing getThing(int index)
+	{
+		return things[index];
+	}
+
+	@Override
+	public int getWeaponCount()
+	{
+		return weapons.length;
+	}
+
+	@Override
+	public DEHWeapon getWeapon(int index)
+	{
+		return weapons[index];
+	}
+
+	@Override
+	public int getStateCount()
+	{
+		return states.length;
+	}
+
+	@Override
+	public DEHState getState(int index) 
+	{
+		return states[index];
+	}
+
+	@Override
+	public Integer getStateActionPointerIndex(int stateIndex) 
+	{
+		return getSourcePatch().getStateActionPointerIndex(stateIndex);
+	}
+
+	@Override
+	public int getActionPointerCount() 
+	{
+		return pointers.length;
+	}
+
+	@Override
+	public DEHActionPointer getActionPointer(int index)
+	{
+		return pointers[index];
+	}
+
+	/**
+	 * Gets if a state is flagged as "free".
+	 * @param index the index.
+	 * @return true if so, false if not.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public boolean isFreeState(int index)
+	{
+		return freeStates[index];
+	}
+	
+	/**
+	 * Marks a state as "free" - painting thing/weapon states will be written to these.
+	 * @param index the index to mark as free.
+	 * @param state true to set as "free", false to unset.
+	 * @throws IllegalStateException if the target state is protected.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @see #protectState(int)
+	 */
+	public void setFreeState(int index, boolean state)
+	{
+		if (isProtectedState(index))
+			throw new IllegalStateException("State " + index + " is a protected state.");
+		freeStates[index] = state;
+	}
+	
+	/**
+	 * Gets if a state is flagged as "protected".
+	 * @param index the index.
+	 * @return true if so, false if not.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public boolean isProtectedState(int index)
+	{
+		return protectedStates[index];
+	}
+
+	/**
+	 * Marks a state as "protected" - attempting to free this state will throw
+	 * @param index the index to mark as protected.
+	 * @param state true to set as "protected", false to unset.
+	 */
+	public void setProtectedState(int index, boolean state)
+	{
+		protectedStates[index] = state;
+	}
+
+	/**
+	 * Searches through the states and flags them as "free" until it hits a "protected" or "free" state.
+	 * The state traversal is through the "next state" indices on each state.
+	 * @param startingStateIndex the state index to start from.
+	 * @return the amount of states freed.
+	 */
+	public int freeConnectedStates(int startingStateIndex)
+	{
+		int out = 0;
+		int index = startingStateIndex;
+		while (!isProtectedState(index) && !isFreeState(index))
+		{
+			setFreeState(index, true);
+			index = getState(index).getNextStateIndex();
+			out++;
+		}
+		return out;
+	}
+	
+	/**
+	 * Flags each associated state in a thing as "free".
+	 * Each starting state index is taken from the state that the corresponding thing uses.
+	 * Each connected state (connected via next state indices) is freed until an already free state
+	 * is reached or a protected state is reached. 
+	 * @param thingIndex the thing slot index.
+	 * @return the amount of states freed.
+	 * @see #getThing(int)
+	 * @see #setFreeState(int, boolean)
+	 * @see #freeConnectedStates(int)
+	 */
+	public int freeThingStates(int thingIndex)
+	{
+		int out = 0;
+		DEHThing thing = getThing(thingIndex);
+		out += freeConnectedStates(thing.getSpawnFrameIndex());
+		out += freeConnectedStates(thing.getWalkFrameIndex());
+		out += freeConnectedStates(thing.getPainFrameIndex());
+		out += freeConnectedStates(thing.getMeleeFrameIndex());
+		out += freeConnectedStates(thing.getMissileFrameIndex());
+		out += freeConnectedStates(thing.getDeathFrameIndex());
+		out += freeConnectedStates(thing.getExtremeDeathFrameIndex());
+		out += freeConnectedStates(thing.getRaiseFrameIndex());
+		return out;
+	}
+	
+	/**
+	 * Flags each associated state in a weapon as "free".
+	 * Each starting state index is taken from the state that the corresponding weapon uses.
+	 * Each connected state (connected via next state indices) is freed until an already free state
+	 * is reached or a protected state is reached. 
+	 * @param weaponIndex the thing slot index.
+	 * @return the amount of states freed.
+	 * @see #getWeapon(int)
+	 * @see #setFreeState(int, boolean)
+	 * @see #freeConnectedStates(int)
+	 */
+	public int freeWeaponStates(int weaponIndex)
+	{
+		int out = 0;
+		DEHWeapon weapon = getWeapon(weaponIndex);
+		out += freeConnectedStates(weapon.getRaiseFrameIndex());
+		out += freeConnectedStates(weapon.getLowerFrameIndex());
+		out += freeConnectedStates(weapon.getReadyFrameIndex());
+		out += freeConnectedStates(weapon.getFireFrameIndex());
+		out += freeConnectedStates(weapon.getFlashFrameIndex());
+		return out;
+	}
+	
+	/**
+	 * Searches linearly for the next free state in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free state, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeState(int startingIndex)
+	{
+		int i = startingIndex;
+		while (!isFreeState(i))
+		{
+			i++;
+			if (i == startingIndex)
+				return null;
+			if (i >= getStateCount())
+				i = 0;
+		}
+		return i;
+	}
+	
+	/**
+	 * Searches linearly for the next free state with an action pointer in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free state, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeActionPointerState(int startingIndex)
+	{
+		int i = startingIndex;
+		while (!isFreeState(i) && getStateActionPointerIndex(i) != null)
+		{
+			i++;
+			if (i == startingIndex)
+				return null;
+			if (i >= getStateCount())
+				i = 0;
+		}
+		return i;
+	}
+	
+	/**
+	 * Writes the patch header.
+	 * @param writer the output writer.
+	 * @param comment a comment line.
+	 * @param version the patch version.
+	 * @param formatNumber the patch format number.
+	 * @throws IOException if a write error occurs.
+	 */
+	protected void writePatchHeader(Writer writer, String comment, int version, int formatNumber) throws IOException
+	{
+		// Header
+		writer.append("Patch File for DeHackEd v3.0").append("\r\n");
+		
+		// Comment Blurb
+		writer.append("# ").append(comment).append("\r\n");
+		writer.append("# Note: Use the pound sign ('#') to start comment lines.").append("\r\n");
+		writer.append("\r\n");
+
+		// Version
+		writer.append("Doom version = " + version).append("\r\n");
+		writer.append("Patch format = " + formatNumber).append("\r\n");
+		writer.append("\r\n");
+		writer.append("\r\n");
+		writer.flush();
+	}
+	
+	/**
+	 * Writes the common patch body.
+	 * @param writer the output writer.
+	 * @throws IOException if a write error occurs.
+	 */
+	protected void writePatchBody(Writer writer) throws IOException
+	{
+		for (int i = 0; i < getThingCount(); i++)
+		{
+			DEHThing thing = getThing(i);
+			DEHThing original = getSourcePatch().getThing(i);
+			if (!thing.equals(original))
+			{
+				writer.append("Thing ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(thing.getName()))
+					.append(")")
+					.append("\r\n");
+				thing.writeObject(writer, original);
+				writer.append("\r\n");
+			}
+		}
+		writer.flush();
+
+		for (int i = 0; i < getStateCount(); i++)
+		{
+			DEHState state = getState(i);
+			DEHState original = getSourcePatch().getState(i);
+			if (!state.equals(original))
+			{
+				writer.append("Frame ").append(String.valueOf(i)).append("\r\n");
+				state.writeObject(writer, original);
+				writer.append("\r\n");
+			}
+		}
+		writer.flush();
+
+		for (int i = 0; i < getSoundCount(); i++)
+		{
+			DEHSound sound = getSound(i);
+			DEHSound original = getSourcePatch().getSound(i);
+			if (!sound.equals(original))
+			{
+				writer.append("Sound ").append(String.valueOf(i)).append("\r\n");
+				sound.writeObject(writer, original);
+				writer.append("\r\n");
+			}
+		}
+		writer.flush();
+
+		for (int i = 0; i < getWeaponCount(); i++)
+		{
+			DEHWeapon weapon = getWeapon(i);
+			DEHWeapon original = getSourcePatch().getWeapon(i);
+			if (!weapon.equals(original))
+			{
+				writer.append("Weapon ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(weapon.getName()))
+					.append(")")
+					.append("\r\n");
+				weapon.writeObject(writer, original);
+				writer.append("\r\n");
+			}
+		}
+		writer.flush();
+
+		for (int i = 0; i < getAmmoCount(); i++)
+		{
+			DEHAmmo ammo = getAmmo(i);
+			DEHAmmo original = getSourcePatch().getAmmo(i);
+			if (!ammo.equals(original))
+			{
+				writer.append("Ammo ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(ammo.getName()))
+					.append(")")
+					.append("\r\n");
+				ammo.writeObject(writer, original);
+				writer.append("\r\n");
+			}
+		}
+		writer.flush();
+
+		DEHMiscellany misc = getMiscellany();
+		DEHMiscellany miscOriginal = getSourcePatch().getMiscellany();
+		if (!misc.equals(miscOriginal))
+		{
+			writer.append("Misc ").append(String.valueOf(0)).append("\r\n");
+			misc.writeObject(writer, miscOriginal);
+			writer.append("\r\n");
+		}
+		writer.flush();
+	}
+	
+	@Override
+	public void writePatch(Writer writer, String comment) throws IOException
+	{
+		writePatchHeader(writer, comment, 19, 6);
+		writePatchBody(writer);
+	}
+	
+}

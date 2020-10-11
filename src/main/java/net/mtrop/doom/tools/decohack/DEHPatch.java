@@ -41,35 +41,11 @@ public interface DEHPatch
 	DEHAmmo getAmmo(int index);
 	
 	/**
-	 * @return the amount of strings.
-	 */
-	int getStringCount();
-	
-	/**
-	 * Gets a string.
-	 * @param index the index.
-	 * @return the corresponding string.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
-	 * @see #getStringCount() 
-	 */
-	String getString(int index);
-	
-	/**
-	 * @return the string offset for sound names, or null if not supported.
-	 */
-	Integer getSoundStringIndex();
-	
-	/**
 	 * Gets the matching sound index for a sound name.
 	 * @param name the sound name.
 	 * @return the sound index, or null if no match.
 	 */
 	Integer getSoundIndex(String name);
-	
-	/**
-	 * @return the string offset for sprite names, or null if not supported.
-	 */
-	Integer getSpriteStringIndex();
 	
 	/**
 	 * Gets the matching sprite index for a sprite name.

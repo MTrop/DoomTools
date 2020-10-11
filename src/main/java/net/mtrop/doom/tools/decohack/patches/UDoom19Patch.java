@@ -3,7 +3,7 @@ package net.mtrop.doom.tools.decohack.patches;
 import net.mtrop.doom.tools.decohack.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.DEHAmmo;
 import net.mtrop.doom.tools.decohack.DEHMiscellany;
-import net.mtrop.doom.tools.decohack.DEHPatch;
+import net.mtrop.doom.tools.decohack.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.DEHSound;
 import net.mtrop.doom.tools.decohack.DEHState;
 import net.mtrop.doom.tools.decohack.DEHThing;
@@ -20,7 +20,7 @@ import java.util.Map;
  * Biggest difference to {@link Doom19Patch} is the string table.
  * @author Matthew Tropiano
  */
-public class UDoom19Patch implements DEHPatch
+public class UDoom19Patch implements DEHPatchDoom19
 {
 	public static final int STRING_INDEX_SOUNDS  = 842;
 	public static final int STRING_INDEX_SPRITES = 954;
@@ -1174,21 +1174,9 @@ public class UDoom19Patch implements DEHPatch
 	}
 
 	@Override
-	public Integer getSoundStringIndex()
-	{
-		return STRING_INDEX_SOUNDS;
-	}
-
-	@Override
 	public Integer getSoundIndex(String name)
 	{
 		return MAP_SOUNDINDEX.get(name.toUpperCase());
-	}
-
-	@Override
-	public Integer getSpriteStringIndex()
-	{
-		return STRING_INDEX_SPRITES;
 	}
 
 	@Override
@@ -1261,6 +1249,12 @@ public class UDoom19Patch implements DEHPatch
 	public DEHActionPointer getActionPointer(int index)
 	{
 		return DEHPOINTER[index];
+	}
+
+	@Override
+	public int getActionPointerFrame(int index)
+	{
+		return DEHPOINTERFRAME[index];
 	}
 
 }

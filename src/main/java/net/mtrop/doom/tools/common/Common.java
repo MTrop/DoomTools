@@ -224,4 +224,49 @@ public final class Common
 		try { c.close(); } catch (Exception e){}
 	}
 
+	/**
+	 * Makes a new String with escape sequences in it.
+	 * @param s	the original string.
+	 * @return the new one with escape sequences in it.
+	 */
+	public static String withEscChars(String s)
+	{
+		StringBuilder out = new StringBuilder();
+		for (int i = 0; i < s.length(); i++)
+			switch (s.charAt(i))
+			{
+				case '\0':
+					out.append("\\0");
+					break;
+				case '\b':
+					out.append("\\b");
+					break;
+				case '\t':
+					out.append("\\t");
+					break;
+				case '\n':
+					out.append("\\n");
+					break;
+				case '\f':
+					out.append("\\f");
+					break;
+				case '\r':
+					out.append("\\r");
+					break;
+				case '\\':
+					out.append("\\\\");
+					break;
+				case '"':
+					if (i != 0 && i != s.length() - 1)
+						out.append("\\\"");						
+					else
+						out.append("\"");
+					break;
+				default:
+					out.append(s.charAt(i));
+					break;
+			}
+		return out.toString();
+	}
+
 }
