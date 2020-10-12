@@ -137,8 +137,6 @@ in a sprite frame. <NUMBER> is the duration in tics. Action pointer mnemonics
 must start with A_ and, if Doom 1.9, MUST be present if it replaces a frame 
 that had an action pointer.
 
-You may NOT change a "protected" state. The only states that start "protected"
-are state 0 and 1.
 
 Examples:
 
@@ -178,6 +176,7 @@ replacement. To free an explicit range (inclusive):
 
 	free state <INTEGER> [ to <INTEGER> ]
 
+
 Examples:
 
 	free state 100
@@ -186,7 +185,8 @@ Examples:
 
 Then, you can fill a sequence of states starting from a specific state, and
 free states will be auto-filled by availability, connected together in 
-sequence.
+sequence. Be careful: it may fail with an error if you run out of available
+states (especially action pointer states in Doom 1.9).
 
 	state fill <INTEGER> 
 	{ 
@@ -201,7 +201,7 @@ sequence.
 
 Examples:
 	
-	state fill 200
+	state fill 714
 	{
 		PAIN H 8 Bright
 		PAIN I 8 Bright A_Scream
@@ -210,4 +210,20 @@ Examples:
 		PAIN M 8 Bright
 		stop
 	}
+
+Each state altered or filled this way is no longer "free."
+
+You can protect a state from being freed (or an inclusive range of them) by 
+writing the following:
+
+	protect state <INTEGER>
+	protect state <INTEGER> to <INTEGER>
+
+It will not be flagged as free if in a range of free states, and attempting to
+alter the state will throw an error. By default, state 0 and 1 are flagged as 
+protected. You can turn off the protection on states by doing the following:
+
+	unprotect state <INTEGER>
+	unprotect state <INTEGER> to <INTEGER>
+
 
