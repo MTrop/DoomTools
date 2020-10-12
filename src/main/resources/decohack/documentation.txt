@@ -1,0 +1,213 @@
+DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or 
+BEX patch.
+
+Language Specs
+==============
+
+<BOOLEAN> : true
+            false
+
+<IDENTIFIER> : Alphanumeric-plus-underscores token (starting with a letter).
+
+<STRING> : Any single- or double-quoted set of characters, or a raw string 
+           bounded in backticks.
+
+<NUMBER> : <INTEGER>
+           - <INTEGER>
+           + <INTEGER> 
+
+<INTEGER> : Any positive integer, or hex integer. 
+
+
+Format
+======
+
+To set the output format:
+
+	using ( doom19 | udoom19 | boom )
+
+Examples:
+
+	using doom19
+	using boom
+
+
+
+Strings
+=======
+
+Reassigns a set of strings. Any strings replaced here can carry through to 
+sprite names and sound names!
+
+Doom 1.9:
+
+    strings
+	{
+		<INTEGER> <STRING>
+		...
+	}
+
+
+Boom:
+
+	strings
+	{
+		<IDENTIFIER> <STRING>
+		...
+	}
+
+
+The Identifier in the Boom definition is the string mnemonic from the Boom 
+DeHackEd specs. 
+
+
+Ammo
+====
+
+Changes an ammo entry. `ammo` plus an index/type name, and an optional string 
+for the new name. 
+
+	ammo ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells ) <STRING>
+	{
+		max <INTEGER>
+		pickup <INTEGER>
+	}
+
+
+Examples:
+
+	ammo 0 "Splinters"
+	{
+		max 300
+		pickup 20
+	}
+	
+	ammo cells
+	{
+		max 5000
+		pickup 100
+	}
+
+
+Sound
+=====
+
+Changes a sound entry. `sound` plus the sound index/name. The sound name must 
+match a sound string in the string table (should not start with DS or DP). 
+
+	sound ( <INTEGER> | <STRING> )
+	{
+		priority <INTEGER>
+		singular <BOOLEAN>
+	}
+
+
+Examples:
+
+	sound 5
+	{
+		priority 200
+		singular true
+	}
+
+	sound "barexp"
+	{
+		priority 200
+		singular true
+	}
+
+
+States
+======
+
+Individual states can be manipulated and/or changed, but be careful - 
+individual state manipulation should only be reserved for very few kinds of 
+changes.
+
+	state <INTEGER> 
+	{ 
+		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
+		( goto <INTEGER> | wait | stop )
+	}
+
+In this case, "stop" is an alias for "goto 0", and "wait" is an alias for 
+"goto <same state>". <SpriteName> must match a sprite name in the string 
+table at the time this is declared. <Frame> must be a single valid character 
+in a sprite frame. <NUMBER> is the duration in tics. Action pointer mnemonics 
+must start with A_ and, if Doom 1.9, MUST be present if it replaces a frame 
+that had an action pointer.
+
+You may NOT change a "protected" state. The only states that start "protected"
+are state 0 and 1.
+
+Examples:
+
+	state 11
+	{
+		PISG A 1 A_Lower
+		wait
+	}
+
+	state 15
+	{
+		PISG C 4
+		goto 16
+	}
+
+	state 17
+	{
+		PISF A 7 Bright A_Light1
+		goto 1
+	}
+
+	state 173
+	{
+		PLAY W -1
+		stop
+	}
+	
+	state 911
+	{
+		CAND A -1 Bright
+		stop
+	}
+
+
+For replacing states in bulk, you will have to "free" a bunch of states for
+replacement. To free an explicit range (inclusive):
+
+	free state <INTEGER> [ to <INTEGER> ]
+
+Examples:
+
+	free state 100
+	free state 100 to 200
+
+
+Then, you can fill a sequence of states starting from a specific state, and
+free states will be auto-filled by availability, connected together in 
+sequence.
+
+	state fill <INTEGER> 
+	{ 
+		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
+		...
+		( goto <INTEGER> | wait | stop )
+	}
+
+
+<Frame> in this situation can be many valid characters in a sprite frame. 
+
+
+Examples:
+	
+	state fill 200
+	{
+		PAIN H 8 Bright
+		PAIN I 8 Bright A_Scream
+		PAIN JK 8 Bright
+		PAIN L 8 Bright A_PainDie
+		PAIN M 8 Bright
+		stop
+	}
+

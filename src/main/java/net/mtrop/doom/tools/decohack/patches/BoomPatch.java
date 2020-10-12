@@ -295,6 +295,81 @@ public class BoomPatch implements DEHPatchBoom
 		}
 	};
 	
+	private static final Map<EpisodeMap, Integer> MAP_PARS = new HashMap<EpisodeMap, Integer>()
+	{
+		private static final long serialVersionUID = -7194135744791190357L;
+		{
+			put(EpisodeMap.create(1, 1), 30);
+			put(EpisodeMap.create(1, 2), 75);
+			put(EpisodeMap.create(1, 3), 120);
+			put(EpisodeMap.create(1, 4), 90);
+			put(EpisodeMap.create(1, 5), 165);
+			put(EpisodeMap.create(1, 6), 180);
+			put(EpisodeMap.create(1, 7), 180);
+			put(EpisodeMap.create(1, 8), 165);
+			put(EpisodeMap.create(1, 9), 165);
+			put(EpisodeMap.create(2, 1), 90);
+			put(EpisodeMap.create(2, 2), 90);
+			put(EpisodeMap.create(2, 3), 90);
+			put(EpisodeMap.create(2, 4), 120);
+			put(EpisodeMap.create(2, 5), 90);
+			put(EpisodeMap.create(2, 6), 360);
+			put(EpisodeMap.create(2, 7), 240);
+			put(EpisodeMap.create(2, 8), 135);
+			put(EpisodeMap.create(2, 9), 170);
+			put(EpisodeMap.create(3, 1), 90);
+			put(EpisodeMap.create(3, 2), 45);
+			put(EpisodeMap.create(3, 3), 90);
+			put(EpisodeMap.create(3, 4), 150);
+			put(EpisodeMap.create(3, 5), 90);
+			put(EpisodeMap.create(3, 6), 90);
+			put(EpisodeMap.create(3, 7), 165);
+			put(EpisodeMap.create(3, 8), 105);
+			put(EpisodeMap.create(3, 9), 135);
+			put(EpisodeMap.create(4, 1), 165);
+			put(EpisodeMap.create(4, 2), 255);
+			put(EpisodeMap.create(4, 3), 135);
+			put(EpisodeMap.create(4, 4), 150);
+			put(EpisodeMap.create(4, 5), 180);
+			put(EpisodeMap.create(4, 6), 390);
+			put(EpisodeMap.create(4, 7), 135);
+			put(EpisodeMap.create(4, 8), 360);
+			put(EpisodeMap.create(4, 9), 180);
+			put(EpisodeMap.create(0, 1), 30);
+			put(EpisodeMap.create(0, 2), 90);
+			put(EpisodeMap.create(0, 3), 120);
+			put(EpisodeMap.create(0, 4), 120);
+			put(EpisodeMap.create(0, 5), 90);
+			put(EpisodeMap.create(0, 6), 150);
+			put(EpisodeMap.create(0, 7), 120);
+			put(EpisodeMap.create(0, 8), 120);
+			put(EpisodeMap.create(0, 9), 270);
+			put(EpisodeMap.create(0, 10), 90);
+			put(EpisodeMap.create(0, 11), 210);
+			put(EpisodeMap.create(0, 12), 150);
+			put(EpisodeMap.create(0, 13), 150);
+			put(EpisodeMap.create(0, 14), 150);
+			put(EpisodeMap.create(0, 15), 210);
+			put(EpisodeMap.create(0, 16), 150);
+			put(EpisodeMap.create(0, 17), 420);
+			put(EpisodeMap.create(0, 18), 150);
+			put(EpisodeMap.create(0, 19), 210);
+			put(EpisodeMap.create(0, 20), 150);
+			put(EpisodeMap.create(0, 21), 240);
+			put(EpisodeMap.create(0, 22), 150);
+			put(EpisodeMap.create(0, 23), 180);
+			put(EpisodeMap.create(0, 24), 150);
+			put(EpisodeMap.create(0, 25), 150);
+			put(EpisodeMap.create(0, 26), 300);
+			put(EpisodeMap.create(0, 27), 350);
+			put(EpisodeMap.create(0, 28), 420);
+			put(EpisodeMap.create(0, 29), 300);
+			put(EpisodeMap.create(0, 30), 180);
+			put(EpisodeMap.create(0, 31), 120);
+			put(EpisodeMap.create(0, 32), 30);
+		}
+	};
+	
 	private static final Map<String, String> MAP_STRINGS = new HashMap<String, String>()
 	{
 		private static final long serialVersionUID = 7194135744791190357L;
@@ -719,6 +794,18 @@ public class BoomPatch implements DEHPatchBoom
 	public DEHActionPointer getActionPointer(int index)
 	{
 		return DEHSTATE[index].getPointer();
+	}
+
+	@Override
+	public Set<EpisodeMap> getParEntries()
+	{
+		return MAP_PARS.keySet();
+	}
+
+	@Override
+	public Integer getParSeconds(EpisodeMap episodeMap) 
+	{
+		return MAP_PARS.get(episodeMap);
 	}
 
 }

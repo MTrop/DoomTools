@@ -205,7 +205,7 @@ public class DEHThing implements DEHObject<DEHThing>
 
 	public DEHThing setDamage(int damage) 
 	{
-		RangeUtils.checkRange("Damage", 0, 999999, damage);
+		RangeUtils.checkRange("Damage", -999999, 999999, damage);
 		this.damage = damage;
 		return this;
 	}

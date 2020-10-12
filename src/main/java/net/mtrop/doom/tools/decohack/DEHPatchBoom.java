@@ -9,6 +9,63 @@ import java.util.Set;
 public interface DEHPatchBoom extends DEHPatch
 {
 	/**
+	 * Episode map.
+	 */
+	public static class EpisodeMap implements Comparable<EpisodeMap>
+	{
+		private int episode;
+		private int map;
+		
+		private EpisodeMap(int episode, int map)
+		{
+			this.episode = episode;
+			this.map = map;
+		}
+		
+		public static EpisodeMap create(int episode, int map)
+		{
+			return new EpisodeMap(episode, map);
+		}
+
+		public int getEpisode() 
+		{
+			return episode;
+		}
+		
+		public int getMap() 
+		{
+			return map;
+		}
+
+		@Override
+		public boolean equals(Object obj) 
+		{
+			if (obj instanceof EpisodeMap)
+				return equals((EpisodeMap)obj);
+			return super.equals(obj);
+		}
+
+		public boolean equals(EpisodeMap obj) 
+		{
+			return episode == obj.episode
+				&& map == obj.map
+			;
+		}
+		
+		@Override
+		public int hashCode() 
+		{
+			return Integer.hashCode(episode) << 5 ^ Integer.hashCode(map);
+		}
+
+		@Override
+		public int compareTo(EpisodeMap episodeMap)
+		{
+			return episode == episodeMap.episode ? map - episodeMap.map : episode - episodeMap.episode;
+		}
+	}
+	
+	/**
 	 * Gets a string by its macro key.
 	 * @param key the key.
 	 * @return the corresponding string.
@@ -19,5 +76,38 @@ public interface DEHPatchBoom extends DEHPatch
 	 * @return all possible string lookup keys.
 	 */
 	Set<String> getStringKeys();
-	
+
+	/**
+	 * @return all added par entries.
+	 */
+	Set<EpisodeMap> getParEntries();
+
+	/**
+	 * Gets par time seconds.
+	 * @param map the map number.
+	 * @return the seconds.
+	 */
+	default Integer getParSeconds(int map)
+	{
+		return getParSeconds(0, map);
+	}
+
+	/**
+	 * Gets par time seconds.
+	 * @param episode the episode number.
+	 * @param map the map number.
+	 * @return the seconds.
+	 */
+	default Integer getParSeconds(int episode, int map)
+	{
+		return getParSeconds(EpisodeMap.create(episode, map));
+	}
+
+	/**
+	 * Gets par time seconds.
+	 * @param episodeMap the episode map number.
+	 * @return the seconds.
+	 */
+	Integer getParSeconds(EpisodeMap episodeMap);
+
 }

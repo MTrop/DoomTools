@@ -771,7 +771,7 @@ Preprocessor directives must occupy a line - the directive plus parameters are t
 
 The #include directive includes the contents of the specified file. The filename is provided as a string parameter, and can either be a relative file path from the file that contains the directive or an absolute path. Files can be included more than once - use this with caution!
 
-NOTE: The Java implementation of the compiler can also resolve resources off of the classpath by prefixing the path string with classpath:. The include behavior can also be replaced entirely in the Java implementation.
+NOTE: The Java implementation of the compiler can also resolve resources off of the classpath by prefixing the path string with `classpath:`. The include behavior can also be replaced entirely in the Java implementation.
 
 
 	#include "util.rscript"
