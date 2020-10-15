@@ -435,14 +435,14 @@ Example:
 			Death:
 				CPOS H 5
 				CPOS I 5 A_Scream
-				CPOS J 5 A_NoBlocking
+				CPOS J 5 A_Fall
 				CPOS KLM 5
 				CPOS N -1
 				Stop
 			XDeath:
 				CPOS O 5 
 				CPOS P 5 A_XScream
-				CPOS Q 5 A_NoBlocking
+				CPOS Q 5 A_Fall
 				CPOS RS 5
 				CPOS T -1
 				Stop
@@ -490,4 +490,13 @@ Miscellaneous data is in the miscellaneous block:
 		maxHealth <INTEGER>
 		maxArmor <INTEGER>
 	}
+
+
+Par Times
+=========
+
+Only for certain patch formats (Boom-compatible), Par Times are declared this way:
+
+	par <INTEGER> <INTEGER> // Doom 2
+	par <INTEGER> <INTEGER> <INTEGER> // Doom 1
 
