@@ -27,6 +27,9 @@ Frame 799:
 Frame 895:
 	All actors jump to this when crushed.
 
+Chaingun Muzzle Flash:
+	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun.
+
 Plasma Muzzle Flash:
 	The plasma rifle's muzzle flash is called at random between the [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
 
@@ -178,6 +181,9 @@ Teleport Destination (Slot 42)
 
 BFG Tracer (Slot 43) 
 	Spawned by tracer hitscans from A_BFGSpray.
+
+Teleport Exit (Slot 44) 
+	Teleporter exit special spot.
 
 Ammo Clip (Slot 64)
 	Created on Trooper's (Slot 2) death with a DROPPED flag. 

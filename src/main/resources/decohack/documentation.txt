@@ -1,22 +1,27 @@
+DECOHACK
+========
+
 DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or 
-BEX patch.
+BEX patch. You should probably read up on the DECORATE format before you 
+proceed. 
+
 
 Language Specs
 ==============
 
-<BOOLEAN> : true
-            false
+<BOOLEAN>    : true
+               false
 
 <IDENTIFIER> : Alphanumeric-plus-underscores token (starting with a letter).
 
-<STRING> : Any single- or double-quoted set of characters, or a raw string 
-           bounded in backticks.
+<STRING>     : Any single- or double-quoted set of characters, or a raw string 
+               bounded in backticks.
 
-<NUMBER> : <INTEGER>
-           - <INTEGER>
-           + <INTEGER> 
+<INTEGER>    : Any positive integer, or hex integer. 
 
-<INTEGER> : Any positive integer, or hex integer. 
+<NUMBER>     : <INTEGER>
+               - <INTEGER>
+               + <INTEGER> 
 
 
 Format
@@ -26,11 +31,11 @@ To set the output format:
 
 	using ( doom19 | udoom19 | boom )
 
+
 Examples:
 
 	using doom19
 	using boom
-
 
 
 Strings
@@ -127,16 +132,15 @@ changes.
 	state <INTEGER> 
 	{ 
 		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
-		( goto <INTEGER> | wait | stop )
+		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] | wait | stop )
 	}
+
 
 In this case, "stop" is an alias for "goto 0", and "wait" is an alias for 
 "goto <same state>". <SpriteName> must match a sprite name in the string 
 table at the time this is declared. <Frame> must be a single valid character 
 in a sprite frame. <NUMBER> is the duration in tics. Action pointer mnemonics 
-must start with A_ and, if Doom 1.9, MUST be present if it replaces a frame 
-that had an action pointer.
-
+must start with A_.
 
 Examples:
 
@@ -172,15 +176,27 @@ Examples:
 
 
 For replacing states in bulk, you will have to "free" a bunch of states for
-replacement. To free an explicit range (inclusive):
+replacement.
 
-	free state <INTEGER> [ to <INTEGER> ]
+	free state <INTEGER>
+
+
+To free an explicit range (inclusive):
+
+	free state <INTEGER> to <INTEGER>
+
+
+To free from a starting state index until a free or protected state is 
+reached, following next state indices:
+
+	free from state <INTEGER>
 
 
 Examples:
 
 	free state 100
 	free state 100 to 200
+	free from state 100
 
 
 Then, you can fill a sequence of states starting from a specific state, and
@@ -192,7 +208,7 @@ states (especially action pointer states in Doom 1.9).
 	{ 
 		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
 		...
-		( goto <INTEGER> | wait | stop )
+		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] | wait | stop )
 	}
 
 
@@ -211,6 +227,7 @@ Examples:
 		stop
 	}
 
+
 Each state altered or filled this way is no longer "free."
 
 You can protect a state from being freed (or an inclusive range of them) by 
@@ -219,6 +236,7 @@ writing the following:
 	protect state <INTEGER>
 	protect state <INTEGER> to <INTEGER>
 
+
 It will not be flagged as free if in a range of free states, and attempting to
 alter the state will throw an error. By default, state 0 and 1 are flagged as 
 protected. You can turn off the protection on states by doing the following:
@@ -226,4 +244,250 @@ protected. You can turn off the protection on states by doing the following:
 	unprotect state <INTEGER>
 	unprotect state <INTEGER> to <INTEGER>
 
+
+Weapon
+======
+
+Weapons are a combination of state filling and attribute declaration. All
+definitions are cumulative on the weapon slot (separate definitions can alter 
+the same slot in different ways).
+
+The only field recognized is AmmoType.
+
+Ready, Select, Deselect, Fire, and Flash state labels set the weapon action 
+indices. Other labels are used for arbitrary jump points. "LightDone" is an 
+alias for frame 1.
+
+"Spawn" is not used, as that is used for the Thing for pickups.
+
+	weapon <INTEGER> <STRING>
+	{
+		ammotype ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells | <STRING> )
+		states
+		{
+			ready:
+				<StateInfo>
+				...
+			deselect:
+				<StateInfo>
+				...
+			select:
+				<StateInfo>
+				...
+			fire:
+				<StateInfo>
+				...
+			flash:
+				<StateInfo>
+				...
+		}
+	}
+
+
+Example:
+
+	weapon 3 "Chaingun"
+	{
+		ammotype bullets
+		states
+		{
+			ready:
+				CHGG A 1 A_WeaponReady
+				loop
+			deselect:
+				CHGG A 1 A_Lower
+				loop
+			select:
+				CHGG A 1 A_Raise
+				loop
+			fire:
+				CHGG AB 4 A_FireCGun
+				CHGG B 0 A_ReFire
+				goto ready
+			flash:
+				CHGF A 5 Bright A_Light1
+				goto lightdone
+				CHGF B 5 Bright A_Light1
+				goto lightdone
+		}
+	}
+
+
+To clear all states connected to a weapon, type the following:
+
+	free weapon <INTEGER> states
+	free weapon <INTEGER> <StateName> states
+
+
+And the same result will happen if you freed from each defined weapon frame 
+individually. Best used before redefining a weapon.
+
+
+Thing
+=====
+
+Things are a combination of state filling and attribute declaration. All
+definitions are cumulative on the thing slot (separate definitions can alter 
+the same slot in different ways).
+
+Spawn, See, Melee, Missile, , and Flash state labels set the weapon action 
+indices. Other labels are used for arbitrary jump points.
+
+	thing <INTEGER> <STRING>
+	{
+		EdNum <NUMBER>
+		
+		Health <NUMBER>
+		Speed <NUMBER>
+		Radius <INTEGER>
+		Height <INTEGER>
+		Damage <NUMBER>
+		ReactionTime <INTEGER>
+		PainChance <INTEGER>
+		Mass <INTEGER>
+	
+		Flags <INTEGER>
+	
+		Monster     // alias for Flags [monsterflags]
+		Projectile  // alias for Flags [projectileflags]
+		+ <INTEGER> // set flag
+		- <INTEGER> // unset flag
+	
+		clear sounds // if present, clear all sounds.
+			
+		SeeSound <STRING>
+		AttackSound <STRING>
+		PainSound <STRING>
+		DeathSound <STRING>
+		ActiveSound <STRING>
+		
+		clear states // if present, clear all state indices.
+		
+		states
+		{
+			spawn:
+				<StateInfo>
+				...
+			see:
+				<StateInfo>
+				...
+			missile:
+				<StateInfo>
+				...
+			pain:
+				<StateInfo>
+				...
+			death:
+				<StateInfo>
+				...
+			xdeath:
+				<StateInfo>
+				...
+			raise:
+				<StateInfo>
+				...
+		}
+	}
+
+
+Example:
+
+	thing 11 "Chaingun Sargeant"
+	{
+		EdNum 65
+		
+		Health 70
+		Speed 8
+		Radius 20
+		Height 56
+		Damage 0
+		ReactionTime 8
+		PainChance 170
+		Mass 100
+	
+		Monster
+		+FLOORCLIP
+	
+		SeeSound "posit2"
+		AttackSound ""
+		PainSound "popain"
+		DeathSound "podth2"
+		ActiveSound "posact"
+		
+		states
+		{
+			Spawn:
+				CPOS AB 10 A_Look
+				Loop
+			See:
+				CPOS AABBCCDD 3 A_Chase
+				Loop
+			Missile:
+				CPOS E 10 A_FaceTarget
+			ReFire:
+				CPOS FE 4 Bright A_CPosAttack
+				CPOS F 1 A_CPosRefire
+				Goto ReFire
+			Pain:
+				CPOS G 3
+				CPOS G 3 A_Pain
+				Goto See
+			Death:
+				CPOS H 5
+				CPOS I 5 A_Scream
+				CPOS J 5 A_NoBlocking
+				CPOS KLM 5
+				CPOS N -1
+				Stop
+			XDeath:
+				CPOS O 5 
+				CPOS P 5 A_XScream
+				CPOS Q 5 A_NoBlocking
+				CPOS RS 5
+				CPOS T -1
+				Stop
+			Raise:
+				CPOS N 5
+				CPOS MLKJIH 5
+				Goto See
+		}
+	}
+
+To clear all states connected to a thing, type the following:
+
+	free thing <INTEGER> states
+	free thing <INTEGER> <StateName> states
+
+
+And the same result will happen if you freed from each defined thing frame 
+individually. Based on the current thing definition. Best used before 
+redefining a thing.
+
+The following editor numbers cannot be used: 1, 2, 3, 4, 11.
+
+
+Miscellany
+==========
+
+Miscellaneous data is in the miscellaneous block:
+
+	misc
+	{
+		monsterInfighting <BOOLEAN>
+		initialBullets <INTEGER>
+		initialHealth <INTEGER>
+		greenArmorClass <INTEGER>
+		blueArmorClass <INTEGER>
+		soulsphereHealth <INTEGER>
+		maxSoulsphereHealth <INTEGER>
+		megasphereHealth <INTEGER>
+		godModeHealth <INTEGER>
+		idfaArmor <INTEGER>
+		idfaArmorClass <INTEGER>
+		idkfaArmor <INTEGER>
+		idkfaArmorClass <INTEGER>
+		bfgCellsPerShot <INTEGER>
+		maxHealth <INTEGER>
+		maxArmor <INTEGER>
+	}
 
