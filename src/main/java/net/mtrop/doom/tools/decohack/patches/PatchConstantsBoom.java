@@ -3,9 +3,10 @@ package net.mtrop.doom.tools.decohack.patches;
 import static net.mtrop.doom.tools.decohack.DEHActionPointer.*;
 
 import net.mtrop.doom.tools.decohack.DEHState;
+import net.mtrop.doom.tools.decohack.DEHThing;
 
 /**
- * Constants for Doom 1.9 specific. 
+ * Constants for Boom. 
  * @author Matthew Tropiano
  */
 interface PatchConstantsBoom 
@@ -980,6 +981,58 @@ interface PatchConstantsBoom
 		BoomState.create(DEHState.create(137, 2, true, 966, 4), NULL),
 		BoomState.create(DEHState.create(137, 3, true, 963, 4), NULL),
 		BoomState.create(DEHState.create(138, 0, false, 0, -1), NULL)
+	};
+	
+	public static final DEHThing[] DEHTHINGBOOM = 
+	{
+		(new DEHThing()).setName("Pusher")
+			.setEditorNumber(5001)
+			.setHealth(1000)
+			.setSpeed(0)
+			.setRadius(0)
+			.setHeight(0)
+			.setDamage(0)
+			.setReactionTime(8)
+			.setPainChance(0)
+			.setFlags(16)
+			.setMass(10)
+			.setSpawnFrameIndex(967)
+			.setWalkFrameIndex(DEHThing.FRAME_NULL)
+			.setPainFrameIndex(DEHThing.FRAME_NULL)
+			.setMeleeFrameIndex(DEHThing.FRAME_NULL)
+			.setMissileFrameIndex(DEHThing.FRAME_NULL)
+			.setDeathFrameIndex(DEHThing.FRAME_NULL)
+			.setExtremeDeathFrameIndex(DEHThing.FRAME_NULL)
+			.setRaiseFrameIndex(DEHThing.FRAME_NULL)
+			.setSeeSoundPosition(DEHThing.SOUND_NONE)
+			.setAttackSoundPosition(DEHThing.SOUND_NONE)
+			.setPainSoundPosition(DEHThing.SOUND_NONE)
+			.setDeathSoundPosition(DEHThing.SOUND_NONE)
+			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+		(new DEHThing()).setName("Puller")
+			.setEditorNumber(5002)
+			.setHealth(1000)
+			.setSpeed(0)
+			.setRadius(0)
+			.setHeight(0)
+			.setDamage(0)
+			.setReactionTime(8)
+			.setPainChance(0)
+			.setFlags(16)
+			.setMass(10)
+			.setSpawnFrameIndex(967)
+			.setWalkFrameIndex(DEHThing.FRAME_NULL)
+			.setPainFrameIndex(DEHThing.FRAME_NULL)
+			.setMeleeFrameIndex(DEHThing.FRAME_NULL)
+			.setMissileFrameIndex(DEHThing.FRAME_NULL)
+			.setDeathFrameIndex(DEHThing.FRAME_NULL)
+			.setExtremeDeathFrameIndex(DEHThing.FRAME_NULL)
+			.setRaiseFrameIndex(DEHThing.FRAME_NULL)
+			.setSeeSoundPosition(DEHThing.SOUND_NONE)
+			.setAttackSoundPosition(DEHThing.SOUND_NONE)
+			.setPainSoundPosition(DEHThing.SOUND_NONE)
+			.setDeathSoundPosition(DEHThing.SOUND_NONE)
+			.setActiveSoundPosition(DEHThing.SOUND_NONE),
 	};
 	
 }

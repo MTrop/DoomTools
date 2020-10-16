@@ -41,6 +41,9 @@ Final Frame:
 Thing Slot Hardcoding
 =====================
 
+Player (Slot 1)
+	Player avatar itself. Created many times.
+
 Trooper (Slot 2)
 	On Death, creates an Ammo Clip (Slot 64) with a DROPPED flag.
 
