@@ -11,7 +11,7 @@ import net.mtrop.doom.tools.decohack.DEHWeapon.Ammo;
  * Patch constants. 
  * @author Matthew Tropiano
  */
-interface PatchConstants 
+interface Constants 
 {
 	static final int S_NULL          = 0;
 	static final int S_LIGHTDONE     = 1;

@@ -9,8 +9,8 @@ import net.mtrop.doom.tools.decohack.DEHState;
 import net.mtrop.doom.tools.decohack.DEHThing;
 import net.mtrop.doom.tools.decohack.DEHWeapon;
 
-import static net.mtrop.doom.tools.decohack.patches.PatchConstants.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsBoom.*;
+import static net.mtrop.doom.tools.decohack.patches.Constants.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsBoom.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Set;
  * Patch implementation for Doom 1.9.
  * @author Matthew Tropiano
  */
-public class BoomPatch implements DEHPatchBoom
+public class PatchBoom implements DEHPatchBoom
 {
 	protected static final String[] SOUNDSTRINGS = 
 	{
@@ -683,6 +683,37 @@ public class BoomPatch implements DEHPatchBoom
 		}
 	};
 	
+	public static class State
+	{
+		private DEHState state;
+		private DEHActionPointer pointer;
+		
+		private State()
+		{
+			this.state = null;
+			this.pointer = null;
+		}
+		
+		public static State create(DEHState state, DEHActionPointer pointer)
+		{
+			State out = new State();
+			out.state = state;
+			out.pointer = pointer;
+			return out;
+		}
+		
+		public DEHState getState() 
+		{
+			return state;
+		}
+		
+		public DEHActionPointer getPointer() 
+		{
+			return pointer;
+		}
+		
+	}
+
 	// ======================================================================
 	
 	@Override

@@ -1,7 +1,7 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
 import net.mtrop.doom.tools.decohack.DEHPatchBoom;
-import net.mtrop.doom.tools.decohack.patches.BoomPatch;
+import net.mtrop.doom.tools.decohack.patches.PatchBoom;
 
 /**
  * Patch context for Boom.
@@ -9,7 +9,7 @@ import net.mtrop.doom.tools.decohack.patches.BoomPatch;
  */
 public class PatchBoomContext extends AbstractPatchBoomContext
 {
-	private static final DEHPatchBoom BOOMPATCH = new BoomPatch();
+	private static final DEHPatchBoom BOOMPATCH = new PatchBoom();
 	
 	@Override
 	public DEHPatchBoom getSourcePatch()

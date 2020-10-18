@@ -7,8 +7,8 @@ public final class PatchMain
 	public static void main(String[] args) 
 	{
 		ArrayList<Integer> list = new ArrayList<>();		
-		for (int i = 0; i < PatchConstantsDoom19.DEHSTATE.length; i++)
-			if (PatchConstantsDoom19.DEHSTATE[i].getPointerIndex() != null)
+		for (int i = 0; i < ConstantsDoom19.DEHSTATE.length; i++)
+			if (ConstantsDoom19.DEHSTATE[i].getPointerIndex() != null)
 				list.add(i);
 		System.out.println("{");
 		for (int i : list)

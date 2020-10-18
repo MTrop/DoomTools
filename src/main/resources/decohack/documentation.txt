@@ -1,13 +1,22 @@
-DECOHACK
-========
+==============================================================================
+============                       DECOHACK                       ============
+==============================================================================
 
 DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or 
 BEX patch. You should probably read up on the DECORATE format before you 
-proceed. 
+proceed, as some pieces are similar, and some are not.
 
+/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-Language Specs
-==============
+      IMPORTANT: It is important to note that DECOHack is CASCADING. 
+      A definition of any kind will replace the original definition, 
+      and anything unspecified is UNCHANGED.
+
+/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+==============================================================================
+===== Language Specs
+==============================================================================
 
 <BOOLEAN>    : true
                false
@@ -24,12 +33,13 @@ Language Specs
                + <INTEGER> 
 
 
-Format
-======
+==============================================================================
+===== Format (MUST BE SET FIRST!)
+==============================================================================
 
-To set the output format:
+To set the output format (and available features):
 
-	using ( doom19 | udoom19 | boom )
+	using ( doom19 | udoom19 | boom | mbf | extended )
 
 
 Examples:
@@ -38,8 +48,9 @@ Examples:
 	using boom
 
 
-Strings
-=======
+==============================================================================
+===== Strings
+==============================================================================
 
 Reassigns a set of strings. Any strings replaced here can carry through to 
 sprite names and sound names!
@@ -53,7 +64,7 @@ Doom 1.9:
 	}
 
 
-Boom:
+Boom and higher:
 
 	strings
 	{
@@ -66,8 +77,9 @@ The Identifier in the Boom definition is the string mnemonic from the Boom
 DeHackEd specs. 
 
 
-Ammo
-====
+==============================================================================
+===== Ammo
+==============================================================================
 
 Changes an ammo entry. `ammo` plus an index/type name, and an optional string 
 for the new name. 
@@ -94,8 +106,9 @@ Examples:
 	}
 
 
-Sound
-=====
+==============================================================================
+===== Sound
+==============================================================================
 
 Changes a sound entry. `sound` plus the sound index/name. The sound name must 
 match a sound string in the string table (should not start with DS or DP). 
@@ -122,8 +135,9 @@ Examples:
 	}
 
 
-States
-======
+==============================================================================
+===== States
+==============================================================================
 
 Individual states can be manipulated and/or changed, but be careful - 
 individual state manipulation should only be reserved for very few kinds of 
@@ -186,8 +200,8 @@ To free an explicit range (inclusive):
 	free state <INTEGER> to <INTEGER>
 
 
-To free from a starting state index until a free or protected state is 
-reached, following next state indices:
+To free from a starting state index, following next state indices until a 
+free or protected state is reached:
 
 	free from state <INTEGER>
 
@@ -198,6 +212,9 @@ Examples:
 	free state 100 to 200
 	free from state 100
 
+
+(NOTE: "Freeing" a state does NOT ALTER IT, it just flags that state as
+"available for the state-filling functions in this utility.)
 
 Then, you can fill a sequence of states starting from a specific state, and
 free states will be auto-filled by availability, connected together in 
@@ -237,30 +254,30 @@ writing the following:
 	protect state <INTEGER> to <INTEGER>
 
 
-It will not be flagged as free if in a range of free states, and attempting to
-alter the state will throw an error. By default, state 0 and 1 are flagged as 
-protected. You can turn off the protection on states by doing the following:
+It will not be flagged as "free" if in a range of free states, and attempting 
+to alter the state directly will throw an error. By default, state 0 and 1 
+are flagged as protected. You can turn off the protection on states by doing 
+the following:
 
 	unprotect state <INTEGER>
 	unprotect state <INTEGER> to <INTEGER>
 
 
-Weapon
-======
+==============================================================================
+===== Weapon
+==============================================================================
 
 Weapons are a combination of state filling and attribute declaration. All
 definitions are cumulative on the weapon slot (separate definitions can alter 
 the same slot in different ways).
 
-The only field recognized is AmmoType.
-
-Ready, Select, Deselect, Fire, and Flash state labels set the weapon action 
+Ready, Select, Deselect, Fire, and Flash state labels set the weapon state 
 indices. Other labels are used for arbitrary jump points. "LightDone" is an 
 alias for frame 1.
 
 "Spawn" is not used, as that is used for the Thing for pickups.
 
-	weapon <INTEGER> <STRING>
+	weapon <INTEGER> [ <STRING> ]
 	{
 		ammotype ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells | <STRING> )
 		states
@@ -323,17 +340,18 @@ And the same result will happen if you freed from each defined weapon frame
 individually. Best used before redefining a weapon.
 
 
-Thing
-=====
+==============================================================================
+===== Thing
+==============================================================================
 
 Things are a combination of state filling and attribute declaration. All
 definitions are cumulative on the thing slot (separate definitions can alter 
 the same slot in different ways).
 
-Spawn, See, Melee, Missile, , and Flash state labels set the weapon action 
-indices. Other labels are used for arbitrary jump points.
+Spawn, See, Melee, Missile, Pain, Death, XDeath, and Raise state labels set 
+the thing state indices. Other labels are used for arbitrary jump points.
 
-	thing <INTEGER> <STRING>
+	thing <INTEGER> [ <STRING> ]
 	{
 		EdNum <NUMBER>
 		
@@ -350,8 +368,8 @@ indices. Other labels are used for arbitrary jump points.
 	
 		Monster     // alias for Flags [monsterflags]
 		Projectile  // alias for Flags [projectileflags]
-		+ <INTEGER> // set flag
-		- <INTEGER> // unset flag
+		+ <INTEGER> // set flag(s)
+		- <INTEGER> // unset flag(s)
 	
 		clear sounds // if present, clear all sounds.
 			
@@ -466,8 +484,34 @@ redefining a thing.
 The following editor numbers cannot be used: 1, 2, 3, 4, 11.
 
 
-Miscellany
-==========
+==============================================================================
+===== Par Times
+==============================================================================
+
+Only for certain patch formats (Boom-compatible), Par Times are declared this 
+way:
+
+	pars
+	{
+		<MapName> <INTEGER> 
+	}
+
+Where <LumpName> is a map lump (map or episode-map is derived from it), and
+<INTEGER> is the par time in SECONDS.
+
+Examples:
+
+	pars
+	{
+		e1m1 30
+		map20 150
+		map45 200
+	}
+
+
+==============================================================================
+===== Miscellany
+==============================================================================
 
 Miscellaneous data is in the miscellaneous block:
 
@@ -491,12 +535,4 @@ Miscellaneous data is in the miscellaneous block:
 		maxArmor <INTEGER>
 	}
 
-
-Par Times
-=========
-
-Only for certain patch formats (Boom-compatible), Par Times are declared this way:
-
-	par <INTEGER> <INTEGER> // Doom 2
-	par <INTEGER> <INTEGER> <INTEGER> // Doom 1
 

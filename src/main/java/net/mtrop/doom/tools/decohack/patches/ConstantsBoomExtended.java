@@ -9,23 +9,23 @@ import net.mtrop.doom.tools.decohack.DEHThing;
  * Constants for MBF. 
  * @author Matthew Tropiano
  */
-interface PatchConstantsBoomExtended 
+interface ConstantsBoomExtended 
 {
-	static final BoomState[] DEHSTATEEXTENDED = 
+	static final PatchBoom.State[] DEHSTATEEXTENDED = 
 	{
-		BoomState.create(DEHState.create(58, 0, false, 806, 6), NULL),
-		BoomState.create(DEHState.create(144, 0, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 1, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 2, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 3, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 4, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 5, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 6, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(144, 7, false, 0, -1), NULL),
-		BoomState.create(DEHState.create(17, 0, true, 1086, 4), NULL),
-		BoomState.create(DEHState.create(17, 1, false, 1087, 4), NULL),
-		BoomState.create(DEHState.create(17, 2, false, 1088, 10), NULL),
-		BoomState.create(DEHState.create(17, 3, false, 0, 14), NULL),
+		PatchBoom.State.create(DEHState.create(58, 0, false, 806, 6), NULL),
+		PatchBoom.State.create(DEHState.create(144, 0, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 1, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 2, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 3, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 4, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 5, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 6, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(144, 7, false, 0, -1), NULL),
+		PatchBoom.State.create(DEHState.create(17, 0, true, 1086, 4), NULL),
+		PatchBoom.State.create(DEHState.create(17, 1, false, 1087, 4), NULL),
+		PatchBoom.State.create(DEHState.create(17, 2, false, 1088, 10), NULL),
+		PatchBoom.State.create(DEHState.create(17, 3, false, 0, 14), NULL),
 	};
 	
 	public static final DEHThing[] DEHTHINGEXTENDED = 

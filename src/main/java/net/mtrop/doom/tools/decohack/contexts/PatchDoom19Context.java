@@ -1,7 +1,7 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
 import net.mtrop.doom.tools.decohack.DEHPatchDoom19;
-import net.mtrop.doom.tools.decohack.patches.Doom19Patch;
+import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
 
 /**
  * Patch context for Doom 1.9.
@@ -9,7 +9,7 @@ import net.mtrop.doom.tools.decohack.patches.Doom19Patch;
  */
 public class PatchDoom19Context extends AbstractPatchDoom19Context
 {
-	private static final DEHPatchDoom19 DOOM19PATCH = new Doom19Patch();
+	private static final DEHPatchDoom19 DOOM19PATCH = new PatchDoom19();
 	
 	@Override
 	public DEHPatchDoom19 getSourcePatch()
@@ -23,7 +23,7 @@ public class PatchDoom19Context extends AbstractPatchDoom19Context
 	@Override
 	public Integer getSoundStringIndex()
 	{
-		return Doom19Patch.STRING_INDEX_SOUNDS;
+		return PatchDoom19.STRING_INDEX_SOUNDS;
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class PatchDoom19Context extends AbstractPatchDoom19Context
 	@Override
 	public Integer getSpriteStringIndex()
 	{
-		return Doom19Patch.STRING_INDEX_SPRITES;
+		return PatchDoom19.STRING_INDEX_SPRITES;
 	}
 
 }

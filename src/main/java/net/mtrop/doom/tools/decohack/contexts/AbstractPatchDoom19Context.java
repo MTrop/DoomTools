@@ -2,7 +2,7 @@ package net.mtrop.doom.tools.decohack.contexts;
 
 import net.mtrop.doom.tools.decohack.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.DEHPatchDoom19;
-import net.mtrop.doom.tools.decohack.patches.Doom19Patch;
+import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -34,11 +34,11 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		
 		this.soundStringIndex = new HashMap<>();
 		for (int i = 0; i < getSoundCount(); i++)
-			this.soundStringIndex.put(strings[i + Doom19Patch.STRING_INDEX_SOUNDS], i);
+			this.soundStringIndex.put(strings[i + PatchDoom19.STRING_INDEX_SOUNDS], i);
 		
 		this.spriteStringIndex = new HashMap<>();
-		for (int i = 0; i < Doom19Patch.STRING_INDEX_SPRITES_COUNT; i++)
-			this.spriteStringIndex.put(strings[i + Doom19Patch.STRING_INDEX_SPRITES], i);
+		for (int i = 0; i < PatchDoom19.STRING_INDEX_SPRITES_COUNT; i++)
+			this.spriteStringIndex.put(strings[i + PatchDoom19.STRING_INDEX_SPRITES], i);
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 			soundStringIndex.put(value, index - getSoundStringIndex());
 		}
 		// if sound name.
-		else if (index >= getSpriteStringIndex() && index < getSpriteStringIndex() + Doom19Patch.STRING_INDEX_SPRITES_COUNT)
+		else if (index >= getSpriteStringIndex() && index < getSpriteStringIndex() + PatchDoom19.STRING_INDEX_SPRITES_COUNT)
 		{
 			spriteStringIndex.remove(strings[index]);
 			spriteStringIndex.put(value, index - getSpriteStringIndex());

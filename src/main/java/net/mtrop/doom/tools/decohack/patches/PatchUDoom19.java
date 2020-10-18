@@ -9,21 +9,21 @@ import net.mtrop.doom.tools.decohack.DEHState;
 import net.mtrop.doom.tools.decohack.DEHThing;
 import net.mtrop.doom.tools.decohack.DEHWeapon;
 
-import static net.mtrop.doom.tools.decohack.patches.PatchConstants.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsDoom19.*;
+import static net.mtrop.doom.tools.decohack.patches.Constants.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsDoom19.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Patch implementation for Doom 1.9.
+ * Patch implementation for Ultimate Doom 1.9.
+ * Biggest difference to {@link PatchDoom19} is the string table.
  * @author Matthew Tropiano
  */
-public class Doom19Patch implements DEHPatchDoom19
+public class PatchUDoom19 implements DEHPatchDoom19
 {
-	public static final int STRING_INDEX_SOUNDS  = 827;
-	public static final int STRING_INDEX_SPRITES = 939;
-	public static final int STRING_INDEX_SPRITES_COUNT = 138;
+	public static final int STRING_INDEX_SOUNDS  = 842;
+	public static final int STRING_INDEX_SPRITES = 954;
 
 	private static final String[] DEHSTRINGS = 
 	{
@@ -162,6 +162,7 @@ public class Doom19Patch implements DEHPatchDoom19
 		"Once you beat the big badasses and\nclean out the moon base you're supposed\nto win, aren't you? Aren't you? Where's\nyour fat reward and ticket home? What\nthe hell is this? It's not supposed to\nend this way!\n\nIt stinks like rotten meat, but looks\nlike the lost Deimos base.  Looks like\nyou're stuck on The Shores of Hell.\nThe only way out is through.\n\nTo continue the DOOM experience, play\nThe Shores of Hell and its amazing\nsequel, Inferno!\n",
 		"You've done it! The hideous cyber-\ndemon lord that ruled the lost Deimos\nmoon base has been slain and you\nare triumphant! But ... where are\nyou? You clamber to the edge of the\nmoon and look down to see the awful\ntruth.\n\nDeimos floats above Hell itself!\nYou've never heard of anyone escaping\nfrom Hell, but you'll make the bastards\nsorry they ever heard of you! Quickly,\nyou rappel down to  the surface of\nHell.\n\nNow, it's on to the final chapter of\nDOOM! -- Inferno.",
 		"The loathsome spiderdemon that\nmasterminded the invasion of the moon\nbases and caused so much death has had\nits ass kicked for all time.\n\nA hidden doorway opens and you enter.\nYou've proven too tough for Hell to\ncontain, and now Hell at last plays\nfair -- for you emerge from the door\nto see the green fields of Earth!\nHome at last.\n\nYou wonder what's been happening on\nEarth while you were battling evil\nunleashed. It's good that no Hell-\nspawn could have come through that\ndoor with you ...",
+		"the spider mastermind must have sent forth\nits legions of hellspawn before your\nfinal confrontation with that terrible\nbeast from hell.  but you stepped forward\nand brought forth eternal damnation and\nsuffering upon the horde as a true hero\nwould in the face of something so evil.\n\nbesides, someone was gonna pay for what\nhappened to daisy, your pet rabbit.\n\nbut now, you see spread before you more\npotential pain and gibbitude as a nation\nof demons run amok among our cities.\n\nnext stop, hell on earth!",
 		"YOU HAVE ENTERED DEEPLY INTO THE INFESTED\nSTARPORT. BUT SOMETHING IS WRONG. THE\nMONSTERS HAVE BROUGHT THEIR OWN REALITY\nWITH THEM, AND THE STARPORT'S TECHNOLOGY\nIS BEING SUBVERTED BY THEIR PRESENCE.\n\nAHEAD, YOU SEE AN OUTPOST OF HELL, A\nFORTIFIED ZONE. IF YOU CAN GET PAST IT,\nYOU CAN PENETRATE INTO THE HAUNTED HEART\nOF THE STARBASE AND FIND THE CONTROLLING\nSWITCH WHICH HOLDS EARTH'S POPULATION\nHOSTAGE.",
 		"YOU HAVE WON! YOUR VICTORY HAS ENABLED\nHUMANKIND TO EVACUATE EARTH AND ESCAPE\nTHE NIGHTMARE.  NOW YOU ARE THE ONLY\nHUMAN LEFT ON THE FACE OF THE PLANET.\nCANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\nAND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\nYOU SIT BACK AND WAIT FOR DEATH, CONTENT\nTHAT YOU HAVE SAVED YOUR SPECIES.\n\nBUT THEN, EARTH CONTROL BEAMS DOWN A\nMESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\nTHE SOURCE OF THE ALIEN INVASION. IF YOU\nGO THERE, YOU MAY BE ABLE TO BLOCK THEIR\nENTRY.  THE ALIEN BASE IS IN THE HEART OF\nYOUR OWN HOME CITY, NOT FAR FROM THE\nSTARPORT.\" SLOWLY AND PAINFULLY YOU GET\nUP AND RETURN TO THE FRAY.",
 		"YOU ARE AT THE CORRUPT HEART OF THE CITY,\nSURROUNDED BY THE CORPSES OF YOUR ENEMIES.\nYOU SEE NO WAY TO DESTROY THE CREATURES'\nENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\nTEETH AND PLUNGE THROUGH IT.\n\nTHERE MUST BE A WAY TO CLOSE IT ON THE\nOTHER SIDE. WHAT DO YOU CARE IF YOU'VE\nGOT TO GO THROUGH HELL TO GET TO IT?",
@@ -177,6 +178,7 @@ public class Doom19Patch implements DEHPatchDoom19
 		"FLOOR4_8",
 		"SFLR6_1",
 		"MFLR8_4",
+		"MFLR8_3",
 		"ZOMBIEMAN",
 		"SHOTGUN GUY",
 		"HEAVY WEAPON DUDE",
@@ -199,8 +201,9 @@ public class Doom19Patch implements DEHPatchDoom19
 		"PFUB1",
 		"END0",
 		"END%i",
-		"HELP2",
+		"CREDIT",
 		"VICTORY2",
+		"ENDPIC",
 		"map01",
 		"PLAYPAL",
 		"M_PAUSE",
@@ -212,8 +215,8 @@ public class Doom19Patch implements DEHPatchDoom19
 		"demo1",
 		"CREDIT",
 		"demo2",
-		"HELP2",
 		"demo3",
+		"demo4",
 		"default.cfg",
 		"doom1.wad",
 		"doom2f.wad",
@@ -221,16 +224,18 @@ public class Doom19Patch implements DEHPatchDoom19
 		"doom.wad",
 		"-shdev",
 		"c:/localid/doom1.wad",
-		"e:/doom/data/texture1.lmp",
-		"e:/doom/data/pnames.lmp",
+		"f:/doom/data_se/data_se/texture1.lmp",
+		"f:/doom/data_se/data_se/pnames.lmp",
 		"c:/localid/default.cfg",
 		"-regdev",
 		"c:/localid/doom.wad",
-		"e:/doom/data/texture2.lmp",
+		"f:/doom/data_se/data_se/texture1.lmp",
+		"f:/doom/data_se/data_se/texture2.lmp",
+		"f:/doom/data_se/data_se/pnames.lmp",
 		"-comdev",
 		"c:/localid/doom2.wad",
-		"e:/doom/cdata/texture1.lmp",
-		"e:/doom/cdata/pnames.lmp",
+		"f:/doom/data_se/cdata/texture1.lmp",
+		"f:/doom/data_se/cdata/pnames.lmp",
 		"French version\n",
 		"Game mode indeterminate.\n",
 		"rb",
@@ -244,7 +249,7 @@ public class Doom19Patch implements DEHPatchDoom19
 		"-devparm",
 		"-altdeath",
 		"-deathmatch",
-		"                          DOOM System Startup v%i.%i                          ",
+		"                         The Ultimate DOOM Startup v%i.%i                        ",
 		"                         DOOM 2: Hell on Earth v%i.%i                           ",
 		"\nP_Init: Checking cmd-line parameters...\n",
 		"Development mode ON.\n",
@@ -255,9 +260,9 @@ public class Doom19Patch implements DEHPatchDoom19
 		"-turbo",
 		"turbo scale: %i%%\n",
 		"-wart",
-		"~e:/doom/cdata/map0%i.wad",
-		"~e:/doom/cdata/map%i.wad",
-		"~e:/doom/E%cM%c.wad",
+		"~f:/doom/data_se/cdata/map0%i.wad",
+		"~f:/doom/data_se/cdata/map%i.wad",
+		"~f:/doom/data_se/E%cM%c.wad",
 		"Warping to Episode %s, Map %s.\n",
 		"-file",
 		"-playdemo",
@@ -339,6 +344,7 @@ public class Doom19Patch implements DEHPatchDoom19
 		"SKY3",
 		"SKY1",
 		"SKY2",
+		"SKY4",
 		".lmp",
 		"-maxdemo",
 		"Demo is from a different game version!",
@@ -703,6 +709,15 @@ public class Doom19Patch implements DEHPatchDoom19
 		"E3M7: Limbo",
 		"E3M8: Dis",
 		"E3M9: Warrens",
+		"E4M1: Hell Beneath",
+		"E4M2: Perfect Hatred",
+		"E4M3: Sever The Wicked",
+		"E4M4: Unruly Evil",
+		"E4M5: They Will Repent",
+		"E4M6: Against Thee Wickedly",
+		"E4M7: And Hell Followed",
+		"E4M8: Unto The Cruel",
+		"E4M9: Fear",
 		"NEWLEVEL",
 		"level 1: entryway",
 		"level 2: underhalls",
@@ -1121,7 +1136,7 @@ public class Doom19Patch implements DEHPatchDoom19
 	{
 		private static final long serialVersionUID = -6738700394837068292L;
 		{
-			for (int i = 0; i < STRING_INDEX_SPRITES_COUNT; i++)
+			for (int i = 0; i < 138; i++)
 				put(DEHSTRINGS[i + STRING_INDEX_SPRITES], i);
 		}
 	};

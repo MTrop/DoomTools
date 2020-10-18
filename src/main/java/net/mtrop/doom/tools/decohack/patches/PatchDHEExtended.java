@@ -4,10 +4,10 @@ import net.mtrop.doom.tools.decohack.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.DEHState;
 import net.mtrop.doom.tools.decohack.DEHThing;
 
-import static net.mtrop.doom.tools.decohack.patches.PatchConstants.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsBoom.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsMBF.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsBoomExtended.*;
+import static net.mtrop.doom.tools.decohack.patches.Constants.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsBoom.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsMBF.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsBoomExtended.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
  * Patch implementation for Extended DeHackEd.
  * @author Matthew Tropiano
  */
-public class ExtendedPatch extends MBFPatch
+public class PatchDHEExtended extends PatchMBF
 {
 	protected static final String[] SPRITESTRINGSEXTENDED = 
 	{
@@ -177,7 +177,7 @@ public class ExtendedPatch extends MBFPatch
 		return 4000;
 	}
 
-	protected BoomState getBoomState(int index)
+	protected PatchBoom.State getBoomState(int index)
 	{
 		int len = DEHSTATE.length + DEHSTATEMBF.length + DEHSTATEEXTENDED.length;
 		int mbflen = DEHSTATE.length + DEHSTATEMBF.length;
@@ -185,7 +185,7 @@ public class ExtendedPatch extends MBFPatch
 		if (index >= getStateCount())
 			throw new ArrayIndexOutOfBoundsException(index);
 		else if (index >= len && index < getStateCount())
-			return BoomState.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL);			
+			return PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL);			
 		else if (index >= mbflen)
 			return DEHSTATEEXTENDED[index - mbflen];			
 		else if (index >= DEHSTATE.length)

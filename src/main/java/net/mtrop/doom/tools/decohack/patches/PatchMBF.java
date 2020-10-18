@@ -5,9 +5,9 @@ import net.mtrop.doom.tools.decohack.DEHSound;
 import net.mtrop.doom.tools.decohack.DEHState;
 import net.mtrop.doom.tools.decohack.DEHThing;
 
-import static net.mtrop.doom.tools.decohack.patches.PatchConstants.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsBoom.*;
-import static net.mtrop.doom.tools.decohack.patches.PatchConstantsMBF.*;
+import static net.mtrop.doom.tools.decohack.patches.Constants.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsBoom.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsMBF.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.Map;
  * Patch implementation for MBF.
  * @author Matthew Tropiano
  */
-public class MBFPatch extends BoomPatch
+public class PatchMBF extends PatchBoom
 {
 	protected static final String[] SOUNDSTRINGSMBF = 
 	{
@@ -120,7 +120,7 @@ public class MBFPatch extends BoomPatch
 		return DEHSTATE.length + DEHSTATEMBF.length;
 	}
 
-	protected BoomState getBoomState(int index)
+	protected PatchBoom.State getBoomState(int index)
 	{
 		if (index >= DEHSTATE.length)
 			return DEHSTATEMBF[index - DEHSTATE.length];			

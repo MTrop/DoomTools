@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -31,8 +32,14 @@ public final class DecoHackMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		
 		private boolean help;
 		private boolean version;
+
+		private File outFile;
+		private File mapinfoOut;
+		private File zMapinfoOut;
+		private File eMapinfoOut;
 		
 		public Options()
 		{
@@ -66,12 +73,6 @@ public final class DecoHackMain
 		private Context(Options options)
 		{
 			this.options = options;
-		}
-		
-		private String fileExtension(byte[] bytes)
-		{
-			// TODO: Finish
-			return ".lmp";
 		}
 		
 		public int call()
