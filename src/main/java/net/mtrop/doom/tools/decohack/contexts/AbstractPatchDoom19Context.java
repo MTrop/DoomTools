@@ -1,11 +1,8 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,46 +112,4 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		return getSourcePatch().getActionPointerFrame(index);
 	}
 
-	@Override
-	public void writePatch(Writer writer, String comment) throws IOException
-	{
-		super.writePatch(writer, comment);
-		
-		for (int i = 0; i < getActionPointerCount(); i++)
-		{
-			DEHActionPointer action = getActionPointer(i);
-			DEHActionPointer original = getSourcePatch().getActionPointer(i);
-			if (!action.equals(original))
-			{
-				writer.append("Pointer ")
-					.append(String.valueOf(i))
-					.append(" (Frame ")
-					.append(String.valueOf(getSourcePatch().getActionPointerFrame(i)))
-					.append(")")
-					.append("\r\n");
-				writer.append("Codep Frame = ").append(String.valueOf(action.getFrame())).append("\r\n");
-				writer.append("\r\n");
-			}
-		}
-		writer.flush();
-
-		for (int i = 0; i < getStringCount(); i++)
-		{
-			String str = getString(i);
-			String original = getSourcePatch().getString(i);
-			if (!str.equals(original))
-			{
-				writer.append("Text ")
-					.append(String.valueOf(original.length()))
-					.append(" ")
-					.append(String.valueOf(str.length()))
-					.append("\r\n");
-				writer.append(original).append(str);
-				if (i < getStringCount() - 1)
-					writer.append("\r\n");
-				writer.flush();
-			}
-		}
-	}
-	
 }

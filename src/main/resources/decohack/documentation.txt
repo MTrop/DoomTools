@@ -145,7 +145,7 @@ changes.
 
 	state <INTEGER> 
 	{ 
-		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
+		[ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
 		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] | wait | stop )
 	}
 
@@ -180,6 +180,11 @@ Examples:
 	{
 		PLAY W -1
 		stop
+	}
+
+	state 575 // change just next state
+	{
+		goto 577
 	}
 	
 	state 911

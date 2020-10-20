@@ -47,6 +47,11 @@ public final class DecoHackMain
 			this.stderr = null;
 			this.help = false;
 			this.version = false;
+
+			this.outFile = null;
+			this.mapinfoOut = null;
+			this.zMapinfoOut = null;
+			this.eMapinfoOut = null;
 		}
 		
 		public Options setHelp(boolean help) 
