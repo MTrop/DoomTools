@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.decohack;
+package net.mtrop.doom.tools.decohack.data;
 
 import java.util.HashMap;
 import java.util.Map;

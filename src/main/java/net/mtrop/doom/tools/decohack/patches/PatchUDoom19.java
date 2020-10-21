@@ -1,19 +1,18 @@
 package net.mtrop.doom.tools.decohack.patches;
 
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.DEHAmmo;
-import net.mtrop.doom.tools.decohack.DEHMiscellany;
-import net.mtrop.doom.tools.decohack.DEHPatchDoom19;
-import net.mtrop.doom.tools.decohack.DEHSound;
-import net.mtrop.doom.tools.decohack.DEHState;
-import net.mtrop.doom.tools.decohack.DEHThing;
-import net.mtrop.doom.tools.decohack.DEHWeapon;
-
 import static net.mtrop.doom.tools.decohack.patches.Constants.*;
 import static net.mtrop.doom.tools.decohack.patches.ConstantsDoom19.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.data.DEHSound;
+import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 
 /**
  * Patch implementation for Ultimate Doom 1.9.

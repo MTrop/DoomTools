@@ -1,6 +1,6 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.DEHPatchBoom;
+import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchMBF;
 
 /**

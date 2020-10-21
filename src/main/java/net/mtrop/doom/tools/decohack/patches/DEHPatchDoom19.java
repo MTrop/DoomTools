@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.decohack;
+package net.mtrop.doom.tools.decohack.patches;
 
 /**
  * Common DeHackEd Patch interface for specific Doom v1.9 executable patches.

@@ -284,7 +284,7 @@ alias for frame 1.
 
 	weapon <INTEGER> [ <STRING> ]
 	{
-		ammotype ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells | <STRING> )
+		ammotype ( 0 | 1 | 2 | 3 | 5 | bullets | shells | rockets | cells | infinite )
 		states
 		{
 			ready:

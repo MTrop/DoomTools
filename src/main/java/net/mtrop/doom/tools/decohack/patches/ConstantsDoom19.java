@@ -1,9 +1,9 @@
 package net.mtrop.doom.tools.decohack.patches;
 
-import static net.mtrop.doom.tools.decohack.DEHActionPointer.*;
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.*;
 
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHState;
 
 /**
  * Constants for Doom 1.9 specific. 

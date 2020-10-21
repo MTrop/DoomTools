@@ -1,10 +1,10 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.DEHPatchBoom;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 
 /**
  * Patch context for Boom.

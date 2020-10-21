@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.decohack;
+package net.mtrop.doom.tools.decohack.patches;
 
 import java.util.Set;
 

@@ -5,17 +5,17 @@ import java.io.Writer;
 import java.util.Objects;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.DEHAmmo;
-import net.mtrop.doom.tools.decohack.DEHMiscellany;
-import net.mtrop.doom.tools.decohack.DEHSound;
-import net.mtrop.doom.tools.decohack.DEHState;
-import net.mtrop.doom.tools.decohack.DEHThing;
-import net.mtrop.doom.tools.decohack.DEHWeapon;
-import net.mtrop.doom.tools.decohack.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.data.DEHSound;
+import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 
 /**
  * Describes all DeHackEd contexts that can be exported.

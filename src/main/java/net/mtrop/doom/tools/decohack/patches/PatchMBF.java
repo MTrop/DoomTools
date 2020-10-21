@@ -1,16 +1,16 @@
 package net.mtrop.doom.tools.decohack.patches;
 
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.DEHSound;
-import net.mtrop.doom.tools.decohack.DEHState;
-import net.mtrop.doom.tools.decohack.DEHThing;
-
 import static net.mtrop.doom.tools.decohack.patches.Constants.*;
 import static net.mtrop.doom.tools.decohack.patches.ConstantsBoom.*;
 import static net.mtrop.doom.tools.decohack.patches.ConstantsMBF.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHSound;
+import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHThing;
 
 /**
  * Patch implementation for MBF.

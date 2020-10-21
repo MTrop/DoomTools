@@ -1,13 +1,13 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.DEHAmmo;
-import net.mtrop.doom.tools.decohack.DEHMiscellany;
-import net.mtrop.doom.tools.decohack.DEHPatch;
-import net.mtrop.doom.tools.decohack.DEHSound;
-import net.mtrop.doom.tools.decohack.DEHState;
-import net.mtrop.doom.tools.decohack.DEHThing;
-import net.mtrop.doom.tools.decohack.DEHWeapon;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.data.DEHSound;
+import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 
 /**
  * Abstract patch context.
@@ -157,6 +157,13 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public DEHActionPointer getActionPointer(int index)
 	{
 		return pointers[index];
+	}
+
+	public void setActionPointer(int index, DEHActionPointer pointer)
+	{
+		if (pointer == null)
+			throw new IllegalArgumentException("Pointer cannot be null.");
+		pointers[index] = pointer;
 	}
 
 	/**

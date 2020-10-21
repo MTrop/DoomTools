@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.decohack;
+package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
