@@ -7,10 +7,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
@@ -399,7 +399,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 
-			if (!parseSingleState(context, index))
+			if (!parseState(context, true, index))
 				return false;
 
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
@@ -429,65 +429,25 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a single state.
-	private boolean parseSingleState(AbstractPatchContext<?> context, int index)
+	private boolean parseState(AbstractPatchContext<?> context, boolean singleFrame, int index)
 	{
-		DEHState state = context.getState(index);
-		
 		Integer nextStateIndex = null;
-
-		if ((nextStateIndex = parseNextState(context, index)) != null)
+		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 			return true;
 		
-		Integer spriteIndex = null;
-		LinkedList<Integer> frameList = new LinkedList<>();
-		Integer duration = null;
-		Boolean bright = null;
-		DEHActionPointer action = null;
-		
-		if ((spriteIndex = matchSpriteIndex(context)) != null)
+		if (currentIsSpriteIndex(context))
 		{
-			if (!matchFrameIndices(frameList) || frameList.size() > 1)
-			{
-				addErrorMessage("Expected valid frame characters after sprite name.");
-				return false;				
-			}
+			DEHState state = context.getState(index);
 			
-			Integer frameIndex = frameList.pollFirst();
-			
-			if ((duration = matchInteger()) == null)
-			{
-				addErrorMessage("Expected valid state duration after frame.");
-				return false;				
-			}
+			if (!parseStateLine(state, context, singleFrame, index))
+				return false;
 
-			bright = matchIdentifierLexemeIgnoreCase("bright");
-			
-			action = matchActionPointer();
-			
-			Integer pointerIndex = context.getStateActionPointerIndex(index);
-			if (pointerIndex == null && action != null || pointerIndex != null && action == null)
-			{
-				if (action != null)
-					addErrorMessage("Action function specified for state without a function!");
-				else
-					addErrorMessage("Action function not specified for state with a function!");
-				return false;				
-			}
-			
-			// Boom special case.
-			if (context instanceof AbstractPatchBoomContext && pointerIndex != null && action == null)
-				action = DEHActionPointer.NULL;
-			
-			// Set action pointer.
-			if (pointerIndex != null)
-				context.setActionPointer(index, action);
-			
 			// Try to parse next state clause.
-			nextStateIndex = parseNextState(context, index);
-			
-			// Set state stuff.
-			state.set(spriteIndex, frameIndex, bright, nextStateIndex != null ? nextStateIndex : state.getNextStateIndex(), duration);
-			
+			nextStateIndex = parseNextStateIndex(context, null, null, index);
+
+			if (nextStateIndex != null)
+				state.setNextStateIndex(nextStateIndex);
+
 			return true;
 		}
 		else
@@ -496,8 +456,77 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;				
 		}
 	}
+
+	// Parse a single state and if true is returned, the input state is altered.
+	// TODO: Maybe parse into a "state" object?
+	private boolean parseStateLine(DEHState state, AbstractPatchContext<?> context, boolean singleFrame, int index) 
+	{
+		Integer spriteIndex = null;
+		LinkedList<Integer> frameList = new LinkedList<>();
+		Integer duration = null;
+		Boolean bright = null;
+		DEHActionPointer action = null;
+		
+		if ((spriteIndex = matchSpriteIndex(context)) == null)
+		{
+			addErrorMessage("Expected valid sprite name.");
+			return false;				
+		}
+		
+		if (!matchFrameIndices(frameList))
+		{
+			addErrorMessage("Expected valid frame characters after sprite name.");
+			return false;				
+		}
+		
+		if (singleFrame && frameList.size() > 1)
+		{
+			addErrorMessage("Expected valid frame characters after sprite name.");
+			return false;				
+		}
+		
+		Integer frameIndex = frameList.pollFirst();
+		
+		if ((duration = matchInteger()) == null)
+		{
+			addErrorMessage("Expected valid state duration after frame.");
+			return false;				
+		}
+
+		bright = matchBrightFlag();
+		
+		action = matchActionPointer();
+		
+		Integer pointerIndex = context.getStateActionPointerIndex(index);
+		if (pointerIndex == null && action != null || pointerIndex != null && action == null)
+		{
+			if (action != null)
+				addErrorMessage("Action function specified for state without a function!");
+			else
+				addErrorMessage("Action function not specified for state with a function!");
+			return false;				
+		}
+		
+		// Boom special case.
+		if (context instanceof AbstractPatchBoomContext && pointerIndex != null && action == null)
+			action = DEHActionPointer.NULL;
+		
+		// Set action pointer.
+		if (pointerIndex != null)
+			context.setActionPointer(index, action);
+		
+		// Set state stuff.
+		state
+			.setSpriteIndex(spriteIndex)
+			.setFrameIndex(frameIndex)
+			.setBright(bright)
+			.setDuration(duration)
+		;
+		return true;
+	}
 	
-	private Integer parseNextState(AbstractPatchContext<?> context, int currentStateIndex)
+	// Parses a next state line.
+	private Integer parseNextStateIndex(AbstractPatchContext<?> context, Map<String, Integer> stateMap, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierLexemeIgnoreCase("stop"))
@@ -508,10 +537,73 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			return currentStateIndex;
 		}
+		else if (matchIdentifierLexemeIgnoreCase("loop"))
+		{
+			if (lastLabelledStateIndex == null)
+			{
+				addErrorMessage("Can't use \"loop\" with no declared state labels.");
+				return null;
+			}
+			return lastLabelledStateIndex;
+		}
 		else if (matchIdentifierLexemeIgnoreCase("goto"))
 		{
 			Integer nextFrame;
-			if ((nextFrame = matchPositiveInteger()) == null)
+			String labelName;
+			if ((labelName = matchIdentifier()) != null)
+			{
+				if (stateMap == null)
+				{
+					addErrorMessage("Name of label was unexpected after \"goto\". Only valid in thing or weapon.");
+					return null;				
+				}
+				else if ((nextFrame = stateMap.get(labelName)) == null)
+				{
+					addErrorMessage("Label \"%s\" is invalid or not declared.");
+					return null;				
+				}
+				
+				// increment/decrement
+				if (matchType(DecoHackKernel.TYPE_PLUS))
+				{
+					Integer amount;
+					if ((amount = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected integer after label name in \"goto\".");
+						return null;				
+					}
+					
+					if (nextFrame + amount >= context.getStateCount())
+					{
+						addErrorMessage("Label \"%s\" plus %d would exceed amount of states.", labelName, amount);
+						return null;				
+					}
+					
+					return nextFrame + amount;
+				}
+				else if (matchType(DecoHackKernel.TYPE_DASH))
+				{
+					Integer amount;
+					if ((amount = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected integer after label name in \"goto\".");
+						return null;				
+					}
+					
+					if (nextFrame - amount < 0)
+					{
+						addErrorMessage("Label \"%s\" minus %d would be less than 0.", labelName, amount);
+						return null;				
+					}
+					
+					return nextFrame - amount;
+				}
+				else
+				{
+					return nextFrame;
+				}
+			}
+			else if ((nextFrame = matchPositiveInteger()) == null)
 			{
 				addErrorMessage("Expected integer after \"goto\".");
 				return null;				
@@ -574,6 +666,15 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 	}
 
+	// Tests for an identifier or string that references a sprite name.
+	private boolean currentIsSpriteIndex(DEHPatch patch)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
+			return false;
+		else
+			return patch.getSpriteIndex(currentToken().getLexeme()) != null;
+	}
+	
 	// Matches an identifier or string that references a sprite name.
 	// If match, advance token and return sprite index integer.
 	// Else, return null.
@@ -611,10 +712,8 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier that can be "bright".
 	// If match, advance token and return true plus modified out list.
 	// Else, return null.
-	private Boolean matchBrightFlag()
+	private boolean matchBrightFlag()
 	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			return null;
 		return matchIdentifierLexemeIgnoreCase("bright");
 	}
 	
