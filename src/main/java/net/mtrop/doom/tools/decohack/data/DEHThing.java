@@ -169,7 +169,7 @@ public class DEHThing implements DEHObject<DEHThing>
 
 	public DEHThing setSpeed(int speed) 
 	{
-		RangeUtils.checkRange("Speed", 0, 999999, speed);
+		RangeUtils.checkRange("Speed", 0, 65535, speed);
 		this.speed = speed;
 		return this;
 	}
@@ -229,7 +229,7 @@ public class DEHThing implements DEHObject<DEHThing>
 
 	public DEHThing setPainChance(int painChance)
 	{
-		RangeUtils.checkRange("Pain chance", 0, 255, painChance);
+		RangeUtils.checkRange("Pain chance", 0, Integer.MAX_VALUE, painChance);
 		this.painChance = painChance;
 		return this;
 	}
@@ -252,7 +252,7 @@ public class DEHThing implements DEHObject<DEHThing>
 
 	public DEHThing setMass(int mass) 
 	{
-		RangeUtils.checkRange("Mass", 0, 255, mass);
+		RangeUtils.checkRange("Mass", 0, Integer.MAX_VALUE, mass);
 		this.mass = mass;
 		return this;
 	}
@@ -452,12 +452,15 @@ public class DEHThing implements DEHObject<DEHThing>
 	@Override
 	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
+		// If projectile, speed is fixed point.
+		int speedVal = ((flags & (1 << 16)) != 0) ? speed << 16 : speed; 
+		
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		if (health != thing.health)
 			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");
-		if (speed != thing.speed)
-			writer.append("Speed = ").append(String.valueOf(speed)).append("\r\n");
+		if (speedVal != thing.speed)
+			writer.append("Speed = ").append(String.valueOf(speedVal)).append("\r\n");
 		if (radius != thing.radius)
 			writer.append("Width = ").append(String.valueOf(radius << 16)).append("\r\n");
 		if (height != thing.height)

@@ -1,0 +1,7 @@
+using doom19
+
+strings
+{
+	667 "1: Butttown"
+	677 "1: asdlkfjafasd  f"
+}

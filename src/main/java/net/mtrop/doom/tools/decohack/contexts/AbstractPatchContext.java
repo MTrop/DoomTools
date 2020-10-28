@@ -43,7 +43,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
 		
 		this.weapons = new DEHWeapon[source.getWeaponCount()];
-		for (int i = 0; i < this.sounds.length; i++)
+		for (int i = 0; i < this.weapons.length; i++)
 			this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
 		
 		this.things = new DEHThing[source.getThingCount()];

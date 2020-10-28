@@ -38,7 +38,25 @@ import net.mtrop.doom.tools.struct.PreprocessorLexer;
 public final class DecoHackParser extends Lexer.Parser
 {
 	public static final String STREAMNAME_TEXT = "[Text String]";
-	
+
+	private static final String KEYWORD_PICKUP = "pickup";
+	private static final String KEYWORD_MAX = "max";
+	private static final String KEYWORD_STATE = "state";
+	private static final String KEYWORD_SOUND = "sound";
+	private static final String KEYWORD_AMMO = "ammo";
+	private static final String KEYWORD_BULLETS = "bullets";
+	private static final String KEYWORD_SHELLS = "shells";
+	private static final String KEYWORD_CELLS = "cells";
+	private static final String KEYWORD_ROCKETS = "rockets";
+	private static final String KEYWORD_INFINITE = "infinite";
+	private static final String KEYWORD_STRINGS = "strings";
+	private static final String KEYWORD_USING = "using";
+	private static final String KEYWORD_DOOM19 = "doom19";
+	private static final String KEYWORD_UDOOM19 = "udoom19";
+	private static final String KEYWORD_BOOM = "boom";
+	private static final String KEYWORD_MBF = "mbf";
+	private static final String KEYWORD_EXTENDED = "extended";
+
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
 	
@@ -123,25 +141,27 @@ public final class DecoHackParser extends Lexer.Parser
 	 */
 	private AbstractPatchContext<?> parseUsing()
 	{
-		if (!matchIdentifierLexemeIgnoreCase("using"))
+		if (!matchIdentifierLexemeIgnoreCase(KEYWORD_USING))
 		{
 			addErrorMessage("Expected \"using\" clause to set the patch format.");
 			return null;
 		}
 		
-		if (matchIdentifierLexemeIgnoreCase("doom19"))
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_DOOM19))
 			return new PatchDoom19Context();
-		else if (matchIdentifierLexemeIgnoreCase("udoom19"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_UDOOM19))
 			return new PatchUltimateDoom19Context();
-		else if (matchIdentifierLexemeIgnoreCase("boom"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BOOM))
 			return new PatchBoomContext();
-		else if (matchIdentifierLexemeIgnoreCase("mbf"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MBF))
 			return new PatchMBFContext();
-		else if (matchIdentifierLexemeIgnoreCase("extended"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EXTENDED))
 			return new PatchDHEExtendedContext();
 		else
 		{
-			addErrorMessage("Expected valid patch format type (doom19, udoom19, boom, mbf, extended).");
+			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s).", 
+				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED
+			);
 			return null;
 		}
 	}
@@ -151,19 +171,19 @@ public final class DecoHackParser extends Lexer.Parser
 	 */
 	private boolean parseEntry(AbstractPatchContext<?> context)
 	{
-		if (matchIdentifierLexemeIgnoreCase("strings"))
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STRINGS))
 		{
 			return parseStringBlock(context);
 		}
-		else if (matchIdentifierLexemeIgnoreCase("ammo"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMO))
 		{
 			return parseAmmoBlock(context);
 		}
-		else if (matchIdentifierLexemeIgnoreCase("sound"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
 		{
 			return parseSoundBlock(context);
 		}
-		else if (matchIdentifierLexemeIgnoreCase("state"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 		{
 			return parseStateBlock(context);
 		}
@@ -183,7 +203,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
-			addErrorMessage("Expected '{' to start \"strings\" section.");
+			addErrorMessage("Expected '{' to start \"%s\" section.", KEYWORD_STRINGS);
 			return false;
 		}
 		
@@ -193,7 +213,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
-				addErrorMessage("Expected '}' to close \"strings\" section, or string index to start string replacement entry.");
+				addErrorMessage("Expected '}' to close \"%s\" section, or string index to start string replacement entry.", KEYWORD_STRINGS);
 				return false;
 			}
 			return true;
@@ -204,7 +224,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
-				addErrorMessage("Expected '}' to close \"strings\" section, or string key name to start string replacement entry.");
+				addErrorMessage("Expected '}' to close \"%s\" section, or string key name to start string replacement entry.", KEYWORD_STRINGS);
 				return false;
 			}
 			return true;
@@ -221,10 +241,16 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer stringIndex;
 		while ((stringIndex = matchPositiveInteger()) != null)
 		{
-			String replacementString;
-			if ((replacementString = matchString()) != null)
+			if (stringIndex >= context.getStringCount())
 			{
-				context.setString(stringIndex, replacementString);
+				addErrorMessage("String index out of range. Must be from 0 to " + (context.getStringCount() - 1));
+				return false;
+			}
+			
+			if (currentType(DecoHackKernel.TYPE_STRING))
+			{
+				context.setString(stringIndex, currentToken().getLexeme());
+				nextToken();
 			}
 			else
 			{
@@ -288,36 +314,36 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierLexemeIgnoreCase("max"))
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX))
 			{
 				Integer value;
 				if ((value = matchPositiveInteger()) == null)
 				{
-					addErrorMessage("Expected positive integer after \"max\".");
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MAX);
 					return false;
 				}
 				ammo.setMax(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase("pickup"))
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PICKUP))
 			{
 				Integer value;
 				if ((value = matchPositiveInteger()) == null)
 				{
-					addErrorMessage("Expected positive integer after \"pickup\".");
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_PICKUP);
 					return false;
 				}
 				ammo.setPickup(value);
 			}
 			else
 			{
-				addErrorMessage("Expected \"max\" or \"pickup\".");
+				addErrorMessage("Expected \"%s\" or \"%s\".", KEYWORD_MAX, KEYWORD_PICKUP);
 				return false;
 			}
 		}
 		
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
-			addErrorMessage("Expected '}' after \"ammo\" section.");
+			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_AMMO);
 			return false;
 		}
 		
@@ -395,21 +421,22 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			if (!matchType(DecoHackKernel.TYPE_LBRACE))
 			{
-				addErrorMessage("Expected '{' after \"state\" header.");
+				addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_STATE);
 				return false;
 			}
 
-			if (!parseState(context, true, index))
+			if (!parseStateBody(context, true, index))
 				return false;
 
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
-				addErrorMessage("Expected '}' after \"state\" definition.");
+				addErrorMessage("Expected '}' after \"%s\" definition.", KEYWORD_STATE);
 				return false;
 			}
 
 			return true;
 		}
+		/*
 		// if fill state...
 		else if (matchIdentifierLexemeIgnoreCase("fill"))
 		{
@@ -420,16 +447,16 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			return true;
 		}
+		*/
 		else
 		{
 			addErrorMessage("Expected state index or \"fill\" keyword after \"state\".");
 			return false;
 		}
-		
 	}
 	
-	// Parses a single state.
-	private boolean parseState(AbstractPatchContext<?> context, boolean singleFrame, int index)
+	// Parses a single state definition body.
+	private boolean parseStateBody(AbstractPatchContext<?> context, boolean singleFrame, int index)
 	{
 		Integer nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
@@ -437,14 +464,41 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		if (currentIsSpriteIndex(context))
 		{
-			DEHState state = context.getState(index);
+			TempState state = new TempState();
+			boolean isBoom = context instanceof AbstractPatchBoomContext;
 			
-			if (!parseStateLine(state, context, singleFrame, index))
+			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			if (!parseStateLine(context, state, singleFrame, isBoom ? null : pointerIndex != null))
 				return false;
 
+			if ((pointerIndex == null && state.action != null) || (pointerIndex != null && state.action == null))
+			{
+				if (state.action != null)
+					addErrorMessage("Action function specified for state without a function!");
+				else
+					addErrorMessage("Action function not specified for state with a function!");
+				return false;
+			}
+			
+			// Boom special case.
+			if (isBoom && pointerIndex != null && state.action == null)
+				state.action = DEHActionPointer.NULL;
+			
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, state.action);
+			
 			// Try to parse next state clause.
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
 
+			// fill state.
+			state
+				.setSpriteIndex(state.spriteIndex)
+				.setFrameIndex(state.frameList.get(0))
+				.setDuration(state.duration)
+				.setBright(state.bright)
+				.setParameter0(state.parameter0)
+				.setParameter1(state.parameter1)
+			;
 			if (nextStateIndex != null)
 				state.setNextStateIndex(nextStateIndex);
 
@@ -458,70 +512,76 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parse a single state and if true is returned, the input state is altered.
-	// TODO: Maybe parse into a "state" object?
-	private boolean parseStateLine(DEHState state, AbstractPatchContext<?> context, boolean singleFrame, int index) 
+	// requireAction is either true, false, or null. If null, no check is performed. 
+	private boolean parseStateLine(AbstractPatchContext<?> context, TempState state, boolean singleFrame, Boolean requireAction) 
 	{
-		Integer spriteIndex = null;
-		LinkedList<Integer> frameList = new LinkedList<>();
-		Integer duration = null;
-		Boolean bright = null;
-		DEHActionPointer action = null;
-		
-		if ((spriteIndex = matchSpriteIndex(context)) == null)
+		if ((state.spriteIndex = matchSpriteIndex(context)) == null)
 		{
 			addErrorMessage("Expected valid sprite name.");
 			return false;				
 		}
 		
-		if (!matchFrameIndices(frameList))
+		if (!matchFrameIndices(state.frameList))
 		{
 			addErrorMessage("Expected valid frame characters after sprite name.");
 			return false;				
 		}
 		
-		if (singleFrame && frameList.size() > 1)
+		if (singleFrame && state.frameList.size() > 1)
 		{
 			addErrorMessage("Expected valid frame characters after sprite name.");
 			return false;				
 		}
 		
-		Integer frameIndex = frameList.pollFirst();
-		
-		if ((duration = matchInteger()) == null)
+		if ((state.duration = matchInteger()) == null)
 		{
 			addErrorMessage("Expected valid state duration after frame.");
 			return false;				
 		}
 
-		bright = matchBrightFlag();
+		state.bright = matchBrightFlag();
 		
-		action = matchActionPointer();
+		state.action = matchActionPointer();
 		
-		Integer pointerIndex = context.getStateActionPointerIndex(index);
-		if (pointerIndex == null && action != null || pointerIndex != null && action == null)
+		if (requireAction != null)
 		{
-			if (action != null)
-				addErrorMessage("Action function specified for state without a function!");
-			else
-				addErrorMessage("Action function not specified for state with a function!");
-			return false;				
+			if (requireAction && state.action == null)
+			{
+				addErrorMessage("Expected an action pointer for this state.");
+				return false;				
+			}
+			if (!requireAction && state.action != null)
+			{
+				addErrorMessage("Expected no action pointer for this state. State definition attempted to set one.");
+				return false;				
+			}
 		}
 		
-		// Boom special case.
-		if (context instanceof AbstractPatchBoomContext && pointerIndex != null && action == null)
-			action = DEHActionPointer.NULL;
+		// Maybe parse parameters.
+		if (state.action != null)
+		{
+			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			{
+				// get first argument
+				if ((state.parameter0 = matchInteger()) != null)
+				{
+					if (matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						if ((state.parameter1 = matchInteger()) == null)
+						{
+							addErrorMessage("Expected an action pointer for this state.");
+							return false;				
+						}
+					}
+				}
+				
+				if (!matchType(DecoHackKernel.TYPE_RPAREN))
+				{
+					
+				}
+			}
+		}
 		
-		// Set action pointer.
-		if (pointerIndex != null)
-			context.setActionPointer(index, action);
-		
-		// Set state stuff.
-		state
-			.setSpriteIndex(spriteIndex)
-			.setFrameIndex(frameIndex)
-			.setBright(bright)
-			.setDuration(duration)
-		;
 		return true;
 	}
 	
@@ -624,6 +684,15 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 	
+	// Tests for an identifier or string that references a sprite name.
+	private boolean currentIsSpriteIndex(DEHPatch patch)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
+			return false;
+		else
+			return patch.getSpriteIndex(currentToken().getLexeme()) != null;
+	}
+
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -652,29 +721,20 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an ammo type identifier.
 	private Integer matchAmmoType()
 	{
-		if (matchIdentifierLexemeIgnoreCase("bullets"))
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_BULLETS))
 			return 0;
-		else if (matchIdentifierLexemeIgnoreCase("shells"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SHELLS))
 			return 1;
-		else if (matchIdentifierLexemeIgnoreCase("cells"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CELLS))
 			return 2;
-		else if (matchIdentifierLexemeIgnoreCase("rockets"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ROCKETS))
 			return 3;
-		else if (matchIdentifierLexemeIgnoreCase("infinite"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INFINITE))
 			return 5;
 		else
 			return null;
 	}
 
-	// Tests for an identifier or string that references a sprite name.
-	private boolean currentIsSpriteIndex(DEHPatch patch)
-	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
-			return false;
-		else
-			return patch.getSpriteIndex(currentToken().getLexeme()) != null;
-	}
-	
 	// Matches an identifier or string that references a sprite name.
 	// If match, advance token and return sprite index integer.
 	// Else, return null.
@@ -733,6 +793,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		if (out == DEHActionPointer.NULL)
 			return null;
+
 		nextToken();
 		return out;
 	}
@@ -938,6 +999,31 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		return context;
+	}
+	
+	private static class TempState extends DEHState
+	{
+		private Integer spriteIndex;
+		private LinkedList<Integer> frameList;
+		private Integer duration;
+		private Boolean bright;
+		private DEHActionPointer action;
+		private Integer parameter0;
+		private Integer parameter1;
+		private DEHActionPointer pointer;
+		
+		private TempState()
+		{
+			this.spriteIndex = null;
+			this.frameList = new LinkedList<>();
+			this.duration = null;
+			this.bright = null;
+			this.action = null;
+			this.parameter0 = null;
+			this.parameter1 = null;
+			this.pointer = null;
+		}
+		
 	}
 	
 	/**

@@ -29,13 +29,15 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		for (int i = 0; i < this.strings.length; i++)
 			this.strings[i] = source.getString(i);
 		
+		int soundStringStart = getSoundStringIndex();
 		this.soundStringIndex = new HashMap<>();
 		for (int i = 0; i < getSoundCount(); i++)
-			this.soundStringIndex.put(strings[i + PatchDoom19.STRING_INDEX_SOUNDS], i);
+			this.soundStringIndex.put(strings[i + soundStringStart].toUpperCase(), i);
 		
+		int spriteStringStart = getSpriteStringIndex();
 		this.spriteStringIndex = new HashMap<>();
 		for (int i = 0; i < PatchDoom19.STRING_INDEX_SPRITES_COUNT; i++)
-			this.spriteStringIndex.put(strings[i + PatchDoom19.STRING_INDEX_SPRITES], i);
+			this.spriteStringIndex.put(strings[i + spriteStringStart].toUpperCase(), i);
 	}
 	
 	/**
@@ -67,19 +69,19 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 	{
 		String original = getSourcePatch().getString(index);
 		if (value.length() > original.length())
-			throw new IllegalArgumentException("Incoming string value is longer than the original string length: " + original.length());
+			throw new IllegalArgumentException(String.format("Incoming string value for index %d is longer than the original string length: %d", index, original.length()));
 		
 		// if sprite.
 		if (index >= getSoundStringIndex() && index < getSoundStringIndex() + getSoundCount())
 		{
-			soundStringIndex.remove(strings[index]);
-			soundStringIndex.put(value, index - getSoundStringIndex());
+			soundStringIndex.remove(strings[index].toUpperCase());
+			soundStringIndex.put(value.toUpperCase(), index - getSoundStringIndex());
 		}
 		// if sound name.
 		else if (index >= getSpriteStringIndex() && index < getSpriteStringIndex() + PatchDoom19.STRING_INDEX_SPRITES_COUNT)
 		{
-			spriteStringIndex.remove(strings[index]);
-			spriteStringIndex.put(value, index - getSpriteStringIndex());
+			spriteStringIndex.remove(strings[index].toUpperCase());
+			spriteStringIndex.put(value.toUpperCase(), index - getSpriteStringIndex());
 		}
 		
 		strings[index] = value;

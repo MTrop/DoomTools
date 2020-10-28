@@ -219,7 +219,7 @@ Examples:
 
 
 (NOTE: "Freeing" a state does NOT ALTER IT, it just flags that state as
-"available for the state-filling functions in this utility.)
+"available" for the state-filling functions in this utility.)
 
 Then, you can fill a sequence of states starting from a specific state, and
 free states will be auto-filled by availability, connected together in 
