@@ -30,7 +30,7 @@ public final class DecoHackMain
 
 	private static final Charset ASCII = Charset.forName("ASCII");
 	
-	private static final String DEFAULT_OUTFILENAME = "dehacked.lmp";
+	private static final String DEFAULT_OUTFILENAME = "dehacked.deh";
 	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
