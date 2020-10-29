@@ -282,7 +282,7 @@ public class PatchBoom implements DEHPatchBoom
 		private static final long serialVersionUID = -4513058612574767102L;
 		{
 			for (int i = 0; i < SOUNDSTRINGS.length; i++)
-				put(SOUNDSTRINGS[i], i);
+				put(SOUNDSTRINGS[i].toUpperCase(), i);
 		}
 	};
 	
@@ -291,7 +291,7 @@ public class PatchBoom implements DEHPatchBoom
 		private static final long serialVersionUID = -91431875042148768L;
 		{
 			for (int i = 0; i < SPRITESTRINGS.length; i++)
-				put(SPRITESTRINGS[i], i);
+				put(SPRITESTRINGS[i].toUpperCase(), i);
 		}
 	};
 	

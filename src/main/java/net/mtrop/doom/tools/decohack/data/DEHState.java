@@ -190,11 +190,11 @@ public class DEHState implements DEHObject<DEHState>
 	{
 		if (spriteIndex != frame.spriteIndex)
 			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append("\r\n");
-		if (frameIndex != frame.frameIndex)
+		if (frameIndex != frame.frameIndex || bright != frame.bright)
 			writer.append("Sprite subnumber = ").append(String.valueOf(frameIndex | (bright ? 0x08000 : 0x00000))).append("\r\n");
 		if (nextStateIndex != frame.nextStateIndex)
-			writer.append("Next frame = ").append(String.valueOf(frameIndex)).append("\r\n");
-		if (duration != frame.duration || bright != frame.bright)
+			writer.append("Next frame = ").append(String.valueOf(nextStateIndex)).append("\r\n");
+		if (duration != frame.duration)
 			writer.append("Duration = ").append(String.valueOf(duration)).append("\r\n");
 		if (parameter0 != frame.parameter0)
 			writer.append("Unknown 1 = ").append(String.valueOf(parameter0)).append("\r\n");

@@ -1,7 +1,45 @@
-using doom19
+using boom
 
 strings
 {
-	667 "1: Butttown"
-	677 "1: asdlkfjafasd  f"
+	HUSTR_1 "1: Butttown"
+	HUSTR_E1M1 "1: asdlkfjafasd"
+}
+
+ammo 0 "Shrapnel"
+{
+	max 50
+	pickup 1
+}
+
+ammo shells "Junk"
+{
+	max 4000
+	pickup 500
+}
+
+// should not replace anything
+ammo 3
+{
+	max 50
+	pickup 1
+}
+
+
+sound "barexp"
+{
+	priority 20
+	singular true
+}
+
+state 5
+{
+	TROO F 8 bright A_Light0()
+	stop
+}
+
+state 17
+{
+	SARG A -1 bright
+	stop
 }

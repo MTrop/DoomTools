@@ -112,7 +112,7 @@ public final class DecoHackExporter
 					writer.append("[CODEPTR]").append("\r\n");
 					codeptrHeader = true;
 				}
-				writer.append("Frame ")
+				writer.append("FRAME ")
 					.append(String.valueOf(i))
 					.append(" = ")
 					.append(pointer.getMnemonic())
@@ -127,7 +127,7 @@ public final class DecoHackExporter
 		for (String keys : patch.getStringKeys())
 		{
 			String value;
-			if (Objects.equals(value = patch.getString(keys), patch.getSourcePatch().getString(keys)))
+			if (!Objects.equals(value = patch.getString(keys), patch.getSourcePatch().getString(keys)))
 			{
 				if (!stringsHeader)
 				{
