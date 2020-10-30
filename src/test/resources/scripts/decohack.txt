@@ -43,3 +43,16 @@ state 17
 	SARG A -1 bright
 	stop
 }
+
+pars
+{
+	e1m1 150
+	map23 90
+	map02 200
+}
+
+misc
+{
+	maxhealth 205
+	maxarmor 300
+}

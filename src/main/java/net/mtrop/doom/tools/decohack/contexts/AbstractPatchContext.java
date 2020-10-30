@@ -25,6 +25,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	private DEHMiscellany miscellany;
 
 	private boolean[] freeStates;
+	private int freeStateCount;
+	private int freePointerStateCount;
 	private boolean[] protectedStates;
 	
 	/**
@@ -61,6 +63,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
 		this.freeStates = new boolean[states.length];
+		this.freeStateCount = 0;
 		this.protectedStates = new boolean[states.length];
 		
 		// Protect first two states from clear.
@@ -167,6 +170,24 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	/**
+	 * Gets how many free states there are.
+	 * @return the amount of states flagged as "free."
+	 */
+	public int getFreeStateCount() 
+	{
+		return freeStateCount;
+	}
+	
+	/**
+	 * Gets how many free pointer-having states there are.
+	 * @return the amount of pointer-attached states flagged as "free."
+	 */
+	public int getFreePointerStateCount() 
+	{
+		return freePointerStateCount;
+	}
+	
+	/**
 	 * Gets if a state is flagged as "free".
 	 * @param index the index.
 	 * @return true if so, false if not.
@@ -189,7 +210,20 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		if (isProtectedState(index))
 			throw new IllegalStateException("State " + index + " is a protected state.");
+		boolean prev = freeStates[index]; 
 		freeStates[index] = state;
+		if (prev && !state)
+		{
+			freeStateCount--;
+			if (getStateActionPointerIndex(index) != null)
+				freePointerStateCount--;
+		}
+		else if (!prev && state)
+		{
+			freeStateCount++;
+			if (getStateActionPointerIndex(index) != null)
+				freePointerStateCount++;
+		}
 	}
 	
 	/**

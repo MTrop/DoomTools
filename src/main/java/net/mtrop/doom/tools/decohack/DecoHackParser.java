@@ -23,7 +23,9 @@ import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
+import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
@@ -38,7 +40,34 @@ public final class DecoHackParser extends Lexer.Parser
 {
 	public static final String STREAMNAME_TEXT = "[Text String]";
 
+	private static final String KEYWORD_MISC = "misc";
+	private static final String KEYWORD_MAX_ARMOR = "maxArmor";
+	private static final String KEYWORD_MAX_HEALTH = "maxHealth";
+	private static final String KEYWORD_BFG_CELLS_PER_SHOT = "bfgCellsPerShot";
+	private static final String KEYWORD_IDKFA_ARMOR_CLASS = "idkfaArmorClass";
+	private static final String KEYWORD_IDKFA_ARMOR = "idkfaArmor";
+	private static final String KEYWORD_IDFA_ARMOR_CLASS = "idfaArmorClass";
+	private static final String KEYWORD_IDFA_ARMOR = "idfaArmor";
+	private static final String KEYWORD_GOD_MODE_HEALTH = "godModeHealth";
+	private static final String KEYWORD_MAX_SOULSPHERE_HEALTH = "maxSoulsphereHealth";
+	private static final String KEYWORD_SOULSPHERE_HEALTH = "soulsphereHealth";
+	private static final String KEYWORD_BLUE_ARMOR_CLASS = "blueArmorClass";
+	private static final String KEYWORD_GREEN_ARMOR_CLASS = "greenArmorClass";
+	private static final String KEYWORD_INITIAL_HEALTH = "initialHealth";
+	private static final String KEYWORD_INITIAL_BULLETS = "initialBullets";
+	private static final String KEYWORD_MONSTER_INFIGHTING = "monsterInfighting";
+	private static final String KEYWORD_PARS = "pars";
 	private static final String KEYWORD_STATE = "state";
+	private static final String KEYWORD_FILL = "fill";
+	private static final String KEYWORD_GOTO = "goto";
+	private static final String KEYWORD_LOOP = "loop";
+	private static final String KEYWORD_WAIT = "wait";
+	private static final String KEYWORD_STOP = "stop";
+	private static final String KEYWORD_FREE = "free";
+	private static final String KEYWORD_PROTECT = "protect";
+	private static final String KEYWORD_UNPROTECT = "unprotect";
+	private static final String KEYWORD_TO = "to";
+	private static final String KEYWORD_FROM = "from";
 	private static final String KEYWORD_SOUND = "sound";
 	private static final String KEYWORD_SINGULAR = "singular";
 	private static final String KEYWORD_PRIORITY = "priority";
@@ -51,6 +80,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PICKUP = "pickup";
 	private static final String KEYWORD_MAX = "max";
 	private static final String KEYWORD_STRINGS = "strings";
+	private static final String KEYWORD_WEAPON = "weapon";
+	private static final String KEYWORD_THING = "thing";
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_DOOM19 = "doom19";
 	private static final String KEYWORD_UDOOM19 = "udoom19";
@@ -188,6 +219,15 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			return parseStateBlock(context);
 		}
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PARS))
+		{
+			return parseParBlock(context);
+		}
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MISC))
+		{
+			return parseMiscellaneousBlock(context);
+		}
+		// TODO: Finish Protect, Unprotect, Thing, and Weapon
 		else if (currentToken() != null)
 		{
 			addErrorMessage("Unknown section or command \"%s\".", currentToken().getLexeme());
@@ -406,6 +446,215 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		return true;
 	}
+
+	// Parses a par block.
+	private boolean parseParBlock(AbstractPatchContext<?> context)
+	{
+		if (!(context instanceof AbstractPatchBoomContext))
+		{
+			addErrorMessage("Par block not supported in non-Boom type patches.");
+			return false;
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_PARS);
+			return false;
+		}
+		
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
+		{
+			EpisodeMap map;
+			if ((map = matchEpisodeMap()) == null)
+			{
+				addErrorMessage("Expected EXMY or MAPXX map entry.");
+				return false;
+			}
+			
+			Integer seconds;
+			if ((seconds = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected seconds after map entry.");
+				return false;
+			}
+			
+			((AbstractPatchBoomContext)context).setParSeconds(map, seconds);
+		}
+
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_PARS);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	// Parses a par block.
+	private boolean parseMiscellaneousBlock(AbstractPatchContext<?> context)
+	{
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_MISC);
+			return false;
+		}
+		
+		DEHMiscellany misc = context.getMiscellany();
+		
+		Boolean flag;
+		Integer value;
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_MONSTER_INFIGHTING))
+			{
+				if ((flag = matchBoolean()) == null)
+				{
+					addErrorMessage("Expected boolean value after \"%s\".", KEYWORD_MONSTER_INFIGHTING);
+					return false;
+				}
+				misc.setMonsterInfightingEnabled(flag);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INITIAL_BULLETS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_INITIAL_BULLETS);
+					return false;
+				}
+				misc.setInitialBullets(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INITIAL_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_INITIAL_HEALTH);
+					return false;
+				}
+				misc.setInitialHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GREEN_ARMOR_CLASS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_GREEN_ARMOR_CLASS);
+					return false;
+				}
+				misc.setGreenArmorClass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BLUE_ARMOR_CLASS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_BLUE_ARMOR_CLASS);
+					return false;
+				}
+				misc.setBlueArmorClass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOULSPHERE_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_SOULSPHERE_HEALTH);
+					return false;
+				}
+				misc.setSoulsphereHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_SOULSPHERE_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_MAX_SOULSPHERE_HEALTH);
+					return false;
+				}
+				misc.setMaxSoulsphereHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOD_MODE_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_GOD_MODE_HEALTH);
+					return false;
+				}
+				misc.setGodModeHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDFA_ARMOR))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_IDFA_ARMOR);
+					return false;
+				}
+				misc.setIDFAArmor(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDFA_ARMOR_CLASS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_IDFA_ARMOR_CLASS);
+					return false;
+				}
+				misc.setIDFAArmorClass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDKFA_ARMOR))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_IDKFA_ARMOR);
+					return false;
+				}
+				misc.setIDKFAArmor(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDKFA_ARMOR_CLASS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_IDKFA_ARMOR_CLASS);
+					return false;
+				}
+				misc.setIDKFAArmorClass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BFG_CELLS_PER_SHOT))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_BFG_CELLS_PER_SHOT);
+					return false;
+				}
+				misc.setBFGCellsPerShot(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_MAX_HEALTH);
+					return false;
+				}
+				misc.setMaxHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_ARMOR))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_MAX_ARMOR);
+					return false;
+				}
+				misc.setMaxArmor(value);
+			}
+			else
+			{
+				addErrorMessage("Expected miscellaneous entry type.");
+				return false;
+			}
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_MISC);
+			return false;
+		}
+
+		return true;
+	}
 	
 	// Parses a state block.
 	private boolean parseStateBlock(AbstractPatchContext<?> context)
@@ -437,26 +686,96 @@ public final class DecoHackParser extends Lexer.Parser
 
 			return true;
 		}
-		/*
 		// if fill state...
-		else if (matchIdentifierLexemeIgnoreCase("fill"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FILL))
 		{
-			if ((index = matchPositiveInteger()) != null)
+			if ((index = matchPositiveInteger()) == null)
 			{
-				// TODO: Finish this.
+				addErrorMessage("Expected state index keyword after \"%s\".", KEYWORD_FILL);
+				return false;
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_LBRACE))
+			{
+				addErrorMessage("Expected '{' after \"%s %s\" header.", KEYWORD_STATE, KEYWORD_FILL);
+				return false;
+			}
+
+			if (!parseStateFillSequence(context, index))
+				return false;
+
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected '}' after \"%s %s\" block.", KEYWORD_STATE, KEYWORD_FILL);
+				return false;
 			}
 			
 			return true;
 		}
-		*/
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		{
+			return parseFreeLine(context);
+		}
+		// TODO: Protect, Unprotect
 		else
 		{
-			addErrorMessage("Expected state index or \"fill\" keyword after \"state\".");
+			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", KEYWORD_FILL, KEYWORD_STATE);
 			return false;
 		}
 	}
+
+	// Parses a sequence of auto-fill states.
+	private boolean parseStateFillSequence(AbstractPatchContext<?> context, int startIndex)
+	{
+		if (!context.isFreeState(startIndex))
+		{
+			addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
+			return false;
+		}
+		
+		// First frame must match state, and the block must contain at least one state.
+		if (!currentIsSpriteIndex(context))
+		{
+			addErrorMessage("Expected sprite name (for a state description).");
+			return false;
+		}
+
+		Integer index = startIndex;
+		TempState parsed = new TempState();
+		boolean isBoom = context instanceof AbstractPatchBoomContext;			
+		Integer pointerIndex = context.getStateActionPointerIndex(index);
+		
+		if (!parseStateLine(context, parsed, true, isBoom ? null : pointerIndex != null))
+			return false;
+		
+		FillState stateCursor = new FillState();
+		stateCursor.lastIndex = index;
+		if (!fillStates(context, parsed, stateCursor))
+			return false;
+		
+		while (currentIsSpriteIndex(context))
+		{
+			parsed.reset();
+			if (!parseStateLine(context, parsed))
+				return false;
+			if (!fillStates(context, parsed, stateCursor))
+				return false;
+		}
+		
+		// Parse end.
+		Integer nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, null, stateCursor.lastIndex)) == null)
+		{
+			addErrorMessage("Expected next state clause (%s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_GOTO);
+			return false;
+		}
+		
+		stateCursor.lastState.setNextStateIndex(nextStateIndex);
+		return true;
+	}
 	
 	// Parses a single state definition body.
+	// Either consists of a next state index clause, a state and next index clause, or just a state.
 	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
 	{
 		Integer nextStateIndex = null;
@@ -466,8 +785,8 @@ public final class DecoHackParser extends Lexer.Parser
 		if (currentIsSpriteIndex(context))
 		{
 			TempState parsedState = new TempState();
-			boolean isBoom = context instanceof AbstractPatchBoomContext;
 			
+			boolean isBoom = context instanceof AbstractPatchBoomContext;			
 			Integer pointerIndex = context.getStateActionPointerIndex(index);
 			if (!parseStateLine(context, parsedState, true, isBoom ? null : pointerIndex != null))
 				return false;
@@ -477,24 +796,18 @@ public final class DecoHackParser extends Lexer.Parser
 				if (pointerIndex != null && parsedState.action == null)
 					parsedState.action = DEHActionPointer.NULL;
 			}
-			else
+			else if ((pointerIndex == null && parsedState.action != null) || (pointerIndex != null && parsedState.action == null))
 			{
-				if ((pointerIndex == null && parsedState.action != null) || (pointerIndex != null && parsedState.action == null))
-				{
-					if (parsedState.action != null)
-						addErrorMessage("Action function specified for state without a function!");
-					else
-						addErrorMessage("Action function not specified for state with a function!");
-					return false;
-				}
+				if (parsedState.action != null)
+					addErrorMessage("Action function specified for state without a function!");
+				else
+					addErrorMessage("Action function not specified for state with a function!");
+				return false;
 			}
 
 			if (pointerIndex != null)
 				context.setActionPointer(pointerIndex, parsedState.action);
 			
-			// Try to parse next state clause.
-			nextStateIndex = parseNextStateIndex(context, null, null, index);
-
 			// fill state.
 			context.getState(index)
 				.setSpriteIndex(parsedState.spriteIndex)
@@ -504,6 +817,9 @@ public final class DecoHackParser extends Lexer.Parser
 				.setParameter0(parsedState.parameter0)
 				.setParameter1(parsedState.parameter1)
 			;
+
+			// Try to parse next state clause.
+			nextStateIndex = parseNextStateIndex(context, null, null, index);
 			if (nextStateIndex != null)
 				context.getState(index).setNextStateIndex(nextStateIndex);
 
@@ -516,6 +832,13 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Parse a single state and if true is returned, the input state is altered.
+	// requireAction is either true, false, or null. If null, no check is performed. 
+	private boolean parseStateLine(AbstractPatchContext<?> context, TempState state)
+	{
+		return parseStateLine(context, state, false, null);
+	}
+	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
 	private boolean parseStateLine(AbstractPatchContext<?> context, TempState state, boolean singleFrame, Boolean requireAction) 
@@ -608,24 +931,24 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer parseNextStateIndex(AbstractPatchContext<?> context, Map<String, Integer> stateMap, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
-		if (matchIdentifierLexemeIgnoreCase("stop"))
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STOP))
 		{
 			return 0;
 		}
-		else if (matchIdentifierLexemeIgnoreCase("wait"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WAIT))
 		{
 			return currentStateIndex;
 		}
-		else if (matchIdentifierLexemeIgnoreCase("loop"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_LOOP))
 		{
 			if (lastLabelledStateIndex == null)
 			{
-				addErrorMessage("Can't use \"loop\" with no declared state labels.");
+				addErrorMessage("Can't use \"%s\" with no declared state labels.", KEYWORD_LOOP);
 				return null;
 			}
 			return lastLabelledStateIndex;
 		}
-		else if (matchIdentifierLexemeIgnoreCase("goto"))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOTO))
 		{
 			Integer nextFrame;
 			String labelName;
@@ -633,7 +956,7 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				if (stateMap == null)
 				{
-					addErrorMessage("Name of label was unexpected after \"goto\". Only valid in thing or weapon.");
+					addErrorMessage("Name of label was unexpected after \"%s\". Only valid in thing or weapon.", KEYWORD_GOTO);
 					return null;				
 				}
 				else if ((nextFrame = stateMap.get(labelName)) == null)
@@ -648,7 +971,7 @@ public final class DecoHackParser extends Lexer.Parser
 					Integer amount;
 					if ((amount = matchPositiveInteger()) == null)
 					{
-						addErrorMessage("Expected integer after label name in \"goto\".");
+						addErrorMessage("Expected integer after label name in \"%s\".", KEYWORD_GOTO);
 						return null;				
 					}
 					
@@ -665,7 +988,7 @@ public final class DecoHackParser extends Lexer.Parser
 					Integer amount;
 					if ((amount = matchPositiveInteger()) == null)
 					{
-						addErrorMessage("Expected integer after label name in \"goto\".");
+						addErrorMessage("Expected integer after label name in \"%s\".", KEYWORD_GOTO);
 						return null;				
 					}
 					
@@ -684,17 +1007,18 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if ((nextFrame = matchPositiveInteger()) == null)
 			{
-				addErrorMessage("Expected integer after \"goto\".");
+				addErrorMessage("Expected integer after \"%s\".", KEYWORD_GOTO);
 				return null;				
 			}
 			else if (nextFrame >= context.getStateCount())
 			{
-				addErrorMessage("Expected valid state index after \"goto\".");
+				addErrorMessage("Expected valid state index after \"%s\".", KEYWORD_GOTO);
 				return null;				
 			}
 			else
 			{
-				return nextFrame;
+				addErrorMessage("Expected state label or state index number after \"%s\".", KEYWORD_GOTO);
+				return null;				
 			}
 		}
 		else
@@ -703,6 +1027,61 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 	
+	// Parses a state freeing command.
+	private boolean parseFreeLine(AbstractPatchContext<?> context)
+	{
+		// TODO: Finish this.
+		return false;
+	}
+	
+	// Attempts to fill states from a starting index.
+	// Returns the last filled state.
+	private boolean fillStates(AbstractPatchContext<?> context, TempState state, FillState fillState)
+	{
+		boolean isBoom = context instanceof AbstractPatchBoomContext;
+		
+		while (!state.frameList.isEmpty())
+		{
+			Integer index = state.action != null 
+				? context.findNextFreeActionPointerState(fillState.lastIndex)
+				: context.findNextFreeState(fillState.lastIndex);
+			
+			if (index == null) 
+			{
+				if (state.action != null)
+					addErrorMessage("No more free states with an action pointer.");
+				else
+					addErrorMessage("No more free states.");
+				return false;
+			}
+			
+			if (fillState.lastState != null)
+				fillState.lastState.setNextStateIndex(index);
+	
+			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			
+			fillState.lastState = context.getState(index)
+				.setSpriteIndex(state.spriteIndex)
+				.setFrameIndex(state.frameList.pollFirst())
+				.setDuration(state.duration)
+				.setBright(state.bright)
+				.setParameter0(state.parameter0)
+				.setParameter1(state.parameter1)
+			;
+	
+			if (isBoom && pointerIndex != null && state.action == null)
+				state.action = DEHActionPointer.NULL;
+			
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, state.action);
+			
+			context.setFreeState(index, false);
+			fillState.lastIndex = index;
+		}
+		
+		return true;
+	}
+
 	// Tests for an identifier or string that references a sprite name.
 	private boolean currentIsSpriteIndex(DEHPatch patch)
 	{
@@ -1020,6 +1399,12 @@ public final class DecoHackParser extends Lexer.Parser
 		return context;
 	}
 	
+	private static class FillState
+	{
+		private DEHState lastState;
+		private int lastIndex;
+	}
+	
 	private static class TempState
 	{
 		private Integer spriteIndex;
@@ -1032,8 +1417,14 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		private TempState()
 		{
-			this.spriteIndex = null;
 			this.frameList = new LinkedList<>();
+			reset();
+		}
+		
+		void reset()
+		{
+			this.spriteIndex = null;
+			this.frameList.clear();
 			this.duration = null;
 			this.bright = null;
 			this.action = null;

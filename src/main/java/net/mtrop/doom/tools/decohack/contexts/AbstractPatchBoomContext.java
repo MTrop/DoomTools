@@ -78,4 +78,35 @@ public abstract class AbstractPatchBoomContext extends AbstractPatchContext<DEHP
 		return pars.get(episodeMap);
 	}
 
+	/**
+	 * Gets par time seconds.
+	 * @param map the map number.
+	 * @param seconds the amount of seconds.
+	 */
+	public void setParSeconds(int map, int seconds)
+	{
+		setParSeconds(0, map, seconds);
+	}
+
+	/**
+	 * Gets par time seconds.
+	 * @param episode the episode number.
+	 * @param map the map number.
+	 * @param seconds the amount of seconds.
+	 */
+	public void setParSeconds(int episode, int map, int seconds)
+	{
+		setParSeconds(EpisodeMap.create(episode, map), seconds);
+	}
+
+	/**
+	 * Sets the seconds of a episode and map.
+	 * @param episodeMap the episode and map.
+	 * @param seconds the amount of seconds.
+	 */
+	public void setParSeconds(EpisodeMap episodeMap, int seconds)
+	{
+		pars.put(episodeMap, seconds);
+	}
+	
 }

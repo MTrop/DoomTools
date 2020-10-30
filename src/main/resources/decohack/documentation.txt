@@ -197,25 +197,25 @@ Examples:
 For replacing states in bulk, you will have to "free" a bunch of states for
 replacement.
 
-	free state <INTEGER>
+	state free <INTEGER>
 
 
 To free an explicit range (inclusive):
 
-	free state <INTEGER> to <INTEGER>
+	state free <INTEGER> to <INTEGER>
 
 
 To free from a starting state index, following next state indices until a 
 free or protected state is reached:
 
-	free from state <INTEGER>
+	state free from <INTEGER>
 
 
 Examples:
 
-	free state 100
-	free state 100 to 200
-	free from state 100
+	state free 100
+	state free 100 to 200
+	state free from 100
 
 
 (NOTE: "Freeing" a state does NOT ALTER IT, it just flags that state as
@@ -255,8 +255,8 @@ Each state altered or filled this way is no longer "free."
 You can protect a state from being freed (or an inclusive range of them) by 
 writing the following:
 
-	protect state <INTEGER>
-	protect state <INTEGER> to <INTEGER>
+	state protect <INTEGER>
+	state protect <INTEGER> to <INTEGER>
 
 
 It will not be flagged as "free" if in a range of free states, and attempting 
@@ -264,8 +264,8 @@ to alter the state directly will throw an error. By default, state 0 and 1
 are flagged as protected. You can turn off the protection on states by doing 
 the following:
 
-	unprotect state <INTEGER>
-	unprotect state <INTEGER> to <INTEGER>
+	state unprotect <INTEGER>
+	state unprotect <INTEGER> to <INTEGER>
 
 
 ==============================================================================
@@ -284,7 +284,10 @@ alias for frame 1.
 
 	weapon <INTEGER> [ <STRING> ]
 	{
-		ammotype ( 0 | 1 | 2 | 3 | 5 | bullets | shells | rockets | cells | infinite )
+		ammotype ( 0 | 1 | 2 | 3 | 5 | bullets | shells | cells | rockets | infinite )
+		
+		state <WeaponStateName> <INTEGER> // specific state assignment.
+		
 		states
 		{
 			ready:
@@ -315,13 +318,13 @@ Example:
 		{
 			ready:
 				CHGG A 1 A_WeaponReady
-				loop
+				wait
 			deselect:
 				CHGG A 1 A_Lower
-				loop
+				wait
 			select:
 				CHGG A 1 A_Raise
-				loop
+				wait
 			fire:
 				CHGG AB 4 A_FireCGun
 				CHGG B 0 A_ReFire
@@ -337,8 +340,8 @@ Example:
 
 To clear all states connected to a weapon, type the following:
 
-	free weapon <INTEGER> states
-	free weapon <INTEGER> <StateName> states
+	weapon <INTEGER> free states
+	weapon <INTEGER> free <WeaponStateName> states
 
 
 And the same result will happen if you freed from each defined weapon frame 
@@ -384,7 +387,7 @@ the thing state indices. Other labels are used for arbitrary jump points.
 		DeathSound <STRING>
 		ActiveSound <STRING>
 		
-		clear states // if present, clear all state indices.
+		state <ThingStateName> <INTEGER> // specific state assignment.
 		
 		states
 		{
@@ -478,8 +481,8 @@ Example:
 
 To clear all states connected to a thing, type the following:
 
-	free thing <INTEGER> states
-	free thing <INTEGER> <StateName> states
+	thing <INTEGER> free states
+	thing <INTEGER> free <ThingStateName> states
 
 
 And the same result will happen if you freed from each defined thing frame 
