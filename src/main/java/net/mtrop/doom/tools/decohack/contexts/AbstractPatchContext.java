@@ -337,7 +337,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
-	 * Searches linearly for the next free state with an action pointer in this context from a starting index.
+	 * Searches linearly for the next free state WITH an action pointer in this context from a starting index.
 	 * If the start index is free, it is returned. If a full search completes without finding
 	 * a free index, <code>null</code> is returned.
 	 * @param startingIndex the starting index.
@@ -346,7 +346,28 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Integer findNextFreeActionPointerState(int startingIndex)
 	{
 		int i = startingIndex;
-		while (!isFreeState(i) && getStateActionPointerIndex(i) != null)
+		while (!(isFreeState(i) && getStateActionPointerIndex(i) != null))
+		{
+			i++;
+			if (i == startingIndex)
+				return null;
+			if (i >= getStateCount())
+				i = 0;
+		}
+		return i;
+	}
+	
+	/**
+	 * Searches linearly for the next free state WITHOUT an action pointer in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free state, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeNonActionPointerState(int startingIndex)
+	{
+		int i = startingIndex;
+		while (!(isFreeState(i) && getStateActionPointerIndex(i) == null))
 		{
 			i++;
 			if (i == startingIndex)

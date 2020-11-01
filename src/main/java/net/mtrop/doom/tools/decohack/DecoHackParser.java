@@ -694,6 +694,12 @@ public final class DecoHackParser extends Lexer.Parser
 				addErrorMessage("Expected state index keyword after \"%s\".", KEYWORD_FILL);
 				return false;
 			}
+
+			if (index >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", index, context.getStateCount() - 1);
+				return false;
+			}
 			
 			if (!matchType(DecoHackKernel.TYPE_LBRACE))
 			{
@@ -714,9 +720,16 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
 		{
-			return parseFreeLine(context);
+			return parseStateFreeLine(context);
 		}
-		// TODO: Protect, Unprotect
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PROTECT))
+		{
+			return parseStateProtectLine(context, true);
+		}
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_UNPROTECT))
+		{
+			return parseStateProtectLine(context, false);
+		}
 		else
 		{
 			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", KEYWORD_FILL, KEYWORD_STATE);
@@ -741,36 +754,29 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		Integer index = startIndex;
-		TempState parsed = new TempState();
-		boolean isBoom = context instanceof AbstractPatchBoomContext;			
-		Integer pointerIndex = context.getStateActionPointerIndex(index);
+		ParsedState parsed = new ParsedState();
+		StateFillCursor stateCursor = new StateFillCursor();
+		stateCursor.lastIndexFilled = index;
+		boolean first = true;
 		
-		if (!parseStateLine(context, parsed, true, isBoom ? null : pointerIndex != null))
-			return false;
-		
-		FillState stateCursor = new FillState();
-		stateCursor.lastIndex = index;
-		if (!fillStates(context, parsed, stateCursor))
-			return false;
-		
-		while (currentIsSpriteIndex(context))
-		{
+		do {
 			parsed.reset();
 			if (!parseStateLine(context, parsed))
 				return false;
-			if (!fillStates(context, parsed, stateCursor))
+			if (!fillStates(context, parsed, stateCursor, first))
 				return false;
-		}
+			first = false;
+		} while (currentIsSpriteIndex(context));
 		
 		// Parse end.
 		Integer nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, null, stateCursor.lastIndex)) == null)
+		if ((nextStateIndex = parseNextStateIndex(context, null, startIndex, stateCursor.lastIndexFilled)) == null)
 		{
 			addErrorMessage("Expected next state clause (%s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_GOTO);
 			return false;
 		}
 		
-		stateCursor.lastState.setNextStateIndex(nextStateIndex);
+		stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
 		return true;
 	}
 	
@@ -784,7 +790,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		if (currentIsSpriteIndex(context))
 		{
-			TempState parsedState = new TempState();
+			ParsedState parsedState = new ParsedState();
 			
 			boolean isBoom = context instanceof AbstractPatchBoomContext;			
 			Integer pointerIndex = context.getStateActionPointerIndex(index);
@@ -834,14 +840,14 @@ public final class DecoHackParser extends Lexer.Parser
 
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, TempState state)
+	private boolean parseStateLine(AbstractPatchContext<?> context, ParsedState state)
 	{
 		return parseStateLine(context, state, false, null);
 	}
 	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, TempState state, boolean singleFrame, Boolean requireAction) 
+	private boolean parseStateLine(AbstractPatchContext<?> context, ParsedState state, boolean singleFrame, Boolean requireAction) 
 	{
 		if ((state.spriteIndex = matchSpriteIndex(context)) == null)
 		{
@@ -857,7 +863,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		if (singleFrame && state.frameList.size() > 1)
 		{
-			addErrorMessage("Expected valid frame characters after sprite name.");
+			addErrorMessage("Expected a single frame character after sprite name.");
 			return false;				
 		}
 		
@@ -1017,8 +1023,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected state label or state index number after \"%s\".", KEYWORD_GOTO);
-				return null;				
+				return nextFrame;				
 			}
 		}
 		else
@@ -1028,39 +1033,146 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a state freeing command.
-	private boolean parseFreeLine(AbstractPatchContext<?> context)
+	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
 	{
-		// TODO: Finish this.
-		return false;
+		Integer min, max;
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FROM))
+		{
+			// free chain
+			if ((min = matchPositiveInteger()) != null)
+			{
+				context.freeConnectedStates(min);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected state index after \"%s\".", KEYWORD_FROM);
+				return false;
+			}
+		}
+		else if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// free range
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					int a = Math.min(min, max);
+					int b = Math.max(min, max);
+					while (a <= b)
+						context.setFreeState(a++, true);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
+					return false;
+				}
+			}
+			// free single
+			else
+			{
+				context.setFreeState(min, true);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or state index after \"%s\".", KEYWORD_FROM, KEYWORD_FREE);
+			return false;
+		}
+	}
+	
+	// Parses a state protection line.
+	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
+	{
+		Integer min, max;
+		if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// protect range
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					int a = Math.min(min, max);
+					int b = Math.max(min, max);
+					while (a <= b)
+						context.setProtectedState(a++, protectedState);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
+					return false;
+				}
+			}
+			// protect single state.
+			else
+			{
+				context.setProtectedState(min, protectedState);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected state index after \"%s\".", protectedState ? KEYWORD_PROTECT : KEYWORD_UNPROTECT);
+			return false;
+		}
 	}
 	
 	// Attempts to fill states from a starting index.
-	// Returns the last filled state.
-	private boolean fillStates(AbstractPatchContext<?> context, TempState state, FillState fillState)
+	// If forceFirst is true, the state index filled MUST be cursor.lastFilledIndex. 
+	// Cursor is advanced.
+	private boolean fillStates(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor, boolean forceFirst)
 	{
 		boolean isBoom = context instanceof AbstractPatchBoomContext;
 		
 		while (!state.frameList.isEmpty())
 		{
-			Integer index = state.action != null 
-				? context.findNextFreeActionPointerState(fillState.lastIndex)
-				: context.findNextFreeState(fillState.lastIndex);
+			Integer currentIndex;
+			if ((currentIndex = searchNextState(context, state, cursor)) == null)
+				return false;
 			
-			if (index == null) 
+			if (!isBoom && forceFirst && currentIndex != cursor.lastIndexFilled)
 			{
-				if (state.action != null)
-					addErrorMessage("No more free states with an action pointer.");
-				else
-					addErrorMessage("No more free states.");
+				addErrorMessage("Provided state definition would not fill state " + cursor.lastIndexFilled + ". " + (
+					state.action != null 
+						? "State " + cursor.lastIndexFilled + " cannot have an action pointer."
+						: "State " + cursor.lastIndexFilled + " must have an action pointer."
+				));
 				return false;
 			}
 			
-			if (fillState.lastState != null)
-				fillState.lastState.setNextStateIndex(index);
+			if (cursor.lastStateFilled != null)
+				cursor.lastStateFilled.setNextStateIndex(currentIndex);
 	
-			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			Integer pointerIndex = context.getStateActionPointerIndex(currentIndex);
 			
-			fillState.lastState = context.getState(index)
+			cursor.lastStateFilled = context.getState(currentIndex)
 				.setSpriteIndex(state.spriteIndex)
 				.setFrameIndex(state.frameList.pollFirst())
 				.setDuration(state.duration)
@@ -1075,11 +1187,40 @@ public final class DecoHackParser extends Lexer.Parser
 			if (pointerIndex != null)
 				context.setActionPointer(pointerIndex, state.action);
 			
-			context.setFreeState(index, false);
-			fillState.lastIndex = index;
+			context.setFreeState(currentIndex, false);
+			cursor.lastIndexFilled = currentIndex;
+			forceFirst = false;
 		}
 		
 		return true;
+	}
+
+	private Integer searchNextState(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor) 
+	{
+		boolean isBoom = context instanceof AbstractPatchBoomContext;
+		
+		Integer index = isBoom 
+			? context.findNextFreeState(cursor.lastIndexFilled)
+			: (state.action != null 
+				? context.findNextFreeActionPointerState(cursor.lastIndexFilled)
+				: context.findNextFreeNonActionPointerState(cursor.lastIndexFilled)
+			);
+		
+		if (index == null) 
+		{
+			if (isBoom)
+			{
+				addErrorMessage("No more free states.");
+			}
+			else
+			{
+				if (state.action != null)
+					addErrorMessage("No more free states with an action pointer.");
+				else
+					addErrorMessage("No more free states without an action pointer.");
+			}
+		}
+		return index;
 	}
 
 	// Tests for an identifier or string that references a sprite name.
@@ -1399,13 +1540,13 @@ public final class DecoHackParser extends Lexer.Parser
 		return context;
 	}
 	
-	private static class FillState
+	private static class StateFillCursor
 	{
-		private DEHState lastState;
-		private int lastIndex;
+		private DEHState lastStateFilled;
+		private int lastIndexFilled;
 	}
 	
-	private static class TempState
+	private static class ParsedState
 	{
 		private Integer spriteIndex;
 		private LinkedList<Integer> frameList;
@@ -1415,7 +1556,7 @@ public final class DecoHackParser extends Lexer.Parser
 		private Integer parameter0;
 		private Integer parameter1;
 		
-		private TempState()
+		private ParsedState()
 		{
 			this.frameList = new LinkedList<>();
 			reset();

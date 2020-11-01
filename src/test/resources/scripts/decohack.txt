@@ -1,9 +1,9 @@
-using boom
+using doom19
 
 strings
 {
-	HUSTR_1 "1: Butttown"
-	HUSTR_E1M1 "1: asdlkfjafasd"
+	//HUSTR_1 "1: Butttown"
+	//HUSTR_E1M1 "1: asdlkfjafasd"
 }
 
 ammo 0 "Shrapnel"
@@ -34,25 +34,35 @@ sound "barexp"
 
 state 5
 {
-	TROO F 8 bright A_Light0()
+	TROO F 8 bright
 	stop
 }
 
 state 17
 {
-	SARG A -1 bright
+	SARG A -1 bright A_Light0
 	stop
 }
-
+/*
 pars
 {
 	e1m1 150
 	map23 90
 	map02 200
 }
-
+*/
 misc
 {
 	maxhealth 205
 	maxarmor 300
 }
+
+state free from 442
+state protect 437
+
+state fill 442 
+{
+	SARG AB 4
+	wait
+}
+
