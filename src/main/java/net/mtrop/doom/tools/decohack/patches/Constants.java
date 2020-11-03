@@ -1123,6 +1123,7 @@ interface Constants
 
 	static final DEHThing[] DEHTHING = 
 	{
+		null,
 		(new DEHThing()).setName("Player")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(100)

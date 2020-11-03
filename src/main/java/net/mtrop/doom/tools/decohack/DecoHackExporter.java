@@ -204,7 +204,7 @@ public final class DecoHackExporter
 	 */
 	private static void writePatchBody(AbstractPatchContext<?> patch, Writer writer) throws IOException
 	{
-		for (int i = 0; i < patch.getThingCount(); i++)
+		for (int i = 1; i < patch.getThingCount(); i++)
 		{
 			DEHThing thing = patch.getThing(i);
 			DEHThing original = patch.getSourcePatch().getThing(i);

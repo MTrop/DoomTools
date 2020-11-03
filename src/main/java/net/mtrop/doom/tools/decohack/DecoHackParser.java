@@ -26,6 +26,9 @@ import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
@@ -80,8 +83,22 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PICKUP = "pickup";
 	private static final String KEYWORD_MAX = "max";
 	private static final String KEYWORD_STRINGS = "strings";
+	private static final String KEYWORD_STATES = "states";
 	private static final String KEYWORD_WEAPON = "weapon";
+	private static final String KEYWORD_WEAPONSTATE_READY = "ready";
+	private static final String KEYWORD_WEAPONSTATE_SELECT = "select";
+	private static final String KEYWORD_WEAPONSTATE_DESELECT = "deselect";
+	private static final String KEYWORD_WEAPONSTATE_FIRE = "fire";
+	private static final String KEYWORD_WEAPONSTATE_FLASH = "flash";
 	private static final String KEYWORD_THING = "thing";
+	private static final String KEYWORD_THINGSTATE_SPAWN = "spawn";
+	private static final String KEYWORD_THINGSTATE_SEE = "see";
+	private static final String KEYWORD_THINGSTATE_MELEE = "melee";
+	private static final String KEYWORD_THINGSTATE_MISSILE = "missile";
+	private static final String KEYWORD_THINGSTATE_PAIN = "pain";
+	private static final String KEYWORD_THINGSTATE_DEATH = "death";
+	private static final String KEYWORD_THINGSTATE_XDEATH = "xdeath";
+	private static final String KEYWORD_THINGSTATE_RAISE = "raise";
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_DOOM19 = "doom19";
 	private static final String KEYWORD_UDOOM19 = "udoom19";
@@ -204,39 +221,28 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseEntry(AbstractPatchContext<?> context)
 	{
 		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STRINGS))
-		{
 			return parseStringBlock(context);
-		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMO))
-		{
 			return parseAmmoBlock(context);
-		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
-		{
 			return parseSoundBlock(context);
-		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
-		{
 			return parseStateBlock(context);
-		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PARS))
-		{
 			return parseParBlock(context);
-		}
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+			return parseThingBlock(context);
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+			return parseWeaponBlock(context);
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MISC))
-		{
 			return parseMiscellaneousBlock(context);
-		}
-		// TODO: Finish Protect, Unprotect, Thing, and Weapon
 		else if (currentToken() != null)
 		{
 			addErrorMessage("Unknown section or command \"%s\".", currentToken().getLexeme());
 			return false;
 		}
 		else
-		{
 			return true;
-		}
 	}
 
 	// Parses a string block.
@@ -328,11 +334,13 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer ammoIndex;
 		if ((ammoIndex = matchPositiveInteger()) == null)
 		{
-			if ((ammoIndex = matchAmmoType()) == null)
+			Ammo ammo;
+			if ((ammo = matchAmmoType()) == null)
 			{
 				addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', or 'rockets'.", context.getAmmoCount() - 1);
 				return false;
 			}
+			ammoIndex = ammo.ordinal();
 		}
 		
 		if (ammoIndex >= context.getAmmoCount())
@@ -654,6 +662,209 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		return true;
+	}
+	
+	// Parses a thing block.
+	private boolean parseThingBlock(AbstractPatchContext<?> context)
+	{
+		Integer slot;
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected positive integer after \"%s\" for the thing slot number.", KEYWORD_THING);
+			return false;
+		}
+		
+		if (slot == 0)
+		{
+			addErrorMessage("Invalid thing index: %d.", slot);
+			return false;
+		}
+
+		if (slot >= context.getThingCount())
+		{
+			addErrorMessage("Invalid thing index: %d. Max is %d.", slot, context.getThingCount() - 1);
+			return false;
+		}
+		
+		// free states.
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		{
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			{
+				context.freeThingStates(slot);
+				return true;
+			}
+
+			if (!currentIsThingState())
+			{
+				addErrorMessage("Expected thing state name or \"%s\" after \"%s\".", KEYWORD_STATES, KEYWORD_FREE);
+				return false;
+			}
+
+			DEHThing thing = context.getThing(slot);
+
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
+				context.freeConnectedStates(thing.getSpawnFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SEE))
+				context.freeConnectedStates(thing.getWalkFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MELEE))
+				context.freeConnectedStates(thing.getMeleeFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
+				context.freeConnectedStates(thing.getMissileFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_PAIN))
+				context.freeConnectedStates(thing.getPainFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_DEATH))
+				context.freeConnectedStates(thing.getDeathFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
+				context.freeConnectedStates(thing.getExtremeDeathFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_RAISE))
+				context.freeConnectedStates(thing.getRaiseFrameIndex());
+			else
+			{
+				addErrorMessage("INTERNAL ERROR - UNEXPECTED THINGSTATE NAME.");
+				return false;
+			}
+			
+			return true;
+		}
+		else
+		{
+			return parseThingBody(context, context.getThing(slot));
+		}
+	}
+
+	// Parses a thing body.
+	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThing thing)
+	{
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			thing.setName(matchString());
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_THING);
+			return false;
+		}
+		
+		// TODO: Finish this.
+
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_THING);
+			return false;
+		}
+		
+		return false;
+	}
+	
+	// Parses a weapon block.
+	private boolean parseWeaponBlock(AbstractPatchContext<?> context)
+	{
+		Integer slot;
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_THING);
+			return false;
+		}
+		
+		if (slot >= context.getWeaponCount())
+		{
+			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
+			return false;
+		}
+		
+		// free states.
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		{
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			{
+				context.freeWeaponStates(slot);
+				return true;
+			}
+
+			if (!currentIsWeaponState())
+			{
+				addErrorMessage("Expected weapon state name or \"%s\" after \"%s\".", KEYWORD_STATES, KEYWORD_FREE);
+				return false;
+			}
+
+			DEHWeapon weapon = context.getWeapon(slot);
+
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
+				context.freeConnectedStates(weapon.getRaiseFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
+				context.freeConnectedStates(weapon.getLowerFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_READY))
+				context.freeConnectedStates(weapon.getReadyFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
+				context.freeConnectedStates(weapon.getFireFrameIndex());
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
+				context.freeConnectedStates(weapon.getFlashFrameIndex());
+			else
+			{
+				addErrorMessage("INTERNAL ERROR - UNEXPECTED WEAPONSTATE NAME.");
+				return false;
+			}
+			
+			return true;
+		}
+		else
+		{
+			return parseWeaponBody(context, context.getWeapon(slot));
+		}
+	}
+
+	// Parses a weapon body.
+	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeapon weapon)
+	{
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			weapon.setName(matchString());
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_WEAPON);
+			return false;
+		}
+		
+		Boolean flag;
+		Integer value;
+		String name;
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			if (matchIdentifierLexemeIgnoreCase("ammotype"))
+			{
+				Integer ammoIndex;
+				if ((ammoIndex = matchPositiveInteger()) == null)
+				{
+					Ammo ammo;
+					if ((ammo = matchAmmoType()) == null)
+					{
+						addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', or 'rockets'.", context.getAmmoCount() - 1);
+						return false;
+					}
+					ammoIndex = ammo.ordinal();
+				}
+				
+				if (ammoIndex >= context.getAmmoCount())
+				{
+					addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', or 'rockets'.", context.getAmmoCount() - 1);
+					return false;
+				}
+				// TODO: Finish.
+				//weapon.setAmmoType(ammoType);
+			}
+		}		
+
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_WEAPON);
+			return false;
+		}
+		
+		return false;
 	}
 	
 	// Parses a state block.
@@ -1232,6 +1443,47 @@ public final class DecoHackParser extends Lexer.Parser
 			return patch.getSpriteIndex(currentToken().getLexeme()) != null;
 	}
 
+	// Tests for an identifier that references a thing state name.
+	private boolean currentIsThingState()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return false;
+		
+		switch (currentToken().getLexeme().toLowerCase())
+		{
+			case KEYWORD_THINGSTATE_SPAWN:
+			case KEYWORD_THINGSTATE_SEE:
+			case KEYWORD_THINGSTATE_MELEE:
+			case KEYWORD_THINGSTATE_MISSILE:
+			case KEYWORD_THINGSTATE_PAIN:
+			case KEYWORD_THINGSTATE_DEATH:
+			case KEYWORD_THINGSTATE_XDEATH:
+			case KEYWORD_THINGSTATE_RAISE:
+				return true; 
+			default:
+				return false;
+		}
+	}
+
+	// Tests for an identifier that references a weapon state name.
+	private boolean currentIsWeaponState()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return false;
+		
+		switch (currentToken().getLexeme().toLowerCase())
+		{
+			case KEYWORD_WEAPONSTATE_READY:
+			case KEYWORD_WEAPONSTATE_DESELECT:
+			case KEYWORD_WEAPONSTATE_SELECT:
+			case KEYWORD_WEAPONSTATE_FIRE:
+			case KEYWORD_WEAPONSTATE_FLASH:
+				return true; 
+			default:
+				return false;
+		}
+	}
+
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -1258,18 +1510,18 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches an ammo type identifier.
-	private Integer matchAmmoType()
+	private Ammo matchAmmoType()
 	{
 		if (matchIdentifierLexemeIgnoreCase(KEYWORD_BULLETS))
-			return 0;
+			return Ammo.BULLETS;
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SHELLS))
-			return 1;
+			return Ammo.SHELLS;
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CELLS))
-			return 2;
+			return Ammo.CELLS;
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ROCKETS))
-			return 3;
+			return Ammo.ROCKETS;
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INFINITE))
-			return 5;
+			return Ammo.INFINITE;
 		else
 			return null;
 	}
