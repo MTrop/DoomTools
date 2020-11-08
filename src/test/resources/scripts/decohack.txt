@@ -60,4 +60,36 @@ state fill 442
 }
 
 thing 2 free states
-thing 2 free states
+thing 2 "Crap Trooper"
+{
+	clear sounds
+	clear states
+	states
+	{
+		spawn:
+			FATT AB 4 A_Look
+			loop
+		see:
+			FATT ABCD 4 A_Chase
+			loop
+		junk:
+			FATT CD 6 Bright
+		junk2:
+			FATT EF 6
+			goto junk2
+	}
+}
+
+weapon 0 free states
+weapon 0 "Junk Weapon"
+{
+	ammotype bullets
+	clear states
+	state fire 200
+	states
+	{
+		ready:
+			PISG A 1 A_Raise
+			wait
+	}
+}

@@ -19,6 +19,8 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 		ROCKETS,
 		UNUSED,
 		INFINITE;
+		
+		public static final Ammo[] VALUES = values();
 	}
 	
 	/** Weapon name. */
