@@ -26,7 +26,8 @@ public final class DecoHackMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String VERSION = Common.getVersionString("decohack");
-	private static final String SPLASH_VERSION = "DECOHack v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String VERSION_LINE = "DECOHack v" + VERSION + " by Matt Tropiano";
+	private static final String SPLASH_VERSION = VERSION_LINE + " (using DoomStruct v" + DOOM_VERSION + ")";
 
 	private static final Charset ASCII = Charset.forName("ASCII");
 	
@@ -48,6 +49,8 @@ public final class DecoHackMain
 	private static final String SWITCH_OUTPUT2 = "-o";
 	private static final String SWITCH_OUTPUTCHARSET = "--output-charset";
 	private static final String SWITCH_OUTPUTCHARSET2 = "-oc";
+	private static final String SWITCH_BUDGET = "--budget";
+	private static final String SWITCH_BUDGET2 = "-b";
 
 	/**
 	 * Program options.
@@ -64,9 +67,7 @@ public final class DecoHackMain
 		
 		private Charset outCharset;
 		private File outFile;
-		private File mapinfoOut;
-		private File zMapinfoOut;
-		private File eMapinfoOut;
+		private boolean outputBudget;
 		
 		public Options()
 		{
@@ -79,9 +80,7 @@ public final class DecoHackMain
 			
 			this.outCharset = ASCII;
 			this.outFile = null;
-			this.mapinfoOut = null;
-			this.zMapinfoOut = null;
-			this.eMapinfoOut = null;
+			this.outputBudget = false;
 		}
 		
 		public Options setHelp(boolean help) 
@@ -114,21 +113,9 @@ public final class DecoHackMain
 			return this;
 		}
 		
-		public Options setMapinfoOut(File mapinfoOut) 
+		public Options setOutputBudget(boolean outputBudget) 
 		{
-			this.mapinfoOut = mapinfoOut;
-			return this;
-		}
-		
-		public Options setZMapinfoOut(File zMapinfoOut)
-		{
-			this.zMapinfoOut = zMapinfoOut;
-			return this;
-		}
-		
-		public Options setEMapinfoOut(File eMapinfoOut) 
-		{
-			this.eMapinfoOut = eMapinfoOut;
+			this.outputBudget = outputBudget;
 			return this;
 		}
 		
@@ -208,10 +195,28 @@ public final class DecoHackMain
 				return ERROR_SECURITY;
 			}
 			
+			if (options.outputBudget)
+			{
+				options.stdout.printf("--- Patch State Budget ---\n");
+				options.stdout.printf(
+					"States: %d used / %d total (%d remaining).\n", 
+					context.getStateCount() - context.getFreeStateCount(), 
+					context.getStateCount(),
+					context.getFreeStateCount()
+				);
+				options.stdout.printf(
+					"Action Pointers: %d used / %d total (%d remaining).\n", 
+					context.getActionPointerCount() - context.getFreePointerStateCount(), 
+					context.getActionPointerCount(),
+					context.getFreePointerStateCount()
+				);
+				options.stdout.printf("--------------------------\n");
+			}
+			
 			// Write Patch.
 			try (Writer writer = new FileWriter(options.outFile, options.outCharset)) 
 			{
-				DecoHackExporter.writePatch(context, writer, "Created with " + SPLASH_VERSION);
+				DecoHackExporter.writePatch(context, writer, "Created with " + VERSION_LINE);
 				options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
 			} 
 			catch (IOException e) 
@@ -224,8 +229,6 @@ public final class DecoHackMain
 				options.stderr.println("ERROR: Could not open input file (access denied).");
 				return ERROR_SECURITY;
 			}
-			
-			// TODO: Finish other modes/options.
 			
 			return ERROR_NONE;
 		}
@@ -262,6 +265,8 @@ public final class DecoHackMain
 						options.setHelp(true);
 					else if (arg.equals(SWITCH_VERSION))
 						options.setVersion(true);
+					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
+						options.setOutputBudget(true);
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
 						state = STATE_OUTFILE;
 					else if (arg.equals(SWITCH_OUTPUTCHARSET) || arg.equals(SWITCH_OUTPUTCHARSET2))
@@ -370,6 +375,9 @@ public final class DecoHackMain
 		out.println("    --output-charset [name]  Sets the output charset to [name]. The default");
 		out.println("    -oc [name]               charset is ASCII, and there are not many reasons");
 		out.println("                             to change.");
+		out.println();
+		out.println("    --budget                 Prints the state budget after compilation.");
+		out.println("    -b");
 	}
 
 }

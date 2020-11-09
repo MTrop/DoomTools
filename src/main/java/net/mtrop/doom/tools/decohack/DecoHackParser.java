@@ -44,6 +44,39 @@ public final class DecoHackParser extends Lexer.Parser
 {
 	public static final String STREAMNAME_TEXT = "[Text String]";
 
+	private static final int FLAG_SPECIAL =       0x00000001;
+	private static final int FLAG_SOLID =         0x00000002;
+	private static final int FLAG_SHOOTABLE =     0x00000004;
+	private static final int FLAG_NOSECTOR =      0x00000008;
+	private static final int FLAG_NOBLOCKMAP =    0x00000010;
+	private static final int FLAG_AMBUSH =        0x00000020;
+	private static final int FLAG_JUSTHIT =       0x00000040;
+	private static final int FLAG_JUSTATTACKED =  0x00000080;
+	private static final int FLAG_SPAWNCEILING =  0x00000100;
+	private static final int FLAG_NOGRAVITY =     0x00000200;
+	private static final int FLAG_DROPOFF =       0x00000400;
+	private static final int FLAG_PICKUP =        0x00000800;
+	private static final int FLAG_NOCLIP =        0x00001000;
+	private static final int FLAG_SLIDE =         0x00002000;
+	private static final int FLAG_FLOAT =         0x00004000;
+	private static final int FLAG_TELEPORT =      0x00008000;
+	private static final int FLAG_MISSILE =       0x00010000;
+	private static final int FLAG_DROPPED =       0x00020000;
+	private static final int FLAG_SHADOW =        0x00040000;
+	private static final int FLAG_NOBLOOD =       0x00080000;
+	private static final int FLAG_CORPSE =        0x00100000;
+	private static final int FLAG_INFLOAT =       0x00200000;
+	private static final int FLAG_COUNTKILL =     0x00400000;
+	private static final int FLAG_COUNTITEM =     0x00800000;
+	private static final int FLAG_SKULLFLY =      0x01000000;
+	private static final int FLAG_NOTDEATHMATCH = 0x02000000;
+	private static final int FLAG_TRANSLATION =   0x04000000;
+	private static final int FLAG_TRANSLATION2 =  0x08000000;
+	private static final int FLAG_TOUCHY =        0x10000000;
+	private static final int FLAG_BOUNCES =       0x20000000;
+	private static final int FLAG_FRIEND =        0x40000000;
+	private static final int FLAG_TRANSLUCENT =   0x80000000;
+
 	private static final String KEYWORD_MISC = "misc";
 	private static final String KEYWORD_MAX_ARMOR = "maxArmor";
 	private static final String KEYWORD_MAX_HEALTH = "maxHealth";
@@ -60,7 +93,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_INITIAL_HEALTH = "initialHealth";
 	private static final String KEYWORD_INITIAL_BULLETS = "initialBullets";
 	private static final String KEYWORD_MONSTER_INFIGHTING = "monsterInfighting";
+	
 	private static final String KEYWORD_PARS = "pars";
+	
 	private static final String KEYWORD_CLEAR = "clear";
 	private static final String KEYWORD_STATE = "state";
 	private static final String KEYWORD_FILL = "fill";
@@ -73,10 +108,12 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_UNPROTECT = "unprotect";
 	private static final String KEYWORD_TO = "to";
 	private static final String KEYWORD_FROM = "from";
+	
 	private static final String KEYWORD_SOUND = "sound";
 	private static final String KEYWORD_SOUNDS = "sounds";
 	private static final String KEYWORD_SINGULAR = "singular";
 	private static final String KEYWORD_PRIORITY = "priority";
+
 	private static final String KEYWORD_AMMO = "ammo";
 	private static final String KEYWORD_BULLETS = "bullets";
 	private static final String KEYWORD_SHELLS = "shells";
@@ -85,8 +122,11 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_INFINITE = "infinite";
 	private static final String KEYWORD_PICKUP = "pickup";
 	private static final String KEYWORD_MAX = "max";
+	
 	private static final String KEYWORD_STRINGS = "strings";
+	
 	private static final String KEYWORD_STATES = "states";
+	
 	private static final String KEYWORD_WEAPON = "weapon";
 	private static final String KEYWORD_AMMOTYPE = "ammotype";
 	private static final String KEYWORD_WEAPONSTATE_READY = "ready";
@@ -94,7 +134,11 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_WEAPONSTATE_DESELECT = "deselect";
 	private static final String KEYWORD_WEAPONSTATE_FIRE = "fire";
 	private static final String KEYWORD_WEAPONSTATE_FLASH = "flash";
+	private static final String KEYWORD_WEAPONSTATE_LIGHTDONE = "lightdone";
+	
 	private static final String KEYWORD_THING = "thing";
+	private static final String KEYWORD_MONSTER = "monster";
+	private static final String KEYWORD_PROJECTILE = "projectile";
 	private static final String KEYWORD_THINGSTATE_SPAWN = "spawn";
 	private static final String KEYWORD_THINGSTATE_SEE = "see";
 	private static final String KEYWORD_THINGSTATE_MELEE = "melee";
@@ -103,6 +147,22 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_THINGSTATE_DEATH = "death";
 	private static final String KEYWORD_THINGSTATE_XDEATH = "xdeath";
 	private static final String KEYWORD_THINGSTATE_RAISE = "raise";
+	private static final String KEYWORD_EDNUM = "ednum";
+	private static final String KEYWORD_FLAGS = "flags";
+	private static final String KEYWORD_MASS = "mass";
+	private static final String KEYWORD_PAINCHANCE = "painchance";
+	private static final String KEYWORD_REACTIONTIME = "reactiontime";
+	private static final String KEYWORD_DAMAGE = "damage";
+	private static final String KEYWORD_HEIGHT = "height";
+	private static final String KEYWORD_RADIUS = "radius";
+	private static final String KEYWORD_SPEED = "speed";
+	private static final String KEYWORD_HEALTH = "health";
+	private static final String KEYWORD_SEESOUND = "seesound";
+	private static final String KEYWORD_ATTACKSOUND = "attacksound";
+	private static final String KEYWORD_PAINSOUND = "painsound";
+	private static final String KEYWORD_DEATHSOUND = "deathsound";
+	private static final String KEYWORD_ACTIVESOUND = "activesound";
+	
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_DOOM19 = "doom19";
 	private static final String KEYWORD_UDOOM19 = "udoom19";
@@ -409,7 +469,12 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer soundIndex;
 		if ((soundIndex = matchSoundIndex(context)) == null)
 		{
-			addErrorMessage("Expected sound index or sound name after \"sound\".");
+			addErrorMessage("Expected sound index or sound name after \"%s\".", KEYWORD_SOUND);
+			return false;
+		}
+		else if (soundIndex < 0)
+		{
+			addErrorMessage("Expected valid sound index or sound name after \"%s\".", KEYWORD_SOUND);
 			return false;
 		}
 
@@ -488,6 +553,17 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				addErrorMessage("Expected seconds after map entry.");
 				return false;
+			}
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				int minutes = seconds;
+				if ((seconds = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected seconds after ':'.");
+					return false;
+				}
+				seconds = (minutes * 60) + seconds;
 			}
 			
 			((AbstractPatchBoomContext)context).setParSeconds(map, seconds);
@@ -751,12 +827,36 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		String name;
-		Boolean flag;
 		Integer value;
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+			if (matchType(DecoHackKernel.TYPE_PLUS))
+			{
+				if ((value = matchFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"+\".");
+					return false;
+				}
+				thing.setFlags(thing.getFlags() | value);
+			}
+			else if (matchType(DecoHackKernel.TYPE_DASH))
+			{
+				if ((value = matchFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"-\".");
+					return false;
+				}
+				thing.setFlags(thing.getFlags() & (~value));
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MONSTER))
+			{
+				thing.setFlags(FLAG_SOLID | FLAG_SHOOTABLE | FLAG_COUNTKILL);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PROJECTILE))
+			{
+				thing.setFlags(FLAG_NOBLOCKMAP | FLAG_NOGRAVITY | FLAG_DROPOFF | FLAG_MISSILE);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 			{
 				if (!parseThingStateClause(context, thing))
 					return false;
@@ -797,13 +897,155 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			// TODO: Finish this (thing properties)
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EDNUM))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_EDNUM);
+					return false;
+				}
+				
+				// bad or reserved ednums.
+				if (value < -1 || value == 0 || value == 1 || value == 2 || value == 3 || value == 4 || value == 11)
+				{
+					addErrorMessage("The editor number %d is either invalid or reserved.", value);
+					return false;
+				}
+				
+				thing.setEditorNumber(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_HEALTH))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_HEALTH);
+					return false;
+				}
+				thing.setHealth(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SPEED))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_SPEED);
+					return false;
+				}
+				thing.setSpeed(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RADIUS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_RADIUS);
+					return false;
+				}
+				thing.setRadius(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_HEIGHT))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_HEIGHT);
+					return false;
+				}
+				thing.setHeight(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_DAMAGE))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_DAMAGE);
+					return false;
+				}
+				thing.setDamage(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_REACTIONTIME))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_REACTIONTIME);
+					return false;
+				}
+				thing.setReactionTime(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PAINCHANCE))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_PAINCHANCE);
+					return false;
+				}
+				thing.setPainChance(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MASS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MASS);
+					return false;
+				}
+				thing.setMass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_FLAGS);
+					return false;
+				}
+				thing.setFlags(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SEESOUND))
+			{
+				if ((value = matchSoundIndex(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_SEESOUND);
+					return false;
+				}
+				thing.setSeeSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ATTACKSOUND))
+			{
+				if ((value = matchSoundIndex(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ATTACKSOUND);
+					return false;
+				}
+				thing.setAttackSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PAINSOUND))
+			{
+				if ((value = matchSoundIndex(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_PAINSOUND);
+					return false;
+				}
+				thing.setPainSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_DEATHSOUND))
+			{
+				if ((value = matchSoundIndex(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_DEATHSOUND);
+					return false;
+				}
+				thing.setDeathSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ACTIVESOUND))
+			{
+				if ((value = matchSoundIndex(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ACTIVESOUND);
+					return false;
+				}
+				thing.setActiveSoundPosition(value + 1);
+			}
 			else
 			{
 				addErrorMessage("Expected '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_STATE);
 				return false;
 			}
-		}		
+		} // while
 
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
@@ -814,7 +1056,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
-	// PArses a thing state clause.
+	// Parses a thing state clause.
 	private boolean parseThingStateClause(AbstractPatchContext<?> context, DEHThing thing) 
 	{
 		Integer value;
@@ -1804,6 +2046,8 @@ public final class DecoHackParser extends Lexer.Parser
 			labelMap.put(KEYWORD_WEAPONSTATE_FIRE, index);
 		if ((index = weapon.getFlashFrameIndex()) > 0)
 			labelMap.put(KEYWORD_WEAPONSTATE_FLASH, index);
+		
+		labelMap.put(KEYWORD_WEAPONSTATE_LIGHTDONE, 1);
 	}
 
 	private void setupThingStateLabels(DEHThing thing, Map<String, Integer> labelMap)
@@ -1951,18 +2195,35 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an ammo type identifier.
 	private Ammo matchAmmoType()
 	{
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_BULLETS))
-			return Ammo.BULLETS;
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SHELLS))
-			return Ammo.SHELLS;
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CELLS))
-			return Ammo.CELLS;
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ROCKETS))
-			return Ammo.ROCKETS;
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INFINITE))
-			return Ammo.INFINITE;
-		else
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
+		
+		Ammo out;
+		switch (currentToken().getLexeme().toLowerCase())
+		{
+			case KEYWORD_BULLETS:
+				out = Ammo.BULLETS;
+				break;
+			case KEYWORD_SHELLS:
+				out = Ammo.SHELLS;
+				break;
+			case KEYWORD_CELLS:
+				out = Ammo.CELLS;
+				break;
+			case KEYWORD_ROCKETS:
+				out = Ammo.ROCKETS;
+				break;
+			case KEYWORD_INFINITE:
+				out = Ammo.INFINITE;
+				break;
+			default:
+				out = null;
+				break;
+		}
+		
+		if (out != null)
+			nextToken();
+		return out;
 	}
 
 	// Matches an identifier or string that references a sprite name.
@@ -2007,6 +2268,128 @@ public final class DecoHackParser extends Lexer.Parser
 		return matchIdentifierLexemeIgnoreCase("bright");
 	}
 	
+	// Matches an identifier that references a flag mnemonic.
+	// If match, advance token and return bitflags.
+	// Else, return null.
+	private Integer matchFlagMnemonic()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+		
+		Integer out;
+		switch (currentToken().getLexeme().toLowerCase())
+		{
+			case "special":
+				out = FLAG_SPECIAL;
+				break;
+			case "solid":
+				out = FLAG_SOLID;
+				break;
+			case "shootable":
+				out = FLAG_SHOOTABLE;
+				break;
+			case "nosector":
+				out = FLAG_NOSECTOR;
+				break;
+			case "noblockmap":
+				out = FLAG_NOBLOCKMAP;
+				break;
+			case "ambush":
+				out = FLAG_AMBUSH;
+				break;
+			case "justhit":
+				out = FLAG_JUSTHIT;
+				break;
+			case "justattacked":
+				out = FLAG_JUSTATTACKED;
+				break;
+			case "spawnceiling":
+				out = FLAG_SPAWNCEILING;
+				break;
+			case "nogravity":
+				out = FLAG_NOGRAVITY;
+				break;
+			case "dropoff":
+				out = FLAG_DROPOFF;
+				break;
+			case "pickup":
+				out = FLAG_PICKUP;
+				break;
+			case "noclip":
+				out = FLAG_NOCLIP;
+				break;
+			case "slide":
+				out = FLAG_SLIDE;
+				break;
+			case "float":
+				out = FLAG_FLOAT;
+				break;
+			case "teleport":
+				out = FLAG_TELEPORT;
+				break;
+			case "missile":
+				out = FLAG_MISSILE;
+				break;
+			case "dropped":
+				out = FLAG_DROPPED;
+				break;
+			case "shadow":
+				out = FLAG_SHADOW;
+				break;
+			case "noblood":
+				out = FLAG_NOBLOOD;
+				break;
+			case "corpse":
+				out = FLAG_CORPSE;
+				break;
+			case "infloat":
+				out = FLAG_INFLOAT;
+				break;
+			case "countkill":
+				out = FLAG_COUNTKILL;
+				break;
+			case "countitem":
+				out = FLAG_COUNTITEM;
+				break;
+			case "skullfly":
+				out = FLAG_SKULLFLY;
+				break;
+			case "notdmatch":
+				out = FLAG_NOTDEATHMATCH;
+				break;
+			case "translation":
+				out = FLAG_TRANSLATION;
+				break;
+			case "translation2":
+			case "unused1":
+				out = FLAG_TRANSLATION2;
+				break;
+			case "unused2":
+			case "touchy":
+				out = FLAG_TOUCHY;
+				break;
+			case "unused3":
+			case "bounces":
+				out = FLAG_BOUNCES;
+				break;
+			case "unused4":
+			case "friend":
+			case "friendly":
+				out = FLAG_FRIEND;
+				break;
+			case "translucent":
+				out = FLAG_TRANSLUCENT;
+				break;
+			default:
+				out = null;
+				break;
+		}
+		
+		if (out != null)
+			nextToken();
+		return out;
+	}
+
 	// Matches an identifier or string that references a sound name.
 	// If match, advance token and return sound index integer.
 	// Else, return null.
@@ -2036,6 +2419,11 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
 		Integer out;
+		if (currentToken().getLexeme().length() == 0)
+		{
+			nextToken();
+			return -1;
+		}
 		if ((out = patch.getSoundIndex(currentToken().getLexeme())) == null)
 			return null;
 		nextToken();

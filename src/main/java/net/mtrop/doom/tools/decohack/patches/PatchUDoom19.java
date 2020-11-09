@@ -21,6 +21,33 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon;
  */
 public class PatchUDoom19 implements DEHPatchDoom19
 {
+	public static final int STRING_INDEX_INTERMISSION_E1 = 132;
+	public static final int STRING_INDEX_INTERMISSION_E2 = 133;
+	public static final int STRING_INDEX_INTERMISSION_E3 = 134;
+	public static final int STRING_INDEX_INTERMISSION_E4 = 135;
+	public static final int STRING_INDEX_INTERMISSION_MAP06 = 136;
+	public static final int STRING_INDEX_INTERMISSION_MAP11 = 137;
+	public static final int STRING_INDEX_INTERMISSION_MAP20 = 138;
+	public static final int STRING_INDEX_INTERMISSION_MAP30 = 139;
+	public static final int STRING_INDEX_INTERMISSION_MAP15 = 140;
+	public static final int STRING_INDEX_INTERMISSION_MAP31 = 141;
+
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP06 = 142;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP11 = 143;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP20 = 144;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP30 = 145;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP15 = 146;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_MAP31 = 147;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_E1 = 148;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_E2 = 149;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_E3 = 150;
+	public static final int STRING_INDEX_INTERMISSION_FLAT_E4 = 151;
+
+	public static final int STRING_INDEX_MAP_NAMES_DOOM1 = 655;
+	public static final int STRING_INDEX_MAP_NAMES_DOOM2 = 692;
+	public static final int STRING_INDEX_MUSIC_NAMES_DOOM1 = 775;
+	public static final int STRING_INDEX_MUSIC_NAMES_DOOM2 = 807;
+	
 	public static final int STRING_INDEX_SOUNDS  = 842;
 	public static final int STRING_INDEX_SPRITES = 954;
 

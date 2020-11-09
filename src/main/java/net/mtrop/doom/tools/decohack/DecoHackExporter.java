@@ -24,6 +24,18 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 public final class DecoHackExporter
 {
 	/**
+	 * 
+	 * @param patch
+	 * @param writer
+	 * @param comment
+	 * @throws IOException
+	 */
+	public static void writeMapInfo(AbstractPatchContext<?> patch, Writer writer, String comment) throws IOException
+	{
+		// TODO: Finish this.
+	}
+	
+	/**
 	 * Writes this patch to a DeHackEd file stream.
 	 * @param patch the patch.
 	 * @param writer the writer to write to.

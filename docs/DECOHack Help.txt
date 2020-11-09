@@ -288,6 +288,8 @@ alias for frame 1.
 		
 		state <WeaponStateName> <INTEGER> // specific state assignment.
 		
+		clear states // if present, clear all state indices (not freed!).
+		
 		states
 		{
 			ready:
@@ -374,8 +376,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
 	
 		Flags <INTEGER>
 	
-		Monster     // alias for Flags [monsterflags]
-		Projectile  // alias for Flags [projectileflags]
+		Monster     // alias for Flags SOLID | SHOOTABLE | COUNTKILL
+		Projectile  // alias for Flags NOBLOCKMAP | NOGRAVITY | DROPOFF | MISSILE
 		+ <INTEGER> // set flag(s)
 		- <INTEGER> // unset flag(s)
 	
@@ -386,6 +388,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
 		PainSound <STRING>
 		DeathSound <STRING>
 		ActiveSound <STRING>
+
+		clear states // if present, clear all state indices (not freed!).
 		
 		state <ThingStateName> <INTEGER> // specific state assignment.
 		
@@ -432,7 +436,6 @@ Example:
 		Mass 100
 	
 		Monster
-		+FLOORCLIP
 	
 		SeeSound "posit2"
 		AttackSound ""
@@ -492,6 +495,58 @@ redefining a thing.
 The following editor numbers cannot be used: 1, 2, 3, 4, 11.
 
 
+------------------
+Flag Mnemonics
+------------------
+
+Instead of integers, you can use the following mnemonics for thing flags:
+
+Example:
+
+	+SOLID
+	-NOGRAVITY
+
+List of valid mnemonics and their values:
+
+	SPECIAL =       0x00000001
+	SOLID =         0x00000002
+	SHOOTABLE =     0x00000004
+	NOSECTOR =      0x00000008
+	NOBLOCKMAP =    0x00000010
+	AMBUSH =        0x00000020
+	JUSTHIT =       0x00000040
+	JUSTATTACKED =  0x00000080
+	SPAWNCEILING =  0x00000100
+	NOGRAVITY =     0x00000200
+	DROPOFF =       0x00000400
+	PICKUP =        0x00000800
+	NOCLIP =        0x00001000
+	SLIDE =         0x00002000
+	FLOAT =         0x00004000
+	TELEPORT =      0x00008000
+	MISSILE =       0x00010000
+	DROPPED =       0x00020000
+	SHADOW =        0x00040000
+	NOBLOOD =       0x00080000
+	CORPSE =        0x00100000
+	INFLOAT =       0x00200000
+	COUNTKILL =     0x00400000
+	COUNTITEM =     0x00800000
+	SKULLFLY =      0x01000000
+	NOTDMATCH =     0x02000000
+	TRANSLATION =   0x04000000
+	UNUSED1 =       0x08000000
+	TRANSLATION2 =  0x08000000
+	TOUCHY =        0x10000000
+	UNUSED2 =       0x10000000
+	BOUNCES =       0x20000000
+	UNUSED3 =       0x20000000
+	FRIEND =        0x40000000
+	FRIENDLY =      0x40000000
+	UNUSED4 =       0x40000000
+	TRANSLUCENT =   0x80000000
+
+
 ==============================================================================
 ===== Par Times
 ==============================================================================
@@ -501,7 +556,8 @@ way:
 
 	pars
 	{
-		<MapName> <INTEGER> 
+		<MapName> <INTEGER>           // seconds
+		<MapName> <INTEGER>:<INTEGER> // minutes:seconds
 	}
 
 Where <LumpName> is a map lump (map or episode-map is derived from it), and
@@ -513,6 +569,7 @@ Examples:
 	{
 		e1m1 30
 		map20 150
+		map20 2:30
 		map45 200
 	}
 
@@ -543,9 +600,103 @@ Miscellaneous data is in the miscellaneous block:
 		maxArmor <INTEGER>
 	}
 
+
 ==============================================================================
 ===== Preprocessor
 ==============================================================================
 
+DECOHack has a C-like preprocessor. The following directives influence how
+a DECOHack file is parsed.
 
+------------------
+#include
+------------------
+
+The #include directive includes the contents of the specified file. The 
+filename is provided as a string parameter, and can either be a relative file 
+path from the file that contains the directive or an absolute path. Files can 
+be included more than once - use this with caution!
+
+	#include "scenery.dh"
+	#include "maps/mapnames.dh"
+
+
+------------------
+#define
+------------------
+
+The #define directive defines a single-token macro that expands to a series of
+other tokens. This is also useful for creating defines and testing if they 
+were defined later. They may also expand to zero tokens. All macro tokens are 
+CASE SENSITIVE!
+
+NOTE: Unlike the C-language preprocessor, this does not create macro 
+functions.
+
+	#define GREETING_TEXT "Hello."
+	#define FILE_WAS_INCLUDED
+
+
+------------------
+#undefine
+------------------
+
+The #undefine directive removes a previously defined macro. All subsequent 
+uses of that macro are treated as though they were never defined.
+
+	#define GREETING_TEXT "Hello."
+	#undefine GREETING_TEXT
+
+
+------------------
+#ifdef
+------------------
+
+The #ifdef directive includes the next series of lines if the following macro
+was defined, until it reaches an #endif directive.
+
+	#define DOOM_STRINGS
+	#ifdef DOOM_STRINGS
+	#include "strings/doom.dh"
+	#endif
+
+
+------------------
+#ifndef
+------------------
+
+The #ifdef directive includes the next series of lines if the following macro 
+was NOT defined, until it reaches an #endif directive.
+
+	#define NO_PAR_TIMES
+	#ifndef NO_PAR_TIMES
+	pars 
+	{ 
+		e1m1 0:40 
+	}
+	#endif
+	
+
+------------------
+#else
+------------------
+
+The #else directive ends the most recently started "if" directive block and 
+provides an alternate section if the first "if" is not processed.
+
+
+	#define TOUGH_PAR_TIMES
+	#ifdef TOUGH_PAR_TIMES
+	#include "maps/tough-partimes.dh"
+	#else
+	#include "maps/normal-partimes.dh"
+	#endif
+
+
+------------------
+#endif
+------------------
+
+The #endif directive ends the most recently started "if" or "else" directive 
+block.
 
