@@ -16,6 +16,7 @@ import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
 
 /**
  * Main class for DECOHack.
@@ -173,6 +174,11 @@ public final class DecoHackMain
 			try 
 			{
 				context = DecoHackParser.read(options.inFile);
+			} 
+			catch (PreprocessorException e) 
+			{
+				options.stderr.println("ERROR: " + e.getLocalizedMessage());
+				return ERROR_PARSEERROR;
 			} 
 			catch (DecoHackParseException e) 
 			{
