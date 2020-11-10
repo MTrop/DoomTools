@@ -1411,12 +1411,6 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an actor's state body.
 	private boolean parseActorStateSet(AbstractPatchContext<?> context, Map<String, Integer> labelMap, LabelApplier applier)
 	{
-		if (currentIsSpriteIndex(context))
-		{
-			addErrorMessage("Expected state label.");
-			return false;
-		}
-		
 		// state label.
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
@@ -1430,16 +1424,13 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (!currentIsSpriteIndex(context))
+			label = currentToken().getLexeme();
+			nextToken();
+			
+			if (!matchType(DecoHackKernel.TYPE_COLON))
 			{
-				label = currentToken().getLexeme();
-				nextToken();
-				
-				if (!matchType(DecoHackKernel.TYPE_COLON))
-				{
-					addErrorMessage("Expected ':' after state label.");
-					return false;
-				}
+				addErrorMessage("Expected ':' after state label.");
+				return false;
 			}
 
 			Integer startIndex;
