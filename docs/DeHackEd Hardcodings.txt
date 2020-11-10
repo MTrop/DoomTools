@@ -1,5 +1,5 @@
-Frame Hardcodings in Doom/Boom
-==============================
+Frame/State Hardcodings in Doom/Boom
+====================================
 
 Frame 0:
 	NULL Frame. Reserved.
@@ -7,6 +7,16 @@ Frame 0:
 
 Frame 1:
 	STOP Frame for weapons that reset player light level boost. Reserved for convenience.
+
+Frame 52:
+	Chaingun first firing frame.
+
+Chaingun Muzzle Flash:
+	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun offset from Frame 52.
+	So, if called from frame 52, [FlashFrame]. If frame 53, [FlashFrame]+1.
+
+Frame 67:
+	If A_WeaponReady is called on this frame while the chainsaw is the active weapon, the chainsaw sound is played.
 
 Frame 154:
 	The player's firing frame on weapon fire.
@@ -27,11 +37,8 @@ Frame 799:
 Frame 895:
 	All actors jump to this when crushed.
 
-Chaingun Muzzle Flash:
-	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun.
-
 Plasma Muzzle Flash:
-	The plasma rifle's muzzle flash is called at random between the [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
+	The plasma rifle's muzzle flash is called at random between [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
 
 Final Frame:
 	If replaced in a DEH patch, using DeHackEd to patch an original EXE will overwrite the weapon table, due to a bug in DeHackEd 3.0
