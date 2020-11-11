@@ -282,7 +282,7 @@ alias for frame 1.
 
 "Spawn" is not used, as that is used for the Thing for pickups.
 
-	weapon <INTEGER> [ <STRING> ]
+	weapon <INTEGER> [ <STRING> ] [ : weapon <INTEGER> ]
 	{
 		ammotype ( 0 | 1 | 2 | 3 | 5 | bullets | shells | cells | rockets | infinite )
 		
@@ -349,6 +349,14 @@ To clear all states connected to a weapon, type the following:
 And the same result will happen if you freed from each defined weapon frame 
 individually. Best used before redefining a weapon.
 
+You can copy from another weapon slot by adding the [ : weapon <INTEGER> ] 
+clause:
+
+	weapon 3 : weapon 4
+	{
+		...
+	}
+
 
 ==============================================================================
 ===== Thing
@@ -361,7 +369,7 @@ the same slot in different ways).
 Spawn, See, Melee, Missile, Pain, Death, XDeath, and Raise state labels set 
 the thing state indices. Other labels are used for arbitrary jump points.
 
-	thing <INTEGER> [ <STRING> ]
+	thing <INTEGER> [ <STRING> ] [ : thing <INTEGER> ]
 	{
 		EdNum <NUMBER>
 		
@@ -493,6 +501,15 @@ individually. Based on the current thing definition. Best used before
 redefining a thing.
 
 The following editor numbers cannot be used: 1, 2, 3, 4, 11.
+
+You can copy from another thing slot by adding the [ : weapon <INTEGER> ] 
+clause:
+
+	thing 3 : thing 4
+	{
+		...
+	}
+
 
 
 ------------------

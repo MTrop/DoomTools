@@ -821,6 +821,30 @@ public final class DecoHackParser extends Lexer.Parser
 			thing.setName(matchString());
 		}
 		
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
+				return false;
+			}
+			
+			Integer slot;
+			if ((slot = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\" for the thing slot number to copy from.", KEYWORD_THING);
+				return false;
+			}
+			
+			if (slot >= context.getWeaponCount())
+			{
+				addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
+				return false;
+			}
+			
+			thing.copyFrom(context.getThing(slot));
+		}
+		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_THING);
@@ -1183,7 +1207,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer slot;
 		if ((slot = matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_THING);
+			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_WEAPON);
 			return false;
 		}
 		
@@ -1240,6 +1264,30 @@ public final class DecoHackParser extends Lexer.Parser
 		if (currentType(DecoHackKernel.TYPE_STRING))
 		{
 			weapon.setName(matchString());
+		}
+		
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
+				return false;
+			}
+			
+			Integer slot;
+			if ((slot = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number to copy from.", KEYWORD_WEAPON);
+				return false;
+			}
+			
+			if (slot >= context.getWeaponCount())
+			{
+				addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
+				return false;
+			}
+			
+			weapon.copyFrom(context.getWeapon(slot));
 		}
 		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
