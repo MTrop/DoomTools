@@ -1841,7 +1841,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((nextFrame = labelMap.get(labelName)) == null)
 				{
-					addErrorMessage("Label \"%s\" is invalid or not declared.");
+					addErrorMessage("Label \"%s\" is invalid or not declared.", labelName);
 					return null;				
 				}
 				
