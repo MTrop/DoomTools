@@ -1482,13 +1482,15 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 
 			Integer startIndex;
-		
+			Integer loopIndex = null;
 			do {
 				parsed.reset();
 				if (!parseStateLine(context, parsed))
 					return false;
 				if ((startIndex = fillStates(context, parsed, stateCursor, false)) == null)
 					return false;
+				if (loopIndex == null)
+					loopIndex = startIndex;
 				if (label != null)
 				{
 					applier.apply(label, startIndex);
@@ -1500,7 +1502,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (currentIsNextStateKeyword())
 			{
 				Integer nextStateIndex = null;
-				if ((nextStateIndex = parseNextStateIndex(context, labelMap, startIndex, stateCursor.lastIndexFilled)) == null)
+				if ((nextStateIndex = parseNextStateIndex(context, labelMap, loopIndex, stateCursor.lastIndexFilled)) == null)
 				{
 					addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
 					return false;
