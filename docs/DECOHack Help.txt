@@ -354,7 +354,7 @@ Example:
 To clear all states connected to a weapon, type the following:
 
 	weapon <INTEGER> free states
-	weapon <INTEGER> free <WeaponStateName> states
+	weapon <INTEGER> free <WeaponStateName>
 
 
 And the same result will happen if you freed from each defined weapon frame 
@@ -506,7 +506,7 @@ Example:
 To clear all states connected to a thing, type the following:
 
 	thing <INTEGER> free states
-	thing <INTEGER> free <ThingStateName> states
+	thing <INTEGER> free <ThingStateName>
 
 
 And the same result will happen if you freed from each defined thing frame 
