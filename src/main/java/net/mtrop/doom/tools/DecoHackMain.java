@@ -1,9 +1,11 @@
 package net.mtrop.doom.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -44,6 +46,7 @@ public final class DecoHackMain
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
+	private static final String SWITCH_HELPFULL = "--help-full";
 	private static final String SWITCH_VERSION = "--version";
 
 	private static final String SWITCH_OUTPUT = "--output";
@@ -62,6 +65,7 @@ public final class DecoHackMain
 		private PrintStream stderr;
 		
 		private boolean help;
+		private boolean full;
 		private boolean version;
 
 		private File inFile;
@@ -87,6 +91,12 @@ public final class DecoHackMain
 		public Options setHelp(boolean help) 
 		{
 			this.help = help;
+			return this;
+		}
+		
+		public Options setFullHelp(boolean full) 
+		{
+			this.full = full;
 			return this;
 		}
 		
@@ -141,7 +151,7 @@ public final class DecoHackMain
 				splash(options.stdout);
 				usage(options.stdout);
 				options.stdout.println();
-				help(options.stdout);
+				help(options.stdout, options.full);
 				return ERROR_NONE;
 			}
 			
@@ -269,6 +279,11 @@ public final class DecoHackMain
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
 						options.setHelp(true);
+					if (arg.equals(SWITCH_HELPFULL))
+					{
+						options.setHelp(true);
+						options.setFullHelp(true);
+					}
 					else if (arg.equals(SWITCH_VERSION))
 						options.setVersion(true);
 					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
@@ -364,10 +379,12 @@ public final class DecoHackMain
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
-	private static void help(PrintStream out)
+	private static void help(PrintStream out, boolean full)
 	{
 		out.println("    --help                   Prints help and exits.");
 		out.println("    -h");
+		out.println();
+		out.println("    --help-full              Prints full help (not just usage) and exits.");
 		out.println();
 		out.println("    --version                Prints version, and exits.");
 		out.println();
@@ -384,6 +401,17 @@ public final class DecoHackMain
 		out.println();
 		out.println("    --budget                 Prints the state budget after compilation.");
 		out.println("    -b");
+		out.println();
+		if (full)
+		{
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(Common.openResource("decohack/help.txt")))) {
+				String line;
+				while ((line = br.readLine()) != null)
+					out.println(line);
+			} catch (IOException e) {
+				/* Do nothing. */
+			}
+		}
 	}
 
 }

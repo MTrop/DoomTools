@@ -42,6 +42,10 @@ import net.mtrop.doom.tools.struct.PreprocessorLexer;
  */
 public final class DecoHackParser extends Lexer.Parser
 {
+	private static final String KEYWORD_WITH = "with";
+
+	private static final String KEYWORD_SWAP = "swap";
+
 	public static final String STREAMNAME_TEXT = "[Text String]";
 
 	private static final int FLAG_SPECIAL =       0x00000001;
@@ -137,8 +141,6 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_WEAPONSTATE_LIGHTDONE = "lightdone";
 	
 	private static final String KEYWORD_THING = "thing";
-	private static final String KEYWORD_MONSTER = "monster";
-	private static final String KEYWORD_PROJECTILE = "projectile";
 	private static final String KEYWORD_THINGSTATE_SPAWN = "spawn";
 	private static final String KEYWORD_THINGSTATE_SEE = "see";
 	private static final String KEYWORD_THINGSTATE_MELEE = "melee";
@@ -748,26 +750,30 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseThingBlock(AbstractPatchContext<?> context)
 	{
 		Integer slot;
-		if ((slot = matchPositiveInteger()) == null)
-		{
-			addErrorMessage("Expected positive integer after \"%s\" for the thing slot number.", KEYWORD_THING);
+		if ((slot = matchThingIndex(context)) == null)
 			return false;
-		}
-		
-		if (slot == 0)
-		{
-			addErrorMessage("Invalid thing index: %d.", slot);
-			return false;
-		}
 
-		if (slot >= context.getThingCount())
+		// thing swap
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_SWAP))
 		{
-			addErrorMessage("Invalid thing index: %d. Max is %d.", slot, context.getThingCount() - 1);
-			return false;
+			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WITH))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_WITH, KEYWORD_SWAP);
+				return false;
+			}
+
+			Integer other;
+			if ((other = matchThingIndex(context)) == null)
+				return false;
+
+			DEHThing temp = new DEHThing();
+			temp.copyFrom(context.getThing(other));
+			context.getThing(other).copyFrom(context.getThing(slot));
+			context.getThing(slot).copyFrom(temp);
+			return true;
 		}
-		
 		// free states.
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
 		{
 			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
 			{
@@ -816,11 +822,6 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a thing body.
 	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThing thing)
 	{
-		if (currentType(DecoHackKernel.TYPE_STRING))
-		{
-			thing.setName(matchString());
-		}
-		
 		if (matchType(DecoHackKernel.TYPE_COLON))
 		{
 			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
@@ -830,19 +831,15 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			Integer slot;
-			if ((slot = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected positive integer after \"%s\" for the thing slot number to copy from.", KEYWORD_THING);
+			if ((slot = matchThingIndex(context)) == null)
 				return false;
-			}
-			
-			if (slot >= context.getWeaponCount())
-			{
-				addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
-				return false;
-			}
 			
 			thing.copyFrom(context.getThing(slot));
+		}
+		
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			thing.setName(matchString());
 		}
 		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -871,14 +868,6 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setFlags(thing.getFlags() & (~value));
-			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MONSTER))
-			{
-				thing.setFlags(FLAG_SOLID | FLAG_SHOOTABLE | FLAG_COUNTKILL);
-			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PROJECTILE))
-			{
-				thing.setFlags(FLAG_NOBLOCKMAP | FLAG_NOGRAVITY | FLAG_DROPOFF | FLAG_MISSILE);
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 			{
@@ -1205,20 +1194,30 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseWeaponBlock(AbstractPatchContext<?> context)
 	{
 		Integer slot;
-		if ((slot = matchPositiveInteger()) == null)
-		{
-			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_WEAPON);
+		if ((slot = matchWeaponIndex(context)) == null)
 			return false;
-		}
 		
-		if (slot >= context.getWeaponCount())
+		// weapon swap
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_SWAP))
 		{
-			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
-			return false;
+			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WITH))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_WITH, KEYWORD_SWAP);
+				return false;
+			}
+
+			Integer other;
+			if ((other = matchThingIndex(context)) == null)
+				return false;
+
+			DEHWeapon temp = new DEHWeapon();
+			temp.copyFrom(context.getWeapon(other));
+			context.getWeapon(other).copyFrom(context.getWeapon(slot));
+			context.getWeapon(slot).copyFrom(temp);
+			return true;
 		}
-		
 		// free states.
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
 		{
 			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
 			{
@@ -1261,11 +1260,6 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a weapon body.
 	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeapon weapon)
 	{
-		if (currentType(DecoHackKernel.TYPE_STRING))
-		{
-			weapon.setName(matchString());
-		}
-		
 		if (matchType(DecoHackKernel.TYPE_COLON))
 		{
 			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
@@ -1275,19 +1269,15 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			Integer slot;
-			if ((slot = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number to copy from.", KEYWORD_WEAPON);
+			if ((slot = matchWeaponIndex(context)) == null)
 				return false;
-			}
-			
-			if (slot >= context.getWeaponCount())
-			{
-				addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
-				return false;
-			}
-			
+
 			weapon.copyFrom(context.getWeapon(slot));
+		}
+		
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			weapon.setName(matchString());
 		}
 		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -1466,13 +1456,13 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		String label = null;
+		LinkedList<String> label = new LinkedList<>();
 		ParsedState parsed = new ParsedState();
 		StateFillCursor stateCursor = new StateFillCursor();
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			label = currentToken().getLexeme();
+			label.add(currentToken().getLexeme());
 			nextToken();
 			
 			if (!matchType(DecoHackKernel.TYPE_COLON))
@@ -1483,20 +1473,20 @@ public final class DecoHackParser extends Lexer.Parser
 
 			Integer startIndex;
 			Integer loopIndex = null;
-			do {
-				parsed.reset();
-				if (!parseStateLine(context, parsed))
-					return false;
-				if ((startIndex = fillStates(context, parsed, stateCursor, false)) == null)
-					return false;
-				if (loopIndex == null)
-					loopIndex = startIndex;
-				if (label != null)
-				{
-					applier.apply(label, startIndex);
-					label = null;
-				}
-			} while (currentIsSpriteIndex(context));
+			if (currentIsSpriteIndex(context))
+			{
+				do {
+					parsed.reset();
+					if (!parseStateLine(context, parsed))
+						return false;
+					if ((startIndex = fillStates(context, parsed, stateCursor, false)) == null)
+						return false;
+					if (loopIndex == null)
+						loopIndex = startIndex;
+					while (!label.isEmpty())
+						applier.apply(label.pollFirst(), startIndex);
+				} while (currentIsSpriteIndex(context));
+			}
 			
 			// Parse next state.
 			if (currentIsNextStateKeyword())
@@ -2208,6 +2198,53 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Matches a valid thing index number.
+	// If match, advance token and return integer.
+	// Else, return null.
+	private Integer matchThingIndex(AbstractPatchContext<?> context)
+	{
+		Integer slot;
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected positive integer for the thing slot number.");
+			return null;
+		}
+		
+		if (slot == 0)
+		{
+			addErrorMessage("Invalid thing index: %d.", slot);
+			return null;
+		}
+
+		if (slot >= context.getThingCount())
+		{
+			addErrorMessage("Invalid thing index: %d. Max is %d.", slot, context.getThingCount() - 1);
+			return null;
+		}
+		
+		return slot;
+	}
+
+	// Matches a valid weapon index number.
+	// If match, advance token and return integer.
+	// Else, return null.
+	private Integer matchWeaponIndex(AbstractPatchContext<?> context) 
+	{
+		Integer slot;
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_WEAPON);
+			return null;
+		}
+		
+		if (slot >= context.getWeaponCount())
+		{
+			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
+			return null;
+		}
+		return slot;
+	}
+
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -2441,7 +2478,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 		String lexeme = currentToken().getLexeme();
 		DEHActionPointer out;
-		if (lexeme.length() < 2 || !lexeme.substring(0, 2).startsWith("A_"))
+		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
 		if ((out = DEHActionPointer.getByMnemonic(lexeme.substring(2))) == null)
 			return null;

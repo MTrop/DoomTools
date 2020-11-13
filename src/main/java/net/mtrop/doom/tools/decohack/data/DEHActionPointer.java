@@ -1,7 +1,7 @@
 package net.mtrop.doom.tools.decohack.data;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Enumeration of action pointers for frames.
@@ -120,7 +120,7 @@ public enum DEHActionPointer
 	{
 		if (MNEMONIC_MAP == null)
 		{
-			MNEMONIC_MAP = new HashMap<>();
+			MNEMONIC_MAP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			for (DEHActionPointer ap : values())
 				MNEMONIC_MAP.put(ap.getMnemonic(), ap);
 		}
