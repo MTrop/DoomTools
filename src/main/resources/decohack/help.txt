@@ -655,6 +655,17 @@ be included more than once - use this with caution!
 	#include "maps/mapnames.dh"
 
 
+You can include some internal resource files by prefixing the file path with
+"classpath:" and it will attempt to read that file from the Java classpath.
+ 
+	#include "classpath:decohack/doom19_constants.dh"
+
+
+The following valid DecoHack internal scripts/resources are as follows:
+
+...
+ 
+
 ------------------
 #define
 ------------------

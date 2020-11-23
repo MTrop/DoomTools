@@ -18,6 +18,12 @@ Chaingun Muzzle Flash:
 Frame 67:
 	If A_WeaponReady is called on this frame while the chainsaw is the active weapon, the chainsaw sound is played.
 
+Frame 91:
+	Hardcoded frame for a bleeding hitscan attack that does between 9 to 12 damage, inclusive.
+
+Frame 92:
+	Hardcoded frame for a bleeding hitscan attack that does strictly less than 9 damage.
+
 Frame 154:
 	The player's firing frame on weapon fire.
 
@@ -176,6 +182,7 @@ Arachnotron Projectile (Slot 37)
 
 Bullet Puff (Slot 38)
 	Spawned on hitscan attacks that don't spawn Blood (Slot 39).
+	Spawned on a seeking A_Tracer call (yes, really).
 	
 Blood (Slot 39) 
 	Spawned on hitscan attacks and other damaging things.
