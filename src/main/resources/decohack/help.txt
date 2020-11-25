@@ -81,10 +81,10 @@ DeHackEd specs.
 ===== Ammo
 ==============================================================================
 
-Changes an ammo entry. `ammo` plus an index/type name, and an optional string 
-for the new name. 
+Changes an ammo entry. `ammo` plus an index, and an optional string for the 
+new name. 
 
-	ammo ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells ) <STRING>
+	ammo ( 0 | 1 | 2 | 3 ) <STRING>
 	{
 		max <INTEGER>
 		pickup <INTEGER>
@@ -99,7 +99,7 @@ Examples:
 		pickup 20
 	}
 	
-	ammo cells
+	ammo 2
 	{
 		max 5000
 		pickup 100
@@ -146,7 +146,7 @@ changes.
 	state <INTEGER> 
 	{ 
 		[ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
-		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] 
+		( goto <INTEGER> | goto <IDENTIFIER>
 			| wait 
 			| stop 
 		)
@@ -233,7 +233,7 @@ states (especially action pointer states in Doom 1.9).
 	{ 
 		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
 		...
-		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] 
+		( goto <INTEGER> | goto <IDENTIFIER>
 			| wait 
 			| stop 
 			| loop 
@@ -284,16 +284,14 @@ definitions are cumulative on the weapon slot (separate definitions can alter
 the same slot in different ways).
 
 Ready, Select, Deselect, Fire, and Flash state labels set the weapon state 
-indices. Other labels are used for arbitrary jump points. "LightDone" is an 
-alias for frame 1.
+indices. Other labels are used for arbitrary jump points. "LightDone" is a 
+built-in alias for frame 1.
 
 "Spawn" is not used, as that is used for the Thing for pickups.
 
 	weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
 	{
-		ammotype ( 0 | 1 | 2 | 3 | 5 
-			| bullets | shells | cells | rockets | infinite 
-		)
+		ammotype ( 0 | 1 | 2 | 3 | 5 )
 		
 		state <WeaponStateName> <INTEGER> // specific state assignment.
 		
@@ -324,7 +322,7 @@ Example:
 
 	weapon 3 "Chaingun"
 	{
-		ammotype bullets
+		ammotype 0
 		clear states
 		states
 		{
@@ -744,4 +742,77 @@ provides an alternate section if the first "if" is not processed.
 
 The #endif directive ends the most recently started "if" or "else" directive 
 block.
+
+
+==============================================================================
+===== Built-in Resources
+==============================================================================
+
+#include "classpath:decohack/doom19.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
+	1.9 EXEs, plus the "using" line.
+
+#include "classpath:decohack/udoom19.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Ultimate Doom 1.9 EXEs, plus the "using" line.
+
+#include "classpath:decohack/boom.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Boom-compatible EXEs, plus the "using" line.
+
+#include "classpath:decohack/constants/doom19.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
+	1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/ammo.dh"
+
+	All ammo slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/states.dh"
+
+	All state mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/things.dh"
+
+	All thing slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/weapons.dh"
+
+	All weapon slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/strings.dh"
+
+	All string mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/udoom19.dh"
+
+	All ammo, state, weapon slot, and thing slot, and string mnemonics for 
+	Ultimate Doom 1.9 EXEs (Doom 1.9 ammo, thing, weapon, and states are 
+	reused).
+
+#include "classpath:decohack/constants/udoom19/strings.dh"
+
+	All string mnemonics for Ultimate Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/boom.dh"
+
+	All ammo, state, weapon slot, and thing slot, and string mnemonics for 
+	Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/boom/states.dh"
+
+	All state mnemonics for Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/boom/strings.dh"
+
+	All string mnemonics for Boom-compatible EXEs (meant to be a common
+	define for both Doom indices and Boom string keys).
+
+#include "classpath:decohack/constants/boom/things.dh"
+
+	All thing mnemonics for Boom-compatible EXEs.
 

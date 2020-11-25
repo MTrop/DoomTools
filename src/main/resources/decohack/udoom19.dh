@@ -1,0 +1,8 @@
+#ifndef __DECOHACK_UDOOM19__
+#define __DECOHACK_UDOOM19__
+
+using udoom19
+
+#include "constants/udoom19.dh"
+
+#endif

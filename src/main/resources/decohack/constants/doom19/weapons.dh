@@ -1,0 +1,19 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Weapon Slot Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_DOOM19_WEAPONS__
+#define __DECOHACK_CONSTANTS_DOOM19_WEAPONS__
+
+#define WP_FIST         0
+#define WP_PISTOL       1
+#define WP_SHOTGUN      2
+#define WP_CHAINGUN     3
+#define WP_MISSILE      4
+#define WP_PLASMA       5
+#define WP_BFG          6
+#define WP_CHAINSAW     7
+#define WP_SUPERSHOTGUN 8
+
+#endif

@@ -119,11 +119,6 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PRIORITY = "priority";
 
 	private static final String KEYWORD_AMMO = "ammo";
-	private static final String KEYWORD_BULLETS = "bullets";
-	private static final String KEYWORD_SHELLS = "shells";
-	private static final String KEYWORD_CELLS = "cells";
-	private static final String KEYWORD_ROCKETS = "rockets";
-	private static final String KEYWORD_INFINITE = "infinite";
 	private static final String KEYWORD_PICKUP = "pickup";
 	private static final String KEYWORD_MAX = "max";
 	
@@ -400,18 +395,13 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer ammoIndex;
 		if ((ammoIndex = matchPositiveInteger()) == null)
 		{
-			Ammo ammo;
-			if ((ammo = matchAmmoType()) == null)
-			{
-				addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', or 'rockets'.", context.getAmmoCount() - 1);
-				return false;
-			}
-			ammoIndex = ammo.ordinal();
+			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
+			return false;
 		}
 		
 		if (ammoIndex >= context.getAmmoCount())
 		{
-			addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', or 'rockets'.", context.getAmmoCount() - 1);
+			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
 			return false;
 		}
 		
@@ -1322,15 +1312,12 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer ammoIndex;
 				if ((ammoIndex = matchPositiveInteger()) == null)
 				{
-					if ((ammo = matchAmmoType()) == null)
-					{
-						addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', 'rockets', or 'infinite'.", context.getAmmoCount() - 1);
-						return false;
-					}
+					addErrorMessage("Expected ammo type: an integer from 0 to %d, or 5.", context.getAmmoCount() - 1);
+					return false;
 				}
-				else if (ammoIndex >= context.getAmmoCount())
+				else if (ammoIndex < 0 || ammoIndex > 5  || ammoIndex == 4)
 				{
-					addErrorMessage("Expected ammo type: an integer from 0 to %d or 'bullets', 'shells', 'cells', 'rockets', or 'infinite'.", context.getAmmoCount() - 1);
+					addErrorMessage("Expected ammo type: an integer from 0 to %d, or 5.", context.getAmmoCount() - 1);
 					return false;
 				}
 				else
@@ -2268,40 +2255,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		nextToken();
 		return true;
-	}
-
-	// Matches an ammo type identifier.
-	private Ammo matchAmmoType()
-	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			return null;
-		
-		Ammo out;
-		switch (currentToken().getLexeme().toLowerCase())
-		{
-			case KEYWORD_BULLETS:
-				out = Ammo.BULLETS;
-				break;
-			case KEYWORD_SHELLS:
-				out = Ammo.SHELLS;
-				break;
-			case KEYWORD_CELLS:
-				out = Ammo.CELLS;
-				break;
-			case KEYWORD_ROCKETS:
-				out = Ammo.ROCKETS;
-				break;
-			case KEYWORD_INFINITE:
-				out = Ammo.INFINITE;
-				break;
-			default:
-				out = null;
-				break;
-		}
-		
-		if (out != null)
-			nextToken();
-		return out;
 	}
 
 	// Matches an identifier or string that references a sprite name.

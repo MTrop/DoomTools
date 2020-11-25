@@ -1,0 +1,9 @@
+#ifndef __DECOHACK_CONSTANTS_DOOM19__
+#define __DECOHACK_CONSTANTS_DOOM19__
+
+#include "doom19/states.dh"
+#include "doom19/things.dh"
+#include "doom19/weapons.dh"
+#include "doom19/ammo.dh"
+
+#endif

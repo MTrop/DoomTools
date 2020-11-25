@@ -19,10 +19,10 @@ Frame 67:
 	If A_WeaponReady is called on this frame while the chainsaw is the active weapon, the chainsaw sound is played.
 
 Frame 91:
-	Hardcoded frame for a bleeding hitscan attack that does between 9 to 12 damage, inclusive.
+	Blood map object is set to this frame for a bleeding hitscan attack that does between 9 to 12 damage, inclusive.
 
 Frame 92:
-	Hardcoded frame for a bleeding hitscan attack that does strictly less than 9 damage.
+	Blood map object is set to this frame for a bleeding hitscan attack that does strictly less than 9 damage.
 
 Frame 154:
 	The player's firing frame on weapon fire.
@@ -41,7 +41,7 @@ Frame 799:
 	It would be wise to then call A_BrainExplode at the end to make the next explosion occur at the end of the animation.
 
 Frame 895:
-	All actors jump to this when crushed.
+	All actors are set to this state when their corpse is crushed.
 
 Plasma Muzzle Flash:
 	The plasma rifle's muzzle flash is called at random between [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.

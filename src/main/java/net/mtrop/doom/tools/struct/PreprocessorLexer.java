@@ -94,8 +94,14 @@ public class PreprocessorLexer extends Lexer
 			if ((lidx = streamName.lastIndexOf('/')) >= 0)
 				streamParent = streamName.substring(0, lidx + 1);
 
-			if (path.startsWith(CLASSPATH_PREFIX) || (streamParent != null && streamParent.startsWith(CLASSPATH_PREFIX)))
+			if (path.startsWith(CLASSPATH_PREFIX))
+			{
+				return path;
+			}
+			else if (streamParent != null && streamParent.startsWith(CLASSPATH_PREFIX))
+			{
 				return (streamParent != null ? streamParent : "") + path;
+			}
 			else
 			{
 				File f = null;
@@ -468,8 +474,8 @@ public class PreprocessorLexer extends Lexer
 				includeIn = includer.getIncludeResource(includePath);
 				if (includeIn == null)
 					errors.add(getInfoLine(streamName, lineNumber, null, "Could not resolve path: \"" + includePath + "\""));
-
-				pushStream(includePath, new InputStreamReader(includeIn));
+				else
+					pushStream(includePath, new InputStreamReader(includeIn));
 				
 			} catch (IOException e) {
 				errors.add(getInfoLine(streamName, lineNumber, null, "Could not resolve path. "+ e.getMessage()));

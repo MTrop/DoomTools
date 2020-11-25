@@ -1,0 +1,8 @@
+#ifndef __DECOHACK_DOOM19__
+#define __DECOHACK_DOOM19__
+
+using doom19
+
+#include "constants/doom19.dh"
+
+#endif

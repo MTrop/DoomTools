@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Writer;
@@ -43,12 +44,15 @@ public final class DecoHackMain
 	private static final int ERROR_IOERROR = 4;
 	private static final int ERROR_SECURITY = 5;
 	private static final int ERROR_PARSEERROR = 6;
+	private static final int ERROR_MISSING_RESOURCE = 7;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_HELPFULL = "--help-full";
 	private static final String SWITCH_VERSION = "--version";
 
+	private static final String SWITCH_DUMPRESOURCE = "--dump-resource";
+	
 	private static final String SWITCH_OUTPUT = "--output";
 	private static final String SWITCH_OUTPUT2 = "-o";
 	private static final String SWITCH_OUTPUTCHARSET = "--output-charset";
@@ -67,6 +71,7 @@ public final class DecoHackMain
 		private boolean help;
 		private boolean full;
 		private boolean version;
+		private String dumpResource;
 
 		private File inFile;
 		
@@ -103,6 +108,12 @@ public final class DecoHackMain
 		public Options setVersion(boolean version) 
 		{
 			this.version = version;
+			return this;
+		}
+		
+		public Options setDumpResource(String dumpResource) 
+		{
+			this.dumpResource = dumpResource;
 			return this;
 		}
 		
@@ -160,6 +171,33 @@ public final class DecoHackMain
 				splash(options.stdout);
 				return ERROR_NONE;
 			}
+			
+			if (options.dumpResource != null)
+			{
+				if (!options.dumpResource.startsWith("decohack/"))
+				{
+					options.stderr.println("ERROR: Bad resource path (must start with \"decohack/\").");
+					return ERROR_MISSING_RESOURCE;
+				}
+				
+				InputStream resIn = Common.openResource(options.dumpResource);
+				if (resIn == null)
+				{
+					options.stderr.printf("ERROR: Bad resource path (%s not found).\n", options.dumpResource);
+					return ERROR_MISSING_RESOURCE;
+				}
+				
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(resIn))) {
+					String line;
+					while ((line = br.readLine()) != null)
+						options.stdout.println(line);
+				} catch (IOException e) {
+					options.stderr.printf("I/O ERROR: %s.\n", e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 		
 			if (options.inFile == null)
 			{
@@ -267,6 +305,7 @@ public final class DecoHackMain
 		final int STATE_START = 0;
 		final int STATE_OUTFILE = 1;
 		final int STATE_OUTCHARSET = 2;
+		final int STATE_DUMPRES = 3;
 		int state = STATE_START;
 
 		for (int i = 0; i < args.length; i++)
@@ -286,6 +325,8 @@ public final class DecoHackMain
 					}
 					else if (arg.equals(SWITCH_VERSION))
 						options.setVersion(true);
+					else if (arg.equals(SWITCH_DUMPRESOURCE))
+						state = STATE_DUMPRES;
 					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
 						options.setOutputBudget(true);
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
@@ -300,6 +341,13 @@ public final class DecoHackMain
 				case STATE_OUTFILE:
 				{
 					options.outFile = new File(arg);
+					state = STATE_START;
+				}
+				break;
+
+				case STATE_DUMPRES:
+				{
+					options.dumpResource = arg;
 					state = STATE_START;
 				}
 				break;
@@ -387,6 +435,9 @@ public final class DecoHackMain
 		out.println("    --help-full              Prints full help (not just usage) and exits.");
 		out.println();
 		out.println("    --version                Prints version, and exits.");
+		out.println();
+		out.println("    --dump-resource [path]   Dumps an internal resource (starting with");
+		out.println("                             \"decohack/\" ) to STDOUT.");
 		out.println();
 		out.println("[filename]:");
 		out.println("    <filename>               The input filename.");

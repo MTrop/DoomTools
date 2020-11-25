@@ -1,0 +1,15 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Ammo Type Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_DOOM19_AMMO__
+#define __DECOHACK_CONSTANTS_DOOM19_AMMO__
+
+#define AM_CLIP         0
+#define AM_SHELL        1
+#define AM_CELL         2
+#define AM_MISL         3
+#define AM_NOAMMO       5
+
+#endif

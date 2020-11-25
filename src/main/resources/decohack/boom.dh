@@ -1,0 +1,8 @@
+#ifndef __DECOHACK_BOOM__
+#define __DECOHACK_BOOM__
+
+using boom
+
+#include "constants/boom.dh"
+
+#endif

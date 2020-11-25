@@ -1,0 +1,236 @@
+/*****************************************************************************
+ * DECOHack Boom Strings Slot Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_BOOM_STRINGS__
+#define __DECOHACK_CONSTANTS_BOOM_STRINGS__
+
+#define STR_E1TEXT             E1TEXT
+#define STR_E2TEXT             E2TEXT
+#define STR_E3TEXT             E3TEXT
+#define STR_E4TEXT             E4TEXT
+#define STR_C1TEXT             C1TEXT
+#define STR_C2TEXT             C2TEXT
+#define STR_C3TEXT             C3TEXT
+#define STR_C4TEXT             C4TEXT
+#define STR_C5TEXT             C5TEXT
+#define STR_C6TEXT             C6TEXT
+#define STR_BGFLATE1           BGFLATE1
+#define STR_BGFLATE2           BGFLATE2
+#define STR_BGFLATE3           BGFLATE3
+#define STR_BGFLATE4           BGFLATE4
+#define STR_BGFLAT06           BGFLAT06
+#define STR_BGFLAT11           BGFLAT11
+#define STR_BGFLAT20           BGFLAT20
+#define STR_BGFLAT30           BGFLAT30
+#define STR_BGFLAT15           BGFLAT15
+#define STR_BGFLAT31           BGFLAT31
+
+#define STR_CC_ZOMBIE          CC_ZOMBIE
+#define STR_CC_SHOTGUN         CC_SHOTGUN
+#define STR_CC_HEAVY           CC_HEAVY
+#define STR_CC_IMP             CC_IMP
+#define STR_CC_DEMON           CC_DEMON
+#define STR_CC_LOST            CC_LOST
+#define STR_CC_CACO            CC_CACO
+#define STR_CC_HELL            CC_HELL
+#define STR_CC_BARON           CC_BARON
+#define STR_CC_ARACH           CC_ARACH
+#define STR_CC_PAIN            CC_PAIN
+#define STR_CC_REVEN           CC_REVEN
+#define STR_CC_MANCU           CC_MANCU
+#define STR_CC_ARCH            CC_ARCH
+#define STR_CC_SPIDER          CC_SPIDER
+#define STR_CC_CYBER           CC_CYBER
+#define STR_CC_HERO            CC_HERO
+
+#define STR_D_DEVSTR           D_DEVSTR
+
+#define STR_D_CDROM            D_CDROM
+
+#define STR_GGSAVED            GGSAVED
+
+#define STR_EMPTYSTRING        EMPTYSTRING
+
+#define STR_LOADNET            LOADNET
+
+#define STR_SAVEDEAD           SAVEDEAD
+#define STR_QSPROMPT           QSPROMPT
+#define STR_QLOADNET           QLOADNET
+#define STR_QSAVESPOT          QSAVESPOT
+#define STR_QLPROMPT           QLPROMPT
+
+#define STR_NEWGAME            NEWGAME
+
+#define STR_NIGHTMARE          NIGHTMARE
+#define STR_SWSTRING           SWSTRING
+
+#define STR_MSGOFF             MSGOFF
+#define STR_MSGON              MSGON
+#define STR_NETEND             NETEND
+#define STR_ENDGAME            ENDGAME
+
+#define STR_DETAILHI           DETAILHI
+#define STR_DETAILLO           DETAILLO
+
+#define STR_AMSTR_FOLLOWON     AMSTR_FOLLOWON
+#define STR_AMSTR_FOLLOWOFF    AMSTR_FOLLOWOFF
+#define STR_AMSTR_GRIDON       AMSTR_GRIDON
+#define STR_AMSTR_GRIDOFF      AMSTR_GRIDOFF
+#define STR_AMSTR_MARKEDSPOT   AMSTR_MARKEDSPOT
+
+#define STR_AMSTR_MARKSCLEARED AMSTR_MARKSCLEARED
+
+#define STR_PD_BLUEO           PD_BLUEO
+#define STR_PD_REDO            PD_REDO
+#define STR_PD_YELLOWO         PD_YELLOWO
+#define STR_PD_BLUEK           PD_BLUEK
+#define STR_PD_REDK            PD_REDK
+#define STR_PD_YELLOWK         PD_YELLOWK
+
+#define STR_GOTARMOR           GOTARMOR
+#define STR_GOTMEGA            GOTMEGA
+#define STR_GOTHTHBONUS        GOTHTHBONUS
+#define STR_GOTARMBONUS        GOTARMBONUS
+#define STR_GOTSUPER           GOTSUPER
+#define STR_GOTMSPHERE         GOTMSPHERE
+#define STR_GOTBLUECARD        GOTBLUECARD
+#define STR_GOTYELWCARD        GOTYELWCARD
+#define STR_GOTREDCARD         GOTREDCARD
+#define STR_GOTBLUESKUL        GOTBLUESKUL
+#define STR_GOTYELWSKUL        GOTYELWSKUL
+#define STR_GOTREDSKULL        GOTREDSKULL
+#define STR_GOTSTIM            GOTSTIM
+#define STR_GOTMEDINEED        GOTMEDINEED
+#define STR_GOTMEDIKIT         GOTMEDIKIT
+#define STR_GOTINVUL           GOTINVUL
+#define STR_GOTBERSERK         GOTBERSERK
+#define STR_GOTINVIS           GOTINVIS
+#define STR_GOTSUIT            GOTSUIT
+#define STR_GOTMAP             GOTMAP
+#define STR_GOTVISOR           GOTVISOR
+#define STR_GOTCLIP            GOTCLIP
+#define STR_GOTCLIPBOX         GOTCLIPBOX
+#define STR_GOTROCKET          GOTROCKET
+#define STR_GOTROCKBOX         GOTROCKBOX
+#define STR_GOTCELL            GOTCELL
+#define STR_GOTCELLBOX         GOTCELLBOX
+#define STR_GOTSHELLS          GOTSHELLS
+#define STR_GOTSHELLBOX        GOTSHELLBOX
+#define STR_GOTBACKPACK        GOTBACKPACK
+#define STR_GOTBFG9000         GOTBFG9000
+#define STR_GOTCHAINGUN        GOTCHAINGUN
+#define STR_GOTCHAINSAW        GOTCHAINSAW
+#define STR_GOTLAUNCHER        GOTLAUNCHER
+#define STR_GOTPLASMA          GOTPLASMA
+#define STR_GOTSHOTGUN         GOTSHOTGUN
+#define STR_GOTSHOTGUN2        GOTSHOTGUN2
+
+#define STR_STSTR_DQDON        STSTR_DQDON
+#define STR_STSTR_DQDOFF       STSTR_DQDOFF
+#define STR_STSTR_FAADDED      STSTR_FAADDED
+#define STR_STSTR_KFAADDED     STSTR_KFAADDED
+#define STR_STSTR_MUS          STSTR_MUS
+#define STR_STSTR_NOMUS        STSTR_NOMUS
+#define STR_STSTR_NCON         STSTR_NCON
+#define STR_STSTR_NCOFF        STSTR_NCOFF
+#define STR_STSTR_BEHOLDX      STSTR_BEHOLDX
+#define STR_STSTR_BEHOLD       STSTR_BEHOLD
+#define STR_STSTR_CHOPPERS     STSTR_CHOPPERS
+
+#define STR_STSTR_CLEV         STSTR_CLEV
+
+#define STR_HUSTR_CHATMACRO0   HUSTR_CHATMACRO0
+#define STR_HUSTR_CHATMACRO1   HUSTR_CHATMACRO1
+#define STR_HUSTR_CHATMACRO2   HUSTR_CHATMACRO2
+#define STR_HUSTR_CHATMACRO3   HUSTR_CHATMACRO3
+#define STR_HUSTR_CHATMACRO4   HUSTR_CHATMACRO4
+#define STR_HUSTR_CHATMACRO5   HUSTR_CHATMACRO5
+#define STR_HUSTR_CHATMACRO6   HUSTR_CHATMACRO6
+#define STR_HUSTR_CHATMACRO7   HUSTR_CHATMACRO7
+#define STR_HUSTR_CHATMACRO8   HUSTR_CHATMACRO8
+#define STR_HUSTR_CHATMACRO9   HUSTR_CHATMACRO9
+#define STR_HUSTR_PLRGREEN     HUSTR_PLRGREEN
+#define STR_HUSTR_PLRINDIGO    HUSTR_PLRINDIGO
+#define STR_HUSTR_PLRBROWN     HUSTR_PLRBROWN
+#define STR_HUSTR_PLRRED       HUSTR_PLRRED
+
+#define STR_HUSTR_E1M1         HUSTR_E1M1
+#define STR_HUSTR_E1M2         HUSTR_E1M2
+#define STR_HUSTR_E1M3         HUSTR_E1M3
+#define STR_HUSTR_E1M4         HUSTR_E1M4
+#define STR_HUSTR_E1M5         HUSTR_E1M5
+#define STR_HUSTR_E1M6         HUSTR_E1M6
+#define STR_HUSTR_E1M7         HUSTR_E1M7
+#define STR_HUSTR_E1M8         HUSTR_E1M8
+#define STR_HUSTR_E1M9         HUSTR_E1M9
+#define STR_HUSTR_E2M1         HUSTR_E2M1
+#define STR_HUSTR_E2M2         HUSTR_E2M2
+#define STR_HUSTR_E2M3         HUSTR_E2M3
+#define STR_HUSTR_E2M4         HUSTR_E2M4
+#define STR_HUSTR_E2M5         HUSTR_E2M5
+#define STR_HUSTR_E2M6         HUSTR_E2M6
+#define STR_HUSTR_E2M7         HUSTR_E2M7
+#define STR_HUSTR_E2M8         HUSTR_E2M8
+#define STR_HUSTR_E2M9         HUSTR_E2M9
+#define STR_HUSTR_E3M1         HUSTR_E3M1
+#define STR_HUSTR_E3M2         HUSTR_E3M2
+#define STR_HUSTR_E3M3         HUSTR_E3M3
+#define STR_HUSTR_E3M4         HUSTR_E3M4
+#define STR_HUSTR_E3M5         HUSTR_E3M5
+#define STR_HUSTR_E3M6         HUSTR_E3M6
+#define STR_HUSTR_E3M7         HUSTR_E3M7
+#define STR_HUSTR_E3M8         HUSTR_E3M8
+#define STR_HUSTR_E3M9         HUSTR_E3M9
+#define STR_HUSTR_E4M1         HUSTR_E4M1
+#define STR_HUSTR_E4M2         HUSTR_E4M2
+#define STR_HUSTR_E4M3         HUSTR_E4M3
+#define STR_HUSTR_E4M4         HUSTR_E4M4
+#define STR_HUSTR_E4M5         HUSTR_E4M5
+#define STR_HUSTR_E4M6         HUSTR_E4M6
+#define STR_HUSTR_E4M7         HUSTR_E4M7
+#define STR_HUSTR_E4M8         HUSTR_E4M8
+#define STR_HUSTR_E4M9         HUSTR_E4M9
+
+#define STR_HUSTR_1            HUSTR_1
+#define STR_HUSTR_2            HUSTR_2
+#define STR_HUSTR_3            HUSTR_3
+#define STR_HUSTR_4            HUSTR_4
+#define STR_HUSTR_5            HUSTR_5
+#define STR_HUSTR_6            HUSTR_6
+#define STR_HUSTR_7            HUSTR_7
+#define STR_HUSTR_8            HUSTR_8
+#define STR_HUSTR_9            HUSTR_9
+#define STR_HUSTR_10           HUSTR_10
+#define STR_HUSTR_11           HUSTR_11
+#define STR_HUSTR_12           HUSTR_12
+#define STR_HUSTR_13           HUSTR_13
+#define STR_HUSTR_14           HUSTR_14
+#define STR_HUSTR_15           HUSTR_15
+#define STR_HUSTR_16           HUSTR_16
+#define STR_HUSTR_17           HUSTR_17
+#define STR_HUSTR_18           HUSTR_18
+#define STR_HUSTR_19           HUSTR_19
+#define STR_HUSTR_20           HUSTR_20
+#define STR_HUSTR_21           HUSTR_21
+#define STR_HUSTR_22           HUSTR_22
+#define STR_HUSTR_23           HUSTR_23
+#define STR_HUSTR_24           HUSTR_24
+#define STR_HUSTR_25           HUSTR_25
+#define STR_HUSTR_26           HUSTR_26
+#define STR_HUSTR_27           HUSTR_27
+#define STR_HUSTR_28           HUSTR_28
+#define STR_HUSTR_29           HUSTR_29
+#define STR_HUSTR_30           HUSTR_30
+#define STR_HUSTR_31           HUSTR_31
+#define STR_HUSTR_32           HUSTR_32
+
+#define STR_HUSTR_MSGU         HUSTR_MSGU
+#define STR_HUSTR_TALKTOSELF1  HUSTR_TALKTOSELF1
+#define STR_HUSTR_TALKTOSELF2  HUSTR_TALKTOSELF2
+#define STR_HUSTR_TALKTOSELF3  HUSTR_TALKTOSELF3
+#define STR_HUSTR_TALKTOSELF4  HUSTR_TALKTOSELF4
+#define STR_HUSTR_TALKTOSELF5  HUSTR_TALKTOSELF5
+
+#endif
