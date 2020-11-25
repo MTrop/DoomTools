@@ -42,10 +42,6 @@ import net.mtrop.doom.tools.struct.PreprocessorLexer;
  */
 public final class DecoHackParser extends Lexer.Parser
 {
-	private static final String KEYWORD_WITH = "with";
-
-	private static final String KEYWORD_SWAP = "swap";
-
 	public static final String STREAMNAME_TEXT = "[Text String]";
 
 	private static final int FLAG_SPECIAL =       0x00000001;
@@ -159,7 +155,10 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PAINSOUND = "painsound";
 	private static final String KEYWORD_DEATHSOUND = "deathsound";
 	private static final String KEYWORD_ACTIVESOUND = "activesound";
-	
+
+	private static final String KEYWORD_WITH = "with";
+	private static final String KEYWORD_SWAP = "swap";
+
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_DOOM19 = "doom19";
 	private static final String KEYWORD_UDOOM19 = "udoom19";
