@@ -6,13 +6,13 @@ DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or
 BEX patch. You should probably read up on the DECORATE format before you 
 proceed, as some pieces are similar, and some are not.
 
-/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
       IMPORTANT: It is important to note that DECOHack is CASCADING. 
       A definition of any kind will replace the original definition, 
       and anything unspecified is UNCHANGED.
 
-/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 ==============================================================================
 ===== Language Specs
@@ -81,10 +81,10 @@ DeHackEd specs.
 ===== Ammo
 ==============================================================================
 
-Changes an ammo entry. `ammo` plus an index/type name, and an optional string 
-for the new name. 
+Changes an ammo entry. `ammo` plus an index, and an optional string for the 
+new name. 
 
-	ammo ( 0 | 1 | 2 | 3 | bullets | shells | rockets | cells ) <STRING>
+	ammo ( 0 | 1 | 2 | 3 ) <STRING>
 	{
 		max <INTEGER>
 		pickup <INTEGER>
@@ -99,7 +99,7 @@ Examples:
 		pickup 20
 	}
 	
-	ammo cells
+	ammo 2
 	{
 		max 5000
 		pickup 100
@@ -146,7 +146,7 @@ changes.
 	state <INTEGER> 
 	{ 
 		[ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
-		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] 
+		( goto <INTEGER> | goto <IDENTIFIER>
 			| wait 
 			| stop 
 		)
@@ -233,7 +233,7 @@ states (especially action pointer states in Doom 1.9).
 	{ 
 		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
 		...
-		( goto <INTEGER> | goto <IDENTIFIER> [ ( + | - ) <INTEGER> ] 
+		( goto <INTEGER> | goto <IDENTIFIER>
 			| wait 
 			| stop 
 			| loop 
@@ -284,16 +284,14 @@ definitions are cumulative on the weapon slot (separate definitions can alter
 the same slot in different ways).
 
 Ready, Select, Deselect, Fire, and Flash state labels set the weapon state 
-indices. Other labels are used for arbitrary jump points. "LightDone" is an 
-alias for frame 1.
+indices. Other labels are used for arbitrary jump points. "LightDone" is a 
+built-in alias for frame 1.
 
 "Spawn" is not used, as that is used for the Thing for pickups.
 
 	weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
 	{
-		ammotype ( 0 | 1 | 2 | 3 | 5 
-			| bullets | shells | cells | rockets | infinite 
-		)
+		ammotype ( 0 | 1 | 2 | 3 | 5 )
 		
 		state <WeaponStateName> <INTEGER> // specific state assignment.
 		
@@ -324,7 +322,7 @@ Example:
 
 	weapon 3 "Chaingun"
 	{
-		ammotype bullets
+		ammotype 0
 		clear states
 		states
 		{
@@ -372,6 +370,16 @@ clause:
 You can also swap two weapon slots:
 
 	weapon 3 swap with 4
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack does NOT have any concept of "inheritance"
+      as DECORATE does. The copy via the ":" is a straight-up 
+      definition copy, and does not have a concept of "super" or
+      "parent" objects of any kind! 
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 
 ==============================================================================
@@ -529,16 +537,20 @@ You can also swap two thing slots:
 	thing 3 swap with 4
 
 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack does NOT have any concept of "inheritance"
+      as DECORATE does. The copy via the ":" is a straight-up 
+      definition copy, and does not have a concept of "super" or
+      "parent" objects of any kind! 
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
 ------------------
 Flag Mnemonics
 ------------------
 
 Instead of integers, you can use the following mnemonics for thing flags:
-
-Example:
-
-	+SOLID
-	-NOGRAVITY
 
 List of valid mnemonics and their values:
 
@@ -580,6 +592,11 @@ List of valid mnemonics and their values:
 	UNUSED4 =       0x40000000
 	TRANSLUCENT =   0x80000000
 
+Example:
+
+	+SOLID
+	-NOGRAVITY
+
 
 ==============================================================================
 ===== Par Times
@@ -594,8 +611,9 @@ way:
 		<MapName> <INTEGER>:<INTEGER> // minutes:seconds
 	}
 
-Where <LumpName> is a map lump (map or episode-map is derived from it), and
-<INTEGER> is the par time in SECONDS.
+Where <MapName> is a map lump (map or episode-map is derived from it), and
+<INTEGER> is the par time in SECONDS (or <INTEGER>:<INTEGER> is 
+minutes:seconds).
 
 Examples:
 
@@ -606,6 +624,16 @@ Examples:
 		map20 2:30
 		map45 200
 	}
+
+
+Note that DECOHack is not prudent enough to check for "valid" minutes and 
+seconds. The formula, no matter what is entered, is always:
+
+	(minutes * 60) + seconds
+
+...which means that a value of 81:75 is considered perfectly valid:
+
+	(81 * 60) + 75 = 4935 sec.
 
 
 ==============================================================================
@@ -654,6 +682,17 @@ be included more than once - use this with caution!
 	#include "scenery.dh"
 	#include "maps/mapnames.dh"
 
+
+You can include some internal resource files by prefixing the file path with
+"classpath:" and it will attempt to read that file from the Java classpath.
+ 
+	#include "classpath:decohack/doom19_constants.dh"
+
+
+The following valid DecoHack internal scripts/resources are as follows:
+
+...
+ 
 
 ------------------
 #define
@@ -733,4 +772,116 @@ provides an alternate section if the first "if" is not processed.
 
 The #endif directive ends the most recently started "if" or "else" directive 
 block.
+
+
+==============================================================================
+===== Built-in Resources
+==============================================================================
+
+#include "classpath:decohack/doom19.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Doom 1.9 EXEs, plus the "using doom19" line.
+
+#include "classpath:decohack/udoom19.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Ultimate Doom 1.9 EXEs, plus the "using udoom19" line.
+
+#include "classpath:decohack/boom.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Boom-compatible EXEs, plus the "using boom" line.
+
+#include "classpath:decohack/mbf.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	MBF-compatible EXEs, plus the "using mbf" line.
+
+#include "classpath:decohack/extended.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Extended-DEH-compatible EXEs, plus the "using extended" line, and freeing
+	up the free extended states immediately for use.
+
+..............................................................................
+
+#include "classpath:decohack/constants/doom19.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
+	1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/ammo.dh"
+
+	All ammo slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/states.dh"
+
+	All state mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/things.dh"
+
+	All thing slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/weapons.dh"
+
+	All weapon slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/strings.dh"
+
+	All string mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/udoom19.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Ultimate Doom 1.9 EXEs (Doom 1.9 ammo, thing, weapon, and states are 
+	reused).
+
+#include "classpath:decohack/constants/udoom19/strings.dh"
+
+	All string mnemonics for Ultimate Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/boom.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/boom/states.dh"
+
+	All state mnemonics for Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/boom/strings.dh"
+
+	All string mnemonics for Boom-compatible EXEs (meant to be a common
+	define for both Doom indices and Boom string keys).
+
+#include "classpath:decohack/constants/boom/things.dh"
+
+	All thing mnemonics for Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf/states.dh"
+
+	All state mnemonics for MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf/things.dh"
+
+	All thing mnemonics for MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/extended.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Extended-DEH-compatible EXEs.
+
+#include "classpath:decohack/constants/extended/states.dh"
+
+	All state mnemonics for Extended-DEH-compatible EXEs.
+
+#include "classpath:decohack/constants/extended/things.dh"
+
+	All thing mnemonics for Extended-DEH-compatible EXEs.
 

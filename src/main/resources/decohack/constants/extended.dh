@@ -1,0 +1,15 @@
+#ifndef __DECOHACK_CONSTANTS_EXTENDED__
+#define __DECOHACK_CONSTANTS_EXTENDED__
+
+// Overlap with Boom for weapons/ammo.
+#include "doom19/weapons.dh"
+#include "doom19/ammo.dh"
+
+// ...but not strings...
+#include "boom/strings.dh"
+
+// ...and not states nor things
+#include "extended/states.dh"
+#include "extended/things.dh"
+
+#endif

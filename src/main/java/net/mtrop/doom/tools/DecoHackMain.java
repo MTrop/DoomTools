@@ -17,6 +17,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackExporter;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
+import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
@@ -247,6 +248,14 @@ public final class DecoHackMain
 			{
 				options.stderr.println("ERROR: Could not open input file (access denied).");
 				return ERROR_SECURITY;
+			}
+			
+			// warn export if [Ultimate] Doom 1.9 and last state is replaced.
+			if (context instanceof AbstractPatchDoom19Context 
+				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
+			))
+			{
+				options.stdout.println("WARNING: Final state was replaced in the exported patch - DHE 3.1 may not import this correctly!");
 			}
 			
 			if (options.outputBudget)

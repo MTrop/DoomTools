@@ -1,0 +1,8 @@
+#ifndef __DECOHACK_MBF__
+#define __DECOHACK_MBF__
+
+using mbf
+
+#include "constants/mbf.dh"
+
+#endif

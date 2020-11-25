@@ -1,0 +1,10 @@
+#ifndef __DECOHACK_EXTENDED__
+#define __DECOHACK_EXTENDED__
+
+using extended
+
+#include "constants/extended.dh"
+
+state free S_FREE_START to S_FREE_END // free the "free" states immediately
+
+#endif

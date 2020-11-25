@@ -6,13 +6,13 @@ DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or
 BEX patch. You should probably read up on the DECORATE format before you 
 proceed, as some pieces are similar, and some are not.
 
-/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
       IMPORTANT: It is important to note that DECOHack is CASCADING. 
       A definition of any kind will replace the original definition, 
       and anything unspecified is UNCHANGED.
 
-/!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 ==============================================================================
 ===== Language Specs
@@ -372,6 +372,16 @@ You can also swap two weapon slots:
 	weapon 3 swap with 4
 
 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack does NOT have any concept of "inheritance"
+      as DECORATE does. The copy via the ":" is a straight-up 
+      definition copy, and does not have a concept of "super" or
+      "parent" objects of any kind! 
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
 ==============================================================================
 ===== Thing
 ==============================================================================
@@ -527,16 +537,20 @@ You can also swap two thing slots:
 	thing 3 swap with 4
 
 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack does NOT have any concept of "inheritance"
+      as DECORATE does. The copy via the ":" is a straight-up 
+      definition copy, and does not have a concept of "super" or
+      "parent" objects of any kind! 
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
 ------------------
 Flag Mnemonics
 ------------------
 
 Instead of integers, you can use the following mnemonics for thing flags:
-
-Example:
-
-	+SOLID
-	-NOGRAVITY
 
 List of valid mnemonics and their values:
 
@@ -578,6 +592,11 @@ List of valid mnemonics and their values:
 	UNUSED4 =       0x40000000
 	TRANSLUCENT =   0x80000000
 
+Example:
+
+	+SOLID
+	-NOGRAVITY
+
 
 ==============================================================================
 ===== Par Times
@@ -592,8 +611,9 @@ way:
 		<MapName> <INTEGER>:<INTEGER> // minutes:seconds
 	}
 
-Where <LumpName> is a map lump (map or episode-map is derived from it), and
-<INTEGER> is the par time in SECONDS.
+Where <MapName> is a map lump (map or episode-map is derived from it), and
+<INTEGER> is the par time in SECONDS (or <INTEGER>:<INTEGER> is 
+minutes:seconds).
 
 Examples:
 
@@ -604,6 +624,16 @@ Examples:
 		map20 2:30
 		map45 200
 	}
+
+
+Note that DECOHack is not prudent enough to check for "valid" minutes and 
+seconds. The formula, no matter what is entered, is always:
+
+	(minutes * 60) + seconds
+
+...which means that a value of 81:75 is considered perfectly valid:
+
+	(81 * 60) + 75 = 4935 sec.
 
 
 ==============================================================================
@@ -750,18 +780,31 @@ block.
 
 #include "classpath:decohack/doom19.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
-	1.9 EXEs, plus the "using" line.
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Doom 1.9 EXEs, plus the "using doom19" line.
 
 #include "classpath:decohack/udoom19.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Ultimate Doom 1.9 EXEs, plus the "using" line.
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Ultimate Doom 1.9 EXEs, plus the "using udoom19" line.
 
 #include "classpath:decohack/boom.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Boom-compatible EXEs, plus the "using" line.
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Boom-compatible EXEs, plus the "using boom" line.
+
+#include "classpath:decohack/mbf.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	MBF-compatible EXEs, plus the "using mbf" line.
+
+#include "classpath:decohack/extended.dh"
+
+	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Extended-DEH-compatible EXEs, plus the "using extended" line, and freeing
+	up the free extended states immediately for use.
+
+..............................................................................
 
 #include "classpath:decohack/constants/doom19.dh"
 
@@ -790,7 +833,7 @@ block.
 
 #include "classpath:decohack/constants/udoom19.dh"
 
-	All ammo, state, weapon slot, and thing slot, and string mnemonics for 
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
 	Ultimate Doom 1.9 EXEs (Doom 1.9 ammo, thing, weapon, and states are 
 	reused).
 
@@ -800,7 +843,7 @@ block.
 
 #include "classpath:decohack/constants/boom.dh"
 
-	All ammo, state, weapon slot, and thing slot, and string mnemonics for 
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
 	Boom-compatible EXEs.
 
 #include "classpath:decohack/constants/boom/states.dh"
@@ -815,4 +858,30 @@ block.
 #include "classpath:decohack/constants/boom/things.dh"
 
 	All thing mnemonics for Boom-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf/states.dh"
+
+	All state mnemonics for MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf/things.dh"
+
+	All thing mnemonics for MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/extended.dh"
+
+	All ammo, state, weapon slot, thing slot, and string mnemonics for 
+	Extended-DEH-compatible EXEs.
+
+#include "classpath:decohack/constants/extended/states.dh"
+
+	All state mnemonics for Extended-DEH-compatible EXEs.
+
+#include "classpath:decohack/constants/extended/things.dh"
+
+	All thing mnemonics for Extended-DEH-compatible EXEs.
 
