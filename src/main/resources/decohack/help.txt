@@ -39,13 +39,13 @@ proceed, as some pieces are similar, and some are not.
 
 To set the output format (and available features):
 
-	using ( doom19 | udoom19 | boom | mbf | extended )
+    using ( doom19 | udoom19 | boom | mbf | extended )
 
 
 Examples:
 
-	using doom19
-	using boom
+    using doom19
+    using boom
 
 
 ==============================================================================
@@ -58,19 +58,19 @@ sprite names and sound names!
 Doom 1.9:
 
     strings
-	{
-		<INTEGER> <STRING>
-		...
-	}
+    {
+        <INTEGER> <STRING>
+        ...
+    }
 
 
 Boom and higher:
 
-	strings
-	{
-		<IDENTIFIER> <STRING>
-		...
-	}
+    strings
+    {
+        <IDENTIFIER> <STRING>
+        ...
+    }
 
 
 The Identifier in the Boom definition is the string mnemonic from the Boom 
@@ -84,26 +84,26 @@ DeHackEd specs.
 Changes an ammo entry. `ammo` plus an index, and an optional string for the 
 new name. 
 
-	ammo ( 0 | 1 | 2 | 3 ) <STRING>
-	{
-		max <INTEGER>
-		pickup <INTEGER>
-	}
+    ammo ( 0 | 1 | 2 | 3 ) <STRING>
+    {
+        max <INTEGER>
+        pickup <INTEGER>
+    }
 
 
 Examples:
 
-	ammo 0 "Splinters"
-	{
-		max 300
-		pickup 20
-	}
-	
-	ammo 2
-	{
-		max 5000
-		pickup 100
-	}
+    ammo 0 "Splinters"
+    {
+        max 300
+        pickup 20
+    }
+    
+    ammo 2
+    {
+        max 5000
+        pickup 100
+    }
 
 
 ==============================================================================
@@ -113,26 +113,26 @@ Examples:
 Changes a sound entry. `sound` plus the sound index/name. The sound name must 
 match a sound string in the string table (should not start with DS or DP). 
 
-	sound ( <INTEGER> | <STRING> )
-	{
-		priority <INTEGER>
-		singular <BOOLEAN>
-	}
+    sound ( <INTEGER> | <STRING> )
+    {
+        priority <INTEGER>
+        singular <BOOLEAN>
+    }
 
 
 Examples:
 
-	sound 5
-	{
-		priority 200
-		singular true
-	}
+    sound 5
+    {
+        priority 200
+        singular true
+    }
 
-	sound "barexp"
-	{
-		priority 200
-		singular true
-	}
+    sound "barexp"
+    {
+        priority 200
+        singular true
+    }
 
 
 ==============================================================================
@@ -143,14 +143,14 @@ Individual states can be manipulated and/or changed, but be careful -
 individual state manipulation should only be reserved for very few kinds of 
 changes.
 
-	state <INTEGER> 
-	{ 
-		[ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
-		( goto <INTEGER> | goto <IDENTIFIER>
-			| wait 
-			| stop 
-		)
-	}
+    state <INTEGER> 
+    { 
+        [ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
+        ( goto <INTEGER> | goto <IDENTIFIER>
+            | wait 
+            | stop 
+        )
+    }
 
 
 In this case, "stop" is an alias for "goto 0", and "wait" is an alias for 
@@ -161,64 +161,64 @@ must start with A_.
 
 Examples:
 
-	state 11
-	{
-		PISG A 1 A_Lower
-		wait
-	}
+    state 11
+    {
+        PISG A 1 A_Lower
+        wait
+    }
 
-	state 15
-	{
-		PISG C 4
-		goto 16
-	}
+    state 15
+    {
+        PISG C 4
+        goto 16
+    }
 
-	state 17
-	{
-		PISF A 7 Bright A_Light1
-		goto 1
-	}
+    state 17
+    {
+        PISF A 7 Bright A_Light1
+        goto 1
+    }
 
-	state 173
-	{
-		PLAY W -1
-		stop
-	}
+    state 173
+    {
+        PLAY W -1
+        stop
+    }
 
-	state 575 // change just next state
-	{
-		goto 577
-	}
-	
-	state 911
-	{
-		CAND A -1 Bright
-		stop
-	}
+    state 575 // change just next state
+    {
+        goto 577
+    }
+    
+    state 911
+    {
+        CAND A -1 Bright
+        stop
+    }
 
 
 For replacing states in bulk, you will have to "free" a bunch of states for
 replacement.
 
-	state free <INTEGER>
+    state free <INTEGER>
 
 
 To free an explicit range (inclusive):
 
-	state free <INTEGER> to <INTEGER>
+    state free <INTEGER> to <INTEGER>
 
 
 To free from a starting state index, following next state indices until a 
 free or protected state is reached:
 
-	state free from <INTEGER>
+    state free from <INTEGER>
 
 
 Examples:
 
-	state free 100
-	state free 100 to 200
-	state free from 100
+    state free 100
+    state free 100 to 200
+    state free from 100
 
 
 (NOTE: "Freeing" a state does NOT ALTER IT, it just flags that state as
@@ -229,32 +229,32 @@ free states will be auto-filled by availability, connected together in
 sequence. Be careful: it may fail with an error if you run out of available
 states (especially action pointer states in Doom 1.9).
 
-	state fill <INTEGER> 
-	{ 
-		<SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
-		...
-		( goto <INTEGER> | goto <IDENTIFIER>
-			| wait 
-			| stop 
-			| loop 
-		)
-	}
+    state fill <INTEGER> 
+    { 
+        <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
+        ...
+        ( goto <INTEGER> | goto <IDENTIFIER>
+            | wait 
+            | stop 
+            | loop 
+        )
+    }
 
 
 <Frame> in this situation can be many valid characters in a sprite frame. 
 
 
 Examples:
-	
-	state fill 714
-	{
-		PAIN H 8 Bright
-		PAIN I 8 Bright A_Scream
-		PAIN JK 8 Bright
-		PAIN L 8 Bright A_PainDie
-		PAIN M 8 Bright
-		stop
-	}
+    
+    state fill 714
+    {
+        PAIN H 8 Bright
+        PAIN I 8 Bright A_Scream
+        PAIN JK 8 Bright
+        PAIN L 8 Bright A_PainDie
+        PAIN M 8 Bright
+        stop
+    }
 
 
 Each state altered or filled this way is no longer "free."
@@ -262,8 +262,8 @@ Each state altered or filled this way is no longer "free."
 You can protect a state from being freed (or an inclusive range of them) by 
 writing the following:
 
-	state protect <INTEGER>
-	state protect <INTEGER> to <INTEGER>
+    state protect <INTEGER>
+    state protect <INTEGER> to <INTEGER>
 
 
 It will not be flagged as "free" if in a range of free states, and attempting 
@@ -271,8 +271,8 @@ to alter the state directly will throw an error. By default, state 0 and 1
 are flagged as protected. You can turn off the protection on states by doing 
 the following:
 
-	state unprotect <INTEGER>
-	state unprotect <INTEGER> to <INTEGER>
+    state unprotect <INTEGER>
+    state unprotect <INTEGER> to <INTEGER>
 
 
 ==============================================================================
@@ -289,70 +289,70 @@ built-in alias for frame 1.
 
 "Spawn" is not used, as that is used for the Thing for pickups.
 
-	weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
-	{
-		ammotype ( 0 | 1 | 2 | 3 | 5 )
-		
-		state <WeaponStateName> <INTEGER> // specific state assignment.
-		
-		clear states // if present, clear all state indices (not freed!).
-		
-		states
-		{
-			ready:
-				<StateInfo>
-				...
-			deselect:
-				<StateInfo>
-				...
-			select:
-				<StateInfo>
-				...
-			fire:
-				<StateInfo>
-				...
-			flash:
-				<StateInfo>
-				...
-		}
-	}
+    weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
+    {
+        ammotype ( 0 | 1 | 2 | 3 | 5 )
+        
+        state <WeaponStateName> <INTEGER> // specific state assignment.
+        
+        clear states // if present, clear all state indices (not freed!).
+        
+        states
+        {
+            ready:
+                <StateInfo>
+                ...
+            deselect:
+                <StateInfo>
+                ...
+            select:
+                <StateInfo>
+                ...
+            fire:
+                <StateInfo>
+                ...
+            flash:
+                <StateInfo>
+                ...
+        }
+    }
 
 
 Example:
 
-	weapon 3 "Chaingun"
-	{
-		ammotype 0
-		clear states
-		states
-		{
-			ready:
-				CHGG A 1 A_WeaponReady
-				wait
-			deselect:
-				CHGG A 1 A_Lower
-				wait
-			select:
-				CHGG A 1 A_Raise
-				wait
-			fire:
-				CHGG AB 4 A_FireCGun
-				CHGG B 0 A_ReFire
-				goto ready
-			flash:
-				CHGF A 5 Bright A_Light1
-				goto lightdone
-			flash2:
-				CHGF B 5 Bright A_Light1
-				goto lightdone
-		}
-	}
+    weapon 3 "Chaingun"
+    {
+        ammotype 0
+        clear states
+        states
+        {
+            ready:
+                CHGG A 1 A_WeaponReady
+                wait
+            deselect:
+                CHGG A 1 A_Lower
+                wait
+            select:
+                CHGG A 1 A_Raise
+                wait
+            fire:
+                CHGG AB 4 A_FireCGun
+                CHGG B 0 A_ReFire
+                goto ready
+            flash:
+                CHGF A 5 Bright A_Light1
+                goto lightdone
+            flash2:
+                CHGF B 5 Bright A_Light1
+                goto lightdone
+        }
+    }
 
 
 To clear all states connected to a weapon, type the following:
 
-	weapon <INTEGER> free states
-	weapon <INTEGER> free <WeaponStateName>
+    weapon <INTEGER> free states
+    weapon <INTEGER> free <WeaponStateName>
 
 
 And the same result will happen if you freed from each defined weapon frame 
@@ -361,15 +361,15 @@ individually. Best used before redefining a weapon.
 You can copy from another weapon slot by adding the [ : weapon <INTEGER> ] 
 clause:
 
-	weapon 3 : weapon 4 "New Weapon Name"
-	{
-		...
-	}
+    weapon 3 : weapon 4 "New Weapon Name"
+    {
+        ...
+    }
 
 
 You can also swap two weapon slots:
 
-	weapon 3 swap with 4
+    weapon 3 swap with 4
 
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
@@ -393,128 +393,128 @@ the same slot in different ways).
 Spawn, See, Melee, Missile, Pain, Death, XDeath, and Raise state labels set 
 the thing state indices. Other labels are used for arbitrary jump points.
 
-	thing <INTEGER> [ : thing <INTEGER> ] [ <STRING> ] 
-	{
-		EdNum <NUMBER>
-		
-		Health <NUMBER>
-		Speed <NUMBER>
-		Radius <INTEGER>
-		Height <INTEGER>
-		Damage <NUMBER>
-		ReactionTime <INTEGER>
-		PainChance <INTEGER>
-		Mass <INTEGER>
-	
-		Flags <INTEGER>
-		+ <INTEGER> // set flag(s)
-		- <INTEGER> // unset flag(s)
-	
-		clear sounds // if present, clear all sounds.
-			
-		SeeSound <STRING>
-		AttackSound <STRING>
-		PainSound <STRING>
-		DeathSound <STRING>
-		ActiveSound <STRING>
+    thing <INTEGER> [ : thing <INTEGER> ] [ <STRING> ] 
+    {
+        EdNum <NUMBER>
+        
+        Health <NUMBER>
+        Speed <NUMBER>
+        Radius <INTEGER>
+        Height <INTEGER>
+        Damage <NUMBER>
+        ReactionTime <INTEGER>
+        PainChance <INTEGER>
+        Mass <INTEGER>
+    
+        Flags <INTEGER>
+        + <INTEGER> // set flag(s)
+        - <INTEGER> // unset flag(s)
+    
+        clear sounds // if present, clear all sounds.
+            
+        SeeSound <STRING>
+        AttackSound <STRING>
+        PainSound <STRING>
+        DeathSound <STRING>
+        ActiveSound <STRING>
 
-		clear states // if present, clear all state indices (not freed!).
-		
-		state <ThingStateName> <INTEGER> // specific state assignment.
-		
-		states
-		{
-			spawn:
-				<StateInfo>
-				...
-			see:
-				<StateInfo>
-				...
-			missile:
-				<StateInfo>
-				...
-			pain:
-				<StateInfo>
-				...
-			death:
-				<StateInfo>
-				...
-			xdeath:
-				<StateInfo>
-				...
-			raise:
-				<StateInfo>
-				...
-		}
-	}
+        clear states // if present, clear all state indices (not freed!).
+        
+        state <ThingStateName> <INTEGER> // specific state assignment.
+        
+        states
+        {
+            spawn:
+                <StateInfo>
+                ...
+            see:
+                <StateInfo>
+                ...
+            missile:
+                <StateInfo>
+                ...
+            pain:
+                <StateInfo>
+                ...
+            death:
+                <StateInfo>
+                ...
+            xdeath:
+                <StateInfo>
+                ...
+            raise:
+                <StateInfo>
+                ...
+        }
+    }
 
 
 Example:
 
-	thing 11 "Chaingun Sargeant"
-	{
-		EdNum 65
-		
-		Health 70
-		Speed 8
-		Radius 20
-		Height 56
-		Damage 0
-		ReactionTime 8
-		PainChance 170
-		Mass 100
-	
-		Monster
-	
-		SeeSound "posit2"
-		AttackSound ""
-		PainSound "popain"
-		DeathSound "podth2"
-		ActiveSound "posact"
-		
-		states
-		{
-			Spawn:
-				CPOS AB 10 A_Look
-				Loop
-			See:
-				CPOS AABBCCDD 3 A_Chase
-				Loop
-			Missile:
-				CPOS E 10 A_FaceTarget
-			ReFire:
-				CPOS FE 4 Bright A_CPosAttack
-				CPOS F 1 A_CPosRefire
-				Goto ReFire
-			Pain:
-				CPOS G 3
-				CPOS G 3 A_Pain
-				Goto See
-			Death:
-				CPOS H 5
-				CPOS I 5 A_Scream
-				CPOS J 5 A_Fall
-				CPOS KLM 5
-				CPOS N -1
-				Stop
-			XDeath:
-				CPOS O 5 
-				CPOS P 5 A_XScream
-				CPOS Q 5 A_Fall
-				CPOS RS 5
-				CPOS T -1
-				Stop
-			Raise:
-				CPOS N 5
-				CPOS MLKJIH 5
-				Goto See
-		}
-	}
+    thing 11 "Chaingun Sargeant"
+    {
+        EdNum 65
+        
+        Health 70
+        Speed 8
+        Radius 20
+        Height 56
+        Damage 0
+        ReactionTime 8
+        PainChance 170
+        Mass 100
+    
+        Monster
+    
+        SeeSound "posit2"
+        AttackSound ""
+        PainSound "popain"
+        DeathSound "podth2"
+        ActiveSound "posact"
+        
+        states
+        {
+            Spawn:
+                CPOS AB 10 A_Look
+                Loop
+            See:
+                CPOS AABBCCDD 3 A_Chase
+                Loop
+            Missile:
+                CPOS E 10 A_FaceTarget
+            ReFire:
+                CPOS FE 4 Bright A_CPosAttack
+                CPOS F 1 A_CPosRefire
+                Goto ReFire
+            Pain:
+                CPOS G 3
+                CPOS G 3 A_Pain
+                Goto See
+            Death:
+                CPOS H 5
+                CPOS I 5 A_Scream
+                CPOS J 5 A_Fall
+                CPOS KLM 5
+                CPOS N -1
+                Stop
+            XDeath:
+                CPOS O 5 
+                CPOS P 5 A_XScream
+                CPOS Q 5 A_Fall
+                CPOS RS 5
+                CPOS T -1
+                Stop
+            Raise:
+                CPOS N 5
+                CPOS MLKJIH 5
+                Goto See
+        }
+    }
 
 To clear all states connected to a thing, type the following:
 
-	thing <INTEGER> free states
-	thing <INTEGER> free <ThingStateName>
+    thing <INTEGER> free states
+    thing <INTEGER> free <ThingStateName>
 
 
 And the same result will happen if you freed from each defined thing frame 
@@ -526,15 +526,15 @@ The following editor numbers cannot be used: 1, 2, 3, 4, 11.
 You can copy from another thing slot by adding the [ : weapon <INTEGER> ] 
 clause:
 
-	thing 3 : thing 4 "New Name"
-	{
-		...
-	}
+    thing 3 : thing 4 "New Name"
+    {
+        ...
+    }
 
 
 You can also swap two thing slots:
 
-	thing 3 swap with 4
+    thing 3 swap with 4
 
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
@@ -554,48 +554,48 @@ Instead of integers, you can use the following mnemonics for thing flags:
 
 List of valid mnemonics and their values:
 
-	SPECIAL =       0x00000001
-	SOLID =         0x00000002
-	SHOOTABLE =     0x00000004
-	NOSECTOR =      0x00000008
-	NOBLOCKMAP =    0x00000010
-	AMBUSH =        0x00000020
-	JUSTHIT =       0x00000040
-	JUSTATTACKED =  0x00000080
-	SPAWNCEILING =  0x00000100
-	NOGRAVITY =     0x00000200
-	DROPOFF =       0x00000400
-	PICKUP =        0x00000800
-	NOCLIP =        0x00001000
-	SLIDE =         0x00002000
-	FLOAT =         0x00004000
-	TELEPORT =      0x00008000
-	MISSILE =       0x00010000
-	DROPPED =       0x00020000
-	SHADOW =        0x00040000
-	NOBLOOD =       0x00080000
-	CORPSE =        0x00100000
-	INFLOAT =       0x00200000
-	COUNTKILL =     0x00400000
-	COUNTITEM =     0x00800000
-	SKULLFLY =      0x01000000
-	NOTDMATCH =     0x02000000
-	TRANSLATION =   0x04000000
-	UNUSED1 =       0x08000000
-	TRANSLATION2 =  0x08000000
-	TOUCHY =        0x10000000
-	UNUSED2 =       0x10000000
-	BOUNCES =       0x20000000
-	UNUSED3 =       0x20000000
-	FRIEND =        0x40000000
-	FRIENDLY =      0x40000000
-	UNUSED4 =       0x40000000
-	TRANSLUCENT =   0x80000000
+    SPECIAL =       0x00000001
+    SOLID =         0x00000002
+    SHOOTABLE =     0x00000004
+    NOSECTOR =      0x00000008
+    NOBLOCKMAP =    0x00000010
+    AMBUSH =        0x00000020
+    JUSTHIT =       0x00000040
+    JUSTATTACKED =  0x00000080
+    SPAWNCEILING =  0x00000100
+    NOGRAVITY =     0x00000200
+    DROPOFF =       0x00000400
+    PICKUP =        0x00000800
+    NOCLIP =        0x00001000
+    SLIDE =         0x00002000
+    FLOAT =         0x00004000
+    TELEPORT =      0x00008000
+    MISSILE =       0x00010000
+    DROPPED =       0x00020000
+    SHADOW =        0x00040000
+    NOBLOOD =       0x00080000
+    CORPSE =        0x00100000
+    INFLOAT =       0x00200000
+    COUNTKILL =     0x00400000
+    COUNTITEM =     0x00800000
+    SKULLFLY =      0x01000000
+    NOTDMATCH =     0x02000000
+    TRANSLATION =   0x04000000
+    UNUSED1 =       0x08000000
+    TRANSLATION2 =  0x08000000
+    TOUCHY =        0x10000000
+    UNUSED2 =       0x10000000
+    BOUNCES =       0x20000000
+    UNUSED3 =       0x20000000
+    FRIEND =        0x40000000
+    FRIENDLY =      0x40000000
+    UNUSED4 =       0x40000000
+    TRANSLUCENT =   0x80000000
 
 Example:
 
-	+SOLID
-	-NOGRAVITY
+    +SOLID
+    -NOGRAVITY
 
 
 ==============================================================================
@@ -605,11 +605,11 @@ Example:
 Only for certain patch formats (Boom-compatible), Par Times are declared this 
 way:
 
-	pars
-	{
-		<MapName> <INTEGER>           // seconds
-		<MapName> <INTEGER>:<INTEGER> // minutes:seconds
-	}
+    pars
+    {
+        <MapName> <INTEGER>           // seconds
+        <MapName> <INTEGER>:<INTEGER> // minutes:seconds
+    }
 
 Where <MapName> is a map lump (map or episode-map is derived from it), and
 <INTEGER> is the par time in SECONDS (or <INTEGER>:<INTEGER> is 
@@ -617,23 +617,23 @@ minutes:seconds).
 
 Examples:
 
-	pars
-	{
-		e1m1 30
-		map20 150
-		map20 2:30
-		map45 200
-	}
+    pars
+    {
+        e1m1 30
+        map20 150
+        map20 2:30
+        map45 200
+    }
 
 
 Note that DECOHack is not prudent enough to check for "valid" minutes and 
 seconds. The formula, no matter what is entered, is always:
 
-	(minutes * 60) + seconds
+    (minutes * 60) + seconds
 
 ...which means that a value of 81:75 is considered perfectly valid:
 
-	(81 * 60) + 75 = 4935 sec.
+    (81 * 60) + 75 = 4935 sec.
 
 
 ==============================================================================
@@ -642,25 +642,25 @@ seconds. The formula, no matter what is entered, is always:
 
 Miscellaneous data is in the miscellaneous block:
 
-	misc
-	{
-		monsterInfighting <BOOLEAN>
-		initialBullets <INTEGER>
-		initialHealth <INTEGER>
-		greenArmorClass <INTEGER>
-		blueArmorClass <INTEGER>
-		soulsphereHealth <INTEGER>
-		maxSoulsphereHealth <INTEGER>
-		megasphereHealth <INTEGER>
-		godModeHealth <INTEGER>
-		idfaArmor <INTEGER>
-		idfaArmorClass <INTEGER>
-		idkfaArmor <INTEGER>
-		idkfaArmorClass <INTEGER>
-		bfgCellsPerShot <INTEGER>
-		maxHealth <INTEGER>
-		maxArmor <INTEGER>
-	}
+    misc
+    {
+        monsterInfighting <BOOLEAN>
+        initialBullets <INTEGER>
+        initialHealth <INTEGER>
+        greenArmorClass <INTEGER>
+        blueArmorClass <INTEGER>
+        soulsphereHealth <INTEGER>
+        maxSoulsphereHealth <INTEGER>
+        megasphereHealth <INTEGER>
+        godModeHealth <INTEGER>
+        idfaArmor <INTEGER>
+        idfaArmorClass <INTEGER>
+        idkfaArmor <INTEGER>
+        idkfaArmorClass <INTEGER>
+        bfgCellsPerShot <INTEGER>
+        maxHealth <INTEGER>
+        maxArmor <INTEGER>
+    }
 
 
 ==============================================================================
@@ -679,14 +679,14 @@ filename is provided as a string parameter, and can either be a relative file
 path from the file that contains the directive or an absolute path. Files can 
 be included more than once - use this with caution!
 
-	#include "scenery.dh"
-	#include "maps/mapnames.dh"
+    #include "scenery.dh"
+    #include "maps/mapnames.dh"
 
 
 You can include some internal resource files by prefixing the file path with
 "classpath:" and it will attempt to read that file from the Java classpath.
  
-	#include "classpath:decohack/doom19_constants.dh"
+    #include "classpath:decohack/doom19_constants.dh"
 
 
 The following valid DecoHack internal scripts/resources are as follows:
@@ -706,8 +706,8 @@ CASE SENSITIVE!
 NOTE: Unlike the C-language preprocessor, this does not create macro 
 functions.
 
-	#define GREETING_TEXT "Hello."
-	#define FILE_WAS_INCLUDED
+    #define GREETING_TEXT "Hello."
+    #define FILE_WAS_INCLUDED
 
 
 ------------------
@@ -717,8 +717,8 @@ functions.
 The #undefine directive removes a previously defined macro. All subsequent 
 uses of that macro are treated as though they were never defined.
 
-	#define GREETING_TEXT "Hello."
-	#undefine GREETING_TEXT
+    #define GREETING_TEXT "Hello."
+    #undefine GREETING_TEXT
 
 
 ------------------
@@ -728,10 +728,10 @@ uses of that macro are treated as though they were never defined.
 The #ifdef directive includes the next series of lines if the following macro
 was defined, until it reaches an #endif directive.
 
-	#define DOOM_STRINGS
-	#ifdef DOOM_STRINGS
-	#include "strings/doom.dh"
-	#endif
+    #define DOOM_STRINGS
+    #ifdef DOOM_STRINGS
+    #include "strings/doom.dh"
+    #endif
 
 
 ------------------
@@ -741,14 +741,14 @@ was defined, until it reaches an #endif directive.
 The #ifdef directive includes the next series of lines if the following macro 
 was NOT defined, until it reaches an #endif directive.
 
-	#define NO_PAR_TIMES
-	#ifndef NO_PAR_TIMES
-	pars 
-	{ 
-		e1m1 0:40 
-	}
-	#endif
-	
+    #define NO_PAR_TIMES
+    #ifndef NO_PAR_TIMES
+    pars 
+    { 
+        e1m1 0:40 
+    }
+    #endif
+    
 
 ------------------
 #else
@@ -758,12 +758,12 @@ The #else directive ends the most recently started "if" directive block and
 provides an alternate section if the first "if" is not processed.
 
 
-	#define TOUGH_PAR_TIMES
-	#ifdef TOUGH_PAR_TIMES
-	#include "maps/tough-partimes.dh"
-	#else
-	#include "maps/normal-partimes.dh"
-	#endif
+    #define TOUGH_PAR_TIMES
+    #ifdef TOUGH_PAR_TIMES
+    #include "maps/tough-partimes.dh"
+    #else
+    #include "maps/normal-partimes.dh"
+    #endif
 
 
 ------------------
@@ -780,108 +780,108 @@ block.
 
 #include "classpath:decohack/doom19.dh"
 
-	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Doom 1.9 EXEs, plus the "using doom19" line.
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Doom 1.9 EXEs, plus the "using doom19" line.
 
 #include "classpath:decohack/udoom19.dh"
 
-	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Ultimate Doom 1.9 EXEs, plus the "using udoom19" line.
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Ultimate Doom 1.9 EXEs, plus the "using udoom19" line.
 
 #include "classpath:decohack/boom.dh"
 
-	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Boom-compatible EXEs, plus the "using boom" line.
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Boom-compatible EXEs, plus the "using boom" line.
 
 #include "classpath:decohack/mbf.dh"
 
-	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-	MBF-compatible EXEs, plus the "using mbf" line.
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    MBF-compatible EXEs, plus the "using mbf" line.
 
 #include "classpath:decohack/extended.dh"
 
-	Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Extended-DEH-compatible EXEs, plus the "using extended" line, and freeing
-	up the free extended states immediately for use.
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Extended-DEH-compatible EXEs, plus the "using extended" line, and freeing
+    up the free extended states immediately for use.
 
 ..............................................................................
 
 #include "classpath:decohack/constants/doom19.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
-	1.9 EXEs.
+    All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
+    1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/ammo.dh"
 
-	All ammo slot mnemonics for Doom 1.9 EXEs.
+    All ammo slot mnemonics for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/states.dh"
 
-	All state mnemonics for Doom 1.9 EXEs.
+    All state mnemonics for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/things.dh"
 
-	All thing slot mnemonics for Doom 1.9 EXEs.
+    All thing slot mnemonics for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/weapons.dh"
 
-	All weapon slot mnemonics for Doom 1.9 EXEs.
+    All weapon slot mnemonics for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/strings.dh"
 
-	All string mnemonics for Doom 1.9 EXEs.
+    All string mnemonics for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/udoom19.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Ultimate Doom 1.9 EXEs (Doom 1.9 ammo, thing, weapon, and states are 
-	reused).
+    All ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Ultimate Doom 1.9 EXEs (Doom 1.9 ammo, thing, weapon, and states are 
+    reused).
 
 #include "classpath:decohack/constants/udoom19/strings.dh"
 
-	All string mnemonics for Ultimate Doom 1.9 EXEs.
+    All string mnemonics for Ultimate Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/boom.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Boom-compatible EXEs.
+    All ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Boom-compatible EXEs.
 
 #include "classpath:decohack/constants/boom/states.dh"
 
-	All state mnemonics for Boom-compatible EXEs.
+    All state mnemonics for Boom-compatible EXEs.
 
 #include "classpath:decohack/constants/boom/strings.dh"
 
-	All string mnemonics for Boom-compatible EXEs (meant to be a common
-	define for both Doom indices and Boom string keys).
+    All string mnemonics for Boom-compatible EXEs (meant to be a common
+    define for both Doom indices and Boom string keys).
 
 #include "classpath:decohack/constants/boom/things.dh"
 
-	All thing mnemonics for Boom-compatible EXEs.
+    All thing mnemonics for Boom-compatible EXEs.
 
 #include "classpath:decohack/constants/mbf.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	MBF-compatible EXEs.
+    All ammo, state, weapon slot, thing slot, and string mnemonics for 
+    MBF-compatible EXEs.
 
 #include "classpath:decohack/constants/mbf/states.dh"
 
-	All state mnemonics for MBF-compatible EXEs.
+    All state mnemonics for MBF-compatible EXEs.
 
 #include "classpath:decohack/constants/mbf/things.dh"
 
-	All thing mnemonics for MBF-compatible EXEs.
+    All thing mnemonics for MBF-compatible EXEs.
 
 #include "classpath:decohack/constants/extended.dh"
 
-	All ammo, state, weapon slot, thing slot, and string mnemonics for 
-	Extended-DEH-compatible EXEs.
+    All ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Extended-DEH-compatible EXEs.
 
 #include "classpath:decohack/constants/extended/states.dh"
 
-	All state mnemonics for Extended-DEH-compatible EXEs.
+    All state mnemonics for Extended-DEH-compatible EXEs.
 
 #include "classpath:decohack/constants/extended/things.dh"
 
-	All thing mnemonics for Extended-DEH-compatible EXEs.
+    All thing mnemonics for Extended-DEH-compatible EXEs.
 
