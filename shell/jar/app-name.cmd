@@ -14,7 +14,7 @@ if exist "%~dp0\jre\bin\java.exe" SET JAVAEXE=%~dp0\jre\bin\java.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
 where java > nul
-if ERRORLEVEL == 0 SET JAVAEXE=java
+if %ERRORLEVEL% == 0 SET JAVAEXE=java
 if not "%JAVAEXE%"=="" goto _calljava
 
 if not %JAVA_HOME%=="" SET JAVAEXE=%JAVA_HOME%\bin\java.exe
