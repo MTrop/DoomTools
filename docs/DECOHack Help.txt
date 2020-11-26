@@ -1,5 +1,5 @@
 ==============================================================================
-============                       DECOHACK                       ============
+============                       DECOHack                       ============
 ==============================================================================
 
 DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or 
@@ -30,7 +30,6 @@ proceed, as some pieces are similar, and some are not.
 
 <NUMBER>     : <INTEGER>
                - <INTEGER>
-               + <INTEGER> 
 
 
 ==============================================================================
@@ -285,9 +284,10 @@ the same slot in different ways).
 
 Ready, Select, Deselect, Fire, and Flash state labels set the weapon state 
 indices. Other labels are used for arbitrary jump points. "LightDone" is a 
-built-in alias for frame 1.
+built-in alias for state 1.
 
-"Spawn" is not used, as that is used for the Thing for pickups.
+Unlike ZDoom DECORATE, the "Spawn" state is not used, as that is used by the 
+Thing for pickups.
 
     weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
     {
@@ -464,7 +464,10 @@ Example:
         PainChance 170
         Mass 100
     
-        Monster
+        Flags 0
+        +SOLID
+        +SHOOTABLE
+        +COUNTKILL
     
         SeeSound "posit2"
         AttackSound ""
@@ -521,9 +524,10 @@ And the same result will happen if you freed from each defined thing frame
 individually. Based on the current thing definition. Best used before 
 redefining a thing.
 
-The following editor numbers cannot be used: 1, 2, 3, 4, 11.
+The following editor numbers cannot be used: 1, 2, 3, 4, or 11, as they have
+a special purpose: Player Starts, plus Deathmatch.
 
-You can copy from another thing slot by adding the [ : weapon <INTEGER> ] 
+You can copy from another thing slot by adding the [ : thing <INTEGER> ] 
 clause:
 
     thing 3 : thing 4 "New Name"
@@ -591,6 +595,11 @@ List of valid mnemonics and their values:
     FRIENDLY =      0x40000000
     UNUSED4 =       0x40000000
     TRANSLUCENT =   0x80000000
+
+Monsters tend to have 0x00400006 set (SOLID, SHOOTABLE, COUNTKILL).
+
+Projectiles tend to have 0x00010610 set (MISSILE, NOGRAVITY, DROPOFF, 
+NOBLOCKMAP).
 
 Example:
 
@@ -687,11 +696,6 @@ You can include some internal resource files by prefixing the file path with
 "classpath:" and it will attempt to read that file from the Java classpath.
  
     #include "classpath:decohack/doom19_constants.dh"
-
-
-The following valid DecoHack internal scripts/resources are as follows:
-
-...
  
 
 ------------------
@@ -801,7 +805,7 @@ block.
 #include "classpath:decohack/extended.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Extended-DEH-compatible EXEs, plus the "using extended" line, and freeing
+    Extended-DEH-compatible EXEs, plus the "using extended" line, AND freeing
     up the free extended states immediately for use.
 
 ..............................................................................
