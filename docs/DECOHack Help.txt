@@ -31,6 +31,27 @@ proceed, as some pieces are similar, and some are not.
 <NUMBER>     : <INTEGER>
                - <INTEGER>
 
+==============================================================================
+===== Comments
+==============================================================================
+
+You can put unparsed comments throughout your code using "//" for single-line
+comments, or "/* */" for multi-line comments, like so:
+
+    // This is a comment.
+    
+    /*
+    This is a comment 
+    on multiple lines.
+    */
+    
+    /* Multi-line comments are
+              pretty
+        free          form */
+
+
+You'll see them in a bunch of places in this documentation.
+
 
 ==============================================================================
 ===== Format (MUST BE SET FIRST!)
