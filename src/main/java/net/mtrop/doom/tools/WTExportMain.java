@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -262,32 +261,22 @@ public final class WTExportMain
 			}
 			
 			options.println("    Scanning patch entries...");
-			if (!scanNamespace("P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices))
+			if (!scanNamespace("P", "PP", PATCH_MARKER, unit, wf, unit.patchIndices, null))
 				return false;
-			if (!scanNamespace("PP", "P", null, unit, wf, unit.patchIndices))
+			if (!scanNamespace("PP", "P", null, unit, wf, unit.patchIndices, null))
 				return false;
 			options.printf("        %d patches.\n", unit.patchIndices.size());
 			options.println("    Scanning flat entries...");
-			if (!scanNamespace("F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices))
+			if (!scanNamespace("F", "FF", FLAT_MARKER, unit, wf, unit.flatIndices, unit.flatList))
 				return false;
-			if (!scanNamespace("FF", "F", null, unit, wf, unit.flatIndices))
+			if (!scanNamespace("FF", "F", null, unit, wf, unit.flatIndices, unit.flatList))
 				return false;
 			options.printf("        %d flats.\n", unit.flatIndices.size());
 			options.println("    Scanning texture namespace entries...");
-			if (!scanNamespace("TX", null, null, unit, wf, unit.texNamespaceIndices))
+			if (!scanNamespace("TX", null, null, unit, wf, unit.texNamespaceIndices, unit.textureList))
 				return false;
 			options.printf("        %d namespace textures.\n", unit.texNamespaceIndices.size());
 			
-			for (Map.Entry<String, Integer> entry : unit.flatIndices.entrySet())
-				unit.flatList.add(entry.getKey());
-		
-			for (Map.Entry<String, Integer> entry : unit.texNamespaceIndices.entrySet())
-			{
-				String s = entry.getKey();
-				if (!unit.textureList.contains(s))
-					unit.textureList.add(s);
-			}
-		
 			for (TextureSet.Texture tex : unit.textureSet)
 				if (!unit.textureList.contains(tex.getName()))
 					unit.textureList.add(tex.getName());
@@ -501,7 +490,7 @@ public final class WTExportMain
 		}
 
 		// Scans namespace entries.
-		private boolean scanNamespace(String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map)
+		private boolean scanNamespace(String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map, List<String> list)
 		{
 			// scan patch namespace
 			int start = wf.indexOf(name+"_START");
@@ -521,7 +510,13 @@ public final class WTExportMain
 						String ename = wf.getEntry(i).getName();
 						if (ignorePattern != null && ignorePattern.matcher(ename).matches())
 							continue;
-						map.put(ename, i);
+						System.out.println(i + ": " + ename);
+						if (!map.containsKey(ename))
+						{
+							map.put(ename, i);
+							if (list != null)
+								list.add(ename);
+						}
 					}
 				}
 				else

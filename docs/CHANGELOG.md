@@ -53,6 +53,11 @@ WTexScan
 WTEXport
 --------
 
+### Changed for 1.2.0
+
+* `Fixed` A botched flat and namespace-texture ordering procedure that potentially messed up animations.
+
+
 ### Changed for 1.1.0
 
 * `Changed` Removed an unnecessary sort step that butchered that Animation handling in flats and textures.
