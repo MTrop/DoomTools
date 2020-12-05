@@ -510,7 +510,6 @@ public final class WTExportMain
 						String ename = wf.getEntry(i).getName();
 						if (ignorePattern != null && ignorePattern.matcher(ename).matches())
 							continue;
-						System.out.println(i + ": " + ename);
 						if (!map.containsKey(ename))
 						{
 							map.put(ename, i);
