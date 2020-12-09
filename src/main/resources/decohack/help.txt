@@ -314,7 +314,14 @@ Thing for pickups.
     {
         ammotype ( 0 | 1 | 2 | 3 | 5 )
         
-        state <WeaponStateName> <INTEGER> // specific state assignment.
+        // specific state assignment.
+        state <WeaponStateName> <INTEGER>
+        
+        // specific state assignment using another thing's states.
+        state <WeaponStateName> thing <INTEGER> <ThingStateName>
+        
+        // specific state assignment using another weapon's states.
+        state <WeaponStateName> weapon <INTEGER> <WeaponStateName>
         
         clear states // if present, clear all state indices (not freed!).
         
@@ -441,7 +448,14 @@ the thing state indices. Other labels are used for arbitrary jump points.
 
         clear states // if present, clear all state indices (not freed!).
         
-        state <ThingStateName> <INTEGER> // specific state assignment.
+        // specific state assignment.
+        state <ThingStateName> <INTEGER>
+        
+        // specific state assignment using another thing's states.
+        state <ThingStateName> thing <INTEGER> <ThingStateName>
+        
+        // specific state assignment using another weapon's states.
+        state <ThingStateName> weapon <INTEGER> <WeaponStateName>
         
         states
         {
@@ -909,4 +923,8 @@ block.
 #include "classpath:decohack/constants/extended/things.dh"
 
     All thing mnemonics for Extended-DEH-compatible EXEs.
+
+#include "classpath:decohack/constants/friendly_things.dh"
+
+    "Friendly" names for Doom things, all the way up through extended.
 

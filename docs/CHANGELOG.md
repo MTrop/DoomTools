@@ -6,7 +6,13 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 DecoHack
 --------
 
-### Changed for 1.0.0
+### Changed for 0.4.0
+
+* `Added` "Friendly" things constants (`classpath:decohack/constants/friendly_things.dh`).
+* `Added` Parser: Set weapon/thing states using other weapon/thing states.
+
+
+### Changed for 0.3.0
 
 * Initial Release.
 

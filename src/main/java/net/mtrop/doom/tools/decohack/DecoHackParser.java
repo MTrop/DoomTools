@@ -1495,7 +1495,76 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer parseStateIndex(AbstractPatchContext<?> context)
 	{
 		Integer value;
-		if ((value = matchPositiveInteger()) == null)
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+		{
+			Integer index;
+			if ((index = matchThingIndex(context)) == null)
+				return null;
+			
+			DEHThing thing = context.getThing(index);
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
+				return thing.getSpawnFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SEE))
+				return thing.getWalkFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MELEE))
+				return thing.getMeleeFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
+				return thing.getMissileFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_PAIN))
+				return thing.getPainFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_DEATH))
+				return thing.getDeathFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
+				return thing.getExtremeDeathFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_RAISE))
+				return thing.getRaiseFrameIndex();
+			else
+			{
+				addErrorMessage(
+					"Expected a valid thing state name (%s, %s, %s, %s, %s, %s, %s, %s).",
+					KEYWORD_THINGSTATE_SPAWN,
+					KEYWORD_THINGSTATE_SEE,
+					KEYWORD_THINGSTATE_MELEE,
+					KEYWORD_THINGSTATE_MISSILE,
+					KEYWORD_THINGSTATE_PAIN,
+					KEYWORD_THINGSTATE_DEATH,
+					KEYWORD_THINGSTATE_XDEATH,
+					KEYWORD_THINGSTATE_RAISE
+				);
+				return null;
+			}
+		}
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+		{
+			Integer index;
+			if ((index = matchWeaponIndex(context)) == null)
+				return null;
+			
+			DEHWeapon weapon = context.getWeapon(index);
+			if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_READY))
+				return weapon.getReadyFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
+				return weapon.getRaiseFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
+				return weapon.getLowerFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
+				return weapon.getFireFrameIndex();
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
+				return weapon.getFlashFrameIndex();
+			else
+			{
+				addErrorMessage(
+					"Expected a valid weapon state name (%s, %s, %s, %s, %s).",
+					KEYWORD_WEAPONSTATE_READY,
+					KEYWORD_WEAPONSTATE_SELECT,
+					KEYWORD_WEAPONSTATE_DESELECT,
+					KEYWORD_WEAPONSTATE_FIRE,
+					KEYWORD_WEAPONSTATE_FLASH
+				);
+				return null;
+			}
+		}
+		else if ((value = matchPositiveInteger()) == null)
 		{
 			addErrorMessage("Expected state index number.");
 			return null;
