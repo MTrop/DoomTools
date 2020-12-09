@@ -70,7 +70,7 @@
 #define MTF_LIGHTAMP              62
 #define MTF_MEGASPHERE            63
 #define MTF_AMMO_BULLETS          64
-#define MTF_AMMO_BULLETS_BOX       65
+#define MTF_AMMO_BULLETS_BOX      65
 #define MTF_AMMO_ROCKET           66
 #define MTF_AMMO_ROCKET_BOX       67
 #define MTF_AMMO_CELLS            68
