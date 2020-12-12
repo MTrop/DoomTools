@@ -12,7 +12,7 @@ Frame 52:
 	Chaingun first firing frame.
 
 Chaingun Muzzle Flash:
-	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun offset from Frame 52.
+	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun, offset from Frame 52.
 	So, if called from frame 52, [FlashFrame]. If frame 53, [FlashFrame]+1.
 
 Frame 67:
@@ -361,9 +361,9 @@ Other Reference
 
 Actions that only play specific Weapon Sounds (played on owning actor):
 	A_OpenShotgun2 (Sound 5 DBOPN)
-	A_CloseShotgun2 (Sound 6 DBCLS)
 	A_LoadShotgun2 (Sound 7 DBLOAD)
 	A_BFGsound (Sound 9 BFG)
+	A_CloseShotgun2 (Sound 6 DBCLS) (also calls A_ReFire)
 
 Actions that play Specific Monster Sounds (played on calling actor):
 	A_FatRaise (Sound 99 MANATK) (also calls A_FaceTarget)

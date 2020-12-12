@@ -9,13 +9,14 @@ proceed, as some pieces are similar, and some are not.
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
       IMPORTANT: It is important to note that DECOHack is CASCADING. 
-      A definition of any kind will replace the original definition, 
-      and anything unspecified is UNCHANGED.
+      A definition of any kind will alter or replace the original 
+      definition, and anything unspecified in a definition will 
+      remain UNCHANGED.
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 ==============================================================================
-===== Language Specs
+===== Some Language Specs
 ==============================================================================
 
 <BOOLEAN>    : true
@@ -295,6 +296,23 @@ the following:
     state unprotect <INTEGER> to <INTEGER>
 
 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack is not very smart about figuring out user
+      intent, especially around states with hardcoded purpose, in
+      order to keep patch crafting as flexible as possible. For 
+      example, one such state, State 266 (S_VILE_HEAL1), is the 
+      state that the action pointer "A_VileChase" can make an actor
+      jump to when it resurrects a dead monster, despite the fact
+      that it is not referenced ANYWHERE on a thing definition's
+      state pointers!
+      
+      Please view "DeHackEd Hardcodings.txt" in the docs folder for
+      more info!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
 ==============================================================================
 ===== Weapon
 ==============================================================================
@@ -348,43 +366,47 @@ Thing for pickups.
 
 Example:
 
-    weapon 3 "Chaingun"
+    weapon 2 "Shotgun"
     {
-        ammotype 0
+        ammotype 1
         clear states
         states
         {
             ready:
-                CHGG A 1 A_WeaponReady
-                wait
+                SHTG A 1 A_WeaponReady
+                loop
             deselect:
-                CHGG A 1 A_Lower
-                wait
+                SHTG A 1 A_Lower
+                loop
             select:
-                CHGG A 1 A_Raise
-                wait
+                SHTG A 1 A_Raise
+                loop
             fire:
-                CHGG AB 4 A_FireCGun
-                CHGG B 0 A_ReFire
-                goto ready
+                SHTG A 3
+                SHTG A 7 A_FireShotgun
+                SHTG BC 5
+                SHTG D 4
+                SHTG CB 5
+                SHTG A 3
+                SHTG A 7 A_ReFire
+                Goto ready
             flash:
-                CHGF A 5 Bright A_Light1
-                goto lightdone
-            flash2:
-                CHGF B 5 Bright A_Light1
+                SHTF A 4 Bright A_Light1
+                SHTF B 3 Bright A_Light2
                 goto lightdone
         }
     }
 
 
-To clear all states connected to a weapon, type the following:
+To free all states connected to a weapon, type the following:
 
     weapon <INTEGER> free states
     weapon <INTEGER> free <WeaponStateName>
 
 
 And the same result will happen if you freed from each defined weapon frame 
-individually. Best used before redefining a weapon.
+individually. Best used before redefining a weapon. NOTE: "Freeing" is NOT
+the same as clearing the state definitions!
 
 You can copy from another weapon slot by adding the [ : weapon <INTEGER> ] 
 clause:
@@ -549,7 +571,7 @@ Example:
         }
     }
 
-To clear all states connected to a thing, type the following:
+To free all states connected to a thing, type the following:
 
     thing <INTEGER> free states
     thing <INTEGER> free <ThingStateName>
@@ -557,7 +579,8 @@ To clear all states connected to a thing, type the following:
 
 And the same result will happen if you freed from each defined thing frame 
 individually. Based on the current thing definition. Best used before 
-redefining a thing.
+redefining a thing. NOTE: "Freeing" is NOT the same as clearing the state 
+definitions!
 
 The following editor numbers cannot be used: 1, 2, 3, 4, or 11, as they have
 a special purpose: Player Starts, plus Deathmatch.
