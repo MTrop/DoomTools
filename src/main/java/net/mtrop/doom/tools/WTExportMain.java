@@ -101,9 +101,9 @@ public final class WTExportMain
 		/** File List. */
 		private List<String> filePaths;
 		/** List of texture names. */
-		private List<String> textureList; 
+		private List<String> extractTextureList; 
 		/** List of flat names. */
-		private List<String> flatList; 
+		private List<String> extractFlatList; 
 
 		public Options()
 		{
@@ -118,8 +118,8 @@ public final class WTExportMain
 			this.additive = null;
 			this.nullComparator = new NullComparator(null);
 			this.filePaths = new ArrayList<>();
-			this.textureList = new ArrayList<>();
-			this.flatList = new ArrayList<>();
+			this.extractTextureList = new ArrayList<>();
+			this.extractFlatList = new ArrayList<>();
 		}
 		
 		void println(Object msg)
@@ -200,13 +200,13 @@ public final class WTExportMain
 	
 		public Options addTexture(String name)
 		{
-			textureList.add(name.toUpperCase());
+			extractTextureList.add(name.toUpperCase());
 			return this;
 		}
 
 		public Options addFlat(String name)
 		{
-			flatList.add(name.toUpperCase());
+			extractFlatList.add(name.toUpperCase());
 			return this;
 		}
 	}
@@ -300,15 +300,14 @@ public final class WTExportMain
 		// Scan for TEXTUREx and PNAMES.
 		private boolean scanTexturesAndPNames(WadUnit unit, WadFile wf) throws IOException
 		{
-			if (!wf.contains("TEXTURE1"))
-				return true;
 			options.println("    Scanning TEXTUREx/PNAMES...");
-			
 			
 			PatchNames patchNames = null;
 			CommonTextureList<?> textureList1 = null;
 			CommonTextureList<?> textureList2 = null;
 			byte[] textureData = null;
+			
+			// Scan TEXTURE1 =====================================
 			
 			try {
 				textureData = wf.getData("TEXTURE1");
@@ -319,24 +318,34 @@ public final class WTExportMain
 				options.printf("ERROR: %s: %s\n", wf.getFilePath(), e.getMessage());
 				return false;
 			}
-		
-			// figure out if Strife or Doom Texture Lump.
-			if (TextureUtils.isStrifeTextureData(textureData))
+			
+			if (textureData != null)
 			{
-				textureList1 = BinaryObject.create(StrifeTextureList.class, textureData);
-				unit.strife = true;
+				// figure out if Strife or Doom Texture Lump.
+				if (TextureUtils.isStrifeTextureData(textureData))
+				{
+					textureList1 = BinaryObject.create(StrifeTextureList.class, textureData);
+					unit.strife = true;
+				}
+				else
+				{
+					textureList1 = BinaryObject.create(DoomTextureList.class, textureData);
+					unit.strife = false;
+				}
+			
+				unit.tex1names = new HashSet<String>(textureList1.size());
+				for (CommonTexture<?> ct : textureList1)
+					unit.tex1names.add(ct.getName());
+			
+				options.printf("        %d entries in TEXTURE1.\n", textureList1.size());
 			}
 			else
 			{
-				textureList1 = BinaryObject.create(DoomTextureList.class, textureData);
-				unit.strife = false;
+				unit.tex1names = Collections.emptySet();
 			}
 		
-			unit.tex1names = new HashSet<String>(textureList1.size());
-			for (CommonTexture<?> ct : textureList1)
-				unit.tex1names.add(ct.getName());
-		
-			options.printf("        %d entries in TEXTURE1.\n", textureList1.size());
+
+			// Scan TEXTURE2 =====================================
 		
 			try {
 				textureData = wf.getData("TEXTURE2");
@@ -352,9 +361,15 @@ public final class WTExportMain
 			{
 				// figure out if Strife or Doom Texture Lump.
 				if (TextureUtils.isStrifeTextureData(textureData))
+				{
 					textureList2 = BinaryObject.create(StrifeTextureList.class, textureData);
+					unit.strife = true;
+				}
 				else
+				{
 					textureList2 = BinaryObject.create(DoomTextureList.class, textureData);
+					unit.strife = true;
+				}
 				
 				options.printf("        %d entries in TEXTURE2.\n", textureList2.size());
 				unit.tex2exists = true;
@@ -377,6 +392,9 @@ public final class WTExportMain
 			
 			options.printf("        %d entries in PNAMES.\n", patchNames.size());
 		
+			if (textureList1 == null)
+				textureList1 = unit.strife ? new StrifeTextureList() : new DoomTextureList();
+			
 			if (textureList2 != null)
 				unit.textureSet = new TextureSet(patchNames, textureList1, textureList2);
 			else
@@ -807,7 +825,7 @@ public final class WTExportMain
 				pnames = new PatchNames();
 				StrifeTextureList tex1 = new StrifeTextureList();
 				StrifeTextureList tex2 = baseUnit.tex2exists ? new StrifeTextureList() : null;
-				Set<String> tex1names = baseUnit.tex2exists ? baseUnit.tex1names : null;
+				Set<String> tex1names = tex2 != null ? baseUnit.tex1names : null;
 				exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
 				tlist.add(tex1);
 				if (tex2 != null)
@@ -819,7 +837,7 @@ public final class WTExportMain
 				pnames = new PatchNames();
 				DoomTextureList tex1 = new DoomTextureList();
 				DoomTextureList tex2 = baseUnit.tex2exists ? new DoomTextureList() : null;
-				Set<String> tex1names = baseUnit.tex2exists ? baseUnit.tex1names : null;
+				Set<String> tex1names = tex2 != null ? baseUnit.tex1names : null;
 				exportSet.textureSet.export(pnames, tex1, tex2, tex1names);
 				tlist.add(tex1);
 				if (tex2 != null)
@@ -1035,9 +1053,9 @@ public final class WTExportMain
 		
 			/* STEP 2 : Compile list of what we want. */
 		
-			for (String t : options.textureList)
+			for (String t : options.extractTextureList)
 				readAndAddTextures(t);
-			for (String f : options.flatList)
+			for (String f : options.extractFlatList)
 				readAndAddFlats(f);
 			
 			/* STEP 3 : Extract the junk and put it in the output wad. */
