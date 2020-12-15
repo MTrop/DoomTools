@@ -17,6 +17,14 @@ DecoHack
 * Initial Release.
 
 
+DMXConv
+-------
+
+### Changed for 1.0.0
+
+* Initial Release.
+
+
 WadMerge
 --------
 

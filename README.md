@@ -102,6 +102,10 @@ A scripting system for doing practically anything with Doom stuff. Also includes
 
 A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.
 
+#### DMXConv
+
+A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.
+
 
 ### Other
 
