@@ -420,7 +420,7 @@ public final class DMXConvertMain
 		out.println();
 		out.println("    --version           Prints version, and exits.");
 		out.println();
-		out.println("[filename]:");
+		out.println("[files]:");
 		out.println("    <filenames>         The input sound files (wildcard expansion wll work!).");
 		out.println();
 		out.println("[switches]:");
