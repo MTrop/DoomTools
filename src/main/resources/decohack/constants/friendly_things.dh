@@ -116,7 +116,7 @@
 #define MTF_HANGING_TORSO2        108
 #define MTF_ONE_LEGGED_BODY2      109
 #define MTF_HANGING_LEG2          110
-#define MTF_HANGING_BODY2         111
+#define MTF_SWAYING_BODY2         111
 #define MTF_CACODEMON_DEAD        112
 #define MTF_PLAYER_DEAD           113
 #define MTF_ZOMBIEMAN_DEAD        114
