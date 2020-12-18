@@ -108,7 +108,7 @@
 #define MTF_CANDLE                100
 #define MTF_CANDELABRA            101
 #define MTF_SWAYING_BODY          102
-#define MTF_SWAYING_BODY_ARMS     103
+#define MTF_HANGING_BODY_ARMS     103
 #define MTF_ONE_LEGGED_BODY       104
 #define MTF_HANGING_TORSO         105
 #define MTF_HANGING_LEG           106
