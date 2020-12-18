@@ -72,6 +72,10 @@ To clean up everything:
 
 ### Utilities
 
+#### DoomTools
+
+A program that just displays info about the toolset that you are using (or manage other things, in the future).
+
 #### WadMerge
 
 A utility that performs Script-based WAD compilation and merging. 
@@ -105,6 +109,7 @@ A utility that uses a DECORATE-like language scheme for creating DeHackEd patche
 #### DMXConv
 
 A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.
+
 
 
 ### Other

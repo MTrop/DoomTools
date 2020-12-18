@@ -81,6 +81,7 @@
 
 	<target name="init.versions" depends="clean.versions">
 		<mkdir dir="${build.versions.dir}" />
+		<echo file="${build.versions.dir}/doomtools.version" message="${build.version.number}" />
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
@@ -138,34 +139,39 @@
 	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
+	<property name="jvm.options.common" value="-Xms64M -Xmx784M" />
+
 	<target name="scripts" description="Creates application shell scripts.">
+		<!-- DoomTools -->
+		<shell-cmd  name="doomtools"  todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
+		<shell-bash name="doomtools"  todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
 		<!-- WadMerge -->
-		<shell-cmd  name="wadmerge"  todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
-		<shell-bash name="wadmerge"  todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-cmd  name="wadmerge"  todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-bash name="wadmerge"  todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
 		<!-- WSWANTBL -->
-		<shell-cmd  name="wswantbl" todir="${build.dir}/shell/cmd"    options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
-		<shell-bash name="wswantbl" todir="${build.dir}/shell/bash"   options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
+		<shell-cmd  name="wswantbl" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
+		<shell-bash name="wswantbl" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
 		<!-- WADTex -->
-		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"      options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
-		<shell-bash name="wadtex" todir="${build.dir}/shell/bash"     options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<shell-cmd  name="wadtex" todir="${build.dir}/shell/cmd"      options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<shell-bash name="wadtex" todir="${build.dir}/shell/bash"     options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<!-- WTexScan -->
-		<shell-cmd  name="wtexscan" todir="${build.dir}/shell/cmd"    options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
-		<shell-bash name="wtexscan" todir="${build.dir}/shell/bash"   options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<shell-cmd  name="wtexscan" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<shell-bash name="wtexscan" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
 		<!-- WTexport -->
-		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"    options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
-		<shell-bash name="wtexport" todir="${build.dir}/shell/bash"   options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-cmd  name="wtexport" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-bash name="wtexport" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 		<!-- WadScript -->
-		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
-		<shell-bash name="wadscript" todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<shell-bash name="wadscript" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<!-- DecoHack -->
-		<shell-cmd  name="decohack" todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
-		<shell-bash name="decohack" todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-cmd  name="decohack" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-bash name="decohack" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
 		<!-- DMXConv -->
-		<shell-cmd  name="dmxconv" todir="${build.dir}/shell/cmd"   options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
-		<shell-bash name="dmxconv" todir="${build.dir}/shell/bash"  options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-cmd  name="dmxconv" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-bash name="dmxconv" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
 		<!-- RookScript -->
-		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  options="-Xms64M -Xmx784M" jarname="jar\${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
-		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="-Xms64M -Xmx784M" jarname="jar/${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
 	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
