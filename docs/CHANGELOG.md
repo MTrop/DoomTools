@@ -10,6 +10,7 @@ DecoHack
 
 * `Added` "Friendly" things constants (`classpath:decohack/constants/friendly_things.dh`).
 * `Added` Parser: Set weapon/thing states using other weapon/thing states.
+* `Changed` Updated help.
 
 
 ### Changed for 0.3.0
