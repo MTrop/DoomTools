@@ -3,8 +3,8 @@
 ==============================================================================
 
 DECOHack is a utility that reads a DECORATE-like syntax and outputs a DEH or 
-BEX patch. You should probably read up on the DECORATE format before you 
-proceed, as some pieces are similar, and some are not.
+BEX patch. You should probably read up on the ZDoom DECORATE format before 
+you proceed, as some pieces are similar, and some are not.
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -31,6 +31,7 @@ proceed, as some pieces are similar, and some are not.
 
 <NUMBER>     : <INTEGER>
                - <INTEGER>
+
 
 ==============================================================================
 ===== Comments
@@ -177,8 +178,9 @@ changes.
 In this case, "stop" is an alias for "goto 0", and "wait" is an alias for 
 "goto <same state>". <SpriteName> must match a sprite name in the string 
 table at the time this is declared. <Frame> must be a single valid character 
-in a sprite frame. <NUMBER> is the duration in tics. Action pointer mnemonics 
-must start with A_.
+in a sprite frame. <NUMBER> is the duration in tics. [Bright] is an optional
+keyword indicating that the state graphic is always painted fullbright. Action 
+pointer mnemonics must start with A_.
 
 Examples:
 
@@ -268,7 +270,7 @@ states (especially action pointer states in Doom 1.9).
     }
 
 
-<Frame> in this situation can be many valid characters in a sprite frame. 
+<Frame> in this situation can be many valid characters in a sprite frame.
 
 
 Examples:
@@ -404,7 +406,17 @@ Example:
     }
 
 
-To free all states connected to a weapon, type the following:
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: Using "goto" to jump to labels/state pointers that 
+      you have not set yet will jump to whatever state is already 
+      declared for that Weapon. To avoid this, you may need to pay 
+      attention to the order of your state labels and declarations!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+To flag all states as "free" that are connected to a weapon, type the 
+following:
 
     weapon <INTEGER> free states
     weapon <INTEGER> free <WeaponStateName>
@@ -577,7 +589,19 @@ Example:
         }
     }
 
-To free all states connected to a thing, type the following:
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: Using "goto" to jump to labels/state pointers that 
+      you have not set yet will jump to whatever state is already 
+      declared for that Thing. To avoid this, you may need to pay 
+      attention to the order of your state labels and declarations!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+To flag all states as "free" that are connected to a thing, type the 
+following:
 
     thing <INTEGER> free states
     thing <INTEGER> free <ThingStateName>
@@ -874,6 +898,12 @@ block.
 
 ..............................................................................
 
+#include "classpath:decohack/constants/friendly_things.dh"
+
+    "Friendly" names for Doom things, all the way up through extended.
+
+..............................................................................
+
 #include "classpath:decohack/constants/doom19.dh"
 
     All ammo, state, weapon slot, thing slot, and string mnemonics for Doom 
@@ -952,8 +982,4 @@ block.
 #include "classpath:decohack/constants/extended/things.dh"
 
     All thing mnemonics for Extended-DEH-compatible EXEs.
-
-#include "classpath:decohack/constants/friendly_things.dh"
-
-    "Friendly" names for Doom things, all the way up through extended.
 
