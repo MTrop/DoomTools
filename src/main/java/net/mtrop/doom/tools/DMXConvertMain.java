@@ -32,10 +32,12 @@ public final class DMXConvertMain
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_NO_FILES = 2;
 	private static final int ERROR_CONVERSION_SKIPPED = 3;
+	private static final int ERROR_NO_FFMPEG = 4;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_VERSION = "--version";
+	private static final String SWITCH_TRYFFMPEG = "--try-ffmpeg";
 
 	private static final String SWITCH_FFMPEG_ONLY = "--ffmpeg-only";
 	private static final String SWITCH_JSPI_ONLY = "--jspi-only";
@@ -52,6 +54,7 @@ public final class DMXConvertMain
 		private PrintStream stderr;
 		private boolean help;
 		private boolean version;
+		private boolean tryFFMpeg;
 		
 		private List<File> sourceFiles;
 		private boolean onlyFFMpeg;
@@ -82,6 +85,12 @@ public final class DMXConvertMain
 		public Options setVersion(boolean version) 
 		{
 			this.version = version;
+			return this;
+		}
+		
+		public Options setTryFFMpeg(boolean tryFFMpeg) 
+		{
+			this.tryFFMpeg = tryFFMpeg;
 			return this;
 		}
 		
@@ -138,6 +147,22 @@ public final class DMXConvertMain
 			{
 				splash(options.stdout);
 				return ERROR_NONE;
+			}
+			
+			if (options.tryFFMpeg)
+			{
+				if (detectFFmpeg(null))
+				{
+					options.stdout.println("SUCCESS. FFmpeg found!");
+					return ERROR_NONE;
+				}
+				else
+				{
+					options.stdout.println("FFmpeg not found on the PATH.");
+					options.stdout.println("Either it is not named \"ffmpeg\", or the executible was not found on the");
+					options.stdout.println("current PATH.");
+					return ERROR_NO_FFMPEG;
+				}
 			}
 			
 			if (options.sourceFiles.isEmpty())
@@ -325,6 +350,8 @@ public final class DMXConvertMain
 						options.setHelp(true);
 					else if (arg.equals(SWITCH_VERSION))
 						options.setVersion(true);
+					else if (arg.equals(SWITCH_TRYFFMPEG))
+						options.setTryFFMpeg(true);
 					else if (arg.equals(SWITCH_FFMPEG_ONLY))
 						options.setOnlyFFMpeg(true);
 					else if (arg.equals(SWITCH_JSPI_ONLY))
@@ -405,8 +432,8 @@ public final class DMXConvertMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: dmxconv  [--help | -h | --version]");
-		out.println("                [files] [switches]");
+		out.println("Usage: dmxconv [--help | -h | --version | --try-ffmpeg]");
+		out.println("               [files] [switches]");
 	}
 	
 	/**
@@ -419,6 +446,9 @@ public final class DMXConvertMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --try-ffmpeg        Quick test to attempt to find FFmpeg via its default");
+		out.println("                        name (\"ffmpeg\") on the current PATH, and exits.");
 		out.println();
 		out.println("[files]:");
 		out.println("    <filenames>         The input sound files (wildcard expansion wll work!).");
