@@ -42,8 +42,7 @@ public interface DEHPatch
 	/**
 	 * Gets an ammo descriptor.
 	 * @param index the index.
-	 * @return the corresponding ammo object.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding ammo object, or null if bad or unsupported index.
 	 * @see #getAmmoCount() 
 	 */
 	DEHAmmo getAmmo(int index);
@@ -70,8 +69,7 @@ public interface DEHPatch
 	/**
 	 * Gets a sound by a sound index (0-based).
 	 * @param index the index.
-	 * @return the corresponding sound.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding sound, or null if bad or unsupported index.
 	 * @see #getSoundCount() 
 	 */
 	DEHSound getSound(int index);
@@ -84,8 +82,7 @@ public interface DEHPatch
 	/**
 	 * Gets a thing by a thing index.
 	 * @param index the index.
-	 * @return the corresponding thing.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding thing, or null if bad or unsupported index.
 	 * @see #getThingCount()
 	 */
 	DEHThing getThing(int index);
@@ -98,8 +95,7 @@ public interface DEHPatch
 	/**
 	 * Gets a weapon by a weapon index.
 	 * @param index the index.
-	 * @return the corresponding weapon.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding weapon, or null if bad or unsupported index.
 	 * @see #getWeaponCount() 
 	 */
 	DEHWeapon getWeapon(int index);
@@ -112,8 +108,7 @@ public interface DEHPatch
 	/**
 	 * Gets a state by a state index.
 	 * @param index the index.
-	 * @return the corresponding state.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding state, or null if bad or unsupported index.
 	 * @see #getStateCount() 
 	 */
 	DEHState getState(int index);
@@ -121,8 +116,7 @@ public interface DEHPatch
 	/**
 	 * Gets the action pointer index using a state index.
 	 * @param stateIndex the state index.
-	 * @return the corresponding pointer index.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding pointer index, or null if bad or unsupported index.
 	 * @see #getStateCount() 
 	 */
 	Integer getStateActionPointerIndex(int stateIndex);

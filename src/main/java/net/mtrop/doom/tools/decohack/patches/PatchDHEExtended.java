@@ -8,6 +8,7 @@ import static net.mtrop.doom.tools.decohack.patches.ConstantsBoomExtended.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
@@ -18,6 +19,8 @@ import net.mtrop.doom.tools.decohack.data.DEHThing;
  */
 public class PatchDHEExtended extends PatchMBF
 {
+	private static final int SOUND_INDEX_EXTENDED_START = 500;
+
 	protected static final String[] SOUNDSTRINGSEXTENDED = 
 	{
 		"FRE000",
@@ -333,7 +336,7 @@ public class PatchDHEExtended extends PatchMBF
 		{
 			// the extended sound range expliticly starts at 500, skipping several
 			// indices, so we need to make the output index relative to that.
-			int extstart = 500;
+			int extstart = SOUND_INDEX_EXTENDED_START;
 			int mbflen = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length;
 			int len = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length + SOUNDSTRINGSEXTENDED.length;
 			for (int i = 0; i < len; i++)
@@ -366,18 +369,34 @@ public class PatchDHEExtended extends PatchMBF
 		}
 	};
 	
+	private static final Map<Integer, State> MAP_EXTENDEDSTATECACHE = new HashMap<Integer, State>();
+	
+	private static State getExtendedState(int index)
+	{
+		State state;
+		if ((state = MAP_EXTENDEDSTATECACHE.get(index)) == null)
+			MAP_EXTENDEDSTATECACHE.put(index, state = PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL));
+		return state;
+	}
+	
 	// ======================================================================
 
 	@Override
 	public Integer getSoundIndex(String name)
 	{
-		return MAP_SOUNDINDEX.get(name.toUpperCase());
+		return MAP_SOUNDINDEX.getOrDefault(name.toUpperCase(), super.getSoundIndex(name));
 	}
 
 	@Override
 	public Integer getSpriteIndex(String name)
 	{
-		return MAP_SPRITEINDEX.get(name.toUpperCase());
+		return MAP_SPRITEINDEX.getOrDefault(name.toUpperCase(), super.getSpriteIndex(name));
+	}
+
+	@Override
+	public int getSoundCount()
+	{
+		return SOUND_INDEX_EXTENDED_START + SOUNDSTRINGSEXTENDED.length;
 	}
 
 	@Override
@@ -390,16 +409,10 @@ public class PatchDHEExtended extends PatchMBF
 	public DEHThing getThing(int index)
 	{
 		int mbflen = DEHTHING.length + DEHTHINGBOOM.length + DEHTHINGMBF.length;
-		int boomlen = DEHTHING.length + DEHTHINGBOOM.length;
-
 		if (index >= mbflen)
-			return DEHTHINGEXTENDED[index - mbflen];
-		else if (index >= boomlen)
-			return DEHTHINGMBF[index - boomlen];
-		else if (index >= DEHTHING.length)
-			return DEHTHINGBOOM[index - DEHTHING.length];
+			return Common.arrayElement(DEHTHINGEXTENDED, index - mbflen);
 		else
-			return DEHTHING[index];
+			return super.getThing(index);
 	}
 
 	@Override
@@ -411,18 +424,13 @@ public class PatchDHEExtended extends PatchMBF
 	protected PatchBoom.State getBoomState(int index)
 	{
 		int len = DEHSTATE.length + DEHSTATEMBF.length + DEHSTATEEXTENDED.length;
-		int mbflen = DEHSTATE.length + DEHSTATEMBF.length;
 		
 		if (index >= getStateCount())
-			throw new ArrayIndexOutOfBoundsException(index);
+			return null;
 		else if (index >= len && index < getStateCount())
-			return PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL);			
-		else if (index >= mbflen)
-			return DEHSTATEEXTENDED[index - mbflen];			
-		else if (index >= DEHSTATE.length)
-			return DEHSTATEMBF[index - DEHSTATE.length];			
+			return getExtendedState(index);
 		else
-			return DEHSTATE[index];
+			return super.getBoomState(index);
 	}
 	
 }

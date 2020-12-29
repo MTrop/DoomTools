@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -24,114 +25,114 @@ public class PatchBoom implements DEHPatchBoom
 {
 	protected static final String[] SOUNDSTRINGS = 
 	{
-		"pistol",
-		"shotgn",
-		"sgcock",
-		"dshtgn",
-		"dbopn",
-		"dbcls",
-		"dbload",
-		"plasma",
-		"bfg",
-		"sawup",
-		"sawidl",
-		"sawful",
-		"sawhit",
-		"rlaunc",
-		"rxplod",
-		"firsht",
-		"firxpl",
-		"pstart",
-		"pstop",
-		"doropn",
-		"dorcls",
-		"stnmov",
-		"swtchn",
-		"swtchx",
-		"plpain",
-		"dmpain",
-		"popain",
-		"vipain",
-		"mnpain",
-		"pepain",
-		"slop",
-		"itemup",
-		"wpnup",
-		"oof",
-		"telept",
-		"posit1",
-		"posit2",
-		"posit3",
-		"bgsit1",
-		"bgsit2",
-		"sgtsit",
-		"cacsit",
-		"brssit",
-		"cybsit",
-		"spisit",
-		"bspsit",
-		"kntsit",
-		"vilsit",
-		"mansit",
-		"pesit",
-		"sklatk",
-		"sgtatk",
-		"skepch",
-		"vilatk",
-		"claw",
-		"skeswg",
-		"pldeth",
-		"pdiehi",
-		"podth1",
-		"podth2",
-		"podth3",
-		"bgdth1",
-		"bgdth2",
-		"sgtdth",
-		"cacdth",
-		"skldth",
-		"brsdth",
-		"cybdth",
-		"spidth",
-		"bspdth",
-		"vildth",
-		"kntdth",
-		"pedth",
-		"skedth",
-		"posact",
-		"bgact",
-		"dmact",
-		"bspact",
-		"bspwlk",
-		"vilact",
-		"noway",
-		"barexp",
-		"punch",
-		"hoof",
-		"metal",
-		"chgun",
-		"tink",
-		"bdopn",
-		"bdcls",
-		"itmbk",
-		"flame",
-		"flamst",
-		"getpow",
-		"bospit",
-		"boscub",
-		"bossit",
-		"bospn",
-		"bosdth",
-		"manatk",
-		"mandth",
-		"sssit",
-		"ssdth",
-		"keenpn",
-		"keendt",
-		"skeact",
-		"skesit",
-		"skeatk",
-		"radio",
+		"PISTOL",
+		"SHOTGN",
+		"SGCOCK",
+		"DSHTGN",
+		"DBOPN",
+		"DBCLS",
+		"DBLOAD",
+		"PLASMA",
+		"BFG",
+		"SAWUP",
+		"SAWIDL",
+		"SAWFUL",
+		"SAWHIT",
+		"RLAUNC",
+		"RXPLOD",
+		"FIRSHT",
+		"FIRXPL",
+		"PSTART",
+		"PSTOP",
+		"DOROPN",
+		"DORCLS",
+		"STNMOV",
+		"SWTCHN",
+		"SWTCHX",
+		"PLPAIN",
+		"DMPAIN",
+		"POPAIN",
+		"VIPAIN",
+		"MNPAIN",
+		"PEPAIN",
+		"SLOP",
+		"ITEMUP",
+		"WPNUP",
+		"OOF",
+		"TELEPT",
+		"POSIT1",
+		"POSIT2",
+		"POSIT3",
+		"BGSIT1",
+		"BGSIT2",
+		"SGTSIT",
+		"CACSIT",
+		"BRSSIT",
+		"CYBSIT",
+		"SPISIT",
+		"BSPSIT",
+		"KNTSIT",
+		"VILSIT",
+		"MANSIT",
+		"PESIT",
+		"SKLATK",
+		"SGTATK",
+		"SKEPCH",
+		"VILATK",
+		"CLAW",
+		"SKESWG",
+		"PLDETH",
+		"PDIEHI",
+		"PODTH1",
+		"PODTH2",
+		"PODTH3",
+		"BGDTH1",
+		"BGDTH2",
+		"SGTDTH",
+		"CACDTH",
+		"SKLDTH",
+		"BRSDTH",
+		"CYBDTH",
+		"SPIDTH",
+		"BSPDTH",
+		"VILDTH",
+		"KNTDTH",
+		"PEDTH",
+		"SKEDTH",
+		"POSACT",
+		"BGACT",
+		"DMACT",
+		"BSPACT",
+		"BSPWLK",
+		"VILACT",
+		"NOWAY",
+		"BAREXP",
+		"PUNCH",
+		"HOOF",
+		"METAL",
+		"CHGUN",
+		"TINK",
+		"BDOPN",
+		"BDCLS",
+		"ITMBK",
+		"FLAME",
+		"FLAMST",
+		"GETPOW",
+		"BOSPIT",
+		"BOSCUB",
+		"BOSSIT",
+		"BOSPN",
+		"BOSDTH",
+		"MANATK",
+		"MANDTH",
+		"SSSIT",
+		"SSDTH",
+		"KEENPN",
+		"KEENDT",
+		"SKEACT",
+		"SKESIT",
+		"SKEATK",
+		"RADIO",
 	};
 		
 	protected static final String[] SPRITESTRINGS = 
@@ -282,7 +283,7 @@ public class PatchBoom implements DEHPatchBoom
 		private static final long serialVersionUID = -4513058612574767102L;
 		{
 			for (int i = 0; i < SOUNDSTRINGS.length; i++)
-				put(SOUNDSTRINGS[i].toUpperCase(), i);
+				put(SOUNDSTRINGS[i], i);
 		}
 	};
 	
@@ -291,7 +292,7 @@ public class PatchBoom implements DEHPatchBoom
 		private static final long serialVersionUID = -91431875042148768L;
 		{
 			for (int i = 0; i < SPRITESTRINGS.length; i++)
-				put(SPRITESTRINGS[i].toUpperCase(), i);
+				put(SPRITESTRINGS[i], i);
 		}
 	};
 	
@@ -713,7 +714,7 @@ public class PatchBoom implements DEHPatchBoom
 		}
 		
 	}
-
+	
 	// ======================================================================
 	
 	@Override
@@ -731,7 +732,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
-		return DEHAMMO[index];
+		return Common.arrayElement(DEHAMMO, index);
 	}
 
 	@Override
@@ -767,7 +768,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHSound getSound(int index)
 	{
-		return DEHSOUND[index];
+		return Common.arrayElement(DEHSOUND, index);
 	}
 
 	@Override
@@ -780,9 +781,9 @@ public class PatchBoom implements DEHPatchBoom
 	public DEHThing getThing(int index)
 	{
 		if (index >= DEHTHING.length)
-			return DEHTHINGBOOM[index - DEHTHING.length];
+			return Common.arrayElement(DEHTHINGBOOM, index - DEHTHING.length);
 		else
-			return DEHTHING[index];
+			return Common.arrayElement(DEHTHING, index);
 	}
 
 	@Override
@@ -794,7 +795,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHWeapon getWeapon(int index)
 	{
-		return DEHWEAPON[index];
+		return Common.arrayElement(DEHWEAPON, index);
 	}
 
 	@Override
@@ -803,10 +804,16 @@ public class PatchBoom implements DEHPatchBoom
 		return DEHSTATE.length;
 	}
 
+	protected PatchBoom.State getBoomState(int index)
+	{
+		return Common.arrayElement(DEHSTATE, index);
+	}
+
 	@Override
 	public DEHState getState(int index) 
 	{
-		return DEHSTATE[index].getState();
+		State state = getBoomState(index);
+		return state != null ? state.getState() : null;
 	}
 
 	@Override
@@ -824,7 +831,8 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHActionPointer getActionPointer(int index)
 	{
-		return DEHSTATE[index].getPointer();
+		State state = getBoomState(index);
+		return state != null ? state.getPointer() : null;
 	}
 
 	@Override

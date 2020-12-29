@@ -14,8 +14,7 @@ public interface DEHPatchDoom19 extends DEHPatch
 	/**
 	 * Gets a string.
 	 * @param index the index.
-	 * @return the corresponding string.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @return the corresponding string, or null if invalid index.
 	 * @see #getStringCount() 
 	 */
 	String getString(int index);
@@ -23,7 +22,7 @@ public interface DEHPatchDoom19 extends DEHPatch
 	/**
 	 * Gets the original frame number for an action pointer. 
 	 * @param index the action pointer index.
-	 * @return the original frame index.
+	 * @return the original frame index, or null if invalid index.
 	 */
-	int getActionPointerFrame(int index);
+	Integer getActionPointerFrame(int index);
 }

@@ -1434,7 +1434,7 @@ interface ConstantsDoom19
 		EXPLODE,
 	};
 	
-	static final int[] DEHPOINTERFRAME = 
+	static final Integer[] DEHPOINTERFRAME = 
 	{
 		1,
 		2,

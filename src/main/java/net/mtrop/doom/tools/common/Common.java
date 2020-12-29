@@ -214,6 +214,31 @@ public final class Common
 	}
 
 	/**
+	 * Gets an element in an array or if out of bounds, null.
+	 * @param <T> the object type in the array.
+	 * @param arr the array.
+	 * @param index the index into the array
+	 * @return the element at the array index, or null.
+	 */
+	public static <T> T arrayElement(T[] arr, int index)
+	{
+		return arrayElement(arr, index, null);
+	}
+
+	/**
+	 * Gets an element in an array or if out of bounds, <code>def</code>.
+	 * @param <T> the object type in the array.
+	 * @param arr the array.
+	 * @param index the index into the array
+	 * @param def the default value.
+	 * @return the element at the array index, or null.
+	 */
+	public static <T> T arrayElement(T[] arr, int index, T def)
+	{
+		return index < 0 || index >= arr.length ? def : arr[index];
+	}
+
+	/**
 	 * Attempts to close an {@link AutoCloseable} object.
 	 * If the object is null, this does nothing.
 	 * @param c the reference to the AutoCloseable object.

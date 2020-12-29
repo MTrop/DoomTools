@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -38,27 +39,33 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		
 		this.ammo = new DEHAmmo[source.getAmmoCount()];
 		for (int i = 0; i < this.ammo.length; i++)
-			this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i));
+			if (source.getAmmo(i) != null)
+				this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i));
 		
 		this.sounds = new DEHSound[source.getSoundCount()];
 		for (int i = 0; i < this.sounds.length; i++)
-			this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
+			if (source.getSound(i) != null)
+				this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
 		
 		this.weapons = new DEHWeapon[source.getWeaponCount()];
 		for (int i = 0; i < this.weapons.length; i++)
-			this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
+			if (source.getWeapon(i) != null)
+				this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
 		
 		this.things = new DEHThing[source.getThingCount()];
 		for (int i = 1; i < this.things.length; i++)
-			this.things[i] = (new DEHThing()).copyFrom(source.getThing(i));
+			if (source.getThing(i) != null)
+				this.things[i] = (new DEHThing()).copyFrom(source.getThing(i));
 		
 		this.states = new DEHState[source.getStateCount()];
 		for (int i = 0; i < this.states.length; i++)
-			this.states[i] = (new DEHState()).copyFrom(source.getState(i));
+			if (source.getState(i) != null)
+				this.states[i] = (new DEHState()).copyFrom(source.getState(i));
 		
 		this.pointers = new DEHActionPointer[source.getActionPointerCount()];
 		for (int i = 0; i < this.pointers.length; i++)
-			this.pointers[i] = source.getActionPointer(i);		
+			if (source.getActionPointer(i) != null)
+				this.pointers[i] = source.getActionPointer(i);		
 		
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
@@ -93,7 +100,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
-		return ammo[index];
+		return Common.arrayElement(ammo, index);
 	}
 
 	@Override
@@ -105,7 +112,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHSound getSound(int index)
 	{
-		return sounds[index];
+		return Common.arrayElement(sounds, index);
 	}
 
 	@Override
@@ -117,7 +124,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHThing getThing(int index)
 	{
-		return things[index];
+		return Common.arrayElement(things, index);
 	}
 
 	@Override
@@ -129,7 +136,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHWeapon getWeapon(int index)
 	{
-		return weapons[index];
+		return Common.arrayElement(weapons, index);
 	}
 
 	@Override
@@ -141,7 +148,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHState getState(int index) 
 	{
-		return states[index];
+		return Common.arrayElement(states, index);
 	}
 
 	@Override
@@ -159,9 +166,15 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public DEHActionPointer getActionPointer(int index)
 	{
-		return pointers[index];
+		return Common.arrayElement(pointers, index);
 	}
 
+	/**
+	 * Sets the pointer at an action pointer index.
+	 * @param index the pointer index.
+	 * @param pointer the pointer.
+	 * @throws IndexOutOfBoundsException if index is out of bounds.
+	 */
 	public void setActionPointer(int index, DEHActionPointer pointer)
 	{
 		if (pointer == null)

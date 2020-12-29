@@ -391,20 +391,23 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an ammo block.
 	private boolean parseAmmoBlock(AbstractPatchContext<?> context)
 	{
+		DEHAmmo ammo;
 		Integer ammoIndex;
 		if ((ammoIndex = matchPositiveInteger()) == null)
 		{
 			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
 			return false;
-		}
-		
-		if (ammoIndex >= context.getAmmoCount())
+		}		
+		else if (ammoIndex >= context.getAmmoCount())
 		{
 			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
 			return false;
 		}
-		
-		DEHAmmo ammo = context.getAmmo(ammoIndex);
+		else if ((ammo = context.getAmmo(ammoIndex)) == null)
+		{
+			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
+			return false;
+		}
 		
 		String optionalName;
 		if ((optionalName = matchString()) != null)
@@ -457,8 +460,9 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an sound block.
 	private boolean parseSoundBlock(AbstractPatchContext<?> context)
 	{
+		DEHSound sound;
 		Integer soundIndex;
-		if ((soundIndex = matchSoundIndex(context)) == null)
+		if ((soundIndex = matchSoundIndexName(context)) == null)
 		{
 			addErrorMessage("Expected sound index or sound name after \"%s\".", KEYWORD_SOUND);
 			return false;
@@ -468,8 +472,11 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected valid sound index or sound name after \"%s\".", KEYWORD_SOUND);
 			return false;
 		}
-
-		DEHSound sound = context.getSound(soundIndex);
+		else if ((sound = context.getSound(soundIndex)) == null)
+		{
+			addErrorMessage("Expected valid sound index or sound name after \"%s\".", KEYWORD_SOUND);
+			return false;
+		}
 		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
@@ -999,7 +1006,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SEESOUND))
 			{
-				if ((value = matchSoundIndex(context)) == null)
+				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_SEESOUND);
 					return false;
@@ -1008,7 +1015,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ATTACKSOUND))
 			{
-				if ((value = matchSoundIndex(context)) == null)
+				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ATTACKSOUND);
 					return false;
@@ -1017,7 +1024,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PAINSOUND))
 			{
-				if ((value = matchSoundIndex(context)) == null)
+				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_PAINSOUND);
 					return false;
@@ -1026,7 +1033,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_DEATHSOUND))
 			{
-				if ((value = matchSoundIndex(context)) == null)
+				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_DEATHSOUND);
 					return false;
@@ -1035,7 +1042,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ACTIVESOUND))
 			{
-				if ((value = matchSoundIndex(context)) == null)
+				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ACTIVESOUND);
 					return false;
@@ -1574,6 +1581,11 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Invalid state index: %d. Max is %d.", value, context.getStateCount() - 1);
 			return null;
 		}
+		else if (context.getState(value) == null)
+		{
+			addErrorMessage("Invalid state index: %d. Max is %d.", value, context.getStateCount() - 1);
+			return null;
+		}
 		else
 		{
 			return value;
@@ -1770,7 +1782,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// requireAction is either true, false, or null. If null, no check is performed. 
 	private boolean parseStateLine(AbstractPatchContext<?> context, ParsedState state, boolean singleFrame, Boolean requireAction) 
 	{
-		if ((state.spriteIndex = matchSpriteIndex(context)) == null)
+		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
 		{
 			addErrorMessage("Expected valid sprite name.");
 			return false;				
@@ -1796,7 +1808,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		state.bright = matchBrightFlag();
 		
-		state.action = matchActionPointer();
+		state.action = matchActionPointerName();
 		
 		if (requireAction != null)
 		{
@@ -2276,7 +2288,13 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Invalid thing index: %d. Max is %d.", slot, context.getThingCount() - 1);
 			return null;
 		}
-		
+
+		if (context.getThing(slot) == null)
+		{
+			addErrorMessage("Invalid thing index: %d. Max is %d.", slot, context.getThingCount() - 1);
+			return null;
+		}
+
 		return slot;
 	}
 
@@ -2297,6 +2315,13 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
 			return null;
 		}
+		
+		if (context.getWeapon(slot) == null)
+		{
+			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
+			return null;
+		}
+
 		return slot;
 	}
 
@@ -2328,7 +2353,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier or string that references a sprite name.
 	// If match, advance token and return sprite index integer.
 	// Else, return null.
-	private Integer matchSpriteIndex(DEHPatch patch)
+	private Integer matchSpriteIndexName(DEHPatch patch)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
@@ -2492,7 +2517,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier or string that references a sound name.
 	// If match, advance token and return sound index integer.
 	// Else, return null.
-	private DEHActionPointer matchActionPointer()
+	private DEHActionPointer matchActionPointerName()
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
@@ -2513,7 +2538,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier or string that references a sound name.
 	// If match, advance token and return sound index integer.
 	// Else, return null.
-	private Integer matchSoundIndex(DEHPatch patch)
+	private Integer matchSoundIndexName(DEHPatch patch)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;

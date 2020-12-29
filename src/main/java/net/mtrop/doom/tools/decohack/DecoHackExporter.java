@@ -54,6 +54,8 @@ public final class DecoHackExporter
 		{
 			DEHActionPointer action = patch.getActionPointer(i);
 			DEHActionPointer original = patch.getSourcePatch().getActionPointer(i);
+			if (action == null)
+				continue;
 			if (!action.equals(original))
 			{
 				writer.append("Pointer ")
@@ -72,6 +74,8 @@ public final class DecoHackExporter
 		{
 			String str = patch.getString(i);
 			String original = patch.getSourcePatch().getString(i);
+			if (str == null)
+				continue;
 			if (!str.equals(original))
 			{
 				writer.append("Text ")
@@ -105,6 +109,8 @@ public final class DecoHackExporter
 		{
 			DEHActionPointer pointer = patch.getActionPointer(i);
 			DEHActionPointer original = patch.getSourcePatch().getActionPointer(i);
+			if (pointer == null)
+				continue;
 			if (!pointer.equals(original))
 			{
 				if (!codeptrHeader)
@@ -208,6 +214,8 @@ public final class DecoHackExporter
 		{
 			DEHThing thing = patch.getThing(i);
 			DEHThing original = patch.getSourcePatch().getThing(i);
+			if (thing == null)
+				continue;
 			if (!thing.equals(original))
 			{
 				writer.append("Thing ")
@@ -226,6 +234,8 @@ public final class DecoHackExporter
 		{
 			DEHState state = patch.getState(i);
 			DEHState original = patch.getSourcePatch().getState(i);
+			if (state == null)
+				continue;
 			if (!state.equals(original))
 			{
 				writer.append("Frame ").append(String.valueOf(i)).append("\r\n");
@@ -239,6 +249,8 @@ public final class DecoHackExporter
 		{
 			DEHSound sound = patch.getSound(i);
 			DEHSound original = patch.getSourcePatch().getSound(i);
+			if (sound == null)
+				continue;
 			if (!sound.equals(original))
 			{
 				writer.append("Sound ").append(String.valueOf(i)).append("\r\n");
@@ -252,6 +264,8 @@ public final class DecoHackExporter
 		{
 			DEHWeapon weapon = patch.getWeapon(i);
 			DEHWeapon original = patch.getSourcePatch().getWeapon(i);
+			if (weapon == null)
+				continue;
 			if (!weapon.equals(original))
 			{
 				writer.append("Weapon ")
@@ -270,6 +284,8 @@ public final class DecoHackExporter
 		{
 			DEHAmmo ammo = patch.getAmmo(i);
 			DEHAmmo original = patch.getSourcePatch().getAmmo(i);
+			if (ammo == null)
+				continue;
 			if (!ammo.equals(original))
 			{
 				writer.append("Ammo ")

@@ -6,6 +6,7 @@ import static net.mtrop.doom.tools.decohack.patches.ConstantsDoom19.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -13,6 +14,7 @@ import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.decohack.patches.PatchDoom19.State;
 
 /**
  * Patch implementation for Ultimate Doom 1.9.
@@ -1154,7 +1156,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 		private static final long serialVersionUID = 4300586837270362529L;
 		{
 			for (int i = 0; i < DEHSOUND.length; i++)
-				put(DEHSTRINGS[i + STRING_INDEX_SOUNDS], i);
+				put(DEHSTRINGS[i + STRING_INDEX_SOUNDS].toUpperCase(), i);
 		}
 	};
 	
@@ -1184,7 +1186,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
-		return DEHAMMO[index];
+		return Common.arrayElement(DEHAMMO, index);
 	}
 
 	@Override
@@ -1196,7 +1198,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public String getString(int index)
 	{
-		return DEHSTRINGS[index];
+		return Common.arrayElement(DEHSTRINGS, index);
 	}
 
 	@Override
@@ -1220,7 +1222,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHSound getSound(int index)
 	{
-		return DEHSOUND[index];
+		return Common.arrayElement(DEHSOUND, index);
 	}
 
 	@Override
@@ -1232,7 +1234,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHThing getThing(int index)
 	{
-		return DEHTHING[index];
+		return Common.arrayElement(DEHTHING, index);
 	}
 
 	@Override
@@ -1244,7 +1246,7 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHWeapon getWeapon(int index)
 	{
-		return DEHWEAPON[index];
+		return Common.arrayElement(DEHWEAPON, index);
 	}
 
 	@Override
@@ -1256,13 +1258,15 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHState getState(int index) 
 	{
-		return DEHSTATE[index].getState();
+		State state = Common.arrayElement(DEHSTATE, index);
+		return state != null ? state.getState() : null;
 	}
 
 	@Override
 	public Integer getStateActionPointerIndex(int stateIndex) 
 	{
-		return DEHSTATE[stateIndex].getPointerIndex();
+		State state = Common.arrayElement(DEHSTATE, stateIndex);
+		return state != null ? state.getPointerIndex() : null;
 	}
 
 	@Override
@@ -1274,13 +1278,13 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	@Override
 	public DEHActionPointer getActionPointer(int index)
 	{
-		return DEHPOINTER[index];
+		return Common.arrayElement(DEHPOINTER, index);
 	}
 
 	@Override
-	public int getActionPointerFrame(int index)
+	public Integer getActionPointerFrame(int index)
 	{
-		return DEHPOINTERFRAME[index];
+		return Common.arrayElement(DEHPOINTERFRAME, index);
 	}
 
 }

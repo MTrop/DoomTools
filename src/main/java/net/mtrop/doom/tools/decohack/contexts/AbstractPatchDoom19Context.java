@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
 
@@ -27,7 +28,8 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		
 		this.strings = new String[source.getStringCount()];
 		for (int i = 0; i < this.strings.length; i++)
-			this.strings[i] = source.getString(i);
+			if (source.getString(i) != null)
+				this.strings[i] = source.getString(i);
 		
 		int soundStringStart = getSoundStringIndex();
 		this.soundStringIndex = new HashMap<>();
@@ -56,7 +58,7 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 	@Override
 	public String getString(int index)
 	{
-		return strings[index];
+		return Common.arrayElement(strings, index);
 	}
 
 	/**
@@ -109,7 +111,8 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		return spriteStringIndex.get(name.toUpperCase());
 	}
 
-	public int getActionPointerFrame(int index)
+	@Override
+	public Integer getActionPointerFrame(int index)
 	{
 		return getSourcePatch().getActionPointerFrame(index);
 	}
