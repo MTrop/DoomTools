@@ -18,6 +18,210 @@ import net.mtrop.doom.tools.decohack.data.DEHThing;
  */
 public class PatchDHEExtended extends PatchMBF
 {
+	protected static final String[] SOUNDSTRINGSEXTENDED = 
+	{
+		"FRE000",
+		"FRE001",
+		"FRE002",
+		"FRE003",
+		"FRE004",
+		"FRE005",
+		"FRE006",
+		"FRE007",
+		"FRE008",
+		"FRE009",
+		"FRE010",
+		"FRE011",
+		"FRE012",
+		"FRE013",
+		"FRE014",
+		"FRE015",
+		"FRE016",
+		"FRE017",
+		"FRE018",
+		"FRE019",
+		"FRE020",
+		"FRE021",
+		"FRE022",
+		"FRE023",
+		"FRE024",
+		"FRE025",
+		"FRE026",
+		"FRE027",
+		"FRE028",
+		"FRE029",
+		"FRE030",
+		"FRE031",
+		"FRE032",
+		"FRE033",
+		"FRE034",
+		"FRE035",
+		"FRE036",
+		"FRE037",
+		"FRE038",
+		"FRE039",
+		"FRE040",
+		"FRE041",
+		"FRE042",
+		"FRE043",
+		"FRE044",
+		"FRE045",
+		"FRE046",
+		"FRE047",
+		"FRE048",
+		"FRE049",
+		"FRE050",
+		"FRE051",
+		"FRE052",
+		"FRE053",
+		"FRE054",
+		"FRE055",
+		"FRE056",
+		"FRE057",
+		"FRE058",
+		"FRE059",
+		"FRE060",
+		"FRE061",
+		"FRE062",
+		"FRE063",
+		"FRE064",
+		"FRE065",
+		"FRE066",
+		"FRE067",
+		"FRE068",
+		"FRE069",
+		"FRE070",
+		"FRE071",
+		"FRE072",
+		"FRE073",
+		"FRE074",
+		"FRE075",
+		"FRE076",
+		"FRE077",
+		"FRE078",
+		"FRE079",
+		"FRE080",
+		"FRE081",
+		"FRE082",
+		"FRE083",
+		"FRE084",
+		"FRE085",
+		"FRE086",
+		"FRE087",
+		"FRE088",
+		"FRE089",
+		"FRE090",
+		"FRE091",
+		"FRE092",
+		"FRE093",
+		"FRE094",
+		"FRE095",
+		"FRE096",
+		"FRE097",
+		"FRE098",
+		"FRE099",
+		"FRE100",
+		"FRE101",
+		"FRE102",
+		"FRE103",
+		"FRE104",
+		"FRE105",
+		"FRE106",
+		"FRE107",
+		"FRE108",
+		"FRE109",
+		"FRE110",
+		"FRE111",
+		"FRE112",
+		"FRE113",
+		"FRE114",
+		"FRE115",
+		"FRE116",
+		"FRE117",
+		"FRE118",
+		"FRE119",
+		"FRE120",
+		"FRE121",
+		"FRE122",
+		"FRE123",
+		"FRE124",
+		"FRE125",
+		"FRE126",
+		"FRE127",
+		"FRE128",
+		"FRE129",
+		"FRE130",
+		"FRE131",
+		"FRE132",
+		"FRE133",
+		"FRE134",
+		"FRE135",
+		"FRE136",
+		"FRE137",
+		"FRE138",
+		"FRE139",
+		"FRE140",
+		"FRE141",
+		"FRE142",
+		"FRE143",
+		"FRE144",
+		"FRE145",
+		"FRE146",
+		"FRE147",
+		"FRE148",
+		"FRE149",
+		"FRE150",
+		"FRE151",
+		"FRE152",
+		"FRE153",
+		"FRE154",
+		"FRE155",
+		"FRE156",
+		"FRE157",
+		"FRE158",
+		"FRE159",
+		"FRE160",
+		"FRE161",
+		"FRE162",
+		"FRE163",
+		"FRE164",
+		"FRE165",
+		"FRE166",
+		"FRE167",
+		"FRE168",
+		"FRE169",
+		"FRE170",
+		"FRE171",
+		"FRE172",
+		"FRE173",
+		"FRE174",
+		"FRE175",
+		"FRE176",
+		"FRE177",
+		"FRE178",
+		"FRE179",
+		"FRE180",
+		"FRE181",
+		"FRE182",
+		"FRE183",
+		"FRE184",
+		"FRE185",
+		"FRE186",
+		"FRE187",
+		"FRE188",
+		"FRE189",
+		"FRE190",
+		"FRE191",
+		"FRE192",
+		"FRE193",
+		"FRE194",
+		"FRE195",
+		"FRE196",
+		"FRE197",
+		"FRE198",
+		"FRE199",
+	};
+
 	protected static final String[] SPRITESTRINGSEXTENDED = 
 	{
 		"BLD2",
@@ -123,6 +327,27 @@ public class PatchDHEExtended extends PatchMBF
 		"SP99",
 	};
 
+	private static final Map<String, Integer> MAP_SOUNDINDEX = new HashMap<String, Integer>()
+	{
+		private static final long serialVersionUID = -4513058612574767103L;
+		{
+			// the extended sound range expliticly starts at 500, skipping several
+			// indices, so we need to make the output index relative to that.
+			int extstart = 500;
+			int mbflen = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length;
+			int len = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length + SOUNDSTRINGSEXTENDED.length;
+			for (int i = 0; i < len; i++)
+			{
+				if (i >= mbflen)
+					put(SOUNDSTRINGSEXTENDED[i - mbflen], i - mbflen + extstart - 1);
+				else if (i >= SOUNDSTRINGS.length)
+					put(SOUNDSTRINGSMBF[i - SOUNDSTRINGS.length], i);
+				else
+					put(SOUNDSTRINGS[i].toUpperCase(), i);
+			}
+		}
+	};
+
 	private static final Map<String, Integer> MAP_SPRITEINDEX = new HashMap<String, Integer>()
 	{
 		private static final long serialVersionUID = -5790149102738250549L;
@@ -142,7 +367,13 @@ public class PatchDHEExtended extends PatchMBF
 	};
 	
 	// ======================================================================
-	
+
+	@Override
+	public Integer getSoundIndex(String name)
+	{
+		return MAP_SOUNDINDEX.get(name.toUpperCase());
+	}
+
 	@Override
 	public Integer getSpriteIndex(String name)
 	{
