@@ -612,9 +612,14 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
+		File[] files;
+		
+		// Sort files first, directories last, alphabetical order.
+		Arrays.sort(files = inDirectory.listFiles(), DIR_FILESORT);
+
 		WadFile.Adder adder = null;
 		try {
-			for (File f : inDirectory.listFiles())
+			for (File f : files)
 			{
 				Response resp;
 				if (f.isDirectory())
@@ -760,8 +765,14 @@ public class WadMergeContext
 		
 		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
 		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
+
+		File[] files;
+		
+		// Sort files first, directories last, alphabetical order.
+		Arrays.sort(files = textureDirectory.listFiles(), DIR_FILESORT);
+
 		try {
-			for (File f : textureDirectory.listFiles())
+			for (File f : files)
 			{
 				if (f.isDirectory())
 				{
@@ -770,17 +781,18 @@ public class WadMergeContext
 				}
 				else
 				{
+					String namenoext = Common.getFileNameWithoutExtension(f);
 					if (adder != null)
 					{
-						if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+						if ((resp = mergeFileData(symbol, f, namenoext, adder)) != Response.OK)
 							return resp;
 					}
 					else
 					{
-						if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), buffer)) != Response.OK)
+						if ((resp = mergeFileData(symbol, f, namenoext, buffer)) != Response.OK)
 							return resp;
 					}
-					String textureName = NameUtils.toValidTextureName(Common.getFileNameWithoutExtension(f));
+					String textureName = NameUtils.toValidTextureName(namenoext);
 					textureSet.createTexture(textureName).createPatch(textureName);
 					verbosef("Add texture `%s`...\n", textureName);
 				}

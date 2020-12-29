@@ -34,6 +34,11 @@ DMXConv
 WadMerge
 --------
 
+### Changed for 1.2.0
+
+* `Fixed` Made directory sorting consistent across all merge commands.
+
+
 ### Changed for 1.1.0
 
 * `Added` The `CREATEFILE` command for creating a File instead of a Buffer.
