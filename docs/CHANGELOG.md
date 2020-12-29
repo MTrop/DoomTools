@@ -6,6 +6,11 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 DecoHack
 --------
 
+### Changed for 0.5.0
+
+* `Added` Support for DEHExtra sound definitions (thanks @XaserAcheron).
+
+
 ### Changed for 0.4.1
 
 * `Fixed` Changed "Friendly" things constants (`classpath:decohack/constants/friendly_things.dh`).

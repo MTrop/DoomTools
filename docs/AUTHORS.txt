@@ -1,2 +1,4 @@
 Matt Tropiano <mtropiano@gmail.com>
-	- API and implementation
+	- All utility design.
+Xaser Acheron 
+	- DECOHack fixes/additions.
