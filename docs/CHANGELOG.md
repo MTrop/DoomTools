@@ -9,6 +9,7 @@ DecoHack
 ### Changed for 0.5.0
 
 * `Added` Support for DEHExtra sound definitions (thanks @XaserAcheron).
+* `Fixed` Better support for DEHExtra in general and code refactoring to accommodate.
 
 
 ### Changed for 0.4.1
