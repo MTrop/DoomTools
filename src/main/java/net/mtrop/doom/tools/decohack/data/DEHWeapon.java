@@ -2,6 +2,8 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
 
@@ -9,8 +11,15 @@ import net.mtrop.doom.util.RangeUtils;
  * A single weapon entry.
  * @author Matthew Tropiano
  */
-public class DEHWeapon implements DEHObject<DEHWeapon>
+public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 {
+	public static final String STATE_LABEL_READY = "ready";
+	public static final String STATE_LABEL_SELECT = "select";
+	public static final String STATE_LABEL_DESELECT = "deselect";
+	public static final String STATE_LABEL_FIRE = "fire";
+	public static final String STATE_LABEL_FLASH = "flash";
+	public static final String STATE_LABEL_LIGHTDONE = "lightdone";
+
 	public static enum Ammo
 	{
 		BULLETS,
@@ -28,19 +37,14 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	
 	/** Ammo type. */
 	private Ammo ammoType;
-	/** Raise frame index. */
-	private int raiseFrameIndex;
-	/** Lower frame index. */
-	private int lowerFrameIndex;
-	/** Ready frame index. */
-	private int readyFrameIndex;
-	/** Fire frame index. */
-	private int fireFrameIndex;
-	/** Muzzle flash index. */
-	private int flashFrameIndex;
+
+	/** State indices (label name to index). */
+	private Map<String, Integer> stateIndexMap;
 	
 	public DEHWeapon()
 	{
+		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
 		setName("");
 		setAmmoType(null);
 		setRaiseFrameIndex(0);
@@ -48,6 +52,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 		setReadyFrameIndex(0);
 		setFireFrameIndex(0);
 		setFlashFrameIndex(0);
+		stateIndexMap.put(STATE_LABEL_LIGHTDONE, 1);
 	}
 	
 	/**
@@ -79,11 +84,11 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	{
 		setName(source.name);
 		setAmmoType(source.ammoType);
-		setRaiseFrameIndex(source.raiseFrameIndex);
-		setLowerFrameIndex(source.lowerFrameIndex);
-		setReadyFrameIndex(source.readyFrameIndex);
-		setFireFrameIndex(source.fireFrameIndex);
-		setFlashFrameIndex(source.flashFrameIndex);
+		setRaiseFrameIndex(source.getRaiseFrameIndex());
+		setLowerFrameIndex(source.getLowerFrameIndex());
+		setReadyFrameIndex(source.getReadyFrameIndex());
+		setFireFrameIndex(source.getFireFrameIndex());
+		setFlashFrameIndex(source.getFlashFrameIndex());
 		return this;
 	}
 	
@@ -130,7 +135,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	 */
 	public int getRaiseFrameIndex() 
 	{
-		return raiseFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_SELECT);
 	}
 	
 	/**
@@ -141,7 +146,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public DEHWeapon setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
-		this.raiseFrameIndex = raiseFrameIndex;
+		stateIndexMap.put(STATE_LABEL_SELECT, raiseFrameIndex);
 		return this;
 	}
 	
@@ -150,7 +155,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	 */
 	public int getLowerFrameIndex() 
 	{
-		return lowerFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_DESELECT);
 	}
 	
 	/**
@@ -161,7 +166,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public DEHWeapon setLowerFrameIndex(int lowerFrameIndex) 
 	{
 		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
-		this.lowerFrameIndex = lowerFrameIndex;
+		stateIndexMap.put(STATE_LABEL_DESELECT, lowerFrameIndex);
 		return this;
 	}
 	
@@ -170,7 +175,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	 */
 	public int getReadyFrameIndex() 
 	{
-		return readyFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_READY);
 	}
 	
 	/**
@@ -181,7 +186,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public DEHWeapon setReadyFrameIndex(int readyFrameIndex) 
 	{
 		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
-		this.readyFrameIndex = readyFrameIndex;
+		stateIndexMap.put(STATE_LABEL_READY, readyFrameIndex);
 		return this;
 	}
 	
@@ -190,7 +195,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	 */
 	public int getFireFrameIndex()
 	{
-		return fireFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_FIRE);
 	}
 	
 	/**
@@ -201,7 +206,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public DEHWeapon setFireFrameIndex(int fireFrameIndex) 
 	{
 		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
-		this.fireFrameIndex = fireFrameIndex;
+		stateIndexMap.put(STATE_LABEL_FIRE, fireFrameIndex);
 		return this;
 	}
 	
@@ -210,7 +215,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	 */
 	public int getFlashFrameIndex()
 	{
-		return flashFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_FLASH);
 	}
 	
 	/**
@@ -221,8 +226,14 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public DEHWeapon setFlashFrameIndex(int flashFrameIndex) 
 	{
 		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
-		this.flashFrameIndex = flashFrameIndex;
+		stateIndexMap.put(STATE_LABEL_FLASH, flashFrameIndex);
 		return this;
+	}
+	
+	@Override
+	public Map<String, Integer> getStateIndexMap() 
+	{
+		return stateIndexMap;
 	}
 	
 	@Override
@@ -236,11 +247,11 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	public boolean equals(DEHWeapon obj) 
 	{
 		return ammoType == obj.ammoType
-			&& raiseFrameIndex == obj.raiseFrameIndex
-			&& lowerFrameIndex == obj.lowerFrameIndex
-			&& readyFrameIndex == obj.readyFrameIndex
-			&& fireFrameIndex == obj.fireFrameIndex
-			&& flashFrameIndex == obj.flashFrameIndex
+			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
+			&& getLowerFrameIndex() == obj.getLowerFrameIndex()
+			&& getReadyFrameIndex() == obj.getReadyFrameIndex()
+			&& getFireFrameIndex() == obj.getFireFrameIndex()
+			&& getFlashFrameIndex() == obj.getFlashFrameIndex()
 		;
 	}	
 	
@@ -249,16 +260,16 @@ public class DEHWeapon implements DEHObject<DEHWeapon>
 	{
 		if (ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append("\r\n");
-		if (raiseFrameIndex != weapon.raiseFrameIndex)
-			writer.append("Deselect frame = ").append(String.valueOf(raiseFrameIndex)).append("\r\n");
-		if (lowerFrameIndex != weapon.lowerFrameIndex)
-			writer.append("Select frame = ").append(String.valueOf(lowerFrameIndex)).append("\r\n");
-		if (readyFrameIndex != weapon.readyFrameIndex)
-			writer.append("Bobbing frame = ").append(String.valueOf(readyFrameIndex)).append("\r\n");
-		if (fireFrameIndex != weapon.fireFrameIndex)
-			writer.append("Shooting frame = ").append(String.valueOf(fireFrameIndex)).append("\r\n");
-		if (flashFrameIndex != weapon.flashFrameIndex)
-			writer.append("Firing frame = ").append(String.valueOf(flashFrameIndex)).append("\r\n");
+		if (getRaiseFrameIndex() != weapon.getRaiseFrameIndex())
+			writer.append("Deselect frame = ").append(String.valueOf(getRaiseFrameIndex())).append("\r\n");
+		if (getLowerFrameIndex() != weapon.getLowerFrameIndex())
+			writer.append("Select frame = ").append(String.valueOf(getLowerFrameIndex())).append("\r\n");
+		if (getReadyFrameIndex() != weapon.getReadyFrameIndex())
+			writer.append("Bobbing frame = ").append(String.valueOf(getReadyFrameIndex())).append("\r\n");
+		if (getFireFrameIndex() != weapon.getFireFrameIndex())
+			writer.append("Shooting frame = ").append(String.valueOf(getFireFrameIndex())).append("\r\n");
+		if (getFlashFrameIndex() != weapon.getFlashFrameIndex())
+			writer.append("Firing frame = ").append(String.valueOf(getFlashFrameIndex())).append("\r\n");
 		writer.flush();
 	}
 

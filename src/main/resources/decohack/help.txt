@@ -168,7 +168,11 @@ changes.
     state <INTEGER> 
     { 
         [ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
-        ( goto <INTEGER> | goto <IDENTIFIER>
+        ( 
+            goto <INTEGER> 
+            | goto <IDENTIFIER>
+            | goto weapon <INTEGER> <WeaponStateLabel>
+            | goto thing <INTEGER> <ThingStateLabel>
             | wait 
             | stop 
         )
@@ -181,6 +185,22 @@ string table at the time this is declared. <Frame> must be a single valid
 character in a sprite frame. <NUMBER> is the duration in tics. [Bright] is an
 optional keyword indicating that the state graphic is always painted 
 fullbright. Action pointer mnemonics must start with A_.
+
+Some action pointers, especially in MBF and later formats, can be optionally 
+parameterized up to two parameters:
+
+	A_Die
+	A_Die()
+	A_Turn(90)
+	A_RandomJump(344, 128)
+
+
+Parameter values can also refer to state indices via thing or weapon label 
+names and references to thing or weapon state labels (like how goto is used).
+
+	A_RandomJump(missile2, 255)
+	A_RandomJump(thing 23 pain, 128)
+
 
 Examples:
 
@@ -262,7 +282,11 @@ states (especially action pointer states in Doom 1.9).
     { 
         <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
         ...
-        ( goto <INTEGER> | goto <IDENTIFIER>
+        (
+            goto <INTEGER> 
+            | goto <IDENTIFIER>
+            | goto weapon <INTEGER> <WeaponStateLabel>
+            | goto thing <INTEGER> <ThingStateLabel>
             | wait 
             | stop 
             | loop 
@@ -344,10 +368,10 @@ Thing for pickups.
         state <WeaponStateName> <INTEGER>
         
         // specific state assignment using another thing's states.
-        state <WeaponStateName> thing <INTEGER> <ThingStateName>
+        state <WeaponStateName> thing <INTEGER> <ThingStateLabel>
         
         // specific state assignment using another weapon's states.
-        state <WeaponStateName> weapon <INTEGER> <WeaponStateName>
+        state <WeaponStateName> weapon <INTEGER> <WeaponStateLabel>
         
         clear states // if present, clear all state indices (not freed!).
         
@@ -397,7 +421,7 @@ Example:
                 SHTG CB 5
                 SHTG A 3
                 SHTG A 7 A_ReFire
-                Goto ready
+                goto ready
             flash:
                 SHTF A 4 Bright A_Light1
                 SHTF B 3 Bright A_Light2
@@ -492,10 +516,10 @@ the thing state indices. Other labels are used for arbitrary jump points.
         state <ThingStateName> <INTEGER>
         
         // specific state assignment using another thing's states.
-        state <ThingStateName> thing <INTEGER> <ThingStateName>
+        state <ThingStateName> thing <INTEGER> <ThingStateLabel>
         
         // specific state assignment using another weapon's states.
-        state <ThingStateName> weapon <INTEGER> <WeaponStateName>
+        state <ThingStateName> weapon <INTEGER> <WeaponStateLabel>
         
         states
         {

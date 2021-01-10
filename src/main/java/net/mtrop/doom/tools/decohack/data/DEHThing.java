@@ -2,6 +2,8 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
 
@@ -10,8 +12,17 @@ import net.mtrop.doom.util.RangeUtils;
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
  * @author Matthew Tropiano
  */
-public class DEHThing implements DEHObject<DEHThing>
+public class DEHThing implements DEHObject<DEHThing>, DEHActor
 {
+	public static final String STATE_LABEL_SPAWN = "spawn";
+	public static final String STATE_LABEL_SEE = "see";
+	public static final String STATE_LABEL_MELEE = "melee";
+	public static final String STATE_LABEL_MISSILE = "missile";
+	public static final String STATE_LABEL_PAIN = "pain";
+	public static final String STATE_LABEL_DEATH = "death";
+	public static final String STATE_LABEL_XDEATH = "xdeath";
+	public static final String STATE_LABEL_RAISE = "raise";
+
 	public static final int EDITORNUMBER_NONE = -1;
 	public static final int SOUND_NONE = 0;
 	public static final int FRAME_NULL = 0;
@@ -30,23 +41,9 @@ public class DEHThing implements DEHObject<DEHThing>
 	private int flags;
 	private int mass;
 
-	/** Spawn frame index. */
-	private int spawnFrameIndex;
-	/** Walk frame index. */
-	private int walkFrameIndex;
-	/** Pain frame index. */
-	private int painFrameIndex;
-	/** Melee frame index. */
-	private int meleeFrameIndex;
-	/** Missile frame index. */
-	private int missileFrameIndex;
-	/** Death frame index. */
-	private int deathFrameIndex;
-	/** Extreme death frame index. */
-	private int extremeDeathFrameIndex;
-	/** Raise frame index. */
-	private int raiseFrameIndex;
-
+	/** State indices (label name to index). */
+	private Map<String, Integer> stateIndexMap;
+	
 	/** Alert sound position. */
 	private int seeSoundPosition;
 	/** Attack sound position. */
@@ -63,6 +60,8 @@ public class DEHThing implements DEHObject<DEHThing>
 	 */
 	public DEHThing()
 	{
+		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		
 		setName("");
 		setEditorNumber(EDITORNUMBER_NONE);
 		
@@ -108,14 +107,14 @@ public class DEHThing implements DEHObject<DEHThing>
 		setFlags(source.flags);
 		setMass(source.mass);
 		
-		setSpawnFrameIndex(source.spawnFrameIndex);
-		setWalkFrameIndex(source.walkFrameIndex);
-		setPainFrameIndex(source.painFrameIndex);
-		setMeleeFrameIndex(source.meleeFrameIndex);
-		setMissileFrameIndex(source.missileFrameIndex);
-		setDeathFrameIndex(source.deathFrameIndex);
-		setExtremeDeathFrameIndex(source.extremeDeathFrameIndex);
-		setRaiseFrameIndex(source.raiseFrameIndex);
+		setSpawnFrameIndex(source.getSpawnFrameIndex());
+		setWalkFrameIndex(source.getWalkFrameIndex());
+		setPainFrameIndex(source.getPainFrameIndex());
+		setMeleeFrameIndex(source.getMeleeFrameIndex());
+		setMissileFrameIndex(source.getMissileFrameIndex());
+		setDeathFrameIndex(source.getDeathFrameIndex());
+		setExtremeDeathFrameIndex(source.getExtremeDeathFrameIndex());
+		setRaiseFrameIndex(source.getRaiseFrameIndex());
 		
 		setSeeSoundPosition(source.seeSoundPosition);
 		setAttackSoundPosition(source.attackSoundPosition);
@@ -259,100 +258,106 @@ public class DEHThing implements DEHObject<DEHThing>
 
 	public int getSpawnFrameIndex()
 	{
-		return spawnFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_SPAWN);
 	}
 
 	public DEHThing setSpawnFrameIndex(int spawnFrameIndex)
 	{
 		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
-		this.spawnFrameIndex = spawnFrameIndex;
+		stateIndexMap.put(STATE_LABEL_SPAWN, spawnFrameIndex);
 		return this;
 	}
 
 	public int getWalkFrameIndex() 
 	{
-		return walkFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_SEE);
 	}
 
 	public DEHThing setWalkFrameIndex(int walkFrameIndex) 
 	{
 		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
-		this.walkFrameIndex = walkFrameIndex;
+		stateIndexMap.put(STATE_LABEL_SEE, walkFrameIndex);
 		return this;
 	}
 
 	public int getPainFrameIndex()
 	{
-		return painFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_PAIN);
 	}
 
 	public DEHThing setPainFrameIndex(int painFrameIndex) 
 	{
 		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
-		this.painFrameIndex = painFrameIndex;
+		stateIndexMap.put(STATE_LABEL_PAIN, painFrameIndex);
 		return this;
 	}
 
 	public int getMeleeFrameIndex() 
 	{
-		return meleeFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_MELEE);
 	}
 
 	public DEHThing setMeleeFrameIndex(int meleeFrameIndex)
 	{
 		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
-		this.meleeFrameIndex = meleeFrameIndex;
+		stateIndexMap.put(STATE_LABEL_MELEE, meleeFrameIndex);
 		return this;
 	}
 
 	public int getMissileFrameIndex() 
 	{
-		return missileFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_MISSILE);
 	}
 
 	public DEHThing setMissileFrameIndex(int missileFrameIndex) 
 	{
 		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
-		this.missileFrameIndex = missileFrameIndex;
+		stateIndexMap.put(STATE_LABEL_MISSILE, missileFrameIndex);
 		return this;
 	}
 
 	public int getDeathFrameIndex() 
 	{
-		return deathFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_DEATH);
 	}
 
 	public DEHThing setDeathFrameIndex(int deathFrameIndex) 
 	{
 		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
-		this.deathFrameIndex = deathFrameIndex;
+		stateIndexMap.put(STATE_LABEL_DEATH, deathFrameIndex);
 		return this;
 	}
 
 	public int getExtremeDeathFrameIndex() 
 	{
-		return extremeDeathFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_XDEATH);
 	}
 
 	public DEHThing setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
 		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
-		this.extremeDeathFrameIndex = extremeDeathFrameIndex;
+		stateIndexMap.put(STATE_LABEL_XDEATH, extremeDeathFrameIndex);
 		return this;
 	}
 
 	public int getRaiseFrameIndex()
 	{
-		return raiseFrameIndex;
+		return stateIndexMap.get(STATE_LABEL_RAISE);
 	}
 
 	public DEHThing setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
-		this.raiseFrameIndex = raiseFrameIndex;
+		stateIndexMap.put(STATE_LABEL_RAISE, raiseFrameIndex);
 		return this;
 	}
 
+	@Override
+	public Map<String, Integer> getStateIndexMap() 
+	{
+		return stateIndexMap;
+	}
+	
 	public int getSeeSoundPosition() 
 	{
 		return seeSoundPosition;
@@ -433,14 +438,14 @@ public class DEHThing implements DEHObject<DEHThing>
 			&& painChance == obj.painChance
 			&& flags == obj.flags
 			&& mass == obj.mass
-			&& spawnFrameIndex == obj.spawnFrameIndex
-			&& walkFrameIndex == obj.walkFrameIndex
-			&& painFrameIndex == obj.painFrameIndex
-			&& meleeFrameIndex == obj.meleeFrameIndex
-			&& missileFrameIndex == obj.missileFrameIndex
-			&& deathFrameIndex == obj.deathFrameIndex
-			&& extremeDeathFrameIndex == obj.extremeDeathFrameIndex
-			&& raiseFrameIndex == obj.raiseFrameIndex
+			&& getSpawnFrameIndex() == obj.getSpawnFrameIndex()
+			&& getWalkFrameIndex() == obj.getWalkFrameIndex()
+			&& getPainFrameIndex() == obj.getPainFrameIndex()
+			&& getMeleeFrameIndex() == obj.getMeleeFrameIndex()
+			&& getMissileFrameIndex() == obj.getMissileFrameIndex()
+			&& getDeathFrameIndex() == obj.getDeathFrameIndex()
+			&& getExtremeDeathFrameIndex() == obj.getExtremeDeathFrameIndex()
+			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
 			&& seeSoundPosition == obj.seeSoundPosition
 			&& activeSoundPosition == obj.activeSoundPosition
 			&& attackSoundPosition == obj.attackSoundPosition
@@ -476,22 +481,22 @@ public class DEHThing implements DEHObject<DEHThing>
 		if (mass != thing.mass)
 			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 
-		if (spawnFrameIndex != thing.spawnFrameIndex)
-			writer.append("Initial frame = ").append(String.valueOf(spawnFrameIndex)).append("\r\n");
-		if (walkFrameIndex != thing.walkFrameIndex)
-			writer.append("First moving frame = ").append(String.valueOf(walkFrameIndex)).append("\r\n");
-		if (painFrameIndex != thing.painFrameIndex)
-			writer.append("Injury frame = ").append(String.valueOf(painFrameIndex)).append("\r\n");
-		if (meleeFrameIndex != thing.meleeFrameIndex)
-			writer.append("Close attack frame = ").append(String.valueOf(meleeFrameIndex)).append("\r\n");
-		if (missileFrameIndex != thing.missileFrameIndex)
-			writer.append("Far attack frame = ").append(String.valueOf(missileFrameIndex)).append("\r\n");
-		if (deathFrameIndex != thing.deathFrameIndex)
-			writer.append("Death frame = ").append(String.valueOf(deathFrameIndex)).append("\r\n");
-		if (extremeDeathFrameIndex != thing.extremeDeathFrameIndex)
-			writer.append("Exploding frame = ").append(String.valueOf(extremeDeathFrameIndex)).append("\r\n");
-		if (raiseFrameIndex != thing.raiseFrameIndex)
-			writer.append("Respawn frame = ").append(String.valueOf(raiseFrameIndex)).append("\r\n");
+		if (getSpawnFrameIndex() != thing.getSpawnFrameIndex())
+			writer.append("Initial frame = ").append(String.valueOf(getSpawnFrameIndex())).append("\r\n");
+		if (getWalkFrameIndex() != thing.getWalkFrameIndex())
+			writer.append("First moving frame = ").append(String.valueOf(getWalkFrameIndex())).append("\r\n");
+		if (getPainFrameIndex() != thing.getPainFrameIndex())
+			writer.append("Injury frame = ").append(String.valueOf(getPainFrameIndex())).append("\r\n");
+		if (getMeleeFrameIndex() != thing.getMeleeFrameIndex())
+			writer.append("Close attack frame = ").append(String.valueOf(getMeleeFrameIndex() )).append("\r\n");
+		if (getMissileFrameIndex() != thing.getMissileFrameIndex())
+			writer.append("Far attack frame = ").append(String.valueOf(getMissileFrameIndex())).append("\r\n");
+		if (getDeathFrameIndex() != thing.getDeathFrameIndex())
+			writer.append("Death frame = ").append(String.valueOf(getDeathFrameIndex())).append("\r\n");
+		if (getExtremeDeathFrameIndex() != thing.getExtremeDeathFrameIndex())
+			writer.append("Exploding frame = ").append(String.valueOf(getExtremeDeathFrameIndex())).append("\r\n");
+		if (getRaiseFrameIndex() != thing.getRaiseFrameIndex())
+			writer.append("Respawn frame = ").append(String.valueOf(getRaiseFrameIndex())).append("\r\n");
 
 		if (seeSoundPosition != thing.seeSoundPosition)
 			writer.append("Alert sound = ").append(String.valueOf(seeSoundPosition)).append("\r\n");

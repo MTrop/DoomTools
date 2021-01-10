@@ -6,6 +6,11 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 DecoHack
 --------
 
+### Changed for 0.6.0
+
+* `Added` Better state referencing.
+
+
 ### Changed for 0.5.0
 
 * `Added` Support for DEHExtra sound definitions (thanks @XaserAcheron).
