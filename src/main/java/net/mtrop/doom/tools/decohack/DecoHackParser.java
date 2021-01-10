@@ -1829,7 +1829,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if (!matchType(DecoHackKernel.TYPE_RPAREN))
 				{
 					addErrorMessage("Expected a ')' after action parameters.");
-					return false;				
+					return false;
 				}
 			}
 		}
