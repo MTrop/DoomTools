@@ -1491,9 +1491,11 @@ public final class DecoHackParser extends Lexer.Parser
 			Integer stateIndex;
 			if ((stateIndex = thing.getStateIndexMap().get(labelName)) == null)
 			{
-				StringBuilder sb = new StringBuilder("Expected a valid thing state label ");
-				sb.append(thing.getStateIndexMap().keySet().toArray());
+				StringBuilder sb = new StringBuilder("Expected a valid thing state label for thing ");
+				sb.append(index).append(' ');
+				sb.append(Arrays.toString(thing.getStateIndexMap().keySet().toArray()));
 				sb.append(".");
+				addErrorMessage(sb.toString());
 				return null;
 			}
 			
@@ -1515,9 +1517,11 @@ public final class DecoHackParser extends Lexer.Parser
 			Integer stateIndex;
 			if ((stateIndex = weapon.getStateIndexMap().get(labelName)) == null)
 			{
-				StringBuilder sb = new StringBuilder("Expected a valid weapon state label ");
-				sb.append(weapon.getStateIndexMap().keySet().toArray());
+				StringBuilder sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+				sb.append(index).append(' ');
+				sb.append(Arrays.toString(weapon.getStateIndexMap().keySet().toArray()));
 				sb.append(".");
+				addErrorMessage(sb.toString());
 				return null;
 			}
 			
