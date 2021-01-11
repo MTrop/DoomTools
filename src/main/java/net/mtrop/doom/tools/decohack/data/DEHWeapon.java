@@ -135,7 +135,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 */
 	public int getRaiseFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_SELECT);
+		return getLabel(STATE_LABEL_SELECT);
 	}
 	
 	/**
@@ -146,16 +146,16 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
-		stateIndexMap.put(STATE_LABEL_SELECT, raiseFrameIndex);
+		setLabel(STATE_LABEL_SELECT, raiseFrameIndex);
 		return this;
 	}
-	
+
 	/**
 	 * @return the lower frame index.
 	 */
 	public int getLowerFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_DESELECT);
+		return getLabel(STATE_LABEL_DESELECT);
 	}
 	
 	/**
@@ -166,7 +166,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setLowerFrameIndex(int lowerFrameIndex) 
 	{
 		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
-		stateIndexMap.put(STATE_LABEL_DESELECT, lowerFrameIndex);
+		setLabel(STATE_LABEL_DESELECT, lowerFrameIndex);
 		return this;
 	}
 	
@@ -175,7 +175,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 */
 	public int getReadyFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_READY);
+		return getLabel(STATE_LABEL_READY);
 	}
 	
 	/**
@@ -186,7 +186,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setReadyFrameIndex(int readyFrameIndex) 
 	{
 		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
-		stateIndexMap.put(STATE_LABEL_READY, readyFrameIndex);
+		setLabel(STATE_LABEL_READY, readyFrameIndex);
 		return this;
 	}
 	
@@ -195,7 +195,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 */
 	public int getFireFrameIndex()
 	{
-		return stateIndexMap.get(STATE_LABEL_FIRE);
+		return getLabel(STATE_LABEL_FIRE);
 	}
 	
 	/**
@@ -206,7 +206,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setFireFrameIndex(int fireFrameIndex) 
 	{
 		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
-		stateIndexMap.put(STATE_LABEL_FIRE, fireFrameIndex);
+		setLabel(STATE_LABEL_FIRE, fireFrameIndex);
 		return this;
 	}
 	
@@ -215,7 +215,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 */
 	public int getFlashFrameIndex()
 	{
-		return stateIndexMap.get(STATE_LABEL_FLASH);
+		return getLabel(STATE_LABEL_FLASH);
 	}
 	
 	/**
@@ -226,7 +226,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setFlashFrameIndex(int flashFrameIndex) 
 	{
 		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
-		stateIndexMap.put(STATE_LABEL_FLASH, flashFrameIndex);
+		setLabel(STATE_LABEL_FLASH, flashFrameIndex);
 		return this;
 	}
 	
@@ -236,6 +236,19 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		return stateIndexMap;
 	}
 	
+	private int getLabel(String label)
+	{
+		return stateIndexMap.getOrDefault(label, 0);
+	}
+
+	private void setLabel(String label, int index)
+	{
+		if (index == 0)
+			stateIndexMap.remove(label);
+		else
+			stateIndexMap.put(label, index);
+	}
+
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -260,10 +273,13 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	{
 		if (ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append("\r\n");
+		
+		// These look backwards. They are not.
 		if (getRaiseFrameIndex() != weapon.getRaiseFrameIndex())
 			writer.append("Deselect frame = ").append(String.valueOf(getRaiseFrameIndex())).append("\r\n");
 		if (getLowerFrameIndex() != weapon.getLowerFrameIndex())
 			writer.append("Select frame = ").append(String.valueOf(getLowerFrameIndex())).append("\r\n");
+
 		if (getReadyFrameIndex() != weapon.getReadyFrameIndex())
 			writer.append("Bobbing frame = ").append(String.valueOf(getReadyFrameIndex())).append("\r\n");
 		if (getFireFrameIndex() != weapon.getFireFrameIndex())

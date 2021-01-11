@@ -32,7 +32,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int editorNumber;
 	
 	private int health;
-	private int speed;
+	private int speed; // written as fixed point 16.16 if PROJECTILE
 	private int radius; // written as fixed point 16.16
 	private int height; // written as fixed point 16.16
 	private int damage;
@@ -258,97 +258,97 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 
 	public int getSpawnFrameIndex()
 	{
-		return stateIndexMap.get(STATE_LABEL_SPAWN);
+		return getLabel(STATE_LABEL_SPAWN);
 	}
 
 	public DEHThing setSpawnFrameIndex(int spawnFrameIndex)
 	{
 		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
-		stateIndexMap.put(STATE_LABEL_SPAWN, spawnFrameIndex);
+		setLabel(STATE_LABEL_SPAWN, spawnFrameIndex);
 		return this;
 	}
 
 	public int getWalkFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_SEE);
+		return getLabel(STATE_LABEL_SEE);
 	}
 
 	public DEHThing setWalkFrameIndex(int walkFrameIndex) 
 	{
 		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
-		stateIndexMap.put(STATE_LABEL_SEE, walkFrameIndex);
+		setLabel(STATE_LABEL_SEE, walkFrameIndex);
 		return this;
 	}
 
 	public int getPainFrameIndex()
 	{
-		return stateIndexMap.get(STATE_LABEL_PAIN);
+		return getLabel(STATE_LABEL_PAIN);
 	}
 
 	public DEHThing setPainFrameIndex(int painFrameIndex) 
 	{
 		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
-		stateIndexMap.put(STATE_LABEL_PAIN, painFrameIndex);
+		setLabel(STATE_LABEL_PAIN, painFrameIndex);
 		return this;
 	}
 
 	public int getMeleeFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_MELEE);
+		return getLabel(STATE_LABEL_MELEE);
 	}
 
 	public DEHThing setMeleeFrameIndex(int meleeFrameIndex)
 	{
 		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
-		stateIndexMap.put(STATE_LABEL_MELEE, meleeFrameIndex);
+		setLabel(STATE_LABEL_MELEE, meleeFrameIndex);
 		return this;
 	}
 
 	public int getMissileFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_MISSILE);
+		return getLabel(STATE_LABEL_MISSILE);
 	}
 
 	public DEHThing setMissileFrameIndex(int missileFrameIndex) 
 	{
 		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
-		stateIndexMap.put(STATE_LABEL_MISSILE, missileFrameIndex);
+		setLabel(STATE_LABEL_MISSILE, missileFrameIndex);
 		return this;
 	}
 
 	public int getDeathFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_DEATH);
+		return getLabel(STATE_LABEL_DEATH);
 	}
 
 	public DEHThing setDeathFrameIndex(int deathFrameIndex) 
 	{
 		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
-		stateIndexMap.put(STATE_LABEL_DEATH, deathFrameIndex);
+		setLabel(STATE_LABEL_DEATH, deathFrameIndex);
 		return this;
 	}
 
 	public int getExtremeDeathFrameIndex() 
 	{
-		return stateIndexMap.get(STATE_LABEL_XDEATH);
+		return getLabel(STATE_LABEL_XDEATH);
 	}
 
 	public DEHThing setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
 		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
-		stateIndexMap.put(STATE_LABEL_XDEATH, extremeDeathFrameIndex);
+		setLabel(STATE_LABEL_XDEATH, extremeDeathFrameIndex);
 		return this;
 	}
 
 	public int getRaiseFrameIndex()
 	{
-		return stateIndexMap.get(STATE_LABEL_RAISE);
+		return getLabel(STATE_LABEL_RAISE);
 	}
 
 	public DEHThing setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
-		stateIndexMap.put(STATE_LABEL_RAISE, raiseFrameIndex);
+		setLabel(STATE_LABEL_RAISE, raiseFrameIndex);
 		return this;
 	}
 
@@ -358,6 +358,19 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return stateIndexMap;
 	}
 	
+	private int getLabel(String label)
+	{
+		return stateIndexMap.getOrDefault(label, 0);
+	}
+
+	private void setLabel(String label, int index)
+	{
+		if (index == 0)
+			stateIndexMap.remove(label);
+		else
+			stateIndexMap.put(label, index);
+	}
+
 	public int getSeeSoundPosition() 
 	{
 		return seeSoundPosition;

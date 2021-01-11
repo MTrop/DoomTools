@@ -1482,22 +1482,37 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			
 			DEHThing thing = context.getThing(index);
-			if ((labelName = matchIdentifier()) == null)
+			if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			{
 				addErrorMessage("Expected thing label name.");
 				return null;
 			}
+			
+			labelName = currentToken().getLexeme();
 
 			Integer stateIndex;
 			if ((stateIndex = thing.getStateIndexMap().get(labelName)) == null)
 			{
-				StringBuilder sb = new StringBuilder("Expected a valid thing state label for thing ");
-				sb.append(index).append(' ');
-				sb.append(Arrays.toString(thing.getStateIndexMap().keySet().toArray()));
-				sb.append(".");
+				Map<String, Integer> map = thing.getStateIndexMap();
+				StringBuilder sb;
+				if (map.isEmpty())
+				{
+					sb = new StringBuilder("Expected a valid thing state label for thing ");
+					sb.append(index);
+					sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+				}
+				else
+				{
+					sb = new StringBuilder("Expected a valid thing state label for thing ");
+					sb.append(index).append(": ");
+					sb.append(Arrays.toString(map.keySet().toArray()));
+					sb.append(".");
+				}
 				addErrorMessage(sb.toString());
 				return null;
 			}
+			
+			nextToken();
 			
 			return stateIndex;
 		}
@@ -1508,23 +1523,38 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			
 			DEHWeapon weapon = context.getWeapon(index);
-			if ((labelName = matchIdentifier()) == null)
+			if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			{
 				addErrorMessage("Expected weapon label name.");
 				return null;
 			}
+			
+			labelName = currentToken().getLexeme();
 
 			Integer stateIndex;
 			if ((stateIndex = weapon.getStateIndexMap().get(labelName)) == null)
 			{
-				StringBuilder sb = new StringBuilder("Expected a valid weapon state label for weapon ");
-				sb.append(index).append(' ');
-				sb.append(Arrays.toString(weapon.getStateIndexMap().keySet().toArray()));
-				sb.append(".");
+				Map<String, Integer> map = weapon.getStateIndexMap();
+				StringBuilder sb;
+				if (map.isEmpty())
+				{
+					sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+					sb.append(index);
+					sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+				}
+				else
+				{
+					sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+					sb.append(index).append(": ");
+					sb.append(Arrays.toString(map.keySet().toArray()));
+					sb.append(".");
+				}
 				addErrorMessage(sb.toString());
 				return null;
 			}
 			
+			nextToken();
+
 			return stateIndex;
 		}
 		else if ((labelName = matchIdentifier()) != null)
@@ -1536,7 +1566,12 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if ((value = labelMap.get(labelName)) == null)
 			{
-				addErrorMessage("Label \"%s\" is invalid or not declared.", labelName);
+				StringBuilder sb = new StringBuilder("Expected a valid state label for this object: ");
+				sb.append(Arrays.toString(labelMap.keySet().toArray()));
+				sb.append(".");
+				addErrorMessage(sb.toString());
+
+				addErrorMessage("Label \"%s\" is invalid or not declared at this moment: " + sb.toString(), labelName);
 				return null;				
 			}
 			
