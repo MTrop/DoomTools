@@ -20,6 +20,7 @@ import net.mtrop.doom.tools.common.Response;
 
 /**
  * The Wad Merge commands.
+ * TODO: Finish return docs.
  * @author Matthew Tropiano
  */
 public enum WadMergeCommand
@@ -51,6 +52,8 @@ public enum WadMergeCommand
 			out.println("    Buffers are best used for speed, but large merges will consume"); 
 			out.println("    lots of memory during merge."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
+			out.println("    Returns: OK if a symbol was created.");
+			out.println("             BAD_SYMBOL if the destination symbol already exists.");
 		}
 		
 		@Override
@@ -74,6 +77,8 @@ public enum WadMergeCommand
 			out.println("    See: CREATE for the in-memory version."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
 			out.println("    [path]: The file to create.");
+			out.println("    Returns: OK if creation successful and a symbol was created.");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
 		
 		@Override
@@ -102,6 +107,8 @@ public enum WadMergeCommand
 			out.println("    Clears an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is deleted and rebuilt."); 
 			out.println("    [symbol]: The symbol for the existing buffer to clear.");
+			out.println("    Returns: OK if successful.");
+			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
 		
 		@Override
@@ -126,6 +133,8 @@ public enum WadMergeCommand
 			out.println("    Discards an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is closed."); 
 			out.println("    [symbol]: The symbol for the existing buffer to discard.");
+			out.println("    Returns: OK if successful.");
+			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
 		
 		@Override
@@ -153,6 +162,8 @@ public enum WadMergeCommand
 			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
 			out.println("    [symbol]: The symbol to export.");
 			out.println("    [file]:   The file to create and export to.");
+			out.println("    Returns: OK if export successful.");
+			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
 		
 		@Override
@@ -173,7 +184,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s is not a WAD.\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -189,6 +200,10 @@ public enum WadMergeCommand
 			out.println("    into memory. The symbol must not already exist.");
 			out.println("    [symbol]: The buffer to create.");
 			out.println("    [file]:   The WAD file to read.");
+			out.println("    Returns: OK if successful.");
+			out.println("             BAD_FILE if the file does not exist or is a directory.");
+			out.println("             BAD_WAD if the file is not a WAD.");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
 		
 		@Override
@@ -202,7 +217,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not writeable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -220,6 +235,8 @@ public enum WadMergeCommand
 			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
 			out.println("    [symbol]: The symbol to export.");
 			out.println("    [file]:   The file to create and export to.");
+			out.println("    Returns: OK if export successful.");
+			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
 		
 		@Override
@@ -240,7 +257,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s is not a WAD.\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -254,6 +271,8 @@ public enum WadMergeCommand
 			out.println("VALID [symbol]"); 
 			out.println("    Asserts that a symbol is a valid buffer."); 
 			out.println("    [symbol]: The symbol to test.");
+			out.println("    Returns: OK if valid.");
+			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
 		
 		@Override
@@ -272,12 +291,20 @@ public enum WadMergeCommand
 			out.println("    Adds an empty entry to [symbol] called [name]."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
+			out.println("    Returns: OK if add successful."); 
+			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
-			return context.addMarker(scanner.next(), scanner.next());
+			String symbol = scanner.next();
+			try {
+				return context.addMarker(symbol, scanner.next());
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
 		}
 	},
 	
@@ -290,12 +317,20 @@ public enum WadMergeCommand
 			out.println("    Adds an entry to [symbol] called [name] with the current date."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
+			out.println("    Returns: OK if add successful."); 
+			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
-			return context.addDateMarker(scanner.next(), scanner.next());
+			String symbol = scanner.next();
+			try {
+				return context.addDateMarker(symbol, scanner.next());
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
 		}
 	},
 	
@@ -306,14 +341,20 @@ public enum WadMergeCommand
 		{
 			out.println("MERGE [dest-symbol] [src-symbol]");
 			out.println("    Adds all entries from [src-symbol] into [dest-symbol].");
-			out.println("    [dest-symbol]: Destination buffer symbol.");
-			out.println("    [src-symbol]:  Source buffer symbol.");
+			out.println("    [dest-symbol]: Destination symbol.");
+			out.println("    [src-symbol]:  Source symbol.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
-			return context.mergeBuffer(scanner.next(), scanner.next());
+			String symbol = scanner.next();
+			try {
+				return context.mergeBuffer(symbol, scanner.next());
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
 		}
 	},
 	
@@ -345,7 +386,70 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s is not a WAD.\n", wadFile);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", wadFile);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	MERGENAMESPACE
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("MERGENAMESPACE [dest-symbol] [src-symbol] [namespace]"); 
+			out.println("    Adds all entries from [src-symbol] into [dest-symbol] that");
+			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
+			out.println("    the START/END namespace markers.");
+			out.println("    [dest-symbol]: Destination symbol.");
+			out.println("    [src-symbol]:  Source symbol.");
+			out.println("    [namespace]:   Namespace name (e.g. FF, PP, TX).");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			try {
+				return context.mergeNamespace(scanner.next(), scanner.next(), scanner.next());
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	MERGENAMESPACEWAD
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("MERGENAMESPACEWAD [symbol] [path] [namespace]"); 
+			out.println("    Reads WAD entries from [path] into buffer [symbol] that");
+			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
+			out.println("    the START/END namespace markers.");
+			out.println("    [symbol]:    The symbol to add to.");
+			out.println("    [path]:      The WAD contents to add.");
+			out.println("    [namespace]: Namespace name (e.g. FF, PP, TX).");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, Scanner scanner)
+		{
+			String symbol = scanner.next();
+			String wadFile = scanner.next();
+			try {
+				return context.mergeNamespace(symbol, wadFile, scanner.next());
+			} catch (FileNotFoundException e) {
+				context.logf("ERROR: File %s not found.\n", wadFile);
+				return Response.BAD_FILE;
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s not readable (access denied).\n", wadFile);
+				return Response.BAD_FILE;
+			} catch (WadException e) {
+				context.logf("ERROR: File %s is not a WAD.\n", wadFile);
+				return Response.BAD_FILE;
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -383,7 +487,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -418,7 +522,7 @@ public enum WadMergeCommand
 			try {
 				return context.mergeMap(destSymbol, map2, srcSymbol, map1);
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", srcSymbol);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -462,7 +566,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s is not a WAD.\n", wadFile);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", wadFile);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -498,7 +602,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", directory);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", directory);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -530,7 +634,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -570,7 +674,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}
@@ -609,7 +713,7 @@ public enum WadMergeCommand
 				context.logf("ERROR: File %s not readable (access denied).\n", file);
 				return Response.BAD_FILE;
 			} catch (IOException e) {
-				context.logf("ERROR: File %s not readable.\n", file);
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
 			}
 		}

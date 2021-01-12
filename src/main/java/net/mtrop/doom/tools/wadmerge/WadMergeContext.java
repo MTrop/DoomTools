@@ -136,7 +136,8 @@ public class WadMergeContext
 	 * Creates a blank Wad buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to associate with the Wad.
-	 * @return OK if the buffer does not exist and it was created, BAD_SYMBOL otherwise.
+	 * @return OK if a symbol was created, 
+	 * 		or BAD_SYMBOL if the destination symbol already exists.
 	 */
 	public Response create(String symbol)
 	{
@@ -153,7 +154,8 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to associate with the Wad.
 	 * @param wadFile the file name for the WAD to initialize.
-	 * @return OK if the Wad does not exist and it was created, BAD_SYMBOL otherwise.
+	 * @return OK if creation successful and a symbol was created, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
 	 * @throws IOException if an error occurs attempting to create the file.
 	 */
 	public Response createFile(String symbol, File wadFile) throws IOException
@@ -162,7 +164,7 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 		
 		currentWads.put(symbol, WadFile.createWadFile(wadFile));
-		verbosef("Created buffer `%s`.\n", symbol);
+		verbosef("Created WAD file `%s` (at `%s`).\n", symbol, wadFile.getPath());
 		return Response.OK;
 	}
 
@@ -170,7 +172,8 @@ public class WadMergeContext
 	 * Checks if a symbol refers to a valid buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to check.
-	 * @return OK if the buffer exists, BAD_SYMBOL otherwise.
+	 * @return OK if valid, 
+	 * 		or BAD_SYMBOL if the symbol is invalid.
 	 */
 	public Response isValid(String symbol)
 	{
@@ -186,8 +189,9 @@ public class WadMergeContext
 	 * Clears an existing Wad buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to clear.
-	 * @return OK if the buffer exists and it was cleared, BAD_SYMBOL otherwise.
-	 * @throws IOException 
+	 * @return OK if successful, 
+	 * 		or BAD_SYMBOL if the symbol is invalid.
+	 * @throws IOException if the Wad could not be closed.
 	 */
 	public Response clear(String symbol) throws IOException
 	{
@@ -195,7 +199,7 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 		
 		Wad buffer = currentWads.remove(symbol);
-		verbosef("Cleared buffer `%s`.\n", symbol);
+		verbosef("Cleared `%s`.\n", symbol);
 		buffer.close();
 		if (buffer instanceof WadBuffer)
 			return create(symbol);
@@ -209,7 +213,8 @@ public class WadMergeContext
 	 * Discards an existing Wad buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to discard.
-	 * @return OK if the buffer exists and it was discarded, BAD_SYMBOL otherwise.
+	 * @return OK if successful, 
+	 * 		or BAD_SYMBOL if the symbol is invalid.
 	 * @throws IOException if the Wad could not be closed.
 	 */
 	public Response discard(String symbol) throws IOException
@@ -218,7 +223,7 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 
 		currentWads.remove(symbol).close();
-		verbosef("Discarded buffer `%s`.\n", symbol);
+		verbosef("Discarded `%s`.\n", symbol);
 		return Response.OK;
 	}
 
@@ -227,7 +232,10 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to merge into.
 	 * @param wadFile the file to read from.
-	 * @return OK if the file was found and contents were merged in, or BAD_SYMBOL if the symbol is invalid. 
+	 * @return OK if successful, 
+	 * 		or BAD_FILE if the file does not exist or is a directory, 
+	 * 		or BAD_WAD if the file is not a WAD, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
@@ -252,7 +260,8 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
+	 * @return OK if export successful, 
+	 * 		or BAD_SYMBOL if the symbol is invalid.
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response save(String symbol, File outFile) throws IOException
@@ -284,7 +293,8 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param outFile the file to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid. 
+	 * @return OK if export successful, 
+	 * 		or BAD_SYMBOL if the symbol is invalid.
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response finish(String symbol, File outFile) throws IOException
@@ -300,22 +310,19 @@ public class WadMergeContext
 	 * Symbol is case-insensitive. The entry is coerced to a valid name.
 	 * @param symbol the symbol to use.
 	 * @param name the entry name.
-	 * @return OK if the buffer exists and was added to, false otherwise.
+	 * @return OK if add successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public Response addMarker(String symbol, String name)
+	public Response addMarker(String symbol, String name) throws IOException
 	{
 		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
-		try {
-			String marker = NameUtils.toValidEntryName(name);
-			buffer.addMarker(marker);
-			verbosef("Added marker `%s` to buffer `%s`.\n", marker, symbol);
-		} catch (IOException e) {
-			// Shouldn't happen.
-			return Response.UNEXPECTED_ERROR;
-		}
+		String marker = NameUtils.toValidEntryName(name);
+		buffer.addMarker(marker);
+		verbosef("Added marker `%s` to buffer `%s`.\n", marker, symbol);
 		return Response.OK;
 	}
 
@@ -324,22 +331,19 @@ public class WadMergeContext
 	 * Symbol is case-insensitive. The entry is coerced to a valid name.
 	 * @param symbol the symbol to use.
 	 * @param name the entry name.
-	 * @return OK if the buffer exists and was added to, BAD_SYMBOL otherwise.
+	 * @return OK if add successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public Response addDateMarker(String symbol, String name)
+	public Response addDateMarker(String symbol, String name) throws IOException
 	{
 		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
-		try {
-			String marker = NameUtils.toValidEntryName(name);
-			buffer.addData(marker, DATE_FORMAT.get().format(new Date()).getBytes(Charset.forName("ASCII")));
-			verbosef("Added date marker `%s` to buffer `%s`.\n", marker, symbol);
-		} catch (IOException e) {
-			// Shouldn't happen.
-			return Response.UNEXPECTED_ERROR;
-		}
+		String marker = NameUtils.toValidEntryName(name);
+		buffer.addData(marker, DATE_FORMAT.get().format(new Date()).getBytes(Charset.forName("ASCII")));
+		verbosef("Added date marker `%s` to buffer `%s`.\n", marker, symbol);
 		return Response.OK;
 	}
 
@@ -348,43 +352,41 @@ public class WadMergeContext
 	 * The symbols are case-insensitive.
 	 * @param destinationSymbol the destination buffer.
 	 * @param sourceSymbol the source buffer.
-	 * @return OK if both buffers exist and the merge worked, BAD_SYMBOL / BAD_SOURCE_SYMBOL otherwise.
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid,
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid.
+	 * @throws IOException if an I/O error occurs.
 	 */
-	public Response mergeBuffer(String destinationSymbol, String sourceSymbol)
+	public Response mergeBuffer(String destinationSymbol, String sourceSymbol) throws IOException
 	{
-		destinationSymbol = destinationSymbol.toLowerCase();
 		Wad bufferDest;
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
 			return Response.BAD_SYMBOL;
 		
-		sourceSymbol = sourceSymbol.toLowerCase();
 		Wad bufferSource;
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 
-		try 
+		destinationSymbol = destinationSymbol.toLowerCase();
+		sourceSymbol = sourceSymbol.toLowerCase();
+		for (WadEntry e : bufferSource)
 		{
-			for (WadEntry e : bufferSource)
-			{
-				bufferDest.addData(e.getName(), bufferSource.getData(e));
-				verbosef("Added entry `%s` to buffer `%s` (from `%s`).\n", e.getName(), destinationSymbol, sourceSymbol);
-			}
-		} 
-		catch (IOException e) 
-		{
-			// Shouldn't happen.
-			return Response.UNEXPECTED_ERROR;
+			bufferDest.addData(e.getName(), bufferSource.getData(e));
+			verbosef("Added entry `%s` to buffer `%s` (from `%s`).\n", e.getName(), destinationSymbol, sourceSymbol);
 		}
 		
 		return Response.OK;
 	}
 	
 	/**
-	 * Merges the contents of a Wad into a buffer.
+	 * Merges the contents of a Wad file into a buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to merge into.
 	 * @param wadFile the file to read from.
-	 * @return OK if the file was found and contents were merged in, false otherwise. 
+	 * @return OK if merge successful, 
+	 * 		or BAD_FILE if the file does not exist or is a directory, 
+	 * 		or BAD_WAD if the file is not a WAD, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
 	 * @throws IOException if the file could not be read.
 	 */
 	public Response mergeWad(String symbol, File wadFile) throws IOException
@@ -399,59 +401,96 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 		
-		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
-		
 		try (WadFile wad = new WadFile(wadFile))
 		{
 			verbosef("Reading WAD `%s`...\n", wadFile.getPath());
-			for (WadEntry e : wad)
-			{
-				if (adder != null)
-					adder.addData(e.getName(), wad.getData(e));
-				else
-					buffer.addData(e.getName(), wad.getData(e));
-				verbosef("Added entry `%s` to buffer `%s`.\n", e.getName(), symbol);
-			}
+			Response out = mergeBulkData(buffer, symbol, wad, wadFile.getPath(), wad.getAllEntries());
 			verbosef("Done reading `%s`.\n", wadFile.getPath());
-		} finally {
-			Common.close(adder);
-		}
-		
-		return Response.OK;
+			return out;
+		}		
 	}
 
-	// Merge map into buffer, with rename.
-	private static Response mergeMap(Wad buffer, String bufferName, String newHeader, Wad source, String header) throws IOException
+	/**
+	 * Merges a Wad buffer into another, but just a source namespace from another WAD.
+	 * The symbols are case-insensitive.
+	 * @param destinationSymbol the destination buffer.
+	 * @param wadFile the source WAD file.
+	 * @param namespace the target namespace.
+	 * @return OK if merge successful, 
+	 * 		or BAD_FILE if the file does not exist or is a directory, 
+	 * 		or BAD_WAD if the file is not a WAD, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
+	 * 		or BAD_NAMESPACE if the namespace could not be found or is incomplete.
+	 * 		or BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
+	 * @throws IOException if the source could not be read.
+	 */
+	public Response mergeNamespace(String destinationSymbol, File wadFile, String namespace) throws IOException
 	{
-		WadEntry[] entries = MapUtils.getMapEntries(source, header);
-		if (entries.length == 0)
-			return Response.BAD_MAP;
+		if (!wadFile.exists() || wadFile.isDirectory())
+			return Response.BAD_FILE;
+
+		if (!Wad.isWAD(wadFile))
+			return Response.BAD_WAD;
+
+		Wad bufferDest;
+		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
+			return Response.BAD_SYMBOL;
 		
-		for (WadEntry e : entries)
+		try (WadFile wad = new WadFile(wadFile))
 		{
-			String outname;
-			if ((outname = e.getName()).equalsIgnoreCase(header))
-				outname = NameUtils.toValidEntryName(newHeader);
-			buffer.addData(outname, source.getData(e));
+			int startIndex;
+			if ((startIndex = wad.indexOf(namespace + "_START")) < 0)
+				return Response.BAD_NAMESPACE;
+
+			int endIndex;
+			if ((endIndex = wad.indexOf(namespace + "_END")) < 0)
+				return Response.BAD_NAMESPACE;
+			
+			if (endIndex < startIndex)
+				return Response.BAD_NAMESPACE_RANGE;
+
+			int len = (endIndex - 1) - startIndex; 
+			return mergeBulkData(bufferDest, destinationSymbol, wad, wadFile.getPath(), wad.mapEntries(startIndex + 1, len));
 		}
-		
-		return Response.OK;
-	}
-	
-	private Response mergeFileData(String symbol, File inFile, String entryName, Wad buffer) throws IOException
-	{
-		entryName = NameUtils.toValidEntryName(entryName);
-		buffer.addData(entryName, inFile);
-		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
-		return Response.OK;
 	}
 
-	private Response mergeFileData(String symbol, File inFile, String entryName, WadFile.Adder adder) throws IOException
+	/**
+	 * Merges a Wad buffer into another, but just a source namespace from another WAD.
+	 * The symbols are case-insensitive.
+	 * @param destinationSymbol the destination buffer.
+	 * @param sourceSymbol the source buffer.
+	 * @param namespace the target namespace.
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
+	 * 		or BAD_NAMESPACE if the namespace could not be found or is incomplete.
+	 * 		or BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
+	 * @throws IOException if the source could not be read.
+	 */
+	public Response mergeNamespace(String destinationSymbol, String sourceSymbol, String namespace) throws IOException
 	{
-		entryName = NameUtils.toValidEntryName(entryName);
-		adder.addData(entryName, inFile);
-		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, symbol, inFile.getPath());
-		return Response.OK;
+		Wad bufferDest;
+		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
+			return Response.BAD_SYMBOL;
+		
+		Wad bufferSource;
+		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
+			return Response.BAD_SOURCE_SYMBOL;
+
+		int startIndex;
+		if ((startIndex = bufferSource.indexOf(namespace + "_START")) < 0)
+			return Response.BAD_NAMESPACE;
+
+		int endIndex;
+		if ((endIndex = bufferSource.indexOf(namespace + "_END")) < 0)
+			return Response.BAD_NAMESPACE;
+		
+		if (endIndex < startIndex)
+			return Response.BAD_NAMESPACE_RANGE;
+
+		int len = (endIndex - 1) - startIndex; 
+		return mergeBulkData(bufferDest, destinationSymbol, bufferSource, sourceSymbol, bufferSource.mapEntries(startIndex + 1, len));
 	}
 
 	/**
@@ -461,7 +500,10 @@ public class WadMergeContext
 	 * @param newHeader the new header name.
 	 * @param wadFile the file to read from.
 	 * @param header the map header.
-	 * @return OK if the file was found and contents were merged in, BAD_SYMBOL otherwise. 
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid,
+	 * 		or BAD_FILE if the file does not exist or is a directory,
+	 * 		or BAD_MAP if the map entries are malformed. 
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
@@ -476,7 +518,7 @@ public class WadMergeContext
 		
 		try (WadFile wad = new WadFile(wadFile))
 		{
-			Response out = mergeMap(buffer, symbol, newHeader, wad, header);
+			Response out = mergeMap(buffer, symbol, newHeader, wad, wadFile.getPath(), header);
 			verbosef("Added map `%s` to `%s` as `%s` (from `%s`).\n", header, symbol, newHeader, wadFile.getPath());
 			return out;
 		}		
@@ -489,7 +531,10 @@ public class WadMergeContext
 	 * @param newHeader the new header name.
 	 * @param sourceSymbol the buffer to read from.
 	 * @param header the map header.
-	 * @return OK if the file was found and contents were merged in, false otherwise. 
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid,
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
+	 * 		or BAD_MAP if the map entries are malformed. 
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
@@ -505,7 +550,7 @@ public class WadMergeContext
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 		
-		Response out = mergeMap(bufferDest, destinationSymbol, newHeader, bufferSource, header);
+		Response out = mergeMap(bufferDest, destinationSymbol, newHeader, bufferSource, sourceSymbol, header);
 		verbosef("Added map `%s` to `%s` as `%s` (from `%s`).\n", header, destinationSymbol, newHeader, sourceSymbol);
 		return out;
 	}
@@ -516,7 +561,9 @@ public class WadMergeContext
 	 * @param symbol the buffer to merge into.
 	 * @param inFile the file to read.
 	 * @param entryName the name of the entry to write as (coerced to a valid name).
-	 * @return OK if the file was found and contents were merged in, false otherwise. 
+	 * @return OK if the was written, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
+	 * 		or BAD_FILE if the provided file does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
 	 */
@@ -529,7 +576,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		return mergeFileData(symbol, inFile, entryName, buffer);
+		return mergeFileData(buffer, symbol, inFile, entryName);
 	}
 
 	/**
@@ -539,7 +586,9 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write.
 	 * @param inDirectory the directory to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid, or BAD_DIRECTORY if the provided file is not a directory. 
+	 * @return OK if the was written, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
+	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response mergeDirectory(String symbol, File inDirectory) throws IOException
@@ -577,7 +626,7 @@ public class WadMergeContext
 				{
 					if (adder == null)
 						adder = ((WadFile)buffer).createAdder();
-					if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+					if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
 						return resp; 
 				}
 				else
@@ -600,7 +649,9 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param inDirectory the directory to read from.
-	 * @return OK if the file was written, or BAD_SYMBOL if the symbol is invalid, or BAD_DIRECTORY if the provided file is not a directory. 
+	 * @return OK if the was written, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
+	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response mergeTree(String symbol, File inDirectory) throws IOException
@@ -650,7 +701,7 @@ public class WadMergeContext
 				{
 					if (adder == null)
 						adder = ((WadFile)buffer).createAdder();
-					if ((resp = mergeFileData(symbol, f, Common.getFileNameWithoutExtension(f), adder)) != Response.OK)
+					if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
 						return resp; 
 				}
 				else
@@ -676,9 +727,9 @@ public class WadMergeContext
 	 * @param strife if true, will read and export in Strife format, false for Doom format. 
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
-	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_PARSE if the file is incorrect,
-	 * 		or BAD_FILE if it does not exist or is a directory.
+	 * 		or BAD_FILE if the file does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
 	 */
 	@SuppressWarnings("unchecked")
@@ -746,7 +797,7 @@ public class WadMergeContext
 	 * @param textureDirectory the texture file to parse.
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
-	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be read.
 	 */
@@ -784,12 +835,12 @@ public class WadMergeContext
 					String namenoext = Common.getFileNameWithoutExtension(f);
 					if (adder != null)
 					{
-						if ((resp = mergeFileData(symbol, f, namenoext, adder)) != Response.OK)
+						if ((resp = mergeFileData(adder, symbol, f, namenoext)) != Response.OK)
 							return resp;
 					}
 					else
 					{
-						if ((resp = mergeFileData(symbol, f, namenoext, buffer)) != Response.OK)
+						if ((resp = mergeFileData(buffer, symbol, f, namenoext)) != Response.OK)
 							return resp;
 					}
 					String textureName = NameUtils.toValidTextureName(namenoext);
@@ -824,7 +875,7 @@ public class WadMergeContext
 	 * @param symbol the buffer to write to.
 	 * @param swantblsFile the texture file to parse.
 	 * @return OK if the file was found and contents were merged in, 
-	 * 		or BAD_SYMBOL if the symbol is invalid, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be read.
 	 */
@@ -858,6 +909,54 @@ public class WadMergeContext
 			logln("ERROR: "+ swantblsFile + ", " + e.getMessage());
 			return Response.BAD_PARSE;
 		}
+	}
+
+	// Merge map into buffer, with rename.
+	private Response mergeMap(Wad targetBuffer, String bufferName, String newHeader, Wad source, String sourceName, String header) throws IOException
+	{
+		int count = MapUtils.getMapEntryCount(source, header);
+		WadEntry[] entries = source.mapEntries(source.indexOf(header) + 1, count - 1);
+		if (entries.length == 0)
+			return Response.BAD_MAP;
+		
+		targetBuffer.addData(newHeader, source.getData(header));
+		mergeBulkData(targetBuffer, bufferName, source, sourceName, entries);
+		return Response.OK;
+	}
+
+	private Response mergeBulkData(Wad targetWad, String targetSymbol, Wad sourceWad, String sourceName, WadEntry[] entries) throws IOException
+	{
+		WadFile.Adder adder = (targetWad instanceof WadFile) ? ((WadFile)targetWad).createAdder() : null;
+
+		try {
+			for (WadEntry e : entries)
+			{
+				if (adder != null)
+					adder.addData(e.getName(), sourceWad.getData(e));
+				else
+					targetWad.addData(e.getName(), sourceWad.getData(e));
+				verbosef("Added `%s` to `%s` (from `%s`).\n", e.getName(), targetSymbol, sourceName);
+			}
+		} finally {
+			Common.close(adder);
+		}
+		return Response.OK;
+	}
+
+	private Response mergeFileData(Wad targetWad, String targetSymbol, File inFile, String entryName) throws IOException
+	{
+		entryName = NameUtils.toValidEntryName(entryName);
+		targetWad.addData(entryName, inFile);
+		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, targetSymbol, inFile.getPath());
+		return Response.OK;
+	}
+
+	private Response mergeFileData(WadFile.Adder targetAdder, String targetSymbol, File inFile, String entryName) throws IOException
+	{
+		entryName = NameUtils.toValidEntryName(entryName);
+		targetAdder.addData(entryName, inFile);
+		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, targetSymbol, inFile.getPath());
+		return Response.OK;
 	}
 	
 }
