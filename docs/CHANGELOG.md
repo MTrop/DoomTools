@@ -48,7 +48,7 @@ WadMerge
 ### Changed for 1.3.0
 
 * `Fixed` Some performance improvements and verbose output performance.
-* `Added` MERGENAMESPACE[WAD] command for merging/importing entry namespaces.
+* `Added` MERGENAMESPACE[FILE] command for merging/importing entry namespaces.
 
 
 ### Changed for 1.2.0
