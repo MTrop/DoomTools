@@ -357,7 +357,7 @@ public class WadMergeContext
 	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public Response mergeBuffer(String destinationSymbol, String sourceSymbol) throws IOException
+	public Response merge(String destinationSymbol, String sourceSymbol) throws IOException
 	{
 		Wad bufferDest;
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
@@ -503,6 +503,7 @@ public class WadMergeContext
 	 * @return OK if merge successful, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid,
 	 * 		or BAD_FILE if the file does not exist or is a directory,
+	 * 		or BAD_WAD if the file is not a WAD, 
 	 * 		or BAD_MAP if the map entries are malformed. 
 	 * @throws IOException if the file could not be read.
 	 * @throws WadException if the file is not a Wad file.
@@ -511,6 +512,9 @@ public class WadMergeContext
 	{
 		if (!wadFile.exists() || wadFile.isDirectory())
 			return Response.BAD_FILE;
+
+		if (!Wad.isWAD(wadFile))
+			return Response.BAD_WAD;
 
 		Wad buffer;
 		if ((buffer = currentWads.get(symbol)) == null)
@@ -536,9 +540,8 @@ public class WadMergeContext
 	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
 	 * 		or BAD_MAP if the map entries are malformed. 
 	 * @throws IOException if the file could not be read.
-	 * @throws WadException if the file is not a Wad file.
 	 */
-	public Response mergeMap(String destinationSymbol, String newHeader, String sourceSymbol, String header) throws IOException, WadException
+	public Response mergeMap(String destinationSymbol, String newHeader, String sourceSymbol, String header) throws IOException
 	{
 		destinationSymbol = destinationSymbol.toLowerCase();
 		Wad bufferDest;
@@ -565,9 +568,8 @@ public class WadMergeContext
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_FILE if the provided file does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
-	 * @throws WadException if the file is not a Wad file.
 	 */
-	public Response mergeFile(String symbol, File inFile, String entryName) throws IOException, WadException
+	public Response mergeFile(String symbol, File inFile, String entryName) throws IOException
 	{
 		if (!inFile.exists() || inFile.isDirectory())
 			return Response.BAD_FILE;
@@ -577,68 +579,6 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 
 		return mergeFileData(buffer, symbol, inFile, entryName);
-	}
-
-	/**
-	 * Iterates through a directory, adding each file's data into the buffer, 
-	 * and if that file is a valid WAD file, it's entries and data are added.
-	 * If it encounters a directory, it is skipped.
-	 * Symbol is case-insensitive.
-	 * @param symbol the buffer to write.
-	 * @param inDirectory the directory to read from.
-	 * @return OK if the was written, 
-	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
-	 * 		or BAD_DIRECTORY if the provided file is not a directory.
-	 * @throws IOException if the file could not be written.
-	 */
-	public Response mergeDirectory(String symbol, File inDirectory) throws IOException
-	{
-		if (!inDirectory.exists() || !inDirectory.isDirectory())
-			return Response.BAD_DIRECTORY;
-
-		Wad buffer;
-		if ((buffer = currentWads.get(symbol)) == null)
-			return Response.BAD_SYMBOL;
-
-		File[] files;
-		
-		// Sort files first, directories last, alphabetical order.
-		Arrays.sort(files = inDirectory.listFiles(), DIR_FILESORT);
-		
-		WadFile.Adder adder = null;
-		try {
-			for (File f : files)
-			{
-				Response resp;
-				if (f.isDirectory())
-					continue;
-				else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
-				{
-					if (adder != null)
-					{
-						adder.close();
-						adder = null;
-					}
-					if ((resp = mergeWad(symbol, f)) != Response.OK)
-						return resp; 
-				}
-				else if (buffer instanceof WadFile)
-				{
-					if (adder == null)
-						adder = ((WadFile)buffer).createAdder();
-					if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-						return resp; 
-				}
-				else
-				{
-					if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-						return resp; 
-				}
-			}
-		} finally {
-			Common.close(adder);
-		}
-		return Response.OK;
 	}
 
 	/**
@@ -728,7 +668,7 @@ public class WadMergeContext
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
-	 * 		or BAD_PARSE if the file is incorrect,
+	 * 		or BAD_PARSE if the input file had a parse error,
 	 * 		or BAD_FILE if the file does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
 	 */
@@ -877,6 +817,7 @@ public class WadMergeContext
 	 * @return OK if the file was found and contents were merged in, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
+	 * 		or BAD_PARSE if the input file had a parse error.
 	 * @throws IOException if the file could not be read.
 	 */
 	public Response mergeSwitchAnimatedTables(String symbol, File swantblsFile) throws IOException

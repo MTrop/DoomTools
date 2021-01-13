@@ -52,6 +52,7 @@ public enum WadMergeCommand
 			out.println("    Buffers are best used for speed, but large merges will consume"); 
 			out.println("    lots of memory during merge."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
+			out.println("    ................................");
 			out.println("    Returns: OK if a symbol was created.");
 			out.println("             BAD_SYMBOL if the destination symbol already exists.");
 		}
@@ -77,6 +78,7 @@ public enum WadMergeCommand
 			out.println("    See: CREATE for the in-memory version."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
 			out.println("    [path]: The file to create.");
+			out.println("    ................................");
 			out.println("    Returns: OK if creation successful and a symbol was created.");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
@@ -107,6 +109,7 @@ public enum WadMergeCommand
 			out.println("    Clears an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is deleted and rebuilt."); 
 			out.println("    [symbol]: The symbol for the existing buffer to clear.");
+			out.println("    ................................");
 			out.println("    Returns: OK if successful.");
 			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
@@ -133,6 +136,7 @@ public enum WadMergeCommand
 			out.println("    Discards an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is closed."); 
 			out.println("    [symbol]: The symbol for the existing buffer to discard.");
+			out.println("    ................................");
 			out.println("    Returns: OK if successful.");
 			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
@@ -162,6 +166,7 @@ public enum WadMergeCommand
 			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
 			out.println("    [symbol]: The symbol to export.");
 			out.println("    [file]:   The file to create and export to.");
+			out.println("    ................................");
 			out.println("    Returns: OK if export successful.");
 			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
@@ -200,6 +205,7 @@ public enum WadMergeCommand
 			out.println("    into memory. The symbol must not already exist.");
 			out.println("    [symbol]: The buffer to create.");
 			out.println("    [file]:   The WAD file to read.");
+			out.println("    ................................");
 			out.println("    Returns: OK if successful.");
 			out.println("             BAD_FILE if the file does not exist or is a directory.");
 			out.println("             BAD_WAD if the file is not a WAD.");
@@ -235,6 +241,7 @@ public enum WadMergeCommand
 			out.println("    WARNING: If the target file already exists, it is OVERWRITTEN!"); 
 			out.println("    [symbol]: The symbol to export.");
 			out.println("    [file]:   The file to create and export to.");
+			out.println("    ................................");
 			out.println("    Returns: OK if export successful.");
 			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
@@ -271,6 +278,7 @@ public enum WadMergeCommand
 			out.println("VALID [symbol]"); 
 			out.println("    Asserts that a symbol is a valid buffer."); 
 			out.println("    [symbol]: The symbol to test.");
+			out.println("    ................................");
 			out.println("    Returns: OK if valid.");
 			out.println("             BAD_SYMBOL if the symbol is invalid.");
 		}
@@ -291,6 +299,7 @@ public enum WadMergeCommand
 			out.println("    Adds an empty entry to [symbol] called [name]."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
+			out.println("    ................................");
 			out.println("    Returns: OK if add successful."); 
 			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
@@ -317,6 +326,7 @@ public enum WadMergeCommand
 			out.println("    Adds an entry to [symbol] called [name] with the current date."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
+			out.println("    ................................");
 			out.println("    Returns: OK if add successful."); 
 			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
@@ -343,6 +353,10 @@ public enum WadMergeCommand
 			out.println("    Adds all entries from [src-symbol] into [dest-symbol].");
 			out.println("    [dest-symbol]: Destination symbol.");
 			out.println("    [src-symbol]:  Source symbol.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid.");
 		}
 		
 		@Override
@@ -350,7 +364,7 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.next();
 			try {
-				return context.mergeBuffer(symbol, scanner.next());
+				return context.merge(symbol, scanner.next());
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -367,6 +381,11 @@ public enum WadMergeCommand
 			out.println("    Reads WAD entries from [path] into buffer [symbol].");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The WAD contents to add.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_FILE if the file does not exist or is a directory,"); 
+			out.println("             BAD_WAD if the file is not a WAD,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
 		}
 		
 		@Override
@@ -404,6 +423,12 @@ public enum WadMergeCommand
 			out.println("    [dest-symbol]: Destination symbol.");
 			out.println("    [src-symbol]:  Source symbol.");
 			out.println("    [namespace]:   Namespace name (e.g. FF, PP, TX).");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
+			out.println("             BAD_NAMESPACE if the namespace could not be found or is incomplete.");
+			out.println("             BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.");
 		}
 		
 		@Override
@@ -418,7 +443,7 @@ public enum WadMergeCommand
 		}
 	},
 	
-	MERGENAMESPACEWAD
+	MERGENAMESPACEFILE
 	{
 		@Override
 		public void help(PrintStream out)
@@ -430,13 +455,21 @@ public enum WadMergeCommand
 			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [path]:      The WAD contents to add.");
 			out.println("    [namespace]: Namespace name (e.g. FF, PP, TX).");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_FILE if the file does not exist or is a directory,"); 
+			out.println("             BAD_WAD if the file is not a WAD,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
+			out.println("             BAD_NAMESPACE if the namespace could not be found or is incomplete.");
+			out.println("             BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.");
 		}
 		
 		@Override
 		public Response execute(WadMergeContext context, Scanner scanner)
 		{
 			String symbol = scanner.next();
-			String wadFile = scanner.next();
+			File wadFile = new File(scanner.next());
 			try {
 				return context.mergeNamespace(symbol, wadFile, scanner.next());
 			} catch (FileNotFoundException e) {
@@ -466,6 +499,10 @@ public enum WadMergeCommand
 			out.println("    [path]:      The file to add.");
 			out.println("    [entryname]: (Optional) If specified, this is the entry name to use");
 			out.println("                 to import as.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
+			out.println("             BAD_FILE if the provided file does not exist or is a directory.");
 		}
 		
 		@Override
@@ -506,6 +543,11 @@ public enum WadMergeCommand
 			out.println("    [sourcemap]:   (Optional) If specified, this is map to read");
 			out.println("                   from the source symbol, and the target is the");
 			out.println("                   new header name. If not, [targetmap] is read.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
+			out.println("             BAD_MAP if the map entries are malformed.");
 		}
 		
 		@Override
@@ -541,6 +583,12 @@ public enum WadMergeCommand
 			out.println("    [sourcemap]: (Optional) If specified, this is map to read");
 			out.println("                 from the source WAD, and the target is the");
 			out.println("                 new header name. If not, [targetmap] is read.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_FILE if the file does not exist or is a directory,");
+			out.println("             BAD_WAD if the file is not a WAD,");
+			out.println("             BAD_MAP if the map entries are malformed.");
 		}
 		
 		@Override
@@ -578,14 +626,22 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println("MERGEDIR [symbol] [path]");
+			out.println("    Adds a directory and its subdirectories recursively (files first, then");
+			out.println("    directory contents, per directory).");
 		    out.println("    For each FILE in [path],"); 
-		    out.println("        If FILE is DIR,");
+		    out.println("        If FILE is a directory,");
 		    out.println("            MARKER [symbol] \\[FILE]");
 		    out.println("            MERGEDIR [symbol] [FILE]");
+		    out.println("        Else if file is a WAD,");
+		    out.println("            MERGEWAD [symbol] [FILE]");
 		    out.println("        Else,");
 		    out.println("            MERGEFILE [symbol] [FILE]");
 			out.println("    [symbol]: The buffer to add to.");
 			out.println("    [path]:   The source directory to scan.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
+			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
 		}
 		
 		@Override
@@ -618,6 +674,11 @@ public enum WadMergeCommand
 			out.println("    entries in [symbol]: ANIMATED and SWITCHES.");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
+			out.println("    ................................");
+			out.println("    Returns: OK if the file was found and contents were merged in,"); 
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_DIRECTORY if the provided file is not a directory,");
+			out.println("             BAD_PARSE if the input file had a parse error.");
 		}
 		
 		@Override
@@ -652,6 +713,11 @@ public enum WadMergeCommand
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  (Optional) If specified, the name of the entry to write.");
+			out.println("    ................................");
+			out.println("    Returns: OK if the file was found and contents were merged in,"); 
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_PARSE if the input file had a parse error,");
+			out.println("             BAD_FILE if the file does not exist or is a directory.");
 		}
 		
 		@Override
@@ -695,6 +761,10 @@ public enum WadMergeCommand
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  The name of the texture entry to write.");
+			out.println("    ................................");
+			out.println("    Returns: OK if the file was found and contents were merged in,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
+			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
 		}
 		
 		@Override

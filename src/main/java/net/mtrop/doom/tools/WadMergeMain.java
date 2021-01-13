@@ -10,11 +10,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
 
@@ -30,6 +32,7 @@ public final class WadMergeMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_INPUT_FILE = 1;
 	private static final int ERROR_BAD_SCRIPT = 2;
+	private static final int ERROR_BAD_OPTIONS = 3;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -45,7 +48,7 @@ public final class WadMergeMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
-		private BufferedReader stdin;
+		private InputStream stdin;
 		
 		private boolean help;
 		private boolean version;
@@ -136,7 +139,7 @@ public final class WadMergeMain
 			if (options.useSTDIN)
 			{
 				streamName = "STDIN";
-				reader = options.stdin;
+				reader = new BufferedReader(new InputStreamReader(options.stdin));
 			}
 			else
 			{
@@ -184,8 +187,9 @@ public final class WadMergeMain
 	 * @param in the standard input buffered reader.
 	 * @param args the argument args.
 	 * @return the parsed options.
+	 * @throws OptionParseException if a parse exception occurs.
 	 */
-	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String ... args)
+	public static Options options(PrintStream out, PrintStream err, InputStream in, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
@@ -225,7 +229,21 @@ public final class WadMergeMain
 	
 	public static void main(String[] args)
 	{
-		System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+		try {
+			Options options = options(System.out, System.err, System.in, args);
+			int status = call(options);
+			if (status == ERROR_BAD_INPUT_FILE && args.length == 0)
+			{
+				splash(System.out);
+				usage(System.out);
+				System.exit(-1);
+				return;
+			}
+			System.exit(status);
+		} catch (OptionParseException e) {
+			System.err.println(e.getMessage());
+			System.exit(ERROR_BAD_OPTIONS);
+		}
 	}
 
 	/**
