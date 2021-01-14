@@ -10,17 +10,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.util.TreeMap;
 
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
+import net.mtrop.doom.tools.struct.TokenScanner;
+import net.mtrop.doom.tools.struct.TokenScanner.ParseException;
 
 /**
  * The Wad Merge commands.
- * TODO: Finish return docs.
  * @author Matthew Tropiano
  */
 public enum WadMergeCommand
@@ -35,7 +36,7 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
 			// Kills the script.
 			return null;
@@ -58,9 +59,9 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			return context.create(scanner.next());
+			return context.create(scanner.nextString());
 		}
 	},
 	
@@ -84,10 +85,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String path = scanner.next();
+			String symbol = scanner.nextString();
+			String path = scanner.nextString();
 			try {
 				return context.createFile(symbol, new File(path));
 			} catch (IOException e) {
@@ -115,9 +116,9 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
+			String symbol = scanner.nextString();
 			try {
 				return context.clear(symbol);
 			} catch (IOException e) {
@@ -142,9 +143,9 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
+			String symbol = scanner.nextString();
 			try {
 				return context.discard(symbol);
 			} catch (IOException e) {
@@ -172,10 +173,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
 			
 			try {
 				return context.save(symbol, new File(file));
@@ -213,10 +214,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
 			try {
 				return context.load(symbol, new File(file));
 			} catch (SecurityException e) {
@@ -247,10 +248,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
 			
 			try {
 				return context.finish(symbol, new File(file));
@@ -284,9 +285,9 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			return context.isValid(scanner.next());
+			return context.isValid(scanner.nextString());
 		}
 	},
 	
@@ -305,11 +306,11 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
+			String symbol = scanner.nextString();
 			try {
-				return context.addMarker(symbol, scanner.next());
+				return context.addMarker(symbol, scanner.nextString());
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -332,11 +333,11 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
+			String symbol = scanner.nextString();
 			try {
-				return context.addDateMarker(symbol, scanner.next());
+				return context.addDateMarker(symbol, scanner.nextString());
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -360,11 +361,11 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
+			String symbol = scanner.nextString();
 			try {
-				return context.merge(symbol, scanner.next());
+				return context.merge(symbol, scanner.nextString());
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -389,10 +390,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String wadFile = scanner.next();
+			String symbol = scanner.nextString();
+			String wadFile = scanner.nextString();
 			try {
 				return context.mergeWad(symbol, new File(wadFile));
 			} catch (FileNotFoundException e) {
@@ -432,10 +433,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
 			try {
-				return context.mergeNamespace(scanner.next(), scanner.next(), scanner.next());
+				return context.mergeNamespace(scanner.nextString(), scanner.nextString(), scanner.nextString());
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -466,12 +467,12 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			File wadFile = new File(scanner.next());
+			String symbol = scanner.nextString();
+			File wadFile = new File(scanner.nextString());
 			try {
-				return context.mergeNamespace(symbol, wadFile, scanner.next());
+				return context.mergeNamespace(symbol, wadFile, scanner.nextString());
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", wadFile);
 				return Response.BAD_FILE;
@@ -506,13 +507,13 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
 			String entryName = null;
 			if (scanner.hasNext())
-				entryName = scanner.next();
+				entryName = scanner.nextString();
 			
 			try {
 				File f = new File(file);
@@ -551,14 +552,14 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String destSymbol = scanner.next();
-			String map1 = scanner.next();
-			String srcSymbol = scanner.next();
+			String destSymbol = scanner.nextString();
+			String map1 = scanner.nextString();
+			String srcSymbol = scanner.nextString();
 			String map2 = null;
 			if (scanner.hasNext())
-				map2 = scanner.next();
+				map2 = scanner.nextString();
 			else
 				map2 = map1;
 			try {
@@ -592,14 +593,14 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String map1 = scanner.next();
-			String wadFile = scanner.next();
+			String symbol = scanner.nextString();
+			String map1 = scanner.nextString();
+			String wadFile = scanner.nextString();
 			String map2 = null;
 			if (scanner.hasNext())
-				map2 = scanner.next();
+				map2 = scanner.nextString();
 			else
 				map2 = map1;
 			try {
@@ -645,10 +646,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String directory = scanner.next();
+			String symbol = scanner.nextString();
+			String directory = scanner.nextString();
 			try {
 				return context.mergeTree(symbol, new File(directory));
 			} catch (FileNotFoundException e) {
@@ -682,10 +683,10 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
 			try {
 				return context.mergeSwitchAnimatedTables(symbol, new File(file));
 			} catch (FileNotFoundException e) {
@@ -721,13 +722,13 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			File file = new File(scanner.next());
+			String symbol = scanner.nextString();
+			File file = new File(scanner.nextString());
 			String textureEntryName = null;
 			if (scanner.hasNext())
-				textureEntryName = scanner.next();
+				textureEntryName = scanner.nextString();
 			else
 				textureEntryName = Common.getFileNameWithoutExtension(file);
 			
@@ -768,11 +769,11 @@ public enum WadMergeCommand
 		}
 		
 		@Override
-		public Response execute(WadMergeContext context, Scanner scanner)
+		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			String symbol = scanner.next();
-			String file = scanner.next();
-			String textureEntryName = scanner.next();
+			String symbol = scanner.nextString();
+			String file = scanner.nextString();
+			String textureEntryName = scanner.nextString();
 			
 			try {
 				return context.mergeTextureDirectory(symbol, new File(file), textureEntryName);
@@ -803,7 +804,7 @@ public enum WadMergeCommand
 	 * @param scanner the scanner for arguments.
 	 * @return a Response enum.
 	 */
-	public abstract Response execute(WadMergeContext context, Scanner scanner);
+	public abstract Response execute(WadMergeContext context, TokenScanner scanner);
 	
 	/**
 	 * Executes the provided script.
@@ -817,7 +818,6 @@ public enum WadMergeCommand
 	{
 		String line;
 		int linenum = 0;
-		Pattern whitespacePattern = Pattern.compile("\\s+"); 
 		
 		while ((line = reader.readLine()) != null)
 		{
@@ -826,13 +826,18 @@ public enum WadMergeCommand
 			if (line.isEmpty() || line.startsWith("#"))
 				continue;
 			WadMergeCommand mergeCommand = null;
-			try (Scanner scanner = new Scanner(line)) 
+			try (TokenScanner scanner = new TokenScanner(line)) 
 			{
-				scanner.useDelimiter(whitespacePattern);
-				String command = scanner.next().toUpperCase();
+				String command = scanner.nextString();
 				try 
 				{
-					mergeCommand = Enum.valueOf(WadMergeCommand.class, command);
+					mergeCommand = WadMergeCommand.VALUES.get(command);
+					if (mergeCommand == null)
+					{
+						context.logf("ERROR: %s, line %d: Unknown command: \"%s\".\n", streamName, linenum, command);
+						return false;
+					}
+					
 					Response out = mergeCommand.execute(context, scanner);
 					if (out == null)
 						return true;
@@ -842,19 +847,25 @@ public enum WadMergeCommand
 						return false;
 					}
 				}
+				catch (ParseException e)
+				{
+					context.logf("ERROR: %s, line %d: An argument in command %s could not be parsed: %s\n", streamName, linenum, command, e.getLocalizedMessage());
+					context.logf("    %s\n", line);
+					return false;
+				}
 				catch (NoSuchElementException e)
 				{
 					context.logf("ERROR: %s, line %d: Command %s is missing an argument.\n", streamName, linenum, command);
 					context.logf("    %s ...?\n", line);
-					context.logln("");
+					context.logln();
 					mergeCommand.help(System.out);
 					return false;
 				}
 				catch (NumberFormatException e)
 				{
-					context.logf("ERROR: %s, line %d: Command %s is missing a numeric argument.\n", streamName, linenum, command);
-					context.logf("    %s ...?\n", line);
-					context.logln("");
+					context.logf("ERROR: %s, line %d: Command %s requires a numeric argument: %s\n", streamName, linenum, command, e.getLocalizedMessage());
+					context.logf("    %s\n", line);
+					context.logln();
 					mergeCommand.help(System.out);
 					return false;
 				}
@@ -874,5 +885,17 @@ public enum WadMergeCommand
 		
 		return true;
 	}
+	
+	/** Value map for command name to command. */
+	public static final Map<String, WadMergeCommand> VALUES = new TreeMap<String, WadMergeCommand>(String.CASE_INSENSITIVE_ORDER)
+	{
+		private static final long serialVersionUID = -9083149204025118660L;
+		{
+			for (WadMergeCommand command : WadMergeCommand.values())
+			{
+				put(command.name(), command);
+			}
+		}
+	};
 	
 }

@@ -106,6 +106,11 @@ public class WadMergeContext
 			logf(seq, args);
 	}
 
+	public void logln()
+	{
+		logln("");
+	}
+	
 	public void logln(String seq)
 	{
 		if (logout != null)

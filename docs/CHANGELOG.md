@@ -49,7 +49,7 @@ WadMerge
 
 * `Fixed` Some performance improvements and verbose output performance.
 * `Added` MERGENAMESPACE[FILE] command for merging/importing entry namespaces.
-
+* `Changed` Strings can be bound in double quotes and escape sequences for single tokens.
 
 ### Changed for 1.2.0
 
