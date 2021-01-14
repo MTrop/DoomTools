@@ -449,7 +449,7 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGENAMESPACEWAD [symbol] [path] [namespace]"); 
+			out.println("MERGENAMESPACEFILE [symbol] [path] [namespace]"); 
 			out.println("    Reads WAD entries from [path] into buffer [symbol] that");
 			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
 			out.println("    the START/END namespace markers.");

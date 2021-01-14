@@ -187,7 +187,7 @@ MERGENAMESPACE [dest-symbol] [src-symbol] [namespace]
              BAD_NAMESPACE if the namespace could not be found or is incomplete.
              BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
 
-MERGENAMESPACEWAD [symbol] [path] [namespace]
+MERGENAMESPACEFILE [symbol] [path] [namespace]
     Reads WAD entries from [path] into buffer [symbol] that
     lie between [namespace]_START and  [namespace]_END, excluding
     the START/END namespace markers.
@@ -244,10 +244,14 @@ MERGEMAPFILE [symbol] [targetmap] [path] [opt:sourcemap]
              BAD_MAP if the map entries are malformed.
 
 MERGEDIR [symbol] [path]
+    Adds a directory and its subdirectories recursively (files first, then
+    directory contents, per directory).
     For each FILE in [path],
-        If FILE is DIR,
+        If FILE is a directory,
             MARKER [symbol] \[FILE]
             MERGEDIR [symbol] [FILE]
+        Else if file is a WAD,
+            MERGEWAD [symbol] [FILE]
         Else,
             MERGEFILE [symbol] [FILE]
     [symbol]: The buffer to add to.
