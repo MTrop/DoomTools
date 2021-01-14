@@ -33,30 +33,6 @@ Usage: wadmerge [--help | -h | --version] [switches] [scriptfile]
 ====                     Script Commands                     ====
 =================================================================
 
-WadMerge vSNAPSHOT by Matt Tropiano (using DoomStruct vSNAPSHOT)
-Usage: wadmerge [--help | -h | --version] [switches] [scriptfile]
-
-    --help        Prints help and exits.
-    -h
-
-    --version     Prints version, and exits.
-
-[switches]:
-    --verbose     Prints verbose output.
-    -v
-
-[scriptfile]:
-    <filename>    The input script file.
-
-    --            Script input is from Standard In, not a file.
-
-    If a file is not specified, ./wadmerge.txt is the default file.
-    The parent directory of the provided script becomes the working directory.
-
-
-Script Commands
-...............
-
 END
     Ends script read.
 
