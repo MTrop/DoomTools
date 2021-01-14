@@ -10,11 +10,11 @@ import net.mtrop.doom.tools.exception.OptionParseException;
  * Main class for Utility.
  * @author Matthew Tropiano
  */
-public final class UtilityMain 
+public final class DoomMakeMain 
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("utilityname");
-	private static final String SPLASH_VERSION = "Utility v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String VERSION = Common.getVersionString("doommake");
+	private static final String SPLASH_VERSION = "DoomMake v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
@@ -161,7 +161,7 @@ public final class UtilityMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: utility  [--help | -h | --version]");
+		out.println("Usage: doommake [--help | -h | --version]");
 		out.println("                [files] [switches]");
 	}
 	

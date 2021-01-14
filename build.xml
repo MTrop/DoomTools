@@ -60,6 +60,7 @@
 	<property name="wadscript.version" value="${build.version}" />
 	<property name="decohack.version" value="${build.version}" />
 	<property name="dmxconv.version" value="${build.version}" />
+	<property name="doommake.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -92,6 +93,7 @@
 		<echo file="${build.versions.dir}/wadscript.version" message="${wadscript.version}" />
 		<echo file="${build.versions.dir}/decohack.version" message="${decohack.version}" />
 		<echo file="${build.versions.dir}/dmxconv.version" message="${dmxconv.version}" />
+		<echo file="${build.versions.dir}/doommake.version" message="${doommake.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
@@ -143,8 +145,8 @@
 
 	<target name="scripts" description="Creates application shell scripts.">
 		<!-- DoomTools -->
-		<shell-cmd  name="doomtools"  todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
-		<shell-bash name="doomtools"  todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
+		<shell-cmd  name="doomtools"  todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
+		<shell-bash name="doomtools"  todir="${build.dir}/shell/bash" options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
 		<!-- WadMerge -->
 		<shell-cmd  name="wadmerge"  todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
 		<shell-bash name="wadmerge"  todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
@@ -164,11 +166,14 @@
 		<shell-cmd  name="wadscript" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<shell-bash name="wadscript" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<!-- DecoHack -->
-		<shell-cmd  name="decohack" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
-		<shell-bash name="decohack" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-cmd  name="decohack" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-bash name="decohack" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
 		<!-- DMXConv -->
-		<shell-cmd  name="dmxconv" todir="${build.dir}/shell/cmd"   options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
-		<shell-bash name="dmxconv" todir="${build.dir}/shell/bash"  options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-cmd  name="dmxconv" todir="${build.dir}/shell/cmd"     options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-bash name="dmxconv" todir="${build.dir}/shell/bash"    options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<!-- DoomMake -->
+		<shell-cmd  name="doommake" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
+		<shell-bash name="doommake" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
 		<!-- RookScript -->
 		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
 		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
