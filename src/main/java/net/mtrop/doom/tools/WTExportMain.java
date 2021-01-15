@@ -105,7 +105,7 @@ public final class WTExportMain
 		/** List of flat names. */
 		private List<String> extractFlatList; 
 
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;

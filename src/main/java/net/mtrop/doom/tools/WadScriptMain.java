@@ -354,7 +354,7 @@ public final class WadScriptMain
 		private Integer stackDepth;
 		private List<String> argList;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;

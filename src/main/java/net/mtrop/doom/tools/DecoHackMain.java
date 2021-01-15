@@ -85,7 +85,7 @@ public final class DecoHackMain
 		private File outFile;
 		private boolean outputBudget;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;

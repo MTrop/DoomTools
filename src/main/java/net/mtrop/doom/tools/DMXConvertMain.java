@@ -67,7 +67,7 @@ public final class DMXConvertMain
 		private File ffmpegPath;
 		private File outputDirectory;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;

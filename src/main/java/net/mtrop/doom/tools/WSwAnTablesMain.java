@@ -68,7 +68,7 @@ public final class WSwAnTablesMain
 		private File sourceFile;
 		private File wadFile;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;

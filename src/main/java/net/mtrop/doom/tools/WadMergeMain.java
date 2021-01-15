@@ -56,7 +56,7 @@ public final class WadMergeMain
 		private boolean useSTDIN;
 		private File inputFile;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;
