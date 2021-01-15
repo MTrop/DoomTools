@@ -40,7 +40,7 @@ public final class DoomToolsMain
 	{
 		private PrintStream stdout;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 		}

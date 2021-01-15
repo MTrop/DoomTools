@@ -85,7 +85,7 @@ public final class WTexScanMain
 		private boolean skipSkies;
 		private List<File> wadFiles;
 		
-		public Options()
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;
