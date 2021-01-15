@@ -1,7 +1,14 @@
 package net.mtrop.doom.tools;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -13,11 +20,15 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 public final class DoomMakeMain 
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
+	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
+	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
-	private static final String SPLASH_VERSION = "DoomMake v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
+	private static final int ERROR_BAD_PROPERTIES = 2;
+	private static final int ERROR_BAD_SCRIPT = 3;
+	private static final int ERROR_UNKNOWN = 100;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -33,12 +44,19 @@ public final class DoomMakeMain
 		private boolean help;
 		private boolean version;
 		
-		public Options()
+		private File propertiesFile;
+		private File scriptFile;
+		private List<String> args;
+		
+		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;
 			this.help = false;
 			this.version = false;
+			this.propertiesFile = new File("doommake.properties");
+			this.scriptFile = new File("doommake.script");
+			this.args = new LinkedList<>();
 		}
 		
 		public Options setHelp(boolean help) 
@@ -50,6 +68,18 @@ public final class DoomMakeMain
 		public Options setVersion(boolean version) 
 		{
 			this.version = version;
+			return this;
+		}
+		
+		public Options setPropertiesFile(File propertiesFile) 
+		{
+			this.propertiesFile = propertiesFile;
+			return this;
+		}
+		
+		public Options setScriptFile(File scriptFile) 
+		{
+			this.scriptFile = scriptFile;
 			return this;
 		}
 		
@@ -84,9 +114,34 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 		
-			// TODO: Finish.
+			Properties props = new Properties();
+			if (options.propertiesFile.exists())
+			{
+				try (Reader reader = new InputStreamReader(new FileInputStream(options.propertiesFile)))
+				{
+					props.load(reader);
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.printf("ERROR: Properties file \"%s\" could not be loaded: %s\n", options.propertiesFile.getPath(), e.getLocalizedMessage());
+					return ERROR_BAD_PROPERTIES;
+				}
+			}
 			
-			return ERROR_NONE;
+			// TODO: Finish stuff.
+			
+			try {
+				WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr)
+					.setScriptFile(options.scriptFile)
+					.addArg(props)
+					.addArg(options.args)
+				;
+				return WadScriptMain.call(wsOptions);
+			} catch (OptionParseException e) {
+				/** Will not be thrown. */
+				return ERROR_UNKNOWN;
+			}
+			
 		}
 	}
 	
@@ -152,9 +207,10 @@ public final class DoomMakeMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println(SPLASH_VERSION);
+		out.println("DoomMake v" + VERSION + " by Matt Tropiano");
+		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", WadScript v" + WADSCRIPT_VERSION + ")");
 	}
-	
+
 	/**
 	 * Prints the usage.
 	 * @param out the print stream to print to.

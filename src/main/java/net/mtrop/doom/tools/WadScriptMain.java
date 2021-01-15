@@ -132,7 +132,7 @@ public final class WadScriptMain
 		}
 		
 	}
-	
+
 	private interface UsageRendererType
 	{
 		/**
@@ -352,7 +352,7 @@ public final class WadScriptMain
 		private Integer runawayLimit;
 		private Integer activationDepth;
 		private Integer stackDepth;
-		private List<String> argList;
+		private List<Object> argList;
 		
 		private Options()
 		{
@@ -403,9 +403,9 @@ public final class WadScriptMain
 			return this;
 		}
 		
-		public Options setArgList(List<String> argList)
+		public Options addArg(Object arg)
 		{
-			this.argList = argList;
+			this.argList.add(arg);
 			return this;
 		}
 		
@@ -556,8 +556,7 @@ public final class WadScriptMain
 					return ERROR_BAD_SCRIPT_ENTRY;
 				}
 				
-				Object[] args = new Object[options.argList.size()];
-				options.argList.toArray(args);
+				Object[] args = options.argList.toArray(new Object[options.argList.size()]);
 				try {
 					ScriptValue retval = ScriptValue.create(null);
 

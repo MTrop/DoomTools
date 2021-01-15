@@ -169,6 +169,27 @@ public final class Common
 	}
 
 	/**
+	 * Cleans a directory.
+	 * @param directory the directory.
+	 * @param deleteTop if true, delete the directory too.
+	 * @return true if everything was deleted successfully, false otherwise.
+	 */
+	public static boolean cleanDirectory(File directory, boolean deleteTop)
+	{
+		boolean out = true;
+		for (File f : directory.listFiles())
+		{
+			if (f.isDirectory())
+				out = out && cleanDirectory(f, true);
+			else
+				out = out && f.delete();
+		}
+		if (deleteTop)
+			out = out && directory.delete();
+		return out;
+	}
+	
+	/**
 	 * Convenience method for
 	 * <code>new BufferedReader(new InputStreamReader(in))</code>
 	 * @param in the stream to read.
