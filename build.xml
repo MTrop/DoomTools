@@ -24,7 +24,7 @@
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 
-	<property name="rookscript.lib.version" value="1.8.1" />
+	<property name="rookscript.lib.version" value="1.9.0" />
 	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
 	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
@@ -40,8 +40,15 @@
 	<property name="project.javadoc.packages" value="
 		net.mtrop.doom.tools,
 		net.mtrop.doom.tools.common,
-		net.mtrop.doom.tools.struct,
+		net.mtrop.doom.tools.decohack,
+		net.mtrop.doom.tools.decohack.contexts,
+		net.mtrop.doom.tools.decohack.data,
+		net.mtrop.doom.tools.decohack.exception,
+		net.mtrop.doom.tools.decohack.patches,
+		net.mtrop.doom.tools.doommake,
+		net.mtrop.doom.tools.exception,
 		net.mtrop.doom.tools.scripting,
+		net.mtrop.doom.tools.struct,
 		net.mtrop.doom.tools.wadmerge,
 		net.mtrop.doom.tools.wtexport
 		"

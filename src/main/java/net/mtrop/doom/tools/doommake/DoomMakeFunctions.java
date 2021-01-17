@@ -159,6 +159,8 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		}
 	},
 	
+	// TODO: Copy directory with optional filename filter.
+	
 	;
 	
 	private final int parameterCount;

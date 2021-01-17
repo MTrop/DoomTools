@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -98,7 +99,19 @@ public final class DecoHackMain
 			this.outFile = null;
 			this.outputBudget = false;
 		}
+
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
 		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
 		public Options setHelp(boolean help) 
 		{
 			this.help = help;

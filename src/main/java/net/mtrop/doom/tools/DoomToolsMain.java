@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import net.mtrop.doom.tools.common.Common;
@@ -43,6 +44,12 @@ public final class DoomToolsMain
 		private Options()
 		{
 			this.stdout = null;
+		}
+		
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
 		}
 		
 	}

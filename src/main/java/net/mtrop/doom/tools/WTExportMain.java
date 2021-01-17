@@ -8,7 +8,9 @@ package net.mtrop.doom.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,7 +82,9 @@ public final class WTExportMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
-		private BufferedReader stdin;
+		private InputStream stdin;
+		
+		private BufferedReader reader;
 		
 		private boolean help;
 		private boolean version;
@@ -153,7 +157,25 @@ public final class WTExportMain
 		
 		String readLine() throws IOException
 		{
-			return stdin.readLine();
+			return reader.readLine();
+		}
+
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
+		public Options setStdin(InputStream stdin) 
+		{
+			this.stdin = stdin;
+			return this;
 		}
 
 		public Options setBaseWad(String baseWad) 
@@ -1239,13 +1261,15 @@ public final class WTExportMain
 	 * @return the parsed options.
 	 * @throws OptionParseException if an error happens parsing the arguments.
 	 */
-	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String ... args) throws OptionParseException
+	public static Options options(PrintStream out, PrintStream err, InputStream in, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
 		options.stderr = err;
 		options.stdin = in;
 	
+		options.reader = new BufferedReader(new InputStreamReader(options.stdin));
+		
 		final int STATE_INIT = 0;
 		final int STATE_BASE = 1;
 		final int STATE_OUT = 2;
@@ -1341,7 +1365,7 @@ public final class WTExportMain
 		}
 	
 		try {
-			System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+			System.exit(call(options(System.out, System.err, System.in, args)));
 		} catch (OptionParseException e) {
 			System.err.println(e.getMessage());
 			System.exit(ERROR_BAD_OPTIONS);

@@ -1,6 +1,14 @@
-DoomTools (C) 2019-2020
+DoomTools (C) 2019-2021
 =======================
 by Matt Tropiano et al. (see AUTHORS.txt)
+
+
+DoomMake
+--------
+
+### Changed for 1.0.0
+
+* Initial release.
 
 
 DecoHack
@@ -119,6 +127,11 @@ WTEXport
 
 WadScript
 ---------
+
+### Changed for 1.0.2
+
+* `Added` Made it easier to interface with from other tools.
+
 
 ### Changed for 1.0.1
 

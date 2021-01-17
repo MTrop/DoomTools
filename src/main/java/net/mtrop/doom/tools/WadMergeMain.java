@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import net.mtrop.doom.struct.io.IOUtils;
@@ -53,7 +54,7 @@ public final class WadMergeMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
-		private boolean useSTDIN;
+		private boolean useStdin;
 		private File inputFile;
 		
 		private Options()
@@ -64,10 +65,27 @@ public final class WadMergeMain
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
-			this.useSTDIN = false;
 			this.inputFile = new File("wadmerge.txt");
 		}
+
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
 		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
+		public Options setStdin(InputStream stdin) 
+		{
+			this.stdin = stdin;
+			return this;
+		}
+
 		public Options setHelp(boolean help) 
 		{
 			this.help = help;
@@ -86,9 +104,9 @@ public final class WadMergeMain
 			return this;
 		}
 		
-		public Options setUseSTDIN(boolean useSTDIN) 
+		public Options setUseStdin(boolean useStdin) 
 		{
-			this.useSTDIN = useSTDIN;
+			this.useStdin = useStdin;
 			return this;
 		}
 
@@ -136,7 +154,7 @@ public final class WadMergeMain
 			
 			String streamName;
 			BufferedReader reader;
-			if (options.useSTDIN)
+			if (options.useStdin)
 			{
 				streamName = "STDIN";
 				reader = new BufferedReader(new InputStreamReader(options.stdin));
@@ -208,7 +226,7 @@ public final class WadMergeMain
 			else if (arg.equals(SWITCH_VERSION))
 				options.version = true;
 			else if (arg.equals(SWITCH_SYSTEMIN))
-				options.useSTDIN = true;
+				options.useStdin = true;
 			else
 				options.inputFile = new File(arg);
 			i++;

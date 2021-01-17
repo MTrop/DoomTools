@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -80,6 +81,18 @@ public final class WSwAnTablesMain
 			this.wadFile = null;
 		}
 		
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
 		public Options setHelp(boolean help)
 		{
 			this.help = help;

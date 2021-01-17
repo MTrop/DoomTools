@@ -7,6 +7,8 @@ package net.mtrop.doom.tools;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -40,6 +42,7 @@ import com.blackrook.rookscript.lang.ScriptFunctionType.Usage;
 import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.ParameterUsage;
 import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
+import com.blackrook.rookscript.resolvers.ScriptVariableResolver;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -130,9 +133,20 @@ public final class WadScriptMain
 			this.namespace = namespace;
 			this.resolver = resolver;
 		}
-		
 	}
 
+	private static class Scope
+	{
+		private String scopeName;
+		private ScriptVariableResolver variableResolver;
+
+		private Scope(String scopeName, ScriptVariableResolver variableResolver)
+		{
+			this.scopeName = scopeName;
+			this.variableResolver = variableResolver;
+		}
+	}
+	
 	private interface UsageRendererType
 	{
 		/**
@@ -332,7 +346,7 @@ public final class WadScriptMain
 
 	}
 	
-	private enum Mode
+	public enum Mode
 	{
 		VERSION,
 		HELP,
@@ -346,27 +360,53 @@ public final class WadScriptMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		private InputStream stdin;
 		private Mode mode;
 		private File scriptFile;
 		private String entryPointName;
 		private Integer runawayLimit;
 		private Integer activationDepth;
 		private Integer stackDepth;
+		private List<Object> parameterList;
 		private List<Object> argList;
+		private List<Resolver> resolvers;
+		private List<Scope> scopes;
 		
 		private Options()
 		{
 			this.stdout = null;
 			this.stderr = null;
+			this.stdin = null;
 			this.mode = Mode.EXECUTE;
 			this.scriptFile = null;
 			this.entryPointName = "main";
 			this.runawayLimit = 0;
 			this.activationDepth = 256;
 			this.stackDepth = 2048;
+			this.parameterList = new LinkedList<>();
 			this.argList = new LinkedList<>();
+			this.resolvers = new LinkedList<>();
+			this.scopes = new LinkedList<>();
 		}
 
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
+		public Options setStdin(InputStream stdin) 
+		{
+			this.stdin = stdin;
+			return this;
+		}
+		
 		public Options setMode(Mode mode) 
 		{
 			this.mode = mode;
@@ -403,9 +443,33 @@ public final class WadScriptMain
 			return this;
 		}
 		
+		public Options addEntryParameterArg(Object arg)
+		{
+			this.parameterList.add(arg);
+			return this;
+		}
+		
 		public Options addArg(Object arg)
 		{
 			this.argList.add(arg);
+			return this;
+		}
+		
+		public Options addResolver(String sectionName, ScriptFunctionResolver resolver)
+		{
+			this.resolvers.add(new Resolver(sectionName, resolver));
+			return this;
+		}
+		
+		public Options addResolver(String sectionName, String namespace, ScriptFunctionResolver resolver)
+		{
+			this.resolvers.add(new Resolver(sectionName, namespace, resolver));
+			return this;
+		}
+		
+		public Options addScope(String scopeName, ScriptVariableResolver variableResolver)
+		{
+			this.scopes.add(new Scope(scopeName, variableResolver));
 			return this;
 		}
 		
@@ -469,7 +533,7 @@ public final class WadScriptMain
 			{
 				ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
 					.withSource(options.scriptFile)
-					.withEnvironment(ScriptEnvironment.createStandardEnvironment())
+					.withEnvironment(ScriptEnvironment.create(options.stdout, options.stderr, options.stdin))
 					.withScriptStack(options.activationDepth, options.stackDepth)
 					.withRunawayLimit(options.runawayLimit);
 
@@ -493,8 +557,26 @@ public final class WadScriptMain
 					} 
 				}
 				
-				// ========================================
+				for (Resolver resolver : options.resolvers)
+				{
+					if (resolver.namespace != null)
+						builder.andFunctionResolver(resolver.namespace, resolver.resolver);
+					else
+						builder.andFunctionResolver(resolver.resolver);
+				}
+				
+				// ============== Add Scopes ==============
 
+				int i = 0;
+				for (Scope scope : options.scopes)
+				{
+					if (i == 0)
+						builder.withScope(scope.scopeName, scope.variableResolver);
+					else
+						builder.andScope(scope.scopeName, scope.variableResolver);
+					i++;
+				}
+				
 				instance = builder.createInstance();
 				
 			} 
@@ -555,13 +637,18 @@ public final class WadScriptMain
 					options.stderr.println("ERROR: Entry point not found: " + options.entryPointName);
 					return ERROR_BAD_SCRIPT_ENTRY;
 				}
+
+				int i = 0;
+				Object[] entryParams = new Object[options.parameterList.size() + 1];
+				for (Object obj : options.parameterList)
+					entryParams[i++] = obj;
+				entryParams[i] = options.argList;
 				
-				Object[] args = options.argList.toArray(new Object[options.argList.size()]);
 				try {
 					ScriptValue retval = ScriptValue.create(null);
-
+					
 					if (entryPoint.getParameterCount() > 0)
-						instance.call(options.entryPointName, new Object[]{args});
+						instance.call(options.entryPointName, entryParams);
 					else
 						instance.call(options.entryPointName);
 
@@ -652,15 +739,17 @@ public final class WadScriptMain
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
+	 * @param in the standard in input stream.
 	 * @param args the argument args.
 	 * @return the parsed options.
 	 * @throws OptionParseException if a parse exception occurs.
 	 */
-	public static Options options(PrintStream out, PrintStream err, String ... args) throws OptionParseException
+	public static Options options(PrintStream out, PrintStream err, InputStream in, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
 		options.stderr = err;
+		options.stdin = in;
 		
 		final int STATE_START = 0;
 		final int STATE_ARGS = 1;
@@ -808,7 +897,7 @@ public final class WadScriptMain
 		}
 
 		try {
-			System.exit(call(options(System.out, System.err, args)));
+			System.exit(call(options(System.out, System.err, System.in, args)));
 		} catch (OptionParseException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);

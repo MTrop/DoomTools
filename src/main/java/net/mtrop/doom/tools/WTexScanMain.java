@@ -5,12 +5,11 @@
  ******************************************************************************/
 package net.mtrop.doom.tools;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -114,6 +113,18 @@ public final class WTexScanMain
 		{
 			if (!quiet)
 				stderr.printf(fmt, args);
+		}
+
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
 		}
 
 		public Options setHelp(boolean help) 
@@ -546,7 +557,7 @@ public final class WTexScanMain
 	 * @return the parsed options.
 	 * @throws OptionParseException if a parse exception occurs.
 	 */
-	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String ... args) throws OptionParseException
+	public static Options options(PrintStream out, PrintStream err, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
@@ -603,7 +614,7 @@ public final class WTexScanMain
 		}
 	
 		try {
-			System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+			System.exit(call(options(System.out, System.err, args)));
 		} catch (OptionParseException e) {
 			System.err.println(e.getMessage());
 			System.exit(ERROR_BAD_OPTIONS);

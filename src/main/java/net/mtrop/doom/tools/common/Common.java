@@ -128,6 +128,24 @@ public final class Common
 	}
 
 	/**
+	 * Joins an array of strings into one string, with a separator between them.
+	 * @param separator the separator to insert between strings. Can be empty or null.
+	 * @param strings the strings to join.
+	 * @return a string of all joined strings and separators.
+	 */
+	public static String joinStrings(String separator, String... strings)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < strings.length; i++)
+		{
+			sb.append(strings[i]);
+			if (i < strings.length - 1)
+				sb.append(separator);
+		}
+		return sb.toString();
+	}
+
+	/**
 	 * Creates the necessary directories for a file path.
 	 * @param file	the abstract file path.
 	 * @return		true if the paths were made (or exists), false otherwise.

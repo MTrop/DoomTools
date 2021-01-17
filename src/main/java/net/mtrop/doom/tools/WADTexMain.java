@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -93,6 +94,30 @@ public final class WADTexMain
 			this.wadFile = null;
 		}
 		
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out);
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err);
+			return this;
+		}
+
+		public Options setStdout(PrintStream stdout)
+		{
+			this.stdout = stdout;
+			return this;
+		}
+		
+		public Options setStderr(PrintStream stderr) 
+		{
+			this.stderr = stderr;
+			return this;
+		}
+
 		public Options setHelp(boolean help)
 		{
 			this.help = help;
@@ -371,7 +396,7 @@ public final class WADTexMain
 	 * @param args the argument args.
 	 * @return the parsed options.
 	 */
-	public static Options options(PrintStream out, PrintStream err, BufferedReader in, String ... args)
+	public static Options options(PrintStream out, PrintStream err, String ... args)
 	{
 		Options options = new Options();
 		options.stdout = out;
@@ -447,7 +472,7 @@ public final class WADTexMain
 			return;
 		}
 
-		System.exit(call(options(System.out, System.err, new BufferedReader(new InputStreamReader(System.in)), args)));
+		System.exit(call(options(System.out, System.err, args)));
 	}
 
 	/**
