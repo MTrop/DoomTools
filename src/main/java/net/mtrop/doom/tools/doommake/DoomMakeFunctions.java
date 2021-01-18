@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptValue;
@@ -165,7 +167,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				)
 				.parameter("regex",
 					type(Type.NULL, "Include everything."),
-					type(Type.STRING, "The pattern to match each file path against.")
+					type(Type.STRING, "The pattern to match each file path against for inclusion. If matched, include.")
 				)
 				.returns(
 					type(Type.NULL, "If either file is null."),
@@ -231,7 +233,194 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		}
 	},
 	
-	// TODO: Zip file list.
+	// TODO: Add "update" back. Need to "roll" the entries over.
+	ZIPFILES(3)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Compresses a series of files into an archive, NOT preserving directory trees. " +
+					"If the destination file exists, it is overwritten."
+				)
+				.parameter("zipfile",
+					type(Type.STRING, "Path to target zip file."),
+					type(Type.OBJECTREF, "File", "Path to target zip file.")
+				)
+				.parameter("files", 
+					type(Type.LIST, "[STRING, ...]", "Paths to files to add."),
+					type(Type.LIST, "[OBJECTREF:File, ...]", "Paths to files to add.")
+				)
+				.parameter("compressed",
+					type(Type.NULL, "Default: True."),
+					type(Type.BOOLEAN, "True to compress, false to not compress.")
+				)
+				.returns(
+					type(Type.NULL, "If [zipfile] is null."),
+					type(Type.STRING, "The path to the created file, if [zipfile] is a STRING."),
+					type(Type.OBJECTREF, "File", "The path to the created file, if [zipfile] is an OBJECTREF:File."),
+					type(Type.ERROR, "BadFile", "If a source file cannot be opened."),
+					type(Type.ERROR, "IOError", "If a read or write error occurs."),
+					type(Type.ERROR, "Security", "If the OS is preventing the read or write.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue files = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				boolean compressed = temp.isNull() ? true : temp.asBoolean();
+				scriptInstance.popStackValue(files);
+				File zipFile = popFile(scriptInstance, temp);
+				boolean wasString = temp.isString();
+				
+				if (zipFile == null)
+				{
+					returnValue.setNull();
+					return true;
+				}
+				else if (zipFile.isDirectory())
+				{
+					returnValue.setError("BadZip", "Target file is a directory.");
+				}
+				
+				try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile, true)))
+				{
+					if (files.isList()) for (int i = 0; i < files.length(); i++)
+					{
+						files.listGetByIndex(i, temp);
+						File file = getFile(temp);
+						if (file == null)
+							returnValue.setError("BadFile", "Target file is a directory.");
+						else
+							zipFile(zos, file, file.getName(), compressed, returnValue);
+						
+						if (returnValue.isError())
+							break;
+					}
+
+					if (!returnValue.isError())
+					{
+						if (wasString)
+							returnValue.set(zipFile.getPath());
+						else
+							returnValue.set(zipFile);
+					}
+				} 
+				catch (FileNotFoundException e)
+				{
+					returnValue.setError("BadZip", "Target file is a directory.");
+				} 
+				catch (IOException e)
+				{
+					returnValue.setError("IOError", "Could not close Zip file.");
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				files.setNull();
+			}
+		}
+	},
+	
+	ZIPDIR(4)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Compresses a series of files into an archive from a directory, preserving directory trees. " +
+					"Always recurses directory structure. If the destination file exists, it is overwritten."
+				)
+				.parameter("zipfile",
+					type(Type.STRING, "Path to source directory (base path)."),
+					type(Type.OBJECTREF, "File", "Path to source directory (base path).")
+				)
+				.parameter("directory", 
+					type(Type.OBJECTREF, "File", "Path to source directory.")
+				)
+				.parameter("regex",
+					type(Type.NULL, "Include everything."),
+					type(Type.STRING, "The pattern to match each file path against for inclusion. If matched, include.")
+				)
+				.parameter("compressed",
+					type(Type.NULL, "Default: True."),
+					type(Type.BOOLEAN, "True to compress, false to not compress.")
+				)
+				.returns(
+					type(Type.NULL, "If [zipfile] is null."),
+					type(Type.STRING, "The path to the created file, if [zipfile] is a STRING."),
+					type(Type.OBJECTREF, "File", "The path to the created file, if [zipfile] is an OBJECTREF:File."),
+					type(Type.ERROR, "BadFile", "If a source file cannot be opened."),
+					type(Type.ERROR, "IOError", "If a read or write error occurs."),
+					type(Type.ERROR, "Security", "If the OS is preventing the read or write.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue files = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				boolean compressed = temp.isNull() ? true : temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				String regex = temp.isNull() ? null : temp.asString();
+				File dir = popFile(scriptInstance, temp);
+				File zipFile = popFile(scriptInstance, temp);
+				boolean wasString = temp.isString();
+				
+				if (zipFile == null)
+				{
+					returnValue.setNull();
+					return true;
+				}
+				else if (zipFile.isDirectory())
+				{
+					returnValue.setError("BadZip", "Target file is a directory.");
+				}
+				
+				try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile, true)))
+				{
+					// TODO: Finish.
+
+					if (!returnValue.isError())
+					{
+						if (wasString)
+							returnValue.set(zipFile.getPath());
+						else
+							returnValue.set(zipFile);
+					}
+				} 
+				catch (FileNotFoundException e)
+				{
+					returnValue.setError("BadZip", "Target file is a directory.");
+				} 
+				catch (IOException e)
+				{
+					returnValue.setError("IOError", "Could not close Zip file.");
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				files.setNull();
+			}
+		}
+	},
 	
 	;
 	
@@ -279,6 +468,12 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	private static File popFile(ScriptInstance scriptInstance, ScriptValue temp) 
 	{
 		scriptInstance.popStackValue(temp);
+		return getFile(temp);
+	}
+
+	// Get file.
+	private static File getFile(ScriptValue temp) 
+	{
 		if (temp.isNull())
 			return null;
 		else if (temp.isObjectRef(File.class))
@@ -328,7 +523,30 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		}
 	}
 
+	private static void zipFile(ZipOutputStream zos, File srcFile, String entryName, boolean compressed, ScriptValue returnValue) 
+	{
+		ZipEntry entry = new ZipEntry(entryName);
+		try (FileInputStream fis = new FileInputStream(srcFile))
+		{
+			zos.putNextEntry(entry);
+			IOUtils.relay(fis, zos);
+		} 
+		catch (FileNotFoundException e) 
+		{
+			returnValue.setError("BadFile", e.getMessage(), e.getLocalizedMessage());
+		}
+		catch (IOException e) 
+		{
+			returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+		catch (SecurityException e) 
+		{
+			returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
+	private static final ThreadLocal<ScriptValue> CACHEVALUE2 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 
 }
