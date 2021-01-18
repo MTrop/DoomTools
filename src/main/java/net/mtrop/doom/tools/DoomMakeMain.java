@@ -389,7 +389,7 @@ public final class DoomMakeMain
 		try {
 			Options options = options(System.out, System.err, System.in, args);
 			int status = call(options);
-			if (status != 0 && args.length == 0)
+			if (status != 0 && args.length == 0 && !options.scriptFile.exists())
 			{
 				splash(System.out);
 				usage(System.out);
