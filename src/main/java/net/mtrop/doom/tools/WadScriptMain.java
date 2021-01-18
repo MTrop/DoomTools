@@ -486,6 +486,12 @@ public final class WadScriptMain
 		
 		private int call()
 		{
+			if (options.mode == null)
+			{
+				splash(options.stdout);
+				return ERROR_NONE;
+			}
+
 			if (options.mode == Mode.VERSION)
 			{
 				splash(options.stdout);
@@ -501,13 +507,13 @@ public final class WadScriptMain
 			
 			if (options.mode == Mode.FUNCTIONHELP)
 			{
-				printFunctionHelp(new UsageTextRenderer(options.stdout));
+				printFunctionHelp(new UsageTextRenderer(options.stdout), options.resolvers);
 				return ERROR_NONE;
 			}
 			
 			if (options.mode == Mode.FUNCTIONHELP_MARKDOWN)
 			{
-				printFunctionHelp(new UsageMarkdownRenderer(options.stdout));
+				printFunctionHelp(new UsageMarkdownRenderer(options.stdout), options.resolvers);
 				return ERROR_NONE;
 			}
 			
@@ -694,6 +700,8 @@ public final class WadScriptMain
 			out.println("    --help, -h                   Prints this help.");
 			out.println("    --version                    Prints the version of this utility.");
 			out.println("    --function-help              Prints all available function usages.");
+			out.println("    --function-help-markdown     Prints all available function usages in");
+			out.println("                                     Markdown format.");
 			out.println("    --disassemble                Prints the disassembly for this script");
 			out.println("                                     and exits.");
 			out.println("    --entry [name]               Use a different entry point named [name].");
@@ -725,11 +733,13 @@ public final class WadScriptMain
 			options.stdout.println();
 		}
 
-		private void printFunctionHelp(UsageRendererType renderer)
+		private void printFunctionHelp(UsageRendererType renderer, List<Resolver> additionalResolvers)
 		{
 			renderer.startRender();
 			for (int i = 0; i < RESOLVERS.length; i++)
-				printFunctionUsages(renderer, RESOLVERS[i].sectionName, RESOLVERS[i].namespace, RESOLVERS[i].resolver);		
+				printFunctionUsages(renderer, RESOLVERS[i].sectionName, RESOLVERS[i].namespace, RESOLVERS[i].resolver);
+			for (Resolver r : additionalResolvers)
+				printFunctionUsages(renderer, r.sectionName, r.namespace, r.resolver);
 			renderer.finishRender();
 		}
 		

@@ -91,9 +91,9 @@ public final class WTExportMain
 		private boolean quiet;
 
 		/** Path to base wad. */
-		private String baseWad;
+		private File baseWad;
 		/** Path to output wad. */
-		private String outWad;
+		private File outWad;
 		/** No animated. */
 		private boolean noAnimated;
 		/** No switches. */
@@ -178,13 +178,13 @@ public final class WTExportMain
 			return this;
 		}
 
-		public Options setBaseWad(String baseWad) 
+		public Options setBaseWad(File baseWad) 
 		{
 			this.baseWad = baseWad;
 			return this;
 		}
 		
-		public Options setOutWad(String outWad) 
+		public Options setOutWad(File outWad) 
 		{
 			this.outWad = outWad;
 			return this;
@@ -264,11 +264,10 @@ public final class WTExportMain
 		}
 
 		// Scan WAD file.
-		private boolean scanWAD(String path, boolean isBase)
+		private boolean scanWAD(File path, boolean isBase)
 		{
 			options.printf("Scanning %s...\n", path);
-			File f = new File(path);
-			WadFile wf = openWadFile(f, false);
+			WadFile wf = openWadFile(path, false);
 			if (wf == null)
 				return false;
 			
@@ -278,7 +277,7 @@ public final class WTExportMain
 				if (!scanTexturesAndPNames(unit, wf))
 					return false;
 			} catch (IOException e) {
-				options.printf("ERROR: \"%s\" could not be read.\n", f.getPath());
+				options.printf("ERROR: \"%s\" could not be read.\n", path.getPath());
 				return false;
 			}
 			
@@ -307,7 +306,7 @@ public final class WTExportMain
 				if (!scanAnimated(unit, wf))
 					return false;
 			} catch (IOException e) {
-				options.printf("ERROR: \"%s\" could not be read: an ANIMATED or SWITCHES lump may be corrupt.\n", f.getPath());
+				options.printf("ERROR: \"%s\" could not be read: an ANIMATED or SWITCHES lump may be corrupt.\n", path.getPath());
 				return false;
 			}
 			
@@ -939,12 +938,12 @@ public final class WTExportMain
 		/** Extracts the necessary stuff for output. */
 		private boolean extractToOutputWad(Options options)
 		{
-			File outFile = new File(options.outWad);
+			File outFile = options.outWad;
 			WadFile outWadFile = options.additive ? openWadFile(outFile, true) : newWadFile(outFile);
 			if (outWadFile == null)
 				return false;
 		
-			File baseFile = new File(options.baseWad);
+			File baseFile = options.baseWad;
 			WadFile baseWadFile = openWadFile(baseFile, false);
 			if (baseWadFile == null)
 			{
@@ -1070,7 +1069,7 @@ public final class WTExportMain
 			
 			// scan patches. 
 			for (String f : options.filePaths)
-				if (!scanWAD(f, false))
+				if (!scanWAD(new File(f), false))
 					return ERROR_BAD_FILE;
 		
 			/* STEP 2 : Compile list of what we want. */
@@ -1309,14 +1308,14 @@ public final class WTExportMain
 			
 				case STATE_BASE:
 				{
-					options.setBaseWad(arg);
+					options.setBaseWad(new File(arg));
 					state = STATE_INIT;
 				}
 				break;
 				
 				case STATE_OUT:
 				{
-					options.setOutWad(arg);
+					options.setOutWad(new File(arg));
 					state = STATE_INIT;
 				}
 				break;

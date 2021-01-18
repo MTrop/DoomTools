@@ -1,12 +1,26 @@
-=================================================================
-====               DoomMake Command Reference                ====
-=================================================================
+==============================================================================
+============                       DoomMake                       ============
+==============================================================================
 
-=================================================================
-====                   Command Line Usage                    ====
-=================================================================
+DoomMake is the maker tool that can build whole projects as well as bits and 
+pieces of a project, and serves as the primary entry point for using the
+DoomTools as a full toolchain for building Doom projects.  
 
-=================================================================
-====                     Script Commands                     ====
-=================================================================
+DoomMake operates on "targets," which are the entry points in a DoomMake
+script file (DoomMake's scripts are an implementation of RookScript/WadScript,
+and the documentation is provided in this distribution as "WadScript Help.txt"
+and "RookScript Quick Guide.md").
+
+Each entry point receives two arguments: a map of properties from an 
+automatically-loaded properties file, and the list of additional command-line 
+arguments passed to the script, if any.
+
+
+==============================================================================
+===== Command Line
+==============================================================================
+
+==============================================================================
+===== Script Commands
+==============================================================================
 

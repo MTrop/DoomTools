@@ -142,6 +142,11 @@ public final class DecoHackMain
 			return this;
 		}
 		
+		public Options setOutCharsetName(String charsetName) 
+		{
+			return setOutCharset(Charset.forName(charsetName));
+		}
+		
 		public Options setOutCharset(Charset outCharset) 
 		{
 			this.outCharset = outCharset;

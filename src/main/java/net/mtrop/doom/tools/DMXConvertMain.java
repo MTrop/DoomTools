@@ -136,6 +136,12 @@ public final class DMXConvertMain
 			return this;
 		}
 		
+		public Options addInputFile(File file)
+		{
+			this.sourceFiles.add(file);
+			return this;
+		}
+		
 	}
 	
 	/**

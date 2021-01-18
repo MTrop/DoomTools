@@ -19,7 +19,7 @@ import net.mtrop.doom.tools.doommake.ToolInvocationFunctions;
 import net.mtrop.doom.tools.exception.OptionParseException;
 
 /**
- * Main class for Utility.
+ * Main class for DoomMake.
  * @author Matthew Tropiano
  */
 public final class DoomMakeMain 
@@ -225,7 +225,7 @@ public final class DoomMakeMain
 					.setRunawayLimit(options.runawayLimit)
 					.setScriptFile(options.scriptFile)
 					.addResolver("DoomMake Functions", DoomMakeFunctions.createResolver())
-					.addResolver("Tool Invocation", "tool", ToolInvocationFunctions.createResolver())
+					.addResolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
 					.addEntryParameterArg(props)
 				;
 				for (Object obj : options.args)
@@ -419,8 +419,9 @@ public final class DoomMakeMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: doommake [--help | -h | --version]");
-		out.println("                [files] [switches]");
+		out.println("Usage: doommake [target] [args] [switches]");
+		out.println("                [--help | -h | --version]");
+		out.println("                [--function-help | --function-help-markdown]");
 	}
 	
 	/**
@@ -429,10 +430,32 @@ public final class DoomMakeMain
 	 */
 	private static void help(PrintStream out)
 	{
-		out.println("    --help              Prints help and exits.");
-		out.println("    -h");
+		out.println("[target]:");
+		out.println("    The target entry point to execute. Default is \"make\".");
 		out.println();
-		out.println("    --version           Prints version, and exits.");
+		out.println("[args]:");
+		out.println("    The additional arguments to pass along to the script.");
+		out.println();
+		out.println("[switches]:");
+		out.println("    --help, -h                   Prints this help.");
+		out.println("    --version                    Prints the version of this utility.");
+		out.println("    --function-help              Prints all available function usages.");
+		out.println("    --function-help-markdown     Prints all available function usages in");
+		out.println("                                     Markdown format.");
+		out.println();
+		out.println("    --script, -s [filename]      Use [filename] for the root build script.");
+		out.println("                                     Default is \"doommake.script\".");
+		out.println("    --properties, -p [filename]  Use [filename] for the project properties.");
+		out.println("                                     Default is \"doommake.properties\".");
+		out.println();
+		out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
+		out.println("                                     before the soft protection on infinite");
+		out.println("                                     loops triggers. 0 is no limit.");
+		out.println("                                     Default: 0");
+		out.println("    --activation-depth [num]     Sets the activation depth to [num].");
+		out.println("                                     Default: 256");
+		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
+		out.println("                                     Default: 2048");
 	}
 
 }

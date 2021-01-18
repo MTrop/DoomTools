@@ -3,10 +3,13 @@ package net.mtrop.doom.tools.doommake;
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptValue;
@@ -15,6 +18,7 @@ import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
+import com.blackrook.rookscript.struct.PatternUtils;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
@@ -127,29 +131,8 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 					returnValue.setNull();
 					return true;
 				}
-
-				if (createDirs && !Common.createPathForFile(destFile))
-				{
-					returnValue.set(false);
-					return true;
-				}
 				
-				try (FileInputStream fis = new FileInputStream(srcFile); FileOutputStream fos = new FileOutputStream(destFile)) 
-				{
-					IOUtils.relay(fis, fos);
-				} 
-				catch (FileNotFoundException e) 
-				{
-					returnValue.setError("BadFile", e.getMessage(), e.getLocalizedMessage());
-				}
-				catch (IOException e) 
-				{
-					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
-				}
-				catch (SecurityException e) 
-				{
-					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
-				}
+				copyFile(srcFile, destFile, createDirs, returnValue);
 				return true;
 			}
 			finally
@@ -159,7 +142,96 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		}
 	},
 	
-	// TODO: Copy directory with optional filename filter.
+	COPYDIR(4)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Copies a series of files from one directory to another, replicating the tree in the destination. " +
+					"If the destination file exists, it is overwritten."
+				)
+				.parameter("srcDir",
+					type(Type.STRING, "Path to source directory (base path)."),
+					type(Type.OBJECTREF, "File", "Path to source directory (base path).")
+				)
+				.parameter("destDir", 
+					type(Type.STRING, "Path to destination directory."),
+					type(Type.OBJECTREF, "File", "Path to destination directory.")
+				)
+				.parameter("recursive",
+					type(Type.BOOLEAN, "If true, scan recursively.")
+				)
+				.parameter("regex",
+					type(Type.NULL, "Include everything."),
+					type(Type.STRING, "The pattern to match each file path against.")
+				)
+				.returns(
+					type(Type.NULL, "If either file is null."),
+					type(Type.LIST, "[STRING, ...]", "The list of copied/created files (destination)."),
+					type(Type.ERROR, "BadFile", "If the source or destination directory does not exist."),
+					type(Type.ERROR, "BadPattern", "If the input RegEx pattern is malformed."),
+					type(Type.ERROR, "IOError", "If a read or write error occurs."),
+					type(Type.ERROR, "Security", "If the OS is preventing the read or write.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String regex = temp.isNull() ? null : temp.asString();
+				scriptInstance.popStackValue(temp);
+				boolean recursive = temp.asBoolean();
+				File destDir = popFile(scriptInstance, temp);
+				File srcDir = popFile(scriptInstance, temp);
+
+				if (srcDir == null || destDir == null)
+				{
+					returnValue.setNull();
+					return true;
+				}
+
+				if (!srcDir.isDirectory())
+				{
+					returnValue.setError("BadFile", "Source directory does not exist.");
+					return true;
+				}
+				if (!destDir.isDirectory())
+				{
+					returnValue.setError("BadFile", "Destination directory does not exist.");
+					return true;
+				}
+				
+				FileFilter filter = ((f) -> true);
+				if (regex != null)
+				{
+					try {
+						final Pattern p = PatternUtils.get(regex);
+						filter = ((f) -> p.matcher(f.getPath()).matches());
+					} catch (PatternSyntaxException e) {
+						returnValue.setError("BadPattern", e.getMessage(), e.getLocalizedMessage());
+						return true;
+					}
+				}
+				
+				returnValue.setEmptyList(128);
+				copyDir(srcDir, srcDir, destDir, recursive, filter, returnValue);
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
+	// TODO: Zip file list.
 	
 	;
 	
@@ -215,6 +287,47 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			return new File(temp.asString());
 	}
 	
+	private static void copyDir(File base, File srcDir, File destDir, boolean recursive, FileFilter filter, ScriptValue returnValue)
+	{
+		for (File f : srcDir.listFiles())
+		{
+			String treeName = f.getPath().substring(base.getPath().length());
+			if (f.isDirectory() && recursive)
+				copyDir(base, f, destDir, recursive, filter, returnValue);
+			else if (filter.accept(f))
+				copyFile(f, new File(destDir.getPath() + treeName), true, returnValue);
+			
+			if (returnValue.isError())
+				break;
+		}
+	}
+	
+	private static void copyFile(File srcFile, File destFile, boolean createDirs, ScriptValue returnValue) 
+	{
+		if (createDirs && !Common.createPathForFile(destFile))
+		{
+			return;
+		}
+		
+		try (FileInputStream fis = new FileInputStream(srcFile); FileOutputStream fos = new FileOutputStream(destFile)) 
+		{
+			IOUtils.relay(fis, fos);
+			returnValue.listAdd(destFile);
+		} 
+		catch (FileNotFoundException e) 
+		{
+			returnValue.setError("BadFile", e.getMessage(), e.getLocalizedMessage());
+		}
+		catch (IOException e) 
+		{
+			returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+		}
+		catch (SecurityException e) 
+		{
+			returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
 	// Threadlocal "stack" values.
 	private static final ThreadLocal<ScriptValue> CACHEVALUE1 = ThreadLocal.withInitial(()->ScriptValue.create(null));
 

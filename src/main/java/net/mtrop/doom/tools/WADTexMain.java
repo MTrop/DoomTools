@@ -106,18 +106,6 @@ public final class WADTexMain
 			return this;
 		}
 
-		public Options setStdout(PrintStream stdout)
-		{
-			this.stdout = stdout;
-			return this;
-		}
-		
-		public Options setStderr(PrintStream stderr) 
-		{
-			this.stderr = stderr;
-			return this;
-		}
-
 		public Options setHelp(boolean help)
 		{
 			this.help = help;
