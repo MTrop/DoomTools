@@ -1,0 +1,54 @@
+##### IDEs / Editors #####
+
+# Emacs/vim
+*~
+*.swp
+
+# Eclipse
+.settings
+.classpath
+.project
+
+# VSCode (includes Eclipse, above, plus:)
+.vscode
+
+# IntelliJ Idea
+/.idea
+*.ipr
+*.iml
+*.iws
+
+# Other
+.stash
+.shelf
+
+
+##### Utilities #####
+
+# DoomMake
+doommake.properties
+doommake.script
+
+# Generate-able by DoomMake
+/bin
+/build
+/dist
+/deps
+
+# Doom Builder and Others
+*.dbs
+*.o
+*.bak
+*.backup*
+
+
+##### Platforms #####
+
+# Windows
+Desktop.ini
+thumbs.db
+
+# OSX/MacOS
+*.DS_Store
+
+

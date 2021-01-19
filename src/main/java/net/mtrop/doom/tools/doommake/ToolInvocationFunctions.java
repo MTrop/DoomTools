@@ -118,9 +118,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"args:LIST[STRING, ...]",
 							"runawayLimit:INTEGER",
 							"activationDepth:INTEGER",
-							"stackDepth:INTEGER",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"stackDepth:INTEGER"
 						) + "}",
 						"Map of options."
 					)
@@ -190,11 +188,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"infile:OBJECTREF(File)",
 							"outfile:OBJECTREF(File)",
 							"outcharsetname:STRING",
-							"outputbudget:BOOLEAN",
-							"help:BOOLEAN",
-							"fullhelp:BOOLEAN",
-							"version:BOOLEAN",
-							"dumpresource:STRING"
+							"outputbudget:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -264,10 +258,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"outputdirectory:OBJECTREF(File)",
 							"ffmpegpath:OBJECTREF(File)",
 							"onlyffmpeg:BOOLEAN",
-							"onlyjspi:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN",
-							"tryffmpeg:BOOLEAN"
+							"onlyjspi:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -351,9 +342,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdin:OBJECTREF(InputStream)",
 							"inputfile:OBJECTREF(File)",
 							"usestdin:BOOLEAN",
-							"verbose:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"verbose:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -422,15 +411,12 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
-							"mode:STRING",
 							"scriptFile:OBJECTREF(File)",
 							"entryPointName:STRING",
 							"runawayLimit:INTEGER",
 							"activationDepth:INTEGER",
 							"stackDepth:INTEGER",
-							"args:LIST[STRING, ...]",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"args:LIST[STRING, ...]"
 						) + "}",
 						"Map of options."
 					)
@@ -515,9 +501,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"additive:BOOLEAN",
 							"exportmode:BOOLEAN",
 							"strife:BOOLEAN",
-							"verbose:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"verbose:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -583,9 +567,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"sourcefile:OBJECTREF(File)",
 							"wadfile:OBJECTREF(File)",
 							"exportmode:BOOLEAN",
-							"verbose:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"verbose:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -655,9 +637,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"additive:BOOLEAN",
 							"nulltexture:STRING",
 							"noanimated:BOOLEAN",
-							"noswitches:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"noswitches:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -743,9 +723,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"quiet:BOOLEAN",
 							"outputtextures:BOOLEAN",
 							"outputflats:BOOLEAN",
-							"skipskies:BOOLEAN",
-							"help:BOOLEAN",
-							"version:BOOLEAN"
+							"skipskies:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)

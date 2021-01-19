@@ -10,13 +10,20 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.DoomMakeFunctions;
+import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ToolInvocationFunctions;
 import net.mtrop.doom.tools.exception.OptionParseException;
+
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.create;
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.file;
+//import static net.mtrop.doom.tools.doommake.ProjectTemplate.directory;
 
 /**
  * Main class for DoomMake.
@@ -32,6 +39,8 @@ public final class DoomMakeMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;
+	private static final int ERROR_BAD_TEMPLATE = 3;
+	private static final int ERROR_BAD_PROJECT = 4;
 	private static final int ERROR_UNKNOWN = 100;
 
 	private static final String SWITCH_HELP = "--help";
@@ -39,15 +48,20 @@ public final class DoomMakeMain
 	private static final String SWITCH_VERSION = "--version";
 	private static final String SWITCH_FUNCHELP1 = "--function-help";
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
-	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
-	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
-	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
-
+	private static final String SWITCH_LISTTEMPLATES = "--list-templates";
+	private static final String SWITCH_NEWPROJECT = "--new-project";
+	
 	private static final String SWITCH_SCRIPTFILE = "--script";
 	private static final String SWITCH_SCRIPTFILE2 = "-s";
 	private static final String SWITCH_PROPERTYFILE = "--properties";
 	private static final String SWITCH_PROPERTYFILE2 = "-p";
+	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
+	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
+	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
 
+	/** The templates. */
+	private static final Map<String, ProjectTemplate> TEMPLATES = 
+		new TreeMap<String, ProjectTemplate>(String.CASE_INSENSITIVE_ORDER);
 	
 	/**
 	 * Program options.
@@ -59,6 +73,9 @@ public final class DoomMakeMain
 		private InputStream stdin;
 		private boolean help;
 		private boolean version;
+		private boolean listTemplates;
+
+		private String createTemplate;
 		
 		private Mode mode;
 		private Integer runawayLimit;
@@ -78,16 +95,15 @@ public final class DoomMakeMain
 			this.stdin = null;
 			this.help = false;
 			this.version = false;
+			this.listTemplates = false;
+			this.createTemplate = null;
 
-			this.mode = Mode.EXECUTE;
 			this.runawayLimit = 0;
 			this.activationDepth = 256;
 			this.stackDepth = 2048;
-
-			this.targetName = "make";
-			
 			this.propertiesFile = new File("doommake.properties");
 			this.scriptFile = new File("doommake.script");
+			this.targetName = "make";
 			this.args = new LinkedList<>();
 		}
 		
@@ -109,18 +125,6 @@ public final class DoomMakeMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
 		public Options setRunawayLimit(Integer runawayLimit)
 		{
 			this.runawayLimit = runawayLimit;
@@ -201,7 +205,43 @@ public final class DoomMakeMain
 				splash(options.stdout);
 				return ERROR_NONE;
 			}
-		
+
+			if (options.listTemplates)
+			{
+				setUpTemplates();
+				options.stdout.println("List of available templates:");
+				for (Map.Entry<String, ProjectTemplate> entry : TEMPLATES.entrySet())
+					options.stdout.println(entry.getKey());
+				return ERROR_NONE;
+			}
+
+			if (options.createTemplate != null)
+			{
+				if (Common.isEmpty(options.targetName))
+				{
+					options.stderr.println("ERROR: No directory path.");
+					return ERROR_BAD_PROJECT;
+				}
+				
+				setUpTemplates();
+				ProjectTemplate template;
+				if ((template = TEMPLATES.get(options.createTemplate)) == null)
+				{
+					options.stderr.println("ERROR: No such project template: " + options.createTemplate);
+					options.stderr.println("Try running DoomMake with --list-templates for the list of available templates.");
+					return ERROR_BAD_TEMPLATE;
+				}
+				
+				try {
+					template.createIn(new File(options.targetName));
+					options.stdout.println("Created project: " + options.targetName);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+				}
+				
+				return ERROR_NONE;
+			}
+
 			Properties props = new Properties();
 			if (options.propertiesFile.exists())
 			{
@@ -260,6 +300,7 @@ public final class DoomMakeMain
 		final int STATE_SWITCHES_ACTIVATION = 3;
 		final int STATE_SWITCHES_STACK = 4;
 		final int STATE_SWITCHES_RUNAWAY = 5;
+		final int STATE_TEMPLATENAME = 6;
 		int state = STATE_START;
 		
 		boolean target = false;
@@ -273,9 +314,13 @@ public final class DoomMakeMain
 				case STATE_START:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						options.setHelp(true);
+						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
-						options.setVersion(true);
+						options.version = true;
+					else if (arg.equals(SWITCH_LISTTEMPLATES))
+						options.listTemplates = true;
+					else if (arg.equals(SWITCH_NEWPROJECT))
+						state = STATE_TEMPLATENAME;
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
@@ -310,6 +355,14 @@ public final class DoomMakeMain
 				case STATE_PROPERTYFILE:
 				{
 					options.propertiesFile = new File(arg);
+					state = STATE_START;
+				}
+				break;
+				
+				case STATE_TEMPLATENAME:
+				{
+					options.targetName = null;
+					options.createTemplate = arg;
 					state = STATE_START;
 				}
 				break;
@@ -364,6 +417,8 @@ public final class DoomMakeMain
 			throw new OptionParseException("ERROR: Expected script file after switch.");
 		if (state == STATE_PROPERTYFILE)
 			throw new OptionParseException("ERROR: Expected properties file after switch.");
+		if (state == STATE_TEMPLATENAME)
+			throw new OptionParseException("ERROR: Expected template name to create.");
 		if (state == STATE_SWITCHES_ACTIVATION)
 			throw new OptionParseException("ERROR: Expected number after activation depth switch.");
 		if (state == STATE_SWITCHES_STACK)
@@ -422,6 +477,8 @@ public final class DoomMakeMain
 		out.println("Usage: doommake [target] [args] [switches]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
+		out.println("                [--list-templates]");
+		out.println("                [--new-project [templatename] [directory]]");
 	}
 	
 	/**
@@ -435,6 +492,12 @@ public final class DoomMakeMain
 		out.println();
 		out.println("[args]:");
 		out.println("    The additional arguments to pass along to the script.");
+		out.println();
+		out.println("[templatename]:");
+		out.println("    The name of the template to use for the new project.");
+		out.println();
+		out.println("[directory]:");
+		out.println("    The directory for the new project.");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --help, -h                   Prints this help.");
@@ -456,6 +519,21 @@ public final class DoomMakeMain
 		out.println("                                     Default: 256");
 		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
 		out.println("                                     Default: 2048");
+	}
+
+	/**
+	 * Sets up the used templates (for lazy init).
+	 */
+	private static void setUpTemplates()
+	{
+		final ProjectTemplate GIT = create(
+			file(".gitignore", 
+				"doommake/git/gitignore.txt"),
+			file(".gitattributes", 
+				"doommake/git/gitattributes.txt")
+		);
+		
+		TEMPLATES.put("git", create().add(GIT));
 	}
 
 }

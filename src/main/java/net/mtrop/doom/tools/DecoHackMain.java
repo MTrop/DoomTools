@@ -112,30 +112,6 @@ public final class DecoHackMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setFullHelp(boolean full) 
-		{
-			this.full = full;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
-		public Options setDumpResource(String dumpResource) 
-		{
-			this.dumpResource = dumpResource;
-			return this;
-		}
-		
 		public Options setInFile(File inFile) 
 		{
 			this.inFile = inFile;
@@ -349,18 +325,18 @@ public final class DecoHackMain
 				case STATE_START:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						options.setHelp(true);
+						options.help = true;
 					if (arg.equals(SWITCH_HELPFULL))
 					{
-						options.setHelp(true);
-						options.setFullHelp(true);
+						options.help = true;
+						options.full = true;
 					}
 					else if (arg.equals(SWITCH_VERSION))
-						options.setVersion(true);
+						options.version = true;
 					else if (arg.equals(SWITCH_DUMPRESOURCE))
 						state = STATE_DUMPRES;
 					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
-						options.setOutputBudget(true);
+						options.outputBudget = true;
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
 						state = STATE_OUTFILE;
 					else if (arg.equals(SWITCH_OUTPUTCHARSET) || arg.equals(SWITCH_OUTPUTCHARSET2))

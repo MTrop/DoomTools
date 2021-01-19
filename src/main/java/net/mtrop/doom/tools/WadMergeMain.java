@@ -86,18 +86,6 @@ public final class WadMergeMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
 		public Options setVerbose(boolean verbose) 
 		{
 			this.verbose = verbose;

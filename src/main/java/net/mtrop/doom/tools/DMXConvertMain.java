@@ -94,24 +94,6 @@ public final class DMXConvertMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
-		public Options setTryFFMpeg(boolean tryFFMpeg) 
-		{
-			this.tryFFMpeg = tryFFMpeg;
-			return this;
-		}
-		
 		public Options setOnlyFFMpeg(boolean onlyFFMpeg) 
 		{
 			this.onlyFFMpeg = onlyFFMpeg;
@@ -371,11 +353,11 @@ public final class DMXConvertMain
 				case STATE_START:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						options.setHelp(true);
+						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
-						options.setVersion(true);
+						options.version = true;
 					else if (arg.equals(SWITCH_TRYFFMPEG))
-						options.setTryFFMpeg(true);
+						options.tryFFMpeg = true;
 					else if (arg.equals(SWITCH_FFMPEG_ONLY))
 						options.setOnlyFFMpeg(true);
 					else if (arg.equals(SWITCH_JSPI_ONLY))

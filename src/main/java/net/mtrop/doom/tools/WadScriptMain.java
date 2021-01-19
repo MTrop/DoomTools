@@ -407,15 +407,15 @@ public final class WadScriptMain
 			return this;
 		}
 		
-		public Options setMode(Mode mode) 
-		{
-			this.mode = mode;
-			return this;
-		}
-
 		public Options setScriptFile(File scriptFile) 
 		{
 			this.scriptFile = scriptFile;
+			return this;
+		}
+		
+		public Options setMode(Mode mode) 
+		{
+			this.mode = mode;
 			return this;
 		}
 		

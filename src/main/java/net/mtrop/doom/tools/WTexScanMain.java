@@ -127,18 +127,6 @@ public final class WTexScanMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
 		public Options setQuiet(boolean quiet) 
 		{
 			this.quiet = quiet;
@@ -568,9 +556,9 @@ public final class WTexScanMain
 		{
 			String arg = args[i];
 			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.setHelp(true);
+				options.help = true;
 			else if (arg.equals(SWITCH_VERSION))
-				options.setVersion(true);
+				options.version = true;
 			else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
 				options.setQuiet(true);
 			else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))

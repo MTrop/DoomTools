@@ -1,0 +1,14 @@
+# Common Doom Project Binaries
+*.lmp binary
+*.dmx binary
+*.wad binary
+*.mid binary
+*.pk3 binary
+
+# Common Doom Project Text
+*.deh text
+*.bex text
+*.zsc text
+*.zscript text
+*.acs text
+*.dh text
