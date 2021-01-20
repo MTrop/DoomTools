@@ -23,7 +23,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.create;
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.file;
-//import static net.mtrop.doom.tools.doommake.ProjectTemplate.directory;
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.directory;
 
 /**
  * Main class for DoomMake.
@@ -39,8 +39,9 @@ public final class DoomMakeMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;
-	private static final int ERROR_BAD_TEMPLATE = 3;
-	private static final int ERROR_BAD_PROJECT = 4;
+	private static final int ERROR_BAD_SCRIPT = 3;
+	private static final int ERROR_BAD_TEMPLATE = 4;
+	private static final int ERROR_BAD_PROJECT = 5;
 	private static final int ERROR_UNKNOWN = 100;
 
 	private static final String SWITCH_HELP = "--help";
@@ -75,7 +76,7 @@ public final class DoomMakeMain
 		private boolean version;
 		private boolean listTemplates;
 
-		private String createTemplate;
+		private List<String> createTemplates;
 		
 		private Mode mode;
 		private Integer runawayLimit;
@@ -96,8 +97,9 @@ public final class DoomMakeMain
 			this.help = false;
 			this.version = false;
 			this.listTemplates = false;
-			this.createTemplate = null;
+			this.createTemplates = null;
 
+			this.mode = Mode.EXECUTE;
 			this.runawayLimit = 0;
 			this.activationDepth = 256;
 			this.stackDepth = 2048;
@@ -211,11 +213,11 @@ public final class DoomMakeMain
 				setUpTemplates();
 				options.stdout.println("List of available templates:");
 				for (Map.Entry<String, ProjectTemplate> entry : TEMPLATES.entrySet())
-					options.stdout.println(entry.getKey());
+					options.stdout.printf("%-10s %s\n", entry.getKey(), Common.isEmpty(entry.getValue().getDescription()) ? "" : entry.getValue().getDescription());
 				return ERROR_NONE;
 			}
 
-			if (options.createTemplate != null)
+			if (options.createTemplates != null)
 			{
 				if (Common.isEmpty(options.targetName))
 				{
@@ -224,12 +226,17 @@ public final class DoomMakeMain
 				}
 				
 				setUpTemplates();
-				ProjectTemplate template;
-				if ((template = TEMPLATES.get(options.createTemplate)) == null)
+				ProjectTemplate template = create();
+				for (String name : options.createTemplates)
 				{
-					options.stderr.println("ERROR: No such project template: " + options.createTemplate);
-					options.stderr.println("Try running DoomMake with --list-templates for the list of available templates.");
-					return ERROR_BAD_TEMPLATE;
+					ProjectTemplate found;
+					if ((found = TEMPLATES.get(name)) == null)
+					{
+						options.stderr.println("ERROR: No such project template: " + name);
+						options.stderr.println("Try running DoomMake with `--list-templates` for the list of available templates.");
+						return ERROR_BAD_TEMPLATE;
+					}
+					template.add(found);
 				}
 				
 				try {
@@ -242,6 +249,12 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 
+			if (options.mode == Mode.EXECUTE && !options.scriptFile.exists())
+			{
+				options.stderr.printf("ERROR: Script file \"%s\" could not be found!\n", options.scriptFile.getPath());
+				return ERROR_BAD_SCRIPT;
+			}
+			
 			Properties props = new Properties();
 			if (options.propertiesFile.exists())
 			{
@@ -320,7 +333,10 @@ public final class DoomMakeMain
 					else if (arg.equals(SWITCH_LISTTEMPLATES))
 						options.listTemplates = true;
 					else if (arg.equals(SWITCH_NEWPROJECT))
+					{
+						options.createTemplates = new LinkedList<>();
 						state = STATE_TEMPLATENAME;
+					}
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
@@ -361,9 +377,7 @@ public final class DoomMakeMain
 				
 				case STATE_TEMPLATENAME:
 				{
-					options.targetName = null;
-					options.createTemplate = arg;
-					state = STATE_START;
+					options.createTemplates.add(arg);
 				}
 				break;
 				
@@ -417,8 +431,6 @@ public final class DoomMakeMain
 			throw new OptionParseException("ERROR: Expected script file after switch.");
 		if (state == STATE_PROPERTYFILE)
 			throw new OptionParseException("ERROR: Expected properties file after switch.");
-		if (state == STATE_TEMPLATENAME)
-			throw new OptionParseException("ERROR: Expected template name to create.");
 		if (state == STATE_SWITCHES_ACTIVATION)
 			throw new OptionParseException("ERROR: Expected number after activation depth switch.");
 		if (state == STATE_SWITCHES_STACK)
@@ -478,7 +490,7 @@ public final class DoomMakeMain
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
 		out.println("                [--list-templates]");
-		out.println("                [--new-project [templatename] [directory]]");
+		out.println("                [[directory] --new-project [templates]]");
 	}
 	
 	/**
@@ -493,8 +505,12 @@ public final class DoomMakeMain
 		out.println("[args]:");
 		out.println("    The additional arguments to pass along to the script.");
 		out.println();
-		out.println("[templatename]:");
-		out.println("    The name of the template to use for the new project.");
+		out.println("[templates]:");
+		out.println("    The names of the template(s) to use or combine for the new ");
+		out.println("    project (applied altogether).");
+		out.println("    E.g.: --new-project wad deh git");
+		out.println("        Combines the \"wad\", \"deh\", and \"git\" templates together,");
+		out.println("        in that order.");
 		out.println();
 		out.println("[directory]:");
 		out.println("    The directory for the new project.");
@@ -532,8 +548,45 @@ public final class DoomMakeMain
 			file(".gitattributes", 
 				"doommake/git/gitattributes.txt")
 		);
+		final ProjectTemplate INFO = create(
+			file("src/wadinfo.txt", 
+				"doommake/common/src/wadinfo.txt"),
+			file("src/credits.txt", 
+				"doommake/common/src/credits.txt")
+		);
+		final ProjectTemplate PROPERTIES = create(
+			file("doommake.properties", 
+				"doommake/doommake.properties")
+		);
+		final ProjectTemplate COMMON = create(
+			directory("_build"),
+			directory("assets/_global"),
+			directory("assets/graphics"),
+			directory("assets/music"),
+			directory("assets/sounds"),
+			directory("assets/sprites"),
+			directory("assets/flats"),
+			directory("assets/patches"),
+			directory("maps")
+		);
+		final ProjectTemplate COMMON_PROJECT = create(
+			file("doommake.script", 
+				"doommake/doommake.script",
+				"doommake/common/doommake-clean.script"
+			),
+			file("README.md", 
+				"doommake/README.md")
+		);
 		
-		TEMPLATES.put("git", create().add(GIT));
+		TEMPLATES.put("git",
+			create("Adds files for Git repository support (ignores, attributes).").add(GIT));
+		TEMPLATES.put("info",
+			create("Adds common info files to source (WADINFO and CREDITS).").add(INFO));
+		TEMPLATES.put("properties",
+			create("Adds the common DoomMake properties.").add(PROPERTIES));
+		TEMPLATES.put("common-project",
+			create("Creates a common project structure (also includes: info, properties).")
+				.add(INFO).add(PROPERTIES).add(COMMON).add(COMMON_PROJECT));
 	}
 
 }

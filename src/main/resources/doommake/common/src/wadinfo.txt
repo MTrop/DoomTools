@@ -1,0 +1,151 @@
+===========================================================================
+Archive Maintainer      : Message to Archive Maintainer, if any.
+Update to               : What is this updating, if anything?
+Advanced engine needed  : Source Port that This is Targeting
+Primary purpose         : Single play / Co-op / Deathmatch / Other
+===========================================================================
+Title                   : Title of this Mod
+Filename                : The main filename
+Release date            : Mnth. Day, Year 
+Author                  : Your Name or Pen Name
+Email Address           : email@yourdomain.com (must match uploader)
+Other Files By Author   : 
+Misc. Author Info       : 
+
+Description             : ADD DESCRIPTION HERE
+
+Additional Credits to   : ADD'L CREDITS HERE
+===========================================================================
+* What is included *
+
+New levels              : Number of levels OR None
+Sounds                  : No / Yes
+Music                   : No / Yes
+Graphics                : No / Yes
+Dehacked/BEX Patch      : No / Yes / DeHackEd Lump
+Demos                   : No / Yes
+Other                   : 
+Other files required    : 
+
+
+* Play Information *
+
+Game                    : Doom / Doom 2 / Heretic ... etc.
+Map #                   : EXMY / MAPXX ...
+Single Player           : Designed for / Player Starts Only / No
+Cooperative 2-4 Player  : Designed for / Player Starts Only / No
+Deathmatch 2-4 Player   : Designed for / Player Starts Only / No
+Other game styles       : 
+Difficulty Settings     : Not implemented / Yes
+
+
+* Construction *
+
+Base                    : New from scratch OR Modified version of (name of
+                          original file).
+Build Time              : 
+Editor(s) used          : 
+Known Bugs              : None OR List bugs here...
+May Not Run With        : Engines/ports/EXEs known to have problems with it.
+Tested With             : Engines/ports/EXEs used to test (include version
+                          numbers).
+
+
+* Copyright / Permissions *
+
+              !!! PICK ONE OF THE FOLLOWING SECTIONS !!!
+
+[[[ ---- Allow Adaptation and Distribution ---- ]]]
+
+This work is licensed under the Creative Commons Attribution 4.0
+International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by/4.0/
+
+You are free to copy and redistribute the material in any medium or format;
+and remix, transform, and build upon the material for any purpose, even
+commercially. If you do so, you must give appropriate credit, provide a link
+to the license, and indicate if changes were made. You may do so in any
+reasonable manner, but not in any way that suggests the licensor endorses you
+or your use.
+
+
+[[[ ---- Allow Adaptation and Distribution, but NOT Commercially ----- ]]]
+
+This work is licensed under the Creative Commons Attribution-NonCommercial 
+4.0 International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by-nc/4.0/
+
+You are free to copy and redistribute the material in any medium or format
+for any purpose, EXCEPT commercially. If you do so, you must give appropriate
+credit, provide a link to the license, and indicate if changes were made. You
+may do so in any reasonable manner, but not in any way that suggests the
+licensor endorses you or your use. You may NOT use the material for commercial
+purposes. If you remix, transform, or build upon the material, you may 
+distribute the modified material.
+
+
+[[[ ---- Allow Adaptation and Distribution and Enforce License Inheritance ----- ]]]
+
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0
+International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by-sa/4.0/
+
+You are free to copy and redistribute the material in any medium or format;
+and remix, transform, and build upon the material for any purpose, even
+commercially. If you do so, you must give appropriate credit, provide a link
+to the license, and indicate if changes were made. You may do so in any
+reasonable manner, but not in any way that suggests the licensor endorses you
+or your use. If you remix, transform, or build upon the material, you MUST
+distribute your contributions under the same license as the original.
+
+
+[[[ ---- Allow Adaptation and Distribution, but NOT Commercially, and Enforce License Inheritance ----- ]]]
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-
+ShareAlike 4.0 International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+You are free to copy and redistribute the material in any medium or format;
+and remix, transform, and build upon the material for any purpose, EXCEPT
+commercially. If you do so, you must give appropriate credit, provide a link
+to the license, and indicate if changes were made. You may do so in any
+reasonable manner, but not in any way that suggests the licensor endorses you
+or your use. You may NOT use the material for commercial purposes. If you 
+remix, transform, or build upon the material, you MUST distribute your 
+contributions under the same license as the original.
+
+
+[[[ ---- Disallow Release of Further Adaptations ----- ]]]
+
+This work is licensed under the Creative Commons Attribution-NoDerivatives
+4.0 International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by-nd/4.0/
+
+You are free to copy and redistribute the material in any medium or format
+for any purpose, even commercially. If you do so, you must give appropriate
+credit, provide a link to the license, and indicate if changes were made. You
+may do so in any reasonable manner, but not in any way that suggests the
+licensor endorses you or your use.  If you remix, transform, or build upon
+the material, you may NOT distribute the modified material.
+
+
+[[[ ---- Disallow Release of Further Adaptations plus Forbid Commercial Distribution ----- ]]]
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-
+NoDerivatives 4.0 International License. To view a copy of this license, visit
+https://creativecommons.org/licenses/by-nc-nd/4.0/
+
+You are free to copy and redistribute the material in any medium or format
+for any purpose, EXCEPT commercially. If you do so, you must give appropriate
+credit, provide a link to the license, and indicate if changes were made. You
+may do so in any reasonable manner, but not in any way that suggests the
+licensor endorses you or your use. You may NOT use the material for commercial
+purposes. If you remix, transform, or build upon the material, you may NOT 
+distribute the modified material.
+
+
+* Where to get the file that this text file describes *
+
+The Usual: ftp://archives.gamers.org/pub/idgames/ and mirrors
+Web sites: 
+FTP sites: 

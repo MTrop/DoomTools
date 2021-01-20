@@ -27,13 +27,9 @@
 
 # DoomMake
 doommake.properties
-doommake.script
 
 # Generate-able by DoomMake
-/bin
-/build
-/dist
-/deps
+/_build
 
 # Doom Builder and Others
 *.dbs
@@ -50,5 +46,3 @@ thumbs.db
 
 # OSX/MacOS
 *.DS_Store
-
-

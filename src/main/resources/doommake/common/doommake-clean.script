@@ -1,0 +1,12 @@
+function cleanBuildDirectory()
+{
+	return cleandir("_build");
+}
+
+// ======== TARGET =========
+// Clean the build directory.
+entry clean(properties, args)
+{
+	cleanBuildDirectory();
+}
+

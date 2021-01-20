@@ -18,6 +18,8 @@ public final class ProjectTemplate
 {
 	private static final String[] BLANK_RESOURCES = new String[0];
 	
+	/** Template description. */
+	private String description;
 	/** Template file entries. */
 	private List<Entry> entries;
 	
@@ -74,18 +76,30 @@ public final class ProjectTemplate
 	}
 	
 	/**
-	 * Crates a new template.
+	 * Creates a new template.
+	 * @param description the template description.
+	 * @param entries the template entries.
+	 * @return the new template.
+	 */
+	public static ProjectTemplate create(String description, Entry... entries)
+	{
+		return new ProjectTemplate(description, entries);
+	}
+
+	/**
+	 * Creates a new template.
 	 * @param entries the template entries.
 	 * @return the new template.
 	 */
 	public static ProjectTemplate create(Entry... entries)
 	{
-		return new ProjectTemplate(entries);
+		return create(null, entries);
 	}
 
 	// New project template.
-	private ProjectTemplate(Entry... entries)
+	private ProjectTemplate(String description, Entry... entries)
 	{
+		this.description = description;
 		this.entries = new LinkedList<>();
 		addEntries(entries);
 	}
@@ -113,6 +127,14 @@ public final class ProjectTemplate
 	{
 		addEntries(template.entries);
 		return this;
+	}
+	
+	/**
+	 * @return this template's description.
+	 */
+	public String getDescription()
+	{
+		return description;
 	}
 	
 	/**
