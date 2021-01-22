@@ -9,24 +9,32 @@ function getMapsWad() {
 }
 
 /**
- * Calls the merge script for merging maps.
+ * Merges maps together.
  */
-check function mergeMaps() {
+function mergeMaps() {
 	verifydirs("src/maps");
 	
 	wadlist = filelist("src/maps", false, `.*\.(wad|WAD)`);
 	
+	outwadpath = getBuildDirectory() + "/" + getMapsWad();
+	
 	check (err) {
-		destwad = wadfilecreate(getBuildDirectory() + "/" + getMapsWad());
+		destwad = wadfilecreate(outwadpath);
 		each (w : wadlist) {
-			srcwad = wadfile(w);
-			destWad->wadimport(srcwad, srcwad->wadentries());
+			check (err) {
+				srcwad = wadfile(w);
+				println("Merging map " + w + "...");
+				destWad->wadimport(srcwad, srcwad->wadentries());
+			}
 			close(srcwad);
+			if (err)
+				return err;
 		}
 	}
 	close(destwad);
 	if (err)
 		return err;
+	println("Wrote file `" + outwadpath + "`.");
 }
 
 
