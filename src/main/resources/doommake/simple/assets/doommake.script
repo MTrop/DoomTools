@@ -11,12 +11,17 @@ check function doRelease() {
 		args: [getBuildDirectory(), getAssetsWad(), getMapsWad(), getProjectWad()]
 	});
 	copyProjectTxt();
+	
+	outzip = getDistDirectory() + "/" + getProjectZip();
+	println("Zipping project to " + outzip + "...");
 	zipfiles(
-		getDistDirectory() + "/" + getProjectZip(), [
+		outzip, 
+		[
 			getBuildDirectory() + "/" + getProjectWad(), 
 			getBuildDirectory() + "/" + getProjectTxt()
 		]
 	);
+	println("Done!");
 }
 
 
