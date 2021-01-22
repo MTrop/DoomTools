@@ -303,7 +303,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				ZipOutputStream zos = null;
 				try 
 				{
-					zos = append && zipFile.exists() ? reopenZipFile(zipFile, returnValue) : new ZipOutputStream(new FileOutputStream(zipFile, true));
+					zos = append && zipFile.exists() ? reopenZipFile(zipFile, returnValue) : new ZipOutputStream(new FileOutputStream(zipFile));
 					if (returnValue.isError())
 					{
 						IOUtils.close(zos);
