@@ -6,4 +6,78 @@
  * All WadScript and DoomMake extensions are available here. 
  ******************************************************************************/
 
- 
+#define PROP_BUILDDIR "doommake.dir.build"
+#define DEFAULT_BUILDDIR "build"
+#define PROP_DISTDIR "doommake.dir.dist"
+#define DEFAULT_DISTDIR "dist"
+
+/**
+ * Return a property by its key, or def if null.
+ */
+function prop(key, def) {
+	out = properties(key);
+	return empty(out) ? def : out;
+}
+
+/**
+ * Return the build directory path.
+ */
+function getBuildDirectory() {
+	return prop(PROP_BUILDDIR, DEFAULT_BUILDDIR); 
+}
+
+/**
+ * Return the distribution directory path.
+ */
+function getDistDirectory() {
+	return prop(PROP_DISTDIR, DEFAULT_DISTDIR); 
+}
+
+/**
+ * Initializes the build directory.
+ */
+function initBuild() {
+	return verifydirs(getBuildDirectory());
+}
+
+/**
+ * Cleans the build directory found in the properties.
+ */
+function cleanBuild() {
+	initBuild();
+	return cleandir(getBuildDirectory());
+}
+
+/**
+ * Initializes the build directory.
+ */
+function initDist() {
+	return verifydirs(getDistDirectory());
+}
+
+
+/*****************************************************************************
+ * TARGET: init
+ *****************************************************************************
+ * Initializes this project.
+ * doommake init
+ ****************************************************************************/
+check entry init(args) {
+	
+	// ---------------------------------------------------
+	// If this project needs initial setup, do it here.
+	// ---------------------------------------------------
+	
+}
+
+
+/*****************************************************************************
+ * TARGET: clean
+ *****************************************************************************
+ * Cleans the build directory.
+ * doommake clean
+ ****************************************************************************/
+check entry clean(args) {
+	cleanBuild();
+}
+

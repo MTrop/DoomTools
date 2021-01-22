@@ -1376,16 +1376,22 @@ FILECANONPATH(path)
         (ERROR:Security) If the OS is preventing the search.
         (ERROR:IOError) If an error occurred during search.
 
-FILELIST(path)
-    Returns all files in a directory (and optionally, whose name fits a RegEx pattern).
+FILELIST(path, recursive, regex)
+    Returns all files in a directory (and optionally, whose name fits a RegEx pattern). If recursive traversal is used, no directories will be added to the resultant list, just the files.
     path:
         (STRING) A file path to inspect.
         (OBJECTREF:File) A file path to inspect.
+    recursive:
+        (BOOLEAN) If true, scan recursively.
+    regex:
+        (NULL) Include everything.
+        (STRING) The pattern to match each file against.
     Returns:
         (NULL) If not a directory or [path] is null.
         (LIST:[STRING, ...]) A list of file paths in the directory (if parameter was string).
         (LIST:[OBJECTREF:File, ...]) A list of file paths in the directory (if parameter was file).
         (ERROR:Security) If the OS is preventing the search.
+        (ERROR:BadPattern) If the input RegEx pattern is malformed.
 
 FILEDELETE(path)
     Attempts to delete a file.
@@ -2197,7 +2203,8 @@ PROPERTIES(key)
         (STRING) Get a single property as a string value.
         (LIST) Get all provided properties as a map.
     Returns:
-        (STRING) The corresponding property, if [key] is a string. Can be null.
+        (NULL) IF no corresponding property, if [key] is a string.
+        (STRING) The corresponding property, if [key] is a string.
         (MAP) The corresponding map of properties, if [key] is null or a list.
         (ERROR:Security) If a property cannot be queried.
 

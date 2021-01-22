@@ -1,0 +1,46 @@
+#define PROP_ASSETWAD "doommake.file.assets"
+#define DEFAULT_ASSETWAD "assets.wad"
+#define PROP_ASSETSCRIPT "doommake.script.assets"
+#define DEFAULT_ASSETSCRIPT "scripts/merge-assets.txt"
+
+/**
+ * Return the asset wad.
+ */
+function getAssetsWad() {
+	return prop(PROP_ASSETWAD, DEFAULT_ASSETWAD); 
+}
+
+/**
+ * Return the asset merge script.
+ */
+function getAssetsScript() {
+	return prop(PROP_ASSETSCRIPT, DEFAULT_ASSETSCRIPT); 
+}
+
+/**
+ * Calls the merge script for merging maps.
+ */
+check function mergeAssets() {
+	verifydirs("src/assets/_global");
+	verifydirs("src/assets/graphics");
+	verifydirs("src/assets/music");
+	verifydirs("src/assets/sounds");
+	verifydirs("src/assets/sprites");
+	return tool::wadmerge({
+		inputfile: file(getAssetsScript()),
+		args: [getBuildDirectory() + "/" + getAssetsWad()] 
+	});
+}
+
+
+/*****************************************************************************
+ * TARGET: assets
+ *****************************************************************************
+ * Merges the assets WAD.
+ * doommake assets
+ ****************************************************************************/
+check entry assets(args) {
+	initBuild();
+	mergeAssets();
+}
+

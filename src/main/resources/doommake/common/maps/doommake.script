@@ -1,0 +1,43 @@
+#define PROP_MAPSWAD "doommake.file.maps"
+#define DEFAULT_MAPSWAD "maps.wad"
+
+/**
+ * Return the asset wad.
+ */
+function getMapsWad() {
+	return prop(PROP_MAPSWAD, DEFAULT_MAPSWAD); 
+}
+
+/**
+ * Calls the merge script for merging maps.
+ */
+check function mergeMaps() {
+	verifydirs("src/maps");
+	
+	wadlist = filelist("src/maps", false, `.*\.(wad|WAD)`);
+	
+	check (err) {
+		destwad = wadfilecreate(getBuildDirectory() + "/" + getMapsWad());
+		each (w : wadlist) {
+			srcwad = wadfile(w);
+			destWad->wadimport(srcwad, srcwad->wadentries());
+			close(srcwad);
+		}
+	}
+	close(destwad);
+	if (err)
+		return err;
+}
+
+
+/*****************************************************************************
+ * TARGET: maps
+ *****************************************************************************
+ * Merges the maps WAD.
+ * doommake maps
+ ****************************************************************************/
+check entry maps(args) {
+	initBuild();
+	mergeMaps();
+}
+

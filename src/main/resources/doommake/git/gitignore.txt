@@ -1,4 +1,6 @@
-##### IDEs / Editors #####
+###############################
+####### IDEs / Editors ########
+###############################
 
 # Emacs/vim
 *~
@@ -23,13 +25,17 @@
 .shelf
 
 
-##### Utilities #####
+###############################
+########## Utilities ##########
+###############################
 
 # DoomMake
 doommake.properties
 
 # Generate-able by DoomMake
-/_build
+/build
+/dist
+/gen
 
 # Doom Builder and Others
 *.dbs
@@ -38,7 +44,9 @@ doommake.properties
 *.backup*
 
 
-##### Platforms #####
+###############################
+########## Platforms ##########
+###############################
 
 # Windows
 Desktop.ini

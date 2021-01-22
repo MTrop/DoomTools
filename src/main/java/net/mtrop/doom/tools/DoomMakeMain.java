@@ -11,7 +11,6 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.WadScriptMain.Mode;
@@ -23,7 +22,8 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.create;
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.file;
-import static net.mtrop.doom.tools.doommake.ProjectTemplate.directory;
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.dir;
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.fileAppend;
 
 /**
  * Main class for DoomMake.
@@ -213,7 +213,7 @@ public final class DoomMakeMain
 				setUpTemplates();
 				options.stdout.println("List of available templates:");
 				for (Map.Entry<String, ProjectTemplate> entry : TEMPLATES.entrySet())
-					options.stdout.printf("%-10s %s\n", entry.getKey(), Common.isEmpty(entry.getValue().getDescription()) ? "" : entry.getValue().getDescription());
+					options.stdout.printf("%-16s %s\n", entry.getKey(), Common.isEmpty(entry.getValue().getDescription()) ? "" : entry.getValue().getDescription());
 				return ERROR_NONE;
 			}
 
@@ -222,6 +222,14 @@ public final class DoomMakeMain
 				if (Common.isEmpty(options.targetName))
 				{
 					options.stderr.println("ERROR: No directory path.");
+					return ERROR_BAD_PROJECT;
+				}
+				
+				File targetDirectory = new File(options.targetName);
+				
+				if (targetDirectory.exists() && targetDirectory.listFiles().length > 0)
+				{
+					options.stderr.println("ERROR: Target directory contains files. Project creation aborted.");
 					return ERROR_BAD_PROJECT;
 				}
 				
@@ -255,12 +263,11 @@ public final class DoomMakeMain
 				return ERROR_BAD_SCRIPT;
 			}
 			
-			Properties props = new Properties();
 			if (options.propertiesFile.exists())
 			{
 				try (Reader reader = new InputStreamReader(new FileInputStream(options.propertiesFile)))
 				{
-					props.load(reader);
+					System.getProperties().load(reader);
 				} 
 				catch (IOException e) 
 				{
@@ -279,7 +286,6 @@ public final class DoomMakeMain
 					.setScriptFile(options.scriptFile)
 					.addResolver("DoomMake Functions", DoomMakeFunctions.createResolver())
 					.addResolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
-					.addEntryParameterArg(props)
 				;
 				for (Object obj : options.args)
 					wsOptions.addArg(obj);
@@ -543,50 +549,97 @@ public final class DoomMakeMain
 	private static void setUpTemplates()
 	{
 		final ProjectTemplate GIT = create(
+			"Git repository support.",
 			file(".gitignore", 
 				"doommake/git/gitignore.txt"),
 			file(".gitattributes", 
 				"doommake/git/gitattributes.txt")
 		);
-		final ProjectTemplate INFO = create(
-			file("src/wadinfo.txt", 
-				"doommake/common/src/wadinfo.txt"),
-			file("src/credits.txt", 
-				"doommake/common/src/credits.txt")
-		);
-		final ProjectTemplate PROPERTIES = create(
-			file("doommake.properties", 
-				"doommake/doommake.properties")
-		);
 		final ProjectTemplate COMMON = create(
-			directory("_build"),
-			directory("assets/_global"),
-			directory("assets/graphics"),
-			directory("assets/music"),
-			directory("assets/sounds"),
-			directory("assets/sprites"),
-			directory("assets/flats"),
-			directory("assets/patches"),
-			directory("maps")
+			"Common WAD info.",
+			file("src/wadinfo.txt", 
+				"doommake/common/wadinfo.txt"),
+			file("src/credits.txt", 
+				"doommake/common/credits.txt")
 		);
-		final ProjectTemplate COMMON_PROJECT = create(
+		final ProjectTemplate COMMON_MAKE = create(
+			"Common make scripts.",
 			file("doommake.script", 
-				"doommake/doommake.script",
-				"doommake/common/doommake-clean.script"
-			),
-			file("README.md", 
+				"doommake/doommake.script"),
+			file("doommake.properties", 
+				"doommake/doommake.properties"),
+			file("README.md",
 				"doommake/README.md")
 		);
+		final ProjectTemplate COMMON_RELEASE_STUB = create(
+			"Common release stubbing.",
+			dir("dist"),
+			fileAppend("doommake.properties", 
+				"doommake/common/release/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/release/doommake.script"),
+			fileAppend("README.md",
+				"doommake/common/release/README.md")
+		);
 		
+		final ProjectTemplate COMMON_MAPS = create(
+			"Common map project structure.",
+			dir("src/maps"),
+			fileAppend("doommake.properties", 
+				"doommake/common/maps/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/maps/doommake.script"),
+			fileAppend("README.md",
+				"doommake/common/maps/README.md")
+		);
+		final ProjectTemplate COMMON_ASSETS = create(
+			"Common asset project structure.",
+			dir("src/assets/_global"),
+			dir("src/assets/graphics"),
+			dir("src/assets/music"),
+			dir("src/assets/sounds"),
+			dir("src/assets/sprites"),
+			file("scripts/merge-assets.txt",
+				"doommake/common/assets/wadmerge.txt"),
+			fileAppend("doommake.properties", 
+				"doommake/common/assets/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/assets/doommake.script"),
+			fileAppend("README.md",
+				"doommake/common/assets/README.md")
+		);
+
 		TEMPLATES.put("git",
-			create("Adds files for Git repository support (ignores, attributes).").add(GIT));
-		TEMPLATES.put("info",
-			create("Adds common info files to source (WADINFO and CREDITS).").add(INFO));
-		TEMPLATES.put("properties",
-			create("Adds the common DoomMake properties.").add(PROPERTIES));
-		TEMPLATES.put("common-project",
-			create("Creates a common project structure (also includes: info, properties).")
-				.add(INFO).add(PROPERTIES).add(COMMON).add(COMMON_PROJECT));
+			create("Adds files for Git repository support (ignores, attributes).")
+				.add(GIT)
+			);
+		TEMPLATES.put("simple-maps",
+			create("A project that builds just a set of maps.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/simple/maps/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/simple/maps/doommake.script")
+				))
+			);
+		TEMPLATES.put("simple-assets",
+			create("A project that builds maps and non-texture assets together.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(COMMON_ASSETS)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/simple/assets/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/simple/assets/doommake.script")
+				))
+			);
 	}
 
 }

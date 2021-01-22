@@ -53,6 +53,12 @@ DMXConv
 WadMerge
 --------
 
+### Changed for 1.4.0
+
+* `Added` An argument for MERGEDIR to omit the directory markers.
+* `Added` Support for argument expansion in scripts.
+
+
 ### Changed for 1.3.0
 
 * `Fixed` Some performance improvements and verbose output performance.

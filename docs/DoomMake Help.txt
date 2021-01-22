@@ -11,16 +11,358 @@ script file (DoomMake's scripts are an implementation of RookScript/WadScript,
 and the documentation is provided in this distribution as "WadScript Help.txt"
 and "RookScript Quick Guide.md").
 
-Each entry point receives two arguments: a map of properties from an 
-automatically-loaded properties file, and the list of additional command-line 
+Each entry point receives one argument: the list of additional command-line 
 arguments passed to the script, if any.
 
+DoomMake automatically loads a properties file to Java's system properties,
+so that is accessible from the "properties()" built-in function. The default 
+properties file is "doommake.properties", unless overridden.
 
 ==============================================================================
 ===== Command Line
 ==============================================================================
 
+Usage: doommake [target] [args] [switches]
+                [--help | -h | --version]
+                [--function-help | --function-help-markdown]
+                [--list-templates]
+                [[directory] --new-project [templates]]
+
+[target]:
+    The target entry point to execute. Default is "make".
+
+[args]:
+    The additional arguments to pass along to the script.
+
+[templates]:
+    The names of the template(s) to use or combine for the new 
+    project (applied altogether).
+    E.g.: --new-project common-map git
+        Combines the "common-map" and "git" templates together,
+        in that order.
+
+[directory]:
+    The directory for the new project.
+
+[switches]:
+    --help, -h                   Prints this help.
+    --version                    Prints the version of this utility.
+    --function-help              Prints all available function usages.
+    --function-help-markdown     Prints all available function usages in
+                                     Markdown format.
+
+    --script, -s [filename]      Use [filename] for the root build script.
+                                     Default is "doommake.script".
+    --properties, -p [filename]  Use [filename] for the project properties.
+                                     Default is "doommake.properties".
+
+    --runaway-limit [num]        Sets the runaway limit (in operations)
+                                     before the soft protection on infinite
+                                     loops triggers. 0 is no limit.
+                                     Default: 0
+    --activation-depth [num]     Sets the activation depth to [num].
+                                     Default: 256
+    --stack-depth [num]          Sets the stack value depth to [num].
+                                     Default: 2048
+
 ==============================================================================
 ===== Script Commands
 ==============================================================================
 
+See WadScript Command reference (WadScript Help.txt), plus the following:
+
+=================================================================
+==== DoomMake Functions
+=================================================================
+
+CLEANDIR(path, deleteTop)
+    Recursively deletes all files and directories inside a target directory.
+    path:
+        (STRING) Path to directory.
+        (OBJECTREF:File) Path to directory.
+    deleteTop:
+        (BOOLEAN) If true, also delete the provided directory as well.
+    Returns:
+        (NULL) If [path] is null.
+        (BOOLEAN) True if the directory existed and was cleaned, false otherwise.
+        (ERROR:Security) If the OS is preventing the read.
+
+COPYFILE(srcFile, destFile, createDirs)
+    Copies a file from one path to another, optionally creating directories 
+    for it. If the destination file exists, it is overwritten.
+    srcFile:
+        (STRING) Path to source file.
+        (OBJECTREF:File) Path to source file.
+    destFile:
+        (STRING) Path to destination file.
+        (OBJECTREF:File) Path to destination file.
+    createDirs:
+        (BOOLEAN) If true, create the directories for the destination, if not made.
+    Returns:
+        (NULL) If either file is null.
+        (BOOLEAN) True if the file was copied successfully, false if not.
+        (ERROR:BadFile) If the source file does not exist.
+        (ERROR:IOError) If a read or write error occurs.
+        (ERROR:Security) If the OS is preventing the read or write.
+
+COPYDIR(srcDir, destDir, recursive, regex)
+    Copies a series of files from one directory to another, replicating the 
+    tree in the destination. If the destination file exists, it is overwritten.
+    srcDir:
+        (STRING) Path to source directory (base path).
+        (OBJECTREF:File) Path to source directory (base path).
+    destDir:
+        (STRING) Path to destination directory.
+        (OBJECTREF:File) Path to destination directory.
+    recursive:
+        (BOOLEAN) If true, scan recursively.
+    regex:
+        (NULL) Include everything.
+        (STRING) The pattern to match each file path against for inclusion. If matched, include.
+    Returns:
+        (NULL) If either file is null.
+        (LIST:[STRING, ...]) The list of copied/created files (destination).
+        (ERROR:BadFile) If the source or destination directory does not exist.
+        (ERROR:BadPattern) If the input RegEx pattern is malformed.
+        (ERROR:IOError) If a read or write error occurs.
+        (ERROR:Security) If the OS is preventing the read or write.
+
+ZIPFILES(zipfile, files, append, compressed)
+    Compresses a series of files into an archive, NOT preserving directory 
+    trees. If the destination file exists, it is overwritten.
+    zipfile:
+        (STRING) Path to target zip file.
+        (OBJECTREF:File) Path to target zip file.
+    files:
+        (LIST:[STRING, ...]) Paths to files to add.
+        (LIST:[OBJECTREF:File, ...]) Paths to files to add.
+    append:
+        (NULL) Default: False.
+        (BOOLEAN) True to append to an existing Zip file, false to overwrite.
+    compressed:
+        (NULL) Default: True.
+        (BOOLEAN) True to compress, false to not compress.
+    Returns:
+        (NULL) If [zipfile] is null.
+        (STRING) The path to the created file, if [zipfile] is a STRING.
+        (OBJECTREF:File) The path to the created file, if [zipfile] is an OBJECTREF:File.
+        (ERROR:BadFile) If a source file cannot be opened.
+        (ERROR:IOError) If a read or write error occurs.
+        (ERROR:Security) If the OS is preventing the read or write.
+
+ZIPDIR(zipfile, directory, prefix, append, regex, compressed)
+    Compresses a series of files into an archive from a directory, preserving 
+    directory trees. Always recurses directory structure. If the destination 
+    file exists, it is overwritten, unless [append] is true.
+    zipfile:
+        (STRING) Path to source directory (base path).
+        (OBJECTREF:File) Path to source directory (base path).
+    directory:
+        (OBJECTREF:File) Path to source directory.
+    prefix:
+        (NULL) No prefix.
+        (STRING) The string to prefix all new entries with.
+    append:
+        (NULL) Default: False.
+        (BOOLEAN) True to append to an existing Zip file, false to overwrite.
+    regex:
+        (NULL) Include everything.
+        (STRING) The pattern to match each file path against for inclusion. If matched, include.
+    compressed:
+        (NULL) Default: True.
+        (BOOLEAN) True to compress, false to not compress.
+    Returns:
+        (NULL) If [zipfile] is null.
+        (STRING) The path to the created file, if [zipfile] is a STRING.
+        (OBJECTREF:File) The path to the created file, if [zipfile] is an OBJECTREF:File.
+        (ERROR:BadFile) If a source file cannot be opened.
+        (ERROR:IOError) If a read or write error occurs.
+        (ERROR:Security) If the OS is preventing the read or write.
+
+
+=================================================================
+==== Tool Invocation
+=================================================================
+
+TOOL::DOOMTOOLS(options)
+    Calls the DoomTools tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+        	stdout:OBJECTREF(OutputStream)
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::DOOMMAKE(options)
+    Calls the DoomMake tool. Inherits STDOUT/STDERR/STDIN of this script 
+    unless overridden (see options). It is important to note that the 
+    instance of DoomMake that runs has no inherent link to this instance.
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        stdin:OBJECTREF(InputStream), 
+	        targetName:STRING, 
+	        propertiesFile:OBJECTREF(File), 
+	        scriptFile:OBJECTREF(File), 
+	        args:LIST[STRING, ...], 
+	        runawayLimit:INTEGER, 
+	        activationDepth:INTEGER, 
+	        stackDepth:INTEGER
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::DECOHACK(options)
+    Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        infile:OBJECTREF(File), 
+	        outfile:OBJECTREF(File), 
+	        outcharsetname:STRING, 
+	        outputbudget:BOOLEAN}
+        ) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::DMXCONVERT(options)
+    Calls the DMXConvert tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        files:LIST[STRING, ...], 
+	        outputdirectory:OBJECTREF(File), 
+	        ffmpegpath:OBJECTREF(File), 
+	        onlyffmpeg:BOOLEAN, 
+	        onlyjspi:BOOLEAN}
+        ) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WADMERGE(options)
+    Calls the WadMerge tool. Inherits STDOUT/STDERR/STDIN of this script 
+    unless overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        stdin:OBJECTREF(InputStream), 
+	        inputfile:OBJECTREF(File), 
+			args:LIST[STRING, ...],
+	        usestdin:BOOLEAN, 
+	        verbose:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WADSCRIPT(options)
+    Calls the WadScript tool. Inherits STDOUT/STDERR/STDIN of this script 
+    unless overridden (see options). It is important to note that the instance
+    of WadScript that runs has no inherent link to this instance.
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        stdin:OBJECTREF(InputStream), 
+	        scriptFile:OBJECTREF(File), 
+	        entryPointName:STRING, 
+	        runawayLimit:INTEGER, 
+	        activationDepth:INTEGER, 
+	        stackDepth:INTEGER, 
+	        args:LIST[STRING, ...]
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WADTEX(options)
+    Calls the WADTex tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream),
+			sourcefile:OBJECTREF(File), 
+			wadfile:OBJECTREF(File), 
+			additive:BOOLEAN, 
+			exportmode:BOOLEAN, 
+			strife:BOOLEAN, 
+			verbose:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WSWANTBL(options)
+    Calls the WSwAnTbl tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        sourcefile:OBJECTREF(File), 
+	        wadfile:OBJECTREF(File), 
+	        exportmode:BOOLEAN, 
+	        verbose:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WTEXPORT(options)
+    Calls the WTEXport tool. Inherits STDOUT/STDERR/STDIN of this script 
+    unless overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        stdin:OBJECTREF(InputStream), 
+	        texturewads:LIST[STRING, ...], 
+	        basewad:OBJECTREF(File), 
+	        outwad:OBJECTREF(File), 
+	        additive:BOOLEAN, 
+	        nulltexture:STRING, 
+	        noanimated:BOOLEAN, 
+	        noswitches:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.
+
+TOOL::WTEXSCAN(options)
+    Calls the WTexScan tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
+    options:
+        (MAP:{
+	        stdout:OBJECTREF(OutputStream), 
+	        stderr:OBJECTREF(OutputStream), 
+	        wadfiles:LIST[STRING, ...], 
+	        quiet:BOOLEAN, 
+	        outputtextures:BOOLEAN, 
+	        outputflats:BOOLEAN, 
+	        skipskies:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+        (ERROR:Security) If the OS is preventing the read.

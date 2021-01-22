@@ -1,15 +1,4 @@
-=================================================================
-====               WADMerge Command Reference                ====
-=================================================================
-
-If you suspect this file is out of date, you can get this info by typing:
-
-wadmerge --help
-
-=================================================================
-====                   Command Line Usage                    ====
-=================================================================
-
+WadMerge v1.3.0 by Matt Tropiano (using DoomStruct v2.10.1)
 Usage: wadmerge [--help | -h | --version]
                 [switches] [scriptfile] [arguments]
 
@@ -44,12 +33,17 @@ Usage: wadmerge [--help | -h | --version]
     Expands to:
     mergedir "banana" "./apple/bananaphone" "doom stuff"
 
-=================================================================
-====                     Script Commands                     ====
-=================================================================
+Script Commands
+...............
 
 END
     Ends script read.
+
+ECHO [...]
+    Prints tokens to output.
+    [...]: The tokens to print.
+    ................................
+    Returns: OK if a symbol was created.
 
 CREATE [symbol]
     Creates a new in-memory buffer, errors out if the symbol exists.
@@ -291,3 +285,4 @@ MERGETEXTUREDIR [symbol] [path] [entry]
     Returns: OK if the file was found and contents were merged in,
              BAD_SYMBOL if the destination symbol is invalid,
              BAD_DIRECTORY if the provided file is not a directory.
+

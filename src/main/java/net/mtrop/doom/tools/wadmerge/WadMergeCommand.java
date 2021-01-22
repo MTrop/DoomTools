@@ -17,6 +17,7 @@ import java.util.TreeMap;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
+import net.mtrop.doom.tools.struct.ArgumentScanner;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.TokenScanner.ParseException;
 
@@ -40,6 +41,33 @@ public enum WadMergeCommand
 		{
 			// Kills the script.
 			return null;
+		}
+	},
+	
+	ECHO
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("ECHO [...]"); 
+			out.println("    Prints tokens to output."); 
+			out.println("    [...]: The tokens to print.");
+			out.println("    ................................");
+			out.println("    Returns: OK if a symbol was created.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			StringBuilder sb = new StringBuilder();
+			while (scanner.hasNext())
+			{
+				if (sb.length() > 0)
+					sb.append(' ');
+				sb.append(scanner.nextString());
+			}
+			context.logln(sb.toString());
+			return Response.OK;
 		}
 	},
 	
@@ -626,7 +654,7 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEDIR [symbol] [path]");
+			out.println("MERGEDIR [symbol] [path] [opt:nomarkers]");
 			out.println("    Adds a directory and its subdirectories recursively (files first, then");
 			out.println("    directory contents, per directory).");
 		    out.println("    For each FILE in [path],"); 
@@ -637,8 +665,9 @@ public enum WadMergeCommand
 		    out.println("            MERGEWAD [symbol] [FILE]");
 		    out.println("        Else,");
 		    out.println("            MERGEFILE [symbol] [FILE]");
-			out.println("    [symbol]: The buffer to add to.");
-			out.println("    [path]:   The source directory to scan.");
+			out.println("    [symbol]:        The buffer to add to.");
+			out.println("    [path]:          The source directory to scan.");
+			out.println("    [opt:nomarkers]: If \"nomarkers\", omit the directory markers.");
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
@@ -650,8 +679,11 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.nextString();
 			String directory = scanner.nextString();
+			boolean omitMarkers = false;
+			if (scanner.hasNext())
+				omitMarkers = scanner.nextBoolean("nomarkers");
 			try {
-				return context.mergeTree(symbol, new File(directory));
+				return context.mergeTree(symbol, new File(directory), omitMarkers);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", directory);
 				return Response.BAD_FILE;
@@ -811,10 +843,11 @@ public enum WadMergeCommand
 	 * @param streamName stream name.
 	 * @param reader the reader to read the script from.
 	 * @param context the WAD merge context.
+	 * @param arguments the WadMerge arguments.
 	 * @return true if no errors, false otherwise.
 	 * @throws IOException
 	 */
-	public static boolean callScript(String streamName, BufferedReader reader, WadMergeContext context) throws IOException
+	public static boolean callScript(String streamName, BufferedReader reader, WadMergeContext context, String[] arguments) throws IOException
 	{
 		String line;
 		int linenum = 0;
@@ -826,7 +859,7 @@ public enum WadMergeCommand
 			if (line.isEmpty() || line.startsWith("#"))
 				continue;
 			WadMergeCommand mergeCommand = null;
-			try (TokenScanner scanner = new TokenScanner(line)) 
+			try (TokenScanner scanner = new ArgumentScanner(arguments, line)) 
 			{
 				String command = scanner.nextString();
 				try 

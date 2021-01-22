@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
@@ -56,6 +58,7 @@ public final class WadMergeMain
 		private boolean verbose;
 		private boolean useStdin;
 		private File inputFile;
+		private List<String> args;
 		
 		private Options()
 		{
@@ -66,6 +69,7 @@ public final class WadMergeMain
 			this.version = false;
 			this.verbose = false;
 			this.inputFile = new File("wadmerge.txt");
+			this.args = new LinkedList<>();
 		}
 
 		public Options setStdout(OutputStream out) 
@@ -101,6 +105,12 @@ public final class WadMergeMain
 		public Options setInputFile(File inputFile) 
 		{
 			this.inputFile = inputFile;
+			return this;
+		}
+		
+		public Options addArg(String arg)
+		{
+			this.args.add(arg);
 			return this;
 		}
 		
@@ -168,7 +178,7 @@ public final class WadMergeMain
 		
 			try 
 			{
-				if (!WadMergeCommand.callScript(streamName, reader, new WadMergeContext(options.stdout, options.verbose)))
+				if (!WadMergeCommand.callScript(streamName, reader, new WadMergeContext(options.stdout, options.verbose), options.args.toArray(new String[options.args.size()])))
 					return ERROR_BAD_SCRIPT;
 			}
 			catch (IOException e)
@@ -202,6 +212,7 @@ public final class WadMergeMain
 		options.stderr = err;
 		options.stdin = in;
 		
+		boolean sawInput = false;
 		int i = 0;
 		while (i < args.length)
 		{
@@ -215,8 +226,13 @@ public final class WadMergeMain
 				options.version = true;
 			else if (arg.equals(SWITCH_SYSTEMIN))
 				options.useStdin = true;
-			else
+			else if (!sawInput)
+			{
 				options.inputFile = new File(arg);
+				sawInput = true;
+			}
+			else
+				options.args.add(arg);
 			i++;
 		}
 		
@@ -267,7 +283,8 @@ public final class WadMergeMain
 	 */
 	private static void usage(PrintStream out)
 	{
-		out.println("Usage: wadmerge [--help | -h | --version] [switches] [scriptfile]");
+		out.println("Usage: wadmerge [--help | -h | --version]");
+		out.println("                [switches] [scriptfile] [arguments]");
 	}
 	
 	/**
@@ -292,6 +309,20 @@ public final class WadMergeMain
 		out.println();
 		out.println("    If a file is not specified, ./wadmerge.txt is the default file.");
 		out.println("    The parent directory of the provided script becomes the working directory.");
+		out.println();
+		out.println("[arguments]:");
+		out.println("    The arguments to pass to the script. Script arguments are injected into");
+		out.println("    commands by just adding \"$\" plus the argument index. (e.g. $0) A");
+		out.println("    doubled-up $ ($$) is interpreted as one \"$\".");
+		out.println();
+		out.println("    The argument index references can be in any part of the parsed tokens, not");
+		out.println("    just by themselves as a singular token. They are parsed at the token level,");
+		out.println("    not the line level.");
+		out.println();
+		out.println("    Arguments: [\"apple\", \"banana\", \"doom stuff\"]");
+		out.println("    mergedir $1 ./$0/$1phone $2");
+		out.println("    Expands to:");
+		out.println("    mergedir \"banana\" \"./apple/bananaphone\" \"doom stuff\"");
 		out.println();
 		out.println("Script Commands");
 		out.println("...............");

@@ -368,7 +368,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				)
 				.parameter("prefix",
 					type(Type.NULL, "No prefix."),
-					type(Type.STRING, "The pattern to match each file path against for inclusion. If matched, include.")
+					type(Type.STRING, "The string to prefix all new entries with.")
 				)
 				.parameter("append",
 					type(Type.NULL, "Default: False."),

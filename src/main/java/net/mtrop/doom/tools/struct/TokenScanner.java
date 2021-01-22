@@ -350,6 +350,31 @@ public class TokenScanner implements AutoCloseable, Iterator<String>
 	}
 	
 	/**
+	 * Scans for the next token and interprets it as a boolean value.
+	 * @param trueValue what a "true" value is, as a string.
+	 * @return true, if <code>expectToken().equalsIgnoreCase(trueValue)</code>, and false, otherwise.
+	 * @throws NoSuchElementException if no more tokens.
+	 * @throws RuntimeException if an I/O problem occurs from reading.
+	 * @see #nextToken()
+	 */
+	public boolean nextBoolean(String trueValue)
+	{
+		return expectToken().equalsIgnoreCase(trueValue);
+	}
+	
+	/**
+	 * Scans for the next token and interprets it as a boolean value.
+	 * @return true, if <code>expectToken().equalsIgnoreCase("true")</code>, and false, otherwise.
+	 * @throws NoSuchElementException if no more tokens.
+	 * @throws RuntimeException if an I/O problem occurs from reading.
+	 * @see #nextToken()
+	 */
+	public boolean nextBoolean()
+	{
+		return nextBoolean("true");
+	}
+	
+	/**
 	 * Scans for the next token and interprets it as an integer that fits in a byte.
 	 * @param radix the numerical base/radix for the expected number. 
 	 * @return the next byte value.

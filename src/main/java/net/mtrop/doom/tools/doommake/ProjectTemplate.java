@@ -28,12 +28,14 @@ public final class ProjectTemplate
 	 */
 	public static class Entry
 	{
+		private boolean appending;
 		private String outputPath;
 		private String[] resourcePaths;
 		
-		private Entry(String outputPath, String[] resourcePaths) 
+		private Entry(boolean appending, String outputPath, String[] resourcePaths) 
 		{
 			super();
+			this.appending = appending;
 			this.outputPath = outputPath;
 			this.resourcePaths = resourcePaths;
 		}
@@ -49,9 +51,9 @@ public final class ProjectTemplate
 	 * @param directoryPath the output directory.
 	 * @return the new entry.
 	 */
-	public static Entry directory(String directoryPath)
+	public static Entry dir(String directoryPath)
 	{
-		return new Entry(directoryPath, null);
+		return new Entry(false, directoryPath, null);
 	}
 	
 	/**
@@ -61,7 +63,7 @@ public final class ProjectTemplate
 	 */
 	public static Entry file(String filePath)
 	{
-		return new Entry(filePath, BLANK_RESOURCES);
+		return new Entry(false, filePath, BLANK_RESOURCES);
 	}
 
 	/**
@@ -72,7 +74,18 @@ public final class ProjectTemplate
 	 */
 	public static Entry file(String filePath, String... resources)
 	{
-		return new Entry(filePath, resources);
+		return new Entry(false, filePath, resources);
+	}
+	
+	/**
+	 * Creates an entry for a template file that appends to existing files.
+	 * @param filePath the output file.
+	 * @param resources the series of resources to read and combine into a file.
+	 * @return the new entry.
+	 */
+	public static Entry fileAppend(String filePath, String... resources)
+	{
+		return new Entry(true, filePath, resources);
 	}
 	
 	/**
@@ -164,7 +177,7 @@ public final class ProjectTemplate
 			{
 				if (!Common.createPathForFile(targetPath))
 					throw new IOException("Could not create necessary directory for file: " + targetPath);
-				try (FileOutputStream fos = new FileOutputStream(targetPath))
+				try (FileOutputStream fos = new FileOutputStream(targetPath, e.appending))
 				{
 					for (String resourcePath : e.resourcePaths)
 					{

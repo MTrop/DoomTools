@@ -104,7 +104,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			return ScriptFunctionUsage.create()
 				.instructions(
 					"Calls the DoomMake tool. Inherits STDOUT/STDERR/STDIN of this script unless overridden (see options). " +
-					"It is important to note that the instance of DoomMake that runs has no inherant link to this instance."
+					"It is important to note that the instance of DoomMake that runs has no inherent link to this instance."
 				)
 				.parameter("options", 
 					type(Type.MAP, 
@@ -341,6 +341,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
 							"inputfile:OBJECTREF(File)",
+							"args:LIST[STRING, ...]",
 							"usestdin:BOOLEAN",
 							"verbose:BOOLEAN"
 						) + "}",
@@ -359,6 +360,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
 		{
 			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue args = CACHEVALUE2.get();
 			try 
 			{
 				PrintStream stdout = scriptInstance.getEnvironment().getStandardOut();
@@ -379,6 +381,17 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 						return true;
 					}
 				}				
+
+				temp.mapGet("args", args);
+				if (!args.isNull() && args.isList())
+				{
+					for (ScriptIteratorType.IteratorPair pair : args)
+					{
+						ScriptValue value = pair.getValue();
+						options.addArg(value.asString());
+					}
+				}
+
 				returnValue.set(WadMergeMain.call(options));
 				return true;
 			} catch (OptionParseException e) {
@@ -391,6 +404,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			finally
 			{
 				temp.setNull();
+				args.setNull();
 			}
 		}
 	},
@@ -403,7 +417,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			return ScriptFunctionUsage.create()
 				.instructions(
 					"Calls the WadScript tool. Inherits STDOUT/STDERR/STDIN of this script unless overridden (see options). " +
-					"It is important to note that the instance of WadScript that runs has no inherant link to this instance."
+					"It is important to note that the instance of WadScript that runs has no inherent link to this instance."
 				)
 				.parameter("options", 
 					type(Type.MAP, 

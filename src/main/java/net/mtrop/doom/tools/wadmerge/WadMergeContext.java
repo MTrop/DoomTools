@@ -594,12 +594,13 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param inDirectory the directory to read from.
+	 * @param omitMarkers if true, omit directory markers.
 	 * @return OK if the was written, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be written.
 	 */
-	public Response mergeTree(String symbol, File inDirectory) throws IOException
+	public Response mergeTree(String symbol, File inDirectory, boolean omitMarkers) throws IOException
 	{
 		if (!inDirectory.exists() || !inDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
@@ -626,9 +627,9 @@ public class WadMergeContext
 						adder = null;
 					}
 					verbosef("Scan directory `%s`...\n", f.getPath());
-					if ((resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
+					if (!omitMarkers && (resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
 						return resp; 
-					if ((resp = mergeTree(symbol, f)) != Response.OK)
+					if ((resp = mergeTree(symbol, f, omitMarkers)) != Response.OK)
 						return resp; 
 					verbosef("Done scanning directory `%s`.\n", f.getPath());
 				}

@@ -1,0 +1,42 @@
+/**
+ * Performs the release.
+ */
+check function doRelease() {
+	initBuild();
+	initDist();
+	mergeMaps();
+	tool::wadmerge({
+		inputFile: file("scripts/merge-release.txt"),
+		args: [getBuildDirectory(), getMapsWad(), getProjectWad()]
+	});
+	copyProjectTxt();
+	zipfiles(
+		getDistDirectory() + "/" + getProjectZip(), [
+			getBuildDirectory() + "/" + getProjectWad(), 
+			getBuildDirectory() + "/" + getProjectTxt()
+		]
+	);
+}
+
+
+/*****************************************************************************
+ * TARGET: release
+ *****************************************************************************
+ * Creates a release and distribution.
+ * doommake release
+ ****************************************************************************/
+check entry release(args) {
+	doRelease();
+}
+
+
+/*****************************************************************************
+ * TARGET: make
+ *****************************************************************************
+ * Default make target.
+ * doommake
+ ****************************************************************************/
+check entry make(args) {
+	doRelease();
+}
+
