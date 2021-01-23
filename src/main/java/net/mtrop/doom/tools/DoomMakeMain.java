@@ -581,7 +581,6 @@ public final class DoomMakeMain
 			fileAppend("README.md",
 				"doommake/common/release/README.md")
 		);
-		
 		final ProjectTemplate COMMON_MAPS = create(
 			"Common map project structure.",
 			dir("src/maps"),
@@ -607,6 +606,21 @@ public final class DoomMakeMain
 				"doommake/common/assets/doommake.script"),
 			fileAppend("README.md",
 				"doommake/common/assets/README.md")
+		);
+		final ProjectTemplate COMMON_IWAD = create(
+			"Common IWAD dependency.",
+			fileAppend("doommake.properties", 
+				"doommake/common/iwad/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/iwad/doommake.script")
+		);
+		final ProjectTemplate COMMON_TEXTURE_WAD = create(
+			"Common texture WAD dependency.",
+			dir("src/wads/textures"),
+			fileAppend("doommake.properties", 
+				"doommake/common/texwad/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/texwad/doommake.script")
 		);
 
 		TEMPLATES.put("git",
@@ -638,6 +652,21 @@ public final class DoomMakeMain
 						"doommake/simple/assets/wadmerge.txt"),
 					fileAppend("doommake.script", 
 						"doommake/simple/assets/doommake.script")
+				))
+			);
+		TEMPLATES.put("simple-maps-and-textures",
+			create("A project that builds maps and uses textures from a set of texture WADs.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(COMMON_IWAD)
+				.add(COMMON_TEXTURE_WAD)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/simple/texmaps/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/simple/texmaps/doommake.script")
 				))
 			);
 	}

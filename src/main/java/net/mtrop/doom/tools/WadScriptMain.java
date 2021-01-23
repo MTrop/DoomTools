@@ -82,6 +82,7 @@ public final class WadScriptMain
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 	private static final String SWITCH_ENTRY1 = "--entry";
+	private static final String SWITCH_ENTRY2 = "-e";
 	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
 	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
 	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
@@ -791,7 +792,7 @@ public final class WadScriptMain
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
-					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg))
+					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg) || SWITCH_ENTRY2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_ENTRY;
 					else if (SWITCH_RUNAWAYLIMIT1.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_RUNAWAY;

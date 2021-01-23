@@ -1,0 +1,9 @@
+#define PROP_IWADPATH "doommake.iwad"
+
+/**
+ * Return the IWAD from properties.
+ */
+function getIwad() {
+	return prop(PROP_IWADPATH, null); 
+}
+

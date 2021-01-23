@@ -402,10 +402,18 @@ public class PreprocessorLexer extends Lexer
 					else if (c == END_OF_STREAM)
 						breakloop = true;
 					else if (c == '\n')
+					{
+						sb.append('\n');
 						state = STATE_READ;
+					}
 					else if (Character.isWhitespace(c))
 					{
 						// eat character.
+					}
+					else
+					{
+						sb.append('\\');
+						state = STATE_READ;
 					}
 				}
 				break;

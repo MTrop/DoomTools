@@ -14,8 +14,7 @@ check function doRelease() {
 	outzip = getDistDirectory() + "/" + getProjectZip();
 	println("Zipping project to " + outzip + "...");
 	zipfiles(
-		outzip, 
-		[
+		outzip, [
 			getBuildDirectory() + "/" + getProjectWad(), 
 			getBuildDirectory() + "/" + getProjectTxt()
 		]
@@ -42,6 +41,7 @@ check entry release(args) {
  * doommake
  ****************************************************************************/
 check entry make(args) {
+	doInit();
 	doRelease();
 }
 

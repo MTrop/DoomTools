@@ -1,0 +1,63 @@
+#define PROP_MAPTEXWAD "doommake.file.maptex"
+#define DEFAULT_MAPTEXWAD "maptex.wad"
+#define DIR_SRC_TEXTURE_WADS "src/wads/textures"
+
+/**
+ * Scans the project for the maps.
+ */
+function scanTextureWadList() {
+	return filelist(DIR_SRC_TEXTURE_WADS, false, REGEX_WADFILES);
+}
+
+/**
+ * Return the output map textures WAD.
+ */
+function getMapTexWad() {
+	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD); 
+}
+
+/**
+ * Extracts textures from the project texture WADs using the maps.  
+ */
+check function extractTextures() {
+	verifydirs(DIR_TEXTURE_WADS);
+	textureWadFiles = scanTextureWadList();
+
+	mapWads = scanMapList();
+	baseIwadPath = getIwad();
+	
+	if (empty(mapWads))
+		return error("NoMaps", "No map WADs to operate on.");
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	
+	// Output buffer.
+	buf = bufnew(64 * 1024); // 64k
+	
+	if (tool::wtexscan({
+		stdout: bosopen(buf), 
+		wadfiles: mapWads
+	})) return error("ToolError", "WTexScan threw an error.");
+	
+	if (tool::wtexport({
+		stdin: bisopen(buf), 
+		texturewads: textureWadFiles,
+		basewad: file(baseIwadPath),
+		outwad: file(getMapTexWad()),
+		additive: false
+	})) return error("ToolError", "WTExport threw an error.");
+}
+
+
+/*****************************************************************************
+ * TARGET: maptextures
+ *****************************************************************************
+ * Reads the map WADs and texture resources and exports them to a WAD 
+ * of used textures.
+ * doommake maptextures
+ ****************************************************************************/
+check entry maptextures(args) {
+	initBuild();
+	extractTextures();
+}
+
