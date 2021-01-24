@@ -1,0 +1,16 @@
+; This file is the texture listing for the TEXTURE1 lump (plus PNAMES).
+;
+; Use ";" to make comment lines.
+; This is also compatible with DEUTEX!
+
+; Example definition:
+;
+; TEXNAME W H
+; * PATCHNAM X Y
+;
+
+; First texture is the NULL texture.
+AASTINKY 24 72
+*   WALL00_3 0 0
+*   WALL00_3 12 -6
+

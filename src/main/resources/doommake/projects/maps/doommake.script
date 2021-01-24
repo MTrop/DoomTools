@@ -21,14 +21,14 @@ check function doRelease() {
 	initBuild();
 	initDist();
 	mergeMaps();
-	tool::wadmerge({
+	if (tool::wadmerge({
 		inputFile: file(DEFAULT_RELEASESCRIPT),
 		args: [
 			getBuildDirectory(), 
 			getMapsWad(), 
 			getProjectWad()
 		]
-	});
+	})) return error("ToolError", "WadMerge threw an error.");
 	copyProjectTxt();
 	zipProject();
 	println("Done!");

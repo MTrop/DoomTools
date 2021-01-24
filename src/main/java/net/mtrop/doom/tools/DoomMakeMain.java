@@ -626,6 +626,23 @@ public final class DoomMakeMain
 			fileAppend("doommake.script", 
 				"doommake/common/iwad/doommake.script")
 		);
+		final ProjectTemplate COMMON_TEXTURES = create(
+			"Common texture WAD dependency.",
+			dir("src/textures/flats"),
+			dir("src/textures/patches"),
+			file("scripts/merge-textures.txt",
+				"doommake/common/textures/wadmerge.txt"),
+			file("src/textures/texture1.txt", 
+				"doommake/common/textures/texture1.txt"),
+			file("src/textures/texture2.txt", 
+				"doommake/common/textures/texture2.txt"),
+			fileAppend("doommake.properties", 
+				"doommake/common/textures/doommake.properties"),
+			fileAppend("doommake.script", 
+				"doommake/common/textures/doommake.script"),
+			fileAppend("README.md",
+				"doommake/common/textures/README.md")
+		);
 		final ProjectTemplate COMMON_TEXTURE_WAD = create(
 			"Common texture WAD dependency.",
 			dir("src/wads/textures"),
@@ -670,7 +687,7 @@ public final class DoomMakeMain
 						"doommake/projects/assets/doommake.script")
 				))
 			);
-		TEMPLATES.put("maps-textures",
+		TEMPLATES.put("maps-texwad",
 			create("A project that builds maps and uses textures from a set of texture WADs.")
 				.add(COMMON)
 				.add(COMMON_MAKE)
@@ -686,7 +703,7 @@ public final class DoomMakeMain
 						"doommake/projects/texmaps/doommake.script")
 				))
 			);
-		TEMPLATES.put("assets-maps-textures",
+		TEMPLATES.put("assets-maps-texwad",
 			create("A project that builds maps, non-texture assets, and uses textures from a set of texture WADs.")
 				.add(COMMON)
 				.add(COMMON_MAKE)

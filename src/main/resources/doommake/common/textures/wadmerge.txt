@@ -1,0 +1,23 @@
+# ===========================================================================
+# WadMerge Script for Textures
+# ===========================================================================
+#
+# Argument 0: The build directory.
+# Argument 1: The output WAD.
+#
+
+create out
+
+mergedeutexfile out src/textures/texture1.txt
+mergedeutexfile out src/textures/texture2.txt
+
+marker    out ff_start
+mergedir  out src/textures/flats
+marker    out ff_end
+
+marker    out pp_start
+mergedir  out src/textures/patches
+marker    out pp_end
+
+finish out $0/$1
+end

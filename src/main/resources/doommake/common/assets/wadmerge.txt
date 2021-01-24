@@ -2,7 +2,8 @@
 # WadMerge Script for Assets
 # ===========================================================================
 #
-# Argument 0: The output path.
+# Argument 0: The build directory.
+# Argument 1: The output WAD.
 #
 
 create out
@@ -24,5 +25,5 @@ mergedir  out src/assets/sounds nomarkers
 # Music
 mergedir  out src/assets/music nomarkers
 
-finish out $0
+finish out $0/$1
 end

@@ -1,0 +1,5 @@
+; This file is the texture listing for the TEXTURE2 lump (plus PNAMES).
+; NOTE: If you don't want a TEXTURE2, remove this file plus its merge line in the merge script.
+;
+; Use ";" to make comment lines.
+; This is also compatible with DEUTEX!

@@ -22,7 +22,7 @@ check function doRelease() {
 	initDist();
 	mergeMaps();
 	mergeAssets();
-	tool::wadmerge({
+	if (tool::wadmerge({
 		inputFile: file(DEFAULT_RELEASESCRIPT),
 		args: [
 			getBuildDirectory(), 
@@ -30,7 +30,7 @@ check function doRelease() {
 			getMapsWad(), 
 			getProjectWad()
 		]
-	});
+	})) return error("ToolError", "WadMerge threw an error.");
 	copyProjectTxt();
 	zipProject();
 	println("Done!");

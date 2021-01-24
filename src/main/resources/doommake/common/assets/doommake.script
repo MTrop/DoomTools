@@ -2,11 +2,10 @@
 #define DEFAULT_ASSETWAD "assets.wad"
 #define PROP_ASSETSCRIPT "doommake.script.assets"
 #define DEFAULT_ASSETSCRIPT "scripts/merge-assets.txt"
-
 #define DIR_SRC_ASSETS "src/assets"
 
 /**
- * Return the asset wad.
+ * Return the output asset wad.
  */
 function getAssetsWad() {
 	return prop(PROP_ASSETWAD, DEFAULT_ASSETWAD); 
@@ -28,10 +27,13 @@ check function mergeAssets() {
 	verifydirs(DIR_SRC_ASSETS + "/music");
 	verifydirs(DIR_SRC_ASSETS + "/sounds");
 	verifydirs(DIR_SRC_ASSETS + "/sprites");
-	return tool::wadmerge({
+	if (tool::wadmerge({
 		inputfile: file(getAssetsScript()),
-		args: [getBuildDirectory() + "/" + getAssetsWad()] 
-	});
+		args: [
+			getBuildDirectory(),
+			getAssetsWad()
+		] 
+	})) return error("ToolError", "WadMerge threw an error.");
 }
 
 
