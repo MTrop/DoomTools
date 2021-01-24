@@ -86,7 +86,7 @@ public final class WTexScanMain
 		private boolean outputFlats;
 		private boolean skipSkies;
 		private List<File> wadFiles;
-		private List<String> mapsToScan;
+		private SortedSet<String> mapsToScan;
 		
 		private Options()
 		{
@@ -99,7 +99,7 @@ public final class WTexScanMain
 			this.outputFlats = false;
 			this.skipSkies = false;
 			this.wadFiles = new LinkedList<>();
-			this.mapsToScan = new LinkedList<>();
+			this.mapsToScan = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		}
 		
 		void println(Object msg)
@@ -246,7 +246,7 @@ public final class WTexScanMain
 		{
 			String[] mapHeaders = MapUtils.getAllMapHeaders(wad);
 			for (String mapName : mapHeaders)
-				if(options.mapsToScan.isEmpty() || options.mapsToScan.contains(mapName))
+				if (options.mapsToScan.isEmpty() || options.mapsToScan.contains(mapName))
 					inspectMap(wad, mapName);
 		}
 
