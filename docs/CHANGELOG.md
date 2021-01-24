@@ -57,6 +57,8 @@ WadMerge
 
 * `Added` An argument for MERGEDIR to omit the directory markers.
 * `Added` Support for argument expansion in scripts.
+* `Fixed` Handling of PNAMES in MERGEDEUTEXFILE for multiple TEXTURE entries 
+  ([Issue 4](https://github.com/MTrop/DoomTools/issues/4)).
 
 
 ### Changed for 1.3.0
@@ -93,6 +95,11 @@ WSwAnTbl
 
 WadTex
 ------
+
+### Changed for 1.1.0
+
+* `Fixed` Handling of PNAMES for multiple TEXTURE entry import.
+
 
 ### Changed for 1.0.0
 

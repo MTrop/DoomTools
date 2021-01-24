@@ -309,9 +309,9 @@ public final class WADTexMain
 		
 					textureSet = Utility.readDEUTEXFile(reader, patchNames, textures);
 					if (strife)
-						textureSet.export(patchNames = new PatchNames(), (CommonTextureList<StrifeTextureList.Texture>)(textures = new StrifeTextureList(128)));
+						textureSet.export(patchNames, (CommonTextureList<StrifeTextureList.Texture>)(textures = new StrifeTextureList(128)));
 					else
-						textureSet.export(patchNames = new PatchNames(), (CommonTextureList<DoomTextureList.Texture>)(textures = new DoomTextureList(128)));
+						textureSet.export(patchNames, (CommonTextureList<DoomTextureList.Texture>)(textures = new DoomTextureList(128)));
 		
 					if (replacePatchNames)
 					{

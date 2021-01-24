@@ -719,9 +719,9 @@ public class WadMergeContext
 		}
 		
 		if (strife)
-			textureSet.export(pout = new PatchNames(), (CommonTextureList<StrifeTextureList.Texture>)(tout = new StrifeTextureList(128)));
+			textureSet.export(pout, (CommonTextureList<StrifeTextureList.Texture>)(tout = new StrifeTextureList(128)));
 		else
-			textureSet.export(pout = new PatchNames(), (CommonTextureList<DoomTextureList.Texture>)(tout = new DoomTextureList(128)));
+			textureSet.export(pout, (CommonTextureList<DoomTextureList.Texture>)(tout = new DoomTextureList(128)));
 
 		if (buffer.contains("PNAMES"))
 			buffer.deleteEntry(buffer.indexOf("PNAMES"));

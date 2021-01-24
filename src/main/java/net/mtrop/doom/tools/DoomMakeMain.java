@@ -634,7 +634,7 @@ public final class DoomMakeMain
 			fileAppend("doommake.script", 
 				"doommake/common/texwad/doommake.script"),
 			fileAppend("README.md",
-				"doommake/common/assets/README.md")
+				"doommake/common/texwad/README.md")
 		);
 
 		TEMPLATES.put("git",

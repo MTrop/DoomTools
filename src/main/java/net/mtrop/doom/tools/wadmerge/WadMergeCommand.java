@@ -741,8 +741,8 @@ public enum WadMergeCommand
 		{
 			out.println("MERGEDEUTEXFILE [symbol] [path] [opt:entry]");
 			out.println("    Reads file from [path], interprets it as a DEUTeX texture/patch assembly");
-			out.println("    file, creates TEXTUREx/PNAMES. The name of the file is the name of the");
-			out.println("    texture lump.");
+			out.println("    file, creates/amends TEXTUREx/PNAMES. The name of the file is the name of");
+			out.println("    the texture lump.");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  (Optional) If specified, the name of the entry to write.");
