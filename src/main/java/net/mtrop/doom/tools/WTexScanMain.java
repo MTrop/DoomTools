@@ -64,6 +64,8 @@ public final class WTexScanMain
 	private static final String SWITCH_FLATS = "--flats";
 	private static final String SWITCH_FLATS2 = "-f";
 	private static final String SWITCH_NOSKIES = "--no-skies";
+	private static final String SWITCH_MAP = "--map";
+	private static final String SWITCH_MAP2 = "-m";
 
 	/** Regex pattern for Episode, Map. */
 	private static final Pattern EPISODE_PATTERN = Pattern.compile("E[1-5]M[1-9]");
@@ -84,6 +86,7 @@ public final class WTexScanMain
 		private boolean outputFlats;
 		private boolean skipSkies;
 		private List<File> wadFiles;
+		private SortedSet<String> mapsToScan;
 		
 		private Options()
 		{
@@ -96,6 +99,7 @@ public final class WTexScanMain
 			this.outputFlats = false;
 			this.skipSkies = false;
 			this.wadFiles = new LinkedList<>();
+			this.mapsToScan = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		}
 		
 		void println(Object msg)
@@ -155,6 +159,12 @@ public final class WTexScanMain
 		public Options addWadFile(File file)
 		{
 			this.wadFiles.add(file);
+			return this;
+		}
+		
+		public Options addMapToScan(String mapname)
+		{
+			this.mapsToScan.add(mapname);
 			return this;
 		}
 
@@ -236,7 +246,8 @@ public final class WTexScanMain
 		{
 			String[] mapHeaders = MapUtils.getAllMapHeaders(wad);
 			for (String mapName : mapHeaders)
-				inspectMap(wad, mapName);
+				if (options.mapsToScan.isEmpty() || options.mapsToScan.contains(mapName))
+					inspectMap(wad, mapName);
 		}
 
 		/**
@@ -552,24 +563,44 @@ public final class WTexScanMain
 		options.stdout = out;
 		options.stderr = err;
 	
+		final int STATE_INIT = 0;
+		final int STATE_MAP = 1;
+	
+		int state = STATE_INIT;
 		int i = 0;
 		while (i < args.length)
 		{
 			String arg = args[i];
-			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.setHelp(true);
-			else if (arg.equals(SWITCH_VERSION))
-				options.setVersion(true);
-			else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
-				options.setQuiet(true);
-			else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))
-				options.setOutputTextures(true);
-			else if (arg.equals(SWITCH_FLATS) || arg.equals(SWITCH_FLATS2))
-				options.setOutputFlats(true);
-			else if (arg.equals(SWITCH_NOSKIES))
-				options.setSkipSkies(true);
-			else
-				options.addWadFile(new File(arg));
+			switch (state)
+			{
+				case STATE_INIT:
+				{
+					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+						options.setHelp(true);
+					else if (arg.equals(SWITCH_VERSION))
+						options.setVersion(true);
+					else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
+						options.setQuiet(true);
+					else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))
+						options.setOutputTextures(true);
+					else if (arg.equals(SWITCH_FLATS) || arg.equals(SWITCH_FLATS2))
+						options.setOutputFlats(true);
+					else if (arg.equals(SWITCH_NOSKIES))
+						options.setSkipSkies(true);
+					else if (arg.equals(SWITCH_MAP) || arg.equals(SWITCH_MAP2))
+						state = STATE_MAP;
+					else
+						options.addWadFile(new File(arg));
+				}
+				break;
+			
+				case STATE_MAP:
+				{
+					options.addMapToScan(arg);
+					state = STATE_INIT;
+				}
+				break;
+			}
 			i++;
 		}
 		
@@ -653,6 +684,9 @@ public final class WTexScanMain
 		out.println("    -f");
 		out.println();
 		out.println("    --no-skies          Skip adding associated skies per map.");
+		out.println();
+		out.println("    --map [mapname]     Map to scan. If not specified, all maps will be scanned.");
+		out.println("    -m");
 	}
 	
 }
