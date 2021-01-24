@@ -1,17 +1,9 @@
+#define DEFAULT_RELEASESCRIPT "scripts/merge-release.txt"
+
 /**
- * Performs the release.
+ * Zips the resulting project.
  */
-check function doRelease() {
-	initBuild();
-	initDist();
-	mergeMaps();
-	mergeAssets();
-	tool::wadmerge({
-		inputFile: file("scripts/merge-release.txt"),
-		args: [getBuildDirectory(), getAssetsWad(), getMapsWad(), getProjectWad()]
-	});
-	copyProjectTxt();
-	
+check function zipProject() {
 	outzip = getDistDirectory() + "/" + getProjectZip();
 	println("Zipping project to " + outzip + "...");
 	zipfiles(
@@ -20,6 +12,29 @@ check function doRelease() {
 			getBuildDirectory() + "/" + getProjectTxt()
 		]
 	);
+}
+
+/**
+ * Performs the release.
+ */
+check function doRelease() {
+	initBuild();
+	initDist();
+	mergeMaps();
+	mergeAssets();
+	extractTextures();
+	tool::wadmerge({
+		inputFile: file(DEFAULT_RELEASESCRIPT),
+		args: [
+			getBuildDirectory(), 
+			getAssetsWad(), 
+			getMapsWad(), 
+			getMapTexWad(), 
+			getProjectWad()
+		]
+	});
+	copyProjectTxt();
+	zipProject();
 	println("Done!");
 }
 
@@ -45,3 +60,4 @@ check entry make(args) {
 	doInit();
 	doRelease();
 }
+

@@ -1,7 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Black Rook Software
- * This program and the accompanying materials are made available under 
- * the terms of the MIT License, which accompanies this distribution.
+ * Copyright (c) 2017-2020 Black Rook Software
+ * This program and the accompanying materials are made available under the 
+ * terms of the GNU Lesser Public License v2.1 which accompanies this 
+ * distribution, and is available at 
+ * http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
  ******************************************************************************/
 package net.mtrop.doom.tools.struct;
 
@@ -58,7 +60,6 @@ public class PreprocessorLexer extends Lexer
 	/** 
 	 * Default includer to use when none specified.
 	 * This includer can either pull from the classpath, URIs, or files.
-	 * <p>
 	 * <ul>
 	 * <li>Paths that start with {@code classpath:} are parsed as resource paths in the current classpath.</li>
 	 * <li>
@@ -406,13 +407,10 @@ public class PreprocessorLexer extends Lexer
 						sb.append('\n');
 						state = STATE_READ;
 					}
-					else if (Character.isWhitespace(c))
-					{
-						// eat character.
-					}
 					else
 					{
 						sb.append('\\');
+						sb.append(c);
 						state = STATE_READ;
 					}
 				}

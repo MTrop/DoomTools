@@ -48,7 +48,7 @@ public final class DoomToolsMain
 		
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out);
+			this.stdout = new PrintStream(out, true);;
 			return this;
 		}
 		

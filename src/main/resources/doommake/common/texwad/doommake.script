@@ -21,29 +21,37 @@ function getMapTexWad() {
  */
 check function extractTextures() {
 	verifydirs(DIR_TEXTURE_WADS);
+	
 	textureWadFiles = scanTextureWadList();
-
+	if (empty(textureWadFiles)) {
+		println("WARNING: No texture WADs found in: " + DIR_TEXTURE_WADS + ". Skipping texture extraction step.");
+		return;
+	}
+	
 	mapWads = scanMapList();
 	baseIwadPath = getIwad();
 	
 	if (empty(mapWads))
-		return error("NoMaps", "No map WADs to operate on.");
+		return error("NoMaps", "No map WADs found in: " + DIR_SRC_MAPS);
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-	
+
 	// Output buffer.
-	buf = bufnew(64 * 1024); // 64k
+	buf = bufnew(96 * 1024); // 96k
 	
 	if (tool::wtexscan({
 		stdout: bosopen(buf), 
 		wadfiles: mapWads
 	})) return error("ToolError", "WTexScan threw an error.");
 	
+	// reset buffer cursor for read.
+	buf->bufsetpos(0);
+	
 	if (tool::wtexport({
 		stdin: bisopen(buf), 
 		texturewads: textureWadFiles,
 		basewad: file(baseIwadPath),
-		outwad: file(getMapTexWad()),
+		outwad: file(getBuildDirectory() + "/" + getMapTexWad()),
 		additive: false
 	})) return error("ToolError", "WTExport threw an error.");
 }

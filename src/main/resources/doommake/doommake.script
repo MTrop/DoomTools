@@ -11,7 +11,7 @@
 #define PROP_DISTDIR "doommake.dir.dist"
 #define DEFAULT_DISTDIR "dist"
 
-#define REGEX_WADFILES ".*\\.[wW][aA][dD]"
+#define REGEX_WADFILES `.*\.([wW][aA][dD])`
 
 /**
  * Return a property by its key, or def if null.
@@ -56,30 +56,6 @@ function cleanBuild() {
 function initDist() {
 	return verifydirs(getDistDirectory());
 }
-
-/**
- * Performs project initialization.
- * Usually used for downloading dependencies or other setup.
- */
-function doInit(args) {
-
-	// ---------------------------------------------------
-	// If this project needs initial setup, do it here.
-	// ---------------------------------------------------
-
-}
-
-
-/*****************************************************************************
- * TARGET: init
- *****************************************************************************
- * Initializes this project.
- * doommake init
- ****************************************************************************/
-check entry init(args) {
-	doInit();
-}
-
 
 /*****************************************************************************
  * TARGET: clean

@@ -1,4 +1,4 @@
-To build the maps WAD:
+To build just the maps WAD:
 
 	doommake maps
 

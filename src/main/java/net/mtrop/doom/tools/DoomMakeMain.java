@@ -51,6 +51,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	private static final String SWITCH_LISTTEMPLATES = "--list-templates";
 	private static final String SWITCH_NEWPROJECT = "--new-project";
+	private static final String SWITCH_NEWPROJECT2 = "-n";
 	
 	private static final String SWITCH_SCRIPTFILE = "--script";
 	private static final String SWITCH_SCRIPTFILE2 = "-s";
@@ -61,8 +62,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
 
 	/** The templates. */
-	private static final Map<String, ProjectTemplate> TEMPLATES = 
-		new TreeMap<String, ProjectTemplate>(String.CASE_INSENSITIVE_ORDER);
+	private static final Map<String, ProjectTemplate> TEMPLATES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	/**
 	 * Program options.
@@ -111,13 +111,13 @@ public final class DoomMakeMain
 		
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out);
+			this.stdout = new PrintStream(out, true);;
 			return this;
 		}
 		
 		public Options setStderr(OutputStream err) 
 		{
-			this.stderr = new PrintStream(err);
+			this.stderr = new PrintStream(err, true);
 			return this;
 		}
 		
@@ -211,9 +211,13 @@ public final class DoomMakeMain
 			if (options.listTemplates)
 			{
 				setUpTemplates();
-				options.stdout.println("List of available templates:");
 				for (Map.Entry<String, ProjectTemplate> entry : TEMPLATES.entrySet())
-					options.stdout.printf("%-16s %s\n", entry.getKey(), Common.isEmpty(entry.getValue().getDescription()) ? "" : entry.getValue().getDescription());
+				{
+					String description = entry.getValue().getDescription();
+					options.stdout.println(entry.getKey());
+					Common.printWrapped(options.stdout, 0, 4, 76, Common.isEmpty(description) ? "" : description);
+					options.stdout.println();
+				}
 				return ERROR_NONE;
 			}
 
@@ -332,13 +336,13 @@ public final class DoomMakeMain
 			{
 				case STATE_START:
 				{
-					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+					if (arg.equalsIgnoreCase(SWITCH_HELP) || arg.equalsIgnoreCase(SWITCH_HELP2))
 						options.help = true;
-					else if (arg.equals(SWITCH_VERSION))
+					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
 						options.version = true;
-					else if (arg.equals(SWITCH_LISTTEMPLATES))
+					else if (arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES))
 						options.listTemplates = true;
-					else if (arg.equals(SWITCH_NEWPROJECT))
+					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
 						options.createTemplates = new LinkedList<>();
 						state = STATE_TEMPLATENAME;
@@ -347,9 +351,9 @@ public final class DoomMakeMain
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
-					else if (arg.equals(SWITCH_SCRIPTFILE) || arg.equals(SWITCH_SCRIPTFILE2))
+					else if (SWITCH_SCRIPTFILE.equalsIgnoreCase(arg) || SWITCH_SCRIPTFILE2.equalsIgnoreCase(arg))
 						state = STATE_SCRIPTFILE;
-					else if (arg.equals(SWITCH_PROPERTYFILE) || arg.equals(SWITCH_PROPERTYFILE2))
+					else if (SWITCH_PROPERTYFILE.equalsIgnoreCase(arg) || SWITCH_PROPERTYFILE2.equalsIgnoreCase(arg))
 						state = STATE_PROPERTYFILE;
 					else if (SWITCH_RUNAWAYLIMIT1.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_RUNAWAY;
@@ -495,8 +499,8 @@ public final class DoomMakeMain
 		out.println("Usage: doommake [target] [args] [switches]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
-		out.println("                [--list-templates]");
-		out.println("                [[directory] --new-project [templates]]");
+		out.println("                --list-templates");
+		out.println("                [directory] --new-project [templates]");
 	}
 	
 	/**
@@ -514,33 +518,36 @@ public final class DoomMakeMain
 		out.println("[templates]:");
 		out.println("    The names of the template(s) to use or combine for the new ");
 		out.println("    project (applied altogether).");
-		out.println("    E.g.: --new-project wad deh git");
-		out.println("        Combines the \"wad\", \"deh\", and \"git\" templates together,");
+		out.println("    E.g.: --new-project simple-maps git");
+		out.println("        Combines the \"simple-maps\", and \"git\" templates together,");
 		out.println("        in that order.");
 		out.println();
 		out.println("[directory]:");
 		out.println("    The directory for the new project.");
 		out.println();
 		out.println("[switches]:");
-		out.println("    --help, -h                   Prints this help.");
-		out.println("    --version                    Prints the version of this utility.");
-		out.println("    --function-help              Prints all available function usages.");
-		out.println("    --function-help-markdown     Prints all available function usages in");
-		out.println("                                     Markdown format.");
+		out.println("    --help, -h                    Prints this help.");
+		out.println("    --version                     Prints the version of this utility.");
+		out.println("    --function-help               Prints all available function usages.");
+		out.println("    --function-help-markdown      Prints all available function usages in");
+		out.println("                                      Markdown format.");
 		out.println();
-		out.println("    --script, -s [filename]      Use [filename] for the root build script.");
-		out.println("                                     Default is \"doommake.script\".");
-		out.println("    --properties, -p [filename]  Use [filename] for the project properties.");
-		out.println("                                     Default is \"doommake.properties\".");
+		out.println("    --new-project, -n [templates] Creates a new project made up of a set of");
+		out.println("                                      templates (requires [directory]).");
 		out.println();
-		out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
-		out.println("                                     before the soft protection on infinite");
-		out.println("                                     loops triggers. 0 is no limit.");
-		out.println("                                     Default: 0");
-		out.println("    --activation-depth [num]     Sets the activation depth to [num].");
-		out.println("                                     Default: 256");
-		out.println("    --stack-depth [num]          Sets the stack value depth to [num].");
-		out.println("                                     Default: 2048");
+		out.println("    --script, -s [filename]       Use [filename] for the root build script.");
+		out.println("                                      Default is \"doommake.script\".");
+		out.println("    --properties, -p [filename]   Use [filename] for the project properties.");
+		out.println("                                      Default is \"doommake.properties\".");
+		out.println();
+		out.println("    --runaway-limit [num]         Sets the runaway limit (in operations)");
+		out.println("                                      before the soft protection on infinite");
+		out.println("                                      loops triggers. 0 is no limit.");
+		out.println("                                      Default: 0");
+		out.println("    --activation-depth [num]      Sets the activation depth to [num].");
+		out.println("                                      Default: 256");
+		out.println("    --stack-depth [num]           Sets the stack value depth to [num].");
+		out.println("                                      Default: 2048");
 	}
 
 	/**
@@ -561,6 +568,11 @@ public final class DoomMakeMain
 				"doommake/common/wadinfo.txt"),
 			file("src/credits.txt", 
 				"doommake/common/credits.txt")
+		);
+		final ProjectTemplate COMMON_INIT = create(
+			"Common blank init.",
+			fileAppend("doommake.script", 
+				"doommake/common/init/doommake.script")
 		);
 		final ProjectTemplate COMMON_MAKE = create(
 			"Common make scripts.",
@@ -620,53 +632,75 @@ public final class DoomMakeMain
 			fileAppend("doommake.properties", 
 				"doommake/common/texwad/doommake.properties"),
 			fileAppend("doommake.script", 
-				"doommake/common/texwad/doommake.script")
+				"doommake/common/texwad/doommake.script"),
+			fileAppend("README.md",
+				"doommake/common/assets/README.md")
 		);
 
 		TEMPLATES.put("git",
 			create("Adds files for Git repository support (ignores, attributes).")
 				.add(GIT)
 			);
-		TEMPLATES.put("simple-maps",
+		TEMPLATES.put("maps",
 			create("A project that builds just a set of maps.")
 				.add(COMMON)
 				.add(COMMON_MAKE)
+				.add(COMMON_INIT)
 				.add(COMMON_RELEASE_STUB)
 				.add(COMMON_MAPS)
 				.add(create(
 					file("scripts/merge-release.txt", 
-						"doommake/simple/maps/wadmerge.txt"),
+						"doommake/projects/maps/wadmerge.txt"),
 					fileAppend("doommake.script", 
-						"doommake/simple/maps/doommake.script")
+						"doommake/projects/maps/doommake.script")
 				))
 			);
-		TEMPLATES.put("simple-assets",
+		TEMPLATES.put("maps-assets",
 			create("A project that builds maps and non-texture assets together.")
 				.add(COMMON)
 				.add(COMMON_MAKE)
+				.add(COMMON_INIT)
 				.add(COMMON_RELEASE_STUB)
 				.add(COMMON_MAPS)
 				.add(COMMON_ASSETS)
 				.add(create(
 					file("scripts/merge-release.txt", 
-						"doommake/simple/assets/wadmerge.txt"),
+						"doommake/projects/assets/wadmerge.txt"),
 					fileAppend("doommake.script", 
-						"doommake/simple/assets/doommake.script")
+						"doommake/projects/assets/doommake.script")
 				))
 			);
-		TEMPLATES.put("simple-maps-and-textures",
+		TEMPLATES.put("maps-textures",
 			create("A project that builds maps and uses textures from a set of texture WADs.")
 				.add(COMMON)
 				.add(COMMON_MAKE)
+				.add(COMMON_IWAD)
+				.add(COMMON_INIT)
 				.add(COMMON_RELEASE_STUB)
 				.add(COMMON_MAPS)
-				.add(COMMON_IWAD)
 				.add(COMMON_TEXTURE_WAD)
 				.add(create(
 					file("scripts/merge-release.txt", 
-						"doommake/simple/texmaps/wadmerge.txt"),
+						"doommake/projects/texmaps/wadmerge.txt"),
 					fileAppend("doommake.script", 
-						"doommake/simple/texmaps/doommake.script")
+						"doommake/projects/texmaps/doommake.script")
+				))
+			);
+		TEMPLATES.put("assets-maps-textures",
+			create("A project that builds maps, non-texture assets, and uses textures from a set of texture WADs.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_IWAD)
+				.add(COMMON_INIT)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(COMMON_ASSETS)
+				.add(COMMON_TEXTURE_WAD)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/projects/assetmaptex/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/projects/assetmaptex/doommake.script")
 				))
 			);
 	}

@@ -3,6 +3,8 @@
 #define PROP_ASSETSCRIPT "doommake.script.assets"
 #define DEFAULT_ASSETSCRIPT "scripts/merge-assets.txt"
 
+#define DIR_SRC_ASSETS "src/assets"
+
 /**
  * Return the asset wad.
  */
@@ -21,11 +23,11 @@ function getAssetsScript() {
  * Calls the merge script for merging maps.
  */
 check function mergeAssets() {
-	verifydirs("src/assets/_global");
-	verifydirs("src/assets/graphics");
-	verifydirs("src/assets/music");
-	verifydirs("src/assets/sounds");
-	verifydirs("src/assets/sprites");
+	verifydirs(DIR_SRC_ASSETS + "/_global");
+	verifydirs(DIR_SRC_ASSETS + "/graphics");
+	verifydirs(DIR_SRC_ASSETS + "/music");
+	verifydirs(DIR_SRC_ASSETS + "/sounds");
+	verifydirs(DIR_SRC_ASSETS + "/sprites");
 	return tool::wadmerge({
 		inputfile: file(getAssetsScript()),
 		args: [getBuildDirectory() + "/" + getAssetsWad()] 

@@ -1,0 +1,61 @@
+#define DEFAULT_RELEASESCRIPT "scripts/merge-release.txt"
+
+/**
+ * Zips the resulting project.
+ */
+check function zipProject() {
+	outzip = getDistDirectory() + "/" + getProjectZip();
+	println("Zipping project to " + outzip + "...");
+	zipfiles(
+		outzip, [
+			getBuildDirectory() + "/" + getProjectWad(), 
+			getBuildDirectory() + "/" + getProjectTxt()
+		]
+	);
+}
+
+/**
+ * Performs the release.
+ */
+check function doRelease() {
+	initBuild();
+	initDist();
+	mergeMaps();
+	extractTextures();
+	tool::wadmerge({
+		inputFile: file(DEFAULT_RELEASESCRIPT),
+		args: [
+			getBuildDirectory(), 
+			getMapsWad(), 
+			getMapTexWad(), 
+			getProjectWad()
+		]
+	});
+	copyProjectTxt();
+	zipProject();
+	println("Done!");
+}
+
+
+/*****************************************************************************
+ * TARGET: release
+ *****************************************************************************
+ * Creates a release and distribution.
+ * doommake release
+ ****************************************************************************/
+check entry release(args) {
+	doRelease();
+}
+
+
+/*****************************************************************************
+ * TARGET: make
+ *****************************************************************************
+ * Default make target.
+ * doommake
+ ****************************************************************************/
+check entry make(args) {
+	doInit();
+	doRelease();
+}
+

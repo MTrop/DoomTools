@@ -84,8 +84,6 @@ public final class WTExportMain
 		private PrintStream stderr;
 		private InputStream stdin;
 		
-		private BufferedReader reader;
-		
 		private boolean help;
 		private boolean version;
 		private boolean quiet;
@@ -155,20 +153,15 @@ public final class WTExportMain
 			return (char)stdin.read();
 		}
 		
-		String readLine() throws IOException
-		{
-			return reader.readLine();
-		}
-
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out);
+			this.stdout = new PrintStream(out, true);;
 			return this;
 		}
 		
 		public Options setStderr(OutputStream err) 
 		{
-			this.stderr = new PrintStream(err);
+			this.stderr = new PrintStream(err, true);
 			return this;
 		}
 
@@ -1011,6 +1004,65 @@ public final class WTExportMain
 			return outWad;
 		}
 
+		private void readList() throws OptionParseException, IOException
+		{
+			BufferedReader reader = new BufferedReader(new InputStreamReader(options.stdin));
+			
+			final String TEXTURES = ":textures";
+			final String FLATS = ":flats";
+			final String END = ":end";
+			
+			final int STATE_NONE = 0;
+			final int STATE_TEXTURES = 1;
+			final int STATE_FLATS = 2;
+			
+			String line = null;
+			int state = STATE_NONE;
+			boolean keepGoing = true;
+			
+			while (keepGoing && ((line = reader.readLine()) != null))
+			{
+				line = line.trim();
+				// skip blank lines
+				if (line.length() == 0)
+					continue;
+				// skip commented lines.
+				if (line.charAt(0) == '#')
+					continue;
+				
+				if (line.equalsIgnoreCase(TEXTURES))
+				{
+					state = STATE_TEXTURES;
+					continue;
+				}
+				else if (line.equalsIgnoreCase(FLATS))
+				{
+					state = STATE_FLATS;
+					continue;
+				}
+				else if (line.equalsIgnoreCase(END))
+				{
+					keepGoing = false;
+					continue;
+				}
+				
+				switch (state)
+				{
+					case STATE_NONE:
+						reader.close();
+						throw new OptionParseException("ERROR: Name before '-textures' or '-flats'.");
+					case STATE_TEXTURES:
+						options.addTexture(line);
+						break;
+					case STATE_FLATS:
+						options.addFlat(line);
+						break;
+				}
+			}
+			
+			reader.close();
+		}
+		
 		/**
 		 * Starts texture extraction.
 		 * @param options
@@ -1060,7 +1112,22 @@ public final class WTExportMain
 				usage(options.stdout);
 				return ERROR_NO_FILES;
 			}
-		
+
+			if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
+			{
+				// Read list from Standard In		
+				options.println("Read texture/flat list...");
+				try {
+					readList();
+				} catch (OptionParseException e) {
+					options.errln("ERROR: " + e.getLocalizedMessage());
+					return ERROR_BAD_OPTIONS;
+				} catch (IOException e) {
+					options.errln("ERROR: " + e.getLocalizedMessage());
+					return ERROR_BAD_OPTIONS;
+				}
+			}
+
 			/* STEP 1 : Scan all incoming WADs so we know where crap is. */
 			
 			// scan base.
@@ -1267,8 +1334,6 @@ public final class WTExportMain
 		options.stderr = err;
 		options.stdin = in;
 	
-		options.reader = new BufferedReader(new InputStreamReader(options.stdin));
-		
 		final int STATE_INIT = 0;
 		final int STATE_BASE = 1;
 		final int STATE_OUT = 2;
@@ -1330,16 +1395,6 @@ public final class WTExportMain
 			i++;
 		}
 		
-		if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
-		{
-			// Read list from Standard In		
-			options.println("Input texture/flat list:");
-			try {
-				readList(options);
-			} catch (IOException e) {
-				throw new OptionParseException(e.getMessage());
-			}
-		}
 		return options;
 	}
 
@@ -1464,61 +1519,4 @@ public final class WTExportMain
 		out.println("The utility WTEXSCAN already produces a list formatted this way.");
 	}
 
-	private static void readList(Options options) throws OptionParseException, IOException
-	{
-		final String TEXTURES = ":textures";
-		final String FLATS = ":flats";
-		final String END = ":end";
-		
-		final int STATE_NONE = 0;
-		final int STATE_TEXTURES = 1;
-		final int STATE_FLATS = 2;
-		
-		String line = null;
-		int state = STATE_NONE;
-		boolean keepGoing = true;
-		
-		while (keepGoing && ((line = options.readLine()) != null))
-		{
-			line = line.trim();
-			// skip blank lines
-			if (line.length() == 0)
-				continue;
-			// skip commented lines.
-			if (line.charAt(0) == '#')
-				continue;
-			
-			if (line.equalsIgnoreCase(TEXTURES))
-			{
-				state = STATE_TEXTURES;
-				continue;
-			}
-			else if (line.equalsIgnoreCase(FLATS))
-			{
-				state = STATE_FLATS;
-				continue;
-			}
-			else if (line.equalsIgnoreCase(END))
-			{
-				keepGoing = false;
-				continue;
-			}
-			
-			switch (state)
-			{
-				case STATE_NONE:
-					options.stdin.close();
-					throw new OptionParseException("ERROR: Name before '-textures' or '-flats'.");
-				case STATE_TEXTURES:
-					options.addTexture(line);
-					break;
-				case STATE_FLATS:
-					options.addFlat(line);
-					break;
-			}
-		}
-		
-		options.stdin.close();
-	}
-	
 }

@@ -102,13 +102,13 @@ public final class DecoHackMain
 
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out);
+			this.stdout = new PrintStream(out, true);;
 			return this;
 		}
 		
 		public Options setStderr(OutputStream err) 
 		{
-			this.stderr = new PrintStream(err);
+			this.stderr = new PrintStream(err, true);
 			return this;
 		}
 

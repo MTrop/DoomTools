@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -331,6 +332,90 @@ public final class Common
 					break;
 			}
 		return out.toString();
+	}
+
+	/**
+	 * Prints a message out to a PrintStream, word-wrapped
+	 * to a set column width (in characters). The width cannot be
+	 * 1 or less or this does nothing. This will also turn any whitespace
+	 * character it encounters into a single space, regardless of specialty.
+	 * @param out the print stream to use. 
+	 * @param startColumn the starting column.
+	 * @param indent the indent line.
+	 * @param width the width in characters.
+	 * @param message the output message.
+	 * @return the ending column for subsequent calls.
+	 */
+	public static int printWrapped(PrintStream out, int startColumn, int indent, int width, CharSequence message)
+	{
+		if (width <= 1) return startColumn;
+		
+		StringBuilder token = new StringBuilder();
+		StringBuilder line = new StringBuilder();
+		int ln = startColumn;
+		int tok = 0;
+		for (int j = 0; j < indent; j++)
+			line.append(' ');
+		for (int i = 0; i < message.length(); i++)
+		{
+			char c = message.charAt(i);
+			if (c == '\n')
+			{
+				line.append(token);
+				ln += token.length();
+				token.delete(0, token.length());
+				tok = 0;
+				out.println(line.toString());
+				line.delete(0, line.length());
+				ln = 0;
+				for (int j = 0; j < indent; j++)
+					line.append(' ');
+			}
+			else if (Character.isWhitespace(c))
+			{
+				line.append(token);
+				ln += token.length();
+				if (ln < width-1)
+				{
+					line.append(' ');
+					ln++;
+				}
+				token.delete(0, token.length());
+				tok = 0;
+			}
+			else if (c == '-')
+			{
+				line.append(token);
+				ln += token.length();
+				line.append('-');
+				ln++;
+				token.delete(0, token.length());
+				tok = 0;
+			}
+			else if (ln + token.length() + 1 > width-1)
+			{
+				out.println(line.toString());
+				line.delete(0, line.length());
+				ln = 0;
+				for (int j = 0; j < indent; j++)
+					line.append(' ');
+				token.append(c);
+				tok++;
+			}
+			else
+			{
+				token.append(c);
+				tok++;
+			}
+		}
+		
+		String linestr = line.toString();
+		if (line.length() > 0)
+			out.print(linestr);
+		if (token.length() > 0)
+			out.print(token.toString());
+		
+		return ln + tok;
 	}
 
 }

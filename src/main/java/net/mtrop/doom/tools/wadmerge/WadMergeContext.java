@@ -664,9 +664,9 @@ public class WadMergeContext
 	}
 
 	/**
-	 * Merges a DEUTEX texture file into TEXTUREX/PNAMES entries in a buffer, 
-	 * using the name of the texture lump is the name of the file.
-	 * Will read in an existing PNAMES lump and/or matching texture lump if it exists in the buffer.
+	 * Merges a DEUTEX texture file into TEXTUREX/PNAMES entries in a buffer
+	 * Will read in an existing PNAMES lump and/or matching texture lump if it exists in the buffer,
+	 * and append the new textures and patch names.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param textureFile the texture file to parse.
