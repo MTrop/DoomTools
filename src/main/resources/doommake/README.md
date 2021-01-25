@@ -12,7 +12,6 @@ Some directories/files in this project are ignored (or *should* be ignored) by r
 
 	/build               Build directory.
 	/dist                Distributables directory.
-	/gen                 Generated/compiled assets directory.
 	doommake.properties  Project property override file.
 
 
@@ -22,6 +21,7 @@ This project requires the [DoomTools](https://github.com/MTrop/DoomTools) toolch
 building it. Clone this project to a new folder and type:
 
 	doommake init
+
 
 ...In order to ensure everything has been prepped correctly (some directories or files
 may need extracting, downloading, or copying).

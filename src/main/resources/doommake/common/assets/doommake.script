@@ -1,37 +1,38 @@
-#define PROP_ASSETWAD "doommake.file.assets"
-#define DEFAULT_ASSETWAD "assets.wad"
-#define PROP_ASSETSCRIPT "doommake.script.assets"
-#define DEFAULT_ASSETSCRIPT "scripts/merge-assets.txt"
-#define DIR_SRC_ASSETS "src/assets"
+/* ------------------------------------------------------------------------ */
+
+#define PROP_ASSETWAD       "doommake.file.assets"
+#define DEFAULT_ASSETWAD    "assets.wad"
+
+#define SCRIPT_ASSETS       "scripts/merge-assets.txt"
+
+#define DIR_SRC_ASSETS      "src/assets"
+
+/* ------------------------------------------------------------------------ */
 
 /**
  * Return the output asset wad.
  */
-function getAssetsWad() {
+function getAssetsWAD() {
 	return prop(PROP_ASSETWAD, DEFAULT_ASSETWAD); 
 }
 
-/**
- * Return the asset merge script.
- */
-function getAssetsScript() {
-	return prop(PROP_ASSETSCRIPT, DEFAULT_ASSETSCRIPT); 
-}
+/* ------------------------------------------------------------------------ */
 
 /**
  * Calls the merge script for merging maps.
+ * Creates assets WAD.
  */
-check function mergeAssets() {
+check function doAssets() {
 	verifydirs(DIR_SRC_ASSETS + "/_global");
 	verifydirs(DIR_SRC_ASSETS + "/graphics");
 	verifydirs(DIR_SRC_ASSETS + "/music");
 	verifydirs(DIR_SRC_ASSETS + "/sounds");
 	verifydirs(DIR_SRC_ASSETS + "/sprites");
 	if (tool::wadmerge({
-		inputfile: file(getAssetsScript()),
+		inputfile: file(SCRIPT_ASSETS),
 		args: [
 			getBuildDirectory(),
-			getAssetsWad()
+			getAssetsWAD()
 		] 
 	})) return error("ToolError", "WadMerge threw an error.");
 }
@@ -45,6 +46,6 @@ check function mergeAssets() {
  ****************************************************************************/
 check entry assets(args) {
 	initBuild();
-	mergeAssets();
+	doAssets();
 }
 

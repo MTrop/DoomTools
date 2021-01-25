@@ -10,13 +10,11 @@
 #
 
 create out
-
 datemarker out __VER__
 mergefile  out src/wadinfo.txt
 mergefile  out src/credits.txt
 mergewad   out $0/$1
 mergewad   out $0/$2
 mergewad   out $0/$3
-
-finish out $0/$4
+finish     out $0/$4
 end

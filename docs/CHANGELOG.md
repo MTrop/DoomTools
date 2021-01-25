@@ -57,6 +57,7 @@ WadMerge
 
 * `Added` An argument for MERGEDIR to omit the directory markers.
 * `Added` Support for argument expansion in scripts.
+* `Added` MERGEWADDIR for just merging in WADs found in a directory search.
 * `Fixed` Handling of PNAMES in MERGEDEUTEXFILE for multiple TEXTURE entries 
   ([Issue 4](https://github.com/MTrop/DoomTools/issues/4)).
 

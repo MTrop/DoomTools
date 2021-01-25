@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.wadmerge;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -594,13 +595,14 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param inDirectory the directory to read from.
+	 * @param filter the file filter to use.
 	 * @param omitMarkers if true, omit directory markers.
 	 * @return OK if the was written, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be written.
 	 */
-	public Response mergeTree(String symbol, File inDirectory, boolean omitMarkers) throws IOException
+	public Response mergeTree(String symbol, File inDirectory, FileFilter filter, boolean omitMarkers) throws IOException
 	{
 		if (!inDirectory.exists() || !inDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
@@ -629,31 +631,34 @@ public class WadMergeContext
 					verbosef("Scan directory `%s`...\n", f.getPath());
 					if (!omitMarkers && (resp = addMarker(symbol, "\\" + f.getName())) != Response.OK)
 						return resp; 
-					if ((resp = mergeTree(symbol, f, omitMarkers)) != Response.OK)
+					if ((resp = mergeTree(symbol, f, filter, omitMarkers)) != Response.OK)
 						return resp; 
 					verbosef("Done scanning directory `%s`.\n", f.getPath());
 				}
-				else if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+				else if (filter.accept(f))
 				{
-					if (adder != null)
+					if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
 					{
-						adder.close();
-						adder = null;
+						if (adder != null)
+						{
+							adder.close();
+							adder = null;
+						}
+						if ((resp = mergeWad(symbol, f)) != Response.OK)
+							return resp; 
 					}
-					if ((resp = mergeWad(symbol, f)) != Response.OK)
-						return resp; 
-				}
-				else if (buffer instanceof WadFile)
-				{
-					if (adder == null)
-						adder = ((WadFile)buffer).createAdder();
-					if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-						return resp; 
-				}
-				else
-				{
-					if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
-						return resp; 
+					else if (buffer instanceof WadFile)
+					{
+						if (adder == null)
+							adder = ((WadFile)buffer).createAdder();
+						if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+							return resp; 
+					}
+					else
+					{
+						if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+							return resp; 
+					}
 				}
 			}
 		} finally {

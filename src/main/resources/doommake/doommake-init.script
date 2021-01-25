@@ -20,4 +20,3 @@ function doInit(args) {
 check entry init(args) {
 	doInit();
 }
-

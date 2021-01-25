@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake;
+package net.mtrop.doom.tools.doommake.functions;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
 

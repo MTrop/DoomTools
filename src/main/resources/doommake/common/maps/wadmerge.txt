@@ -1,0 +1,12 @@
+# ===========================================================================
+# WadMerge Script for Maps
+# ===========================================================================
+#
+# Argument 0: The build directory.
+# Argument 1: The output WAD.
+#
+
+create out
+mergewaddir out src/maps
+finish out $0/$1
+end

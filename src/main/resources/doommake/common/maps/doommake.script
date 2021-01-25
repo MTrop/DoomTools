@@ -1,38 +1,38 @@
-#define PROP_MAPSWAD "doommake.file.maps"
-#define DEFAULT_MAPSWAD "maps.wad"
+/* ------------------------------------------------------------------------ */
 
-#define DIR_SRC_MAPS "src/maps"
+#define PROP_MAPSWAD        "doommake.file.maps"
+#define DEFAULT_MAPSWAD     "maps.wad"
+
+#define SCRIPT_MAPS         "scripts/merge-assets.txt"
+
+#define DIR_SRC_MAPS        "src/maps"
+
+/* ------------------------------------------------------------------------ */
 
 /**
  * Returns the output map wad.
  */
-function getMapsWad() {
+function getMapsWAD() {
 	return prop(PROP_MAPSWAD, DEFAULT_MAPSWAD); 
 }
 
-/**
- * Scans the project for the maps.
- */
-function scanMapList() {
-	return filelist(DIR_SRC_MAPS, false, REGEX_WADFILES);
-}
+/* ------------------------------------------------------------------------ */
 
 /**
  * Merges maps together.
+ * Creates map WAD.
  */
-function mergeMaps() {
+function doMaps() {
+	initBuild();
 	verifydirs(DIR_SRC_MAPS);
 	
-	outwadpath = getBuildDirectory() + "/" + getMapsWad();
-
-	check (err) {
-		mapWads = scanMapList();
-		if (empty(mapWads))
-			return error("NoMaps", "No map WADs found in: " + DIR_SRC_MAPS);
-		mergeWads(outwadpath, mapWads);	
-	} if (err) return err;
-	
-	println("Wrote file `" + outwadpath + "`.");
+	if (tool::wadmerge({
+		inputfile: file(SCRIPT_MAPS),
+		args: [
+			getBuildDirectory(),
+			getMapsWAD()
+		] 
+	})) return error("ToolError", "WadMerge threw an error.");
 }
 
 
@@ -43,7 +43,6 @@ function mergeMaps() {
  * doommake maps
  ****************************************************************************/
 check entry maps(args) {
-	initBuild();
-	mergeMaps();
+	doMaps();
 }
 

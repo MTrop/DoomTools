@@ -683,7 +683,51 @@ public enum WadMergeCommand
 			if (scanner.hasNext())
 				omitMarkers = scanner.nextBoolean("nomarkers");
 			try {
-				return context.mergeTree(symbol, new File(directory), omitMarkers);
+				return context.mergeTree(symbol, new File(directory), (file)->true, omitMarkers);
+			} catch (FileNotFoundException e) {
+				context.logf("ERROR: File %s not found.\n", directory);
+				return Response.BAD_FILE;
+			} catch (SecurityException e) {
+				context.logf("ERROR: File %s not readable (access denied).\n", directory);
+				return Response.BAD_FILE;
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	MERGEWADDIR
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("MERGEWADDIR [symbol] [path]");
+			out.println("    Adds a directory and its subdirectories recursively (files first, then");
+			out.println("    directory contents, per directory), but only the WAD files (by type and");
+			out.println("    extension).");
+		    out.println("    For each FILE in [path],"); 
+		    out.println("        If FILE is a directory,");
+		    out.println("            MERGEDIR [symbol] [FILE]");
+		    out.println("        Else if file is a WAD,");
+		    out.println("            MERGEWAD [symbol] [FILE]");
+		    out.println("        Else,");
+		    out.println("            Skip file.");
+			out.println("    [symbol]: The buffer to add to.");
+			out.println("    [path]:   The source directory to scan.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
+			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			String symbol = scanner.nextString();
+			String directory = scanner.nextString();
+			try {
+				return context.mergeTree(symbol, new File(directory), (file)->file.getName().toLowerCase().endsWith(".wad"), true);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", directory);
 				return Response.BAD_FILE;

@@ -1,6 +1,18 @@
-#define PROP_MAPTEXWAD "doommake.file.maptex"
-#define DEFAULT_MAPTEXWAD "maptex.wad"
-#define DIR_SRC_TEXTURE_WADS "src/wads/textures"
+/* ------------------------------------------------------------------------ */
+
+#define PROP_MAPTEXWAD      "doommake.file.maptex"
+#define DEFAULT_MAPTEXWAD   "maptex.wad"
+
+#define DIR_SRC_TEXTUREWADS "src/wads/textures"
+
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Return the output map textures WAD.
+ */
+function getMapTexWad() {
+	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD);
+}
 
 /**
  * Scans the project for the maps.
@@ -9,17 +21,15 @@ function scanTextureWadList() {
 	return filelist(DIR_SRC_TEXTURE_WADS, false, REGEX_WADFILES);
 }
 
-/**
- * Return the output map textures WAD.
- */
-function getMapTexWad() {
-	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD); 
-}
+/* ------------------------------------------------------------------------ */
 
 /**
  * Extracts textures from the project texture WADs using the maps.
+ * Creates maptex WAD.
  */
-check function extractWADTextures() {
+check function doMapTextures() {
+	initBuild();
+	verifydirs(DIR_TEXTURE_WADS);	
 
 	textureWadFiles = scanTextureWadList();
 	if (empty(textureWadFiles)) {
@@ -35,7 +45,10 @@ check function extractWADTextures() {
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
-	extractUsedMapTextures(baseIwadPath, mapWads, textureWadFiles, getBuildDirectory() + "/" + getMapTexWad());
+	outputWad = getBuildDirectory() + "/" + getMapTexWad();
+
+	extractUsedMapTextures(baseIwadPath, mapWads, textureWadFiles, outputWad);
+	println("Extracted map textures to `" + outputWad + "`.");
 }
 
 
@@ -47,8 +60,6 @@ check function extractWADTextures() {
  * doommake maptextures
  ****************************************************************************/
 check entry maptextures(args) {
-	initBuild();
-	verifydirs(DIR_TEXTURE_WADS);	
-	extractWADTextures();
+	doMapTextures();
 }
 
