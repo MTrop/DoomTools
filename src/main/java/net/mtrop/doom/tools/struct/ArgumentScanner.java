@@ -25,7 +25,7 @@ public class ArgumentScanner extends TokenScanner
 	public String getArgument(int index)
 	{
 		if (index < 0 || index >= arguments.length)
-			return "";
+			return "$" + index;
 		else
 			return arguments[index];
 	}

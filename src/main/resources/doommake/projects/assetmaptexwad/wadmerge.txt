@@ -1,5 +1,5 @@
 # ===========================================================================
-# WadMerge Script for Release Simple Map with Assets and Textures Project
+# WadMerge Script for Release Simple Map with Assets and Texture Wads Project
 # ===========================================================================
 #
 # Argument 0: Build directory.

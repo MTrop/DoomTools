@@ -17,11 +17,10 @@ function getMapTexWad() {
 }
 
 /**
- * Extracts textures from the project texture WADs using the maps.  
+ * Extracts textures from the project texture WADs using the maps.
  */
-check function extractTextures() {
-	verifydirs(DIR_TEXTURE_WADS);
-	
+check function extractWADTextures() {
+
 	textureWadFiles = scanTextureWadList();
 	if (empty(textureWadFiles)) {
 		println("WARNING: No texture WADs found in: " + DIR_TEXTURE_WADS + ". Skipping texture extraction step.");
@@ -36,24 +35,7 @@ check function extractTextures() {
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
-	// Output buffer.
-	buf = bufnew(96 * 1024); // 96k
-	
-	if (tool::wtexscan({
-		stdout: bosopen(buf), 
-		wadfiles: mapWads
-	})) return error("ToolError", "WTexScan threw an error.");
-	
-	// reset buffer cursor for read.
-	buf->bufsetpos(0);
-	
-	if (tool::wtexport({
-		stdin: bisopen(buf), 
-		texturewads: textureWadFiles,
-		basewad: file(baseIwadPath),
-		outwad: file(getBuildDirectory() + "/" + getMapTexWad()),
-		additive: false
-	})) return error("ToolError", "WTExport threw an error.");
+	extractUsedMapTextures(baseIwadPath, mapWads, textureWadFiles, getBuildDirectory() + "/" + getMapTexWad());
 }
 
 
@@ -66,6 +48,7 @@ check function extractTextures() {
  ****************************************************************************/
 check entry maptextures(args) {
 	initBuild();
-	extractTextures();
+	verifydirs(DIR_TEXTURE_WADS);	
+	extractWADTextures();
 }
 

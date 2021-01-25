@@ -1,20 +1,6 @@
 #define DEFAULT_RELEASESCRIPT "scripts/merge-release.txt"
 
 /**
- * Zips the resulting project.
- */
-check function zipProject() {
-	outzip = getDistDirectory() + "/" + getProjectZip();
-	println("Zipping project to " + outzip + "...");
-	zipfiles(
-		outzip, [
-			getBuildDirectory() + "/" + getProjectWad(), 
-			getBuildDirectory() + "/" + getProjectTxt()
-		]
-	);
-}
-
-/**
  * Performs the release.
  */
 check function doRelease() {

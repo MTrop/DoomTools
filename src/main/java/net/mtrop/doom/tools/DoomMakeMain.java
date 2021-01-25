@@ -50,6 +50,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_FUNCHELP1 = "--function-help";
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	private static final String SWITCH_LISTTEMPLATES = "--list-templates";
+	private static final String SWITCH_LISTTEMPLATES2 = "-t";
 	private static final String SWITCH_NEWPROJECT = "--new-project";
 	private static final String SWITCH_NEWPROJECT2 = "-n";
 	
@@ -340,7 +341,7 @@ public final class DoomMakeMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
 						options.version = true;
-					else if (arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES))
+					else if (arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES) || arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES2))
 						options.listTemplates = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
@@ -497,10 +498,10 @@ public final class DoomMakeMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: doommake [target] [args] [switches]");
-		out.println("                [--help | -h | --version]");
-		out.println("                [--function-help | --function-help-markdown]");
 		out.println("                --list-templates");
 		out.println("                [directory] --new-project [templates]");
+		out.println("                [--help | -h | --version]");
+		out.println("                [--function-help | --function-help-markdown]");
 	}
 	
 	/**
@@ -518,8 +519,8 @@ public final class DoomMakeMain
 		out.println("[templates]:");
 		out.println("    The names of the template(s) to use or combine for the new ");
 		out.println("    project (applied altogether).");
-		out.println("    E.g.: --new-project simple-maps git");
-		out.println("        Combines the \"simple-maps\", and \"git\" templates together,");
+		out.println("    E.g.: --new-project maps git");
+		out.println("        Combines the \"maps\", and \"git\" templates together,");
 		out.println("        in that order.");
 		out.println();
 		out.println("[directory]:");
@@ -576,9 +577,10 @@ public final class DoomMakeMain
 		);
 		final ProjectTemplate COMMON_MAKE = create(
 			"Common make scripts.",
-			file("doommake.script", 
+			dir("build"),
+			file("doommake.script",
 				"doommake/doommake.script"),
-			file("doommake.properties", 
+			file("doommake.properties",
 				"doommake/doommake.properties"),
 			file("README.md",
 				"doommake/README.md")
@@ -586,7 +588,7 @@ public final class DoomMakeMain
 		final ProjectTemplate COMMON_RELEASE_STUB = create(
 			"Common release stubbing.",
 			dir("dist"),
-			fileAppend("doommake.properties", 
+			fileAppend("doommake.properties",
 				"doommake/common/release/doommake.properties"),
 			fileAppend("doommake.script", 
 				"doommake/common/release/doommake.script"),
@@ -596,8 +598,10 @@ public final class DoomMakeMain
 		final ProjectTemplate COMMON_MAPS = create(
 			"Common map project structure.",
 			dir("src/maps"),
-			fileAppend("doommake.properties", 
+			fileAppend("doommake.properties",
 				"doommake/common/maps/doommake.properties"),
+			fileAppend("doommake.script",
+				"doommake/doommake.mergewads.script"),
 			fileAppend("doommake.script", 
 				"doommake/common/maps/doommake.script"),
 			fileAppend("README.md",
@@ -614,7 +618,7 @@ public final class DoomMakeMain
 				"doommake/common/assets/wadmerge.txt"),
 			fileAppend("doommake.properties", 
 				"doommake/common/assets/doommake.properties"),
-			fileAppend("doommake.script", 
+			fileAppend("doommake.script",
 				"doommake/common/assets/doommake.script"),
 			fileAppend("README.md",
 				"doommake/common/assets/README.md")
@@ -638,6 +642,8 @@ public final class DoomMakeMain
 				"doommake/common/textures/texture2.txt"),
 			fileAppend("doommake.properties", 
 				"doommake/common/textures/doommake.properties"),
+			fileAppend("doommake.script",
+				"doommake/doommake.extractmaptex.script"),
 			fileAppend("doommake.script", 
 				"doommake/common/textures/doommake.script"),
 			fileAppend("README.md",
@@ -646,9 +652,11 @@ public final class DoomMakeMain
 		final ProjectTemplate COMMON_TEXTURE_WAD = create(
 			"Common texture WAD dependency.",
 			dir("src/wads/textures"),
-			fileAppend("doommake.properties", 
+			fileAppend("doommake.properties",
 				"doommake/common/texwad/doommake.properties"),
-			fileAppend("doommake.script", 
+			fileAppend("doommake.script",
+				"doommake/doommake.extractmaptex.script"),
+			fileAppend("doommake.script",
 				"doommake/common/texwad/doommake.script"),
 			fileAppend("README.md",
 				"doommake/common/texwad/README.md")
@@ -672,6 +680,20 @@ public final class DoomMakeMain
 						"doommake/projects/maps/doommake.script")
 				))
 			);
+		TEMPLATES.put("tex",
+			create("A project that builds texture WADs.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_INIT)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_TEXTURES)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/projects/textures/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/projects/textures/doommake.script")
+				))
+			);
 		TEMPLATES.put("maps-assets",
 			create("A project that builds maps and non-texture assets together.")
 				.add(COMMON)
@@ -687,6 +709,22 @@ public final class DoomMakeMain
 						"doommake/projects/assets/doommake.script")
 				))
 			);
+		TEMPLATES.put("maps-tex",
+			create("A project that builds maps and uses a from-scratch texture set.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_IWAD)
+				.add(COMMON_INIT)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(COMMON_TEXTURES)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/projects/texturemaps/wadmerge.txt"),
+					fileAppend("doommake.script", 
+						"doommake/projects/texturemaps/doommake.script")
+				))
+			);
 		TEMPLATES.put("maps-texwad",
 			create("A project that builds maps and uses textures from a set of texture WADs.")
 				.add(COMMON)
@@ -698,9 +736,28 @@ public final class DoomMakeMain
 				.add(COMMON_TEXTURE_WAD)
 				.add(create(
 					file("scripts/merge-release.txt", 
-						"doommake/projects/texmaps/wadmerge.txt"),
+						"doommake/projects/texwadmaps/wadmerge.txt"),
 					fileAppend("doommake.script", 
-						"doommake/projects/texmaps/doommake.script")
+						"doommake/projects/texwadmaps/doommake.script")
+				))
+			);
+		TEMPLATES.put("assets-maps-tex",
+			create("A project that builds maps, non-texture assets, and a from-scratch texture set.")
+				.add(COMMON)
+				.add(COMMON_MAKE)
+				.add(COMMON_IWAD)
+				.add(COMMON_INIT)
+				.add(COMMON_RELEASE_STUB)
+				.add(COMMON_MAPS)
+				.add(COMMON_ASSETS)
+				.add(COMMON_TEXTURES)
+				.add(create(
+					file("scripts/merge-release.txt", 
+						"doommake/projects/assetmaptex/wadmerge.txt"),
+					fileAppend("doommake.properties", 
+						"doommake/projects/assetmaptex/doommake.properties"),
+					fileAppend("doommake.script", 
+						"doommake/projects/assetmaptex/doommake.script")
 				))
 			);
 		TEMPLATES.put("assets-maps-texwad",
@@ -715,9 +772,9 @@ public final class DoomMakeMain
 				.add(COMMON_TEXTURE_WAD)
 				.add(create(
 					file("scripts/merge-release.txt", 
-						"doommake/projects/assetmaptex/wadmerge.txt"),
+						"doommake/projects/assetmaptexwad/wadmerge.txt"),
 					fileAppend("doommake.script", 
-						"doommake/projects/assetmaptex/doommake.script")
+						"doommake/projects/assetmaptexwad/doommake.script")
 				))
 			);
 	}

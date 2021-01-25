@@ -1,27 +1,4 @@
-#define PROP_MAPTEXWAD "doommake.file.maptex"
-#define DEFAULT_MAPTEXWAD "maptex.wad"
 #define DEFAULT_RELEASESCRIPT "scripts/merge-release.txt"
-
-/**
- * Return the output map textures WAD.
- */
-function getMapTexWad() {
-	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD); 
-}
-
-check function reduceTextures() {
-	baseIwadPath = getIwad();
-	
-	if (empty(baseIwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-
-	extractUsedMapTextures(
-		baseIwadPath, 
-		[getBuildDirectory() + "/" + getMapsWad()], 
-		[getBuildDirectory() + "/" + getTextureWad()], 
-		getBuildDirectory() + "/" + getMapTexWad()
-	);	
-}
 
 /**
  * Performs the release.
@@ -30,16 +7,13 @@ check function doRelease() {
 	initBuild();
 	initDist();
 	mergeMaps();
-	mergeAssets();
-	mergeTextures();
-	reduceTextures();
+	extractWADTextures();
 	if (tool::wadmerge({
 		inputFile: file(DEFAULT_RELEASESCRIPT),
 		args: [
-			getBuildDirectory(), 
-			getAssetsWad(), 
-			getMapsWad(), 
-			getMapTexWad(), 
+			getBuildDirectory(),
+			getMapsWad(),
+			getMapTexWad(),
 			getProjectWad()
 		]
 	})) return error("ToolError", "WadMerge threw an error.");

@@ -24,28 +24,14 @@ function mergeMaps() {
 	verifydirs(DIR_SRC_MAPS);
 	
 	outwadpath = getBuildDirectory() + "/" + getMapsWad();
-	
-	mapWads = scanMapList();
-	if (empty(mapWads))
-		return error("NoMaps", "No map WADs found in: " + DIR_SRC_MAPS);
-	
-	check (err) {
-		destwad = wadfilecreate(outwadpath);
-		each (w : mapWads) {
-			check (err) {
-				srcwad = wadfile(w);
-				println("Merging map " + w + "...");
-				destWad->wadimport(srcwad, srcwad->wadentries());
-			}
-			close(srcwad);
-			if (err)
-				return err;
-		}
-	}
-	close(destwad);
-	if (err)
-		return err;
 
+	check (err) {
+		mapWads = scanMapList();
+		if (empty(mapWads))
+			return error("NoMaps", "No map WADs found in: " + DIR_SRC_MAPS);
+		mergeWads(outwadpath, mapWads);	
+	} if (err) return err;
+	
 	println("Wrote file `" + outwadpath + "`.");
 }
 

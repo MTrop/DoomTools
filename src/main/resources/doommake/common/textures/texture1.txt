@@ -7,7 +7,7 @@
 ;
 ; TEXNAME W H
 ; * PATCHNAM X Y
-;
+; ...
 
 ; First texture is the NULL texture.
 AASTINKY 24 72

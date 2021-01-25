@@ -38,3 +38,17 @@ check function copyProjectTxt() {
 	copyfile(file(SRC_WADINFO_TXT), file(getBuildDirectory() + "/" + getProjectTxt()), true);
 }
 
+/**
+ * Zips the resulting project.
+ */
+check function zipProject() {
+	outzip = getDistDirectory() + "/" + getProjectZip();
+	println("Zipping project to " + outzip + "...");
+	zipfiles(
+		outzip, [
+			getBuildDirectory() + "/" + getProjectWad(), 
+			getBuildDirectory() + "/" + getProjectTxt()
+		]
+	);
+}
+
