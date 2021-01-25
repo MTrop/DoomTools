@@ -155,6 +155,14 @@ public final class WTexScanMain
 			return this;
 		}
 		
+		public Options setMapsToScan(String[] maps)
+		{
+			this.mapsToScan.clear();
+			for (String map : maps)
+				addMapToScan(map);
+			return this;
+		}
+		
 		public Options addWadFile(File file)
 		{
 			this.wadFiles.add(file);

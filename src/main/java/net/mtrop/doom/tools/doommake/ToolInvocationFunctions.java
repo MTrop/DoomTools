@@ -734,6 +734,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"wadfiles:LIST[STRING, ...]",
+							"mapsToScan:LIST[STRING, ...]",
 							"quiet:BOOLEAN",
 							"outputtextures:BOOLEAN",
 							"outputflats:BOOLEAN",
