@@ -1,14 +1,5 @@
 /* ------------------------------------------------------------------------ */
 
-#define PROP_MAPSWAD        "doommake.file.maps"
-#define DEFAULT_MAPSWAD     "maps.wad"
-
-#define SCRIPT_MAPS         "scripts/merge-assets.txt"
-
-#define DIR_SRC_MAPS        "src/maps"
-
-/* ------------------------------------------------------------------------ */
-
 /**
  * Returns the output map wad.
  */
@@ -24,15 +15,11 @@ function getMapsWAD() {
  */
 function doMaps() {
 	initBuild();
-	verifydirs(DIR_SRC_MAPS);
-	
-	if (tool::wadmerge({
-		inputfile: file(SCRIPT_MAPS),
-		args: [
-			getBuildDirectory(),
-			getMapsWAD()
-		] 
-	})) return error("ToolError", "WadMerge threw an error.");
+	verifydirs(SRC_DIR_MAPS);
+	wadmerge(file(SCRIPT_MAPS),[
+		getBuildDirectory(),
+		getMapsWAD()
+	]);
 }
 
 

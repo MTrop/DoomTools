@@ -1,20 +1,22 @@
 # ===========================================================================
-# WadMerge Script for Release Simple Map with Assets and Texture Wads Project
+# WadMerge Script for Release
 # ===========================================================================
 #
 # Argument 0: Build directory.
-# Argument 1: Assets file.
-# Argument 2: Maps file.
-# Argument 3: Map Texture file.
-# Argument 4: Project Wad.
+# Argument 1: Project Wad.
+# Argument 2: Assets file.
+# Argument 3: Maps file.
+# Argument 4: Map Texture file.
 #
 
 create out
 datemarker out __VER__
 mergefile  out src/wadinfo.txt
 mergefile  out src/credits.txt
-mergewad   out $0/$1
+
 mergewad   out $0/$2
 mergewad   out $0/$3
-finish     out $0/$4
+mergewad   out $0/$4
+
+finish     out $0/$1
 end

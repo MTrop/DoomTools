@@ -1,0 +1,265 @@
+/****************************************************************************
+ * DoomMake Script and Defines Library
+ * There is little reason to change this file.
+ ****************************************************************************/
+
+// Project-specific.
+#define PROP_PROJECTNAME    "doommake.project.name"
+#define DEFAULT_PROJECTNAME "project"
+
+// Local-specific.
+#define PROP_BUILDDIR       "doommake.dir.build"
+#define DEFAULT_BUILDDIR    "build"
+#define PROP_DISTDIR        "doommake.dir.dist"
+#define DEFAULT_DISTDIR     "dist"
+#define PROP_IWADPATH       "doommake.iwad"
+
+// Build-specific.
+#define PROP_ASSETWAD       "doommake.file.assets"
+#define DEFAULT_ASSETWAD    "assets.wad"
+#define PROP_MAPSWAD        "doommake.file.maps"
+#define DEFAULT_MAPSWAD     "maps.wad"
+#define PROP_MAPTEXWAD      "doommake.file.maptex"
+#define DEFAULT_MAPTEXWAD   "maptex.wad"
+#define PROP_TEXWAD         "doommake.file.textures"
+#define DEFAULT_TEXWAD      "textures.wad"
+
+// Paths
+#define SRC_WADINFO         "src/wadinfo.txt"
+#define SRC_CREDITS         "src/credits.txt"
+#define SRC_DIR_ASSETS      "src/assets" 
+#define SRC_DIR_MAPS        "src/maps"
+#define SRC_DIR_TEXTURES    "src/textures"
+#define SRC_DIR_TEXTUREWADS "src/wads/textures"
+
+#define MERGESCRIPT_ASSETS  "scripts/merge-assets.txt"
+#define MERGESCRIPT_MAPS    "scripts/merge-maps.txt"
+#define MERGESCRIPT_TEXTURE "scripts/merge-textures.txt"
+#define MERGESCRIPT_RELEASE "scripts/merge-release.txt"
+
+// WAD Files Pattern
+#define REGEX_WADFILES      `.*\.([wW][aA][dD])`
+
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Return a property by its key, or def if null.
+ */
+function prop(key, def) {
+	out = properties(key);
+	return empty(out) ? def : out;
+}
+
+/**
+ * Return the build directory path.
+ */
+function getBuildDirectory() {
+	return prop(PROP_BUILDDIR, DEFAULT_BUILDDIR); 
+}
+
+/**
+ * Return the distribution directory path.
+ */
+function getDistDirectory() {
+	return prop(PROP_DISTDIR, DEFAULT_DISTDIR); 
+}
+
+/**
+ * Returns the project name.
+ */
+function getProjectName() {
+	return prop(PROP_PROJECTNAME, DEFAULT_PROJECTNAME);
+}
+
+/**
+ * Return the IWAD from properties.
+ */
+function getIWAD() {
+	return prop(PROP_IWADPATH, null); 
+}
+
+/**
+ * Return the output asset wad.
+ */
+function getAssetsWAD() {
+	return prop(PROP_ASSETWAD, DEFAULT_ASSETWAD); 
+}
+
+/**
+ * Returns the output map wad.
+ */
+function getMapsWAD() {
+	return prop(PROP_MAPSWAD, DEFAULT_MAPSWAD); 
+}
+
+/**
+ * Return the output map textures WAD.
+ */
+function getMapTextureWAD() {
+	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD);
+}
+
+/**
+ * Scans the project for the maps.
+ */
+function scanTextureWADList() {
+	return filelist(SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
+}
+
+/**
+ * Return the project WAD file name.
+ */
+function getProjectWAD() {
+	return getProjectName() + ".wad"; 
+}
+
+/**
+ * Return the project PK3 file name.
+ */
+function getProjectPK3() {
+	return getProjectName() + ".pk3"; 
+}
+
+/**
+ * Return the project TXT file name.
+ */
+function getProjectTXT() {
+	return getProjectName() + ".txt"; 
+}
+
+/**
+ * Return the project Zip file name.
+ */
+function getProjectZip() {
+	return getProjectName() + ".zip"; 
+}
+
+
+/****************************************************************************
+ * Initialize build.
+ ****************************************************************************/
+function initBuild() {
+	verifydirs(getBuildDirectory());
+}
+
+/****************************************************************************
+ * Initializes the build directory.
+ ****************************************************************************/
+function initDist() {
+	return verifydirs(getDistDirectory());
+}
+
+/****************************************************************************
+ * Copies the WAD info to the build directory as its TXT file.
+ * Throws error if unsuccessful.
+ ****************************************************************************/
+check function copyProjectTXT() {
+	copyfile(file(SRC_WADINFO_TXT), file(getBuildDirectory() + "/" + getProjectTXT()), true);
+}
+
+/****************************************************************************
+ * Calls WadMerge and throws an error if something bad happens.
+ * 
+ * scriptFilePath: Path to script file to execute.
+ * args: Script arguments.
+ ****************************************************************************/
+function wadmerge(scriptFilePath, args) {
+	if (args === null)
+		args = [];
+	if (empty(scriptFilePath))
+		return error("ToolError", "Script file not specified.");
+	if (tool::wadmerge({inputFile: file(scriptFilePath), args: args})) 
+		return error("ToolError", "WadMerge threw an error.");
+}
+
+/****************************************************************************
+ * Calls DECOHack and throws an error if something bad happens.
+ * 
+ * mainFilePath: Path to root file.
+ * outFilePath: Output file.
+ * budget: If true, output budget.
+ ****************************************************************************/
+function decohack(mainFilePath, outFilePath, budget) {
+	if (empty(mainFilePath))
+		return error("ToolError", "Root file not specified.");
+	if (empty(outFilePath))
+		return error("ToolError", "Output file path not specified.");
+	if (tool::decohack({
+		infile: mainFilePath,
+		outfile: outFilePath,
+		outputbudget: budget
+	})) return error("ToolError", "WadMerge threw an error.");
+}
+
+/****************************************************************************
+ * Merges a set of WADs together into one.
+ *
+ * outputWadFile: the output WAD file path.
+ * wadList: a list of WAD files.
+ ****************************************************************************/
+function mergeWads(outputWadFile, wadList) {
+	check (err) {
+		destwad = wadfilecreate(outputWadFile);
+		each (w : wadList) {
+			check (err) {
+				srcwad = wadfile(w);
+				println("Merging WAD `" + w + "`...");
+				destWad->wadimport(srcwad, srcwad->wadentries());
+			}
+			close(srcwad);
+			if (err)
+				return err;
+		}
+	}
+	close(destwad);
+	if (err)
+		return err;
+
+	println("Created WAD `" + outputWadFile->file()->filepath() + "`.");
+}
+
+/****************************************************************************
+ * Extracts used textures from a set of map-containing WADs from a set of 
+ * texture WADs and puts them in an output WAD.
+ * 
+ * baseIwadPath: Path to the base IWAD file.
+ * mapWadPathList: The list of map WADs to inspect.
+ * textureWadPathList: The list of texture WADs to pull from.
+ * outputWadPath: The path to the output WAD file.
+ ****************************************************************************/
+function extractUsedMapTextures(baseIwadPath, mapWadPathList, textureWadPathList, outputWadPath) {
+	// Output buffer.
+	buf = bufnew(96 * 1024); // 96k
+	
+	if (tool::wtexscan({
+		stdout: bosopen(buf), 
+		wadfiles: mapWadPathList
+	})) return error("ToolError", "WTexScan threw an error.");
+	
+	// reset buffer cursor for read.
+	buf->bufsetpos(0);
+	
+	if (tool::wtexport({
+		stdin: bisopen(buf), 
+		texturewads: textureWadPathList,
+		basewad: file(baseIwadPath),
+		outwad: file(outputWadPath),
+		additive: false
+	})) return error("ToolError", "WTExport threw an error.");
+	
+	println("Extracted map textures to `" + outputWadPath + "`.");
+}
+
+/****************************************************************************
+ * Zips the resulting project.
+ ****************************************************************************/
+check function zipProject() {
+	outzip = getDistDirectory() + "/" + getProjectZip();
+	println("Zipping project to " + outzip + "...");
+	zipfiles(
+		outzip, [
+			getBuildDirectory() + "/" + getProjectWAD(), 
+			getBuildDirectory() + "/" + getProjectTXT()
+		]
+	);
+}

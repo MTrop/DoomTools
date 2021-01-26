@@ -1,3 +1,7 @@
+/****************************************************************************
+ * DoomMake Project Init Script
+ ****************************************************************************/
+
 /**
  * Performs project initialization.
  * Usually used for downloading dependencies or other setup.
@@ -8,15 +12,4 @@ function doInit(args) {
 	// If this project needs initial setup, do it here.
 	// ---------------------------------------------------
 
-}
-
-
-/*****************************************************************************
- * TARGET: init
- *****************************************************************************
- * Initializes this project.
- * doommake init
- ****************************************************************************/
-check entry init(args) {
-	doInit();
 }

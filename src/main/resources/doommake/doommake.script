@@ -6,176 +6,8 @@
  * All WadScript and DoomMake extensions are available here. 
  ****************************************************************************/
 
+#include "doommake-lib.script"
 #include "doommake-init.script"
-
-#define PROP_BUILDDIR       "doommake.dir.build"
-#define DEFAULT_BUILDDIR    "build"
-
-#define PROP_DISTDIR        "doommake.dir.dist"
-#define DEFAULT_DISTDIR     "dist"
-
-#define PROP_PROJECTNAME    "doommake.project.name"
-#define DEFAULT_PROJECTNAME "project"
-
-#define PROP_IWADPATH       "doommake.iwad"
-
-#define SRC_WADINFO_TXT     "src/wadinfo.txt"
-#define SRC_CREDITS_TXT     "src/credits.txt"
-
-#define REGEX_WADFILES      `.*\.([wW][aA][dD])`
-
-/* ------------------------------------------------------------------------ */
-
-/**
- * Return a property by its key, or def if null.
- */
-function prop(key, def) {
-	out = properties(key);
-	return empty(out) ? def : out;
-}
-
-/**
- * Return the build directory path.
- */
-function getBuildDirectory() {
-	return prop(PROP_BUILDDIR, DEFAULT_BUILDDIR); 
-}
-
-/**
- * Return the distribution directory path.
- */
-function getDistDirectory() {
-	return prop(PROP_DISTDIR, DEFAULT_DISTDIR); 
-}
-
-/**
- * Returns the project name.
- */
-function getProjectName() {
-	return prop(PROP_PROJECTNAME, DEFAULT_PROJECTNAME);
-}
-
-/**
- * Return the IWAD from properties.
- */
-function getIWAD() {
-	return prop(PROP_IWADPATH, null); 
-}
-
-/**
- * Return the project WAD file name.
- */
-function getProjectWAD() {
-	return getProjectName() + ".wad"; 
-}
-
-/**
- * Return the project PK3 file name.
- */
-function getProjectPK3() {
-	return getProjectName() + ".pk3"; 
-}
-
-/**
- * Return the project TXT file name.
- */
-function getProjectTXT() {
-	return getProjectName() + ".txt"; 
-}
-
-/**
- * Return the project Zip file name.
- */
-function getProjectZip() {
-	return getProjectName() + ".zip"; 
-}
-
-/* ------------------------------------------------------------------------ */
-
-/**
- * Initialize build.
- */
-function initBuild() {
-	verifydirs(getBuildDirectory());
-}
-
-/**
- * Copies the WAD info to the build directory as its TXT file.
- */
-check function copyProjectTXT() {
-	copyfile(file(SRC_WADINFO_TXT), file(getBuildDirectory() + "/" + getProjectTXT()), true);
-}
-
-/**
- * Extracts used textures from a set of map-containing WADs from a set of texture WADs
- * and puts them in an output WAD.
- * 
- * baseIwadPath: Path to the base IWAD file.
- * mapWadList: The list of map WADs to inspect.
- * textureWadList: The list of texture WADs to pull from.
- * outputWad: The path to the output WAD file.
- */
-function extractUsedMapTextures(baseIwadPath, mapWadList, textureWadList, outputWad) {
-	// Output buffer.
-	buf = bufnew(96 * 1024); // 96k
-	
-	if (tool::wtexscan({
-		stdout: bosopen(buf), 
-		wadfiles: mapWadList
-	})) return error("ToolError", "WTexScan threw an error.");
-	
-	// reset buffer cursor for read.
-	buf->bufsetpos(0);
-	
-	if (tool::wtexport({
-		stdin: bisopen(buf), 
-		texturewads: textureWadList,
-		basewad: file(baseIwadPath),
-		outwad: file(outputWad),
-		additive: false
-	})) return error("ToolError", "WTExport threw an error.");
-}
-
-/**
- * Merges a set of WADs together into one.
- *
- * outputWadFile: the output WAD file path.
- * wadList: a list of WAD files.
- */
-function mergeWads(outputWadFile, wadList) {
-	check (err) {
-		destwad = wadfilecreate(outputWadFile);
-		each (w : wadList) {
-			check (err) {
-				srcwad = wadfile(w);
-				println("Merging WAD `" + w + "`...");
-				destWad->wadimport(srcwad, srcwad->wadentries());
-			}
-			close(srcwad);
-			if (err)
-				return err;
-		}
-	}
-	close(destwad);
-	if (err)
-		return err;
-
-	println("Created WAD `" + outputWadFile->file()->filepath() + "`.");
-}
-
-/**
- * Zips the resulting project.
- */
-check function zipProject() {
-	outzip = getDistDirectory() + "/" + getProjectZip();
-	println("Zipping project to " + outzip + "...");
-	zipfiles(
-		outzip, [
-			getBuildDirectory() + "/" + getProjectWAD(), 
-			getBuildDirectory() + "/" + getProjectTXT()
-		]
-	);
-}
 
 /* ------------------------------------------------------------------------ */
 
@@ -185,6 +17,17 @@ check function zipProject() {
 function doClean() {
 	initBuild();
 	return cleandir(getBuildDirectory());
+}
+
+
+/****************************************************************************
+ * TARGET: init
+ ****************************************************************************
+ * Initializes this project.
+ * doommake init
+ ****************************************************************************/
+check entry init(args) {
+	doInit(args);
 }
 
 

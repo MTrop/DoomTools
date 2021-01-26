@@ -1,14 +1,5 @@
 /* ------------------------------------------------------------------------ */
 
-#define PROP_TEXWAD         "doommake.file.textures"
-#define DEFAULT_TEXWAD      "textures.wad"
-
-#define SCRIPT_TEXTURE      "scripts/merge-textures.txt"
-
-#define DIR_SRC_TEXTURES    "src/textures"
-
-/* ------------------------------------------------------------------------ */
-
 /**
  * Return the output textures WAD.
  */
@@ -23,24 +14,6 @@ function getTexturesScript() {
 	return prop(PROP_TEXTURESCRIPT, DEFAULT_TEXTURESCRIPT); 
 }
 
-/**
- * Reduces the textures to what are used in the maps. 
- * Creates maptex WAD.
- */
-check function reduceTextures() {
-	baseIwadPath = getIwad();
-	
-	if (empty(baseIwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-
-	extractUsedMapTextures(
-		baseIwadPath, 
-		[getBuildDirectory() + "/" + getMapsWad()], 
-		[getBuildDirectory() + "/" + getTextureWad()], 
-		getBuildDirectory() + "/" + getMapTexWad()
-	);	
-}
-
 /* ------------------------------------------------------------------------ */
 
 /**
@@ -51,14 +24,28 @@ check function doTextures() {
 	initBuild();
 	verifydirs(DIR_SRC_TEXTURES + "/flats");
 	verifydirs(DIR_SRC_TEXTURES + "/patches");
-	
-	if (tool::wadmerge({
-		inputfile: file(getTexturesScript()),
-		args: [
-			getBuildDirectory(), 
-			getTextureWad()
-		]
-	})) return error("ToolError", "WadMerge threw an error.");
+	wadmerge(file(getTexturesScript()), [
+		getBuildDirectory(), 
+		getTextureWad()
+	]);
+}
+
+/**
+ * Reduces the textures to what are used in the maps. 
+ * Creates maptex WAD.
+ */
+function doMapTextures() {
+	baseIwadPath = getIwad();	
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+
+	check (err) extractUsedMapTextures(
+		baseIwadPath,
+		[getBuildDirectory() + "/" + getMapsWad()],
+		[getBuildDirectory() + "/" + getTextureWad()],
+		getBuildDirectory() + "/" + getMapTexWad()
+	);
+	return err;
 }
 
 
@@ -70,5 +57,17 @@ check function doTextures() {
  ****************************************************************************/
 check entry textures(args) {
 	doTextures();
+}
+
+
+/*****************************************************************************
+ * TARGET: exportmaptextures
+ *****************************************************************************
+ * Reads the map WADs and compiled texture resources and exports 
+ * them to a WAD of used textures.
+ * doommake exportmaptextures
+ ****************************************************************************/
+check entry mapTextures(args) {
+	doMapTextures();
 }
 

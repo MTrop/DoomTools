@@ -11,17 +11,16 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectModule;
-import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.exception.OptionParseException;
 
-import static net.mtrop.doom.tools.doommake.ProjectTemplate.build;
 import static net.mtrop.doom.tools.doommake.ProjectModule.create;
 import static net.mtrop.doom.tools.doommake.ProjectModule.file;
 import static net.mtrop.doom.tools.doommake.ProjectModule.dir;
@@ -64,8 +63,12 @@ public final class DoomMakeMain
 	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
 	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
 
-	/** The templates. */
-	private static final Map<String, ProjectTemplate> TEMPLATES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	/** The main templates. */
+	private static final Map<String, ProjectModule> TEMPLATES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	/** The release template fragments. */
+	private static final Map<String, ProjectModule> RELEASE_SCRIPT = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	/** The release template fragments. */
+	private static final Map<String, ProjectModule> RELEASE_MERGE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	/**
 	 * Program options.
@@ -214,10 +217,10 @@ public final class DoomMakeMain
 			if (options.listTemplates)
 			{
 				setUpTemplates();
-				for (ProjectTemplate descriptor : TEMPLATES.values())
+				for (Entry<String, ProjectModule> descriptor : TEMPLATES.entrySet())
 				{
-					String description = descriptor.getDescription();
-					options.stdout.println(descriptor.getName());
+					String description = descriptor.getValue().getDescription();
+					options.stdout.println(descriptor.getKey());
 					Common.printWrapped(options.stdout, 0, 4, 76, Common.isEmpty(description) ? "" : description);
 					options.stdout.println();
 				}
@@ -243,7 +246,7 @@ public final class DoomMakeMain
 				setUpTemplates();
 				for (String name : options.createTemplates)
 				{
-					ProjectTemplate found;
+					ProjectModule found;
 					if ((found = TEMPLATES.get(name)) == null)
 					{
 						options.stderr.println("ERROR: No such project template: " + name);
@@ -267,18 +270,8 @@ public final class DoomMakeMain
 				return ERROR_BAD_SCRIPT;
 			}
 			
-			if (options.propertiesFile.exists())
-			{
-				try (Reader reader = new InputStreamReader(new FileInputStream(options.propertiesFile)))
-				{
-					System.getProperties().load(reader);
-				} 
-				catch (IOException e) 
-				{
-					options.stderr.printf("ERROR: Properties file \"%s\" could not be loaded: %s\n", options.propertiesFile.getPath(), e.getLocalizedMessage());
-					return ERROR_BAD_PROPERTIES;
-				}
-			}
+			loadProperties(new File("doommake.project.properties"));
+			loadProperties(options.propertiesFile);
 			
 			try {
 				WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
@@ -299,6 +292,25 @@ public final class DoomMakeMain
 				return ERROR_UNKNOWN;
 			}
 		}
+
+		// Load a properties file into System.properties.
+		private int loadProperties(File propertiesFile) 
+		{
+			if (propertiesFile.exists())
+			{
+				try (Reader reader = new InputStreamReader(new FileInputStream(propertiesFile)))
+				{
+					System.getProperties().load(reader);
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.printf("ERROR: Properties file \"%s\" could not be loaded: %s\n", propertiesFile.getPath(), e.getLocalizedMessage());
+					return ERROR_BAD_PROPERTIES;
+				}
+			}
+			return ERROR_NONE;
+		}
+		
 	}
 	
 	/**
@@ -497,8 +509,8 @@ public final class DoomMakeMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: doommake [target] [args] [switches]");
-		out.println("                --list-templates");
 		out.println("                [directory] --new-project [templates]");
+		out.println("                [--list-templates | -t]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
 	}
@@ -523,31 +535,36 @@ public final class DoomMakeMain
 		out.println("        in that order.");
 		out.println();
 		out.println("[directory]:");
-		out.println("    The directory for the new project.");
+		out.println("    The directory/name for the new project.");
 		out.println();
 		out.println("[switches]:");
-		out.println("    --help, -h                    Prints this help.");
-		out.println("    --version                     Prints the version of this utility.");
-		out.println("    --function-help               Prints all available function usages.");
-		out.println("    --function-help-markdown      Prints all available function usages in");
-		out.println("                                      Markdown format.");
+		out.println("    --help, -h                     Prints this help.");
+		out.println("    --version                      Prints the version of this utility.");
+		out.println("    --function-help                Prints all available function usages.");
+		out.println("    --function-help-markdown       Prints all available function usages in");
+		out.println("                                       Markdown format.");
+		out.println("    --list-templates, -t           Lists all available templates.");
 		out.println();
-		out.println("    --new-project, -n [templates] Creates a new project made up of a set of");
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("    --new-project, -n [templates]  Creates a new project made up of a set of");
 		out.println("                                      templates (requires [directory]).");
 		out.println();
-		out.println("    --script, -s [filename]       Use [filename] for the root build script.");
-		out.println("                                      Default is \"doommake.script\".");
-		out.println("    --properties, -p [filename]   Use [filename] for the project properties.");
-		out.println("                                      Default is \"doommake.properties\".");
+		out.println("-----------------------------------------------------------------------------");
 		out.println();
-		out.println("    --runaway-limit [num]         Sets the runaway limit (in operations)");
-		out.println("                                      before the soft protection on infinite");
-		out.println("                                      loops triggers. 0 is no limit.");
-		out.println("                                      Default: 0");
-		out.println("    --activation-depth [num]      Sets the activation depth to [num].");
-		out.println("                                      Default: 256");
-		out.println("    --stack-depth [num]           Sets the stack value depth to [num].");
-		out.println("                                      Default: 2048");
+		out.println("    --script, -s [filename]        Use [filename] for the root build script.");
+		out.println("                                       Default is \"doommake.script\".");
+		out.println("    --properties, -p [filename]    Use [filename] for the project properties.");
+		out.println("                                       Default is \"doommake.properties\".");
+		out.println();
+		out.println("    --runaway-limit [num]          Sets the runaway limit (in operations)");
+		out.println("                                       before the soft protection on infinite");
+		out.println("                                       loops triggers. 0 is no limit.");
+		out.println("                                       Default: 0");
+		out.println("    --activation-depth [num]       Sets the activation depth to [num].");
+		out.println("                                       Default: 256");
+		out.println("    --stack-depth [num]            Sets the stack value depth to [num].");
+		out.println("                                       Default: 2048");
 	}
 
 	/**
@@ -574,134 +591,92 @@ public final class DoomMakeMain
 				"doommake/doommake.script"),
 			file("doommake-init.script",
 				"doommake/doommake-init.script"),
+			file("doommake-lib.script",
+				"doommake/doommake-lib.script"),
 			file("doommake.properties",
 				"doommake/doommake.properties"),
+			file("doommake.project.properties",
+				"doommake/doommake.project.properties"),
 			file("README.md",
 				"doommake/README.md")
 		);
-		final ProjectModule COMMON_IWAD = create(
-			fileAppend("doommake.properties", 
-				"doommake/common/iwad/doommake.properties"),
-			fileAppend("doommake.script", 
-				"doommake/common/iwad/doommake.script")
-		);
-		final ProjectModule COMMON_RELEASE_STUB = create(
-			fileAppend("doommake.properties",
-				"doommake/common/release/doommake.properties"),
-			fileAppend("doommake.script", 
-				"doommake/common/release/doommake.script"),
-			fileAppend("README.md",
-				"doommake/common/release/README.md")
-		);
-		final ProjectModule COMMON_MAPS = create(
-			dir("src/maps"),
-			fileAppend("doommake.properties",
-				"doommake/common/maps/doommake.properties"),
-			fileAppend("doommake.script", 
-				"doommake/common/maps/doommake.script"),
-			fileAppend("README.md",
-				"doommake/common/maps/README.md")
-		);
-		final ProjectModule COMMON_ASSETS = create(
-			dir("src/assets/_global"),
-			dir("src/assets/graphics"),
-			dir("src/assets/music"),
-			dir("src/assets/sounds"),
-			dir("src/assets/sprites"),
-			file("scripts/merge-assets.txt",
-				"doommake/common/assets/wadmerge.txt"),
-			fileAppend("doommake.properties", 
-				"doommake/common/assets/doommake.properties"),
+		final ProjectModule PROJECT_HEADER = create(
 			fileAppend("doommake.script",
-				"doommake/common/assets/doommake.script"),
-			fileAppend("README.md",
-				"doommake/common/assets/README.md")
+				"doommake/projects/doommake-header.script")
 		);
-		final ProjectModule COMMON_TEXTURES = create(
-			dir("src/textures/flats"),
-			dir("src/textures/patches"),
-			file("scripts/merge-textures.txt",
-				"doommake/common/textures/wadmerge.txt"),
-			file("src/textures/texture1.txt", 
-				"doommake/common/textures/texture1.txt"),
-			file("src/textures/texture2.txt", 
-				"doommake/common/textures/texture2.txt"),
-			fileAppend("doommake.properties", 
-				"doommake/common/textures/doommake.properties"),
-			fileAppend("doommake.script", 
-				"doommake/common/textures/doommake.script"),
-			fileAppend("README.md",
-				"doommake/common/textures/README.md")
-		);
-		final ProjectModule COMMON_TEXTURE_WAD = create(
-			dir("src/wads/textures"),
-			fileAppend("doommake.properties",
-				"doommake/common/texwad/doommake.properties"),
+		final ProjectModule PROJECT_FOOTER = create(
 			fileAppend("doommake.script",
-				"doommake/common/texwad/doommake.script"),
-			fileAppend("README.md",
-				"doommake/common/texwad/README.md")
+				"doommake/projects/doommake-footer.script")
 		);
 
 		final ProjectModule BASE = create()
 			.add(COMMON)
 			.add(COMMON_MAKE)
-			.add(COMMON_IWAD)
-			.add(COMMON_RELEASE_STUB)
 		;
 
 		TEMPLATES.put("git",
-			build("git", "Adds files for Git repository support (ignores, attributes).")
+			create("Adds files for Git repository support (ignores, attributes).")
 				.add(GIT)
 			);
-		TEMPLATES.put("decohack",
-			build("decohack", "Adds files for DECOHack modding.")
-				.add(BASE)
-			);
 		TEMPLATES.put("maps",
-			build("maps", "A project that builds just a set of maps.")
-				.add(BASE)
-				.add(COMMON_MAPS)
-				.add(create(
-					file("scripts/merge-release.txt", 
-						"doommake/projects/maps/wadmerge.txt"),
-					fileAppend("doommake.script", 
-						"doommake/projects/maps/doommake.script")
-				))
-			);
+			create("A project that builds just a set of maps.",
+				dir("src/maps"),
+				file("scripts/merge-maps.txt",
+					"doommake/common/maps/wadmerge.txt"),
+				fileAppend("doommake.properties",
+					"doommake/common/maps/doommake.properties"),
+				fileAppend("doommake.script", 
+					"doommake/common/maps/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/maps/README.md")
+			)
+		);
 		TEMPLATES.put("assets",
-			build("assets", "A project that builds maps and non-texture assets together.")
-				.add(BASE)
-				.add(COMMON_ASSETS)
-				.add(create(
-					file("scripts/merge-release.txt", 
-						"doommake/projects/assets/wadmerge.txt"),
-					fileAppend("doommake.script", 
-						"doommake/projects/assets/doommake.script")
-				))
-			);
+			create("A project that builds maps and non-texture assets together.",
+				dir("src/assets/_global"),
+				dir("src/assets/graphics"),
+				dir("src/assets/music"),
+				dir("src/assets/sounds"),
+				dir("src/assets/sprites"),
+				file("scripts/merge-assets.txt",
+					"doommake/common/assets/wadmerge.txt"),
+				fileAppend("doommake.properties", 
+					"doommake/common/assets/doommake.properties"),
+				fileAppend("doommake.script",
+					"doommake/common/assets/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/assets/README.md")
+			)
+		);
 		TEMPLATES.put("textures",
-			build("tex", "A project that builds texture WADs.")
-				.add(BASE)
-				.add(COMMON_TEXTURES)
-				.add(create(
-					file("scripts/merge-release.txt", 
-						"doommake/projects/textures/wadmerge.txt"),
-					fileAppend("doommake.script", 
-						"doommake/projects/textures/doommake.script")
-				))
-			);
+			create("A project that builds texture WADs.",
+				dir("src/textures/flats"),
+				dir("src/textures/patches"),
+				file("scripts/merge-textures.txt",
+					"doommake/common/textures/wadmerge.txt"),
+				file("src/textures/texture1.txt", 
+					"doommake/common/textures/texture1.txt"),
+				file("src/textures/texture2.txt", 
+					"doommake/common/textures/texture2.txt"),
+				fileAppend("doommake.properties", 
+					"doommake/common/textures/doommake.properties"),
+				fileAppend("doommake.script", 
+					"doommake/common/textures/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/textures/README.md")
+			)
+		);
 		TEMPLATES.put("texwad",
-			build("texwad", "A project that builds maps and uses textures from a set of texture WADs.")
-				.add(BASE)
-				.add(COMMON_TEXTURE_WAD)
-				.add(create(
-					file("scripts/merge-release.txt", 
-						"doommake/projects/texwadmaps/wadmerge.txt"),
-					fileAppend("doommake.script", 
-						"doommake/projects/texwadmaps/doommake.script")
-				))
-			);
+			create("A project that builds maps and uses textures from a set of texture WADs.",
+				dir("src/wads/textures"),
+				fileAppend("doommake.properties",
+					"doommake/common/texwad/doommake.properties"),
+				fileAppend("doommake.script",
+					"doommake/common/texwad/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/texwad/README.md")
+			)
+		);
 	}
 
 }

@@ -1,0 +1,13 @@
+	doMaps();
+	doAssets();
+	doTextures();
+	doMapTextures();
+	
+	wadmerge(file(SCRIPT_RELEASE), [
+		getBuildDirectory(),
+		getProjectWad(),
+		getAssetsWad(),
+		getMapsWad(),
+		getMapTexWad()
+	]);
+

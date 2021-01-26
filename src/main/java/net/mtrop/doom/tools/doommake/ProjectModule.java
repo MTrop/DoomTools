@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +18,9 @@ import net.mtrop.doom.tools.common.Common;
 public final class ProjectModule 
 {
 	private static final String[] BLANK_RESOURCES = new String[0];
-	
+
+	/** Descriptor. */
+	private String description;
 	/** Module file entries. */
 	private List<Entry> entries;
 	
@@ -28,13 +31,15 @@ public final class ProjectModule
 	{
 		private boolean appending;
 		private String outputPath;
+		private boolean pathsAreContentLines;
 		private String[] resourcePaths;
 		
-		private Entry(boolean appending, String outputPath, String[] resourcePaths) 
+		private Entry(boolean appending, String outputPath, boolean pathsAreContentLines, String[] resourcePaths) 
 		{
 			super();
 			this.appending = appending;
 			this.outputPath = outputPath;
+			this.pathsAreContentLines = pathsAreContentLines;
 			this.resourcePaths = resourcePaths;
 		}
 		
@@ -51,7 +56,7 @@ public final class ProjectModule
 	 */
 	public static Entry dir(String directoryPath)
 	{
-		return new Entry(false, directoryPath, null);
+		return new Entry(false, directoryPath, false, null);
 	}
 	
 	/**
@@ -61,7 +66,7 @@ public final class ProjectModule
 	 */
 	public static Entry file(String filePath)
 	{
-		return new Entry(false, filePath, BLANK_RESOURCES);
+		return new Entry(false, filePath, false, BLANK_RESOURCES);
 	}
 
 	/**
@@ -72,7 +77,18 @@ public final class ProjectModule
 	 */
 	public static Entry file(String filePath, String... resources)
 	{
-		return new Entry(false, filePath, resources);
+		return new Entry(false, filePath, false, resources);
+	}
+	
+	/**
+	 * Creates an entry for a module file.
+	 * @param filePath the output file.
+	 * @param lines the lines to add to the file.
+	 * @return the new entry.
+	 */
+	public static Entry fileContent(String filePath, String... lines)
+	{
+		return new Entry(false, filePath, true, lines);
 	}
 	
 	/**
@@ -83,7 +99,18 @@ public final class ProjectModule
 	 */
 	public static Entry fileAppend(String filePath, String... resources)
 	{
-		return new Entry(true, filePath, resources);
+		return new Entry(true, filePath, false, resources);
+	}
+	
+	/**
+	 * Creates an entry for a module file that appends to existing files.
+	 * @param filePath the output file.
+	 * @param lines the lines to add to the file.
+	 * @return the new entry.
+	 */
+	public static Entry fileContentAppend(String filePath, String... lines)
+	{
+		return new Entry(true, filePath, true, lines);
 	}
 	
 	/**
@@ -93,12 +120,24 @@ public final class ProjectModule
 	 */
 	public static ProjectModule create(Entry... entries)
 	{
-		return new ProjectModule(entries);
+		return new ProjectModule(null, entries);
+	}
+
+	/**
+	 * Creates a new module.
+	 * @param description the description.
+	 * @param entries the module entries.
+	 * @return the new module.
+	 */
+	public static ProjectModule create(String description, Entry... entries)
+	{
+		return new ProjectModule(description, entries);
 	}
 
 	// New project module.
-	private ProjectModule(Entry... entries)
+	private ProjectModule(String description, Entry... entries)
 	{
+		this.description = description;
 		this.entries = new LinkedList<>();
 		addEntries(entries);
 	}
@@ -129,6 +168,14 @@ public final class ProjectModule
 	}
 	
 	/**
+	 * @return the description.
+	 */
+	public String getDescription()
+	{
+		return description;
+	}
+	
+	/**
 	 * Creates this module in a target directory.
 	 * @param directory the directory.
 	 * @throws IOException if a problem happens while creating the module.
@@ -155,15 +202,28 @@ public final class ProjectModule
 			{
 				if (!Common.createPathForFile(targetPath))
 					throw new IOException("Could not create necessary directory for file: " + targetPath);
-				try (FileOutputStream fos = new FileOutputStream(targetPath, e.appending))
+				if (e.pathsAreContentLines)
 				{
-					for (String resourcePath : e.resourcePaths)
+					try (PrintStream ps = new PrintStream(new FileOutputStream(targetPath, e.appending)))
 					{
-						try (InputStream in = Common.openResource(resourcePath))
+						for (String resourcePath : e.resourcePaths)
 						{
-							if (in == null)
-								throw new IOException("INTERNAL ERROR: Could not find resource: " + resourcePath);
-							IOUtils.relay(in, fos);
+							ps.println(resourcePath);
+						}						
+					}					
+				}
+				else
+				{
+					try (FileOutputStream fos = new FileOutputStream(targetPath, e.appending))
+					{
+						for (String resourcePath : e.resourcePaths)
+						{
+							try (InputStream in = Common.openResource(resourcePath))
+							{
+								if (in == null)
+									throw new IOException("INTERNAL ERROR: Could not find resource: " + resourcePath);
+								IOUtils.relay(in, fos);
+							}
 						}
 					}
 				}
