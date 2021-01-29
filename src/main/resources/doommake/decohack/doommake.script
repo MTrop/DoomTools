@@ -15,11 +15,11 @@ function getPatchFile() {
  */
 check function doPatch(budget) {
 	initBuild();
-	if (tool::decohack({
-		infile: file(SRC_DECOHACK),
-		outfile: file(getBuildDirectory() + "/" + getPatchFile()),
-		outputbudget: budget
-	})) return error("ToolError", "DECOHack threw an error.");
+	decohack(
+		file(SRC_DECOHACK), 
+		file(getBuildDirectory() + "/" + getPatchFile()), 
+		budget
+	);
 }
 
 
