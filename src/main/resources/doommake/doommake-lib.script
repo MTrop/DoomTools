@@ -23,6 +23,8 @@
 #define DEFAULT_MAPTEXWAD   "maptex.wad"
 #define PROP_TEXWAD         "doommake.file.textures"
 #define DEFAULT_TEXWAD      "textures.wad"
+#define PROP_PATCHFILE      "doommake.file.patch"
+#define DEFAULT_PATCHFILE   "dehacked.deh"
 
 // Paths
 #define SRC_WADINFO         "src/wadinfo.txt"
@@ -31,6 +33,7 @@
 #define SRC_DIR_MAPS        "src/maps"
 #define SRC_DIR_TEXTURES    "src/textures"
 #define SRC_DIR_TEXTUREWADS "src/wads/textures"
+#define SRC_DECOHACK        "src/decohack/main.dh"
 
 #define MERGESCRIPT_ASSETS  "scripts/merge-assets.txt"
 #define MERGESCRIPT_MAPS    "scripts/merge-maps.txt"

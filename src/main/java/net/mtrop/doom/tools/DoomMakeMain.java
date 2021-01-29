@@ -618,6 +618,18 @@ public final class DoomMakeMain
 			create("Adds files for Git repository support (ignores, attributes).")
 				.add(GIT)
 			);
+		TEMPLATES.put("decohack",
+			create("A project that compiles a DeHackEd patch.",
+				file("src/decohack/main.dh",
+					"doommake/decohack/main.dh"),
+				fileAppend("doommake.properties",
+					"doommake/decohack/doommake.properties"),
+				fileAppend("doommake.script", 
+					"doommake/decohack/doommake.script"),
+				fileAppend("README.md",
+					"doommake/decohack/README.md")
+			)
+		);
 		TEMPLATES.put("maps",
 			create("A project that builds just a set of maps.",
 				dir("src/maps"),

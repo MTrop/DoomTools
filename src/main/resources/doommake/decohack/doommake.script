@@ -1,0 +1,35 @@
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Return the output patch file name.
+ */
+function getPatchFile() {
+	return prop(PROP_PATCHFILE, DEFAULT_PATCHFILE); 
+}
+
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Calls DECOHack.
+ * Creates patch.
+ */
+check function doPatch(budget) {
+	initBuild();
+	if (tool::decohack({
+		infile: file(SRC_DECOHACK),
+		outfile: file(getBuildDirectory() + "/" + getPatchFile()),
+		outputbudget: budget
+	})) return error("ToolError", "DECOHack threw an error.");
+}
+
+
+/*****************************************************************************
+ * TARGET: patch
+ *****************************************************************************
+ * Compiles the DeHackEd patch (and shows the budget).
+ * doommake patch
+ ****************************************************************************/
+check entry patch(args) {
+	doPatch(true);
+}
+
