@@ -15,10 +15,14 @@ import net.mtrop.doom.tools.common.Common;
  * A project module definition for DoomMake. 
  * @author Matthew Tropiano
  */
-public final class ProjectModule 
+public final class ProjectModule implements Comparable<ProjectModule>
 {
 	private static final String[] BLANK_RESOURCES = new String[0];
 
+	/** Sort bias. */
+	private int sort;
+	/** Name. */
+	private String name;
 	/** Descriptor. */
 	private String description;
 	/** Module file entries. */
@@ -115,28 +119,35 @@ public final class ProjectModule
 	
 	/**
 	 * Creates a new module.
+	 * @param sort the sort order bias.
+	 * @param name the name of the module.
+	 * @param description the description.
 	 * @param entries the module entries.
 	 * @return the new module.
 	 */
 	public static ProjectModule create(Entry... entries)
 	{
-		return new ProjectModule(null, entries);
+		return new ProjectModule(-1, null, null, entries);
 	}
 
 	/**
 	 * Creates a new module.
+	 * @param sort the sort order bias.
+	 * @param name the name of the module.
 	 * @param description the description.
 	 * @param entries the module entries.
 	 * @return the new module.
 	 */
-	public static ProjectModule create(String description, Entry... entries)
+	public static ProjectModule create(int sort, String name, String description, Entry... entries)
 	{
-		return new ProjectModule(description, entries);
+		return new ProjectModule(sort, name, description, entries);
 	}
 
 	// New project module.
-	private ProjectModule(String description, Entry... entries)
+	private ProjectModule(int sort, String name, String description, Entry... entries)
 	{
+		this.sort = sort;
+		this.name = name;
 		this.description = description;
 		this.entries = new LinkedList<>();
 		addEntries(entries);
@@ -168,11 +179,25 @@ public final class ProjectModule
 	}
 	
 	/**
+	 * @return the name.
+	 */
+	public String getName() 
+	{
+		return name;
+	}
+	
+	/**
 	 * @return the description.
 	 */
 	public String getDescription()
 	{
 		return description;
+	}
+	
+	@Override
+	public int compareTo(ProjectModule module) 
+	{
+		return sort - module.sort;
 	}
 	
 	/**
@@ -230,5 +255,5 @@ public final class ProjectModule
 			}
 		}
 	}
-	
+
 }
