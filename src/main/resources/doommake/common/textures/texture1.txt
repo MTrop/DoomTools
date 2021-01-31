@@ -2,12 +2,16 @@
 ;
 ; Use ";" to make comment lines.
 ; This is also compatible with DEUTEX!
-
+;
 ; Example definition:
 ;
 ; TEXNAME W H
 ; * PATCHNAM X Y
 ; ...
+
+; NOTE: If you intend to use this for adding to an IWAD's texture set,
+; you will need to add the texture definitions from the IWAD here, or they
+; will not be available when to compile the project together.
 
 ; First texture is the NULL texture.
 AASTINKY 24 72

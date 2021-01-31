@@ -22,8 +22,8 @@ function getTexturesScript() {
  */
 check function doTextures() {
 	initBuild();
-	verifydirs(DIR_SRC_TEXTURES + "/flats");
-	verifydirs(DIR_SRC_TEXTURES + "/patches");
+	verifydirs(SRC_DIR_TEXTURES + "/flats");
+	verifydirs(SRC_DIR_TEXTURES + "/patches");
 	wadmerge(file(getTexturesScript()), [
 		getBuildDirectory(), 
 		getTextureWad()
@@ -35,6 +35,13 @@ check function doTextures() {
  * Creates maptex WAD.
  */
 function doMapTextures() {
+	
+	// Only do if maps were compiled.
+	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
+		println("No maps in `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Skipping texture extraction.");
+		return;
+	}
+
 	baseIwadPath = getIwad();	
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
@@ -61,13 +68,13 @@ check entry textures(args) {
 
 
 /*****************************************************************************
- * TARGET: exportmaptextures
+ * TARGET: maptextures
  *****************************************************************************
  * Reads the map WADs and compiled texture resources and exports 
  * them to a WAD of used textures.
- * doommake exportmaptextures
+ * doommake maptextures
  ****************************************************************************/
-check entry mapTextures(args) {
+check entry maptextures(args) {
 	doMapTextures();
 }
 

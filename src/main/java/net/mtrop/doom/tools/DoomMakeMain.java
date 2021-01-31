@@ -72,6 +72,8 @@ public final class DoomMakeMain
 	private static final Map<String, ProjectModule> RELEASE_SCRIPT = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	/** The release template fragments. */
 	private static final Map<String, ProjectModule> RELEASE_SCRIPT_MERGE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	/** The release WadMerge line. */
+	private static final Map<String, String> RELEASE_WADMERGE_LINE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	
 	/**
 	 * Program options.
@@ -314,9 +316,9 @@ public final class DoomMakeMain
 					"doommake/common/credits.txt"),
 				file("doommake.script",
 					"doommake/doommake.script"),
-				file("doommake-init.script",
+				file("scripts/doommake-init.script",
 					"doommake/doommake-init.script"),
-				file("doommake-lib.script",
+				file("scripts/doommake-lib.script",
 					"doommake/doommake-lib.script"),
 				file("doommake.properties",
 					"doommake/doommake.properties"),
@@ -347,7 +349,7 @@ public final class DoomMakeMain
 			// WadMerge Properties Start
 			create(
 				fileContentAppend("doommake.script", 
-					"\n\twadmerge(file(SCRIPT_RELEASE), [",
+					"\n\twadmerge(file(MERGESCRIPT_RELEASE), [",
             		"\t\tgetBuildDirectory()",
             		"\t\t,getProjectWad()"
             	)
@@ -356,7 +358,7 @@ public final class DoomMakeMain
 			// Add merge script.
 			create(
 				file("scripts/merge-release.txt",
-					"doommake/projects/wadmerge-header.script")
+					"doommake/projects/wadmerge-header.txt")
 			).createIn(targetDirectory);
 
 			// Project Modules.
@@ -367,10 +369,14 @@ public final class DoomMakeMain
 				if ((found = RELEASE_SCRIPT_MERGE.get(module.getName())) != null)
 				{
 					found.createIn(targetDirectory);
-					create(
-						fileContentAppend("scripts/merge-release.txt",
-							"\nfinish out $0/$" + (x++))
-					).createIn(targetDirectory);
+					
+					String line;
+					if ((line = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
+					{
+						create(
+							fileContentAppend("scripts/merge-release.txt", line + (x++))
+						).createIn(targetDirectory);
+					}
 				}
 			}
 
@@ -614,8 +620,8 @@ public final class DoomMakeMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: doommake [target] [args] [switches]");
-		out.println("                [directory] --new-project [templates]");
-		out.println("                [--list-modules | -t]");
+		out.println("                [directory] --new-project [modules...]");
+		out.println("                [--list-modules | -lm]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
 	}
@@ -679,7 +685,8 @@ public final class DoomMakeMain
 		// ................................................................
 		
 		MODULES.put("git",
-			create(0, "git", "Adds files for Git repository support (ignores, attributes).",
+			create(0, "git", 
+				"Adds files for Git repository support (ignores, attributes).",
 				file(".gitignore", 
 					"doommake/git/gitignore.txt"),
 				file(".gitattributes", 
@@ -690,7 +697,8 @@ public final class DoomMakeMain
 		// ................................................................
 
 		MODULES.put("decohack",
-			create(1, "decohack", "A module that compiles a DeHackEd patch.",
+			create(1, "decohack", 
+				"A module that compiles a DeHackEd patch.",
 				file("src/decohack/main.dh",
 					"doommake/decohack/main.dh"),
 				fileAppend("doommake.properties",
@@ -704,7 +712,7 @@ public final class DoomMakeMain
 		RELEASE_SCRIPT.put("decohack",
 			create(
 				fileContentAppend("doommake.script",
-					"\tdoPatch();"
+					"\tdoPatch(false);"
 				)
 			)
 		);
@@ -715,11 +723,15 @@ public final class DoomMakeMain
 				)
 			)
 		);
+		RELEASE_WADMERGE_LINE.put("decohack",
+			"mergefile  out $0/$"
+		);
 		
 		// ................................................................
 
 		MODULES.put("maps",
-			create(2, "maps", "A module that builds a set of maps.",
+			create(2, "maps", 
+				"A module that builds a set of maps.",
 				dir("src/maps"),
 				file("scripts/merge-maps.txt",
 					"doommake/common/maps/wadmerge.txt"),
@@ -745,11 +757,15 @@ public final class DoomMakeMain
 				)
 			)
 		);
+		RELEASE_WADMERGE_LINE.put("maps",
+			"mergewad   out $0/$"
+		);
 		
 		// ................................................................
 
 		MODULES.put("assets",
-			create(3, "assets", "A module that builds maps and non-texture assets together.",
+			create(3, "assets", 
+				"A module that builds maps and non-texture assets together.",
 				dir("src/assets/_global"),
 				dir("src/assets/graphics"),
 				dir("src/assets/music"),
@@ -775,15 +791,20 @@ public final class DoomMakeMain
 		RELEASE_SCRIPT_MERGE.put("assets",
 			create(
 				fileContentAppend("doommake.script",
-					"\t\t,getAssetsWad()"
+					"\t\t,getAssetsWAD()"
 				)
 			)
+		);
+		RELEASE_WADMERGE_LINE.put("assets",
+			"mergewad   out $0/$"
 		);
 		
 		// ................................................................
 
 		MODULES.put("textures",
-			create(4, "textures", "A module that builds texture WADs.",
+			create(4, "textures", 
+				"A module that builds texture WADs." +
+				"\nIf this is used, do NOT use the \"texwad\" module.",
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
 				file("scripts/merge-textures.txt",
@@ -815,11 +836,16 @@ public final class DoomMakeMain
 				)
 			)
 		);
-
+		RELEASE_WADMERGE_LINE.put("textures",
+			"mergewad   out $0/$"
+		);
+		
 		// ................................................................
 
 		MODULES.put("texwad",
-			create(5, "texwad", "A module that uses textures from a set of provided texture WADs.",
+			create(5, "texwad", 
+				"A module that uses textures from a set of provided texture WADs." +
+				"\nIf this is used, do NOT use the \"textures\" module.",
 				dir("src/wads/textures"),
 				fileAppend("doommake.properties",
 					"doommake/common/texwad/doommake.properties"),
@@ -843,7 +869,9 @@ public final class DoomMakeMain
 				)
 			)
 		);
-		
+		RELEASE_WADMERGE_LINE.put("texwad",
+			"mergewad   out $0/$"
+		);
 	}
 
 }

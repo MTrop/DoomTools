@@ -8,6 +8,12 @@ check function doMapTextures() {
 	initBuild();
 	verifydirs(SRC_DIR_TEXTUREWADS);
 
+	// Only do if maps were compiled.
+	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
+		println("No maps in `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Skipping texture extraction.");
+		return;
+	}
+
 	textureWadFiles = scanTextureWadList();
 	if (empty(textureWadFiles)) {
 		println("WARNING: No texture WADs found in: " + SRC_DIR_TEXTUREWADS + ". Skipping texture extraction step.");

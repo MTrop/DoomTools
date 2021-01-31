@@ -14,19 +14,23 @@ and "RookScript Quick Guide.md").
 Each entry point receives one argument: the list of additional command-line 
 arguments passed to the script, if any.
 
-DoomMake automatically loads a properties file to Java's system properties,
-so that is accessible from the "properties()" built-in function. The default 
-properties file is "doommake.properties", unless overridden.
+DoomMake automatically loads two properties files to Java's system properties
+so that is accessible from the "properties()" built-in function. 
+
+The project properties file is "doommake.project.properties".
+
+The default property override file is "doommake.properties", unless 
+overridden.
 
 ==============================================================================
 ===== Command Line
 ==============================================================================
 
 Usage: doommake [target] [args] [switches]
+                [directory] --new-project [modules...]
+                [--list-modules | -t]
                 [--help | -h | --version]
                 [--function-help | --function-help-markdown]
-                [--list-templates]
-                [[directory] --new-project [templates]]
 
 [target]:
     The target entry point to execute. Default is "make".
@@ -34,36 +38,44 @@ Usage: doommake [target] [args] [switches]
 [args]:
     The additional arguments to pass along to the script.
 
-[templates]:
-    The names of the template(s) to use or combine for the new 
+[modules]:
+    The names of the modules(s) to use or combine for the new 
     project (applied altogether).
-    E.g.: --new-project common-map git
-        Combines the "common-map" and "git" templates together,
-        in that order.
+    E.g.: --new-project maps git
+        Combines the "maps", and "git" modules together.
 
 [directory]:
-    The directory for the new project.
+    The directory/name for the new project.
 
 [switches]:
-    --help, -h                   Prints this help.
-    --version                    Prints the version of this utility.
-    --function-help              Prints all available function usages.
-    --function-help-markdown     Prints all available function usages in
-                                     Markdown format.
+    --help, -h                     Prints this help.
+    --version                      Prints the version of this utility.
+    --function-help                Prints all available function usages.
+    --function-help-markdown       Prints all available function usages in
+                                       Markdown format.
+    --list-modules, -lm            Lists all available project modules.
 
-    --script, -s [filename]      Use [filename] for the root build script.
-                                     Default is "doommake.script".
-    --properties, -p [filename]  Use [filename] for the project properties.
-                                     Default is "doommake.properties".
+-----------------------------------------------------------------------------
 
-    --runaway-limit [num]        Sets the runaway limit (in operations)
-                                     before the soft protection on infinite
-                                     loops triggers. 0 is no limit.
-                                     Default: 0
-    --activation-depth [num]     Sets the activation depth to [num].
-                                     Default: 256
-    --stack-depth [num]          Sets the stack value depth to [num].
-                                     Default: 2048
+    --new-project, -n [modules]    Creates a new project made up of a set of
+                                      templates (requires [directory]).
+
+-----------------------------------------------------------------------------
+
+    --script, -s [filename]        Use [filename] for the root build script.
+                                       Default is "doommake.script".
+    --properties, -p [filename]    Use [filename] for the project properties.
+                                       Default is "doommake.properties".
+
+    --runaway-limit [num]          Sets the runaway limit (in operations)
+                                       before the soft protection on infinite
+                                       loops triggers. 0 is no limit.
+                                       Default: 0
+    --activation-depth [num]       Sets the activation depth to [num].
+                                       Default: 256
+    --stack-depth [num]            Sets the stack value depth to [num].
+                                       Default: 2048
+
 
 ==============================================================================
 ===== Script Commands
@@ -71,9 +83,10 @@ Usage: doommake [target] [args] [switches]
 
 See WadScript Command reference (WadScript Help.txt), plus the following:
 
-=================================================================
+
+==============================================================================
 ==== DoomMake Functions
-=================================================================
+==============================================================================
 
 CLEANDIR(path, deleteTop)
     Recursively deletes all files and directories inside a target directory.
@@ -100,7 +113,7 @@ COPYFILE(srcFile, destFile, createDirs)
         (BOOLEAN) If true, create the directories for the destination, if not made.
     Returns:
         (NULL) If either file is null.
-        (BOOLEAN) True if the file was copied successfully, false if not.
+        (OBJECTREF:File) The created destination file.
         (ERROR:BadFile) If the source file does not exist.
         (ERROR:IOError) If a read or write error occurs.
         (ERROR:Security) If the OS is preventing the read or write.
@@ -121,7 +134,7 @@ COPYDIR(srcDir, destDir, recursive, regex)
         (STRING) The pattern to match each file path against for inclusion. If matched, include.
     Returns:
         (NULL) If either file is null.
-        (LIST:[STRING, ...]) The list of copied/created files (destination).
+        (LIST:[OBJECTREF:File, ...]) The list of copied/created files (destination).
         (ERROR:BadFile) If the source or destination directory does not exist.
         (ERROR:BadPattern) If the input RegEx pattern is malformed.
         (ERROR:IOError) If a read or write error occurs.
@@ -179,10 +192,50 @@ ZIPDIR(zipfile, directory, prefix, append, regex, compressed)
         (ERROR:IOError) If a read or write error occurs.
         (ERROR:Security) If the OS is preventing the read or write.
 
+FETCH(url, destFile, createDirs, timeoutMillis)
+    Fetches a file from a URL and writes it to a destination file.
+    url:
+        (STRING) URL path.
+        (OBJECTREF:URL) URL path.
+    destFile:
+        (STRING) Path to destination file.
+        (OBJECTREF:File) Path to destination file.
+    createDirs:
+        (BOOLEAN) If true, create the directories for the destination, if not made.
+    timeoutMillis:
+        (NULL) Use 5000 ms.
+        (INTEGER) Timeout in milliseconds.
+    Returns:
+        (NULL) If the URL or the destination file is null.
+        (OBJECTREF:File) The downloaded file.
+        (ERROR:BadURL) If the provided URL is malformed.
+        (ERROR:Timeout) If the connection timed out.
+        (ERROR:IOError) If the connection could not be opened.
+        (ERROR:Security) If the OS is preventing the read or write.
 
-=================================================================
+UNZIP(zipFile, destDir, entries)
+    Unzips a Zip archive to a target directory, preserving directory structure.
+    zipFile:
+        (STRING) Zip file path.
+        (OBJECTREF:File) Zip file path.
+    destDir:
+        (STRING) Path to destination directory.
+        (OBJECTREF:File) Path to destination directory.
+    entries:
+        (NULL) All entries.
+        (LIST:[STRING, ...]) If provided, the list of entries to unzip.
+    Returns:
+        (NULL) If the zip file or the destination directory is null.
+        (LIST:[OBJECTREF:File, ...]) The list of created files.
+        (ERROR:BadFile) If the provided destination is not a directory.
+        (ERROR:BadZip) If the provided file is not a zip file.
+        (ERROR:IOError) If a read or write error occurs.
+        (ERROR:Security) If the OS is preventing the read or write.
+
+
+==============================================================================
 ==== Tool Invocation
-=================================================================
+==============================================================================
 
 TOOL::DOOMTOOLS(options)
     Calls the DoomTools tool. Inherits STDOUT/STDERR of this script unless 
@@ -198,8 +251,8 @@ TOOL::DOOMTOOLS(options)
 
 TOOL::DOOMMAKE(options)
     Calls the DoomMake tool. Inherits STDOUT/STDERR/STDIN of this script 
-    unless overridden (see options). It is important to note that the 
-    instance of DoomMake that runs has no inherent link to this instance.
+    unless overridden (see options). It is important to note that the instance
+    of DoomMake that runs has no inherent link to this instance.
     options:
         (MAP:{
 	        stdout:OBJECTREF(OutputStream), 
@@ -228,8 +281,8 @@ TOOL::DECOHACK(options)
 	        infile:OBJECTREF(File), 
 	        outfile:OBJECTREF(File), 
 	        outcharsetname:STRING, 
-	        outputbudget:BOOLEAN}
-        ) Map of options.
+	        outputbudget:BOOLEAN
+        }) Map of options.
     Returns:
         (INTEGER) The normal return of this tool's process.
         (ERROR:BadOptions) If the options map could not be applied.
@@ -246,8 +299,8 @@ TOOL::DMXCONVERT(options)
 	        outputdirectory:OBJECTREF(File), 
 	        ffmpegpath:OBJECTREF(File), 
 	        onlyffmpeg:BOOLEAN, 
-	        onlyjspi:BOOLEAN}
-        ) Map of options.
+	        onlyjspi:BOOLEAN
+        }) Map of options.
     Returns:
         (INTEGER) The normal return of this tool's process.
         (ERROR:BadOptions) If the options map could not be applied.
@@ -262,7 +315,7 @@ TOOL::WADMERGE(options)
 	        stderr:OBJECTREF(OutputStream), 
 	        stdin:OBJECTREF(InputStream), 
 	        inputfile:OBJECTREF(File), 
-			args:LIST[STRING, ...],
+	        args:LIST[STRING, ...], 
 	        usestdin:BOOLEAN, 
 	        verbose:BOOLEAN
         }) Map of options.
@@ -273,8 +326,8 @@ TOOL::WADMERGE(options)
 
 TOOL::WADSCRIPT(options)
     Calls the WadScript tool. Inherits STDOUT/STDERR/STDIN of this script 
-    unless overridden (see options). It is important to note that the instance
-    of WadScript that runs has no inherent link to this instance.
+    unless overridden (see options). It is important to note that the 
+    instance of WadScript that runs has no inherent link to this instance.
     options:
         (MAP:{
 	        stdout:OBJECTREF(OutputStream), 
@@ -298,13 +351,13 @@ TOOL::WADTEX(options)
     options:
         (MAP:{
 	        stdout:OBJECTREF(OutputStream), 
-	        stderr:OBJECTREF(OutputStream),
-			sourcefile:OBJECTREF(File), 
-			wadfile:OBJECTREF(File), 
-			additive:BOOLEAN, 
-			exportmode:BOOLEAN, 
-			strife:BOOLEAN, 
-			verbose:BOOLEAN
+	        stderr:OBJECTREF(OutputStream), 
+	        sourcefile:OBJECTREF(File), 
+	        wadfile:OBJECTREF(File), 
+	        additive:BOOLEAN, 
+	        exportmode:BOOLEAN, 
+	        strife:BOOLEAN, 
+	        verbose:BOOLEAN
         }) Map of options.
     Returns:
         (INTEGER) The normal return of this tool's process.
@@ -357,6 +410,7 @@ TOOL::WTEXSCAN(options)
 	        stdout:OBJECTREF(OutputStream), 
 	        stderr:OBJECTREF(OutputStream), 
 	        wadfiles:LIST[STRING, ...], 
+	        mapsToScan:LIST[STRING, ...], 
 	        quiet:BOOLEAN, 
 	        outputtextures:BOOLEAN, 
 	        outputflats:BOOLEAN, 

@@ -1,15 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Return the output asset wad.
- */
-function getAssetsWAD() {
-	return prop(PROP_ASSETWAD, DEFAULT_ASSETWAD); 
-}
-
-/* ------------------------------------------------------------------------ */
-
-/**
  * Calls the merge script for merging maps.
  * Creates assets WAD.
  */
@@ -23,7 +14,17 @@ check function doAssets() {
 	wadmerge(file(SCRIPT_ASSETS), [
 		getBuildDirectory(),
 		getAssetsWAD()
-	]); 
+	]);
+	
+	// Remove the sprite namespace if empty.
+	wf = wadfile(getBuildDirectory() + "/" + getAssetsWAD());
+	sx = wadentryindex(wf, "SS_START");
+	sy = wadentryindex(wf, "SS_END");
+	if (sx !== null && (sy - sx === 1)) {
+		wf->waddelete(wf->wadentryindex("SS_START"));
+		wf->waddelete(wf->wadentryindex("SS_END"));
+	}
+	close(wf);
 }
 
 

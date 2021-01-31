@@ -23,6 +23,7 @@ public final class DoomToolsMain
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
 
+	private static final String DOOMMAKE_VERSION = Common.getVersionString("doommake");
 	private static final String DECOHACK_VERSION = Common.getVersionString("decohack");
 	private static final String DMXCONV_VERSION = Common.getVersionString("dmxconv");
 	private static final String WADMERGE_VERSION = Common.getVersionString("wadmerge");
@@ -75,6 +76,7 @@ public final class DoomToolsMain
 			options.stdout.println();
 			options.stdout.println("Contains DECOHack v" + DECOHACK_VERSION);
 			options.stdout.println("Contains DMXConv v" + DMXCONV_VERSION);
+			options.stdout.println("Contains DoomMake v" + DOOMMAKE_VERSION);
 			options.stdout.println("Contains WadMerge v" + WADMERGE_VERSION);
 			options.stdout.println("Contains WadScript v" + WADSCRIPT_VERSION);
 			options.stdout.println("Contains WADTex v" + WADTEX_VERSION);

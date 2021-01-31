@@ -1,15 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Return the output patch file name.
- */
-function getPatchFile() {
-	return prop(PROP_PATCHFILE, DEFAULT_PATCHFILE); 
-}
-
-/* ------------------------------------------------------------------------ */
-
-/**
  * Calls DECOHack.
  * Creates patch.
  */

@@ -6,8 +6,8 @@
  * All WadScript and DoomMake extensions are available here. 
  ****************************************************************************/
 
-#include "doommake-lib.script"
-#include "doommake-init.script"
+#include "scripts/doommake-lib.script"
+#include "scripts/doommake-init.script"
 
 /* ------------------------------------------------------------------------ */
 

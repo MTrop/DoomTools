@@ -232,6 +232,10 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			} catch (ClassCastException e) {
 				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
 				return true;
+			} catch (Exception e) {
+				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
+				e.printStackTrace();
+				return true;
 			}
 			finally
 			{

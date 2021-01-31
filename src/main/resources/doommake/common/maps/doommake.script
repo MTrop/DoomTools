@@ -1,15 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Returns the output map wad.
- */
-function getMapsWAD() {
-	return prop(PROP_MAPSWAD, DEFAULT_MAPSWAD); 
-}
-
-/* ------------------------------------------------------------------------ */
-
-/**
  * Merges maps together.
  * Creates map WAD.
  */

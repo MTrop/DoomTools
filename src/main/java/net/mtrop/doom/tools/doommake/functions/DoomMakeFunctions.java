@@ -505,7 +505,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.NULL, "If the URL or the destination file is null."),
-					type(Type.OBJECTREF, "The downloaded file."),
+					type(Type.OBJECTREF, "File", "The downloaded file."),
 					type(Type.ERROR, "BadURL", "If the provided URL is malformed."),
 					type(Type.ERROR, "Timeout", "If the connection timed out."),
 					type(Type.ERROR, "IOError", "If the connection could not be opened."),

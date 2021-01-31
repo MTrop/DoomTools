@@ -103,6 +103,13 @@ function getMapTextureWAD() {
 }
 
 /**
+ * Return the output patch file name.
+ */
+function getPatchFile() {
+	return prop(PROP_PATCHFILE, DEFAULT_PATCHFILE); 
+}
+
+/**
  * Scans the project for the maps.
  */
 function scanTextureWADList() {
@@ -156,8 +163,11 @@ function initDist() {
  * Copies the WAD info to the build directory as its TXT file.
  * Throws error if unsuccessful.
  ****************************************************************************/
-check function copyProjectTXT() {
-	copyfile(file(SRC_WADINFO_TXT), file(getBuildDirectory() + "/" + getProjectTXT()), true);
+function copyProjectTXT() {
+	srcfile = file(SRC_WADINFO);
+	destfile = file(getBuildDirectory() + "/" + getProjectTXT());
+	println("Copying " + srcfile + " to " + destfile + "...");
+	return copyfile(srcfile, destfile, true);
 }
 
 /****************************************************************************
@@ -171,6 +181,7 @@ function wadmerge(scriptFilePath, args) {
 		args = [];
 	if (empty(scriptFilePath))
 		return error("ToolError", "Script file not specified.");
+		
 	if (tool::wadmerge({inputFile: file(scriptFilePath), args: args})) 
 		return error("ToolError", "WadMerge threw an error.");
 }
@@ -180,18 +191,21 @@ function wadmerge(scriptFilePath, args) {
  * 
  * mainFilePath: Path to root file.
  * outFilePath: Output file.
- * budget: If true, output budget.
+ * budget: If true, output budget. False, don't.
  ****************************************************************************/
 function decohack(mainFilePath, outFilePath, budget) {
 	if (empty(mainFilePath))
 		return error("ToolError", "Root file not specified.");
 	if (empty(outFilePath))
 		return error("ToolError", "Output file path not specified.");
+	if (budget === null)
+		return error("ToolError", "Budget flag is null.");
+		
 	if (tool::decohack({
 		infile: mainFilePath,
 		outfile: outFilePath,
 		outputbudget: budget
-	})) return error("ToolError", "WadMerge threw an error.");
+	})) return error("ToolError", "DECOHack threw an error.");
 }
 
 /****************************************************************************
@@ -256,13 +270,8 @@ function extractUsedMapTextures(baseIwadPath, mapWadPathList, textureWadPathList
 /****************************************************************************
  * Zips the resulting project.
  ****************************************************************************/
-check function zipProject() {
+check function zipProject(fileList) {
 	outzip = getDistDirectory() + "/" + getProjectZip();
 	println("Zipping project to " + outzip + "...");
-	zipfiles(
-		outzip, [
-			getBuildDirectory() + "/" + getProjectWAD(), 
-			getBuildDirectory() + "/" + getProjectTXT()
-		]
-	);
+	zipfiles(outzip, fileList);
 }

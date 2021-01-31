@@ -6,4 +6,3 @@ create out
 datemarker out __VER__
 mergefile  out src/wadinfo.txt
 mergefile  out src/credits.txt
-

@@ -2,8 +2,11 @@
 	// ====================
 
 	initDist();
-	copyProjectTxt();
-	zipProject();
+	copyProjectTXT();
+	zipProject([
+		getBuildDirectory() + "/" + getProjectWAD(), 
+		getBuildDirectory() + "/" + getProjectTXT()
+	]);
 	println("Done!");
 }
 
