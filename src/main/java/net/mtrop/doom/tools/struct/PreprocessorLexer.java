@@ -58,7 +58,6 @@ public class PreprocessorLexer extends Lexer
 	/** 
 	 * Default includer to use when none specified.
 	 * This includer can either pull from the classpath, URIs, or files.
-	 * <p>
 	 * <ul>
 	 * <li>Paths that start with {@code classpath:} are parsed as resource paths in the current classpath.</li>
 	 * <li>

@@ -193,6 +193,7 @@ public class TokenScanner implements AutoCloseable, Iterator<String>
 	 * Tokens can just be a series of non-whitespace characters, or a series of characters
 	 * bounded by double quotes. Double-quoted strings can have escaped characters in them:
 	 * <table>
+	 * 		<caption>Escape sequences for strings.</caption>
 	 * 		<thead>
 	 * 			<tr>
 	 * 				<th>Escape sequence</th>

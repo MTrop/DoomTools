@@ -812,7 +812,7 @@ public enum WadMergeCommand
 	 * @param reader the reader to read the script from.
 	 * @param context the WAD merge context.
 	 * @return true if no errors, false otherwise.
-	 * @throws IOException
+	 * @throws IOException if the script can't be read.
 	 */
 	public static boolean callScript(String streamName, BufferedReader reader, WadMergeContext context) throws IOException
 	{
