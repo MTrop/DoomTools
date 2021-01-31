@@ -20,8 +20,13 @@ import java.util.Map;
  */
 public final class Common
 {
-	/** Version number. */
+	/** Version number map. */
 	private static Map<String, String> VERSION_MAP = new HashMap<>();
+	
+	/**
+	 * A null file stream.
+	 */
+	public static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
 	
 	/**
 	 * Gets the embedded version string for a tool name.

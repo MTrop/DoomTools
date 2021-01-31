@@ -8,10 +8,11 @@ package net.mtrop.doom.tools;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -282,7 +283,7 @@ public final class DecoHackMain
 			}
 			
 			// Write Patch.
-			try (Writer writer = new FileWriter(options.outFile, options.outCharset)) 
+			try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
 			{
 				DecoHackExporter.writePatch(context, writer, "Created with " + VERSION_LINE);
 				options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
