@@ -297,7 +297,7 @@ public final class DMXConvertMain
 				.command(
 					exe, "-i", input.getPath(), "-f", "wav", "-acodec", "pcm_s16le", "-ac", "2", "-"
 				)
-				.redirectError(Redirect.DISCARD)
+				.redirectError(Redirect.appendTo(Common.NULL_FILE))
 				.redirectOutput(Redirect.PIPE)
 			.start();
 			try {
@@ -312,8 +312,8 @@ public final class DMXConvertMain
 			try {
 				(new ProcessBuilder())
 					.command(ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg")
-					.redirectError(Redirect.DISCARD)
-					.redirectOutput(Redirect.DISCARD)
+					.redirectError(Redirect.appendTo(Common.NULL_FILE))
+					.redirectOutput(Redirect.appendTo(Common.NULL_FILE))
 				.start().waitFor();
 				return true;
 			} catch (IOException e) {

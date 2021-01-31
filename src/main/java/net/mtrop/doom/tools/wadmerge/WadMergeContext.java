@@ -591,7 +591,7 @@ public class WadMergeContext
 	 * Iterates through a directory, adding each file's data into the buffer, 
 	 * and if that file is a valid WAD file, it's entries and data are added.
 	 * If it encounters a directory, a marker is added (directory name prepended with a backslash), 
-	 * and {@link #mergeDirectory(String, File)} is called on it.
+	 * and {@link #mergeTree(String, File)} is called on it.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param inDirectory the directory to read from.
