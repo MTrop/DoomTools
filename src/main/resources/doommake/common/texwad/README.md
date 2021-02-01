@@ -1,4 +1,4 @@
-To build just the map textures subset WAD:
+To extract only the textures used by maps to a separate WAD file:
 
 	doommake maptextures
 

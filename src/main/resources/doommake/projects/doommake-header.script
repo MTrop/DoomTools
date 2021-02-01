@@ -1,5 +1,7 @@
 /* ------------------------------------------------------------------------ */
 
+#define MERGESCRIPT_RELEASE "scripts/merge-release.txt"
+
 /**
  * Performs the release.
  * Creates project WAD.
@@ -8,5 +10,4 @@ check function doRelease() {
 
 	initBuild();
 
-	// ====================
 

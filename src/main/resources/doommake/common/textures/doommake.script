@@ -1,5 +1,10 @@
 /* ------------------------------------------------------------------------ */
 
+#define PROP_TEXWAD         "doommake.file.textures"
+#define DEFAULT_TEXWAD      "textures.wad"
+#define SRC_DIR_TEXTURES    "src/textures"
+#define MERGESCRIPT_TEXTURE "scripts/merge-textures.txt"
+
 /**
  * Return the output textures WAD.
  */
@@ -30,31 +35,6 @@ check function doTextures() {
 	]);
 }
 
-/**
- * Reduces the textures to what are used in the maps. 
- * Creates maptex WAD.
- */
-function doMapTextures() {
-	
-	// Only do if maps were compiled.
-	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
-		println("No maps in `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Skipping texture extraction.");
-		return;
-	}
-
-	baseIwadPath = getIwad();	
-	if (empty(baseIwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-
-	check (err) extractUsedMapTextures(
-		baseIwadPath,
-		[getBuildDirectory() + "/" + getMapsWad()],
-		[getBuildDirectory() + "/" + getTextureWad()],
-		getBuildDirectory() + "/" + getMapTexWad()
-	);
-	return err;
-}
-
 
 /*****************************************************************************
  * TARGET: textures
@@ -64,17 +44,5 @@ function doMapTextures() {
  ****************************************************************************/
 check entry textures(args) {
 	doTextures();
-}
-
-
-/*****************************************************************************
- * TARGET: maptextures
- *****************************************************************************
- * Reads the map WADs and compiled texture resources and exports 
- * them to a WAD of used textures.
- * doommake maptextures
- ****************************************************************************/
-check entry maptextures(args) {
-	doMapTextures();
 }
 

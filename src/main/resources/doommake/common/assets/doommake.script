@@ -1,30 +1,44 @@
 /* ------------------------------------------------------------------------ */
 
+#define SRC_DIR_ASSETS     "src/assets" 
+#define MERGESCRIPT_ASSETS "scripts/merge-assets.txt"
+
 /**
- * Calls the merge script for merging maps.
- * Creates assets WAD.
+ * Cleans up the created asset WAD.
  */
-check function doAssets() {
-	initBuild();
-	verifydirs(SRC_DIR_ASSETS + "/_global");
-	verifydirs(SRC_DIR_ASSETS + "/graphics");
-	verifydirs(SRC_DIR_ASSETS + "/music");
-	verifydirs(SRC_DIR_ASSETS + "/sounds");
-	verifydirs(SRC_DIR_ASSETS + "/sprites");
-	wadmerge(file(SCRIPT_ASSETS), [
-		getBuildDirectory(),
-		getAssetsWAD()
-	]);
+check function cleanUpAssetWAD(wadpath) {
+	wf = wadfile(wadpath);
 	
 	// Remove the sprite namespace if empty.
-	wf = wadfile(getBuildDirectory() + "/" + getAssetsWAD());
 	sx = wadentryindex(wf, "SS_START");
 	sy = wadentryindex(wf, "SS_END");
 	if (sx !== null && (sy - sx === 1)) {
 		wf->waddelete(wf->wadentryindex("SS_START"));
 		wf->waddelete(wf->wadentryindex("SS_END"));
 	}
+	
 	close(wf);
+}
+
+/**
+ * Calls the merge script for merging maps.
+ * Creates assets WAD.
+ */
+check function doAssets() {
+	
+	initBuild();
+	verifydirs(SRC_DIR_ASSETS + "/_global");
+	verifydirs(SRC_DIR_ASSETS + "/graphics");
+	verifydirs(SRC_DIR_ASSETS + "/music");
+	verifydirs(SRC_DIR_ASSETS + "/sounds");
+	verifydirs(SRC_DIR_ASSETS + "/sprites");
+	
+	wadmerge(file(MERGESCRIPT_ASSETS), [
+		getBuildDirectory(),
+		getAssetsWAD()
+	]);
+	
+	cleanUpAssetWAD(getBuildDirectory() + "/" + getAssetsWAD());
 }
 
 

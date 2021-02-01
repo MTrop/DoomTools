@@ -1,0 +1,43 @@
+/**
+ * Reduces the textures to what are used in the maps. 
+ * Creates maptex WAD.
+ */
+function doMapTextures() {
+	
+	// Only do if maps were compiled.
+	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
+		println("No maps at `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Maps WAD not built. Skipping texture extraction.");
+		return;
+	}
+
+	// Only do if textures were compiled.
+	if (!fileexists(getBuildDirectory() + "/" + getTextureWad())) {
+		println("No texture WAD at `" + (getBuildDirectory() + "/" + getTextureWad()) + "`. Texture WAD not built. Skipping texture extraction.");
+		return;
+	}
+
+	baseIwadPath = getIwad();	
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+
+	check (err) extractUsedMapTextures(
+		baseIwadPath,
+		[getBuildDirectory() + "/" + getMapsWad()],
+		[getBuildDirectory() + "/" + getTextureWad()],
+		getBuildDirectory() + "/" + getMapTexWad()
+	);
+	return err;
+}
+
+
+/*****************************************************************************
+ * TARGET: maptextures
+ *****************************************************************************
+ * Reads the map WADs and compiled texture resources and exports 
+ * them to a WAD of used textures.
+ * doommake maptextures
+ ****************************************************************************/
+check entry maptextures(args) {
+	doMapTextures();
+}
+

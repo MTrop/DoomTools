@@ -1,5 +1,7 @@
 /* ------------------------------------------------------------------------ */
 
+#define SRC_DECOHACK        "src/decohack/main.dh"
+
 /**
  * Calls DECOHack.
  * Creates patch.

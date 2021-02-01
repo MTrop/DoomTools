@@ -1,5 +1,16 @@
 /* ------------------------------------------------------------------------ */
 
+/****************************************************************************
+ * Scans the project for available texture WADs.
+ ****************************************************************************/
+#define SRC_DIR_TEXTUREWADS "src/wads/textures"
+
+function scanTextureWADList() {
+	return filelist(SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
+}
+
+/* ------------------------------------------------------------------------ */
+
 /**
  * Extracts textures from the project texture WADs using the maps.
  * Creates maptex WAD.

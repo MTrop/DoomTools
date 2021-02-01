@@ -21,10 +21,8 @@ public final class ProjectModule implements Comparable<ProjectModule>
 
 	/** Sort bias. */
 	private int sort;
-	/** Name. */
+	/** Module name. */
 	private String name;
-	/** Descriptor. */
-	private String description;
 	/** Module file entries. */
 	private List<Entry> entries;
 	
@@ -119,36 +117,42 @@ public final class ProjectModule implements Comparable<ProjectModule>
 	
 	/**
 	 * Creates a new module.
-	 * @param sort the sort order bias.
-	 * @param name the name of the module.
-	 * @param description the description.
 	 * @param entries the module entries.
 	 * @return the new module.
 	 */
-	public static ProjectModule create(Entry... entries)
+	public static ProjectModule module(Entry... entries)
 	{
-		return new ProjectModule(-1, null, null, entries);
+		return new ProjectModule(-1, null, entries);
+	}
+
+	/**
+	 * Creates a new module.
+	 * @param name the name of the module.
+	 * @param entries the module entries.
+	 * @return the new module.
+	 */
+	public static ProjectModule module(String name, Entry... entries)
+	{
+		return new ProjectModule(-1, name, entries);
 	}
 
 	/**
 	 * Creates a new module.
 	 * @param sort the sort order bias.
 	 * @param name the name of the module.
-	 * @param description the description.
 	 * @param entries the module entries.
 	 * @return the new module.
 	 */
-	public static ProjectModule create(int sort, String name, String description, Entry... entries)
+	public static ProjectModule module(int sort, String name, Entry... entries)
 	{
-		return new ProjectModule(sort, name, description, entries);
+		return new ProjectModule(sort, name, entries);
 	}
 
 	// New project module.
-	private ProjectModule(int sort, String name, String description, Entry... entries)
+	private ProjectModule(int sort, String name, Entry... entries)
 	{
 		this.sort = sort;
 		this.name = name;
-		this.description = description;
 		this.entries = new LinkedList<>();
 		addEntries(entries);
 	}
@@ -178,20 +182,9 @@ public final class ProjectModule implements Comparable<ProjectModule>
 		return this;
 	}
 	
-	/**
-	 * @return the name.
-	 */
-	public String getName() 
+	public String getName()
 	{
 		return name;
-	}
-	
-	/**
-	 * @return the description.
-	 */
-	public String getDescription()
-	{
-		return description;
 	}
 	
 	@Override

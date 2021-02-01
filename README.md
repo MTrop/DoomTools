@@ -24,7 +24,9 @@ A bunch of command-line utilities for Doom stuff. This time, they're useful.
 
 ### Why?
 
-Because it's super useful, and can run anywhere (that runs Java).
+Because they are all super useful, and can run anywhere (that runs Java). This also enables authors to
+create a Continuous Integration path for building ongoing WAD projects. How cool would it be to always 
+have a demo copy buildable at all times?
 
 ### Compiling with Ant
 
@@ -76,6 +78,18 @@ To clean up everything:
 
 A program that just displays info about the toolset that you are using (or manage other things, in the future).
 
+#### DecoHack
+
+A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.
+
+#### DMXConv
+
+A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.
+
+#### DoomMake
+
+A project build utility that is agnostic to all operating systems (for the most part).
+
 #### WadMerge
 
 A utility that performs Script-based WAD compilation and merging. 
@@ -101,15 +115,6 @@ A utility that exports textures from one WAD into another, including associated 
 #### WadScript
 
 A scripting system for doing practically anything with Doom stuff. Also includes Rookscript, a subset script. 
-
-#### DecoHack
-
-A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.
-
-#### DMXConv
-
-A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.
-
 
 
 ### Other
