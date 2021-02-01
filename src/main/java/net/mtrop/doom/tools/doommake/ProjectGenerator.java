@@ -261,8 +261,6 @@ public final class ProjectGenerator
 		// A module that adds map texture exports for texture WAD stuff.
 		MODULES.put(MODULE_TEXTURES_MAPS,
 			module(6, MODULE_TEXTURES_MAPS,
-				fileAppend("doommake.properties",
-					"doommake/common/textures/maps/doommake.properties"),
 				fileAppend("doommake.script", 
 					"doommake/common/textures/maps/doommake.script")
 			)
@@ -292,8 +290,6 @@ public final class ProjectGenerator
 		MODULES.put(MODULE_TEXTUREWADS,
 			module(5, MODULE_TEXTUREWADS,
 				dir("src/wads/textures"),
-				fileAppend("doommake.properties",
-					"doommake/common/texwad/doommake.properties"),
 				fileAppend("doommake.script",
 					"doommake/common/texwad/doommake.script"),
 				fileAppend("README.md",

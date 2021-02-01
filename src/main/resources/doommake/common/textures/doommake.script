@@ -12,13 +12,6 @@ function getTextureWad() {
 	return prop(PROP_TEXWAD, DEFAULT_TEXWAD); 
 }
 
-/**
- * Return the texture merge script.
- */
-function getTexturesScript() {
-	return prop(PROP_TEXTURESCRIPT, DEFAULT_TEXTURESCRIPT); 
-}
-
 /* ------------------------------------------------------------------------ */
 
 /**
@@ -29,7 +22,7 @@ check function doTextures() {
 	initBuild();
 	verifydirs(SRC_DIR_TEXTURES + "/flats");
 	verifydirs(SRC_DIR_TEXTURES + "/patches");
-	wadmerge(file(getTexturesScript()), [
+	wadmerge(file(MERGESCRIPT_TEXTURE), [
 		getBuildDirectory(), 
 		getTextureWad()
 	]);

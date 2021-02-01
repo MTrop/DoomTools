@@ -9,5 +9,3 @@
 check function doRelease() {
 
 	initBuild();
-
-
