@@ -1,6 +1,24 @@
 /* ------------------------------------------------------------------------ */
 
 #define MERGESCRIPT_RELEASE "scripts/merge-release.txt"
+#define SRC_WADINFO "src/wadinfo.txt"
+
+/**
+ * Initializes the build directory.
+ */
+function initDist() {
+	return verifydirs(getDistDirectory());
+}
+
+/**
+ * Copies the WAD info to the build directory as its TXT file.
+ * Throws error if unsuccessful.
+ */
+function copyProjectTXT(destfile) {
+	srcfile = file(SRC_WADINFO);
+	println("Copying " + srcfile + " to " + destfile + "...");
+	return copyfile(srcfile, destfile, true);
+}
 
 /**
  * Performs the release.
@@ -9,3 +27,4 @@
 check function doRelease() {
 
 	initBuild();
+

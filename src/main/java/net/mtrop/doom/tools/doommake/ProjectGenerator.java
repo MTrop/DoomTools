@@ -32,6 +32,7 @@ public final class ProjectGenerator
 	private static final String CATEGORY_ASSETS = "Assets";
 
 	private static final String TEMPLATE_GIT = "git";
+	private static final String TEMPLATE_BARE = "bare";
 	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_ASSETS = "assets";
 	private static final String TEMPLATE_TEXTURES = "textures";
@@ -45,6 +46,7 @@ public final class ProjectGenerator
 
 	private static final String MODULE_GIT = "git";
 	private static final String MODULE_BASE = "base";
+	private static final String MODULE_BARE = "bare";
 	private static final String MODULE_DECOHACK = "decohack";
 	private static final String MODULE_MAPS = "maps";
 	private static final String MODULE_MAPTEX = "maptex";
@@ -109,6 +111,22 @@ public final class ProjectGenerator
 			)
 		);
 		
+		// ................................................................
+
+		MODULES.put(MODULE_BARE, 
+			module(100, MODULE_BARE)
+		);
+		RELEASE_SCRIPT.put(MODULE_BARE,
+			module(
+				fileContentAppend("doommake.script",
+					"\t// Add other resource constructors here."
+				)
+			)
+		);
+		RELEASE_WADMERGE_LINE.put(MODULE_BARE,
+			"# Add resource merging here."
+		);
+
 		// ................................................................
 
 		// A module that compiles a DeHackEd patch.
@@ -326,6 +344,11 @@ public final class ProjectGenerator
 			MODULE_BASE, MODULE_DECOHACK
 		));
 
+		TEMPLATES.put(TEMPLATE_BARE, template(
+			TEMPLATE_BARE, CATEGORY_ASSETS, "An empty base project.",
+			MODULE_BASE, MODULE_BARE
+		));
+		
 		TEMPLATES.put(TEMPLATE_MAPS, template(
 			TEMPLATE_MAPS, CATEGORY_ASSETS, "A project for merging just maps together.",
 			MODULE_BASE, MODULE_MAPS
@@ -343,7 +366,7 @@ public final class ProjectGenerator
 
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTUREWADS, template(
 			TEMPLATE_MAPS_ASSETS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps, assets, and used textures from texture WADs together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_ASSETS, MODULE_TEXTUREWADS
+			MODULE_BASE, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTURES, template(
@@ -389,13 +412,18 @@ public final class ProjectGenerator
 	{
 		// Get Modules.
 		SortedSet<ProjectModule> selected = new TreeSet<>();
+		Set<String> selectedCategories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 
 		// Get Templates.
 		for (String name : templateNameList)
 		{
 			ProjectTemplate found;
 			if ((found = TEMPLATES.get(name)) == null)
-				throw new UtilityException("No such project template: " + name + "\nTry running DoomMake with `--list-templates` for the list of available templates.");
+				throw new UtilityException("No such project template: " + name + "\nRun DoomMake with `--list-templates` for a list of available templates.");
+			if (selectedCategories.contains(found.getCategory()))
+				throw new UtilityException("Already included a template from category: " + found.getCategory() + ".");
+
+			selectedCategories.add(found.getCategory());
 			
 			for (String modname : found)
 			{

@@ -138,26 +138,6 @@ function initBuild() {
 }
 
 /****************************************************************************
- * Initializes the build directory.
- ****************************************************************************/
-function initDist() {
-	return verifydirs(getDistDirectory());
-}
-
-/****************************************************************************
- * Copies the WAD info to the build directory as its TXT file.
- * Throws error if unsuccessful.
- ****************************************************************************/
-#define SRC_WADINFO "src/wadinfo.txt"
-
-function copyProjectTXT() {
-	srcfile = file(SRC_WADINFO);
-	destfile = file(getBuildDirectory() + "/" + getProjectTXT());
-	println("Copying " + srcfile + " to " + destfile + "...");
-	return copyfile(srcfile, destfile, true);
-}
-
-/****************************************************************************
  * Calls WadMerge and throws an error if something bad happens.
  * 
  * scriptFilePath: Path to script file to execute.

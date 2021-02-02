@@ -1,10 +1,13 @@
 
+	// Assemble project archive.
 	initDist();
-	copyProjectTXT();
+	copyProjectTXT(getBuildDirectory() + "/" + getProjectTXT());
+	copyProjectTXT(getDistDirectory() + "/" + getProjectTXT());
 	zipProject([
 		getBuildDirectory() + "/" + getProjectWAD(), 
 		getBuildDirectory() + "/" + getProjectTXT()
 	]);
+	
 	println("Done!");
 }
 
