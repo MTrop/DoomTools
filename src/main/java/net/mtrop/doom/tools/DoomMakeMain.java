@@ -538,11 +538,11 @@ public final class DoomMakeMain
 		out.println("    --function-help                Prints all available function usages.");
 		out.println("    --function-help-markdown       Prints all available function usages in");
 		out.println("                                       Markdown format.");
-		out.println("    --list-templates, -t           Lists all available project modules.");
+		out.println("    --list-templates, -t           Lists all available project templates.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();
-		out.println("    --new-project, -n [modules]    Creates a new project made up of a set of");
+		out.println("    --new-project, -n [templates]  Creates a new project made up of a set of");
 		out.println("                                      templates (requires [directory]).");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");

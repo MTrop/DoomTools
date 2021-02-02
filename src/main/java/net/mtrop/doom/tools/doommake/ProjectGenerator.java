@@ -454,7 +454,12 @@ public final class ProjectGenerator
 
 		// WadMerge Properties Start
 		module(
-			fileContentAppend("doommake.script", 
+			fileContentAppend("doommake.script",
+				"}\n",
+				"/**",
+				" * Merges all components into the project file and creates the distributable.",
+				" */",
+				"check function doRelease() {",
 				"\n\twadmerge(file(MERGESCRIPT_RELEASE), [",
         		"\t\tgetBuildDirectory()",
         		"\t\t,getProjectWad()"

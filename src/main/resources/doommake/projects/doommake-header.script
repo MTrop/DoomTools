@@ -21,10 +21,7 @@ function copyProjectTXT(destfile) {
 }
 
 /**
- * Performs the release.
- * Creates project WAD.
+ * Builds every component for the project release.
  */
-check function doRelease() {
-
+check function doAll() {
 	initBuild();
-
