@@ -3,7 +3,7 @@
  * Creates maptex WAD.
  */
 function doMapTextures() {
-	
+
 	// Only do if maps were compiled.
 	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
 		println("No maps at `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Maps WAD not built. Skipping texture extraction.");
@@ -16,7 +16,7 @@ function doMapTextures() {
 		return;
 	}
 
-	baseIwadPath = getIwad();	
+	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 

@@ -30,9 +30,10 @@ public final class ProjectGenerator
 	private static final String CATEGORY_REPOSITORY = "Repositories";
 	private static final String CATEGORY_PATCHES = "Patches";
 	private static final String CATEGORY_ASSETS = "Assets";
+	private static final String CATEGORY_EXECUTION = "Execution";
 
 	private static final String TEMPLATE_GIT = "git";
-	private static final String TEMPLATE_BARE = "bare";
+	private static final String TEMPLATE_BASE = "base";
 	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_ASSETS = "assets";
 	private static final String TEMPLATE_TEXTURES = "textures";
@@ -43,10 +44,11 @@ public final class ProjectGenerator
 	private static final String TEMPLATE_MAPS_ASSETS_TEXTURES = "maps-assets-textures";
 	private static final String TEMPLATE_MAPS_ASSETS_TEXTUREWADS = "maps-assets-texturewads";
 	private static final String TEMPLATE_DECOHACK = "decohack";
+	private static final String TEMPLATE_RUN = "run";
 
 	private static final String MODULE_GIT = "git";
-	private static final String MODULE_BASE = "base";
-	private static final String MODULE_BARE = "bare";
+	private static final String MODULE_INIT = "init";
+	private static final String MODULE_BASE = "bare";
 	private static final String MODULE_DECOHACK = "decohack";
 	private static final String MODULE_MAPS = "maps";
 	private static final String MODULE_MAPTEX = "maptex";
@@ -54,6 +56,7 @@ public final class ProjectGenerator
 	private static final String MODULE_TEXTURES = "textures";
 	private static final String MODULE_TEXTURES_MAPS = "textures-maps";
 	private static final String MODULE_TEXTUREWADS = "texturewads";
+	private static final String MODULE_RUN = "run";
 
 	/** The main templates. */
 	private static final SortedMap<String, ProjectTemplate> TEMPLATES;
@@ -88,8 +91,8 @@ public final class ProjectGenerator
 
 		// ................................................................
 
-		MODULES.put(MODULE_BASE, 
-			module(0, MODULE_BASE,
+		MODULES.put(MODULE_INIT, 
+			module(0, MODULE_INIT,
 				dir("build"),
 				dir("dist"),
 				file("src/wadinfo.txt", 
@@ -113,17 +116,17 @@ public final class ProjectGenerator
 		
 		// ................................................................
 
-		MODULES.put(MODULE_BARE, 
-			module(100, MODULE_BARE)
+		MODULES.put(MODULE_BASE, 
+			module(100, MODULE_BASE)
 		);
-		RELEASE_SCRIPT.put(MODULE_BARE,
+		RELEASE_SCRIPT.put(MODULE_BASE,
 			module(
 				fileContentAppend("doommake.script",
 					"\t// Add other resource constructors here."
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_BARE,
+		RELEASE_WADMERGE_LINE.put(MODULE_BASE,
 			"# Add resource merging here."
 		);
 
@@ -276,33 +279,6 @@ public final class ProjectGenerator
 		
 		// ................................................................
 
-		// A module that adds map texture exports for texture WAD stuff.
-		MODULES.put(MODULE_TEXTURES_MAPS,
-			module(6, MODULE_TEXTURES_MAPS,
-				fileAppend("doommake.script", 
-					"doommake/common/textures/maps/doommake.script")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_TEXTURES_MAPS,
-			module(
-				fileContentAppend("doommake.script",
-					"\tdoMapTextures();"
-				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_TEXTURES_MAPS,
-			module(
-				fileContentAppend("doommake.script",
-					"\t\t,getMapTexWad()"
-				)
-			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS,
-			"mergewad   out $0/$"
-		);
-
-		// ................................................................
-
 		// A module that uses textures from a set of provided texture WADs.
 		// If this is used, do NOT use the "textures" module.
 		MODULES.put(MODULE_TEXTUREWADS,
@@ -334,6 +310,47 @@ public final class ProjectGenerator
 		
 		// ................................................................
 
+		// A module that adds map texture exports for texture WAD stuff.
+		MODULES.put(MODULE_TEXTURES_MAPS,
+			module(6, MODULE_TEXTURES_MAPS,
+				fileAppend("doommake.script", 
+					"doommake/common/textures/maps/doommake.script")
+			)
+		);
+		RELEASE_SCRIPT.put(MODULE_TEXTURES_MAPS,
+			module(
+				fileContentAppend("doommake.script",
+					"\tdoMapTextures();"
+				)
+			)
+		);
+		RELEASE_SCRIPT_MERGE.put(MODULE_TEXTURES_MAPS,
+			module(
+				fileContentAppend("doommake.script",
+					"\t\t,getMapTexWad()"
+				)
+			)
+		);
+		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS,
+			"mergewad   out $0/$"
+		);
+
+		// ................................................................
+
+		// A module that allows running this project.
+		MODULES.put(MODULE_RUN,
+			module(7, MODULE_RUN,
+				fileAppend("doommake.properties",
+					"doommake/run/doommake.properties"),
+				fileAppend("doommake.script",
+					"doommake/run/doommake.script"),
+				fileAppend("README.md",
+					"doommake/run/README.md")
+			)
+		);
+		
+		// ................................................................
+
 		TEMPLATES.put(TEMPLATE_GIT, template(
 			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository support to the project.",
 			MODULE_GIT
@@ -341,57 +358,62 @@ public final class ProjectGenerator
 		
 		TEMPLATES.put(TEMPLATE_DECOHACK, template(
 			TEMPLATE_DECOHACK, CATEGORY_PATCHES, "Adds a DECOHack stub for a DeHackEd patch.",
-			MODULE_BASE, MODULE_DECOHACK
+			MODULE_INIT, MODULE_DECOHACK
 		));
 
-		TEMPLATES.put(TEMPLATE_BARE, template(
-			TEMPLATE_BARE, CATEGORY_ASSETS, "An empty base project.",
-			MODULE_BASE, MODULE_BARE
+		TEMPLATES.put(TEMPLATE_RUN, template(
+			TEMPLATE_RUN, CATEGORY_EXECUTION, "Adds the ability to run this project.",
+			MODULE_INIT, MODULE_RUN
+		));
+			
+		TEMPLATES.put(TEMPLATE_BASE, template(
+			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.",
+			MODULE_INIT, MODULE_BASE
 		));
 		
 		TEMPLATES.put(TEMPLATE_MAPS, template(
 			TEMPLATE_MAPS, CATEGORY_ASSETS, "A project for merging just maps together.",
-			MODULE_BASE, MODULE_MAPS
+			MODULE_INIT, MODULE_MAPS
 		));
 		
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS, template(
 			TEMPLATE_MAPS_ASSETS, CATEGORY_ASSETS, "A project for merging maps and assets together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_ASSETS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTURES, template(
 			TEMPLATE_MAPS_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps, assets, and textures together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTUREWADS, template(
 			TEMPLATE_MAPS_ASSETS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps, assets, and used textures from texture WADs together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTURES, template(
 			TEMPLATE_MAPS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps and textures together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
+			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTUREWADS, template(
 			TEMPLATE_MAPS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps and used textures from texture WADs together.",
-			MODULE_BASE, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTUREWADS
+			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTUREWADS
 		));
 
 		TEMPLATES.put(TEMPLATE_ASSETS, template(
 			TEMPLATE_ASSETS, CATEGORY_ASSETS, "A project for merging just non-texture assets together.",
-			MODULE_BASE, MODULE_ASSETS
+			MODULE_INIT, MODULE_ASSETS
 		));
 		
 		TEMPLATES.put(TEMPLATE_ASSETS_TEXTURES, template(
 			TEMPLATE_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging assets together, including a from-scratch texture set.",
-			MODULE_BASE, MODULE_ASSETS, MODULE_TEXTURES
+			MODULE_INIT, MODULE_ASSETS, MODULE_TEXTURES
 		));
 		
 		TEMPLATES.put(TEMPLATE_TEXTURES, template(
 			TEMPLATE_TEXTURES, CATEGORY_ASSETS, "A project for merging a texture WAD together.",
-			MODULE_BASE, MODULE_TEXTURES
+			MODULE_INIT, MODULE_TEXTURES
 		));
 
 	}

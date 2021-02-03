@@ -1,0 +1,86 @@
+/* ------------------------------------------------------------------------ */
+
+#define PROP_RUN_EXE            "doommake.run.exe"
+#define PROP_RUN_EXE_WORK       "doommake.run.exe.workdir"
+#define PROP_RUN_SWITCH_IWAD    "doommake.run.switch.iwad"
+#define DEFAULT_RUN_SWITCH_IWAD "-iwad"
+#define PROP_RUN_SWITCH_FILE    "doommake.run.switch.file"
+#define DEFAULT_RUN_SWITCH_FILE "-file"
+#define PROP_RUN_SWITCH_DEH     "doommake.run.switch.deh"
+#define DEFAULT_RUN_SWITCH_DEH  "-deh"
+
+/**
+ * Calls a port to run this project.
+ * portType: If specified, then this looks for the properties that end with ".porttype".
+ * wadList: List of WAD files to add.
+ * dehFile: DEH file to add.
+ */
+check function doRun(portType, wadList, dehFile) {
+
+	portType = empty(portType) ? "" : "." + portType;
+
+	exepath =    prop(PROP_RUN_EXE + portType);
+	exeworkdir = prop(PROP_RUN_EXE_WORK + portType) ?: fileparent(exepath);
+	iwadSwitch = prop(PROP_RUN_SWITCH_IWAD + portType, DEFAULT_RUN_SWITCH_IWAD);
+	fileSwitch = prop(PROP_RUN_SWITCH_FILE + portType, DEFAULT_RUN_SWITCH_FILE);
+	dehSwitch =  prop(PROP_RUN_SWITCH_DEH + portType, DEFAULT_RUN_SWITCH_DEH);
+	
+	if (empty(exepath))
+		return error("NoEXE", "Executable not specified. Requires a property to be set: " + PROP_RUN_EXE + portType);
+	
+	if (!fileexists(exepath))
+		return error("NoEXE", "Executable could not be found: " + exepath);
+	if (!fileexists(exeworkdir))
+		return error("NoEXE", "Working directory for executable not found: " + exeworkdir);
+
+	if (empty(iwadSwitch))
+		return error("RunError", "IWAD switch not specified. Requires a property to be set: " + PROP_RUN_SWITCH_IWAD + portType);
+	if (empty(fileSwitch))
+		return error("RunError", "FILE switch not specified. Requires a property to be set: " + PROP_RUN_SWITCH_FILE + portType);
+	if (empty(dehSwitch))
+		return error("RunError", "DEH switch not specified. Requires a property to be set: " + PROP_RUN_SWITCH_DEH + portType);
+
+	arguments = [];
+
+	iwadPath = getIwad();
+	if (empty(iwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+
+	arguments->listadd(iwadSwitch);
+	arguments->listadd(iwadPath);
+
+	if (!empty(wadList)) {
+		arguments->listadd(fileSwitch);
+		each (w : wadList)
+			arguments->listadd(w);
+	}
+
+	if (!empty(dehFile)) {
+		arguments->listadd(dehSwitch);
+		arguments->listadd(dehFile);
+	}
+	
+	return execresult(exec(
+		exepath, arguments, envvars(), exeworkdir, stdout(), stderr(), stdin()
+	));
+}
+
+
+/*****************************************************************************
+ * TARGET: run
+ *****************************************************************************
+ * Runs this project.
+ * doommake run
+ ****************************************************************************/
+check entry run(args) {
+
+	wadList = [
+		// Add WADS to run to this list here.
+	];
+	
+	// Set DEH file here, if any.
+	dehFile = null;
+
+	return doRun(args[0], wadList, dehFile);
+}
+
