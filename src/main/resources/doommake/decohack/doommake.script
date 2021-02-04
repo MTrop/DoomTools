@@ -15,14 +15,3 @@ check function doPatch(budget) {
 	);
 }
 
-
-/*****************************************************************************
- * TARGET: patch
- *****************************************************************************
- * Compiles the DeHackEd patch (and shows the budget).
- * doommake patch
- ****************************************************************************/
-check entry patch(args) {
-	doPatch(true);
-}
-

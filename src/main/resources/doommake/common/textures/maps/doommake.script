@@ -30,14 +30,3 @@ function doMapTextures() {
 }
 
 
-/*****************************************************************************
- * TARGET: maptextures
- *****************************************************************************
- * Reads the map WADs and compiled texture resources and exports 
- * them to a WAD of used textures.
- * doommake maptextures
- ****************************************************************************/
-check entry maptextures(args) {
-	doMapTextures();
-}
-

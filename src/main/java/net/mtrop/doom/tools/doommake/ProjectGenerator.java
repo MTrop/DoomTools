@@ -68,6 +68,8 @@ public final class ProjectGenerator
 	private static final Map<String, ProjectModule> RELEASE_SCRIPT_MERGE;
 	/** The release WadMerge line. */
 	private static final Map<String, String> RELEASE_WADMERGE_LINE;
+	/** The post-release add-on template fragments. */
+	private static final Map<String, ProjectModule> POST_RELEASE;
 
 	static
 	{
@@ -76,6 +78,7 @@ public final class ProjectGenerator
 		RELEASE_SCRIPT = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		RELEASE_SCRIPT_MERGE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		RELEASE_WADMERGE_LINE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		POST_RELEASE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 		// ................................................................
 
@@ -111,6 +114,13 @@ public final class ProjectGenerator
 					"doommake/doommake.project.properties"),
 				file("README.md",
 					"doommake/README.md")
+			)
+		);
+		POST_RELEASE.put(MODULE_INIT,
+			module(
+				fileAppend("doommake.script",
+					"doommake/doommake-target.script"
+				)
 			)
 		);
 		
@@ -162,6 +172,13 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE.put(MODULE_DECOHACK,
 			"mergefile  out $0/$"
 		);
+		POST_RELEASE.put(MODULE_DECOHACK,
+			module(
+				fileAppend("doommake.script",
+					"doommake/decohack/doommake-target.script"
+				)
+			)
+		);
 		
 		// ................................................................
 
@@ -195,6 +212,13 @@ public final class ProjectGenerator
 		);
 		RELEASE_WADMERGE_LINE.put(MODULE_MAPS,
 			"mergewad   out $0/$"
+		);
+		POST_RELEASE.put(MODULE_MAPS,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/maps/doommake-target.script"
+				)
+			)
 		);
 		
 		// ................................................................
@@ -233,6 +257,13 @@ public final class ProjectGenerator
 		);
 		RELEASE_WADMERGE_LINE.put(MODULE_ASSETS,
 			"mergewad   out $0/$"
+		);
+		POST_RELEASE.put(MODULE_ASSETS,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/assets/doommake-target.script"
+				)
+			)
 		);
 		
 		// ................................................................
@@ -276,6 +307,13 @@ public final class ProjectGenerator
 				)
 			)
 		);
+		POST_RELEASE.put(MODULE_TEXTURES,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/textures/doommake-target.script"
+				)
+			)
+		);
 		
 		// ................................................................
 
@@ -307,6 +345,13 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE.put(MODULE_TEXTUREWADS,
 			"mergewad   out $0/$"
 		);
+		POST_RELEASE.put(MODULE_TEXTUREWADS,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/texwad/doommake-target.script"
+				)
+			)
+		);
 		
 		// ................................................................
 
@@ -334,18 +379,36 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS,
 			"mergewad   out $0/$"
 		);
-
+		POST_RELEASE.put(MODULE_TEXTURES_MAPS,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/textures/maps/doommake-target.script"
+				)
+			)
+		);
+		
 		// ................................................................
 
 		// A module that allows running this project.
+		// Stub for validity.
 		MODULES.put(MODULE_RUN,
-			module(7, MODULE_RUN,
+			module(7, MODULE_RUN)
+		);
+		POST_RELEASE.put(MODULE_RUN,
+			module(0, MODULE_RUN,
 				fileAppend("doommake.properties",
 					"doommake/run/doommake.properties"),
 				fileAppend("doommake.script",
 					"doommake/run/doommake.script"),
 				fileAppend("README.md",
 					"doommake/run/README.md")
+			)
+		);
+		POST_RELEASE.put(MODULE_RUN,
+			module(
+				fileAppend("doommake.script",
+					"doommake/run/doommake-target.script"
+				)
 			)
 		);
 		
@@ -538,6 +601,22 @@ public final class ProjectGenerator
 			fileAppend("README.md",
 				"doommake/projects/README.md")
 		).createIn(targetDirectory);
+		
+		// ===============================================================
+		
+		for (ProjectModule module : selected)
+		{
+			ProjectModule found;
+			if ((found = POST_RELEASE.get(module.getName())) != null)
+				found.createIn(targetDirectory);
+		}
+
+		// Add release targets.
+		module(
+			fileAppend("doommake.script",
+				"doommake/projects/doommake-target.script")
+		).createIn(targetDirectory);
+		
 	}
 	
 }

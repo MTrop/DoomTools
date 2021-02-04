@@ -29,13 +29,3 @@ check function doTextures() {
 }
 
 
-/*****************************************************************************
- * TARGET: textures
- *****************************************************************************
- * Reads the texture assets and merges them into a WAD.
- * doommake textures
- ****************************************************************************/
-check entry textures(args) {
-	doTextures();
-}
-

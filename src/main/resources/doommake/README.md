@@ -48,3 +48,8 @@ To clean the build folder, type:
 	doommake clean
 
 
+To both initialize and build this project:
+
+	doommake
+
+

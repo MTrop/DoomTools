@@ -1,0 +1,18 @@
+/*****************************************************************************
+ * TARGET: run
+ *****************************************************************************
+ * Runs this project.
+ * doommake run
+ ****************************************************************************/
+check entry run(args) {
+
+	wadList = [
+		// Add WADS to run to this list here.
+	];
+	
+	// Set DEH file here, if any.
+	dehFile = null;
+
+	return doRun(args[0], wadList, dehFile);
+}
+
