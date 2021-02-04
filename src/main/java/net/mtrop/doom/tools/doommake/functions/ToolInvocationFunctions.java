@@ -51,8 +51,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -125,8 +124,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -195,8 +193,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -232,10 +229,6 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			} catch (ClassCastException e) {
 				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
 				return true;
-			} catch (Exception e) {
-				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
-				e.printStackTrace();
-				return true;
 			}
 			finally
 			{
@@ -269,8 +262,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -354,8 +346,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -441,8 +432,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -526,8 +516,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -592,8 +581,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -662,8 +650,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
@@ -749,8 +736,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.returns(
 					type(Type.INTEGER, "The normal return of this tool's process."),
-					type(Type.ERROR, "BadOptions", "If the options map could not be applied."),
-					type(Type.ERROR, "Security", "If the OS is preventing the read.")
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
 				)
 			;
 		}
