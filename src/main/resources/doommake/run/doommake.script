@@ -47,17 +47,17 @@ check function doRun(portType, wadList, dehFile) {
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
 	arguments->listadd(iwadSwitch);
-	arguments->listadd(iwadPath);
+	arguments->listadd(iwadPath->filecanonpath());
 
 	if (!empty(wadList)) {
 		arguments->listadd(fileSwitch);
 		each (w : wadList)
-			arguments->listadd(w);
+			arguments->listadd(w->filecanonpath());
 	}
 
 	if (!empty(dehFile)) {
 		arguments->listadd(dehSwitch);
-		arguments->listadd(dehFile);
+		arguments->listadd(dehFile->filecanonpath());
 	}
 	
 	return execresult(exec(

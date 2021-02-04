@@ -392,10 +392,7 @@ public final class ProjectGenerator
 		// A module that allows running this project.
 		// Stub for validity.
 		MODULES.put(MODULE_RUN,
-			module(7, MODULE_RUN)
-		);
-		POST_RELEASE.put(MODULE_RUN,
-			module(0, MODULE_RUN,
+			module(7, MODULE_RUN,
 				fileAppend("doommake.properties",
 					"doommake/run/doommake.properties"),
 				fileAppend("doommake.script",
