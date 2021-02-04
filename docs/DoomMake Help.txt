@@ -27,8 +27,8 @@ overridden.
 ==============================================================================
 
 Usage: doommake [target] [args] [switches]
-                [directory] --new-project [modules...]
-                [--list-modules | -t]
+                [directory] --new-project [templates...]
+                [--list-templates | -t]
                 [--help | -h | --version]
                 [--function-help | --function-help-markdown]
 
@@ -38,11 +38,11 @@ Usage: doommake [target] [args] [switches]
 [args]:
     The additional arguments to pass along to the script.
 
-[modules]:
-    The names of the modules(s) to use or combine for the new 
+[templates]:
+    The names of the template(s) to use or combine for the new 
     project (applied altogether).
     E.g.: --new-project maps git
-        Combines the "maps", and "git" modules together.
+        Combines the "maps", and "git" templates together.
 
 [directory]:
     The directory/name for the new project.
@@ -53,11 +53,11 @@ Usage: doommake [target] [args] [switches]
     --function-help                Prints all available function usages.
     --function-help-markdown       Prints all available function usages in
                                        Markdown format.
-    --list-modules, -lm            Lists all available project modules.
+    --list-templates, -t           Lists all available project templates.
 
 -----------------------------------------------------------------------------
 
-    --new-project, -n [modules]    Creates a new project made up of a set of
+    --new-project, -n [templates]  Creates a new project made up of a set of
                                       templates (requires [directory]).
 
 -----------------------------------------------------------------------------
