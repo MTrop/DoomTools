@@ -16,7 +16,7 @@ syntax: glob
 .vscode
 
 # IntelliJ Idea
-/.idea
+.idea/
 *.ipr
 *.iml
 *.iws
@@ -35,9 +35,9 @@ syntax: glob
 doommake.properties
 
 # Generate-able by DoomMake
-/build
-/dist
-/gen
+build/
+dist/
+gen/
 
 # Doom Builder and Others
 *.dbs
