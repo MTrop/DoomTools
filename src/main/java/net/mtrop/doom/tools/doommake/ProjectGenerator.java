@@ -495,7 +495,8 @@ public final class ProjectGenerator
 		// Get Modules.
 		SortedSet<ProjectModule> selected = new TreeSet<>();
 		Set<String> selectedCategories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-
+		boolean includedInit = false;
+		
 		// Get Templates.
 		for (String name : templateNameList)
 		{
@@ -512,6 +513,8 @@ public final class ProjectGenerator
 				ProjectModule modfound;
 				if ((modfound = MODULES.get(modname)) == null)
 					throw new UtilityException("INTERNAL: No such project module: " + modname + "!!");
+				if (modname.equals(MODULE_INIT))
+					includedInit = true;
 				selected.add(modfound);
 			}
 		}
@@ -520,99 +523,103 @@ public final class ProjectGenerator
 		for (ProjectModule module : selected)
 			module.createIn(targetDirectory);
 
-		// Add release script header.
-		module(
-			fileAppend("doommake.script",
-				"doommake/projects/doommake-header.script")
-		).createIn(targetDirectory);
-
-		// Project Modules.
-		for (ProjectModule module : selected)
+		if (includedInit)
 		{
-			ProjectModule found;
-			if ((found = RELEASE_SCRIPT.get(module.getName())) != null)
-				found.createIn(targetDirectory);
-		}
+			// Add release script header.
+			module(
+				fileAppend("doommake.script",
+					"doommake/projects/doommake-header.script")
+			).createIn(targetDirectory);
 
-		// WadMerge Properties Start
-		module(
-			fileContentAppend("doommake.script",
-				"}\n",
-				"/**",
-				" * Merges all components into the project file and creates the distributable.",
-				" */",
-				"check function doRelease() {",
-				"\n\twadmerge(file(MERGESCRIPT_RELEASE), [",
-        		"\t\tgetBuildDirectory()",
-        		"\t\t,getProjectWad()"
-        	)
-		).createIn(targetDirectory);
-		
-		// Add merge script.
-		module(
-			file("scripts/merge-release.txt",
-				"doommake/projects/wadmerge-header.txt")
-		).createIn(targetDirectory);
-
-		// Project Modules.
-		int x = 2;
-		for (ProjectModule module : selected)
-		{
-			ProjectModule found;
-			if ((found = RELEASE_SCRIPT_MERGE.get(module.getName())) != null)
+			// Project Modules.
+			for (ProjectModule module : selected)
 			{
-				found.createIn(targetDirectory);
-				
-				String line;
-				if ((line = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
+				ProjectModule found;
+				if ((found = RELEASE_SCRIPT.get(module.getName())) != null)
+					found.createIn(targetDirectory);
+			}
+
+			// WadMerge Properties Start
+			module(
+				fileContentAppend("doommake.script",
+					"}\n",
+					"/**",
+					" * Merges all components into the project file and creates the distributable.",
+					" */",
+					"check function doRelease() {",
+					"\n\twadmerge(file(MERGESCRIPT_RELEASE), [",
+	        		"\t\tgetBuildDirectory()",
+	        		"\t\t,getProjectWad()"
+	        	)
+			).createIn(targetDirectory);
+			
+			// Add merge script.
+			module(
+				file("scripts/merge-release.txt",
+					"doommake/projects/wadmerge-header.txt")
+			).createIn(targetDirectory);
+
+			// Project Modules.
+			int x = 2;
+			for (ProjectModule module : selected)
+			{
+				ProjectModule found;
+				if ((found = RELEASE_SCRIPT_MERGE.get(module.getName())) != null)
 				{
-					module(
-						fileContentAppend("scripts/merge-release.txt", line + (x++))
-					).createIn(targetDirectory);
+					found.createIn(targetDirectory);
+					
+					String line;
+					if ((line = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
+					{
+						module(
+							fileContentAppend("scripts/merge-release.txt", line + (x++))
+						).createIn(targetDirectory);
+					}
 				}
 			}
-		}
 
-		// WadMerge Properties End
-		module(
-			fileContentAppend("doommake.script", 
-				"\t]);"
-        	)
-		).createIn(targetDirectory);
-		
-		// Add release script footer.
-		module(
-			fileAppend("doommake.script",
-				"doommake/projects/doommake-footer.script")
-		).createIn(targetDirectory);
-		
-		// Add merge script ending.
-		module(
-			fileContentAppend("scripts/merge-release.txt",
-				"\nfinish out $0/$1",
-				"end")
-		).createIn(targetDirectory);
-		
-		// Finish README
-		module(
-			fileAppend("README.md",
-				"doommake/projects/README.md")
-		).createIn(targetDirectory);
-		
-		// ===============================================================
-		
-		for (ProjectModule module : selected)
-		{
-			ProjectModule found;
-			if ((found = POST_RELEASE.get(module.getName())) != null)
-				found.createIn(targetDirectory);
-		}
+			// WadMerge Properties End
+			module(
+				fileContentAppend("doommake.script", 
+					"\t]);"
+	        	)
+			).createIn(targetDirectory);
+			
+			// Add release script footer.
+			module(
+				fileAppend("doommake.script",
+					"doommake/projects/doommake-footer.script")
+			).createIn(targetDirectory);
+			
+			// Add merge script ending.
+			module(
+				fileContentAppend("scripts/merge-release.txt",
+					"\nfinish out $0/$1",
+					"end")
+			).createIn(targetDirectory);
+			
+			// Finish README
+			module(
+				fileAppend("README.md",
+					"doommake/projects/README.md")
+			).createIn(targetDirectory);
+			
+			// ===============================================================
+			
+			for (ProjectModule module : selected)
+			{
+				ProjectModule found;
+				if ((found = POST_RELEASE.get(module.getName())) != null)
+					found.createIn(targetDirectory);
+			}
 
-		// Add release targets.
-		module(
-			fileAppend("doommake.script",
-				"doommake/projects/doommake-target.script")
-		).createIn(targetDirectory);
+			// Add release targets.
+			module(
+				fileAppend("doommake.script",
+					"doommake/projects/doommake-target.script")
+			).createIn(targetDirectory);
+			
+		}
 		
 	}
 	
