@@ -424,12 +424,12 @@ public final class ProjectGenerator
 		// ................................................................
 
 		TEMPLATES.put(TEMPLATE_GIT, template(
-			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository support to the project.",
+			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository ignores/attributes to the project.",
 			MODULE_GIT
 		));
 		
 		TEMPLATES.put(TEMPLATE_MERCURIAL, template(
-			TEMPLATE_MERCURIAL, CATEGORY_REPOSITORY, "Adds Mercurial repository support to the project.",
+			TEMPLATE_MERCURIAL, CATEGORY_REPOSITORY, "Adds Mercurial repository ignores to the project.",
 			MODULE_MERCURIAL
 		));
 		
