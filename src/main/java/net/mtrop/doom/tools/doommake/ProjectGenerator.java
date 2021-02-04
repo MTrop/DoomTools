@@ -33,6 +33,7 @@ public final class ProjectGenerator
 	private static final String CATEGORY_EXECUTION = "Execution";
 
 	private static final String TEMPLATE_GIT = "git";
+	private static final String TEMPLATE_MERCURIAL = "hg";
 	private static final String TEMPLATE_BASE = "base";
 	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_ASSETS = "assets";
@@ -47,6 +48,7 @@ public final class ProjectGenerator
 	private static final String TEMPLATE_RUN = "run";
 
 	private static final String MODULE_GIT = "git";
+	private static final String MODULE_MERCURIAL = "hg";
 	private static final String MODULE_INIT = "init";
 	private static final String MODULE_BASE = "bare";
 	private static final String MODULE_DECOHACK = "decohack";
@@ -89,6 +91,16 @@ public final class ProjectGenerator
 					"doommake/git/gitignore.txt"),
 				file(".gitattributes", 
 					"doommake/git/gitattributes.txt")
+			)
+		);
+
+		// ................................................................
+
+		// Adds files for Mercurial repository support.
+		MODULES.put(MODULE_MERCURIAL,
+			module(-1, MODULE_MERCURIAL,
+				file(".hgignore", 
+					"doommake/hg/hgignore.txt")
 			)
 		);
 
@@ -414,6 +426,11 @@ public final class ProjectGenerator
 		TEMPLATES.put(TEMPLATE_GIT, template(
 			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository support to the project.",
 			MODULE_GIT
+		));
+		
+		TEMPLATES.put(TEMPLATE_MERCURIAL, template(
+			TEMPLATE_MERCURIAL, CATEGORY_REPOSITORY, "Adds Mercurial repository support to the project.",
+			MODULE_MERCURIAL
 		));
 		
 		TEMPLATES.put(TEMPLATE_DECOHACK, template(
