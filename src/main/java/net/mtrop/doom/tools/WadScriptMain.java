@@ -22,6 +22,8 @@ import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptInstanceBuilder;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.ErrorType;
+import com.blackrook.rookscript.desktop.functions.DesktopFunctions;
+import com.blackrook.rookscript.desktop.functions.ImageFunctions;
 import com.blackrook.rookscript.exception.ScriptExecutionException;
 import com.blackrook.rookscript.exception.ScriptParseException;
 import com.blackrook.rookscript.functions.MathFunctions;
@@ -65,6 +67,7 @@ public final class WadScriptMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
+	private static final String ROOKSCRIPT_DESKTOP_VERSION = Common.getVersionString("rookscript-desktop");
 	private static final String VERSION = Common.getVersionString("wadscript");
 
 	private static final int ERROR_NONE = 0;
@@ -109,6 +112,8 @@ public final class WadScriptMain
 		new Resolver("Digest", DigestFunctions.createResolver()),
 		new Resolver("JSON", JSONFunctions.createResolver()),
 		new Resolver("System", SystemFunctions.createResolver()),
+		new Resolver("Images", ImageFunctions.createResolver()),
+		new Resolver("Desktop", "DESKTOP", DesktopFunctions.createResolver()),
 		new Resolver("WADs", WadFunctions.createResolver()),
 		new Resolver("PK3s", PK3Functions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
@@ -922,7 +927,7 @@ public final class WadScriptMain
 	private static void splash(PrintStream out)
 	{
 		out.println("WadScript v" + VERSION + " by Matt Tropiano");
-		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ")");
+		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + ")");
 	}
 
 	/**

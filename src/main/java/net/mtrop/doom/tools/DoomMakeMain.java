@@ -31,6 +31,7 @@ public final class DoomMakeMain
 {
 	private static final String DOOM_VERSION = Common.getVersionString("doom");
 	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
+	private static final String ROOKSCRIPT_DESKTOP_VERSION = Common.getVersionString("rookscript-desktop");
 	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
 
@@ -495,7 +496,7 @@ public final class DoomMakeMain
 	private static void splash(PrintStream out)
 	{
 		out.println("DoomMake v" + VERSION + " by Matt Tropiano");
-		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", WadScript v" + WADSCRIPT_VERSION + ")");
+		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + " , WadScript v" + WADSCRIPT_VERSION + ")");
 	}
 
 	/**

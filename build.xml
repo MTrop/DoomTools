@@ -30,10 +30,16 @@
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
 	<property name="rookscript.jar.src" value="${rookscript.project}-sources.jar" />
 
+	<property name="rookscript.desktop.lib.version" value="1.10.2" />
+	<property name="rookscript.desktop.tag" value="${rookscript.desktop.lib.version}-RELEASE" />
+	<property name="rookscript.desktop.project" value="blackrook-rookscript-desktop-${rookscript.desktop.lib.version}" />	
+	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
+	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
+
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -67,6 +73,7 @@
 	<property name="wadscript.version" value="${build.version}" />
 	<property name="decohack.version" value="${build.version}" />
 	<property name="dmxconv.version" value="${build.version}" />
+	<property name="dimgconv.version" value="${build.version}" />
 	<property name="doommake.version" value="${build.version}" />
 
 	
@@ -92,6 +99,7 @@
 		<echo file="${build.versions.dir}/doomtools.version" message="${build.version.number}" />
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
+		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.desktop.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -100,6 +108,7 @@
 		<echo file="${build.versions.dir}/wadscript.version" message="${wadscript.version}" />
 		<echo file="${build.versions.dir}/decohack.version" message="${decohack.version}" />
 		<echo file="${build.versions.dir}/dmxconv.version" message="${dmxconv.version}" />
+		<echo file="${build.versions.dir}/dimgconv.version" message="${dimgconv.version}" />
 		<echo file="${build.versions.dir}/doommake.version" message="${doommake.version}" />
 	</target>
 
@@ -128,6 +137,7 @@
 		<jar destfile="${jar.dir}/${jar.filename}">
 			<zipgroupfileset file="${dependencies.dir}/${doom.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${rookscript.desktop.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
@@ -145,7 +155,12 @@
 		<github-dl repository="BlackRookSoftware/RookScript" tag="${rookscript.tag}" file="${rookscript.jar.src}" dest="${dependencies.dir}" />
 	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.rookscript.desktop">
+		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar}" dest="${dependencies.dir}" />
+		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar.src}" dest="${dependencies.dir}" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx784M" />
@@ -178,6 +193,9 @@
 		<!-- DMXConv -->
 		<shell-cmd  name="dmxconv" todir="${build.dir}/shell/cmd"     options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
 		<shell-bash name="dmxconv" todir="${build.dir}/shell/bash"    options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<!-- DImgConv -->
+		<shell-cmd  name="dimgconv" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
+		<shell-bash name="dimgconv" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
 		<!-- DoomMake -->
 		<shell-cmd  name="doommake" todir="${build.dir}/shell/cmd"    options="${jvm.options.common}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
 		<shell-bash name="doommake" todir="${build.dir}/shell/bash"   options="${jvm.options.common}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />

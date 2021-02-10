@@ -2203,7 +2203,7 @@ PROPERTIES(key)
         (STRING) Get a single property as a string value.
         (LIST) Get all provided properties as a map.
     Returns:
-        (NULL) IF no corresponding property, if [key] is a string.
+        (NULL) If no corresponding property, if [key] is a string.
         (STRING) The corresponding property, if [key] is a string.
         (MAP) The corresponding map of properties, if [key] is null or a list.
         (ERROR:Security) If a property cannot be queried.
@@ -2261,6 +2261,257 @@ EXECRESULT(command, waitmillis)
         (INTEGER) The process return result.
         (ERROR:BadParameter) A type of a parameter is unexpected.
         (ERROR:Timeout) If the wait timed out.
+
+
+=================================================================
+==== Images
+=================================================================
+
+IMAGE(width, height)
+    Creates a new, blank image of the specified width and height (32-bit ARGB format).
+    width:
+        (INTEGER) Width in pixels.
+    height:
+        (INTEGER) Height in pixels.
+    Returns:
+        (OBJECTREF:BufferedImage) The new image.
+        (ERROR:BadDimensions) If width or height is 0 or less.
+
+IMAGEREAD(source)
+    Creates a new image by reading it from a file or stream. The data must be in a format recognized by Java ImageIO.
+    source:
+        (STRING) The path to a file.
+        (OBJECTREF:File) The path to the file.
+        (OBJECTREF:InputStream) The open stream to read.
+        (OBJECTREF:URL) A URL to an image to read.
+    Returns:
+        (OBJECTREF:Image) The image loaded from the source.
+        (ERROR:BadImage) If the data could not be interpreted.
+        (ERROR:IOError) If the stream could not be read.
+
+IMAGEWRITE(image, destination, type)
+    Writes an image out to a file or stream. The target data type must be in a format recognized by Java ImageIO.
+    image:
+        (OBJECTREF:BufferedImage) The image to write.
+    destination:
+        (STRING) The path to a file.
+        (OBJECTREF:File) The path to a target file.
+        (OBJECTREF:OutputStream) The open stream to write to.
+    type:
+        (STRING) The informal type name.
+    Returns:
+        (NULL) If the destination is null.
+        (STRING) The file path, if [destination] is a string.
+        (OBJECTREF:File) The file, if [destination] is a File.
+        (OBJECTREF:OutputStream) The stream, if [destination] is an OutputStream.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadFormat) If the [type] is not a valid type, nor inferred by output.
+        (ERROR:IOError) If the stream could not be written to.
+
+IMAGECOPY(image)
+    Creates a new image from an existing image, such that the new image is a copy of the provided image.
+    image:
+        (OBJECTREF:BufferedImage) The image to copy.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is a copy of [image].
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGERESIZE(image, width, height, mode)
+    Creates a new image that is a resized version of an image.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    width:
+        (INTEGER) New width in pixels.
+    height:
+        (INTEGER) New height in pixels.
+    mode:
+        (NULL) Use Nearest Neighbor ('nearest').
+        (STRING) A resize mode: 'nearest', 'linear', 'bilinear', 'bicubic'.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image] with the resized dimensions.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadMode) If the provided [mode] is an unsupported mode.
+        (ERROR:BadDimensions) If width or height is 0 or less.
+
+IMAGESCALE(image, scaleX, scaleY, mode)
+    Creates a new image that is a resized version of an image using scalar values.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    scaleX:
+        (INTEGER) Scalar value, X-axis.
+    scaleY:
+        (INTEGER) Scalar value, Y-axis.
+    mode:
+        (NULL) Use Nearest Neighbor ('nearest').
+        (STRING) A resize mode: 'nearest', 'linear', 'bilinear', 'bicubic'.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image] with the scaled dimensions.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadMode) If the fourth parameter is an unsupported mode.
+        (ERROR:BadDimensions) If width or height will be 0 or less.
+
+IMAGECROP(image, x, y, width, height)
+    Creates a new image that is a cropped area of an image.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    x:
+        (INTEGER) X-axis offset in pixels (from left side of image).
+    y:
+        (INTEGER) Y-axis offset in pixels (from top of image).
+    width:
+        (INTEGER) Width of crop area in pixels.
+    height:
+        (INTEGER) Height of crop area in pixels.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image] with the cropped dimensions.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadDimensions) If width or height is 0 or less.
+
+IMAGEFLIPH(image)
+    Creates a new image by flipping it horizontally.
+    image:
+        (OBJECTREF:BufferedImage) The image to fill.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image], flipped horizontally.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEFLIPV(image)
+    Creates a new image by flipping it vertically.
+    image:
+        (OBJECTREF:BufferedImage) The image to fill.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image], flipped vertically.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGETRANSPOSE(image)
+    Creates a new image by flipping it vertically.
+    image:
+        (OBJECTREF:BufferedImage) The image to fill.
+    Returns:
+        (OBJECTREF:BufferedImage) A new image that is [image], flipped vertically.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEFILL(image, color)
+    Fills an image with the provided color.
+    image:
+        (OBJECTREF:BufferedImage) The image to fill.
+    color:
+        (INTEGER) The color, formatted as a 32-bit ARGB value.
+    Returns:
+        (OBJECTREF:BufferedImage) [image]
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEPAINT(image, sourceImage, x, y, width, height, blend, alpha, mode)
+    Fills an image with the provided color.
+    image:
+        (OBJECTREF:BufferedImage) The image to paint into.
+    sourceImage:
+        (OBJECTREF:BufferedImage) The image to paint.
+    x:
+        (NULL) Use 0.
+        (INTEGER) X-axis offset in pixels (from left side of image).
+    y:
+        (NULL) Use 0.
+        (INTEGER) Y-axis offset in pixels (from top of image).
+    width:
+        (NULL) Use source image width.
+        (INTEGER) Width in pixels.
+    height:
+        (NULL) Use source image height.
+        (INTEGER) Height in pixels.
+    blend:
+        (NULL) Use alpha compositing ('alpha').
+        (STRING) A blending mode: 'replace', 'alpha', 'add', 'subtract', 'multiply'.
+    alpha:
+        (NULL) Use 1.0.
+        (FLOAT) The pre-alpha scalar (image alpha is also applied). NOTE: 'replace' does not use this value.
+    mode:
+        (NULL) Use Nearest Neighbor ('nearest').
+        (STRING) A resize mode: 'nearest', 'linear', 'bilinear', 'bicubic'.
+    Returns:
+        (OBJECTREF:BufferedImage) [image]
+        (ERROR:BadImage) If the first or second parameter is not a BufferedImage.
+        (ERROR:BadMode) If the provided [mode] is an unsupported mode.
+        (ERROR:BadBlend) If the provided [blend] is not a valid blend.
+        (ERROR:BadDimensions) If width or height is 0 or less.
+
+IMAGEWIDTH(image)
+    Gets the width of an image in pixels.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    Returns:
+        (INTEGER) The image width.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEHEIGHT(image)
+    Gets the height of an image in pixels.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    Returns:
+        (INTEGER) The image height.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEGET(image, x, y)
+    Gets an image's pixel data.
+    image:
+        (OBJECTREF:BufferedImage) The image to use.
+    x:
+        (NULL) Use 0.
+        (INTEGER) Image X-coordinate (from left side of image).
+    y:
+        (NULL) Use 0.
+        (INTEGER) Image Y-coordinate (from top of image).
+    Returns:
+        (INTEGER) The image pixel data, 32-bit ARGB.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadCoordinates) If X or Y is out of bounds.
+
+IMAGESET(image, x, y, color)
+    Sets an image's pixel data.
+    image:
+        (OBJECTREF:BufferedImage) The image to use.
+    x:
+        (NULL) Use 0.
+        (INTEGER) Image X-coordinate (from left side of image).
+    y:
+        (NULL) Use 0.
+        (INTEGER) Image Y-coordinate (from top of image).
+    color:
+        (INTEGER) The color, formatted as a 32-bit ARGB value.
+    Returns:
+        (OBJECTREF:BufferedImage) [image].
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadCoordinates) If X or Y is out of bounds.
+
+
+=================================================================
+==== Desktop
+=================================================================
+
+DESKTOP::OPEN(file)
+    Opens a file using the current OS-assigned program.
+    file:
+        (STRING) The path to the file to open.
+        (OBJECTREF:File) The path to the file to open.
+    Returns:
+        (NULL) If [file] is null.
+        (BOOLEAN) True if called, false if not.
+        (ERROR:BadFile) If the file is not found.
+        (ERROR:NotSupported) If opening a file is unsupported.
+        (ERROR:IOError) If the program cannot be started or a default program was not found.
+        (ERROR:Security) If the OS denies acces to the file or the program that opens that file.
+
+DESKTOP::BROWSE(uri)
+    Browses to a provided URI using the default browser.
+    uri:
+        (STRING) The URI to browse to.
+    Returns:
+        (NULL) If [uri] is null.
+        (BOOLEAN) True if browsed, false if not.
+        (ERROR:BadURI) If the URI is malformed.
+        (ERROR:NotSupported) If browsing to a URI is unsupported.
+        (ERROR:IOError) If the program cannot be started or a default program was not found.
+        (ERROR:Security) If the OS denies acces to the file or the program that opens that file.
 
 
 =================================================================
@@ -2981,5 +3232,3 @@ UTIL::EXPORTSWANTBLS(wad, output, header)
         (ERROR:BadFile) If [output] is a file and is a directory.
         (ERROR:Security) If [output] is a file and the OS is preventing the read.
         (ERROR:IOError) If a read or write error occurs.
-
-

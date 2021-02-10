@@ -84,7 +84,7 @@ public final class DMXConvertMain
 
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out, true);;
+			this.stdout = new PrintStream(out, true);
 			return this;
 		}
 		
