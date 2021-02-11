@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.7.0
+
+* `Added` Support for using the "unused" state parameters as offsets (supported in Doom code). (Issue #9)
+
+
 ### Changed for 0.6.1
 
 * `Fixed` Changed file export for compatibility with Java 8.

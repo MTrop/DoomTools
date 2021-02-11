@@ -93,8 +93,8 @@ public enum DEHActionPointer
 	// MBF Action Pointers
 	
 	DETONATE        (-1, "Detonate", true),
-	MUSHROOM        (-1, "Mushroom", true, -359, 359, -32767, 32767), // fixed point on both
-	SPAWN           (-1, "Spawn", true, 0, Integer.MAX_VALUE, -32767, 32767),
+	MUSHROOM        (-1, "Mushroom", true, (-360 << 16) + 1, (360 << 16) - 1, Integer.MIN_VALUE, Integer.MAX_VALUE), // fixed point on both
+	SPAWN           (-1, "Spawn", true, 0, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE),
 	TURN            (-1, "Turn", true, -359, 359),
 	FACE            (-1, "Face", true, 0, 359),
 	SCRATCH         (-1, "Scratch", true, -32767, 32767, 0, Integer.MAX_VALUE),
