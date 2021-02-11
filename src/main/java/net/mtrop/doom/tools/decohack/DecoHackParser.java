@@ -159,6 +159,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_DEATHSOUND = "deathsound";
 	private static final String KEYWORD_ACTIVESOUND = "activesound";
 
+	private static final String KEYWORD_OFFSET = "offset";
+	private static final String KEYWORD_BRIGHT = "bright";
+	
 	private static final String KEYWORD_WITH = "with";
 	private static final String KEYWORD_SWAP = "swap";
 
@@ -1819,16 +1822,32 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;				
 			}
 		}
+
+		boolean useOffsets = false;
+		
+		if (state.action == null)
+		{
+			useOffsets = matchOffsetDirective();
+		}
+		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && state.action.isMBF())
+		{
+			addErrorMessage("MBF action pointer used: " + state.action.getMnemonic() +". Patch is not MBF or better.");
+			return false;
+		}
 		
 		// Maybe parse parameters.
 		state.parameter0 = 0;
 		state.parameter1 = 0;
-		if (state.action != null)
+		
+		if (state.action != null || useOffsets)
 		{
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
-				state.parameter0 = 0;
-				state.parameter1 = 0;
+				// no arguments
+				if (matchType(DecoHackKernel.TYPE_RPAREN))
+				{
+					return true;
+				}
 
 				// get first argument
 				Integer p;
@@ -1837,18 +1856,13 @@ public final class DecoHackParser extends Lexer.Parser
 					if ((p = parseStateIndex(context, labelMap)) == null)
 						return false;
 				}
-				else if ((p = matchInteger()) == null)
+				else if ((p = matchNumeric()) == null)
 				{
 					addErrorMessage("Expected parameter.");
 					return false;
 				}
 
 				state.parameter0 = p;
-				if (!state.action.isMBF())
-				{
-					addErrorMessage("Action does not require parameters.");
-					return false;				
-				}
 				
 				if (matchType(DecoHackKernel.TYPE_COMMA))
 				{
@@ -1857,7 +1871,7 @@ public final class DecoHackParser extends Lexer.Parser
 						if ((p = parseStateIndex(context, labelMap)) == null)
 							return false;
 					}
-					else if ((p = matchInteger()) == null)
+					else if ((p = matchNumeric()) == null)
 					{
 						addErrorMessage("Expected a second parameter after ','.");
 						return false;
@@ -1871,6 +1885,11 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected a ')' after action parameters.");
 					return false;
 				}
+			}
+			else if (useOffsets)
+			{
+				addErrorMessage("Expected a '(' after \"offset\".");
+				return false;
 			}
 		}
 		
@@ -2330,7 +2349,15 @@ public final class DecoHackParser extends Lexer.Parser
 	// Else, return null.
 	private boolean matchBrightFlag()
 	{
-		return matchIdentifierLexemeIgnoreCase("bright");
+		return matchIdentifierLexemeIgnoreCase(KEYWORD_BRIGHT);
+	}
+	
+	// Matches an identifier that can be "offset".
+	// If match, advance token and return true plus modified out list.
+	// Else, return null.
+	private boolean matchOffsetDirective()
+	{
+		return matchIdentifierLexemeIgnoreCase(KEYWORD_OFFSET);
 	}
 	
 	// Matches an identifier that references a flag mnemonic.
@@ -2455,8 +2482,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 
-	// Matches an identifier or string that references a sound name.
-	// If match, advance token and return sound index integer.
+	// Matches an identifier or string that references an action pointer name.
+	// If match, advance token and return action pointer.
 	// Else, return null.
 	private DEHActionPointer matchActionPointerName()
 	{
@@ -2539,6 +2566,62 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 
+	// Matches a numeric value, and returns an integer or a fixed-point value. 
+	private Integer matchNumeric()
+	{
+		if (matchType(DecoHackKernel.TYPE_DASH))
+		{
+			Integer out;
+			if ((out = matchPositiveNumeric()) == null)
+				return null;
+			return -out;
+		}
+		return matchPositiveNumeric();
+	}
+	
+	// Matches a positive numeric value, and returns an integer or a fixed-point value. 
+	private Integer matchPositiveNumeric()
+	{
+		if (!currentType(DecoHackKernel.TYPE_NUMBER))
+			return null;
+	
+		String lexeme = currentToken().getLexeme();
+		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
+		{
+			try {
+				long v = parseUnsignedHexLong(lexeme.substring(2));
+				if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
+					return null;
+				nextToken();
+				return (int)v;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		else if (lexeme.contains("."))
+		{
+			try {
+				int out = (int)(Double.parseDouble(lexeme) * (1 << 16L));
+				nextToken();
+				return out;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		else
+		{
+			try {
+				long v = Long.parseLong(lexeme);
+				if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
+					return null;
+				nextToken();
+				return (int)v;
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+	}
+	
 	// Matches a positive integer.
 	private Integer matchPositiveInteger()
 	{
