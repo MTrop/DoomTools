@@ -3,6 +3,7 @@ DecoHack
 
 ### Changed for 0.7.0
 
+* `Fixed` Disallow MBF action pointers in non-MBF patches.
 * `Added` Support for using the "unused" state parameters as offsets (supported in Doom code). (Issue #9)
 
 

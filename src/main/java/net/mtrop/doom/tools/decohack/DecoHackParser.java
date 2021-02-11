@@ -1829,7 +1829,12 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			useOffsets = matchOffsetDirective();
 		}
-
+		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && state.action.isMBF())
+		{
+			addErrorMessage("MBF action pointer used: " + state.action.getMnemonic() +". Patch is not MBF or better.");
+			return false;
+		}
+		
 		// Maybe parse parameters.
 		state.parameter0 = 0;
 		state.parameter1 = 0;
@@ -1881,16 +1886,12 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else
+			else if (useOffsets)
 			{
-				if (state.action != null)
-					addErrorMessage("Expected a '(' after action function name.");
-				else
-					addErrorMessage("Expected a '(' after \"offset\".");
+				addErrorMessage("Expected a '(' after \"offset\".");
 				return false;
 			}
 		}
-		
 		
 		return true;
 	}
@@ -2481,8 +2482,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 
-	// Matches an identifier or string that references a sound name.
-	// If match, advance token and return sound index integer.
+	// Matches an identifier or string that references an action pointer name.
+	// If match, advance token and return action pointer.
 	// Else, return null.
 	private DEHActionPointer matchActionPointerName()
 	{

@@ -222,6 +222,16 @@ via the "Offset" function (only useful on weapon states):
 	Offset(1, 32)
 
 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: Even if you provide an action pointer, you can still 
+      set the offsets (misc parameters) even if the function does not
+      use them exclusively just by putting them in parenthesis, a la:
+      A_Raise(1, 32).
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
 Examples:
 
     state 11
