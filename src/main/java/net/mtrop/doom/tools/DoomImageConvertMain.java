@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -208,12 +207,51 @@ public final class DoomImageConvertMain
 				return ERROR_NO_SOURCEFILE;
 			}
 			
+			if (options.sourcePath.isDirectory())
+			{
+				// TODO: Finish this.
+			}
+			else // is file.
+			{
+				// TODO: Finish this.
+			}
+			
 			// TODO: Finish.
 
 			return ERROR_NONE;
 		}
 
-		private static void readFile(File input, File output, Palette palette, MetaInfo info) throws IOException, SecurityException
+		private void processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, File destDir) throws IOException, SecurityException, UtilityException
+		{
+			File metaFile = new File(srcDir.getPath() + File.separator + options.metaInfoFilename);
+			Map<String, MetaInfo> metaMap;
+			if (metaFile.exists())
+				metaMap = readMetaInfoFile(metaFile);
+			else
+				metaMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			
+			for (File f : srcDir.listFiles())
+			{
+				String treeName = f.getPath().substring(base.getPath().length());
+				if (f.isDirectory())
+				{
+					if (!recursive)
+						continue;
+					else
+						processDir(base, f, recursive, palette, fallback, destDir);
+				}
+				else
+				{
+					String fileName = Common.getFileNameWithoutExtension(f);
+					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
+					File outputFile = new File(destDir.getPath() + treeName);
+					info = info == null ? fallback : info;
+					readFile(f, palette, info, outputFile);
+				}
+			}
+		}
+				
+		private static void readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
 		{
 			switch (info.mode)
 			{
@@ -264,7 +302,7 @@ public final class DoomImageConvertMain
 			}
 		}
 		
-		private static void readFile(File input, Wad output, Palette palette, MetaInfo info) throws IOException
+		private static void readFile(File input, Palette palette, MetaInfo info, Wad output) throws IOException
 		{
 			switch (info.mode)
 			{
@@ -290,7 +328,7 @@ public final class DoomImageConvertMain
 			}
 		}
 		
-		private static void readFile(File input, WadFile.Adder output, Palette palette, MetaInfo info) throws IOException
+		private static void readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
 		{
 			switch (info.mode)
 			{
@@ -361,7 +399,7 @@ public final class DoomImageConvertMain
 			return out;
 		}
 		
-		private static Map<String, MetaInfo> readMetaInfoFile(File f) throws FileNotFoundException, IOException, UtilityException
+		private static Map<String, MetaInfo> readMetaInfoFile(File f) throws IOException, UtilityException
 		{
 			Map<String, MetaInfo> out = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			int i = 0;
