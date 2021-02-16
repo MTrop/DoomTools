@@ -12,6 +12,8 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
@@ -40,6 +42,7 @@ public final class DoomImageConvertMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_NO_SOURCEFILE = 2;
+	private static final int ERROR_NO_DESTINATION = 3;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -47,15 +50,6 @@ public final class DoomImageConvertMain
 
 	private static final String SWITCH_RECURSIVE = "--recursive";
 	private static final String SWITCH_RECURSIVE2 = "-r";
-
-	private static final String SWITCH_OUTPUT = "--output";
-	private static final String SWITCH_OUTPUT2 = "-o";
-
-	private static final String SWITCH_METAINFOFILE = "--infofile";
-	private static final String SWITCH_METAINFOFILE2 = "-i";
-
-	private static final String SWITCH_PALETTE = "--palette";
-	private static final String SWITCH_PALETTE2 = "-p";
 
 	private static final String SWITCH_MODE_PALETTES = "--mode-palettes";
 	private static final String SWITCH_MODE_PALETTES2 = "-mp";
@@ -65,6 +59,15 @@ public final class DoomImageConvertMain
 
 	private static final String SWITCH_MODE_FLATS = "--mode-flats";
 	private static final String SWITCH_MODE_FLATS2 = "-mf";
+
+	private static final String SWITCH_OUTPUT = "--output";
+	private static final String SWITCH_OUTPUT2 = "-o";
+
+	private static final String SWITCH_METAINFOFILE = "--infofile";
+	private static final String SWITCH_METAINFOFILE2 = "-i";
+
+	private static final String SWITCH_PALETTE = "--palette";
+	private static final String SWITCH_PALETTE2 = "-p";
 
 	private static final Colormap COLORMAP_IDENTITY = Colormap.createIdentityMap();
 	
@@ -107,6 +110,8 @@ public final class DoomImageConvertMain
 		// Filename for meta info.
 		private String metaInfoFilename;
 		
+		private MetaInfo metaInfoFallback;
+		
 		public Options()
 		{
 			this.stdout = null;
@@ -120,6 +125,8 @@ public final class DoomImageConvertMain
 			this.outputPath = new File(".");
 			this.paletteSourcePath = null;
 			this.metaInfoFilename = "dimgconv.txt";
+			this.metaInfoFallback = new MetaInfo();
+			this.metaInfoFallback.mode = Mode.GRAPHIC;
 		}
 		
 		public Options setStdout(OutputStream out) 
@@ -161,6 +168,12 @@ public final class DoomImageConvertMain
 		public Options setOutputPath(File outputPath) 
 		{
 			this.outputPath = outputPath;
+			return this;
+		}
+		
+		public Options setMode(Mode mode)
+		{
+			this.metaInfoFallback.mode = mode;
 			return this;
 		}
 		
@@ -207,11 +220,25 @@ public final class DoomImageConvertMain
 				return ERROR_NO_SOURCEFILE;
 			}
 			
+			if (!options.sourcePath.exists())
+			{
+				options.stderr.println("ERROR: Source path not found.");
+				return ERROR_NO_SOURCEFILE;
+			}
+			
+			if (options.outputPath == null)
+			{
+				options.stderr.println("ERROR: Destination path not specified (use the `--output` switch).");
+				return ERROR_NO_DESTINATION;
+			}
+			
+			// TODO: Figure out if output is directory or WAD.
+			
 			if (options.sourcePath.isDirectory())
 			{
 				// TODO: Finish this.
 			}
-			else // is file.
+			else // source is file.
 			{
 				// TODO: Finish this.
 			}
@@ -221,7 +248,13 @@ public final class DoomImageConvertMain
 			return ERROR_NONE;
 		}
 
-		private void processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, File destDir) throws IOException, SecurityException, UtilityException
+		@FunctionalInterface
+		private interface FileAdder
+		{
+			void addFile(File input, Palette palette, MetaInfo info, String path);
+		}
+		
+		private void processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, FileAdder adder) throws IOException, SecurityException, UtilityException
 		{
 			File metaFile = new File(srcDir.getPath() + File.separator + options.metaInfoFilename);
 			Map<String, MetaInfo> metaMap;
@@ -238,15 +271,14 @@ public final class DoomImageConvertMain
 					if (!recursive)
 						continue;
 					else
-						processDir(base, f, recursive, palette, fallback, destDir);
+						processDir(base, f, recursive, palette, fallback, adder);
 				}
 				else
 				{
 					String fileName = Common.getFileNameWithoutExtension(f);
 					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
-					File outputFile = new File(destDir.getPath() + treeName);
 					info = info == null ? fallback : info;
-					readFile(f, palette, info, outputFile);
+					adder.addFile(f, palette, info, treeName);
 				}
 			}
 		}
@@ -464,16 +496,73 @@ public final class DoomImageConvertMain
 		options.stdout = out;
 		options.stderr = err;
 	
+		final int STATE_START = 0;
+		final int STATE_OUTPUT = 1;
+		final int STATE_METAFILENAME = 2;
+		final int STATE_PALETTE = 3;
+		int state = STATE_START;
+		
 		int i = 0;
 		while (i < args.length)
 		{
 			String arg = args[i];
-			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.help = true;
-			else if (arg.equals(SWITCH_VERSION))
-				options.version = true;
+			switch (state)
+			{
+				case STATE_START:
+				{
+					if (arg.equalsIgnoreCase(SWITCH_HELP) || arg.equalsIgnoreCase(SWITCH_HELP2))
+						options.help = true;
+					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
+						options.version = true;
+					else if (arg.equalsIgnoreCase(SWITCH_RECURSIVE) || arg.equalsIgnoreCase(SWITCH_RECURSIVE2))
+						options.setRecursive(true);
+					else if (arg.equalsIgnoreCase(SWITCH_MODE_PALETTES) || arg.equalsIgnoreCase(SWITCH_MODE_PALETTES2))
+						options.setMode(Mode.PALETTE);
+					else if (arg.equalsIgnoreCase(SWITCH_MODE_COLORMAPS) || arg.equalsIgnoreCase(SWITCH_MODE_COLORMAPS2))
+						options.setMode(Mode.COLORMAP);
+					else if (arg.equalsIgnoreCase(SWITCH_MODE_FLATS) || arg.equalsIgnoreCase(SWITCH_MODE_FLATS2))
+						options.setMode(Mode.FLAT);
+					else if (arg.equalsIgnoreCase(SWITCH_OUTPUT) || arg.equalsIgnoreCase(SWITCH_OUTPUT2))
+						state = STATE_OUTPUT;
+					else if (arg.equalsIgnoreCase(SWITCH_METAINFOFILE) || arg.equalsIgnoreCase(SWITCH_METAINFOFILE2))
+						state = STATE_METAFILENAME;
+					else if (arg.equalsIgnoreCase(SWITCH_PALETTE) || arg.equalsIgnoreCase(SWITCH_PALETTE2))
+						state = STATE_PALETTE;
+					else
+						options.sourcePath = new File(arg);
+				}
+				break;
+
+				case STATE_OUTPUT:
+				{
+					options.outputPath = new File(arg);
+					state = STATE_START;
+				}
+				break;
+
+				case STATE_METAFILENAME:
+				{
+					options.metaInfoFilename = arg;
+					state = STATE_START;
+				}
+				break;
+
+				case STATE_PALETTE:
+				{
+					options.paletteSourcePath = new File(arg);
+					state = STATE_START;
+				}
+				break;
+			}
 			i++;
 		}
+		
+		if (state == STATE_OUTPUT)
+			throw new OptionParseException("ERROR: Expected path to output directory (or WAD file).");
+		if (state == STATE_METAFILENAME)
+			throw new OptionParseException("ERROR: Expected name of metainfo filename.");
+		if (state == STATE_PALETTE)
+			throw new OptionParseException("ERROR: Expected path to palette file.");
 		
 		return options;
 	}
