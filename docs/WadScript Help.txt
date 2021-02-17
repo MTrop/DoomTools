@@ -2298,6 +2298,7 @@ IMAGEWRITE(image, destination, type)
         (OBJECTREF:File) The path to a target file.
         (OBJECTREF:OutputStream) The open stream to write to.
     type:
+        (NULL) Detect from file extension.
         (STRING) The informal type name.
     Returns:
         (NULL) If the destination is null.
@@ -2370,7 +2371,7 @@ IMAGECROP(image, x, y, width, height)
 IMAGEFLIPH(image)
     Creates a new image by flipping it horizontally.
     image:
-        (OBJECTREF:BufferedImage) The image to fill.
+        (OBJECTREF:BufferedImage) The image to flip.
     Returns:
         (OBJECTREF:BufferedImage) A new image that is [image], flipped horizontally.
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
@@ -2378,17 +2379,17 @@ IMAGEFLIPH(image)
 IMAGEFLIPV(image)
     Creates a new image by flipping it vertically.
     image:
-        (OBJECTREF:BufferedImage) The image to fill.
+        (OBJECTREF:BufferedImage) The image to flip.
     Returns:
         (OBJECTREF:BufferedImage) A new image that is [image], flipped vertically.
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 IMAGETRANSPOSE(image)
-    Creates a new image by flipping it vertically.
+    Creates a new image by transposing its X and Y axes.
     image:
-        (OBJECTREF:BufferedImage) The image to fill.
+        (OBJECTREF:BufferedImage) The image to transpose.
     Returns:
-        (OBJECTREF:BufferedImage) A new image that is [image], flipped vertically.
+        (OBJECTREF:BufferedImage) A new image that is [image], transposed.
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 IMAGEFILL(image, color)

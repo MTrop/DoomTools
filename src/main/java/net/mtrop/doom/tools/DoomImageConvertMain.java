@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,8 +13,6 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
@@ -21,8 +20,10 @@ import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.graphics.Colormap;
 import net.mtrop.doom.graphics.Flat;
+import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
+import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
@@ -43,10 +44,16 @@ public final class DoomImageConvertMain
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_NO_SOURCEFILE = 2;
 	private static final int ERROR_NO_DESTINATION = 3;
+	private static final int ERROR_NO_PALETTE = 4;
+	private static final int ERROR_BAD_OUTPUT = 5;
+	private static final int ERROR_IO = 6;
+	private static final int ERROR_PARSE = 7;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_VERSION = "--version";
+	private static final String SWITCH_VERBOSE = "--verbose";
+	private static final String SWITCH_VERBOSE2 = "-v";
 
 	private static final String SWITCH_RECURSIVE = "--recursive";
 	private static final String SWITCH_RECURSIVE2 = "-r";
@@ -69,8 +76,6 @@ public final class DoomImageConvertMain
 	private static final String SWITCH_PALETTE = "--palette";
 	private static final String SWITCH_PALETTE2 = "-p";
 
-	private static final Colormap COLORMAP_IDENTITY = Colormap.createIdentityMap();
-	
 	public enum Mode
 	{
 		PALETTE,
@@ -171,6 +176,19 @@ public final class DoomImageConvertMain
 			return this;
 		}
 		
+		public Options setModeType(String mode)
+		{
+			if ("palette".equalsIgnoreCase(mode))
+				setMode(Mode.PALETTE);
+			else if ("colormap".equalsIgnoreCase(mode))
+				setMode(Mode.COLORMAP);
+			else if ("graphic".equalsIgnoreCase(mode))
+				setMode(Mode.GRAPHIC);
+			else if ("flat".equalsIgnoreCase(mode))
+				setMode(Mode.FLAT);
+			return this;
+		}
+		
 		public Options setMode(Mode mode)
 		{
 			this.metaInfoFallback.mode = mode;
@@ -181,6 +199,12 @@ public final class DoomImageConvertMain
 		{
 			this.metaInfoFilename = metaInfoFilename;
 			return this;
+		}
+		
+		public void verboseln(String message) 
+		{
+			if (verbose)
+				stdout.println(message);
 		}
 		
 	}
@@ -214,6 +238,7 @@ public final class DoomImageConvertMain
 				return ERROR_NONE;
 			}
 		
+			// Check source.
 			if (options.sourcePath == null)
 			{
 				options.stderr.println("ERROR: No source path specified.");
@@ -226,36 +251,291 @@ public final class DoomImageConvertMain
 				return ERROR_NO_SOURCEFILE;
 			}
 			
+			// Check output.
 			if (options.outputPath == null)
 			{
 				options.stderr.println("ERROR: Destination path not specified (use the `--output` switch).");
 				return ERROR_NO_DESTINATION;
 			}
 			
-			// TODO: Figure out if output is directory or WAD.
+			// Check palette.
+			if (options.paletteSourcePath == null) 
+			{
+				if(options.metaInfoFallback.mode != Mode.PALETTE)
+				{
+					options.stderr.println("ERROR: No palette specified, and mode is not Palette (use the `--palette` switch to specify, or `--mode-palette` to create one).");
+					return ERROR_NO_PALETTE;
+				}
+			}
+			else if (!options.paletteSourcePath.exists())
+			{
+				options.stderr.println("ERROR: The palette file specified does not exist: " + options.paletteSourcePath);
+				return ERROR_NO_PALETTE;
+			}
+			else if (options.paletteSourcePath.isDirectory())
+			{
+				options.stderr.println("ERROR: The palette file specified is a directory: " + options.paletteSourcePath);
+				return ERROR_NO_PALETTE;
+			}
+
+			Palette palette = null;
+			
+			// Grab palette, if any.
+			if (options.paletteSourcePath != null)
+			{
+				try 
+				{
+					if (Wad.isWAD(options.paletteSourcePath))
+					{
+						try (WadFile wf = new WadFile(options.paletteSourcePath))
+						{
+							palette = wf.getDataAs("PLAYPAL", Palette.class);
+							options.verboseln("Loaded PLAYPAL from " + options.paletteSourcePath.getPath());
+						}
+					}
+					else
+					{
+						try (FileInputStream fis = new FileInputStream(options.paletteSourcePath))
+						{
+							palette = BinaryObject.read(Palette.class, fis);
+							options.verboseln("Loaded palette from " + options.paletteSourcePath.getPath());
+						}
+					}
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.println("ERROR: I/O Error reading palette: " + e.getLocalizedMessage());
+					return ERROR_IO;
+				}
+			}
+			
+			// Figure out if output is directory or WAD.
+			WadFile outputWad = null;
+			File outputDir = null;
+			File outputFile = null;
+			
+			// If it doesn't exist...
+			if (!options.outputPath.exists())
+			{
+				// Is WAD?
+				if (Common.getFileExtension(options.outputPath).equalsIgnoreCase("wad"))
+				{
+					if (!Common.createPathForFile(options.outputPath))
+					{
+						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
+						return ERROR_BAD_OUTPUT;
+					}
+					
+					try {
+						outputWad = WadFile.createWadFile(options.outputPath);
+						options.verboseln("Created " + options.outputPath.getPath());
+					} catch (IOException e) {
+						options.stderr.println("ERROR: Could not create WAD file: " + options.outputPath.getPath() + ": " + e.getLocalizedMessage());
+						return ERROR_BAD_OUTPUT;
+					} catch (SecurityException e) {
+						options.stderr.println("ERROR: Could not create WAD file: " + options.outputPath.getPath() + ": Access denied.");
+						return ERROR_BAD_OUTPUT;
+					}
+				}
+				// Is directory (no extension).
+				else if (Common.getFileExtension(options.outputPath).length() == 0)
+				{
+					if (!Common.createPath(options.outputPath.getPath()))
+					{
+						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
+						return ERROR_BAD_OUTPUT;
+					}
+					outputDir = options.outputPath;
+					options.verboseln("Output directory is " + options.outputPath.getPath());
+				}
+				// Is file, and source is file.
+				else if (!options.sourcePath.isDirectory())
+				{
+					if (!Common.createPathForFile(options.outputPath))
+					{
+						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
+						return ERROR_BAD_OUTPUT;
+					}
+					outputFile = options.outputPath;
+					options.verboseln("Output file is " + options.outputPath.getPath());
+				}
+				// Else, error.
+				else
+				{
+					options.stderr.println("ERROR: Target is a non-WAD file, but source is potentially multiple: " + options.sourcePath.getPath());
+					return ERROR_BAD_OUTPUT;
+				}
+			}
+			// Exists and is directory.
+			else if (options.outputPath.isDirectory())
+			{
+				outputDir = options.outputPath;
+				options.verboseln("Output directory is " + options.outputPath.getPath());
+			}
+			// Exists and is a file.
+			else
+			{
+				try 
+				{
+					if (Wad.isWAD(options.outputPath))
+					{
+						outputWad = new WadFile(options.outputPath);
+						options.verboseln("Output WAD is " + options.outputPath.getPath());
+					}
+					else if (!options.sourcePath.isDirectory())
+					{
+						outputFile = options.outputPath;
+						options.verboseln("Output file is " + options.outputPath.getPath());
+					}
+					else
+					{
+						options.stderr.println("ERROR: Target is a non-WAD file, but source is potentially multiple: " + options.sourcePath.getPath());
+						return ERROR_BAD_OUTPUT;
+					}
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.println("ERROR: Could not open " + options.outputPath.getPath() + " for inspection: " + e.getLocalizedMessage());
+					return ERROR_BAD_OUTPUT;
+				}
+			}
 			
 			if (options.sourcePath.isDirectory())
 			{
-				// TODO: Finish this.
+				if (outputFile != null)
+				{
+					options.stderr.println("!INTERNAL ERROR!: Bad Output target!");
+					return ERROR_BAD_OUTPUT;
+				}
+				else if (outputDir != null)
+				{
+					try
+					{
+						final File dest = outputDir;
+						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
+							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + path))
+						);
+					}
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (UtilityException e) 
+					{
+						options.stderr.println("ERROR: " + e.getLocalizedMessage());
+						return ERROR_PARSE;
+					}
+				}
+				else if (outputWad != null)
+				{
+					try (final WadFile.Adder adder = outputWad.createAdder())
+					{
+						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
+							(input, pal, info, path)->readFile(input, pal, info, adder)
+						);
+					}
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (UtilityException e) 
+					{
+						options.stderr.println("ERROR: " + e.getLocalizedMessage());
+						return ERROR_PARSE;
+					}
+				}
+				else
+				{
+					options.stderr.println("!INTERNAL ERROR!: Output target not selected!");
+					return ERROR_BAD_OUTPUT;
+				}
 			}
 			else // source is file.
 			{
-				// TODO: Finish this.
+				if (outputFile != null)
+				{
+					try
+					{
+						readFile(options.sourcePath, palette, options.metaInfoFallback, outputFile);
+					}
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+				}
+				else if (outputDir != null)
+				{
+					try
+					{
+						File file = new File(outputDir.getPath() + File.separator + Common.getFileNameWithoutExtension(options.sourcePath) + ".lmp");
+						readFile(options.sourcePath, palette, options.metaInfoFallback, file);
+					}
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+				}
+				else if (outputWad != null)
+				{
+					try (final WadFile.Adder adder = outputWad.createAdder())
+					{
+						readFile(options.sourcePath, palette, options.metaInfoFallback, adder);
+					}
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
+						return ERROR_IO;
+					} 
+				}
+				else
+				{
+					options.stderr.println("!INTERNAL ERROR!: Output target not selected!");
+					return ERROR_BAD_OUTPUT;
+				}
 			}
 			
-			// TODO: Finish.
-
+			options.stdout.println("Done.");
 			return ERROR_NONE;
 		}
 
 		@FunctionalInterface
 		private interface FileAdder
 		{
-			void addFile(File input, Palette palette, MetaInfo info, String path);
+			void addFile(File input, Palette palette, MetaInfo info, String path) throws IOException;
 		}
 		
 		private void processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, FileAdder adder) throws IOException, SecurityException, UtilityException
 		{
+			options.verboseln("Scanning directory " + srcDir.getPath() + "...");
 			File metaFile = new File(srcDir.getPath() + File.separator + options.metaInfoFilename);
 			Map<String, MetaInfo> metaMap;
 			if (metaFile.exists())
@@ -273,7 +553,7 @@ public final class DoomImageConvertMain
 					else
 						processDir(base, f, recursive, palette, fallback, adder);
 				}
-				else
+				else if (!f.getName().equals(options.metaInfoFilename))
 				{
 					String fileName = Common.getFileNameWithoutExtension(f);
 					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
@@ -283,7 +563,7 @@ public final class DoomImageConvertMain
 			}
 		}
 				
-		private static void readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
+		private void readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
 		{
 			switch (info.mode)
 			{
@@ -311,7 +591,7 @@ public final class DoomImageConvertMain
 
 				case FLAT:
 				{
-					Flat flat = readFlat(palette, COLORMAP_IDENTITY, input);
+					Flat flat = readFlat(palette, input);
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						flat.writeBytes(fos);
@@ -322,9 +602,7 @@ public final class DoomImageConvertMain
 				default:
 				case GRAPHIC:
 				{
-					Picture picture = readGraphic(palette, COLORMAP_IDENTITY, input);
-					picture.setOffsetX(info.x != null ? info.x : 0);
-					picture.setOffsetY(info.y != null ? info.y : 0);
+					Picture picture = readPictureFile(input, palette, info);
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						picture.writeBytes(fos);
@@ -332,107 +610,146 @@ public final class DoomImageConvertMain
 				}
 				break;
 			}
+			options.verboseln("Wrote " + output.getPath() + ".");
 		}
-		
-		private static void readFile(File input, Palette palette, MetaInfo info, Wad output) throws IOException
+
+		private void readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
 		{
+			String entryName = NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input));
 			switch (info.mode)
 			{
 				case PALETTE:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readPalette(input));
+					output.addData(entryName, readPalette(input));
 					break;
 				
 				case COLORMAP:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readColormaps(palette, input));
+					output.addData(entryName, readColormaps(palette, input));
 					break;
 	
 				case FLAT:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readFlat(palette, COLORMAP_IDENTITY, input));
+					output.addData(entryName, readFlat(palette, input));
 					break;
 				
 				default:
 				case GRAPHIC:
-					Picture picture = readGraphic(palette, COLORMAP_IDENTITY, input);
-					picture.setOffsetX(info.x != null ? info.x : 0);
-					picture.setOffsetY(info.y != null ? info.y : 0);
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), picture);
-					break;
+				{
+					Picture picture = readPictureFile(input, palette, info);
+					output.addData(entryName, picture);
+				}
+				break;
 			}
+			options.verboseln("Added " + input.getPath() + " to WAD as " + entryName);
 		}
 		
-		private static void readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
+		private Picture readPictureFile(File input, Palette palette, MetaInfo info) throws IOException, FileNotFoundException
 		{
-			switch (info.mode)
+			Picture picture;
+			if (Common.getFileExtension(input).equalsIgnoreCase("png"))
 			{
-				case PALETTE:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readPalette(input));
-					break;
-				
-				case COLORMAP:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readColormaps(palette, input));
-					break;
-	
-				case FLAT:
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), readFlat(palette, COLORMAP_IDENTITY, input));
-					break;
-				
-				default:
-				case GRAPHIC:
-					Picture picture = readGraphic(palette, COLORMAP_IDENTITY, input);
-					picture.setOffsetX(info.x != null ? info.x : 0);
-					picture.setOffsetY(info.y != null ? info.y : 0);
-					output.addData(NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input)), picture);
-					break;
+				options.verboseln("Reading " + input.getPath() + " as PNG graphic...");
+				PNGPicture png = new PNGPicture();
+				try (FileInputStream fis = new FileInputStream(input))
+				{
+					png.readBytes(fis);
+				}
+				picture = new Picture(png.getWidth(), png.getHeight());
+				for (int x = 0; x < png.getWidth(); x++)
+				{
+					for (int y = 0; y < png.getHeight(); y++)
+					{
+						int argb = png.getImage().getRGB(x, y);
+						// must be absolutely opaque.
+						if ((argb & 0xff000000) != 0xff000000)
+							picture.setPixel(x, y, Picture.PIXEL_TRANSLUCENT);
+						else
+							picture.setPixel(x, y, palette.getNearestColorIndex(argb));
+					}
+				}
+				picture.setOffsetX(png.getOffsetX());
+				picture.setOffsetY(png.getOffsetY());
 			}
+			else
+			{
+				picture = readPicture(palette, input);
+			}
+			
+			if (info.x != null)
+				picture.setOffsetX(info.x);
+			if (info.y != null)
+				picture.setOffsetY(info.y);
+			
+			return picture;
 		}
 		
-		private static Palette[] readPalette(File f) throws IOException
+		private Palette[] readPalette(File f) throws IOException
 		{
+			options.verboseln("Reading " + f.getPath() + " as palette...");
 			BufferedImage image = ImageIO.read(f);
 			Palette[] out = new Palette[image.getHeight()];
+			int maxWidth = Math.min(Math.max(image.getWidth(), 0), 256);
+			for (int i = 0; i < out.length; i++)
+				out[i] = new Palette();
+			
 			for (int y = 0; y < out.length; y++)
-				for (int x = 0; x < image.getWidth(); x++)
+				for (int x = 0; x < maxWidth; x++)
 					out[y].setColor(x, image.getRGB(x, y));
 			return out;
 		}
 		
-		private static Colormap[] readColormaps(Palette pal, File f) throws IOException
+		private Colormap[] readColormaps(Palette pal, File f) throws IOException
 		{
+			options.verboseln("Reading " + f.getPath() + " as colormap...");
 			BufferedImage image = ImageIO.read(f);
 			Colormap[] out = new Colormap[image.getHeight()];
+			int maxWidth = Math.min(Math.max(image.getWidth(), 0), 256);
+			for (int i = 0; i < out.length; i++)
+				out[i] = new Colormap();
+
 			for (int y = 0; y < out.length; y++)
-				for (int x = 0; x < image.getWidth(); x++)
+				for (int x = 0; x < maxWidth; x++)
 					out[y].setPaletteIndex(x, pal.getNearestColorIndex(image.getRGB(x, y)));
 			return out;
 		}
 		
-		private static Picture readGraphic(Palette pal, Colormap cm, File f) throws IOException
+		private Picture readPicture(Palette pal, File f) throws IOException
 		{
+			options.verboseln("Reading " + f.getPath() + " as graphic...");
 			BufferedImage image = ImageIO.read(f);
 			Picture out = new Picture(image.getWidth(), image.getHeight());
 			for (int x = 0; x < image.getWidth(); x++)
 				for (int y = 0; y < image.getHeight(); y++)
 				{
 					int argb = image.getRGB(x, y);
+					// must be absolutely opaque.
 					if ((argb & 0xff000000) != 0xff000000)
-						continue;
-					out.setPixel(x, y, cm.getPaletteIndex(pal.getNearestColorIndex(argb)));
+						out.setPixel(x, y, Picture.PIXEL_TRANSLUCENT);
+					else
+						out.setPixel(x, y, pal.getNearestColorIndex(argb));
 				}
 			return out;
 		}
 		
-		private static Flat readFlat(Palette pal, Colormap cm, File f) throws IOException
+		private Flat readFlat(Palette pal, File f) throws IOException
 		{
+			options.verboseln("Reading " + f.getPath() + " as flat...");
 			BufferedImage image = ImageIO.read(f);
 			Flat out = new Flat(image.getWidth(), image.getHeight());
 			for (int x = 0; x < image.getWidth(); x++)
 				for (int y = 0; y < image.getHeight(); y++)
-					out.setPixel(x, y, cm.getPaletteIndex(pal.getNearestColorIndex(image.getRGB(x, y))));
+				{
+					int argb = image.getRGB(x, y);
+					// must be absolutely opaque.
+					if ((argb & 0xff000000) != 0xff000000)
+						out.setPixel(x, y, 0);
+					else
+						out.setPixel(x, y, pal.getNearestColorIndex(argb));
+				}
 			return out;
 		}
 		
-		private static Map<String, MetaInfo> readMetaInfoFile(File f) throws IOException, UtilityException
+		private Map<String, MetaInfo> readMetaInfoFile(File f) throws IOException, UtilityException
 		{
+			options.verboseln("Reading metadata file from " + f.getPath() + "...");
 			Map<String, MetaInfo> out = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			int i = 0;
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f))))
@@ -514,6 +831,8 @@ public final class DoomImageConvertMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equalsIgnoreCase(SWITCH_VERBOSE) || arg.equalsIgnoreCase(SWITCH_VERBOSE2))
+						options.setVerbose(true);
 					else if (arg.equalsIgnoreCase(SWITCH_RECURSIVE) || arg.equalsIgnoreCase(SWITCH_RECURSIVE2))
 						options.setRecursive(true);
 					else if (arg.equalsIgnoreCase(SWITCH_MODE_PALETTES) || arg.equalsIgnoreCase(SWITCH_MODE_PALETTES2))
@@ -611,7 +930,7 @@ public final class DoomImageConvertMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: dimgconv [--help | -h | --version]");
-		out.println("                [files] [switches]");
+		out.println("                [source] [switches]");
 	}
 	
 	/**
@@ -624,6 +943,98 @@ public final class DoomImageConvertMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("[source]:");
+		out.println("    The source file or directory to read from.");
+		out.println();
+		out.println("[switches]:");
+		out.println("    --output [path]     Sets the output path for converted files. Can be");
+		out.println("    -o [path]           a single file, a directory, or a WAD file to add");
+		out.println("                        entries to.");
+		out.println();
+		out.println("    --palette [path]    Sets the path to the source of target palette to use");
+		out.println("    -p [path]           for conversion (Doom format). Can be a file or a");
+		out.println("                        WAD. If WAD, it looks for the \"PLAYPAL\" lump.");
+		out.println();
+		out.println("    --recursive         If the [source] is a directory, this scans directories");
+		out.println("    -r                  recursively.");
+		out.println();
+		out.println("    --mode-palettes     Assumes that the incoming file or files are, by");
+		out.println("    -mp                 default, palettes, unless overridden by a metainfo");
+		out.println("                        file.");
+		out.println();
+		out.println("    --mode-colormaps    Assumes that the incoming file or files are, by");
+		out.println("    -mc                 default, colormaps, unless overridden by a metainfo");
+		out.println("                        file.");
+		out.println();
+		out.println("    --mode-flats        Assumes that the incoming file or files are, by");
+		out.println("    -mf                 default, flats, unless overridden by a metainfo");
+		out.println("                        file.");
+		out.println();
+		out.println("    --infofile [name]   Sets the name of the metainfo file found in each");
+		out.println("    -i [name]           directory that specifies the mode for specific");
+		out.println("                        files. Default is \"dimgconv.txt\"");
+		out.println();
+		out.println("    --verbose           Prints verbose output.");
+		out.println("    -v");
+		out.println();
+		out.println();
+		out.println("Palettes");
+		out.println("--------");
+		out.println();
+		out.println("Palettes are expected to be images where the x-axis describes the colors in a");
+		out.println("palette and the y-axis is the palette index.");
+		out.println();
+		out.println("Colormaps");
+		out.println("---------");
+		out.println();
+		out.println("Colormaps are expected to be images where the x-axis describes the colors in a");
+		out.println("colomap to match against a palette to create the resulting map data and the");
+		out.println("y-axis is the colormap index.");
+		out.println();
+		out.println("Stuff like TRANMAPs and TINTTABs are also COLORMAPs.");
+		out.println();
+		out.println("Graphics");
+		out.println("--------");
+		out.println();
+		out.println("Graphics, if they are PNGs, can contain the custom 'grAb' chunks for default");
+		out.println("offsets.");
+		out.println();
+		out.println("The MetaInfo Files");
+		out.println("------------------");
+		out.println();
+		out.println("The meta info files consist of plain text lines of the following:");
+		out.println();
+		out.println("    [name] [mode] [x-offset] [y-offset]");
+		out.println();
+		out.println("[name]:");
+		out.println("    The name of the file in this directory (no extension). Can be \"*\" for the");
+		out.println("    default fallback.");
+		out.println();
+		out.println("[mode]:");
+		out.println("    One of four modes: \"palette\", \"colormap\", \"graphic\" or \"flat\".");
+		out.println();
+		out.println("[x-offset]:");
+		out.println("    (Optional) If mode is \"graphic\", specify an x-offset to set.");
+		out.println();
+		out.println("[y-offset]:");
+		out.println("    (Optional) If mode is \"graphic\", specify a y-offset to set.");
+		out.println();
+		out.println("Lines that are blank and lines that begin with a \"#\" are ignored.");
+		out.println();
+		out.println("Example line for \"everything in this directory is a flat\":");
+		out.println();
+		out.println("    * flat");
+		out.println();
+		out.println("Example lines for \"GRAYTALL is a graphic but everything else is a flat\":");
+		out.println();
+		out.println("    graytall graphic");
+		out.println("    * flat");
+		out.println();
+		out.println("Graphics with specific offsets:");
+		out.println();
+		out.println("    m_skull graphic 0 12");
+		out.println("    m_doom graphic 30 -24");
 	}
 
 }

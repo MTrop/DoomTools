@@ -4,7 +4,7 @@ Copyright (c) 2019-2021 Matt Tropiano
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.10.1+  
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.11.0+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.10.2+
 
 ### Required Modules
@@ -81,6 +81,10 @@ A program that just displays info about the toolset that you are using (or manag
 #### DecoHack
 
 A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.
+
+#### DImgConv
+
+A utility that bulk converts images to Doom formats.
 
 #### DMXConv
 

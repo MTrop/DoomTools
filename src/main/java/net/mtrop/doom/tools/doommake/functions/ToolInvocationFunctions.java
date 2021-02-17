@@ -17,6 +17,7 @@ import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 
 import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
+import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.WADTexMain;
@@ -233,6 +234,79 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			finally
 			{
 				temp.setNull();
+			}
+		}
+	},
+
+	DIMGCONV(1)
+	{
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Calls the DImgConv tool. Inherits STDOUT/STDERR of this script unless overridden (see options)."
+				)
+				.parameter("options", 
+					type(Type.MAP, 
+						"{" + Common.joinStrings(", ",
+							"stdout:OBJECTREF(OutputStream)",
+							"stderr:OBJECTREF(OutputStream)",
+							"sourcePath:OBJECTREF(File)",
+							"outputPath:OBJECTREF(File)",
+							"recursive:BOOLEAN",
+							"paletteSourcePath:OBJECTREF(File)",
+							"modeType:STRING",
+							"metaInfoFilename:STRING",
+							"verbose:BOOLEAN"
+						) + "}",
+						"Map of options."
+					)
+				)
+				.returns(
+					type(Type.INTEGER, "The normal return of this tool's process."),
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue files = CACHEVALUE2.get();
+			try 
+			{
+				PrintStream stdout = scriptInstance.getEnvironment().getStandardOut();
+				PrintStream stderr = scriptInstance.getEnvironment().getStandardErr();
+				DoomImageConvertMain.Options options = DoomImageConvertMain.options(stdout, stderr);
+				scriptInstance.popStackValue(temp);
+				if (!temp.isNull())
+				{
+					if (!temp.isMap())
+					{
+						returnValue.setError("BadOptions", "Options parameter needs to be a Map type.");
+						return true;
+					}
+					else if (!temp.mapApply(options))
+					{
+						returnValue.setError("BadOptions", "Options Map could not be applied.");
+						return true;
+					}
+				}
+				returnValue.set(DoomImageConvertMain.call(options));
+				return true;
+			} catch (OptionParseException e) {
+				returnValue.setError("BadOptions", "Option argument parse failed: " + e.getLocalizedMessage());
+				return true;
+			} catch (ClassCastException e) {
+				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				files.setNull();
 			}
 		}
 	},

@@ -285,6 +285,24 @@ TOOL::DECOHACK(options)
         (INTEGER) The normal return of this tool's process.
         (ERROR:BadOptions) If the options map could not be applied.
 
+TOOL::DIMGCONV(options)
+    Calls the DImgConv tool. Inherits STDOUT/STDERR of this script unless overridden (see options).
+    options:
+        (MAP:{
+            stdout:OBJECTREF(OutputStream), 
+            stderr:OBJECTREF(OutputStream), 
+            sourcePath:OBJECTREF(File),
+            outputPath:OBJECTREF(File), 
+            recursive:BOOLEAN, 
+            paletteSourcePath:OBJECTREF(File), 
+            modeType:STRING, 
+            metaInfoFilename:STRING, 
+            verbose:BOOLEAN
+        }) Map of options.
+    Returns:
+        (INTEGER) The normal return of this tool's process.
+        (ERROR:BadOptions) If the options map could not be applied.
+
 TOOL::DMXCONVERT(options)
     Calls the DMXConvert tool. Inherits STDOUT/STDERR of this script unless 
     overridden (see options).
