@@ -30,7 +30,7 @@
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
 	<property name="rookscript.jar.src" value="${rookscript.project}-sources.jar" />
 
-	<property name="rookscript.desktop.lib.version" value="1.10.2" />
+	<property name="rookscript.desktop.lib.version" value="1.10.2.1" />
 	<property name="rookscript.desktop.tag" value="${rookscript.desktop.lib.version}-RELEASE" />
 	<property name="rookscript.desktop.project" value="blackrook-rookscript-desktop-${rookscript.desktop.lib.version}" />	
 	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />

@@ -263,7 +263,7 @@ public final class DoomImageConvertMain
 			{
 				if(options.metaInfoFallback.mode != Mode.PALETTE)
 				{
-					options.stderr.println("ERROR: No palette specified, and mode is not Palette (use the `--palette` switch to specify, or `--mode-palette` to create one).");
+					options.stderr.println("ERROR: No palette specified, and mode is not Palette (use the `--palette` switch to specify, or `--mode-palettes` to create one).");
 					return ERROR_NO_PALETTE;
 				}
 			}
@@ -847,8 +847,10 @@ public final class DoomImageConvertMain
 						state = STATE_METAFILENAME;
 					else if (arg.equalsIgnoreCase(SWITCH_PALETTE) || arg.equalsIgnoreCase(SWITCH_PALETTE2))
 						state = STATE_PALETTE;
-					else
+					else if (options.sourcePath == null)
 						options.sourcePath = new File(arg);
+					else
+						throw new OptionParseException("ERROR: Source already declared.");
 				}
 				break;
 
