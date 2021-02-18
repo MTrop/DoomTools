@@ -2318,7 +2318,7 @@ IMAGECOPY(image)
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 IMAGERESIZE(image, width, height, mode)
-    Creates a new image that is a resized version of an image.
+    Creates a new image that is a resized version of a source image.
     image:
         (OBJECTREF:BufferedImage) The image to inspect.
     width:
@@ -2335,7 +2335,7 @@ IMAGERESIZE(image, width, height, mode)
         (ERROR:BadDimensions) If width or height is 0 or less.
 
 IMAGESCALE(image, scaleX, scaleY, mode)
-    Creates a new image that is a resized version of an image using scalar values.
+    Creates a new image that is a resized version of a source image using scalar values.
     image:
         (OBJECTREF:BufferedImage) The image to inspect.
     scaleX:
@@ -2352,7 +2352,7 @@ IMAGESCALE(image, scaleX, scaleY, mode)
         (ERROR:BadDimensions) If width or height will be 0 or less.
 
 IMAGECROP(image, x, y, width, height)
-    Creates a new image that is a cropped area of an image.
+    Creates a new image that is a cropped area of a source image.
     image:
         (OBJECTREF:BufferedImage) The image to inspect.
     x:
@@ -2369,7 +2369,7 @@ IMAGECROP(image, x, y, width, height)
         (ERROR:BadDimensions) If width or height is 0 or less.
 
 IMAGEFLIPH(image)
-    Creates a new image by flipping it horizontally.
+    Creates a new image by flipping a source image horizontally.
     image:
         (OBJECTREF:BufferedImage) The image to flip.
     Returns:
@@ -2377,7 +2377,7 @@ IMAGEFLIPH(image)
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 IMAGEFLIPV(image)
-    Creates a new image by flipping it vertically.
+    Creates a new image by flipping a source image vertically.
     image:
         (OBJECTREF:BufferedImage) The image to flip.
     Returns:
@@ -2385,7 +2385,7 @@ IMAGEFLIPV(image)
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 IMAGETRANSPOSE(image)
-    Creates a new image by transposing its X and Y axes.
+    Creates a new image by transposing a source image's X and Y axes.
     image:
         (OBJECTREF:BufferedImage) The image to transpose.
     Returns:
@@ -2402,8 +2402,8 @@ IMAGEFILL(image, color)
         (OBJECTREF:BufferedImage) [image]
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
-IMAGEPAINT(image, sourceImage, x, y, width, height, blend, alpha, mode)
-    Fills an image with the provided color.
+IMAGEPAINT(image, sourceImage, x, y, width, height, blend, prealpha, mode)
+    Paints an image into another image, changing the target image.
     image:
         (OBJECTREF:BufferedImage) The image to paint into.
     sourceImage:
@@ -2422,8 +2422,8 @@ IMAGEPAINT(image, sourceImage, x, y, width, height, blend, alpha, mode)
         (INTEGER) Height in pixels.
     blend:
         (NULL) Use alpha compositing ('alpha').
-        (STRING) A blending mode: 'replace', 'alpha', 'add', 'subtract', 'multiply'.
-    alpha:
+        (STRING) A blending mode: 'replace', 'alpha', 'add', 'subtract', 'multiply', 'desaturate'.
+    prealpha:
         (NULL) Use 1.0.
         (FLOAT) The pre-alpha scalar (image alpha is also applied). NOTE: 'replace' does not use this value.
     mode:
@@ -2436,36 +2436,28 @@ IMAGEPAINT(image, sourceImage, x, y, width, height, blend, alpha, mode)
         (ERROR:BadBlend) If the provided [blend] is not a valid blend.
         (ERROR:BadDimensions) If width or height is 0 or less.
 
-IMAGEWIDTH(image)
-    Gets the width of an image in pixels.
+IMAGEDRAW(image, sourceImage, x, y, blend, prealpha)
+    Paints an image into another image, changing the target image. To contrast with IMAGEPAINT(), this is a convenience function that does not accept resizing parameters.
     image:
-        (OBJECTREF:BufferedImage) The image to inspect.
-    Returns:
-        (INTEGER) The image width.
-        (ERROR:BadImage) If the first parameter is not a BufferedImage.
-
-IMAGEHEIGHT(image)
-    Gets the height of an image in pixels.
-    image:
-        (OBJECTREF:BufferedImage) The image to inspect.
-    Returns:
-        (INTEGER) The image height.
-        (ERROR:BadImage) If the first parameter is not a BufferedImage.
-
-IMAGEGET(image, x, y)
-    Gets an image's pixel data.
-    image:
-        (OBJECTREF:BufferedImage) The image to use.
+        (OBJECTREF:BufferedImage) The image to paint into.
+    sourceImage:
+        (OBJECTREF:BufferedImage) The image to paint.
     x:
         (NULL) Use 0.
-        (INTEGER) Image X-coordinate (from left side of image).
+        (INTEGER) X-axis offset in pixels (from left side of image).
     y:
         (NULL) Use 0.
-        (INTEGER) Image Y-coordinate (from top of image).
+        (INTEGER) Y-axis offset in pixels (from top of image).
+    blend:
+        (NULL) Use alpha compositing ('alpha').
+        (STRING) A blending mode: 'replace', 'alpha', 'add', 'subtract', 'multiply', 'desaturate'.
+    prealpha:
+        (NULL) Use 1.0.
+        (FLOAT) The pre-alpha scalar (image alpha is also applied). NOTE: 'replace' does not use this value.
     Returns:
-        (INTEGER) The image pixel data, 32-bit ARGB.
-        (ERROR:BadImage) If the first parameter is not a BufferedImage.
-        (ERROR:BadCoordinates) If X or Y is out of bounds.
+        (OBJECTREF:BufferedImage) [image]
+        (ERROR:BadImage) If the first or second parameter is not a BufferedImage.
+        (ERROR:BadBlend) If the provided [blend] is not a valid blend.
 
 IMAGESET(image, x, y, color)
     Sets an image's pixel data.
@@ -2483,6 +2475,37 @@ IMAGESET(image, x, y, color)
         (OBJECTREF:BufferedImage) [image].
         (ERROR:BadImage) If the first parameter is not a BufferedImage.
         (ERROR:BadCoordinates) If X or Y is out of bounds.
+
+IMAGEGET(image, x, y)
+    Gets an image's pixel data.
+    image:
+        (OBJECTREF:BufferedImage) The image to use.
+    x:
+        (NULL) Use 0.
+        (INTEGER) Image X-coordinate (from left side of image).
+    y:
+        (NULL) Use 0.
+        (INTEGER) Image Y-coordinate (from top of image).
+    Returns:
+        (INTEGER) The image pixel data, 32-bit ARGB.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+        (ERROR:BadCoordinates) If X or Y is out of bounds.
+
+IMAGEWIDTH(image)
+    Gets the width of an image in pixels.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    Returns:
+        (INTEGER) The image width.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
+
+IMAGEHEIGHT(image)
+    Gets the height of an image in pixels.
+    image:
+        (OBJECTREF:BufferedImage) The image to inspect.
+    Returns:
+        (INTEGER) The image height.
+        (ERROR:BadImage) If the first parameter is not a BufferedImage.
 
 
 =================================================================
