@@ -178,13 +178,13 @@ public final class DoomImageConvertMain
 		
 		public Options setModeType(String mode)
 		{
-			if ("palette".equalsIgnoreCase(mode))
+			if ("palettes".equalsIgnoreCase(mode))
 				setMode(Mode.PALETTE);
-			else if ("colormap".equalsIgnoreCase(mode))
+			else if ("colormaps".equalsIgnoreCase(mode))
 				setMode(Mode.COLORMAP);
-			else if ("graphic".equalsIgnoreCase(mode))
+			else if ("graphics".equalsIgnoreCase(mode))
 				setMode(Mode.GRAPHIC);
-			else if ("flat".equalsIgnoreCase(mode))
+			else if ("flats".equalsIgnoreCase(mode))
 				setMode(Mode.FLAT);
 			return this;
 		}
@@ -987,6 +987,7 @@ public final class DoomImageConvertMain
 		out.println("Palettes are expected to be images where the x-axis describes the colors in a");
 		out.println("palette and the y-axis is the palette index.");
 		out.println();
+		out.println();
 		out.println("Colormaps");
 		out.println("---------");
 		out.println();
@@ -996,11 +997,13 @@ public final class DoomImageConvertMain
 		out.println();
 		out.println("Stuff like TRANMAPs and TINTTABs are also COLORMAPs.");
 		out.println();
+		out.println();
 		out.println("Graphics");
 		out.println("--------");
 		out.println();
 		out.println("Graphics, if they are PNGs, can contain the custom 'grAb' chunks for default");
 		out.println("offsets.");
+		out.println();
 		out.println();
 		out.println("The MetaInfo Files");
 		out.println("------------------");

@@ -256,7 +256,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"outputPath:OBJECTREF(File)",
 							"recursive:BOOLEAN",
 							"paletteSourcePath:OBJECTREF(File)",
-							"modeType:STRING",
+							"modeType:STRING (one of 'palettes', 'colormaps', 'graphics', 'flats')",
 							"metaInfoFilename:STRING",
 							"verbose:BOOLEAN"
 						) + "}",
