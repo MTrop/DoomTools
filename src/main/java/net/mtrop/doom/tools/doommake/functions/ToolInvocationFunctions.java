@@ -238,7 +238,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 		}
 	},
 
-	DIMGCONV(1)
+	DIMGCONVERT(1)
 	{
 		@Override
 		protected Usage usage() 
