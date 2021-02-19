@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.TreeMap;
 
 import net.mtrop.doom.Wad;
+import net.mtrop.doom.Wad.Type;
 import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
@@ -142,15 +143,19 @@ public class WadMergeContext
 	 * Creates a blank Wad buffer.
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to associate with the Wad.
+	 * @param iwad if true, created WAD is an IWAD.
 	 * @return OK if a symbol was created, 
 	 * 		or BAD_SYMBOL if the destination symbol already exists.
 	 */
-	public Response create(String symbol)
+	public Response create(String symbol, boolean iwad)
 	{
 		if (currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
 		
-		currentWads.put(symbol, new WadBuffer());
+		WadBuffer buffer = new WadBuffer();
+		if (iwad)
+			buffer.setType(Type.IWAD);
+		currentWads.put(symbol, buffer);
 		verbosef("Created buffer `%s`.\n", symbol);
 		return Response.OK;
 	}
@@ -160,16 +165,20 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to associate with the Wad.
 	 * @param wadFile the file name for the WAD to initialize.
+	 * @param iwad if true, file is an IWAD, not PWAD.
 	 * @return OK if creation successful and a symbol was created, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid.
 	 * @throws IOException if an error occurs attempting to create the file.
 	 */
-	public Response createFile(String symbol, File wadFile) throws IOException
+	public Response createFile(String symbol, File wadFile, boolean iwad) throws IOException
 	{
 		if (currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
 		
-		currentWads.put(symbol, WadFile.createWadFile(wadFile));
+		WadFile wad = WadFile.createWadFile(wadFile);
+		if (iwad)
+			wad.setType(Type.IWAD);
+		currentWads.put(symbol, wad);
 		verbosef("Created WAD file `%s` (at `%s`).\n", symbol, wadFile.getPath());
 		return Response.OK;
 	}
@@ -205,12 +214,13 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 		
 		Wad buffer = currentWads.remove(symbol);
+		boolean iwad = buffer.isIWAD();
 		verbosef("Cleared `%s`.\n", symbol);
 		buffer.close();
 		if (buffer instanceof WadBuffer)
-			return create(symbol);
+			return create(symbol, iwad);
 		else if (buffer instanceof WadFile)
-			return createFile(symbol, new File(((WadFile)buffer).getFilePath()));
+			return createFile(symbol, new File(((WadFile)buffer).getFilePath()), iwad);
 		else
 			return Response.UNEXPECTED_ERROR;
 	}
@@ -253,11 +263,18 @@ public class WadMergeContext
 		if (!Wad.isWAD(wadFile))
 			return Response.BAD_WAD;
 	
+		boolean iwad;
+		try (WadFile wf = new WadFile(wadFile))
+		{
+			iwad = wf.isIWAD();
+		}
+		
 		Response out;
-		if ((out = create(symbol)) != Response.OK)
+		if ((out = create(symbol, iwad)) != Response.OK)
 			return out;
 		if ((out = mergeWad(symbol, wadFile)) != Response.OK)
 			return out;
+		
 		return Response.OK;
 	}
 

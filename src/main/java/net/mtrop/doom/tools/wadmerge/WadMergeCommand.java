@@ -81,6 +81,7 @@ public enum WadMergeCommand
 			out.println("    Buffers are best used for speed, but large merges will consume"); 
 			out.println("    lots of memory during merge."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
+			out.println("    [iwad]: (Optional) If \"iwad\", the created WAD file is an IWAD.");
 			out.println("    ................................");
 			out.println("    Returns: OK if a symbol was created.");
 			out.println("             BAD_SYMBOL if the destination symbol already exists.");
@@ -89,7 +90,11 @@ public enum WadMergeCommand
 		@Override
 		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
-			return context.create(scanner.nextString());
+			String symbol = scanner.nextString();
+			boolean iwad = false;
+			if (scanner.hasNext())
+				scanner.nextString().equalsIgnoreCase("iwad");
+			return context.create(symbol, iwad);
 		}
 	},
 	
@@ -98,7 +103,7 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("CREATEFILE [symbol] [path]"); 
+			out.println("CREATEFILE [symbol] [path] [iwad]"); 
 			out.println("    Creates a new WAD file (on disk - not in memory), errors out if ");
 			out.println("    the symbol exists or the new file could not be created."); 
 			out.println("    WARNING: If the file already exists, it is OVERWRITTEN!"); 
@@ -107,6 +112,7 @@ public enum WadMergeCommand
 			out.println("    See: CREATE for the in-memory version."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
 			out.println("    [path]: The file to create.");
+			out.println("    [iwad]: (Optional) If \"iwad\", the created WAD file is an IWAD.");
 			out.println("    ................................");
 			out.println("    Returns: OK if creation successful and a symbol was created.");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid.");
@@ -117,8 +123,11 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.nextString();
 			String path = scanner.nextString();
+			boolean iwad = false;
+			if (scanner.hasNext())
+				scanner.nextString().equalsIgnoreCase("iwad");
 			try {
-				return context.createFile(symbol, new File(path));
+				return context.createFile(symbol, new File(path), iwad);
 			} catch (IOException e) {
 				context.logf("ERROR: File %s could not be created.\n", path);
 				return Response.BAD_FILE;
@@ -665,9 +674,9 @@ public enum WadMergeCommand
 		    out.println("            MERGEWAD [symbol] [FILE]");
 		    out.println("        Else,");
 		    out.println("            MERGEFILE [symbol] [FILE]");
-			out.println("    [symbol]:        The buffer to add to.");
-			out.println("    [path]:          The source directory to scan.");
-			out.println("    [opt:nomarkers]: If \"nomarkers\", omit the directory markers.");
+			out.println("    [symbol]:    The buffer to add to.");
+			out.println("    [path]:      The source directory to scan.");
+			out.println("    [nomarkers]: (Optional) If \"nomarkers\", omit the directory markers.");
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 

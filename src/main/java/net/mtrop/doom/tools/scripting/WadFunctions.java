@@ -291,6 +291,85 @@ public enum WadFunctions implements ScriptFunctionType
 		}
 	},
 
+	/** @since 1.1.0  */
+	WADSETTYPE(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Sets a Wad's major type."
+				)
+				.parameter("wad", 
+					type(Type.OBJECTREF, "Wad", "The WAD to change.")
+				)
+				.parameter("type", 
+					type(Type.STRING, "The new WAD type - \"iwad\" or \"pwad\" .")
+				)
+				.returns(
+					type(Type.OBJECTREF, "Wad", "[wad], on success."),
+					type(Type.ERROR, "BadType", "If [type] is not \"iwad\" or \"pwad\"."),
+					type(Type.ERROR, "BadParameter", "If [wad] is not a WAD."),
+					type(Type.ERROR, "IOError", "If a write error occurs.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try
+			{
+				scriptInstance.popStackValue(temp);
+				String type = temp.isNull() ? null : temp.asString();
+				scriptInstance.popStackValue(temp);
+				if (!temp.isObjectRef(Wad.class))
+				{
+					returnValue.setError("BadParameter", "First parameter is not a Wad.");
+					return true;
+				}
+
+				try
+				{
+					Wad wad = temp.asObjectType(Wad.class);
+					if (net.mtrop.doom.Wad.Type.IWAD.name().equalsIgnoreCase(type))
+					{
+						if (wad instanceof WadFile)
+							((WadFile)wad).setType(net.mtrop.doom.Wad.Type.IWAD);
+						else if (wad instanceof WadBuffer)
+							((WadBuffer)wad).setType(net.mtrop.doom.Wad.Type.IWAD);
+						returnValue.set(wad);
+					}
+					else if (net.mtrop.doom.Wad.Type.PWAD.name().equalsIgnoreCase(type))
+					{
+						if (wad instanceof WadFile)
+							((WadFile)wad).setType(net.mtrop.doom.Wad.Type.PWAD);
+						else if (wad instanceof WadBuffer)
+							((WadBuffer)wad).setType(net.mtrop.doom.Wad.Type.PWAD);
+						returnValue.set(wad);
+					}
+					else
+					{
+						returnValue.setError("BadType", "Type is not \"iwad\" or \"pwad\".");
+						return true;
+					}
+				} 
+				catch (IOException e) 
+				{
+					returnValue.setError("IOError", e.getLocalizedMessage());
+					return true;
+				}
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+	
 	WADINFO(1)
 	{
 		@Override
@@ -912,7 +991,7 @@ public enum WadFunctions implements ScriptFunctionType
 					type(Type.ERROR, "BadParameter", "If [wad] is not a Wad file."),
 					type(Type.ERROR, "BadData", "If [data] is not an accepted value type."),
 					type(Type.ERROR, "BadIndex", "If an [index] was provided and it is less than 0 or greater than the current entry count."),
-					type(Type.ERROR, "IOError", "If a read error occurs.")
+					type(Type.ERROR, "IOError", "If a read or write error occurs.")
 				)
 			;
 		}

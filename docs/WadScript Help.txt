@@ -2591,6 +2591,18 @@ WADBUFFER(file)
         (ERROR:Security) If the OS denied permission to read the file.
         (ERROR:IOError) If there was an error reading the file.
 
+WADSETTYPE(wad, type)
+    Sets a Wad's major type.
+    wad:
+        (OBJECTREF:Wad) The WAD to change.
+    type:
+        (STRING) The new WAD type - "iwad" or "pwad" .
+    Returns:
+        (OBJECTREF:Wad) [wad], on success.
+        (ERROR:BadType) If [type] is not "iwad" or "pwad".
+        (ERROR:BadParameter) If [wad] is not a WAD.
+        (ERROR:IOError) If a write error occurs.
+
 WADINFO(wad)
     Fetches a Wad's info.
     wad:
@@ -2717,7 +2729,7 @@ WADADD(wad, name, data, index)
         (ERROR:BadParameter) If [wad] is not a Wad file.
         (ERROR:BadData) If [data] is not an accepted value type.
         (ERROR:BadIndex) If an [index] was provided and it is less than 0 or greater than the current entry count.
-        (ERROR:IOError) If a read error occurs.
+        (ERROR:IOError) If a read or write error occurs.
 
 WADREMOVE(wad, index)
     Removes a WAD's entry by index. Does not remove content.

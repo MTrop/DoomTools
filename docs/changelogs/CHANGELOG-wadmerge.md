@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.5.0
+
+* `Changed` Added ability to create IWAD buffers via CREATE and CREATEFILE.
+
+
 ### Changed for 1.4.0
 
 * `Added` An argument for MERGEDIR to omit the directory markers.
