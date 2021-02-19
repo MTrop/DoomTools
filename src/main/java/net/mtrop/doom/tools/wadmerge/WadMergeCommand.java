@@ -93,7 +93,7 @@ public enum WadMergeCommand
 			String symbol = scanner.nextString();
 			boolean iwad = false;
 			if (scanner.hasNext())
-				scanner.nextString().equalsIgnoreCase("iwad");
+				iwad = scanner.nextString().equalsIgnoreCase("iwad");
 			return context.create(symbol, iwad);
 		}
 	},
@@ -125,7 +125,7 @@ public enum WadMergeCommand
 			String path = scanner.nextString();
 			boolean iwad = false;
 			if (scanner.hasNext())
-				scanner.nextString().equalsIgnoreCase("iwad");
+				iwad = scanner.nextString().equalsIgnoreCase("iwad");
 			try {
 				return context.createFile(symbol, new File(path), iwad);
 			} catch (IOException e) {
