@@ -4,6 +4,7 @@ WadMerge
 ### Changed for 1.5.0
 
 * `Changed` Added ability to create IWAD buffers via CREATE and CREATEFILE.
+* `Changed` Some non-verbose message output.
 
 
 ### Changed for 1.4.0

@@ -179,7 +179,7 @@ public class WadMergeContext
 		if (iwad)
 			wad.setType(Type.IWAD);
 		currentWads.put(symbol, wad);
-		verbosef("Created WAD file `%s` (at `%s`).\n", symbol, wadFile.getPath());
+		logf("Created WAD file `%s` (at `%s`).\n", symbol, wadFile.getPath());
 		return Response.OK;
 	}
 
@@ -301,13 +301,22 @@ public class WadMergeContext
 		{
 			File wadFile = new File(((WadFile)buffer).getFilePath());
 			if (!wadFile.equals(outFile))
-				WadFile.extract(outFile, buffer, 0, buffer.getEntryCount());
+			{
+				try (WadFile wf = WadFile.extract(outFile, buffer, 0, buffer.getEntryCount()))
+				{
+					wf.setType(((WadFile)buffer).getType());
+				}
+				logf("Wrote file `%s`.\n", outFile.getPath());
+			}
 			// Do nothing if same file.
+			else
+			{
+				logf("Finished file `%s`.\n", outFile.getPath());
+			}
 		}
 		else
 			return Response.UNEXPECTED_ERROR;
 
-		logf("Wrote file `%s`.\n", outFile.getPath());
 		return Response.OK;
 	}
 
