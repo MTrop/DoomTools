@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.7.1
+
+* `Fixed` Parsing a single state body with just the next frame clause did nothing. (Issue #10) (thanks, Aurelius!)
+
+
 ### Changed for 0.7.0
 
 * `Fixed` Disallow MBF action pointers in non-MBF patches.
