@@ -498,6 +498,7 @@ clause:
         ...
     }
 
+All weapon characteristics and state labels get copied.
 
 You can also swap two weapon slots:
 
@@ -691,6 +692,8 @@ clause:
         ...
     }
 
+
+All thing characteristics and state labels get copied.
 
 You can also swap two thing slots:
 
