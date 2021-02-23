@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
@@ -52,12 +53,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		setName("");
 		setAmmoType(null);
-		setRaiseFrameIndex(0);
-		setLowerFrameIndex(0);
-		setReadyFrameIndex(0);
-		setFireFrameIndex(0);
-		setFlashFrameIndex(0);
-		stateIndexMap.put(STATE_LABEL_LIGHTDONE, 1);
+		clearLabels();
 	}
 	
 	/**
@@ -76,6 +72,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		DEHWeapon out = new DEHWeapon(); 
 		out.setName(name);
 		out.setAmmoType(ammo);
+		out.clearLabels();
 		out.setRaiseFrameIndex(raise);
 		out.setLowerFrameIndex(lower);
 		out.setReadyFrameIndex(ready);
@@ -89,11 +86,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	{
 		setName(source.name);
 		setAmmoType(source.ammoType);
-		setRaiseFrameIndex(source.getRaiseFrameIndex());
-		setLowerFrameIndex(source.getLowerFrameIndex());
-		setReadyFrameIndex(source.getReadyFrameIndex());
-		setFireFrameIndex(source.getFireFrameIndex());
-		setFlashFrameIndex(source.getFlashFrameIndex());
+		clearLabels();
+		for (String label : source.getLabels())
+			setLabel(label, source.getLabel(label));
 		return this;
 	}
 	
@@ -236,22 +231,38 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	}
 	
 	@Override
-	public Map<String, Integer> getStateIndexMap() 
+	public String[] getLabels()
 	{
-		return stateIndexMap;
+		Set<String> labelSet = stateIndexMap.keySet();
+		return labelSet.toArray(new String[labelSet.size()]);
 	}
-	
-	private int getLabel(String label)
+
+	@Override
+	public boolean hasLabel(String label)
+	{
+		return stateIndexMap.containsKey(label);
+	}
+
+	@Override
+	public int getLabel(String label)
 	{
 		return stateIndexMap.getOrDefault(label, 0);
 	}
 
-	private void setLabel(String label, int index)
+	@Override
+	public void setLabel(String label, int index)
 	{
 		if (index == 0)
 			stateIndexMap.remove(label);
 		else
 			stateIndexMap.put(label, index);
+	}
+
+	@Override
+	public void clearLabels()
+	{
+		stateIndexMap.clear();
+		setLabel(STATE_LABEL_LIGHTDONE, 1);
 	}
 
 	@Override

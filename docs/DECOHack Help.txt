@@ -409,7 +409,11 @@ Thing for pickups.
         // specific state assignment using another weapon's states.
         state <WeaponStateName> weapon <INTEGER> <WeaponStateLabel>
         
-        clear states // if present, clear all state indices (not freed!).
+        // if present, clear all state indices (not freed!).
+        clear states 
+
+		// clears a specific label (not freed!).
+        clear state <WeaponStateLabel>
         
         states
         {
@@ -546,8 +550,6 @@ the thing state indices. Other labels are used for arbitrary jump points.
         DeathSound <STRING>
         ActiveSound <STRING>
 
-        clear states // if present, clear all state indices (not freed!).
-        
         // specific state assignment.
         state <ThingStateName> <INTEGER>
         
@@ -556,6 +558,12 @@ the thing state indices. Other labels are used for arbitrary jump points.
         
         // specific state assignment using another weapon's states.
         state <ThingStateName> weapon <INTEGER> <WeaponStateLabel>
+        
+        // if present, clear all state indices (not freed!).
+        clear states
+
+		// clears a specific label (not freed!).
+        clear state <ThingStateLabel>
         
         states
         {

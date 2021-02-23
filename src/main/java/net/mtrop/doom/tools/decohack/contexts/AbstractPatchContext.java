@@ -299,14 +299,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		int out = 0;
 		DEHThing thing = getThing(thingIndex);
-		out += freeConnectedStates(thing.getSpawnFrameIndex());
-		out += freeConnectedStates(thing.getWalkFrameIndex());
-		out += freeConnectedStates(thing.getPainFrameIndex());
-		out += freeConnectedStates(thing.getMeleeFrameIndex());
-		out += freeConnectedStates(thing.getMissileFrameIndex());
-		out += freeConnectedStates(thing.getDeathFrameIndex());
-		out += freeConnectedStates(thing.getExtremeDeathFrameIndex());
-		out += freeConnectedStates(thing.getRaiseFrameIndex());
+		for (String label : thing.getLabels())
+			out += freeConnectedStates(thing.getLabel(label));
 		return out;
 	}
 	
@@ -325,11 +319,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		int out = 0;
 		DEHWeapon weapon = getWeapon(weaponIndex);
-		out += freeConnectedStates(weapon.getRaiseFrameIndex());
-		out += freeConnectedStates(weapon.getLowerFrameIndex());
-		out += freeConnectedStates(weapon.getReadyFrameIndex());
-		out += freeConnectedStates(weapon.getFireFrameIndex());
-		out += freeConnectedStates(weapon.getFlashFrameIndex());
+		for (String label : weapon.getLabels())
+			out += freeConnectedStates(weapon.getLabel(label));
 		return out;
 	}
 	

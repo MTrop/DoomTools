@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
@@ -79,21 +80,14 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(0);
 		setFlags(0x00000000);
 		setMass(0);
-		
-		setSpawnFrameIndex(FRAME_NULL);
-		setWalkFrameIndex(FRAME_NULL);
-		setPainFrameIndex(FRAME_NULL);
-		setMeleeFrameIndex(FRAME_NULL);
-		setMissileFrameIndex(FRAME_NULL);
-		setDeathFrameIndex(FRAME_NULL);
-		setExtremeDeathFrameIndex(FRAME_NULL);
-		setRaiseFrameIndex(FRAME_NULL);
-		
+
 		setSeeSoundPosition(SOUND_NONE);
 		setAttackSoundPosition(SOUND_NONE);
 		setPainSoundPosition(SOUND_NONE);
 		setDeathSoundPosition(SOUND_NONE);
 		setActiveSoundPosition(SOUND_NONE);
+		
+		clearLabels();
 	}
 
 	@Override
@@ -112,20 +106,16 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setFlags(source.flags);
 		setMass(source.mass);
 		
-		setSpawnFrameIndex(source.getSpawnFrameIndex());
-		setWalkFrameIndex(source.getWalkFrameIndex());
-		setPainFrameIndex(source.getPainFrameIndex());
-		setMeleeFrameIndex(source.getMeleeFrameIndex());
-		setMissileFrameIndex(source.getMissileFrameIndex());
-		setDeathFrameIndex(source.getDeathFrameIndex());
-		setExtremeDeathFrameIndex(source.getExtremeDeathFrameIndex());
-		setRaiseFrameIndex(source.getRaiseFrameIndex());
-		
 		setSeeSoundPosition(source.seeSoundPosition);
 		setAttackSoundPosition(source.attackSoundPosition);
 		setPainSoundPosition(source.painSoundPosition);
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
+		
+		clearLabels();
+		for (String label : source.getLabels())
+			setLabel(label, source.getLabel(label));
+
 		return this;
 	}
 	
@@ -358,22 +348,40 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}
 
 	@Override
-	public Map<String, Integer> getStateIndexMap() 
+	public String[] getLabels()
 	{
-		return stateIndexMap;
+		Set<String> labelSet = stateIndexMap.keySet();
+		return labelSet.toArray(new String[labelSet.size()]);
 	}
-	
-	private int getLabel(String label)
+
+	@Override
+	public boolean hasLabel(String label)
+	{
+		return stateIndexMap.containsKey(label);
+	}
+
+	@Override
+	public int getLabel(String label)
 	{
 		return stateIndexMap.getOrDefault(label, 0);
 	}
 
-	private void setLabel(String label, int index)
+	@Override
+	public void setLabel(String label, int index)
 	{
+		if (index < 0)
+			throw new IllegalArgumentException("index cannot be < 0");
+		
 		if (index == 0)
 			stateIndexMap.remove(label);
 		else
 			stateIndexMap.put(label, index);
+	}
+
+	@Override
+	public void clearLabels()
+	{
+		stateIndexMap.clear();
 	}
 
 	public int getSeeSoundPosition() 

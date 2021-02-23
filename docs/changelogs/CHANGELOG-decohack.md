@@ -1,9 +1,10 @@
 DecoHack
 --------
 
-### Changed for 0.7.1
+### Changed for 0.8.0
 
 * `Fixed` Parsing a single state body with just the next frame clause did nothing. (Issue #10) (thanks, Aurelius!)
+* `Added` Ability to clear single states or labels on things and weapons. (Issue #11)
 
 
 ### Changed for 0.7.0

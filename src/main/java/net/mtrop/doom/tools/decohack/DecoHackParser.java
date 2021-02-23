@@ -15,7 +15,6 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
@@ -27,6 +26,7 @@ import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
@@ -883,18 +883,30 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CLEAR))
 			{
-				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 				{
-					thing
-						.setSpawnFrameIndex(0)
-						.setWalkFrameIndex(0)
-						.setPainFrameIndex(0)
-						.setMeleeFrameIndex(0)
-						.setMissileFrameIndex(0)
-						.setDeathFrameIndex(0)
-						.setExtremeDeathFrameIndex(0)
-						.setRaiseFrameIndex(0)
-					;
+					String labelName;
+					if ((labelName = matchIdentifier()) != null)
+					{
+						if (thing.getLabel(labelName) == 0)
+						{
+							addErrorMessage("Label \"%s\" is invalid or not declared at this moment. Expected one of: %s", labelName, Arrays.toString(thing.getLabels()));
+							return false;
+						}
+						else
+						{
+							thing.setLabel(labelName, 0);
+						}
+					}
+					else
+					{
+						addErrorMessage("Expected state label after '%s': %s", KEYWORD_STATE, Arrays.toString(thing.getLabels()));
+						return false;
+					}
+				}
+				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				{
+					thing.clearLabels();
 				}
 				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUNDS))
 				{
@@ -908,7 +920,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					addErrorMessage("Expected '%s' or '%s', after '%s'.", KEYWORD_STATES, KEYWORD_SOUNDS, KEYWORD_CLEAR);
+					addErrorMessage("Expected '%s', '%s', or '%s' after '%s'.", KEYWORD_STATE, KEYWORD_STATES, KEYWORD_SOUNDS, KEYWORD_CLEAR);
 					return false;
 				}
 			}
@@ -1159,10 +1171,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		final Map<String, Integer> labelMap = thing.getStateIndexMap();
-		if (!parseActorStateSet(context, labelMap, (label, idx) -> {
-			labelMap.put(label, idx);
-		})) return false;
+		if (!parseActorStateSet(context, thing)) 
+			return false;
 		
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
@@ -1283,19 +1293,34 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CLEAR))
 			{
-				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 				{
-					weapon
-						.setRaiseFrameIndex(0)
-						.setLowerFrameIndex(0)
-						.setReadyFrameIndex(0)
-						.setFireFrameIndex(0)
-						.setFlashFrameIndex(0)
-					;
+					String labelName;
+					if ((labelName = matchIdentifier()) != null)
+					{
+						if (weapon.getLabel(labelName) == 0)
+						{
+							addErrorMessage("Label \"%s\" is invalid or not declared at this moment. Expected one of: %s", labelName, Arrays.toString(weapon.getLabels()));
+							return false;
+						}
+						else
+						{
+							weapon.setLabel(labelName, 0);
+						}
+					}
+					else
+					{
+						addErrorMessage("Expected state label after '%s': %s", KEYWORD_STATE, Arrays.toString(weapon.getLabels()));
+						return false;
+					}
+				}
+				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				{
+					weapon.clearLabels();
 				}
 				else
 				{
-					addErrorMessage("Expected '%s', after '%s'.", KEYWORD_STATES, KEYWORD_CLEAR);
+					addErrorMessage("Expected '%s' or '%s' after '%s'.", KEYWORD_STATE, KEYWORD_STATES, KEYWORD_CLEAR);
 					return false;
 				}
 			}
@@ -1399,10 +1424,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		final Map<String, Integer> labelMap = weapon.getStateIndexMap();
-		if (!parseActorStateSet(context, labelMap, (label, idx) -> {
-			labelMap.put(label, idx);
-		})) return false;
+		if (!parseActorStateSet(context, weapon)) 
+			return false;
 		
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
@@ -1414,7 +1437,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses an actor's state body.
-	private boolean parseActorStateSet(AbstractPatchContext<?> context, Map<String, Integer> labelMap, LabelApplier applier)
+	private boolean parseActorStateSet(AbstractPatchContext<?> context, DEHActor actor)
 	{
 		// state label.
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
@@ -1444,14 +1467,14 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				do {
 					parsed.reset();
-					if (!parseStateLine(context, labelMap, parsed))
+					if (!parseStateLine(context, actor, parsed))
 						return false;
 					if ((startIndex = fillStates(context, parsed, stateCursor, false)) == null)
 						return false;
 					if (loopIndex == null)
 						loopIndex = startIndex;
 					while (!label.isEmpty())
-						applier.apply(label.pollFirst(), startIndex);
+						actor.setLabel(label.pollFirst(), startIndex);
 				} while (currentIsSpriteIndex(context));
 			}
 			
@@ -1459,7 +1482,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (currentIsNextStateKeyword())
 			{
 				Integer nextStateIndex = null;
-				if ((nextStateIndex = parseNextStateIndex(context, labelMap, loopIndex, stateCursor.lastIndexFilled)) == null)
+				if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
 				{
 					addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
 					return false;
@@ -1479,7 +1502,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a mandatory state index.
-	private Integer parseStateIndex(AbstractPatchContext<?> context, Map<String, Integer> labelMap)
+	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor actor)
 	{
 		Integer value;
 		String labelName;
@@ -1499,11 +1522,11 @@ public final class DecoHackParser extends Lexer.Parser
 			labelName = currentToken().getLexeme();
 
 			Integer stateIndex;
-			if ((stateIndex = thing.getStateIndexMap().get(labelName)) == null)
+			if ((stateIndex = thing.getLabel(labelName)) == 0)
 			{
-				Map<String, Integer> map = thing.getStateIndexMap();
+				String[] labels = thing.getLabels();
 				StringBuilder sb;
-				if (map.isEmpty())
+				if (labels.length == 0)
 				{
 					sb = new StringBuilder("Expected a valid thing state label for thing ");
 					sb.append(index);
@@ -1513,7 +1536,7 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					sb = new StringBuilder("Expected a valid thing state label for thing ");
 					sb.append(index).append(": ");
-					sb.append(Arrays.toString(map.keySet().toArray()));
+					sb.append(Arrays.toString(labels));
 					sb.append(".");
 				}
 				addErrorMessage(sb.toString());
@@ -1540,42 +1563,42 @@ public final class DecoHackParser extends Lexer.Parser
 			labelName = currentToken().getLexeme();
 
 			Integer stateIndex;
-			if ((stateIndex = weapon.getStateIndexMap().get(labelName)) == null)
+			if ((stateIndex = weapon.getLabel(labelName)) == 0)
 			{
-				Map<String, Integer> map = weapon.getStateIndexMap();
+				String[] labels = weapon.getLabels();
 				StringBuilder sb;
-				if (map.isEmpty())
+				if (labels.length == 0)
 				{
-					sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+					sb = new StringBuilder("Expected a valid thing state label for weapon ");
 					sb.append(index);
 					sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
 				}
 				else
 				{
-					sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+					sb = new StringBuilder("Expected a valid thing state label for weapon ");
 					sb.append(index).append(": ");
-					sb.append(Arrays.toString(map.keySet().toArray()));
+					sb.append(Arrays.toString(labels));
 					sb.append(".");
 				}
 				addErrorMessage(sb.toString());
 				return null;
 			}
-			
+
 			nextToken();
 
 			return stateIndex;
 		}
 		else if ((labelName = matchIdentifier()) != null)
 		{
-			if (labelMap == null)
+			if (actor == null)
 			{
 				addErrorMessage("Name of label was unexpected after \"%s\". Only valid in thing or weapon.", KEYWORD_GOTO);
 				return null;				
 			}
-			else if ((value = labelMap.get(labelName)) == null)
+			else if ((value = actor.getLabel(labelName)) == 0)
 			{
 				StringBuilder sb = new StringBuilder("Expected a valid state label for this object: ");
-				sb.append(Arrays.toString(labelMap.keySet().toArray()));
+				sb.append(Arrays.toString(actor.getLabels()));
 				sb.append(".");
 				addErrorMessage(sb.toString());
 
@@ -1775,14 +1798,14 @@ public final class DecoHackParser extends Lexer.Parser
 
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, Map<String, Integer> labelMap, ParsedState state)
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor actor, ParsedState state)
 	{
-		return parseStateLine(context, labelMap, state, false, null);
+		return parseStateLine(context, actor, state, false, null);
 	}
 	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, Map<String, Integer> labelMap, ParsedState state, boolean singleFrame, Boolean requireAction) 
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
 	{
 		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
 		{
@@ -1856,7 +1879,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer p;
 				if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
 				{
-					if ((p = parseStateIndex(context, labelMap)) == null)
+					if ((p = parseStateIndex(context, actor)) == null)
 						return false;
 				}
 				else if ((p = matchNumeric()) == null)
@@ -1871,7 +1894,7 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
 					{
-						if ((p = parseStateIndex(context, labelMap)) == null)
+						if ((p = parseStateIndex(context, actor)) == null)
 							return false;
 					}
 					else if ((p = matchNumeric()) == null)
@@ -1900,7 +1923,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a next state line.
-	private Integer parseNextStateIndex(AbstractPatchContext<?> context, Map<String, Integer> labelMap, Integer lastLabelledStateIndex, int currentStateIndex)
+	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STOP))
@@ -1922,7 +1945,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOTO))
 		{
-			return parseStateIndex(context, labelMap);
+			return parseStateIndex(context, actor);
 		}
 		else
 		{
