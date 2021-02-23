@@ -1718,7 +1718,10 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		Integer nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
+		{
+			context.getState(index).setNextStateIndex(nextStateIndex);
 			return true;
+		}
 		
 		if (currentIsSpriteIndex(context))
 		{
