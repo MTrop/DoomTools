@@ -1099,7 +1099,7 @@
 #define S_TRAIL3        1087
 #define S_TRAIL4        1088
 
-#define S_FREE_START    1089
+#define S_FREE_START    1100
 #define S_FREE_END      3999
 
 #endif

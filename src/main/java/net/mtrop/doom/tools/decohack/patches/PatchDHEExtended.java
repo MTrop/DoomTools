@@ -374,13 +374,13 @@ public class PatchDHEExtended extends PatchMBF
 		}
 	};
 	
-	private static final Map<Integer, State> MAP_EXTENDEDSTATECACHE = new HashMap<Integer, State>();
+	private static final Map<Integer, State> MAP_POSTEXTENDEDSTATECACHE = new HashMap<Integer, State>();
 	
-	private static State getExtendedState(int index)
+	private static State getPostExtendedState(int index)
 	{
 		State state;
-		if ((state = MAP_EXTENDEDSTATECACHE.get(index)) == null)
-			MAP_EXTENDEDSTATECACHE.put(index, state = PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL));
+		if ((state = MAP_POSTEXTENDEDSTATECACHE.get(index)) == null)
+			MAP_POSTEXTENDEDSTATECACHE.put(index, state = PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL));
 		return state;
 	}
 	
@@ -428,12 +428,15 @@ public class PatchDHEExtended extends PatchMBF
 
 	protected PatchBoom.State getBoomState(int index)
 	{
-		int len = DEHSTATE.length + DEHSTATEMBF.length + DEHSTATEEXTENDED.length;
+		int mbflen = DEHSTATE.length + DEHSTATEMBF.length;
+		int extlen = mbflen + DEHSTATEEXTENDED.length;
 		
 		if (index >= getStateCount())
 			return null;
-		else if (index >= len && index < getStateCount())
-			return getExtendedState(index);
+		else if (index >= extlen)
+			return getPostExtendedState(index);
+		else if (index >= mbflen)
+			return Common.arrayElement(DEHSTATEEXTENDED, index - mbflen);
 		else
 			return super.getBoomState(index);
 	}

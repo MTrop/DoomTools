@@ -4,7 +4,9 @@ DecoHack
 ### Changed for 0.8.0
 
 * `Fixed` Parsing a single state body with just the next frame clause did nothing. (Issue #10) (thanks, Aurelius!)
+* `Fixed` Certain non-blank DEH Extended states were not accessible.
 * `Added` Ability to clear single states or labels on things and weapons. (Issue #11)
+* `Changed` `S_FREE_START` in `classpath:decohack/constants/extended/states.dh` is now 1100.
 
 
 ### Changed for 0.7.0
