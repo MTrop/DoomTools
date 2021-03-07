@@ -29,7 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
- * Script functions for PK3.
+ * Script functions for PK3/PKE.
  * @author Matthew Tropiano
  */
 public enum PK3Functions implements ScriptFunctionType
@@ -41,17 +41,17 @@ public enum PK3Functions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Opens a Doom PK3. The ZF* functions can work with this - a Doom PK3 is a Zip file! " +
+					"Opens a Doom PK3/PKE. The ZF* functions can work with this - a Doom PK3/PKE is a Zip file! " +
 					"The file, if opened, is registered as a resource, and will be closed when the script terminates."
 				)
 				.parameter("path", 
-					type(Type.STRING, "Path to PK3 file. Relative paths are relative to working directory."),
-					type(Type.OBJECTREF, "File", "Path to PK3 file. Relative paths are relative to working directory.")
+					type(Type.STRING, "Path to PK3/PKE file. Relative paths are relative to working directory."),
+					type(Type.OBJECTREF, "File", "Path to PK3/PKE file. Relative paths are relative to working directory.")
 				)
 				.returns(
-					type(Type.OBJECTREF, "DoomPK3", "An open PK3 file."),
+					type(Type.OBJECTREF, "DoomPK3", "An open PK3/PKE file."),
 					type(Type.ERROR, "Security", "If the OS denied opening the file for the required permissions."),
-					type(Type.ERROR, "IOError", "If [path] is null or the file is not a PK3 file, or it does could not be opened/found for some reason.")
+					type(Type.ERROR, "IOError", "If [path] is null or the file is not a PK3/PKE file, or it does could not be opened/found for some reason.")
 				)
 			;
 		}
@@ -93,10 +93,10 @@ public enum PK3Functions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Returns a list of all of the entries in an open PK3 file. This is a rebrand of ZFENTRY - same function."
+					"Returns a list of all of the entries in an open PK3/PKE file. This is a rebrand of ZFENTRY - same function."
 				)
 				.parameter("zip", 
-					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3/PKE file.")
 				)
 				.parameter("entry", 
 					type(Type.STRING, "The entry name.")
@@ -151,7 +151,7 @@ public enum PK3Functions implements ScriptFunctionType
 				scriptInstance.popStackValue(temp);
 				if (!temp.isObjectType(ZipFile.class))
 				{
-					returnValue.setError("BadParameter", "First parameter is not an open Zip/PK3 file.");
+					returnValue.setError("BadParameter", "First parameter is not an open Zip/PK3/PKE file.");
 					return true;
 				}
 
@@ -191,7 +191,7 @@ public enum PK3Functions implements ScriptFunctionType
 					"This is a rebrand of ZFENTRY - same function."
 				)
 				.parameter("zip", 
-					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3/PKE file.")
 				)
 				.parameter("entry", 
 					type(Type.STRING, "The entry name."),
@@ -220,10 +220,10 @@ public enum PK3Functions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Reads a PK3 entry as though it were a WAD file and returns an in-memory Wad buffer (not a resource - does not require closing)."
+					"Reads a PK3/PKE entry as though it were a WAD file and returns an in-memory Wad buffer (not a resource - does not require closing)."
 				)
 				.parameter("zip", 
-					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3 file.")
+					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3/PKE file.")
 				)
 				.parameter("entry", 
 					type(Type.STRING, "The entry name."),

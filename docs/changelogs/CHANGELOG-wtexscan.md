@@ -1,6 +1,12 @@
 WTexScan
 --------
 
+### Changed for 1.1.1
+
+* `Added` Autodetect PKE.
+* `Changed` Temp file name for PK3/PKEs extracted from an archive altered slightly.
+
+
 ### Changed for 1.1.0
 
 * `Added` Map filtering switch feature (by @XaserAcheron).

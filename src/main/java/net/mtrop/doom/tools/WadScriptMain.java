@@ -115,7 +115,7 @@ public final class WadScriptMain
 		new Resolver("Images", ImageFunctions.createResolver()),
 		new Resolver("Desktop", "DESKTOP", DesktopFunctions.createResolver()),
 		new Resolver("WADs", WadFunctions.createResolver()),
-		new Resolver("PK3s", PK3Functions.createResolver()),
+		new Resolver("PK3/PKEs", PK3Functions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
 		new Resolver("Utilities", "UTIL", UtilityFunctions.createResolver())
 	};

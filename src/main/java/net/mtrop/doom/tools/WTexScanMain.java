@@ -206,7 +206,10 @@ public final class WTexScanMain
 				ZipEntry ze = en.nextElement();
 				if (ze.isDirectory())
 					continue;
-				if (ze.getName().toLowerCase().endsWith(".wad"))
+				
+				String zeName = ze.getName().toLowerCase();
+				
+				if (zeName.endsWith(".wad"))
 				{
 					WadBuffer wm = null;
 					try (InputStream zin = zf.getInputStream(ze)) 
@@ -219,9 +222,9 @@ public final class WTexScanMain
 						options.errln("ERROR: Could not read entry "+ze.getName()+".");
 					}
 				}
-				else if (ze.getName().toLowerCase().endsWith(".pk3"))
+				else if (zeName.endsWith(".pk3") || zeName.endsWith(".pke"))
 				{
-					File pk3 = File.createTempFile("texspy", "pk3tmp");
+					File pk3 = File.createTempFile("wtexscan", "pk3tmp");
 					try (InputStream zin = zf.getInputStream(ze); FileOutputStream fos = new FileOutputStream(pk3)) 
 					{
 						IOUtils.relay(zin, fos);
@@ -494,11 +497,13 @@ public final class WTexScanMain
 						processWAD(f);
 					else if (f.getName().toLowerCase().endsWith(".pk3"))
 						processPK3(f.getPath(), f);
+					else if (f.getName().toLowerCase().endsWith(".pke"))
+						processPK3(f.getPath(), f);
 					else if (f.getName().toLowerCase().endsWith(".zip"))
 						processPK3(f.getPath(), f);
 					else
 					{
-						options.errf("ERROR: %s is not a WAD, PK3, or ZIP.\n", f.getPath());
+						options.errf("ERROR: %s is not a WAD, PK3, PKE, or ZIP.\n", f.getPath());
 						atLeastOneError = true;
 					}
 				}
@@ -678,7 +683,7 @@ public final class WTexScanMain
 		out.println("    --version           Prints version, and exits.");
 		out.println();
 		out.println("[files]:");
-		out.println("    <filename>          The files to inspect (WAD/PK3, accepts wildcards).");
+		out.println("    <filename>          The files to inspect (WAD/PK3/PKE, accepts wildcards).");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --quiet             Output no messages.");

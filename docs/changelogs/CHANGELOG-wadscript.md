@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.1.0.1
+
+* `Added` Clarifications to documentation that PKE files are also openable like PK3s.
+
+
 ### Changed for 1.1.0
 
 * `Added` Functions: WADSETTYPE for setting the WAD type.
