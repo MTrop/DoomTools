@@ -296,7 +296,10 @@ public class WadMergeContext
 		Common.createPathForFile(outFile);
 		
 		if (buffer instanceof WadBuffer)
+		{
 			((WadBuffer)buffer).writeToFile(outFile);
+			logf("Wrote file `%s`.\n", outFile.getPath());
+		}
 		else if (buffer instanceof WadFile)
 		{
 			File wadFile = new File(((WadFile)buffer).getFilePath());

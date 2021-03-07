@@ -74,7 +74,7 @@ public final class WadMergeMain
 
 		public Options setStdout(OutputStream out) 
 		{
-			this.stdout = new PrintStream(out, true);;
+			this.stdout = new PrintStream(out, true);
 			return this;
 		}
 		

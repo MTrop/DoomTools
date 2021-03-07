@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.5.1
+
+* `Fixed` Saving a WAD from a buffer didn't output a message (introduced in previous version).
+
+
 ### Changed for 1.5.0
 
 * `Changed` Added ability to create IWAD buffers via CREATE and CREATEFILE.
