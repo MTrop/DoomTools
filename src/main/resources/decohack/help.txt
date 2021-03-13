@@ -32,6 +32,13 @@ you proceed, as some pieces are similar, and some are not.
 <NUMBER>     : <INTEGER>
                - <INTEGER>
 
+<FIXED>      : Any number with a decimal point in it (converted to a 
+               fixed-point number). 
+
+<NUMERIC>    : <FIXED>
+               <INTEGER>
+               - <FIXED>
+               - <NUMBER>
 
 ==============================================================================
 ===== Comments
@@ -167,7 +174,7 @@ changes.
 
     state <INTEGER> 
     { 
-        [ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>] ]
+        [ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>|<Offset>] ]
         ( 
             goto <INTEGER> 
             | goto <IDENTIFIER>
@@ -202,6 +209,29 @@ names and references to thing or weapon state labels (like how goto is used).
 	A_RandomJump(thing 23 pain, 128)
 
 
+Some parameter values can be set with fixed-point numbers, but not every 
+function requires them (be careful - it is up to the function to interpret
+them as such):
+
+    A_Mushroom(-45.0, 16.0)
+
+
+If you don't use an Action Pointer, you can still set the parameter values
+via the "Offset" function (only useful on weapon states):
+
+	Offset(1, 32)
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: Even if you provide an action pointer, you can still 
+      set the offsets (misc parameters) even if the function does not
+      use them exclusively just by putting them in parenthesis, a la:
+      A_Raise(1, 32).
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
 Examples:
 
     state 11
@@ -210,7 +240,13 @@ Examples:
         wait
     }
 
-    state 15
+    state 13
+    {
+        PISG A 4 Offset(1, 32)
+        goto 16
+    }
+
+    state 16
     {
         PISG C 4
         goto 16
@@ -266,9 +302,9 @@ Examples:
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-      IMPORTANT: (NOTE: "Freeing" a state does NOT ALTER IT, it just 
-      flags that state as "available" for the state-filling functions 
-      in this utility.)
+      IMPORTANT: "Freeing" a state does NOT ALTER IT, it just flags 
+      that state as "available" for the state-filling functions in 
+      this utility.
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -280,7 +316,7 @@ states (especially action pointer states in Doom 1.9).
 
     state fill <INTEGER> 
     { 
-        <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>]
+        <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>|<Offset>]
         ...
         (
             goto <INTEGER> 
@@ -319,10 +355,10 @@ writing the following:
     state protect <INTEGER> to <INTEGER>
 
 
-It will not be flagged as "free" if in a range of free states, and attempting 
-to alter the state directly will throw an error. By default, state 0 and 1 
-are flagged as protected. You can turn off the protection on states by doing 
-the following:
+It will not be flagged as "free" if in a range of free states, it won't be 
+treated as "free" in state filling functions, and attempting to alter the 
+state directly will throw an error. By default, state 0 and 1 are flagged as 
+protected. You can turn off the protection on states by doing the following:
 
     state unprotect <INTEGER>
     state unprotect <INTEGER> to <INTEGER>
@@ -373,7 +409,11 @@ Thing for pickups.
         // specific state assignment using another weapon's states.
         state <WeaponStateName> weapon <INTEGER> <WeaponStateLabel>
         
-        clear states // if present, clear all state indices (not freed!).
+        // if present, clear all state indices (not freed!).
+        clear states 
+
+		// clears a specific label (not freed!).
+        clear state <WeaponStateLabel>
         
         states
         {
@@ -458,6 +498,7 @@ clause:
         ...
     }
 
+All weapon characteristics and state labels get copied.
 
 You can also swap two weapon slots:
 
@@ -510,8 +551,6 @@ the thing state indices. Other labels are used for arbitrary jump points.
         DeathSound <STRING>
         ActiveSound <STRING>
 
-        clear states // if present, clear all state indices (not freed!).
-        
         // specific state assignment.
         state <ThingStateName> <INTEGER>
         
@@ -520,6 +559,12 @@ the thing state indices. Other labels are used for arbitrary jump points.
         
         // specific state assignment using another weapon's states.
         state <ThingStateName> weapon <INTEGER> <WeaponStateLabel>
+        
+        // if present, clear all state indices (not freed!).
+        clear states
+
+		// clears a specific label (not freed!).
+        clear state <ThingStateLabel>
         
         states
         {
@@ -647,6 +692,8 @@ clause:
         ...
     }
 
+
+All thing characteristics and state labels get copied.
 
 You can also swap two thing slots:
 

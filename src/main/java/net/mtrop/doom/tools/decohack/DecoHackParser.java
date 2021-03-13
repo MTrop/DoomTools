@@ -1700,6 +1700,11 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
 			return false;
 		}
+		if (context.isProtectedState(startIndex))
+		{
+			addErrorMessage("Starting state index for state fill, %d, is a protected state.", startIndex);
+			return false;
+		}
 		
 		// First frame must match state, and the block must contain at least one state.
 		if (!currentIsSpriteIndex(context))
@@ -1739,6 +1744,12 @@ public final class DecoHackParser extends Lexer.Parser
 	// Either consists of a next state index clause, a state and next index clause, or just a state.
 	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
 	{
+		if (context.isProtectedState(index))
+		{
+			addErrorMessage("State index %d is a protected state.", index);
+			return false;
+		}
+		
 		Integer nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{

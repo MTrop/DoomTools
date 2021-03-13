@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.9.0
+
+* `Changed` Handling of protected states - protected states are never treated as free, and cannot be altered directly.
+
+
 ### Changed for 0.8.0
 
 * `Fixed` Parsing a single state body with just the next frame clause did nothing. (Issue #10) (thanks, Aurelius!)

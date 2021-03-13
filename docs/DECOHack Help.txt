@@ -355,10 +355,10 @@ writing the following:
     state protect <INTEGER> to <INTEGER>
 
 
-It will not be flagged as "free" if in a range of free states, and attempting 
-to alter the state directly will throw an error. By default, state 0 and 1 
-are flagged as protected. You can turn off the protection on states by doing 
-the following:
+It will not be flagged as "free" if in a range of free states, it won't be 
+treated as "free" in state filling functions, and attempting to alter the 
+state directly will throw an error. By default, state 0 and 1 are flagged as 
+protected. You can turn off the protection on states by doing the following:
 
     state unprotect <INTEGER>
     state unprotect <INTEGER> to <INTEGER>

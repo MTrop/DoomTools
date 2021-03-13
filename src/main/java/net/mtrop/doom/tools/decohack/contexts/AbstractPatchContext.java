@@ -256,7 +256,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	/**
-	 * Marks a state as "protected" - attempting to free this state will throw
+	 * Marks a state as "protected" - attempting to free this state or alter it
+	 * directly will throw an exception.
 	 * @param index the index to mark as protected.
 	 * @param state true to set as "protected", false to unset.
 	 */
@@ -334,7 +335,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Integer findNextFreeState(int startingIndex)
 	{
 		int i = startingIndex;
-		while (!isFreeState(i))
+		while (!isFillableState(i))
 		{
 			i++;
 			if (i == startingIndex)
@@ -355,7 +356,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Integer findNextFreeActionPointerState(int startingIndex)
 	{
 		int i = startingIndex;
-		while (!(isFreeState(i) && getStateActionPointerIndex(i) != null))
+		while (!(isFillableState(i) && getStateActionPointerIndex(i) != null))
 		{
 			i++;
 			if (i == startingIndex)
@@ -376,7 +377,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Integer findNextFreeNonActionPointerState(int startingIndex)
 	{
 		int i = startingIndex;
-		while (!(isFreeState(i) && getStateActionPointerIndex(i) == null))
+		while (!(isFillableState(i) && getStateActionPointerIndex(i) == null))
 		{
 			i++;
 			if (i == startingIndex)
@@ -385,6 +386,20 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 				i = 0;
 		}
 		return i;
+	}
+
+	/**
+	 * Checks if a state is considered "fillable," which means it is both
+	 * free and not protected.
+	 * Equivalent to: <code>isFreeState(index) && !isProtectedState(index)</code>
+	 * @param index the state index to check.
+	 * @return true if so, false if not.
+	 * @see #isFreeState(int)
+	 * @see #isProtectedState(int)
+	 */
+	public boolean isFillableState(int index)
+	{
+		return isFreeState(index) && !isProtectedState(index);
 	}
 	
 }
