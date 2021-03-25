@@ -12,6 +12,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -32,6 +35,7 @@ import net.mtrop.doom.texture.PatchNames;
 import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.common.Common;
@@ -68,6 +72,9 @@ public class WadMergeContext
 				return a.getPath().compareTo(b.getPath());
 		}
 	};
+
+	private final int WIDTH_INDEX = 0;
+	private final int HEIGHT_INDEX = 2;
 
 	/** Map of open wads. */
 	private TreeMap<String, Wad> currentWads;
@@ -824,7 +831,10 @@ public class WadMergeContext
 							return resp;
 					}
 					String textureName = NameUtils.toValidTextureName(namenoext);
-					textureSet.createTexture(textureName).createPatch(textureName);
+					Texture texture = textureSet.createTexture(textureName);
+					texture.setHeight(getTextureDimensionFromFile(f, HEIGHT_INDEX));
+					texture.setWidth(getTextureDimensionFromFile(f, WIDTH_INDEX));
+					texture.createPatch(textureName);
 					verbosef("Add texture `%s`...\n", textureName);
 				}
 			}
@@ -848,6 +858,22 @@ public class WadMergeContext
 		return Response.OK;
 	}
 	
+	// Assumes that the texture is in the Doom patch format (not a png)
+	private int getTextureDimensionFromFile(File file, int byteIndex) throws IOException
+	{
+		RandomAccessFile raf = new RandomAccessFile(file, "r");
+
+		byte[] dimensionBytes = new byte[2];
+
+		raf.seek(byteIndex);
+		raf.read(dimensionBytes);
+		raf.close();
+
+		ByteBuffer byteBuffer = ByteBuffer.wrap(dimensionBytes);
+		byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+		return byteBuffer.getShort(); 
+	}
+
 	/**
 	 * Creates ANIMATED and SWITCHES entries in a buffer using a table file read by SWANTBLS.
 	 * If ANIMATED and SWITCHES exist, they are appended to.
