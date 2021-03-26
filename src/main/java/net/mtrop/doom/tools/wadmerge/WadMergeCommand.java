@@ -454,13 +454,16 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGENAMESPACE [dest-symbol] [src-symbol] [namespace]"); 
+			out.println("MERGENAMESPACE [dest-symbol] [src-symbol] [namespace] [opt:amend]"); 
 			out.println("    Adds all entries from [src-symbol] into [dest-symbol] that");
 			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
 			out.println("    the START/END namespace markers.");
 			out.println("    [dest-symbol]: Destination symbol.");
 			out.println("    [src-symbol]:  Source symbol.");
 			out.println("    [namespace]:   Namespace name (e.g. FF, PP, TX).");
+			out.println("    [amend]:       (Optional) If \"amend\", find the namespace in the");
+			out.println("                   destination and append to its end. If the namespace does not");
+			out.println("                   exist in the destination, it is created.");
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
@@ -472,8 +475,14 @@ public enum WadMergeCommand
 		@Override
 		public Response execute(WadMergeContext context, TokenScanner scanner)
 		{
+			String destinationSymbol = scanner.nextString(); 
+			String sourceSymbol = scanner.nextString();
+			String namespace = scanner.nextString();
+			boolean amendNamespace = false;
+			if (scanner.hasNext())
+				amendNamespace = scanner.nextBoolean("amend");
 			try {
-				return context.mergeNamespace(scanner.nextString(), scanner.nextString(), scanner.nextString());
+				return context.mergeNamespace(destinationSymbol, sourceSymbol, namespace, amendNamespace);
 			} catch (IOException e) {
 				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
 				return Response.BAD_FILE;
@@ -493,6 +502,9 @@ public enum WadMergeCommand
 			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [path]:      The WAD contents to add.");
 			out.println("    [namespace]: Namespace name (e.g. FF, PP, TX).");
+			out.println("    [amend]:     (Optional) If \"amend\", find the namespace in the");
+			out.println("                 destination and append to its end. If the namespace does not");
+			out.println("                 exist in the destination, it is created.");
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_FILE if the file does not exist or is a directory,"); 
@@ -508,8 +520,12 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.nextString();
 			File wadFile = new File(scanner.nextString());
+			String namespace = scanner.nextString();
+			boolean amendNamespace = false;
+			if (scanner.hasNext())
+				amendNamespace = scanner.nextBoolean("amend");
 			try {
-				return context.mergeNamespace(symbol, wadFile, scanner.nextString());
+				return context.mergeNamespace(symbol, wadFile, namespace, amendNamespace);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", wadFile);
 				return Response.BAD_FILE;
@@ -792,13 +808,15 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEDEUTEXFILE [symbol] [path] [opt:entry]");
+			out.println("MERGEDEUTEXFILE [symbol] [path] [opt:entry] [opt:strife]");
 			out.println("    Reads file from [path], interprets it as a DEUTeX texture/patch assembly");
 			out.println("    file, creates/amends TEXTUREx/PNAMES. The name of the file is the name of");
 			out.println("    the texture lump.");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The file to read.");
 			out.println("    [entry]:  (Optional) If specified, the name of the entry to write.");
+			out.println("    [strife]: (Optional) If \"strife\", the texture entry is read and/or");
+			out.println("              written as a Strife-formatted texture set.");
 			out.println("    ................................");
 			out.println("    Returns: OK if the file was found and contents were merged in,"); 
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
@@ -811,14 +829,22 @@ public enum WadMergeCommand
 		{
 			String symbol = scanner.nextString();
 			File file = new File(scanner.nextString());
+
 			String textureEntryName = null;
+			boolean strife = false;
 			if (scanner.hasNext())
+			{
 				textureEntryName = scanner.nextString();
+				if (scanner.hasNext())
+					strife = scanner.nextBoolean("strife");
+			}
 			else
+			{
 				textureEntryName = Common.getFileNameWithoutExtension(file);
-			
+			}
+
 			try {
-				return context.mergeDEUTEXTextureFile(symbol, file, false, textureEntryName);
+				return context.mergeDEUTEXTextureFile(symbol, file, strife, textureEntryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
@@ -837,18 +863,18 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGETEXTUREDIR [symbol] [path] [entry]");
-		    out.println("    Reads directory from [path].");
-		    out.println("    Calls `MARKER [symbol] pp_start`.");
-		    out.println("    For each file in [path],");
-		    out.println("        Add file name to PNAMES, add [file] to TEXTURE1 with only patch [file].");
-		    out.println("    Calls `MARKER [symbol] pp_end`.");
-		    out.println("    Export [entry]/PNAMES.");
+			out.println("MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]");
+			out.println("    Imports a directory's files as Doom Patches (or PNGs) and adds them");
+			out.println("    to either a new or already-existing PP namespace and texture set entry");
+			out.println("    (plus PNAMES).");
 			out.println("    [symbol]: The symbol to add to.");
-			out.println("    [path]:   The file to read.");
-			out.println("    [entry]:  The name of the texture entry to write.");
+			out.println("    [path]:   The directory to read.");
+			out.println("    [entry]:  The name of the texture entry to write/append to.");
+			out.println("    [strife]: (Optional) If \"strife\", the texture entry is read and/or");
+			out.println("              written as a Strife-formatted texture set.");
 			out.println("    ................................");
 			out.println("    Returns: OK if the file was found and contents were merged in,");
+			out.println("             BAD_FILE if a file could not be read,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
 			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
 		}
@@ -859,9 +885,13 @@ public enum WadMergeCommand
 			String symbol = scanner.nextString();
 			String file = scanner.nextString();
 			String textureEntryName = scanner.nextString();
+
+			boolean strife = false;
+			if (scanner.hasNext())
+				strife = scanner.nextBoolean("strife");
 			
 			try {
-				return context.mergeTextureDirectory(symbol, new File(file), textureEntryName);
+				return context.mergeTextureDirectory(symbol, new File(file), strife, textureEntryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
