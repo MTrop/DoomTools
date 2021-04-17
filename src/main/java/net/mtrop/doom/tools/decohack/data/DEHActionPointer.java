@@ -107,6 +107,21 @@ public enum DEHActionPointer
 	FIREOLDBFG      (-1, "FireOldBFG", DEHActionPointerType.MBF),
 	BETASKULLATTACK (-1, "BetaSkullAttack", DEHActionPointerType.MBF),
 	STOP            (-1, "Stop", DEHActionPointerType.MBF),
+
+	// MBF21 Action Pointers
+
+	SPAWNFACING         (-1, "SpawnFacing", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE),
+	MONSTERPROJECTILE   (-1, "MonsterProjectile", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, (-360 << 16) + 1, (360 << 16) - 1),
+	MONSTERBULLETATTACK (-1, "MonsterBulletAttack", DEHActionPointerType.MBF21, -32767, 32767, (-360 << 16) + 1, (360 << 16) - 1),
+	RADIUSDAMAGE        (-1, "RadiusDamage", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE),
+	WEAPONPROJECTILE    (-1, "WeaponProjectile", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, (-360 << 16) + 1, (360 << 16) - 1),
+	WEAPONBULLETATTACK  (-1, "WeaponBulletAttack", DEHActionPointerType.MBF21, -32767, 32767, (-360 << 16) + 1, (360 << 16) - 1),
+	WEAPONSOUND         (-1, "WeaponSound", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, 0, 1),
+	WEAPONJUMP          (-1, "WeaponJump", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, 0, 255),
+	CONSUMEAMMO         (-1, "ConsumeAmmo", DEHActionPointerType.MBF21, -32767, 32767),
+	CHECKAMMO           (-1, "CheckAmmo", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, -32767, 32767),
+	REFIRETO            (-1, "RefireTo", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, 0, 1),
+	GUNFLASHTO          (-1, "GunFlashTo", DEHActionPointerType.MBF21, 0, Integer.MAX_VALUE, 0, 1),
 	;
 	
 	/** Originating frame (for DEH 3.0 format 19). */
