@@ -128,6 +128,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private static final String KEYWORD_WEAPON = "weapon";
 	private static final String KEYWORD_AMMOTYPE = "ammotype";
+	private static final String KEYWORD_AMMOPERSHOT = "ammopershot";
 	private static final String KEYWORD_WEAPONSTATE_READY = DEHWeapon.STATE_LABEL_READY;
 	private static final String KEYWORD_WEAPONSTATE_SELECT = DEHWeapon.STATE_LABEL_SELECT;
 	private static final String KEYWORD_WEAPONSTATE_DESELECT = DEHWeapon.STATE_LABEL_DESELECT;
@@ -1345,9 +1346,22 @@ public final class DecoHackParser extends Lexer.Parser
 
 				weapon.setAmmoType(ammo);
 			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMOPERSHOT))
+			{
+				Integer ammoPerShot;
+				if ((ammoPerShot = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected ammo per shot: a positive integer.");
+					return false;
+				}
+				else
+				{
+					weapon.setAmmoPerShot(ammoPerShot);
+				}
+			}
 			else
 			{
-				addErrorMessage("Expected '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_STATE);
+				addErrorMessage("Expected '%s', '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_AMMOPERSHOT, KEYWORD_STATE);
 				return false;
 			}
 		}		

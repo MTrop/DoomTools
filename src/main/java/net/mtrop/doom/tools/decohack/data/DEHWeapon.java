@@ -43,6 +43,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	
 	/** Ammo type. */
 	private Ammo ammoType;
+	
+	/** Ammo per shot. */
+	private int ammoPerShot;
 
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -53,6 +56,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		setName("");
 		setAmmoType(null);
+		setAmmoPerShot(-1);
 		clearLabels();
 	}
 	
@@ -67,7 +71,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 * @param flash the muzzle flash index.
 	 * @return a weapon entry.
 	 */
-	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash)
+	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash, int ammoPerShot)
 	{
 		DEHWeapon out = new DEHWeapon(); 
 		out.setName(name);
@@ -78,6 +82,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		out.setReadyFrameIndex(ready);
 		out.setFireFrameIndex(fire);
 		out.setFlashFrameIndex(flash);
+		out.setAmmoPerShot(ammoPerShot);
 		return out;
 	}
 	
@@ -86,6 +91,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	{
 		setName(source.name);
 		setAmmoType(source.ammoType);
+		setAmmoPerShot(source.ammoPerShot);
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
@@ -127,6 +133,25 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setAmmoType(Ammo ammoType) 
 	{
 		this.ammoType = ammoType;
+		return this;
+	}
+	
+	/**
+	 * @return the ammo per shot.
+	 */
+	public int getAmmoPerShot() 
+	{
+		return ammoPerShot;
+	}
+	
+	/**
+	 * Sets the ammo per shot.
+	 * @param ammoPerShot the ammo per shot.
+	 * @return this object.
+	 */
+	public DEHWeapon setAmmoPerShot(int ammoPerShot) 
+	{
+		this.ammoPerShot = ammoPerShot;
 		return this;
 	}
 	
@@ -276,6 +301,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public boolean equals(DEHWeapon obj) 
 	{
 		return ammoType == obj.ammoType
+			&& ammoPerShot == obj.ammoPerShot
 			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
 			&& getLowerFrameIndex() == obj.getLowerFrameIndex()
 			&& getReadyFrameIndex() == obj.getReadyFrameIndex()
@@ -302,6 +328,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 			writer.append("Shooting frame = ").append(String.valueOf(getFireFrameIndex())).append("\r\n");
 		if (getFlashFrameIndex() != weapon.getFlashFrameIndex())
 			writer.append("Firing frame = ").append(String.valueOf(getFlashFrameIndex())).append("\r\n");
+
+		if (ammoPerShot != weapon.ammoPerShot)
+			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 		writer.flush();
 	}
 
