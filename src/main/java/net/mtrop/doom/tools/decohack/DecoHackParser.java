@@ -24,6 +24,7 @@ import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDHEExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
@@ -172,6 +173,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_BOOM = "boom";
 	private static final String KEYWORD_MBF = "mbf";
 	private static final String KEYWORD_EXTENDED = "extended";
+	private static final String KEYWORD_MBF21 = "mbf21";
 
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
@@ -273,10 +275,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return new PatchMBFContext();
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EXTENDED))
 			return new PatchDHEExtendedContext();
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MBF21))
+			return new PatchMBF21Context();
 		else
 		{
-			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s).", 
-				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED
+			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s, %s).", 
+				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED, KEYWORD_MBF21
 			);
 			return null;
 		}
@@ -1880,7 +1884,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			useOffsets = matchOffsetDirective();
 		}
-		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && state.action.isMBF())
+		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && !(context instanceof PatchMBF21Context) && state.action.isMBF())
 		{
 			addErrorMessage("MBF action pointer used: " + state.action.getMnemonic() +". Patch is not MBF or better.");
 			return false;

@@ -1,0 +1,10 @@
+#ifndef __DECOHACK_MBF21__
+#define __DECOHACK_MBF21__
+
+using mbf21
+
+#include "constants/mbf21.dh"
+
+state free S_FREE_START to S_FREE_END // free the "free" states immediately
+
+#endif
