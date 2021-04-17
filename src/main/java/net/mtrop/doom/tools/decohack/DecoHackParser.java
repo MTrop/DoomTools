@@ -1884,9 +1884,9 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			useOffsets = matchOffsetDirective();
 		}
-		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && !(context instanceof PatchMBF21Context) && state.action.isMBF())
+		else if (!context.isActionPointerTypeSupported(state.action.getType()))
 		{
-			addErrorMessage("MBF action pointer used: " + state.action.getMnemonic() +". Patch is not MBF or better.");
+			addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
 			return false;
 		}
 		

@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchBoom;
 
@@ -22,4 +23,9 @@ public class PatchBoomContext extends AbstractPatchBoomContext
 		return BOOMPATCH;
 	}
 
+	@Override
+	public boolean isActionPointerTypeSupported(DEHActionPointerType type)
+	{
+		return type == DEHActionPointerType.DOOM19;
+	}
 }

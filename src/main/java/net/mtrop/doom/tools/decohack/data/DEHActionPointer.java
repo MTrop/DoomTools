@@ -8,6 +8,8 @@ package net.mtrop.doom.tools.decohack.data;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
+
 /**
  * Enumeration of action pointers for frames.
  * @author Matthew Tropiano
@@ -92,27 +94,27 @@ public enum DEHActionPointer
 	
 	// MBF Action Pointers
 	
-	DETONATE        (-1, "Detonate", true),
-	MUSHROOM        (-1, "Mushroom", true, (-360 << 16) + 1, (360 << 16) - 1, Integer.MIN_VALUE, Integer.MAX_VALUE), // fixed point on both
-	SPAWN           (-1, "Spawn", true, 0, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE),
-	TURN            (-1, "Turn", true, -359, 359),
-	FACE            (-1, "Face", true, 0, 359),
-	SCRATCH         (-1, "Scratch", true, -32767, 32767, 0, Integer.MAX_VALUE),
-	PLAYSOUND       (-1, "PlaySound", true, 0, Integer.MAX_VALUE, 0, 1),
-	RANDOMJUMP      (-1, "RandomJump", true, 0, Integer.MAX_VALUE, 0, 255),
-	LINEEFFECT      (-1, "LineEffect", true, -32767, 32767, -32767, 32767),
-	DIE             (-1, "Die", true),
-	FIREOLDBFG      (-1, "FireOldBFG", true),
-	BETASKULLATTACK (-1, "BetaSkullAttack", true),
-	STOP            (-1, "Stop", true),	
+	DETONATE        (-1, "Detonate", DEHActionPointerType.MBF),
+	MUSHROOM        (-1, "Mushroom", DEHActionPointerType.MBF, (-360 << 16) + 1, (360 << 16) - 1, Integer.MIN_VALUE, Integer.MAX_VALUE), // fixed point on both
+	SPAWN           (-1, "Spawn", DEHActionPointerType.MBF, 0, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE),
+	TURN            (-1, "Turn", DEHActionPointerType.MBF, -359, 359),
+	FACE            (-1, "Face", DEHActionPointerType.MBF, 0, 359),
+	SCRATCH         (-1, "Scratch", DEHActionPointerType.MBF, -32767, 32767, 0, Integer.MAX_VALUE),
+	PLAYSOUND       (-1, "PlaySound", DEHActionPointerType.MBF, 0, Integer.MAX_VALUE, 0, 1),
+	RANDOMJUMP      (-1, "RandomJump", DEHActionPointerType.MBF, 0, Integer.MAX_VALUE, 0, 255),
+	LINEEFFECT      (-1, "LineEffect", DEHActionPointerType.MBF, -32767, 32767, -32767, 32767),
+	DIE             (-1, "Die", DEHActionPointerType.MBF),
+	FIREOLDBFG      (-1, "FireOldBFG", DEHActionPointerType.MBF),
+	BETASKULLATTACK (-1, "BetaSkullAttack", DEHActionPointerType.MBF),
+	STOP            (-1, "Stop", DEHActionPointerType.MBF),
 	;
 	
 	/** Originating frame (for DEH 3.0 format 19). */
 	private int frame;
 	/** Mnemonic name for BEX/DECORATE. */
 	private String mnemonic;
-	/** MBF only. */
-	private boolean mbf;
+	/** Action pointer type. */
+	private DEHActionPointerType type;
 	
 	private int param0min;
 	private int param0max;
@@ -134,24 +136,24 @@ public enum DEHActionPointer
 	
 	private DEHActionPointer(int frame, String mnemonic)
 	{
-		this(frame, mnemonic, false, 0, 0, 0, 0);
+		this(frame, mnemonic, DEHActionPointerType.DOOM19, 0, 0, 0, 0);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type)
 	{
-		this(frame, mnemonic, mbf, 0, 0, 0, 0);
+		this(frame, mnemonic, type, 0, 0, 0, 0);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf, int param0min, int param0max)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type, int param0min, int param0max)
 	{
-		this(frame, mnemonic, mbf, param0min, param0max, 0, 0);
+		this(frame, mnemonic, type, param0min, param0max, 0, 0);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf, int param0min, int param0max, int param1min, int param1max)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type, int param0min, int param0max, int param1min, int param1max)
 	{
 		this.frame = frame;
 		this.mnemonic = mnemonic;
-		this.mbf = mbf;
+		this.type = type;
 		this.param0min = param0min;
 		this.param0max = param0max;
 		this.param1min = param1min;
@@ -168,9 +170,9 @@ public enum DEHActionPointer
 		return mnemonic;
 	}
 	
-	public boolean isMBF() 
+	public DEHActionPointerType getType() 
 	{
-		return mbf;
+		return type;
 	}
 	
 	public int getParam0min()

@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
 
@@ -20,6 +21,12 @@ public class PatchDoom19Context extends AbstractPatchDoom19Context
 	public DEHPatchDoom19 getSourcePatch()
 	{
 		return DOOM19PATCH;
+	}
+
+	@Override
+	public boolean isActionPointerTypeSupported(DEHActionPointerType type)
+	{
+		return type == DEHActionPointerType.DOOM19;
 	}
 
 	/**
