@@ -1,7 +1,7 @@
 DecoHack
 --------
 
-### Changed for [NOW]
+### Changed for 0.10.0
 
 * `Added` An index value clause for sound indices on parameters.
 

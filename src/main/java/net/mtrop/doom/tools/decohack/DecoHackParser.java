@@ -1626,6 +1626,18 @@ public final class DecoHackParser extends Lexer.Parser
 		return stateIndex;
 	}
 	
+	// Parses a sound index.
+	private Integer parseSoundIndex(AbstractPatchContext<?> context)
+	{
+		Integer value;
+		if ((value = matchSoundIndexName(context)) == null)
+		{
+			addErrorMessage("Expected a valid sound name after '%s'.", KEYWORD_SOUND);
+			return null;
+		}
+		return value;
+	}
+	
 	// Parses a state block.
 	private boolean parseStateBlock(AbstractPatchContext<?> context)
 	{
@@ -1901,19 +1913,13 @@ public final class DecoHackParser extends Lexer.Parser
 				// get first argument
 				Integer p;
 				if ((p = parseActionPointerParameterValue(context, actor)) == null)
-				{
-					addErrorMessage("Expected parameter.");
 					return false;
-				}
 				state.parameter0 = p;
 				
 				if (matchType(DecoHackKernel.TYPE_COMMA))
 				{
 					if ((p = parseActionPointerParameterValue(context, actor)) == null)
-					{
-						addErrorMessage("Expected a second parameter after ','.");
 						return false;
-					}
 					state.parameter1 = p;
 				}
 
@@ -1943,7 +1949,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
-			return matchSoundIndexName(context);
+			return parseSoundIndex(context);
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
 		else if ((value = matchNumeric()) != null)
