@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for [NOW]
+
+* `Added` An index value clause for sound indices on parameters.
+
+
 ### Changed for 0.9.0
 
 * `Changed` Handling of protected states - protected states are never treated as free, and cannot be altered directly.

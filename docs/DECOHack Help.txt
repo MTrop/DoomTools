@@ -196,22 +196,26 @@ fullbright. Action pointer mnemonics must start with A_.
 Some action pointers, especially in MBF and later formats, can be optionally 
 parameterized up to two parameters:
 
-	A_Die
-	A_Die()
-	A_Turn(90)
-	A_RandomJump(344, 128)
+    A_Die
+    A_Die()
+    A_Turn(90)
+    A_RandomJump(344, 128)
 
 
-Parameter values can also refer to state indices via thing or weapon label 
-names and references to thing or weapon state labels (like how goto is used).
+Parameter values can also resolve to values via thing or weapon label names, 
+sound indices, and references to thing or weapon state labels (like how goto 
+is used).
 
-	A_RandomJump(missile2, 255)
-	A_RandomJump(thing 23 pain, 128)
+    A_RandomJump(missile2, 255)         // Actor label
+    A_RandomJump(thing 23 pain, 128)    // Thing state label
+    A_RandomJump(weapon 5 fire2, 128)   // Weapon state label
+    A_PlaySound(sound "FRE001", 0)      // Sound name
+    A_PlaySound(sound pistol, 0)        // Sound name
 
 
 Some parameter values can be set with fixed-point numbers, but not every 
-function requires them (be careful - it is up to the function to interpret
-them as such):
+function requires them or understands them (be careful - it is up to the 
+function to interpret them as such):
 
     A_Mushroom(-45.0, 16.0)
 
@@ -219,7 +223,7 @@ them as such):
 If you don't use an Action Pointer, you can still set the parameter values
 via the "Offset" function (only useful on weapon states):
 
-	Offset(1, 32)
+    Offset(1, 32)
 
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
@@ -412,7 +416,7 @@ Thing for pickups.
         // if present, clear all state indices (not freed!).
         clear states 
 
-		// clears a specific label (not freed!).
+        // clears a specific label (not freed!).
         clear state <WeaponStateLabel>
         
         states
@@ -563,7 +567,7 @@ the thing state indices. Other labels are used for arbitrary jump points.
         // if present, clear all state indices (not freed!).
         clear states
 
-		// clears a specific label (not freed!).
+        // clears a specific label (not freed!).
         clear state <ThingStateLabel>
         
         states
