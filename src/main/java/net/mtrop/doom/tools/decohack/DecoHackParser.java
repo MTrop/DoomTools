@@ -1807,8 +1807,8 @@ public final class DecoHackParser extends Lexer.Parser
 				.setFrameIndex(parsedState.frameList.get(0))
 				.setDuration(parsedState.duration)
 				.setBright(parsedState.bright)
-				.setParameter0(parsedState.parameter0)
-				.setParameter1(parsedState.parameter1)
+				.setMisc1(parsedState.misc1)
+				.setMisc2(parsedState.misc2)
 			;
 
 			// Try to parse next state clause.
@@ -1891,8 +1891,8 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		// Maybe parse parameters.
-		state.parameter0 = 0;
-		state.parameter1 = 0;
+		state.misc1 = 0;
+		state.misc2 = 0;
 		
 		if (state.action != null || useOffsets)
 		{
@@ -1917,7 +1917,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 
-				state.parameter0 = p;
+				state.misc1 = p;
 				
 				if (matchType(DecoHackKernel.TYPE_COMMA))
 				{
@@ -1932,7 +1932,7 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 
-					state.parameter1 = p;
+					state.misc2 = p;
 				}
 
 				if (!matchType(DecoHackKernel.TYPE_RPAREN))
@@ -2130,8 +2130,8 @@ public final class DecoHackParser extends Lexer.Parser
 				.setFrameIndex(state.frameList.pollFirst())
 				.setDuration(state.duration)
 				.setBright(state.bright)
-				.setParameter0(state.parameter0)
-				.setParameter1(state.parameter1)
+				.setMisc1(state.misc1)
+				.setMisc2(state.misc2)
 			;
 	
 			if (isBoom && pointerIndex != null && state.action == null)
@@ -2841,8 +2841,8 @@ public final class DecoHackParser extends Lexer.Parser
 		private Integer duration;
 		private Boolean bright;
 		private DEHActionPointer action;
-		private Integer parameter0;
-		private Integer parameter1;
+		private Integer misc1;
+		private Integer misc2;
 		
 		private ParsedState()
 		{
@@ -2857,8 +2857,8 @@ public final class DecoHackParser extends Lexer.Parser
 			this.duration = null;
 			this.bright = null;
 			this.action = null;
-			this.parameter0 = null;
-			this.parameter1 = null;
+			this.misc1 = null;
+			this.misc2 = null;
 		}
 		
 	}
