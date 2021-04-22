@@ -11,9 +11,21 @@ package net.mtrop.doom.tools.decohack.data;
  */
 public enum DEHActionPointerType
 {
-	DOOM19,
-	MBF,
-	MBF21;
+	DOOM19(false),
+	MBF(false),
+	MBF21(true);
 
 	public static final DEHActionPointerType[] VALUES = values();
+
+	private boolean useArgs;
+
+	private DEHActionPointerType(boolean useArgs)
+	{
+		this.useArgs = useArgs;
+	}
+
+	public boolean getUseArgs()
+	{
+		return useArgs;
+	}
 }

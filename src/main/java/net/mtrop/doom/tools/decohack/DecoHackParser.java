@@ -1809,6 +1809,7 @@ public final class DecoHackParser extends Lexer.Parser
 				.setBright(parsedState.bright)
 				.setMisc1(parsedState.misc1)
 				.setMisc2(parsedState.misc2)
+				.setArgs(parsedState.args)
 			;
 
 			// Try to parse next state clause.
@@ -1889,12 +1890,12 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
 			return false;
 		}
-		
-		// Maybe parse parameters.
+
+		// Maybe parse misc fields (offsets / MBF args)
 		state.misc1 = 0;
 		state.misc2 = 0;
 		
-		if (state.action != null || useOffsets)
+		if ((state.action != null && !state.action.useArgs() ) || useOffsets)
 		{
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
@@ -1945,6 +1946,58 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				addErrorMessage("Expected a '(' after \"offset\".");
 				return false;
+			}
+		}
+
+		// Maybe parse MBF21 args
+		state.args.clear();
+
+		if (state.action != null && state.action.useArgs())
+		{
+			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			{
+				// no arguments
+				if (matchType(DecoHackKernel.TYPE_RPAREN))
+				{
+					return true;
+				}
+
+				boolean done = false;
+				while (!done)
+				{
+					// get argument
+					Integer p;
+					if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+					{
+						if ((p = parseStateIndex(context, actor)) == null)
+							return false;
+					}
+					else if ((p = matchNumeric()) == null)
+					{
+						if(state.args.size() == 0)
+						{
+							addErrorMessage("Expected parameter.");
+							return false;
+						}
+						else
+						{
+							addErrorMessage("Expected an additional parameter after ','.");
+							return false;
+						}
+					}
+
+					state.args.add(p);
+
+					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						done = true;
+					}
+					else if (!matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						addErrorMessage("Expected a ')' after action parameters.");
+						return false;
+					}
+				}
 			}
 		}
 		
@@ -2132,6 +2185,7 @@ public final class DecoHackParser extends Lexer.Parser
 				.setBright(state.bright)
 				.setMisc1(state.misc1)
 				.setMisc2(state.misc2)
+				.setArgs(state.args)
 			;
 	
 			if (isBoom && pointerIndex != null && state.action == null)
@@ -2843,10 +2897,12 @@ public final class DecoHackParser extends Lexer.Parser
 		private DEHActionPointer action;
 		private Integer misc1;
 		private Integer misc2;
+		private LinkedList<Integer> args;
 		
 		private ParsedState()
 		{
 			this.frameList = new LinkedList<>();
+			this.args = new LinkedList<>();
 			reset();
 		}
 		
@@ -2859,6 +2915,7 @@ public final class DecoHackParser extends Lexer.Parser
 			this.action = null;
 			this.misc1 = null;
 			this.misc2 = null;
+			this.args.clear();
 		}
 		
 	}

@@ -196,5 +196,10 @@ public enum DEHActionPointer
 	{
 		return param1;
 	}
+
+	public boolean useArgs()
+	{
+		return type != null && type.getUseArgs();
+	}
 	
 }
