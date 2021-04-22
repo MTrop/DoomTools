@@ -1899,28 +1899,26 @@ public final class DecoHackParser extends Lexer.Parser
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
 				// no arguments
-				if (matchType(DecoHackKernel.TYPE_RPAREN))
-				{
-					return true;
-				}
-
-				// get first argument
-				Integer p;
-				if ((p = parseActionPointerParameterValue(context, actor)) == null)
-					return false;
-				state.misc1 = p;
-				
-				if (matchType(DecoHackKernel.TYPE_COMMA))
-				{
-					if ((p = parseActionPointerParameterValue(context, actor)) == null)
-						return false;
-					state.misc2 = p;
-				}
-
 				if (!matchType(DecoHackKernel.TYPE_RPAREN))
 				{
-					addErrorMessage("Expected a ')' after offsets.");
-					return false;
+					// get first argument
+					Integer p;
+					if ((p = parseActionPointerParameterValue(context, actor)) == null)
+						return false;
+					state.misc1 = p;
+				
+					if (matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+							return false;
+						state.misc2 = p;
+					}
+
+					if (!matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						addErrorMessage("Expected a ')' after offsets.");
+						return false;
+					}
 				}
 			}
 			else
