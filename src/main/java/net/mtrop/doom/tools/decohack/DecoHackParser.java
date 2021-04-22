@@ -1862,40 +1862,14 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		state.bright = matchBrightFlag();
-		
-		state.action = matchActionPointerName();
-		
-		if (requireAction != null)
-		{
-			if (requireAction && state.action == null)
-			{
-				addErrorMessage("Expected an action pointer for this state.");
-				return false;				
-			}
-			if (!requireAction && state.action != null)
-			{
-				addErrorMessage("Expected no action pointer for this state. State definition attempted to set one.");
-				return false;				
-			}
-		}
 
-		boolean useOffsets = false;
-		
-		if (state.action == null)
-		{
-			useOffsets = matchOffsetDirective();
-		}
-		else if (!context.isActionPointerTypeSupported(state.action.getType()))
-		{
-			addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
-			return false;
-		}
-
-		// Maybe parse misc fields (offsets / MBF args)
+		// Maybe parse offsets
 		state.misc1 = 0;
 		state.misc2 = 0;
-		
-		if ((state.action != null && !state.action.useArgs() ) || useOffsets)
+		state.args.clear();
+
+		boolean useoffsets = matchOffsetDirective();
+		if( useoffsets )
 		{
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
@@ -1914,7 +1888,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((p = matchNumeric()) == null)
 				{
-					addErrorMessage("Expected parameter.");
+					addErrorMessage("Expected offset value.");
 					return false;
 				}
 
@@ -1929,7 +1903,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((p = matchNumeric()) == null)
 					{
-						addErrorMessage("Expected a second parameter after ','.");
+						addErrorMessage("Expected a second offset value after ','.");
 						return false;
 					}
 
@@ -1938,34 +1912,60 @@ public final class DecoHackParser extends Lexer.Parser
 
 				if (!matchType(DecoHackKernel.TYPE_RPAREN))
 				{
-					addErrorMessage("Expected a ')' after action parameters.");
+					addErrorMessage("Expected a ')' after offsets.");
 					return false;
 				}
 			}
-			else if (useOffsets)
+			else
 			{
 				addErrorMessage("Expected a '(' after \"offset\".");
 				return false;
 			}
 		}
 
-		// Maybe parse MBF21 args
-		state.args.clear();
-
-		if (state.action != null && state.action.useArgs())
+		// Maybe parse action
+		state.action = matchActionPointerName();
+		
+		if (requireAction != null)
 		{
-			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			if (requireAction && state.action == null)
 			{
-				// no arguments
-				if (matchType(DecoHackKernel.TYPE_RPAREN))
-				{
-					return true;
-				}
+				addErrorMessage("Expected an action pointer for this state.");
+				return false;				
+			}
+			if (!requireAction && state.action != null)
+			{
+				addErrorMessage("Expected no action pointer for this state. State definition attempted to set one.");
+				return false;				
+			}
+		}
 
-				boolean done = false;
-				while (!done)
+		if (state.action != null)
+		{
+			if (!context.isActionPointerTypeSupported(state.action.getType()))
+			{
+				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
+				return false;
+			}
+
+			// MBF args (misc1/misc2)
+			if (!state.action.useArgs())
+			{
+				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
-					// get argument
+					// no arguments
+					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						return true;
+					}
+
+					if (useoffsets)
+					{
+						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
+						return false;
+					}
+
+					// get first argument
 					Integer p;
 					if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
 					{
@@ -1974,28 +1974,82 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((p = matchNumeric()) == null)
 					{
-						if(state.args.size() == 0)
-						{
-							addErrorMessage("Expected parameter.");
-							return false;
-						}
-						else
-						{
-							addErrorMessage("Expected an additional parameter after ','.");
-							return false;
-						}
+						addErrorMessage("Expected parameter.");
+						return false;
 					}
 
-					state.args.add(p);
+					state.misc1 = p;
 
-					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						done = true;
+						if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+						{
+							if ((p = parseStateIndex(context, actor)) == null)
+								return false;
+						}
+						else if ((p = matchNumeric()) == null)
+						{
+							addErrorMessage("Expected a second parameter after ','.");
+							return false;
+						}
+
+						state.misc2 = p;
 					}
-					else if (!matchType(DecoHackKernel.TYPE_COMMA))
+
+					if (!matchType(DecoHackKernel.TYPE_RPAREN))
 					{
 						addErrorMessage("Expected a ')' after action parameters.");
 						return false;
+					}
+				}
+			}
+
+			// MBF21 args
+			else
+			{
+				if (matchType(DecoHackKernel.TYPE_LPAREN))
+				{
+					// no arguments
+					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						return true;
+					}
+
+					boolean done = false;
+					while (!done)
+					{
+						// get argument
+						Integer p;
+						if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+						{
+							if ((p = parseStateIndex(context, actor)) == null)
+								return false;
+						}
+						else if ((p = matchNumeric()) == null)
+						{
+							if(state.args.size() == 0)
+							{
+								addErrorMessage("Expected parameter.");
+								return false;
+							}
+							else
+							{
+								addErrorMessage("Expected an additional parameter after ','.");
+								return false;
+							}
+						}
+
+						state.args.add(p);
+
+						if (matchType(DecoHackKernel.TYPE_RPAREN))
+						{
+							done = true;
+						}
+						else if (!matchType(DecoHackKernel.TYPE_COMMA))
+						{
+							addErrorMessage("Expected a ')' after action parameters.");
+							return false;
+						}
 					}
 				}
 			}
