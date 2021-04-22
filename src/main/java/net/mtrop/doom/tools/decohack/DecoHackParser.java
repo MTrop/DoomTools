@@ -1974,16 +1974,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 					// get first argument
 					Integer p;
-					if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-					{
-						if ((p = parseStateIndex(context, actor)) == null)
-							return false;
-					}
-					else if ((p = matchNumeric()) == null)
-					{
-						addErrorMessage("Expected parameter.");
+					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
-					}
 
 					if(!checkActionParamValue(state.action, 0, p))
 						return false;
@@ -1992,16 +1984,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-						{
-							if ((p = parseStateIndex(context, actor)) == null)
-								return false;
-						}
-						else if ((p = matchNumeric()) == null)
-						{
-							addErrorMessage("Expected a second parameter after ','.");
+						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
-						}
 
 						if(!checkActionParamValue(state.action, 1, p))
 							return false;
@@ -2034,24 +2018,8 @@ public final class DecoHackParser extends Lexer.Parser
 						// get argument
 						int argIndex = state.args.size();
 						Integer p;
-						if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-						{
-							if ((p = parseStateIndex(context, actor)) == null)
-								return false;
-						}
-						else if ((p = matchNumeric()) == null)
-						{
-							if(argIndex == 0)
-							{
-								addErrorMessage("Expected parameter.");
-								return false;
-							}
-							else
-							{
-								addErrorMessage("Expected an additional parameter after ','.");
-								return false;
-							}
-						}
+						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+							return false;
 
 						if(!checkActionParamValue(state.action, argIndex, p))
 							return false;
