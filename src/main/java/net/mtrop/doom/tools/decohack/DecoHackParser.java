@@ -27,6 +27,7 @@ import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerParam;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -1978,6 +1979,9 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 
+					if(!checkActionParamValue(state.action, 0, p))
+						return false;
+
 					state.misc1 = p;
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
@@ -1992,6 +1996,9 @@ public final class DecoHackParser extends Lexer.Parser
 							addErrorMessage("Expected a second parameter after ','.");
 							return false;
 						}
+
+						if(!checkActionParamValue(state.action, 1, p))
+							return false;
 
 						state.misc2 = p;
 					}
@@ -2019,6 +2026,7 @@ public final class DecoHackParser extends Lexer.Parser
 					while (!done)
 					{
 						// get argument
+						int argIndex = state.args.size();
 						Integer p;
 						if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
 						{
@@ -2027,7 +2035,7 @@ public final class DecoHackParser extends Lexer.Parser
 						}
 						else if ((p = matchNumeric()) == null)
 						{
-							if(state.args.size() == 0)
+							if(argIndex == 0)
 							{
 								addErrorMessage("Expected parameter.");
 								return false;
@@ -2038,6 +2046,9 @@ public final class DecoHackParser extends Lexer.Parser
 								return false;
 							}
 						}
+
+						if(!checkActionParamValue(state.action, argIndex, p))
+							return false;
 
 						state.args.add(p);
 
@@ -2852,6 +2863,32 @@ public final class DecoHackParser extends Lexer.Parser
 			out |= (n << (4 * x));
 		}
 		return out;
+	}
+
+	// checks if a value can be assigned to a given action
+	// pointer parameter; if not, prints an error message.
+	private boolean checkActionParamValue(DEHActionPointer action, int index, int value)
+	{
+		if(action == null || index < 0)
+		{
+			addErrorMessage("Error in checkActionParamValue: invalid action or index. This is a bug with DECOHack!");
+			return false;
+		}
+
+		DEHActionPointerParam[] params = action.getParams();
+		if(index >= params.length)
+		{
+			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
+			return false;
+		}
+
+		if(!params[index].isValueValid(value))
+		{
+			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, params[index].getValueMin(), params[index].getValueMax());
+			return false;
+		}
+
+		return true;
 	}
 	
 	// =======================================================================
