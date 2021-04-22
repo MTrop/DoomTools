@@ -1523,114 +1523,138 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a mandatory state index.
 	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor actor)
 	{
-		Integer value;
 		String labelName;
 		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
-		{
-			Integer index;
-			if ((index = matchThingIndex(context)) == null)
-				return null;
-			
-			DEHThing thing = context.getThing(index);
-			if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			{
-				addErrorMessage("Expected thing label name.");
-				return null;
-			}
-			
-			labelName = currentToken().getLexeme();
-
-			Integer stateIndex;
-			if ((stateIndex = thing.getLabel(labelName)) == 0)
-			{
-				String[] labels = thing.getLabels();
-				StringBuilder sb;
-				if (labels.length == 0)
-				{
-					sb = new StringBuilder("Expected a valid thing state label for thing ");
-					sb.append(index);
-					sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
-				}
-				else
-				{
-					sb = new StringBuilder("Expected a valid thing state label for thing ");
-					sb.append(index).append(": ");
-					sb.append(Arrays.toString(labels));
-					sb.append(".");
-				}
-				addErrorMessage(sb.toString());
-				return null;
-			}
-			
-			nextToken();
-			
-			return stateIndex;
-		}
+			return parseThingStateIndex(context);
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-		{
-			Integer index;
-			if ((index = matchWeaponIndex(context)) == null)
-				return null;
-			
-			DEHWeapon weapon = context.getWeapon(index);
-			if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			{
-				addErrorMessage("Expected weapon label name.");
-				return null;
-			}
-			
-			labelName = currentToken().getLexeme();
-
-			Integer stateIndex;
-			if ((stateIndex = weapon.getLabel(labelName)) == 0)
-			{
-				String[] labels = weapon.getLabels();
-				StringBuilder sb;
-				if (labels.length == 0)
-				{
-					sb = new StringBuilder("Expected a valid thing state label for weapon ");
-					sb.append(index);
-					sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
-				}
-				else
-				{
-					sb = new StringBuilder("Expected a valid thing state label for weapon ");
-					sb.append(index).append(": ");
-					sb.append(Arrays.toString(labels));
-					sb.append(".");
-				}
-				addErrorMessage(sb.toString());
-				return null;
-			}
-
-			nextToken();
-
-			return stateIndex;
-		}
+			return parseWeaponStateIndex(context);
 		else if ((labelName = matchIdentifier()) != null)
-		{
-			if (actor == null)
-			{
-				addErrorMessage("Name of label was unexpected after \"%s\". Only valid in thing or weapon.", KEYWORD_GOTO);
-				return null;				
-			}
-			else if ((value = actor.getLabel(labelName)) == 0)
-			{
-				StringBuilder sb = new StringBuilder("Expected a valid state label for this object: ");
-				sb.append(Arrays.toString(actor.getLabels()));
-				sb.append(".");
-				addErrorMessage(sb.toString());
-
-				addErrorMessage("Label \"%s\" is invalid or not declared at this moment: " + sb.toString(), labelName);
-				return null;				
-			}
-			
-			return value;
-		}
+			return parseActorStateLabelIndex(actor, labelName);
 		else
-		{
 			return matchStateIndex(context);
+	}
+
+	// Parses a label state index.
+	private Integer parseActorStateLabelIndex(DEHActor actor, String labelName) 
+	{
+		Integer value;
+		if (actor == null)
+		{
+			addErrorMessage("Name of label was unexpected after \"%s\". Only valid in thing or weapon.", KEYWORD_GOTO);
+			return null;				
 		}
+		else if ((value = actor.getLabel(labelName)) == 0)
+		{
+			StringBuilder sb = new StringBuilder("Expected a valid state label for this object: ");
+			sb.append(Arrays.toString(actor.getLabels()));
+			sb.append(".");
+			addErrorMessage(sb.toString());
+
+			addErrorMessage("Label \"%s\" is invalid or not declared at this moment: " + sb.toString(), labelName);
+			return null;				
+		}
+		
+		return value;
+	}
+
+	// Parses a weapon state index.
+	private Integer parseWeaponStateIndex(AbstractPatchContext<?> context)
+	{
+		String labelName;
+		Integer index;
+		if ((index = matchWeaponIndex(context)) == null)
+			return null;
+		
+		DEHWeapon weapon = context.getWeapon(index);
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected weapon label name.");
+			return null;
+		}
+		
+		labelName = currentToken().getLexeme();
+
+		Integer stateIndex;
+		if ((stateIndex = weapon.getLabel(labelName)) == 0)
+		{
+			String[] labels = weapon.getLabels();
+			StringBuilder sb;
+			if (labels.length == 0)
+			{
+				sb = new StringBuilder("Expected a valid thing state label for weapon ");
+				sb.append(index);
+				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+			}
+			else
+			{
+				sb = new StringBuilder("Expected a valid thing state label for weapon ");
+				sb.append(index).append(": ");
+				sb.append(Arrays.toString(labels));
+				sb.append(".");
+			}
+			addErrorMessage(sb.toString());
+			return null;
+		}
+
+		nextToken();
+
+		return stateIndex;
+	}
+
+	// Parses a thing state index.
+	private Integer parseThingStateIndex(AbstractPatchContext<?> context) 
+	{
+		String labelName;
+		Integer index;
+		if ((index = matchThingIndex(context)) == null)
+			return null;
+		
+		DEHThing thing = context.getThing(index);
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected thing label name.");
+			return null;
+		}
+		
+		labelName = currentToken().getLexeme();
+
+		Integer stateIndex;
+		if ((stateIndex = thing.getLabel(labelName)) == 0)
+		{
+			String[] labels = thing.getLabels();
+			StringBuilder sb;
+			if (labels.length == 0)
+			{
+				sb = new StringBuilder("Expected a valid thing state label for thing ");
+				sb.append(index);
+				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+			}
+			else
+			{
+				sb = new StringBuilder("Expected a valid thing state label for thing ");
+				sb.append(index).append(": ");
+				sb.append(Arrays.toString(labels));
+				sb.append(".");
+			}
+			addErrorMessage(sb.toString());
+			return null;
+		}
+		
+		nextToken();
+		
+		return stateIndex;
+	}
+	
+	// Parses a sound index.
+	private Integer parseSoundIndex(AbstractPatchContext<?> context)
+	{
+		Integer value;
+		if ((value = matchSoundIndexName(context)) == null)
+		{
+			addErrorMessage("Expected a valid sound name after '%s'.", KEYWORD_SOUND);
+			return null;
+		}
+		return value;
 	}
 	
 	// Parses a state block.
@@ -1882,32 +1906,14 @@ public final class DecoHackParser extends Lexer.Parser
 
 				// get first argument
 				Integer p;
-				if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-				{
-					if ((p = parseStateIndex(context, actor)) == null)
-						return false;
-				}
-				else if ((p = matchNumeric()) == null)
-				{
-					addErrorMessage("Expected offset value.");
+				if ((p = parseActionPointerParameterValue(context, actor)) == null)
 					return false;
-				}
-
 				state.misc1 = p;
 				
 				if (matchType(DecoHackKernel.TYPE_COMMA))
 				{
-					if (currentIdentifierLexemeIgnoreCase(KEYWORD_THING) || currentIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
-					{
-						if ((p = parseStateIndex(context, actor)) == null)
-							return false;
-					}
-					else if ((p = matchNumeric()) == null)
-					{
-						addErrorMessage("Expected a second offset value after ','.");
+					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
-					}
-
 					state.misc2 = p;
 				}
 
@@ -2069,6 +2075,28 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parses a pointer argument value.
+	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor actor)
+	{
+		Integer value;
+		String labelName;
+		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+			return parseThingStateIndex(context);
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+			return parseWeaponStateIndex(context);
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
+			return parseSoundIndex(context);
+		else if ((labelName = matchIdentifier()) != null)
+			return parseActorStateLabelIndex(actor, labelName);
+		else if ((value = matchNumeric()) != null)
+			return value;
+		else
+		{
+			addErrorMessage("Expected parameter.");
+			return null;
+		}
+	}
+
 	// Parses a next state line.
 	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{

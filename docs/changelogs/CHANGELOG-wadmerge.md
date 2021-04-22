@@ -1,6 +1,13 @@
 WadMerge
 --------
 
+### Changed for 1.6.0
+
+* `Added` MERGEDEUTEXFILE can now write a Strife texture entry set.
+* `Added` MERGETEXTUREDIR can now write a Strife texture entry set and replace/amend sets and namespaces.
+* `Changed` MERGENAMESPACE/MERGENAMESPACEFILE can now optionally import into an existing matching namespace in the destination.
+
+
 ### Changed for 1.5.1
 
 * `Fixed` Saving a WAD from a buffer didn't output a message (introduced in previous version).

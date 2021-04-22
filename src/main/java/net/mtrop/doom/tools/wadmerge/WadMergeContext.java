@@ -25,6 +25,8 @@ import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.graphics.PNGPicture;
+import net.mtrop.doom.struct.io.SerialReader;
 import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
@@ -32,6 +34,7 @@ import net.mtrop.doom.texture.PatchNames;
 import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.common.Common;
@@ -439,7 +442,7 @@ public class WadMergeContext
 		try (WadFile wad = new WadFile(wadFile))
 		{
 			verbosef("Reading WAD `%s`...\n", wadFile.getPath());
-			Response out = mergeBulkData(buffer, symbol, wad, wadFile.getPath(), wad.getAllEntries());
+			Response out = mergeBulkData(buffer, symbol, buffer.getEntryCount(), wad, wadFile.getPath(), wad.getAllEntries());
 			verbosef("Done reading `%s`.\n", wadFile.getPath());
 			return out;
 		}		
@@ -451,6 +454,7 @@ public class WadMergeContext
 	 * @param destinationSymbol the destination buffer.
 	 * @param wadFile the source WAD file.
 	 * @param namespace the target namespace.
+	 * @param amendNamespace if true, amend the destination namespace if it exists.
 	 * @return OK if merge successful, 
 	 * 		or BAD_FILE if the file does not exist or is a directory, 
 	 * 		or BAD_WAD if the file is not a WAD, 
@@ -460,7 +464,7 @@ public class WadMergeContext
 	 * 		or BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
 	 * @throws IOException if the source could not be read.
 	 */
-	public Response mergeNamespace(String destinationSymbol, File wadFile, String namespace) throws IOException
+	public Response mergeNamespace(String destinationSymbol, File wadFile, String namespace, boolean amendNamespace) throws IOException
 	{
 		if (!wadFile.exists() || wadFile.isDirectory())
 			return Response.BAD_FILE;
@@ -472,21 +476,44 @@ public class WadMergeContext
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
 			return Response.BAD_SYMBOL;
 		
+		String startEntry = namespace.toUpperCase() + "_START";
+		String endEntry = namespace.toUpperCase() + "_END";
+		
+		int insertIndex = bufferDest.getEntryCount();
+		if (amendNamespace)
+		{
+			int idx;
+			if ((idx = bufferDest.indexOf(endEntry)) >= 0)
+			{
+				insertIndex = idx;
+				verbosef("Found `%s` in symbol `%s` for insertion point.\n", endEntry, destinationSymbol);
+			}
+			else
+			{
+				Response resp;
+				if ((resp = addMarker(destinationSymbol, startEntry)) != Response.OK)
+					return resp;
+				if ((resp = addMarker(destinationSymbol, endEntry)) != Response.OK)
+					return resp;
+				insertIndex = bufferDest.lastIndexOf(endEntry);
+			}
+		}
+		
 		try (WadFile wad = new WadFile(wadFile))
 		{
 			int startIndex;
-			if ((startIndex = wad.indexOf(namespace + "_START")) < 0)
+			if ((startIndex = wad.indexOf(startEntry)) < 0)
 				return Response.BAD_NAMESPACE;
 
 			int endIndex;
-			if ((endIndex = wad.indexOf(namespace + "_END")) < 0)
+			if ((endIndex = wad.indexOf(endEntry)) < 0)
 				return Response.BAD_NAMESPACE;
 			
 			if (endIndex < startIndex)
 				return Response.BAD_NAMESPACE_RANGE;
 
 			int len = (endIndex - 1) - startIndex; 
-			return mergeBulkData(bufferDest, destinationSymbol, wad, wadFile.getPath(), wad.mapEntries(startIndex + 1, len));
+			return mergeBulkData(bufferDest, destinationSymbol, insertIndex, wad, wadFile.getPath(), wad.mapEntries(startIndex + 1, len));
 		}
 	}
 
@@ -496,6 +523,7 @@ public class WadMergeContext
 	 * @param destinationSymbol the destination buffer.
 	 * @param sourceSymbol the source buffer.
 	 * @param namespace the target namespace.
+	 * @param amendNamespace if true, amend the destination namespace if it exists. If doesn't exist, it is created.
 	 * @return OK if merge successful, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
@@ -503,7 +531,7 @@ public class WadMergeContext
 	 * 		or BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
 	 * @throws IOException if the source could not be read.
 	 */
-	public Response mergeNamespace(String destinationSymbol, String sourceSymbol, String namespace) throws IOException
+	public Response mergeNamespace(String destinationSymbol, String sourceSymbol, String namespace, boolean amendNamespace) throws IOException
 	{
 		Wad bufferDest;
 		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
@@ -513,6 +541,29 @@ public class WadMergeContext
 		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
 			return Response.BAD_SOURCE_SYMBOL;
 
+		String startEntry = namespace.toUpperCase() + "_START";
+		String endEntry = namespace.toUpperCase() + "_END";
+		
+		int insertIndex = bufferDest.getEntryCount();
+		if (amendNamespace)
+		{
+			int idx;
+			if ((idx = bufferDest.indexOf(endEntry)) >= 0)
+			{
+				insertIndex = idx;
+				verbosef("Found `%s` in symbol `%s` for insertion point.\n", endEntry, destinationSymbol);
+			}
+			else
+			{
+				Response resp;
+				if ((resp = addMarker(destinationSymbol, startEntry)) != Response.OK)
+					return resp;
+				if ((resp = addMarker(destinationSymbol, endEntry)) != Response.OK)
+					return resp;
+				insertIndex = bufferDest.lastIndexOf(endEntry);
+			}
+		}
+		
 		int startIndex;
 		if ((startIndex = bufferSource.indexOf(namespace + "_START")) < 0)
 			return Response.BAD_NAMESPACE;
@@ -525,7 +576,7 @@ public class WadMergeContext
 			return Response.BAD_NAMESPACE_RANGE;
 
 		int len = (endIndex - 1) - startIndex; 
-		return mergeBulkData(bufferDest, destinationSymbol, bufferSource, sourceSymbol, bufferSource.mapEntries(startIndex + 1, len));
+		return mergeBulkData(bufferDest, destinationSymbol, insertIndex, bufferSource, sourceSymbol, bufferSource.mapEntries(startIndex + 1, len));
 	}
 
 	/**
@@ -613,7 +664,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		return mergeFileData(buffer, symbol, inFile, entryName);
+		return mergeFileData(buffer, symbol, inFile, entryName, buffer.getEntryCount());
 	}
 
 	/**
@@ -680,7 +731,7 @@ public class WadMergeContext
 					{
 						if (adder == null)
 							adder = ((WadFile)buffer).createAdder();
-						if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+						if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f), buffer.getEntryCount())) != Response.OK)
 							return resp; 
 					}
 					else
@@ -757,31 +808,50 @@ public class WadMergeContext
 		else
 			textureSet.export(pout, (CommonTextureList<DoomTextureList.Texture>)(tout = new DoomTextureList(128)));
 
-		if (buffer.contains("PNAMES"))
-			buffer.deleteEntry(buffer.indexOf("PNAMES"));
-		
 		textureEntryName = NameUtils.toValidEntryName(textureEntryName);
-		buffer.addData(textureEntryName, tout);
-		verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
-		buffer.addData("PNAMES", pout);
-		verbosef("Added `PNAMES` to `%s`.\n", symbol);
+
+		if (buffer.contains(textureEntryName))
+		{
+			buffer.deleteEntry(buffer.indexOf(textureEntryName));
+			buffer.addData(textureEntryName, tout);
+			verbosef("Replaced `%s` in `%s`.\n", textureEntryName, symbol);
+		}
+		else
+		{
+			buffer.addData(textureEntryName, tout);
+			verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
+		}
+		
+		if (buffer.contains("PNAMES"))
+		{
+			buffer.deleteEntry(buffer.indexOf("PNAMES"));
+			buffer.addData("PNAMES", pout);
+			verbosef("Replaced `PNAMES` in `%s`.\n", symbol);
+		}
+		else
+		{
+			buffer.addData("PNAMES", pout);
+			verbosef("Added `PNAMES` to `%s`.\n", symbol);
+		}
 
 		return Response.OK;
 	}
 
 	/**
-	 * Creates TEXTUREX/PNAMES entries in a buffer, using a directory of patches as the only textures,
+	 * Creates/modifies TEXTUREX/PNAMES entries in a buffer, using a directory of patches as the only textures,
 	 * and imports all of the patch files between PP_START and PP_END markers.
 	 * Symbol is case-insensitive.
 	 * @param symbol the buffer to write to.
 	 * @param textureDirectory the texture file to parse.
+	 * @param strife if the entry doesn't exist, create in Strife format.
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_DIRECTORY if the provided file is not a directory.
 	 * @throws IOException if the file could not be read.
 	 */
-	public Response mergeTextureDirectory(String symbol, File textureDirectory, String textureEntryName) throws IOException
+	@SuppressWarnings("unchecked")
+	public Response mergeTextureDirectory(String symbol, File textureDirectory, boolean strife, String textureEntryName) throws IOException
 	{
 		if (!textureDirectory.exists() || !textureDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
@@ -790,11 +860,48 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		Response resp;
-		if ((resp = addMarker(symbol, "PP_START")) != Response.OK)
-			return resp;
+		// Find existing texture data.
+		PatchNames pout;
+		if (buffer.contains("PNAMES"))
+		{
+			pout = buffer.getDataAs("PNAMES", PatchNames.class);
+			verbosef("Found existing `PNAMES`.\n");
+		}
+		else
+			pout = new PatchNames();
+
+		CommonTextureList<?> tout;
+		if (buffer.contains(textureEntryName))
+		{
+			if (strife)
+				tout = buffer.getDataAs(textureEntryName, StrifeTextureList.class);
+			else
+				tout = buffer.getDataAs(textureEntryName, DoomTextureList.class);
+			verbosef("Found existing `%s`.\n", textureEntryName);
+		}
+		else
+		{
+			tout = strife ? new StrifeTextureList(128) : new DoomTextureList(128);
+		}
 		
-		TextureSet textureSet = new TextureSet(new PatchNames(), new DoomTextureList(128));
+		// Find places to insert patches
+		int insertIndex;
+		if (buffer.contains("PP_END"))
+		{
+			insertIndex = buffer.lastIndexOf("PP_END");
+			verbosef("Found existing `PP_END` for insertion point.\n");
+		}
+		else
+		{
+			Response resp;
+			if ((resp = addMarker(symbol, "PP_START")) != Response.OK)
+				return resp;
+			if ((resp = addMarker(symbol, "PP_END")) != Response.OK)
+				return resp;
+			insertIndex = buffer.lastIndexOf("PP_END");
+		}
+		
+		TextureSet textureSet = new TextureSet(pout, tout);
 		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
 
 		File[] files;
@@ -812,19 +919,24 @@ public class WadMergeContext
 				}
 				else
 				{
+					Response resp;
 					String namenoext = Common.getFileNameWithoutExtension(f);
 					if (adder != null)
 					{
-						if ((resp = mergeFileData(adder, symbol, f, namenoext)) != Response.OK)
+						if ((resp = mergeFileData(adder, symbol, f, namenoext, insertIndex)) != Response.OK)
 							return resp;
 					}
 					else
 					{
-						if ((resp = mergeFileData(buffer, symbol, f, namenoext)) != Response.OK)
+						if ((resp = mergeFileData(buffer, symbol, f, namenoext, insertIndex)) != Response.OK)
 							return resp;
 					}
+					insertIndex++;
+					
 					String textureName = NameUtils.toValidTextureName(namenoext);
-					textureSet.createTexture(textureName).createPatch(textureName);
+					Texture texture = textureSet.createTexture(textureName);
+					setTextureDimensions(texture, f);
+					texture.createPatch(textureName);
 					verbosef("Add texture `%s`...\n", textureName);
 				}
 			}
@@ -832,19 +944,37 @@ public class WadMergeContext
 			Common.close(adder);
 		}
 
-		if ((resp = addMarker(symbol, "PP_END")) != Response.OK)
-			return resp;
-
-		PatchNames pout;
-		DoomTextureList tout;
-		textureSet.export(pout = new PatchNames(), tout = new DoomTextureList());
+		if (strife)
+			textureSet.export(pout, (CommonTextureList<StrifeTextureList.Texture>)(tout = new StrifeTextureList(128)));
+		else
+			textureSet.export(pout, (CommonTextureList<DoomTextureList.Texture>)(tout = new DoomTextureList(128)));
 
 		textureEntryName = NameUtils.toValidEntryName(textureEntryName);
-		buffer.addData(textureEntryName, tout);
-		verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
-		buffer.addData("PNAMES", pout);
-		verbosef("Added `PNAMES` to `%s`.\n", symbol);
+
+		if (buffer.contains(textureEntryName))
+		{
+			buffer.deleteEntry(buffer.indexOf(textureEntryName));
+			buffer.addData(textureEntryName, tout);
+			verbosef("Replaced `%s` in `%s`.\n", textureEntryName, symbol);
+		}
+		else
+		{
+			buffer.addData(textureEntryName, tout);
+			verbosef("Added `%s` to `%s`.\n", textureEntryName, symbol);
+		}
 		
+		if (buffer.contains("PNAMES"))
+		{
+			buffer.deleteEntry(buffer.indexOf("PNAMES"));
+			buffer.addData("PNAMES", pout);
+			verbosef("Replaced `PNAMES` in `%s`.\n", symbol);
+		}
+		else
+		{
+			buffer.addData("PNAMES", pout);
+			verbosef("Added `PNAMES` to `%s`.\n", symbol);
+		}
+
 		return Response.OK;
 	}
 	
@@ -892,6 +1022,35 @@ public class WadMergeContext
 		}
 	}
 
+	private Response setTextureDimensions(Texture t, File f)
+	{
+		try (FileInputStream fis = new FileInputStream(f))
+		{
+			if (Common.getFileExtension(f).toLowerCase().equals("png"))
+			{
+				PNGPicture picture = new PNGPicture();
+				picture.readBytes(fis);
+				t.setWidth(picture.getWidth());
+				t.setHeight(picture.getHeight());
+			}
+			else
+			{
+				// Quick scan Doom Graphic
+				SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
+				int x = sr.readUnsignedShort(fis);
+				int y = sr.readUnsignedShort(fis);
+				t.setWidth(x);
+				t.setHeight(y);
+			}
+		}
+		catch (IOException e)
+		{
+			return Response.BAD_FILE;
+		}
+		
+		return Response.OK;
+	}
+	
 	// Merge map into buffer, with rename.
 	private Response mergeMap(Wad targetBuffer, String bufferName, String newHeader, Wad source, String sourceName, String header) throws IOException
 	{
@@ -901,11 +1060,11 @@ public class WadMergeContext
 			return Response.BAD_MAP;
 		
 		targetBuffer.addData(newHeader, source.getData(header));
-		mergeBulkData(targetBuffer, bufferName, source, sourceName, entries);
+		mergeBulkData(targetBuffer, bufferName, targetBuffer.getEntryCount(), source, sourceName, entries);
 		return Response.OK;
 	}
 
-	private Response mergeBulkData(Wad targetWad, String targetSymbol, Wad sourceWad, String sourceName, WadEntry[] entries) throws IOException
+	private Response mergeBulkData(Wad targetWad, String targetSymbol, int targetIndex, Wad sourceWad, String sourceName, WadEntry[] entries) throws IOException
 	{
 		WadFile.Adder adder = (targetWad instanceof WadFile) ? ((WadFile)targetWad).createAdder() : null;
 
@@ -913,10 +1072,11 @@ public class WadMergeContext
 			for (WadEntry e : entries)
 			{
 				if (adder != null)
-					adder.addData(e.getName(), sourceWad.getData(e));
+					adder.addDataAt(targetIndex, e.getName(), sourceWad.getData(e));
 				else
-					targetWad.addData(e.getName(), sourceWad.getData(e));
+					targetWad.addDataAt(targetIndex, e.getName(), sourceWad.getData(e));
 				verbosef("Added `%s` to `%s` (from `%s`).\n", e.getName(), targetSymbol, sourceName);
+				targetIndex++;
 			}
 		} finally {
 			Common.close(adder);
@@ -924,18 +1084,18 @@ public class WadMergeContext
 		return Response.OK;
 	}
 
-	private Response mergeFileData(Wad targetWad, String targetSymbol, File inFile, String entryName) throws IOException
+	private Response mergeFileData(Wad targetWad, String targetSymbol, File inFile, String entryName, int index) throws IOException
 	{
 		entryName = NameUtils.toValidEntryName(entryName);
-		targetWad.addData(entryName, inFile);
+		targetWad.addDataAt(index, entryName, inFile);
 		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, targetSymbol, inFile.getPath());
 		return Response.OK;
 	}
 
-	private Response mergeFileData(WadFile.Adder targetAdder, String targetSymbol, File inFile, String entryName) throws IOException
+	private Response mergeFileData(WadFile.Adder targetAdder, String targetSymbol, File inFile, String entryName, int index) throws IOException
 	{
 		entryName = NameUtils.toValidEntryName(entryName);
-		targetAdder.addData(entryName, inFile);
+		targetAdder.addDataAt(index, entryName, inFile);
 		verbosef("Added `%s` to `%s` (from `%s`).\n", entryName, targetSymbol, inFile.getPath());
 		return Response.OK;
 	}
