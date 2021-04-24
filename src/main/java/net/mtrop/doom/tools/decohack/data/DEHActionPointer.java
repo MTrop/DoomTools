@@ -8,6 +8,9 @@ package net.mtrop.doom.tools.decohack.data;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerParam;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
+
 /**
  * Enumeration of action pointers for frames.
  * @author Matthew Tropiano
@@ -92,32 +95,44 @@ public enum DEHActionPointer
 	
 	// MBF Action Pointers
 	
-	DETONATE        (-1, "Detonate", true),
-	MUSHROOM        (-1, "Mushroom", true, (-360 << 16) + 1, (360 << 16) - 1, Integer.MIN_VALUE, Integer.MAX_VALUE), // fixed point on both
-	SPAWN           (-1, "Spawn", true, 0, Integer.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE),
-	TURN            (-1, "Turn", true, -359, 359),
-	FACE            (-1, "Face", true, 0, 359),
-	SCRATCH         (-1, "Scratch", true, -32767, 32767, 0, Integer.MAX_VALUE),
-	PLAYSOUND       (-1, "PlaySound", true, 0, Integer.MAX_VALUE, 0, 1),
-	RANDOMJUMP      (-1, "RandomJump", true, 0, Integer.MAX_VALUE, 0, 255),
-	LINEEFFECT      (-1, "LineEffect", true, -32767, 32767, -32767, 32767),
-	DIE             (-1, "Die", true),
-	FIREOLDBFG      (-1, "FireOldBFG", true),
-	BETASKULLATTACK (-1, "BetaSkullAttack", true),
-	STOP            (-1, "Stop", true),	
+	DETONATE        (-1, "Detonate", DEHActionPointerType.MBF ),
+	MUSHROOM        (-1, "Mushroom", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT ), // fixed point on both
+	SPAWN           (-1, "Spawn", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.INT ),
+	TURN            (-1, "Turn", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_INT ),
+	FACE            (-1, "Face", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_UINT ),
+	SCRATCH         (-1, "Scratch", DEHActionPointerType.MBF, DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT ),
+	PLAYSOUND       (-1, "PlaySound", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	RANDOMJUMP      (-1, "RandomJump", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE ),
+	LINEEFFECT      (-1, "LineEffect", DEHActionPointerType.MBF, DEHActionPointerParam.SHORT, DEHActionPointerParam.SHORT ),
+	DIE             (-1, "Die", DEHActionPointerType.MBF ),
+	FIREOLDBFG      (-1, "FireOldBFG", DEHActionPointerType.MBF ),
+	BETASKULLATTACK (-1, "BetaSkullAttack", DEHActionPointerType.MBF ),
+	STOP            (-1, "Stop", DEHActionPointerType.MBF ),
+
+	// MBF21 Action Pointers
+
+	SPAWNFACING         (-1, "SpawnFacing", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.INT ),
+	MONSTERPROJECTILE   (-1, "MonsterProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED ),
+	MONSTERBULLETATTACK (-1, "MonsterBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED ),
+	RADIUSDAMAGE        (-1, "RadiusDamage", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT ),
+	WEAPONPROJECTILE    (-1, "WeaponProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED ),
+	WEAPONBULLETATTACK  (-1, "WeaponBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED ),
+	WEAPONSOUND         (-1, "WeaponSound", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	WEAPONJUMP          (-1, "WeaponJump", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE ),
+	CONSUMEAMMO         (-1, "ConsumeAmmo", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT ),
+	CHECKAMMO           (-1, "CheckAmmo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT ),
+	REFIRETO            (-1, "RefireTo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	GUNFLASHTO          (-1, "GunFlashTo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
 	;
 	
 	/** Originating frame (for DEH 3.0 format 19). */
 	private int frame;
 	/** Mnemonic name for BEX/DECORATE. */
 	private String mnemonic;
-	/** MBF only. */
-	private boolean mbf;
+	/** Action pointer type. */
+	private DEHActionPointerType type;
 	
-	private int param0min;
-	private int param0max;
-	private int param1min;
-	private int param1max;
+	private DEHActionPointerParam[] params;
 
 	private static Map<String, DEHActionPointer> MNEMONIC_MAP = null;
 
@@ -134,28 +149,20 @@ public enum DEHActionPointer
 	
 	private DEHActionPointer(int frame, String mnemonic)
 	{
-		this(frame, mnemonic, false, 0, 0, 0, 0);
+		this(frame, mnemonic, DEHActionPointerType.DOOM19, new DEHActionPointerParam[0]);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type)
 	{
-		this(frame, mnemonic, mbf, 0, 0, 0, 0);
+		this(frame, mnemonic, type, new DEHActionPointerParam[0]);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf, int param0min, int param0max)
-	{
-		this(frame, mnemonic, mbf, param0min, param0max, 0, 0);
-	}
-
-	private DEHActionPointer(int frame, String mnemonic, boolean mbf, int param0min, int param0max, int param1min, int param1max)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type, DEHActionPointerParam ... params)
 	{
 		this.frame = frame;
 		this.mnemonic = mnemonic;
-		this.mbf = mbf;
-		this.param0min = param0min;
-		this.param0max = param0max;
-		this.param1min = param1min;
-		this.param1max = param1max;
+		this.type = type;
+		this.params = params;
 	}
 
 	public int getFrame() 
@@ -168,29 +175,19 @@ public enum DEHActionPointer
 		return mnemonic;
 	}
 	
-	public boolean isMBF() 
+	public DEHActionPointerType getType() 
 	{
-		return mbf;
+		return type;
 	}
 	
-	public int getParam0min()
+	public DEHActionPointerParam[] getParams()
 	{
-		return param0min;
+		return params;
 	}
-	
-	public int getParam0max() 
+
+	public boolean useArgs()
 	{
-		return param0max;
-	}
-	
-	public int getParam1min()
-	{
-		return param1min;
-	}
-	
-	public int getParam1max() 
-	{
-		return param1max;
+		return type != null && type.getUseArgs();
 	}
 	
 }

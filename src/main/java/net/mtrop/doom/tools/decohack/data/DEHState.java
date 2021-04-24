@@ -7,6 +7,8 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
 
 import net.mtrop.doom.util.RangeUtils;
 
@@ -21,8 +23,9 @@ public class DEHState implements DEHObject<DEHState>
 	private boolean bright;
 	private int nextStateIndex;
 	private int duration;
-	private int parameter0;
-	private int parameter1;
+	private int misc1;
+	private int misc2;
+	private int[] args;
 	
 	/**
 	 * Creates a new frame.
@@ -36,16 +39,17 @@ public class DEHState implements DEHObject<DEHState>
 			0, 
 			-1,
 			0,
-			0
+			0,
+			new int[0]
 		);
 	}
 	
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0);
+		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int parameter0, int parameter1)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args)
 	{
 		return (new DEHState()).set(
 			spriteIndex,
@@ -53,8 +57,9 @@ public class DEHState implements DEHObject<DEHState>
 			bright,
 			nextStateIndex, 
 			duration,
-			parameter0,
-			parameter1
+			misc1,
+			misc2,
+			args
 		);
 	}
 
@@ -67,25 +72,27 @@ public class DEHState implements DEHObject<DEHState>
 			source.bright, 
 			source.nextStateIndex, 
 			source.duration, 
-			source.parameter0, 
-			source.parameter1
+			source.misc1, 
+			source.misc2,
+			source.args
 		);
 	}
 	
 	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0);
+		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
 	}
 	
-	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int parameter0, int parameter1)
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args)
 	{
 		setSpriteIndex(spriteIndex);
 		setFrameIndex(frameIndex);
 		setBright(bright);
 		setNextStateIndex(nextStateIndex);
 		setDuration(duration);
-		setParameter0(parameter0);
-		setParameter1(parameter1);
+		setMisc1(misc1);
+		setMisc2(misc2);
+		setArgs(args);
 		return this;
 	}
 	
@@ -148,25 +155,49 @@ public class DEHState implements DEHObject<DEHState>
 		return this;
 	}
 	
-	public int getParameter0() 
+	public int getMisc1() 
 	{
-		return parameter0;
+		return misc1;
 	}
 	
-	public DEHState setParameter0(int parameter0) 
+	public DEHState setMisc1(int misc1) 
 	{
-		this.parameter0 = parameter0;
+		this.misc1 = misc1;
 		return this;
 	}
 	
-	public int getParameter1()
+	public int getMisc2()
 	{
-		return parameter1;
+		return misc2;
 	}
 	
-	public DEHState setParameter1(int parameter1)
+	public DEHState setMisc2(int misc2)
 	{
-		this.parameter1 = parameter1;
+		this.misc2 = misc2;
+		return this;
+	}
+	
+	public int[] getArgs()
+	{
+		return args;
+	}
+	
+	public DEHState setArgs(int[] args)
+	{
+		this.args = args;
+		return this;
+	}
+
+	public DEHState setArgs(List<Integer> arglist)
+	{
+		// gotta do this manually, 'cause unboxing, yuck :P
+		this.args = new int[arglist.size()];
+		int i = 0;
+		for (Integer arg : arglist)
+		{
+			this.args[i] = arg;
+			i++;
+		}
 		return this;
 	}
 	
@@ -185,8 +216,9 @@ public class DEHState implements DEHObject<DEHState>
 			&& bright == obj.bright
 			&& nextStateIndex == obj.nextStateIndex
 			&& duration == obj.duration
-			&& parameter0 == obj.parameter0
-			&& parameter1 == obj.parameter1
+			&& misc1 == obj.misc1
+			&& misc2 == obj.misc2
+			&& Arrays.equals(args, obj.args)
 		;
 	}	
 		
@@ -201,10 +233,13 @@ public class DEHState implements DEHObject<DEHState>
 			writer.append("Next frame = ").append(String.valueOf(nextStateIndex)).append("\r\n");
 		if (duration != frame.duration)
 			writer.append("Duration = ").append(String.valueOf(duration)).append("\r\n");
-		if (parameter0 != frame.parameter0)
-			writer.append("Unknown 1 = ").append(String.valueOf(parameter0)).append("\r\n");
-		if (parameter1 != frame.parameter1)
-			writer.append("Unknown 2 = ").append(String.valueOf(parameter1)).append("\r\n");
+		if (misc1 != frame.misc1)
+			writer.append("Unknown 1 = ").append(String.valueOf(misc1)).append("\r\n");
+		if (misc2 != frame.misc2)
+			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
+		for (int i = 0; i < args.length; i++)
+			if ((i >= frame.args.length || args[i] != frame.args[i]) && args[i] != 0) // [XA] skip zeroes, since mbf21 args explicitly use 0 as the default
+				writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
 		writer.flush();
 	}
 

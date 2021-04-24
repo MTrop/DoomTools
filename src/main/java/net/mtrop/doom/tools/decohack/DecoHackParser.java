@@ -24,8 +24,10 @@ import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDHEExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerParam;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -128,6 +130,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private static final String KEYWORD_WEAPON = "weapon";
 	private static final String KEYWORD_AMMOTYPE = "ammotype";
+	private static final String KEYWORD_AMMOPERSHOT = "ammopershot";
 	private static final String KEYWORD_WEAPONSTATE_READY = DEHWeapon.STATE_LABEL_READY;
 	private static final String KEYWORD_WEAPONSTATE_SELECT = DEHWeapon.STATE_LABEL_SELECT;
 	private static final String KEYWORD_WEAPONSTATE_DESELECT = DEHWeapon.STATE_LABEL_DESELECT;
@@ -171,6 +174,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_BOOM = "boom";
 	private static final String KEYWORD_MBF = "mbf";
 	private static final String KEYWORD_EXTENDED = "extended";
+	private static final String KEYWORD_MBF21 = "mbf21";
 
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
@@ -272,10 +276,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return new PatchMBFContext();
 		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EXTENDED))
 			return new PatchDHEExtendedContext();
+		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MBF21))
+			return new PatchMBF21Context();
 		else
 		{
-			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s).", 
-				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED
+			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s, %s).", 
+				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED, KEYWORD_MBF21
 			);
 			return null;
 		}
@@ -1345,9 +1351,22 @@ public final class DecoHackParser extends Lexer.Parser
 
 				weapon.setAmmoType(ammo);
 			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMOPERSHOT))
+			{
+				Integer ammoPerShot;
+				if ((ammoPerShot = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected ammo per shot: a positive integer.");
+					return false;
+				}
+				else
+				{
+					weapon.setAmmoPerShot(ammoPerShot);
+				}
+			}
 			else
 			{
-				addErrorMessage("Expected '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_STATE);
+				addErrorMessage("Expected '%s', '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_AMMOPERSHOT, KEYWORD_STATE);
 				return false;
 			}
 		}		
@@ -1813,8 +1832,9 @@ public final class DecoHackParser extends Lexer.Parser
 				.setFrameIndex(parsedState.frameList.get(0))
 				.setDuration(parsedState.duration)
 				.setBright(parsedState.bright)
-				.setParameter0(parsedState.parameter0)
-				.setParameter1(parsedState.parameter1)
+				.setMisc1(parsedState.misc1)
+				.setMisc2(parsedState.misc2)
+				.setArgs(parsedState.args)
 			;
 
 			// Try to parse next state clause.
@@ -1867,7 +1887,57 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		state.bright = matchBrightFlag();
-		
+
+		// Maybe parse offsets
+		state.misc1 = 0;
+		state.misc2 = 0;
+		state.args.clear();
+
+		boolean useoffsets = matchOffsetDirective();
+		if (useoffsets)
+		{
+			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			{
+				// no arguments
+				if (!matchType(DecoHackKernel.TYPE_RPAREN))
+				{
+					// get first argument
+					Integer p;
+					if ((p = matchInteger()) == null)
+					{
+						addErrorMessage("Expected integer for X offset value.");
+						return false;
+					}
+					state.misc1 = p;
+
+					if (!matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						addErrorMessage("Expected a ',' after X offset; both X and Y offsets must be defined.");
+						return false;
+					}
+
+					if ((p = matchInteger()) == null)
+					{
+						addErrorMessage("Expected integer for Y offset value.");
+						return false;
+					}
+					state.misc2 = p;
+
+					if (!matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						addErrorMessage("Expected a ')' after offsets.");
+						return false;
+					}
+				}
+			}
+			else
+			{
+				addErrorMessage("Expected a '(' after \"offset\".");
+				return false;
+			}
+		}
+
+		// Maybe parse action
 		state.action = matchActionPointerName();
 		
 		if (requireAction != null)
@@ -1884,55 +1954,96 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		}
 
-		boolean useOffsets = false;
-		
-		if (state.action == null)
+		if (state.action != null)
 		{
-			useOffsets = matchOffsetDirective();
-		}
-		else if (!(context instanceof PatchMBFContext) && !(context instanceof PatchDHEExtendedContext) && state.action.isMBF())
-		{
-			addErrorMessage("MBF action pointer used: " + state.action.getMnemonic() +". Patch is not MBF or better.");
-			return false;
-		}
-		
-		// Maybe parse parameters.
-		state.parameter0 = 0;
-		state.parameter1 = 0;
-		
-		if (state.action != null || useOffsets)
-		{
-			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			if (!context.isActionPointerTypeSupported(state.action.getType()))
 			{
-				// no arguments
-				if (matchType(DecoHackKernel.TYPE_RPAREN))
-				{
-					return true;
-				}
+				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
+				return false;
+			}
 
-				// get first argument
-				Integer p;
-				if ((p = parseActionPointerParameterValue(context, actor)) == null)
-					return false;
-				state.parameter0 = p;
-				
-				if (matchType(DecoHackKernel.TYPE_COMMA))
+			// MBF args (misc1/misc2)
+			if (!state.action.useArgs())
+			{
+				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
+					// no arguments
+					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						return true;
+					}
+
+					if (useoffsets)
+					{
+						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
+						return false;
+					}
+
+					// get first argument
+					Integer p;
 					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
-					state.parameter1 = p;
-				}
 
-				if (!matchType(DecoHackKernel.TYPE_RPAREN))
-				{
-					addErrorMessage("Expected a ')' after action parameters.");
-					return false;
+					if (!checkActionParamValue(state.action, 0, p))
+						return false;
+
+					state.misc1 = p;
+
+					if (matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+							return false;
+
+						if (!checkActionParamValue(state.action, 1, p))
+							return false;
+
+						state.misc2 = p;
+					}
+
+					if (!matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						addErrorMessage("Expected a ')' after action parameters.");
+						return false;
+					}
 				}
 			}
-			else if (useOffsets)
+
+			// MBF21 args
+			else
 			{
-				addErrorMessage("Expected a '(' after \"offset\".");
-				return false;
+				if (matchType(DecoHackKernel.TYPE_LPAREN))
+				{
+					// no arguments
+					if (matchType(DecoHackKernel.TYPE_RPAREN))
+					{
+						return true;
+					}
+
+					boolean done = false;
+					while (!done)
+					{
+						// get argument
+						int argIndex = state.args.size();
+						Integer p;
+						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+							return false;
+
+						if (!checkActionParamValue(state.action, argIndex, p))
+							return false;
+
+						state.args.add(p);
+
+						if (matchType(DecoHackKernel.TYPE_RPAREN))
+						{
+							done = true;
+						}
+						else if (!matchType(DecoHackKernel.TYPE_COMMA))
+						{
+							addErrorMessage("Expected a ')' after action parameters.");
+							return false;
+						}
+					}
+				}
 			}
 		}
 		
@@ -2140,8 +2251,9 @@ public final class DecoHackParser extends Lexer.Parser
 				.setFrameIndex(state.frameList.pollFirst())
 				.setDuration(state.duration)
 				.setBright(state.bright)
-				.setParameter0(state.parameter0)
-				.setParameter1(state.parameter1)
+				.setMisc1(state.misc1)
+				.setMisc2(state.misc2)
+				.setArgs(state.args)
 			;
 	
 			if (isBoom && pointerIndex != null && state.action == null)
@@ -2755,6 +2867,32 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		return out;
 	}
+
+	// checks if a value can be assigned to a given action
+	// pointer parameter; if not, prints an error message.
+	private boolean checkActionParamValue(DEHActionPointer action, int index, int value)
+	{
+		if (action == null || index < 0)
+		{
+			addErrorMessage("Error in checkActionParamValue: invalid action or index. This is a bug with DECOHack!");
+			return false;
+		}
+
+		DEHActionPointerParam[] params = action.getParams();
+		if (index >= params.length)
+		{
+			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
+			return false;
+		}
+
+		if (!params[index].isValueValid(value))
+		{
+			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, params[index].getValueMin(), params[index].getValueMax());
+			return false;
+		}
+
+		return true;
+	}
 	
 	// =======================================================================
 
@@ -2851,12 +2989,14 @@ public final class DecoHackParser extends Lexer.Parser
 		private Integer duration;
 		private Boolean bright;
 		private DEHActionPointer action;
-		private Integer parameter0;
-		private Integer parameter1;
+		private Integer misc1;
+		private Integer misc2;
+		private List<Integer> args;
 		
 		private ParsedState()
 		{
 			this.frameList = new LinkedList<>();
+			this.args = new LinkedList<>();
 			reset();
 		}
 		
@@ -2867,8 +3007,9 @@ public final class DecoHackParser extends Lexer.Parser
 			this.duration = null;
 			this.bright = null;
 			this.action = null;
-			this.parameter0 = null;
-			this.parameter1 = null;
+			this.misc1 = null;
+			this.misc2 = null;
+			this.args.clear();
 		}
 		
 	}

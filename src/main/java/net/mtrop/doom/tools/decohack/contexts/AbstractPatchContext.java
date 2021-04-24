@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.decohack.contexts;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
@@ -173,6 +174,13 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		return Common.arrayElement(pointers, index);
 	}
+
+	/**
+	 * Checks if the given action pointer type is supported by this patch context.
+	 * @param DEHActionPointerType the action pointer type to check.
+	 * @return true if so, false if not.
+	 */
+	public abstract boolean isActionPointerTypeSupported(DEHActionPointerType type);
 
 	/**
 	 * Sets the pointer at an action pointer index.
