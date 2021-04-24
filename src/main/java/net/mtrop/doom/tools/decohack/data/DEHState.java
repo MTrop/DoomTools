@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.List;
 
 import net.mtrop.doom.util.RangeUtils;
 
@@ -188,7 +188,7 @@ public class DEHState implements DEHObject<DEHState>
 		return this;
 	}
 
-	public DEHState setArgs(LinkedList<Integer> arglist)
+	public DEHState setArgs(List<Integer> arglist)
 	{
 		// gotta do this manually, 'cause unboxing, yuck :P
 		this.args = new int[arglist.size()];

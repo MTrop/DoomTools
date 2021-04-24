@@ -2982,7 +2982,7 @@ public final class DecoHackParser extends Lexer.Parser
 		private DEHActionPointer action;
 		private Integer misc1;
 		private Integer misc2;
-		private LinkedList<Integer> args;
+		private List<Integer> args;
 		
 		private ParsedState()
 		{
