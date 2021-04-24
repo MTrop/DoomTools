@@ -26,6 +26,8 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public static final String STATE_LABEL_FLASH = "flash";
 	public static final String STATE_LABEL_LIGHTDONE = "lightdone";
 
+	public static final int DEFAULT_AMMO_PER_SHOT = -1;
+
 	public static enum Ammo
 	{
 		BULLETS,
@@ -56,7 +58,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		setName("");
 		setAmmoType(null);
-		setAmmoPerShot(-1);
+		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
 		clearLabels();
 	}
 	

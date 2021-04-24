@@ -1003,15 +1003,15 @@ interface Constants
 
 	static final DEHWeapon[] DEHWEAPON = 
 	{
-		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, -1),
-		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, -1),
-		DEHWeapon.create("Shotgun",         Ammo.SHELLS,   S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, -1),
-		DEHWeapon.create("Chaingun",        Ammo.BULLETS,  S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, -1),
-		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, -1),
-		DEHWeapon.create("Plasma rifle",    Ammo.CELLS,    S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, -1),
-		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, -1),
-		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, -1),
-		DEHWeapon.create("Super-shotgun",   Ammo.SHELLS,   S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, -1)
+		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Shotgun",         Ammo.SHELLS,   S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Chaingun",        Ammo.BULLETS,  S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Plasma rifle",    Ammo.CELLS,    S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT),
+		DEHWeapon.create("Super-shotgun",   Ammo.SHELLS,   S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT)
 	};
 
 	static final DEHSound[] DEHSOUND = 
