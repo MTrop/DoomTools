@@ -420,6 +420,7 @@ public final class DecoHackMain
 	private static void splash(PrintStream out)
 	{
 		out.println(SPLASH_VERSION);
+		out.println("Addtional feature support by Xaser Acheron.");
 		out.println("With special thanks to Simon \"fraggle\" Howard (DEH9000)");
 		out.println("and Dennis \"exl\" Meuwissen (WhackEd).");
 	}

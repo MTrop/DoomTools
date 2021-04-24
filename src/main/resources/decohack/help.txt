@@ -206,7 +206,7 @@ Parameter values can also resolve to values via thing or weapon label names,
 sound indices, and references to thing or weapon state labels (like how goto 
 is used).
 
-    A_RandomJump(missile2, 255)         // Actor label
+    A_RandomJump(missile2, 255)         // Available state label on same actor
     A_RandomJump(thing 23 pain, 128)    // Thing state label
     A_RandomJump(weapon 5 fire2, 128)   // Weapon state label
     A_PlaySound(sound "FRE001", 0)      // Sound name
@@ -220,18 +220,21 @@ function to interpret them as such):
     A_Mushroom(-45.0, 16.0)
 
 
-If you don't use an Action Pointer, you can still set the parameter values
-via the "Offset" function (only useful on weapon states):
+Weapon states have a special characteristic that went unused for the most part
+in Doom, but is still modifiable in DECOHack. You can set the offset of the
+weapon graphic on the frame (but note that it will only apply it if the first
+argument is nonzero).
 
     Offset(1, 32)
 
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-      IMPORTANT: Even if you provide an action pointer, you can still 
-      set the offsets (misc parameters) even if the function does not
-      use them exclusively just by putting them in parenthesis, a la:
-      A_Raise(1, 32).
+      IMPORTANT: Some MBF pointers use the miscellaneous offset fields
+      as function parameters, so attempting to use Offset on those
+      weapon states that use them will cause an error! You can still 
+      use Offset with Doom/Ultimate Doom 1.9 pointers - those do not 
+      use those fields at all.
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -958,18 +961,25 @@ block.
 #include "classpath:decohack/boom.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Boom-compatible EXEs, plus the "using boom" line.
+    Boom-compatible ports, plus the "using boom" line.
 
 #include "classpath:decohack/mbf.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF-compatible EXEs, plus the "using mbf" line.
+    MBF-compatible ports, plus the "using mbf" line.
 
 #include "classpath:decohack/extended.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Extended-DEH-compatible EXEs, plus the "using extended" line, AND freeing
-    up the free extended states immediately for use.
+    Extended-DEH-compatible ports, plus the "using extended" line, AND 
+    freeing up the free extended states immediately for use.
+
+#include "classpath:decohack/mbf21.dh"
+
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    MBF 2.1-compliant ports (which includes Extended-DEH), plus the 
+    "using mbf21" line, AND freeing up the free extended states 
+    immediately for use.
 
 ..............................................................................
 
@@ -1017,7 +1027,7 @@ block.
 #include "classpath:decohack/constants/boom.dh"
 
     All ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Boom-compatible EXEs.
+    Boom-compatible ports.
 
 #include "classpath:decohack/constants/boom/states.dh"
 
@@ -1035,7 +1045,7 @@ block.
 #include "classpath:decohack/constants/mbf.dh"
 
     All ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF-compatible EXEs.
+    MBF-compatible ports.
 
 #include "classpath:decohack/constants/mbf/states.dh"
 
@@ -1048,7 +1058,7 @@ block.
 #include "classpath:decohack/constants/extended.dh"
 
     All ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Extended-DEH-compatible EXEs.
+    Extended-DEH-compatible ports.
 
 #include "classpath:decohack/constants/extended/states.dh"
 
