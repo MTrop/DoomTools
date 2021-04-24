@@ -71,6 +71,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 * @param ready the ready frame index.
 	 * @param fire the fire frame index.
 	 * @param flash the muzzle flash index.
+	 * @param ammoPerShot the ammot per shot, or {@link #DEFAULT_AMMO_PER_SHOT} for internal default.
 	 * @return a weapon entry.
 	 */
 	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash, int ammoPerShot)

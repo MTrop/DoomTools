@@ -177,7 +177,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	/**
 	 * Checks if the given action pointer type is supported by this patch context.
-	 * @param DEHActionPointerType the action pointer type to check.
+	 * @param type the action pointer type to check.
 	 * @return true if so, false if not.
 	 */
 	public abstract boolean isActionPointerTypeSupported(DEHActionPointerType type);

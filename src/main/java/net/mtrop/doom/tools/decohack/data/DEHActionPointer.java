@@ -8,9 +8,6 @@ package net.mtrop.doom.tools.decohack.data;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.mtrop.doom.tools.decohack.data.DEHActionPointerParam;
-import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
-
 /**
  * Enumeration of action pointers for frames.
  * @author Matthew Tropiano
