@@ -1894,7 +1894,7 @@ public final class DecoHackParser extends Lexer.Parser
 		state.args.clear();
 
 		boolean useoffsets = matchOffsetDirective();
-		if( useoffsets )
+		if (useoffsets)
 		{
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
@@ -1975,7 +1975,7 @@ public final class DecoHackParser extends Lexer.Parser
 					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
 
-					if(!checkActionParamValue(state.action, 0, p))
+					if (!checkActionParamValue(state.action, 0, p))
 						return false;
 
 					state.misc1 = p;
@@ -1985,7 +1985,7 @@ public final class DecoHackParser extends Lexer.Parser
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
 
-						if(!checkActionParamValue(state.action, 1, p))
+						if (!checkActionParamValue(state.action, 1, p))
 							return false;
 
 						state.misc2 = p;
@@ -2019,7 +2019,7 @@ public final class DecoHackParser extends Lexer.Parser
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
 
-						if(!checkActionParamValue(state.action, argIndex, p))
+						if (!checkActionParamValue(state.action, argIndex, p))
 							return false;
 
 						state.args.add(p);
@@ -2863,20 +2863,20 @@ public final class DecoHackParser extends Lexer.Parser
 	// pointer parameter; if not, prints an error message.
 	private boolean checkActionParamValue(DEHActionPointer action, int index, int value)
 	{
-		if(action == null || index < 0)
+		if (action == null || index < 0)
 		{
 			addErrorMessage("Error in checkActionParamValue: invalid action or index. This is a bug with DECOHack!");
 			return false;
 		}
 
 		DEHActionPointerParam[] params = action.getParams();
-		if(index >= params.length)
+		if (index >= params.length)
 		{
 			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
 			return false;
 		}
 
-		if(!params[index].isValueValid(value))
+		if (!params[index].isValueValid(value))
 		{
 			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, params[index].getValueMin(), params[index].getValueMax());
 			return false;

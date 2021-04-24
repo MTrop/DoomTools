@@ -193,7 +193,8 @@ public class DEHState implements DEHObject<DEHState>
 		// gotta do this manually, 'cause unboxing, yuck :P
 		this.args = new int[arglist.size()];
 		int i = 0;
-		for (Integer arg : arglist) {
+		for (Integer arg : arglist)
+		{
 			this.args[i] = arg;
 			i++;
 		}
@@ -236,8 +237,8 @@ public class DEHState implements DEHObject<DEHState>
 			writer.append("Unknown 1 = ").append(String.valueOf(misc1)).append("\r\n");
 		if (misc2 != frame.misc2)
 			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
-		for(int i = 0; i < args.length; i++)
-			if((i >= frame.args.length || args[i] != frame.args[i]) && args[i] != 0) // [XA] skip zeroes, since mbf21 args explicitly use 0 as the default
+		for (int i = 0; i < args.length; i++)
+			if ((i >= frame.args.length || args[i] != frame.args[i]) && args[i] != 0) // [XA] skip zeroes, since mbf21 args explicitly use 0 as the default
 				writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
 		writer.flush();
 	}
