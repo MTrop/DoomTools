@@ -1903,16 +1903,25 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					// get first argument
 					Integer p;
-					if ((p = parseActionPointerParameterValue(context, actor)) == null)
-						return false;
-					state.misc1 = p;
-				
-					if (matchType(DecoHackKernel.TYPE_COMMA))
+					if ((p = matchInteger()) == null)
 					{
-						if ((p = parseActionPointerParameterValue(context, actor)) == null)
-							return false;
-						state.misc2 = p;
+						addErrorMessage("Expected integer for X offset value.");
+						return false;
 					}
+					state.misc1 = p;
+
+					if (!matchType(DecoHackKernel.TYPE_COMMA))
+					{
+						addErrorMessage("Expected a ',' after X offset; both X and Y offsets must be defined.");
+						return false;
+					}
+
+					if ((p = matchInteger()) == null)
+					{
+						addErrorMessage("Expected integer for Y offset value.");
+						return false;
+					}
+					state.misc2 = p;
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
 					{
