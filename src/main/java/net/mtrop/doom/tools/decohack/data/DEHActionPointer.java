@@ -96,14 +96,14 @@ public enum DEHActionPointer
 	// MBF Action Pointers
 	
 	DETONATE        (-1, "Detonate", DEHActionPointerType.MBF ),
-	MUSHROOM        (-1, "Mushroom", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT } ), // fixed point on both
-	SPAWN           (-1, "Spawn", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.INT } ),
-	TURN            (-1, "Turn", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.ANGLE_INT } ),
-	FACE            (-1, "Face", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.ANGLE_UINT } ),
-	SCRATCH         (-1, "Scratch", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT } ),
-	PLAYSOUND       (-1, "PlaySound", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL } ),
-	RANDOMJUMP      (-1, "RandomJump", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE } ),
-	LINEEFFECT      (-1, "LineEffect", DEHActionPointerType.MBF, new DEHActionPointerParam[]{ DEHActionPointerParam.SHORT, DEHActionPointerParam.SHORT } ),
+	MUSHROOM        (-1, "Mushroom", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT ), // fixed point on both
+	SPAWN           (-1, "Spawn", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.INT ),
+	TURN            (-1, "Turn", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_INT ),
+	FACE            (-1, "Face", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_UINT ),
+	SCRATCH         (-1, "Scratch", DEHActionPointerType.MBF, DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT ),
+	PLAYSOUND       (-1, "PlaySound", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	RANDOMJUMP      (-1, "RandomJump", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE ),
+	LINEEFFECT      (-1, "LineEffect", DEHActionPointerType.MBF, DEHActionPointerParam.SHORT, DEHActionPointerParam.SHORT ),
 	DIE             (-1, "Die", DEHActionPointerType.MBF ),
 	FIREOLDBFG      (-1, "FireOldBFG", DEHActionPointerType.MBF ),
 	BETASKULLATTACK (-1, "BetaSkullAttack", DEHActionPointerType.MBF ),
@@ -111,18 +111,18 @@ public enum DEHActionPointer
 
 	// MBF21 Action Pointers
 
-	SPAWNFACING         (-1, "SpawnFacing", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.INT } ),
-	MONSTERPROJECTILE   (-1, "MonsterProjectile", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED } ),
-	MONSTERBULLETATTACK (-1, "MonsterBulletAttack", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED } ),
-	RADIUSDAMAGE        (-1, "RadiusDamage", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.UINT } ),
-	WEAPONPROJECTILE    (-1, "WeaponProjectile", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED } ),
-	WEAPONBULLETATTACK  (-1, "WeaponBulletAttack", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED } ),
-	WEAPONSOUND         (-1, "WeaponSound", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL } ),
-	WEAPONJUMP          (-1, "WeaponJump", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE } ),
-	CONSUMEAMMO         (-1, "ConsumeAmmo", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.SHORT } ),
-	CHECKAMMO           (-1, "CheckAmmo", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT } ),
-	REFIRETO            (-1, "RefireTo", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL } ),
-	GUNFLASHTO          (-1, "GunFlashTo", DEHActionPointerType.MBF21, new DEHActionPointerParam[]{ DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL } ),
+	SPAWNFACING         (-1, "SpawnFacing", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.INT ),
+	MONSTERPROJECTILE   (-1, "MonsterProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED ),
+	MONSTERBULLETATTACK (-1, "MonsterBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED ),
+	RADIUSDAMAGE        (-1, "RadiusDamage", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT ),
+	WEAPONPROJECTILE    (-1, "WeaponProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED ),
+	WEAPONBULLETATTACK  (-1, "WeaponBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT, DEHActionPointerParam.ANGLE_FIXED ),
+	WEAPONSOUND         (-1, "WeaponSound", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	WEAPONJUMP          (-1, "WeaponJump", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE ),
+	CONSUMEAMMO         (-1, "ConsumeAmmo", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT ),
+	CHECKAMMO           (-1, "CheckAmmo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT ),
+	REFIRETO            (-1, "RefireTo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
+	GUNFLASHTO          (-1, "GunFlashTo", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL ),
 	;
 	
 	/** Originating frame (for DEH 3.0 format 19). */
@@ -157,7 +157,7 @@ public enum DEHActionPointer
 		this(frame, mnemonic, type, new DEHActionPointerParam[0]);
 	}
 
-	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type, DEHActionPointerParam[] params)
+	private DEHActionPointer(int frame, String mnemonic, DEHActionPointerType type, DEHActionPointerParam ... params)
 	{
 		this.frame = frame;
 		this.mnemonic = mnemonic;
