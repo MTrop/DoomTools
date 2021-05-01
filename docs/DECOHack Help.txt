@@ -68,7 +68,7 @@ You'll see them in a bunch of places in this documentation.
 
 To set the output format (and available features):
 
-    using ( doom19 | udoom19 | boom | mbf | extended )
+    using ( doom19 | udoom19 | boom | mbf | extended | mbf21 )
 
 
 Examples:
