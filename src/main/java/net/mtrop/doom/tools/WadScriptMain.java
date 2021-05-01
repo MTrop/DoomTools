@@ -48,10 +48,10 @@ import com.blackrook.rookscript.resolvers.ScriptVariableResolver;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
-import net.mtrop.doom.tools.scripting.DoomMapFunctions;
-import net.mtrop.doom.tools.scripting.PK3Functions;
-import net.mtrop.doom.tools.scripting.UtilityFunctions;
-import net.mtrop.doom.tools.scripting.WadFunctions;
+import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
+import net.mtrop.doom.tools.wadscript.PK3Functions;
+import net.mtrop.doom.tools.wadscript.UtilityFunctions;
+import net.mtrop.doom.tools.wadscript.WadFunctions;
 
 import com.blackrook.rookscript.functions.DateFunctions;
 import com.blackrook.rookscript.functions.DigestFunctions;
