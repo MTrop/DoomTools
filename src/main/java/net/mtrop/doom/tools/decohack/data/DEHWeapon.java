@@ -13,6 +13,8 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
 
+import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
+
 /**
  * A single weapon entry.
  * @author Matthew Tropiano
@@ -48,6 +50,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	
 	/** Ammo per shot. */
 	private int ammoPerShot;
+	
+	/** Flags. */
+	private int flags;
 
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -59,6 +64,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		setName("");
 		setAmmoType(null);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		setFlags(0x00000000);
 		clearLabels();
 	}
 	
@@ -72,9 +78,10 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 * @param fire the fire frame index.
 	 * @param flash the muzzle flash index.
 	 * @param ammoPerShot the ammot per shot, or {@link #DEFAULT_AMMO_PER_SHOT} for internal default.
+	 * @param flags weapon flags.
 	 * @return a weapon entry.
 	 */
-	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash, int ammoPerShot)
+	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash, int ammoPerShot, int flags)
 	{
 		DEHWeapon out = new DEHWeapon(); 
 		out.setName(name);
@@ -86,6 +93,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		out.setFireFrameIndex(fire);
 		out.setFlashFrameIndex(flash);
 		out.setAmmoPerShot(ammoPerShot);
+		out.setFlags(flags);
 		return out;
 	}
 	
@@ -95,6 +103,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		setName(source.name);
 		setAmmoType(source.ammoType);
 		setAmmoPerShot(source.ammoPerShot);
+		setFlags(source.flags);
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
@@ -155,6 +164,25 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	public DEHWeapon setAmmoPerShot(int ammoPerShot) 
 	{
 		this.ammoPerShot = ammoPerShot;
+		return this;
+	}
+	
+	/**
+	 * @return this weapon's flags.
+	 */
+	public int getFlags() 
+	{
+		return flags;
+	}
+	
+	/**
+	 * Sets weapon flags.
+	 * @param setFlags weapon flags to set.
+	 * @return this object.
+	 */
+	public DEHWeapon setFlags(int flags)
+	{
+		this.flags = flags;
 		return this;
 	}
 	
@@ -305,6 +333,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	{
 		return ammoType == obj.ammoType
 			&& ammoPerShot == obj.ammoPerShot
+			&& flags == obj.flags
 			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
 			&& getLowerFrameIndex() == obj.getLowerFrameIndex()
 			&& getReadyFrameIndex() == obj.getReadyFrameIndex()
@@ -334,6 +363,27 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		if (ammoPerShot != weapon.ammoPerShot)
 			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
+
+		// Write out MBF21 flags explicitly, 'cause it's required by the 'standard'
+		if (flags != weapon.flags)
+		{
+			writer.append("MBF21 Bits = ");
+
+			boolean more = false;
+			for(int i = 0; i < DEHWeaponFlag.VALUES.length; i++)
+			{
+				if((flags & DEHWeaponFlag.VALUES[i].getValue()) != 0)
+				{
+					if(more)
+						writer.append(" | ");
+					writer.append(DEHWeaponFlag.VALUES[i].getMnemonic());
+					more = true;
+				}
+			}
+
+			writer.append("\r\n");
+		}
+
 		writer.flush();
 	}
 
