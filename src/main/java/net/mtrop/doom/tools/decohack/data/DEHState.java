@@ -238,7 +238,7 @@ public class DEHState implements DEHObject<DEHState>
 		if (misc2 != frame.misc2)
 			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
 		for (int i = 0; i < args.length; i++)
-			if ((i >= frame.args.length || args[i] != frame.args[i]) && args[i] != 0) // [XA] skip zeroes, since mbf21 args explicitly use 0 as the default
+			if (i >= frame.args.length || args[i] != frame.args[i])
 				writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
 		writer.flush();
 	}
