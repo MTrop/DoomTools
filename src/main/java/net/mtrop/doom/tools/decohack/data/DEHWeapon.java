@@ -363,26 +363,8 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		if (ammoPerShot != weapon.ammoPerShot)
 			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
-
-		// Write out MBF21 flags explicitly, 'cause it's required by the 'standard'
 		if (flags != weapon.flags)
-		{
-			writer.append("MBF21 Bits = ");
-
-			boolean more = false;
-			for(int i = 0; i < DEHWeaponFlag.VALUES.length; i++)
-			{
-				if((flags & DEHWeaponFlag.VALUES[i].getValue()) != 0)
-				{
-					if(more)
-						writer.append(" | ");
-					writer.append(DEHWeaponFlag.VALUES[i].getMnemonic());
-					more = true;
-				}
-			}
-
-			writer.append("\r\n");
-		}
+			writer.append("MBF21 Bits = ").append(String.valueOf(flags)).append("\r\n");
 
 		writer.flush();
 	}
