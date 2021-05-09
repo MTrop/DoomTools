@@ -36,6 +36,7 @@ import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
+import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
@@ -1285,8 +1286,28 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
+			if (matchType(DecoHackKernel.TYPE_PLUS))
+			{
+				Integer flags;
+				if ((flags = matchWeaponFlagMnemonic()) == null && (flags = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"+\".");
+					return false;
+				}
+				weapon.setFlags(weapon.getFlags() | flags);
+			}
+			else if (matchType(DecoHackKernel.TYPE_DASH))
+			{
+				Integer flags;
+				if ((flags = matchWeaponFlagMnemonic()) == null && (flags = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"-\".");
+					return false;
+				}
+				weapon.setFlags(weapon.getFlags() & (~flags));
+			}
 			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
 			{
 				if (!parseWeaponStateClause(context, weapon))
@@ -1362,6 +1383,19 @@ public final class DecoHackParser extends Lexer.Parser
 				else
 				{
 					weapon.setAmmoPerShot(ammoPerShot);
+				}
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
+			{
+				Integer flags;
+				if ((flags = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_FLAGS);
+					return false;
+				}
+				else
+				{
+					weapon.setFlags(flags);
 				}
 			}
 			else
@@ -2652,6 +2686,31 @@ public final class DecoHackParser extends Lexer.Parser
 			default:
 				out = null;
 				break;
+		}
+		
+		if (out != null)
+			nextToken();
+		return out;
+	}
+	
+	// Matches an identifier that references a weapon
+	// flag mnemonic. If match, advance token and
+	// return bitflags. Else, return null.
+	private Integer matchWeaponFlagMnemonic()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+		
+		Integer out = null;
+		String mnemonic = currentToken().getLexeme().toLowerCase();
+
+		for (int i = 0; i < DEHWeaponFlag.VALUES.length; i++)
+		{
+			if(DEHWeaponFlag.VALUES[i].getMnemonic().equals(mnemonic))
+			{
+				out = DEHWeaponFlag.VALUES[i].getValue();
+				break;
+			}
 		}
 		
 		if (out != null)
