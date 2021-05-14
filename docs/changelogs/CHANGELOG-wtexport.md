@@ -3,7 +3,7 @@ WTEXport
 
 ### Changed for 1.4.0
 
-* `Fixed` Textures added via ANIMATED/SWITCHES searching did not also check for animated SWITCHES.
+* `Fixed` Textures added via ANIMATED searching did not also check for SWITCHES pairings.
 
 
 ### Changed for 1.3.0
