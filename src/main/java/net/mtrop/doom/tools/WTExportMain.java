@@ -560,12 +560,15 @@ public final class WTExportMain
 			return true;
 		}
 
-		private void addToLists(Set<String> set, List<String> list, String s)
+		private boolean addToLists(Set<String> set, List<String> list, String s)
 		{
-			if (set.contains(s))
-				return;
-			set.add(s);
-			list.add(s);
+			if (!set.contains(s))
+			{
+				set.add(s);
+				list.add(s);
+				return true;
+			}
+			return false;
 		}
 
 		private void readAndAddTextures(String textureName)
@@ -576,33 +579,47 @@ public final class WTExportMain
 				return;
 			}
 			
-			addToLists(textureSet, textureList, textureName);
-		
-			for (WadUnit unit : wadPriority)
+			if (addToLists(textureSet, textureList, textureName))
 			{
-				if (!options.noAnimated)
+				for (WadUnit unit : wadPriority)
 				{
-					if (unit.animatedTexture.containsKey(textureName))
-						for (String s : unit.animatedTexture.get(textureName))
-							addToLists(textureSet, textureList, s);
-				}
-			
-				if (!options.noSwitches)
-				{
-					if (unit.switchMap.containsKey(textureName))
-					{
-						addToLists(textureSet, textureList, textureName);
-						addToLists(textureSet, textureList, unit.switchMap.get(textureName));
-					}
-					else if (TextureTables.SWITCH_TABLE.containsKey(textureName))
-					{
-						addToLists(textureSet, textureList, textureName);
-						addToLists(textureSet, textureList, TextureTables.SWITCH_TABLE.get(textureName));
-					}
+					if (!options.noAnimated)
+						readAndAddAnimatedTextures(unit, textureName);
+				
+					if (!options.noSwitches)
+						readAndAddSwitchTextures(unit, textureName);
 				}
 			}
 		}
 
+		private void readAndAddAnimatedTextures(WadUnit unit, String textureName)
+		{
+			if (unit.animatedTexture.containsKey(textureName))
+			{
+				for (String s : unit.animatedTexture.get(textureName))
+					if (addToLists(textureSet, textureList, s) && !options.noSwitches)
+						readAndAddSwitchTextures(unit, s);
+			}
+		}
+
+		private void readAndAddSwitchTextures(WadUnit unit, String textureName)
+		{
+			if (unit.switchMap.containsKey(textureName))
+			{
+				if (addToLists(textureSet, textureList, textureName) && !options.noAnimated)
+					readAndAddAnimatedTextures(unit, textureName);
+				if (addToLists(textureSet, textureList, unit.switchMap.get(textureName)) && !options.noAnimated)
+					readAndAddAnimatedTextures(unit, unit.switchMap.get(textureName));
+			}
+			else if (TextureTables.SWITCH_TABLE.containsKey(textureName))
+			{
+				if (addToLists(textureSet, textureList, textureName) && !options.noAnimated)
+					readAndAddAnimatedTextures(unit, textureName);
+				if (addToLists(textureSet, textureList, TextureTables.SWITCH_TABLE.get(textureName)) && !options.noAnimated)
+					readAndAddAnimatedTextures(unit, TextureTables.SWITCH_TABLE.get(textureName));
+			}
+		}
+		
 		private void readAndAddFlats(String textureName)
 		{
 			addToLists(flatSet, flatList, textureName);

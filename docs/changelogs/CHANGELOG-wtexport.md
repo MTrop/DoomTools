@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.4.0
+
+* `Fixed` Textures added via ANIMATED/SWITCHES searching did not also check for animated SWITCHES.
+
+
 ### Changed for 1.3.0
 
 * `Fixed` Better support for texture WADs missing a TEXTURE1 lump (but having a TEXTURE2).
