@@ -162,6 +162,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PAINSOUND = "painsound";
 	private static final String KEYWORD_DEATHSOUND = "deathsound";
 	private static final String KEYWORD_ACTIVESOUND = "activesound";
+	private static final String KEYWORD_RIPSOUND = "ripsound";
 
 	private static final String KEYWORD_OFFSET = "offset";
 	private static final String KEYWORD_BRIGHT = "bright";
@@ -923,6 +924,7 @@ public final class DecoHackParser extends Lexer.Parser
 						.setPainSoundPosition(0)
 						.setDeathSoundPosition(0)
 						.setActiveSoundPosition(0)
+						.setRipSoundPosition(0)
 					;
 				}
 				else
@@ -1073,6 +1075,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setActiveSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RIPSOUND))
+			{
+				if ((value = matchSoundIndexName(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_RIPSOUND);
+					return false;
+				}
+				thing.setRipSoundPosition(value + 1);
 			}
 			else
 			{

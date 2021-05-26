@@ -60,6 +60,8 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int deathSoundPosition;
 	/** Active sound position. */
 	private int activeSoundPosition;
+	/** Rip sound position. */
+	private int ripSoundPosition;
 
 	/**
 	 * Creates a new blank thing.
@@ -86,6 +88,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainSoundPosition(SOUND_NONE);
 		setDeathSoundPosition(SOUND_NONE);
 		setActiveSoundPosition(SOUND_NONE);
+		setRipSoundPosition(SOUND_NONE);
 		
 		clearLabels();
 	}
@@ -111,6 +114,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainSoundPosition(source.painSoundPosition);
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
+		setRipSoundPosition(source.ripSoundPosition);
 		
 		clearLabels();
 		for (String label : source.getLabels())
@@ -444,6 +448,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return this;
 	}
 
+	public int getRipSoundPosition()
+	{
+		return ripSoundPosition;
+	}
+
+	public DEHThing setRipSoundPosition(int ripSoundPosition)
+	{
+		RangeUtils.checkRange("Rip sound position", 0, Integer.MAX_VALUE, ripSoundPosition);
+		this.ripSoundPosition = ripSoundPosition;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -477,6 +493,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
+			&& ripSoundPosition == obj.ripSoundPosition
 		;
 	}	
 	
@@ -534,6 +551,10 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			writer.append("Pain sound = ").append(String.valueOf(painSoundPosition)).append("\r\n");
 		if (deathSoundPosition != thing.deathSoundPosition)
 			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
+
+		// MBF21 features
+		if (ripSoundPosition != thing.ripSoundPosition)
+			writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 		
 		writer.flush();
 	}
