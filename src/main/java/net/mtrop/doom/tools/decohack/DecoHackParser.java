@@ -156,6 +156,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_HEIGHT = "height";
 	private static final String KEYWORD_RADIUS = "radius";
 	private static final String KEYWORD_SPEED = "speed";
+	private static final String KEYWORD_FASTSPEED = "fastspeed";
 	private static final String KEYWORD_HEALTH = "health";
 	private static final String KEYWORD_SEESOUND = "seesound";
 	private static final String KEYWORD_ATTACKSOUND = "attacksound";
@@ -967,6 +968,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setSpeed(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FASTSPEED))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_FASTSPEED);
+					return false;
+				}
+				thing.setFastSpeed(value);
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RADIUS))
 			{
