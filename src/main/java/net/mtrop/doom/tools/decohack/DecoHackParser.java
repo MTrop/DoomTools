@@ -150,6 +150,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_EDNUM = "ednum";
 	private static final String KEYWORD_FLAGS = "flags";
 	private static final String KEYWORD_MASS = "mass";
+	private static final String KEYWORD_MELEERANGE = "meleerange";
 	private static final String KEYWORD_PAINCHANCE = "painchance";
 	private static final String KEYWORD_REACTIONTIME = "reactiontime";
 	private static final String KEYWORD_DAMAGE = "damage";
@@ -1031,6 +1032,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setMass(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MELEERANGE))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MELEERANGE);
+					return false;
+				}
+				thing.setMeleeRange(value);
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
 			{
