@@ -85,7 +85,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(0);
 		setFlags(0x00000000);
 		setMass(0);
-		setMeleeRange(-1);
+		setMeleeRange(64);
 
 		setSeeSoundPosition(SOUND_NONE);
 		setAttackSoundPosition(SOUND_NONE);
@@ -280,7 +280,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 
 	public DEHThing setMeleeRange(int meleeRange) 
 	{
-		RangeUtils.checkRange("Melee range", -1, 65535, meleeRange);
+		RangeUtils.checkRange("Melee range", 0, 65535, meleeRange);
 		this.meleeRange = meleeRange;
 		return this;
 	}
@@ -537,9 +537,6 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		int speedVal = isProjectile ? speed << 16 : speed;
 		int fastSpeedVal = isProjectile ? fastSpeed << 16 : fastSpeed;
 
-		// If not -1 (i.e. "unset"), meleeRange is fixed point.
-		int meleeRangeVal = meleeRange > 0 ? meleeRange << 16 : meleeRange;
-
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		if (health != thing.health)
@@ -595,7 +592,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		if (fastSpeed != thing.fastSpeed)
 			writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
 		if (meleeRange != thing.meleeRange)
-			writer.append("Melee range = ").append(String.valueOf(meleeRangeVal)).append("\r\n");
+			writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
 
 		writer.flush();
 	}
