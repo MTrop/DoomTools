@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.4.0
+
+* `Fixed` Textures added via ANIMATED searching did not also check for SWITCHES pairings.
+
+
 ### Changed for 1.3.0
 
 * `Fixed` Better support for texture WADs missing a TEXTURE1 lump (but having a TEXTURE2).
