@@ -57,26 +57,26 @@ ECHO [...]
     ................................
     Returns: OK if a symbol was created.
 
-CREATE [symbol]
+CREATE [symbol] [opt:iwad]
     Creates a new in-memory buffer, errors out if the symbol exists.
     Buffers are best used for speed, but large merges will consume
     lots of memory during merge.
     [symbol]: The symbol for the new buffer.
-    [iwad]: (Optional) If "iwad", the created WAD file is an IWAD.
+    [iwad]:  (Optional) If "iwad", the created WAD file is an IWAD.
     ................................
     Returns: OK if a symbol was created.
              BAD_SYMBOL if the destination symbol already exists.
 
-CREATEFILE [symbol] [path] [iwad]
-    Creates a new WAD file (on disk - not in memory), errors out if 
+CREATEFILE [symbol] [path] [opt:iwad]
+    Creates a new WAD file (on disk - not in memory), errors out if
     the symbol exists or the new file could not be created.
     WARNING: If the file already exists, it is OVERWRITTEN!
     Files are best used for memory efficiency, but large merges will
     incur lots of overhead as the output file grows.
     See: CREATE for the in-memory version.
     [symbol]: The symbol for the new buffer.
-    [path]: The file to create.
-    [iwad]: (Optional) If "iwad", the created WAD file is an IWAD.
+    [path]:   The file to create.
+    [iwad]:   (Optional) If "iwad", the created WAD file is an IWAD.
     ................................
     Returns: OK if creation successful and a symbol was created.
              BAD_SYMBOL if the destination symbol is invalid.
@@ -189,7 +189,7 @@ MERGENAMESPACE [dest-symbol] [src-symbol] [namespace] [opt:amend]
              BAD_NAMESPACE if the namespace could not be found or is incomplete.
              BAD_NAMESPACE_RANGE if the namespace entries are not in sequence.
 
-MERGENAMESPACEFILE [symbol] [path] [namespace]
+MERGENAMESPACEFILE [symbol] [path] [namespace] [opt:amend]
     Reads WAD entries from [path] into buffer [symbol] that
     lie between [namespace]_START and  [namespace]_END, excluding
     the START/END namespace markers.

@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.6.0.1
+
+* `Fixed` Some documentation inconsistencies.
+
+
 ### Changed for 1.6.0
 
 * `Added` MERGEDEUTEXFILE can now write a Strife texture entry set.
