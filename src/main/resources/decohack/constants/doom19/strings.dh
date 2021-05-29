@@ -15,15 +15,17 @@
 #define STR_C4TEXT             138
 #define STR_C5TEXT             139
 #define STR_C6TEXT             140
-#define STR_BGFLATE1           141
-#define STR_BGFLATE2           142
-#define STR_BGFLATE3           143
-#define STR_BGFLAT06           144
-#define STR_BGFLAT11           145
-#define STR_BGFLAT20           146
-#define STR_BGFLAT30           147
-#define STR_BGFLAT15           148
-#define STR_BGFLAT31           149
+
+#define STR_BGFLAT06           141
+#define STR_BGFLAT11           142
+#define STR_BGFLAT20           143
+#define STR_BGFLAT30           144
+#define STR_BGFLAT15           145
+#define STR_BGFLAT31           146
+
+#define STR_BGFLATE1           147
+#define STR_BGFLATE2           148
+#define STR_BGFLATE3           149
 
 #define STR_CC_ZOMBIE          150
 #define STR_CC_SHOTGUN         151

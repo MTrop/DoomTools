@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.10.1
+
+* `Fixed` The background flat string indices in the constants files were incorrect.
+
+
 ### Changed for 0.10.0
 
 * `Added` An index value clause for sound indices on parameters.
