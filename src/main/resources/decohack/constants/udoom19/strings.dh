@@ -16,16 +16,18 @@
 #define STR_C4TEXT             139
 #define STR_C5TEXT             140
 #define STR_C6TEXT             141
-#define STR_BGFLATE1           142
-#define STR_BGFLATE2           143
-#define STR_BGFLATE3           144
-#define STR_BGFLATE4           145
-#define STR_BGFLAT06           146
-#define STR_BGFLAT11           147
-#define STR_BGFLAT20           148
-#define STR_BGFLAT30           149
-#define STR_BGFLAT15           150
-#define STR_BGFLAT31           151
+
+#define STR_BGFLAT06           142
+#define STR_BGFLAT11           143
+#define STR_BGFLAT20           144
+#define STR_BGFLAT30           145
+#define STR_BGFLAT15           146
+#define STR_BGFLAT31           147
+
+#define STR_BGFLATE1           148
+#define STR_BGFLATE2           149
+#define STR_BGFLATE3           150
+#define STR_BGFLATE4           151
 
 #define STR_CC_ZOMBIE          152
 #define STR_CC_SHOTGUN         153

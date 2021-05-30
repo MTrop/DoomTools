@@ -45,6 +45,7 @@ import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.ParameterUsage;
 import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.ScriptVariableResolver;
+import com.blackrook.rookscript.resolvers.variable.DefaultVariableResolver;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -118,6 +119,11 @@ public final class WadScriptMain
 		new Resolver("PK3/PKEs", PK3Functions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
 		new Resolver("Utilities", "UTIL", UtilityFunctions.createResolver())
+	};
+
+	private static final Scope[] SCOPES = 
+	{
+		new Scope("GLOBAL", new DefaultVariableResolver())
 	};
 	
 	private static class Resolver
@@ -579,14 +585,21 @@ public final class WadScriptMain
 				
 				// ============== Add Scopes ==============
 
-				int i = 0;
-				for (Scope scope : options.scopes)
+				for (int i = 0; i < SCOPES.length; i++)
 				{
 					if (i == 0)
-						builder.withScope(scope.scopeName, scope.variableResolver);
-					else
-						builder.andScope(scope.scopeName, scope.variableResolver);
-					i++;
+					{
+						builder.withScope(SCOPES[i].scopeName, SCOPES[i].variableResolver);
+					}
+					else 
+					{
+						builder.andScope(SCOPES[i].scopeName, SCOPES[i].variableResolver);
+					} 
+				}
+				
+				for (Scope scope : options.scopes)
+				{
+					builder.andScope(scope.scopeName, scope.variableResolver);
 				}
 				
 				instance = builder.createInstance();
@@ -729,6 +742,12 @@ public final class WadScriptMain
 			out.println("                                     First argument after this is the script");
 			out.println("                                     file, and every argument after are args");
 			out.println("                                     to pass to the script.");
+			out.println();
+			out.println("Scopes");
+			out.println("------");
+			out.println("All scripts can access a scope called `global` that serves as a common variable");
+			out.println("scope for sharing values outside of functions or for data that you would want");
+			out.println("to initialize once.");
 		}
 
 		private void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver)

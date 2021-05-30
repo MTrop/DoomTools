@@ -28,10 +28,12 @@
 #define STR_P4TEXT             P4TEXT
 #define STR_P5TEXT             P5TEXT
 #define STR_P6TEXT             P6TEXT
+
 #define STR_BGFLATE1           BGFLATE1
 #define STR_BGFLATE2           BGFLATE2
 #define STR_BGFLATE3           BGFLATE3
 #define STR_BGFLATE4           BGFLATE4
+
 #define STR_BGFLAT06           BGFLAT06
 #define STR_BGFLAT11           BGFLAT11
 #define STR_BGFLAT20           BGFLAT20

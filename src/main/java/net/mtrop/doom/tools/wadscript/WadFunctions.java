@@ -292,7 +292,7 @@ public enum WadFunctions implements ScriptFunctionType
 	},
 
 	/** @since 1.1.0  */
-	WADSETTYPE(1)
+	WADSETTYPE(2)
 	{
 		@Override
 		protected Usage usage()
