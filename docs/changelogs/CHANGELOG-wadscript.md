@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.2.1
+
+* `Fixed` WADSETTYPE() did not accept two parameters, as described.
+
+
 ### Changed for 1.2.0
 
 * `Added` All scripts can now make use of a global scope called `global`.
