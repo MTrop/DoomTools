@@ -561,6 +561,14 @@ public final class DoomMakeMain
 		out.println("                                       Default: 256");
 		out.println("    --stack-depth [num]            Sets the stack value depth to [num].");
 		out.println("                                       Default: 2048");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("Scopes");
+		out.println("------");
+		out.println("DoomMake has a variable scope called `global` that serves as a common variable");
+		out.println("scope for sharing values outside of functions or for data that you would want");
+		out.println("to initialize once.");
 	}
 
 }

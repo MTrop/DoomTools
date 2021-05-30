@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.2.0
+
+* `Added` All scripts can now make use of a global scope called `global`.
+
+
 ### Changed for 1.1.0.1
 
 * `Added` Clarifications to documentation that PKE files are also openable like PK3s.

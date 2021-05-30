@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.3.0
+
+* `Added` All scripts can now make use of a global scope called `global`.
+
+
 ### Changed for 0.2.0
 
 - `Added` Ability to invoke DImgConv.
