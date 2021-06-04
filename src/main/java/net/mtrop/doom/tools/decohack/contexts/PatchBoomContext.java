@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.decohack.contexts;
 
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
+import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchBoom;
 
@@ -28,4 +29,11 @@ public class PatchBoomContext extends AbstractPatchBoomContext
 	{
 		return type == DEHActionPointerType.DOOM19;
 	}
+
+	@Override
+	public DEHFeatureLevel getFeatureLevel() 
+	{
+		return DEHFeatureLevel.BOOM;
+	}
+
 }

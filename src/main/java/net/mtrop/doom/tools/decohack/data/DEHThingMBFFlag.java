@@ -9,39 +9,33 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * MBF21 Weapon flags.
- * @author Xaser Acheron
+ * MBF21 Thing Flags.
  * @author Matthew Tropiano 
  */
-public enum DEHWeaponFlag
+public enum DEHThingMBFFlag
 {
-	NOTHRUST       (0x00000001),
-	SILENT         (0x00000002),
-	NOAUTOFIRE     (0x00000004),
-	FLEEMELEE      (0x00000008),
-	AUTOSWITCHFROM (0x00000010),
-	NOAUTOSWITCHTO (0x00000020),
+	// TODO: Finish this.
 	;
 
-	public static final DEHWeaponFlag[] VALUES = values();
+	public static final DEHThingMBFFlag[] VALUES = values();
 
-	private static final Map<String, DEHWeaponFlag> MNEMONIC_MAP = new TreeMap<String, DEHWeaponFlag>(String.CASE_INSENSITIVE_ORDER)
+	private static final Map<String, DEHThingMBFFlag> MNEMONIC_MAP = new TreeMap<String, DEHThingMBFFlag>(String.CASE_INSENSITIVE_ORDER)
 	{
-		private static final long serialVersionUID = -2813044917550646916L;
+		private static final long serialVersionUID = -3232636284673026047L;
 		{
-			for (DEHWeaponFlag val : DEHWeaponFlag.values())
+			for (DEHThingMBFFlag val : DEHThingMBFFlag.values())
 				put(val.name(), val);
 		}
 	};
 
-	public static DEHWeaponFlag getByMnemonic(String mnemonic)
+	public static DEHThingMBFFlag getByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
 	
 	private int value;
 
-	private DEHWeaponFlag(int value)
+	private DEHThingMBFFlag(int value)
 	{
 		this.value = value;
 	}

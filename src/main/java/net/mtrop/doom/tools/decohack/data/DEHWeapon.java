@@ -13,8 +13,6 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
 
-import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
-
 /**
  * A single weapon entry.
  * @author Matthew Tropiano
@@ -177,7 +175,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	
 	/**
 	 * Sets weapon flags.
-	 * @param setFlags weapon flags to set.
+	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
 	public DEHWeapon setFlags(int flags)

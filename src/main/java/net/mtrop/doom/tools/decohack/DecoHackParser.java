@@ -30,10 +30,13 @@ import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerParam;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.DEHThingMBFFlag;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
@@ -50,39 +53,6 @@ import net.mtrop.doom.tools.struct.PreprocessorLexer;
 public final class DecoHackParser extends Lexer.Parser
 {
 	public static final String STREAMNAME_TEXT = "[Text String]";
-
-	private static final int FLAG_SPECIAL =       0x00000001;
-	private static final int FLAG_SOLID =         0x00000002;
-	private static final int FLAG_SHOOTABLE =     0x00000004;
-	private static final int FLAG_NOSECTOR =      0x00000008;
-	private static final int FLAG_NOBLOCKMAP =    0x00000010;
-	private static final int FLAG_AMBUSH =        0x00000020;
-	private static final int FLAG_JUSTHIT =       0x00000040;
-	private static final int FLAG_JUSTATTACKED =  0x00000080;
-	private static final int FLAG_SPAWNCEILING =  0x00000100;
-	private static final int FLAG_NOGRAVITY =     0x00000200;
-	private static final int FLAG_DROPOFF =       0x00000400;
-	private static final int FLAG_PICKUP =        0x00000800;
-	private static final int FLAG_NOCLIP =        0x00001000;
-	private static final int FLAG_SLIDE =         0x00002000;
-	private static final int FLAG_FLOAT =         0x00004000;
-	private static final int FLAG_TELEPORT =      0x00008000;
-	private static final int FLAG_MISSILE =       0x00010000;
-	private static final int FLAG_DROPPED =       0x00020000;
-	private static final int FLAG_SHADOW =        0x00040000;
-	private static final int FLAG_NOBLOOD =       0x00080000;
-	private static final int FLAG_CORPSE =        0x00100000;
-	private static final int FLAG_INFLOAT =       0x00200000;
-	private static final int FLAG_COUNTKILL =     0x00400000;
-	private static final int FLAG_COUNTITEM =     0x00800000;
-	private static final int FLAG_SKULLFLY =      0x01000000;
-	private static final int FLAG_NOTDEATHMATCH = 0x02000000;
-	private static final int FLAG_TRANSLATION =   0x04000000;
-	private static final int FLAG_TRANSLATION2 =  0x08000000;
-	private static final int FLAG_TOUCHY =        0x10000000;
-	private static final int FLAG_BOUNCES =       0x20000000;
-	private static final int FLAG_FRIEND =        0x40000000;
-	private static final int FLAG_TRANSLUCENT =   0x80000000;
 
 	private static final String KEYWORD_MISC = "misc";
 	private static final String KEYWORD_MAX_ARMOR = "maxArmor";
@@ -327,24 +297,24 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		if (context instanceof AbstractPatchDoom19Context)
-		{
-			if (!parseStringEntryList((AbstractPatchDoom19Context)context))
-				return false;
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				addErrorMessage("Expected '}' to close \"%s\" section, or string index to start string replacement entry.", KEYWORD_STRINGS);
-				return false;
-			}
-			return true;
-		}
-		else if (context instanceof AbstractPatchBoomContext)
+		if (context.supports(DEHFeatureLevel.BOOM))
 		{
 			if (!parseStringEntryList((AbstractPatchBoomContext)context))
 				return false;
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
 				addErrorMessage("Expected '}' to close \"%s\" section, or string key name to start string replacement entry.", KEYWORD_STRINGS);
+				return false;
+			}
+			return true;
+		}
+		else if (context.supports(DEHFeatureLevel.DOOM19))
+		{
+			if (!parseStringEntryList((AbstractPatchDoom19Context)context))
+				return false;
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected '}' to close \"%s\" section, or string index to start string replacement entry.", KEYWORD_STRINGS);
 				return false;
 			}
 			return true;
@@ -538,9 +508,9 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a par block.
 	private boolean parseParBlock(AbstractPatchContext<?> context)
 	{
-		if (!(context instanceof AbstractPatchBoomContext))
+		if (!context.supports(DEHFeatureLevel.BOOM))
 		{
-			addErrorMessage("Par block not supported in non-Boom type patches.");
+			addErrorMessage("Par block not supported in non-Boom-feature-level patches.");
 			return false;
 		}
 		
@@ -862,7 +832,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
-				if ((value = matchFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				if ((value = matchThingFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
 				{
 					addErrorMessage("Expected integer after \"+\".");
 					return false;
@@ -871,7 +841,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
-				if ((value = matchFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				if ((value = matchThingFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
 				{
 					addErrorMessage("Expected integer after \"-\".");
 					return false;
@@ -1838,7 +1808,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			ParsedState parsedState = new ParsedState();
 			
-			boolean isBoom = context instanceof AbstractPatchBoomContext;			
+			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
 			Integer pointerIndex = context.getStateActionPointerIndex(index);
 			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
 				return false;
@@ -2255,7 +2225,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer fillStates(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor, boolean forceFirst)
 	{
 		Integer out = null;
-		boolean isBoom = context instanceof AbstractPatchBoomContext;
+		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
 		
 		while (!state.frameList.isEmpty())
 		{
@@ -2306,7 +2276,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private Integer searchNextState(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor) 
 	{
-		boolean isBoom = context instanceof AbstractPatchBoomContext;
+		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
 		
 		Integer index = isBoom 
 			? context.findNextFreeState(cursor.lastIndexFilled)
@@ -2571,150 +2541,60 @@ public final class DecoHackParser extends Lexer.Parser
 		return matchIdentifierLexemeIgnoreCase(KEYWORD_OFFSET);
 	}
 	
-	// Matches an identifier that references a flag mnemonic.
+	// Matches an identifier that references a thing flag mnemonic.
 	// If match, advance token and return bitflags.
 	// Else, return null.
-	private Integer matchFlagMnemonic()
+	private Integer matchThingFlagMnemonic()
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
-		
-		Integer out;
-		switch (currentToken().getLexeme().toLowerCase())
+
+		Integer out = null;
+		DEHThingFlag flag;
+		if ((flag = DEHThingFlag.getByMnemonic(currentToken().getLexeme())) != null)
 		{
-			case "special":
-				out = FLAG_SPECIAL;
-				break;
-			case "solid":
-				out = FLAG_SOLID;
-				break;
-			case "shootable":
-				out = FLAG_SHOOTABLE;
-				break;
-			case "nosector":
-				out = FLAG_NOSECTOR;
-				break;
-			case "noblockmap":
-				out = FLAG_NOBLOCKMAP;
-				break;
-			case "ambush":
-				out = FLAG_AMBUSH;
-				break;
-			case "justhit":
-				out = FLAG_JUSTHIT;
-				break;
-			case "justattacked":
-				out = FLAG_JUSTATTACKED;
-				break;
-			case "spawnceiling":
-				out = FLAG_SPAWNCEILING;
-				break;
-			case "nogravity":
-				out = FLAG_NOGRAVITY;
-				break;
-			case "dropoff":
-				out = FLAG_DROPOFF;
-				break;
-			case "pickup":
-				out = FLAG_PICKUP;
-				break;
-			case "noclip":
-				out = FLAG_NOCLIP;
-				break;
-			case "slide":
-				out = FLAG_SLIDE;
-				break;
-			case "float":
-				out = FLAG_FLOAT;
-				break;
-			case "teleport":
-				out = FLAG_TELEPORT;
-				break;
-			case "missile":
-				out = FLAG_MISSILE;
-				break;
-			case "dropped":
-				out = FLAG_DROPPED;
-				break;
-			case "shadow":
-				out = FLAG_SHADOW;
-				break;
-			case "noblood":
-				out = FLAG_NOBLOOD;
-				break;
-			case "corpse":
-				out = FLAG_CORPSE;
-				break;
-			case "infloat":
-				out = FLAG_INFLOAT;
-				break;
-			case "countkill":
-				out = FLAG_COUNTKILL;
-				break;
-			case "countitem":
-				out = FLAG_COUNTITEM;
-				break;
-			case "skullfly":
-				out = FLAG_SKULLFLY;
-				break;
-			case "notdmatch":
-				out = FLAG_NOTDEATHMATCH;
-				break;
-			case "translation":
-				out = FLAG_TRANSLATION;
-				break;
-			case "translation2":
-			case "unused1":
-				out = FLAG_TRANSLATION2;
-				break;
-			case "unused2":
-			case "touchy":
-				out = FLAG_TOUCHY;
-				break;
-			case "unused3":
-			case "bounces":
-				out = FLAG_BOUNCES;
-				break;
-			case "unused4":
-			case "friend":
-			case "friendly":
-				out = FLAG_FRIEND;
-				break;
-			case "translucent":
-				out = FLAG_TRANSLUCENT;
-				break;
-			default:
-				out = null;
-				break;
+			out = flag.getValue();
+			nextToken();
 		}
 		
-		if (out != null)
-			nextToken();
 		return out;
 	}
 	
-	// Matches an identifier that references a weapon
-	// flag mnemonic. If match, advance token and
-	// return bitflags. Else, return null.
+	// Matches an identifier that references an MBF thing flag mnemonic.
+	// If match, advance token and return bitflags.
+	// Else, return null.
+	private Integer matchThingMBFFlagMnemonic()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+
+		Integer out = null;
+		DEHThingMBFFlag flag;
+		if ((flag = DEHThingMBFFlag.getByMnemonic(currentToken().getLexeme())) != null)
+		{
+			out = flag.getValue();
+			nextToken();
+		}
+		
+		return out;
+	}
+	
+	// Matches an identifier that references a weapon flag mnemonic. 
+	// If match, advance token and return bitflags. 
+	// Else, return null.
 	private Integer matchWeaponFlagMnemonic()
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 		
 		Integer out = null;
-		String mnemonic = currentToken().getLexeme().toLowerCase();
-
-		for (int i = 0; i < DEHWeaponFlag.VALUES.length; i++)
+		DEHWeaponFlag flag;
+		if ((flag = DEHWeaponFlag.getByMnemonic(currentToken().getLexeme())) != null)
 		{
-			if(DEHWeaponFlag.VALUES[i].getMnemonic().equals(mnemonic))
-			{
-				out = DEHWeaponFlag.VALUES[i].getValue();
-				break;
-			}
+			out = flag.getValue();
+			nextToken();
 		}
 		
-		if (out != null)
-			nextToken();
 		return out;
 	}
 

@@ -25,6 +25,7 @@ import net.mtrop.doom.tools.decohack.DecoHackExporter;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
+import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
@@ -44,6 +45,7 @@ public final class DecoHackMain
 	private static final Charset ASCII = Charset.forName("ASCII");
 	
 	private static final String DEFAULT_OUTFILENAME = "dehacked.deh";
+	private static final String RESOURCE_HELP_CONSTANTS = "decohack/help-constants.txt";
 	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
@@ -59,6 +61,7 @@ public final class DecoHackMain
 	private static final String SWITCH_HELPFULL = "--help-full";
 	private static final String SWITCH_VERSION = "--version";
 
+	private static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
 	private static final String SWITCH_DUMPRESOURCE = "--dump-resource";
 	
 	private static final String SWITCH_OUTPUT = "--output";
@@ -251,7 +254,7 @@ public final class DecoHackMain
 			}
 			
 			// warn export if [Ultimate] Doom 1.9 and last state is replaced.
-			if (context instanceof AbstractPatchDoom19Context 
+			if (context.getFeatureLevel() == DEHFeatureLevel.DOOM19
 				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
 			))
 			{
@@ -334,6 +337,8 @@ public final class DecoHackMain
 					}
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equals(SWITCH_DUMPCONSTANTS))
+						options.dumpResource = RESOURCE_HELP_CONSTANTS;
 					else if (arg.equals(SWITCH_DUMPRESOURCE))
 						state = STATE_DUMPRES;
 					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
@@ -432,6 +437,8 @@ public final class DecoHackMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: decohack [--help | -h | --version]");
+		out.println("                --dump-constants");
+		out.println("                --dump-resource [path]");
 		out.println("                [filename] [switches]");
 	}
 	
@@ -447,6 +454,9 @@ public final class DecoHackMain
 		out.println("    --help-full              Prints full help (not just usage) and exits.");
 		out.println();
 		out.println("    --version                Prints version, and exits.");
+		out.println();
+		out.println("    --dump-constants         Dumps the list of available defined constants");
+		out.println("                             to STDOUT.");
 		out.println();
 		out.println("    --dump-resource [path]   Dumps an internal resource (starting with");
 		out.println("                             \"decohack/\" ) to STDOUT.");

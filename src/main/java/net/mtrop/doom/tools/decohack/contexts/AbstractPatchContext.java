@@ -9,6 +9,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
@@ -181,6 +182,21 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @return true if so, false if not.
 	 */
 	public abstract boolean isActionPointerTypeSupported(DEHActionPointerType type);
+
+	/**
+	 * @return this patch context's feature level.
+	 */
+	public abstract DEHFeatureLevel getFeatureLevel();
+
+	/**
+	 * Checks if the provided feature level is supported by this patch.
+	 * @param level the provided level.
+	 * @return true if so, false if not.
+	 */
+	public boolean supports(DEHFeatureLevel level)
+	{
+		return getFeatureLevel().supports(level);
+	}
 
 	/**
 	 * Sets the pointer at an action pointer index.
