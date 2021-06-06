@@ -64,6 +64,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_IDFA_ARMOR = "idfaArmor";
 	private static final String KEYWORD_GOD_MODE_HEALTH = "godModeHealth";
 	private static final String KEYWORD_MAX_SOULSPHERE_HEALTH = "maxSoulsphereHealth";
+	private static final String KEYWORD_MEGASPHERE_HEALTH = "megasphereHealth";
 	private static final String KEYWORD_SOULSPHERE_HEALTH = "soulsphereHealth";
 	private static final String KEYWORD_BLUE_ARMOR_CLASS = "blueArmorClass";
 	private static final String KEYWORD_GREEN_ARMOR_CLASS = "greenArmorClass";
@@ -640,6 +641,15 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMaxSoulsphereHealth(value);
 			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MEGASPHERE_HEALTH))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected integer value after \"%s\".", KEYWORD_MEGASPHERE_HEALTH);
+					return false;
+				}
+				misc.setMegasphereHealth(value);
+			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOD_MODE_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
@@ -714,7 +724,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected miscellaneous entry type.");
+				addErrorMessage("Expected valid miscellaneous entry type.");
 				return false;
 			}
 		}

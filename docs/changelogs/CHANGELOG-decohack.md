@@ -1,6 +1,12 @@
 DecoHack
 --------
 
+### Changed for 0.10.2
+
+* `Fixed` Megasphere health misc entry was not parsed! Whoops!
+* `Fixed` Megasphere health not initialized, either!
+
+
 ### Changed for 0.10.1
 
 * `Fixed` The background flat string indices in the constants files were incorrect.
