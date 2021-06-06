@@ -39,6 +39,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	
 	private int health;
 	private int speed; // written as fixed point 16.16 if PROJECTILE
+	private int fastSpeed; // written as fixed point 16.16 if PROJECTILE
 	private int radius; // written as fixed point 16.16
 	private int height; // written as fixed point 16.16
 	private int damage;
@@ -46,6 +47,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int painChance;
 	private int flags;
 	private int mass;
+	private int meleeRange; // written as fixed point 16.16
 
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -60,6 +62,8 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int deathSoundPosition;
 	/** Active sound position. */
 	private int activeSoundPosition;
+	/** Rip sound position. */
+	private int ripSoundPosition;
 
 	/**
 	 * Creates a new blank thing.
@@ -73,6 +77,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		
 		setHealth(0);
 		setSpeed(0);
+		setFastSpeed(-1);
 		setRadius(0);
 		setHeight(0);
 		setDamage(0);
@@ -80,12 +85,14 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(0);
 		setFlags(0x00000000);
 		setMass(0);
+		setMeleeRange(64);
 
 		setSeeSoundPosition(SOUND_NONE);
 		setAttackSoundPosition(SOUND_NONE);
 		setPainSoundPosition(SOUND_NONE);
 		setDeathSoundPosition(SOUND_NONE);
 		setActiveSoundPosition(SOUND_NONE);
+		setRipSoundPosition(SOUND_NONE);
 		
 		clearLabels();
 	}
@@ -98,6 +105,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		
 		setHealth(source.health);
 		setSpeed(source.speed);
+		setFastSpeed(source.fastSpeed);
 		setRadius(source.radius);
 		setHeight(source.height);
 		setDamage(source.damage);
@@ -105,12 +113,14 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(source.painChance);
 		setFlags(source.flags);
 		setMass(source.mass);
+		setMeleeRange(source.meleeRange);
 		
 		setSeeSoundPosition(source.seeSoundPosition);
 		setAttackSoundPosition(source.attackSoundPosition);
 		setPainSoundPosition(source.painSoundPosition);
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
+		setRipSoundPosition(source.ripSoundPosition);
 		
 		clearLabels();
 		for (String label : source.getLabels())
@@ -165,6 +175,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	{
 		RangeUtils.checkRange("Speed", 0, 65535, speed);
 		this.speed = speed;
+		return this;
+	}
+
+	public int getFastSpeed() 
+	{
+		return fastSpeed;
+	}
+
+	public DEHThing setFastSpeed(int fastSpeed) 
+	{
+		RangeUtils.checkRange("Fast speed", -1, 65535, fastSpeed);
+		this.fastSpeed = fastSpeed;
 		return this;
 	}
 
@@ -248,6 +270,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	{
 		RangeUtils.checkRange("Mass", 0, Integer.MAX_VALUE, mass);
 		this.mass = mass;
+		return this;
+	}
+
+	public int getMeleeRange() 
+	{
+		return meleeRange;
+	}
+
+	public DEHThing setMeleeRange(int meleeRange) 
+	{
+		RangeUtils.checkRange("Melee range", 0, 65535, meleeRange);
+		this.meleeRange = meleeRange;
 		return this;
 	}
 
@@ -444,6 +478,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return this;
 	}
 
+	public int getRipSoundPosition()
+	{
+		return ripSoundPosition;
+	}
+
+	public DEHThing setRipSoundPosition(int ripSoundPosition)
+	{
+		RangeUtils.checkRange("Rip sound position", 0, Integer.MAX_VALUE, ripSoundPosition);
+		this.ripSoundPosition = ripSoundPosition;
+		return this;
+	}
+
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -457,6 +503,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return editorNumber == obj.editorNumber
 			&& health == obj.health
 			&& speed == obj.speed
+			&& fastSpeed == obj.fastSpeed
 			&& radius == obj.radius
 			&& height == obj.height
 			&& damage == obj.damage
@@ -464,6 +511,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& painChance == obj.painChance
 			&& flags == obj.flags
 			&& mass == obj.mass
+			&& meleeRange == obj.meleeRange
 			&& getSpawnFrameIndex() == obj.getSpawnFrameIndex()
 			&& getWalkFrameIndex() == obj.getWalkFrameIndex()
 			&& getPainFrameIndex() == obj.getPainFrameIndex()
@@ -477,15 +525,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
+			&& ripSoundPosition == obj.ripSoundPosition
 		;
 	}	
 	
 	@Override
 	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
-		// If projectile, speed is fixed point.
-		int speedVal = ((flags & (1 << 16)) != 0) ? speed << 16 : speed; 
-		
+		// If projectile, speed and fastSpeed are fixed point.
+		boolean isProjectile = (flags & (1 << 16)) != 0;
+		int speedVal = isProjectile ? speed << 16 : speed;
+		int fastSpeedVal = isProjectile ? fastSpeed << 16 : fastSpeed;
+
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		if (health != thing.health)
@@ -534,7 +585,15 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			writer.append("Pain sound = ").append(String.valueOf(painSoundPosition)).append("\r\n");
 		if (deathSoundPosition != thing.deathSoundPosition)
 			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
-		
+
+		// MBF21 features
+		if (ripSoundPosition != thing.ripSoundPosition)
+			writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
+		if (fastSpeed != thing.fastSpeed)
+			writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
+		if (meleeRange != thing.meleeRange)
+			writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
+
 		writer.flush();
 	}
 

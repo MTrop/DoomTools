@@ -120,18 +120,21 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_EDNUM = "ednum";
 	private static final String KEYWORD_FLAGS = "flags";
 	private static final String KEYWORD_MASS = "mass";
+	private static final String KEYWORD_MELEERANGE = "meleerange";
 	private static final String KEYWORD_PAINCHANCE = "painchance";
 	private static final String KEYWORD_REACTIONTIME = "reactiontime";
 	private static final String KEYWORD_DAMAGE = "damage";
 	private static final String KEYWORD_HEIGHT = "height";
 	private static final String KEYWORD_RADIUS = "radius";
 	private static final String KEYWORD_SPEED = "speed";
+	private static final String KEYWORD_FASTSPEED = "fastspeed";
 	private static final String KEYWORD_HEALTH = "health";
 	private static final String KEYWORD_SEESOUND = "seesound";
 	private static final String KEYWORD_ATTACKSOUND = "attacksound";
 	private static final String KEYWORD_PAINSOUND = "painsound";
 	private static final String KEYWORD_DEATHSOUND = "deathsound";
 	private static final String KEYWORD_ACTIVESOUND = "activesound";
+	private static final String KEYWORD_RIPSOUND = "ripsound";
 
 	private static final String KEYWORD_OFFSET = "offset";
 	private static final String KEYWORD_BRIGHT = "bright";
@@ -893,6 +896,7 @@ public final class DecoHackParser extends Lexer.Parser
 						.setPainSoundPosition(0)
 						.setDeathSoundPosition(0)
 						.setActiveSoundPosition(0)
+						.setRipSoundPosition(0)
 					;
 				}
 				else
@@ -935,6 +939,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setSpeed(value);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FASTSPEED))
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_FASTSPEED);
+					return false;
+				}
+				thing.setFastSpeed(value);
 			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RADIUS))
 			{
@@ -990,6 +1003,15 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setMass(value);
 			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MELEERANGE))
+			{
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MELEERANGE);
+					return false;
+				}
+				thing.setMeleeRange(value);
+			}
 			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
 			{
 				if ((value = matchPositiveInteger()) == null)
@@ -1043,6 +1065,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setActiveSoundPosition(value + 1);
+			}
+			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RIPSOUND))
+			{
+				if ((value = matchSoundIndexName(context)) == null)
+				{
+					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_RIPSOUND);
+					return false;
+				}
+				thing.setRipSoundPosition(value + 1);
 			}
 			else
 			{
