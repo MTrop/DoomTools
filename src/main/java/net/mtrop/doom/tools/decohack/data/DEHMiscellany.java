@@ -45,6 +45,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 		setBlueArmorClass(2);
 		setSoulsphereHealth(100);
 		setMaxSoulsphereHealth(200);
+		setMegasphereHealth(200);
 		setGodModeHealth(100);
 		setBFGCellsPerShot(40);
 		setIDFAArmor(200);
@@ -65,6 +66,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 		setBlueArmorClass(source.blueArmorClass);
 		setSoulsphereHealth(source.soulsphereHealth);
 		setMaxSoulsphereHealth(source.maxSoulsphereHealth);
+		setMegasphereHealth(source.megasphereHealth);
 		setGodModeHealth(source.godModeHealth);
 		setBFGCellsPerShot(source.bfgCellsPerShot);
 		setIDFAArmor(source.idfaArmor);
