@@ -25,13 +25,13 @@ public class PatchMBFContext extends AbstractPatchBoomContext
 	}
 
 	@Override
-	public boolean isActionPointerTypeSupported(DEHActionPointerType type)
+	public DEHActionPointerType getSupportedActionPointerType() 
 	{
-		return type == DEHActionPointerType.DOOM19 || type == DEHActionPointerType.MBF;
+		return DEHActionPointerType.MBF;
 	}
-
+	
 	@Override
-	public DEHFeatureLevel getFeatureLevel() 
+	public DEHFeatureLevel getSupportedFeatureLevel() 
 	{
 		return DEHFeatureLevel.MBF;
 	}

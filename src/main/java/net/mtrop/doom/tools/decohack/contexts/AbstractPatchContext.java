@@ -177,16 +177,24 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	/**
-	 * Checks if the given action pointer type is supported by this patch context.
-	 * @param type the action pointer type to check.
-	 * @return true if so, false if not.
+	 * @return this patch context's supported action pointer type level.
 	 */
-	public abstract boolean isActionPointerTypeSupported(DEHActionPointerType type);
+	public abstract DEHActionPointerType getSupportedActionPointerType();
 
 	/**
 	 * @return this patch context's feature level.
 	 */
-	public abstract DEHFeatureLevel getFeatureLevel();
+	public abstract DEHFeatureLevel getSupportedFeatureLevel();
+
+	/**
+	 * Checks if the provided pointer type is supported by this one.
+	 * @param type the provided type.
+	 * @return true if so, false if not.
+	 */
+	public boolean supports(DEHActionPointerType type)
+	{
+		return getSupportedActionPointerType().supports(type);
+	}
 
 	/**
 	 * Checks if the provided feature level is supported by this patch.
@@ -195,7 +203,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean supports(DEHFeatureLevel level)
 	{
-		return getFeatureLevel().supports(level);
+		return getSupportedFeatureLevel().supports(level);
 	}
 
 	/**

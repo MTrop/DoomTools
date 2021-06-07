@@ -32,14 +32,17 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	public static final int EDITORNUMBER_NONE = -1;
 	public static final int SOUND_NONE = 0;
 	public static final int FRAME_NULL = 0;
+	public static final int NO_ITEM = -1;
+	public static final int DEFAULT_GROUP = 0;
+	public static final int DEFAULT_FASTSPEED = -1;
+	public static final int DEFAULT_MELEE_RANGE = 64;
 	
 	private String name;
 	
 	private int editorNumber;
 	
 	private int health;
-	private int speed; // written as fixed point 16.16 if PROJECTILE
-	private int fastSpeed; // written as fixed point 16.16 if PROJECTILE
+	private int speed; // written as fixed point 16.16 if MISSILE
 	private int radius; // written as fixed point 16.16
 	private int height; // written as fixed point 16.16
 	private int damage;
@@ -47,7 +50,6 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int painChance;
 	private int flags;
 	private int mass;
-	private int meleeRange; // written as fixed point 16.16
 
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -62,7 +64,16 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	private int deathSoundPosition;
 	/** Active sound position. */
 	private int activeSoundPosition;
-	/** Rip sound position. */
+
+	private int droppedItem;
+
+	private int mbfFlags;
+	private int infightingGroup;
+	private int projectileGroup;
+	private int splashGroup;
+	private int fastSpeed; // written as fixed point 16.16 if MISSILE
+	private int meleeRange;
+	/** Ripper sound position. */
 	private int ripSoundPosition;
 
 	/**
@@ -85,13 +96,21 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(0);
 		setFlags(0x00000000);
 		setMass(0);
-		setMeleeRange(64);
-
+		
 		setSeeSoundPosition(SOUND_NONE);
 		setAttackSoundPosition(SOUND_NONE);
 		setPainSoundPosition(SOUND_NONE);
 		setDeathSoundPosition(SOUND_NONE);
 		setActiveSoundPosition(SOUND_NONE);
+
+		setDroppedItem(NO_ITEM);
+
+		setMBFFlags(0x00000000);
+		setInfightingGroup(DEFAULT_GROUP);
+		setProjectileGroup(DEFAULT_GROUP);
+		setSplashGroup(DEFAULT_GROUP);
+		setFastSpeed(DEFAULT_FASTSPEED);
+		setMeleeRange(DEFAULT_MELEE_RANGE);
 		setRipSoundPosition(SOUND_NONE);
 		
 		clearLabels();
@@ -113,15 +132,23 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setPainChance(source.painChance);
 		setFlags(source.flags);
 		setMass(source.mass);
-		setMeleeRange(source.meleeRange);
 		
 		setSeeSoundPosition(source.seeSoundPosition);
 		setAttackSoundPosition(source.attackSoundPosition);
 		setPainSoundPosition(source.painSoundPosition);
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
-		setRipSoundPosition(source.ripSoundPosition);
 		
+		setDroppedItem(source.droppedItem);
+		
+		setMBFFlags(source.mbfFlags);
+		setInfightingGroup(source.infightingGroup);
+		setProjectileGroup(source.projectileGroup);
+		setSplashGroup(source.splashGroup);
+		setFastSpeed(source.fastSpeed);
+		setMeleeRange(source.meleeRange);
+		setRipSoundPosition(source.ripSoundPosition);
+
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
@@ -239,7 +266,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}
 
 	public int getPainChance()
-{
+	{
 		return painChance;
 	}
 
@@ -258,6 +285,17 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	public DEHThing setFlags(int bits) 
 	{
 		this.flags = bits;
+		return this;
+	}
+
+	public int getMBFFlags() 
+	{
+		return mbfFlags;
+	}
+
+	public DEHThing setMBFFlags(int bits) 
+	{
+		this.mbfFlags = bits;
 		return this;
 	}
 
@@ -285,6 +323,54 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return this;
 	}
 
+	public int getInfightingGroup() 
+	{
+		return infightingGroup;
+	}
+	
+	public DEHThing setInfightingGroup(int infightingGroup) 
+	{
+		RangeUtils.checkRange("Infighting group", 0, Integer.MAX_VALUE, infightingGroup);
+		this.infightingGroup = infightingGroup;
+		return this;
+	}
+	
+	public int getProjectileGroup() 
+	{
+		return projectileGroup;
+	}
+	
+	public DEHThing setProjectileGroup(int projectileGroup) 
+	{
+		RangeUtils.checkRange("Projectile group", -1, Integer.MAX_VALUE, splashGroup);
+		this.projectileGroup = projectileGroup;
+		return this;
+	}
+	
+	public int getSplashGroup()
+	{
+		return splashGroup;
+	}
+	
+	public DEHThing setSplashGroup(int splashGroup) 
+	{
+		RangeUtils.checkRange("Splash group", 0, Integer.MAX_VALUE, splashGroup);
+		this.splashGroup = splashGroup;
+		return this;
+	}
+	
+	public int getDroppedItem() 
+	{
+		return droppedItem;
+	}
+	
+	public DEHThing setDroppedItem(int droppedItem) 
+	{
+		RangeUtils.checkRange("Dropped item", 0, Integer.MAX_VALUE, droppedItem);
+		this.droppedItem = droppedItem;
+		return this;
+	}
+	
 	public int getSpawnFrameIndex()
 	{
 		return getLabel(STATE_LABEL_SPAWN);
@@ -511,7 +597,6 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& painChance == obj.painChance
 			&& flags == obj.flags
 			&& mass == obj.mass
-			&& meleeRange == obj.meleeRange
 			&& getSpawnFrameIndex() == obj.getSpawnFrameIndex()
 			&& getWalkFrameIndex() == obj.getWalkFrameIndex()
 			&& getPainFrameIndex() == obj.getPainFrameIndex()
@@ -525,6 +610,11 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
+			&& mbfFlags == obj.mbfFlags
+			&& meleeRange == obj.meleeRange
+			&& infightingGroup == obj.infightingGroup
+			&& projectileGroup == obj.projectileGroup
+			&& splashGroup == obj.splashGroup
 			&& ripSoundPosition == obj.ripSoundPosition
 		;
 	}	
@@ -532,10 +622,9 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	@Override
 	public void writeObject(Writer writer, DEHThing thing) throws IOException
 	{
-		// If projectile, speed and fastSpeed are fixed point.
-		boolean isProjectile = (flags & (1 << 16)) != 0;
+		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0;
 		int speedVal = isProjectile ? speed << 16 : speed;
-		int fastSpeedVal = isProjectile ? fastSpeed << 16 : fastSpeed;
+		int fastSpeedVal = isProjectile && fastSpeed != DEFAULT_FASTSPEED ? fastSpeed << 16 : fastSpeed;
 
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
@@ -565,7 +654,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		if (getPainFrameIndex() != thing.getPainFrameIndex())
 			writer.append("Injury frame = ").append(String.valueOf(getPainFrameIndex())).append("\r\n");
 		if (getMeleeFrameIndex() != thing.getMeleeFrameIndex())
-			writer.append("Close attack frame = ").append(String.valueOf(getMeleeFrameIndex() )).append("\r\n");
+			writer.append("Close attack frame = ").append(String.valueOf(getMeleeFrameIndex())).append("\r\n");
 		if (getMissileFrameIndex() != thing.getMissileFrameIndex())
 			writer.append("Far attack frame = ").append(String.valueOf(getMissileFrameIndex())).append("\r\n");
 		if (getDeathFrameIndex() != thing.getDeathFrameIndex())
@@ -586,13 +675,25 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		if (deathSoundPosition != thing.deathSoundPosition)
 			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
 
+		// Extended features
+		if (droppedItem != thing.droppedItem)
+			writer.append("Dropped item = ").append(String.valueOf(droppedItem)).append("\r\n");
+
 		// MBF21 features
-		if (ripSoundPosition != thing.ripSoundPosition)
-			writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
-		if (fastSpeed != thing.fastSpeed)
+		if (mbfFlags != thing.mbfFlags)
+			writer.append("MBF21 Bits = ").append(String.valueOf(mbfFlags)).append("\r\n");
+		if (infightingGroup != thing.infightingGroup)
+			writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
+		if (projectileGroup != thing.projectileGroup)
+			writer.append("Projectile group = ").append(String.valueOf(projectileGroup)).append("\r\n");
+		if (splashGroup != thing.splashGroup)
+			writer.append("Splash group = ").append(String.valueOf(splashGroup)).append("\r\n");
+		if (fastSpeedVal != thing.fastSpeed)
 			writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
 		if (meleeRange != thing.meleeRange)
-			writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
+			writer.append("Melee range = ").append(String.valueOf(meleeRange)).append("\r\n");
+		if (ripSoundPosition != thing.ripSoundPosition)
+			writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 
 		writer.flush();
 	}

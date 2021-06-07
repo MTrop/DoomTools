@@ -50,7 +50,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	private int ammoPerShot;
 	
 	/** Flags. */
-	private int flags;
+	private int mbfFlags;
 
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -62,7 +62,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		setName("");
 		setAmmoType(null);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
-		setFlags(0x00000000);
+		setMBFFlags(0x00000000);
 		clearLabels();
 	}
 	
@@ -91,7 +91,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		out.setFireFrameIndex(fire);
 		out.setFlashFrameIndex(flash);
 		out.setAmmoPerShot(ammoPerShot);
-		out.setFlags(flags);
+		out.setMBFFlags(flags);
 		return out;
 	}
 	
@@ -101,7 +101,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		setName(source.name);
 		setAmmoType(source.ammoType);
 		setAmmoPerShot(source.ammoPerShot);
-		setFlags(source.flags);
+		setMBFFlags(source.mbfFlags);
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
@@ -168,9 +168,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	/**
 	 * @return this weapon's flags.
 	 */
-	public int getFlags() 
+	public int getMBFFlags() 
 	{
-		return flags;
+		return mbfFlags;
 	}
 	
 	/**
@@ -178,9 +178,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
-	public DEHWeapon setFlags(int flags)
+	public DEHWeapon setMBFFlags(int flags)
 	{
-		this.flags = flags;
+		this.mbfFlags = flags;
 		return this;
 	}
 	
@@ -331,7 +331,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	{
 		return ammoType == obj.ammoType
 			&& ammoPerShot == obj.ammoPerShot
-			&& flags == obj.flags
+			&& mbfFlags == obj.mbfFlags
 			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
 			&& getLowerFrameIndex() == obj.getLowerFrameIndex()
 			&& getReadyFrameIndex() == obj.getReadyFrameIndex()
@@ -361,8 +361,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 
 		if (ammoPerShot != weapon.ammoPerShot)
 			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
-		if (flags != weapon.flags)
-			writer.append("MBF21 Bits = ").append(String.valueOf(flags)).append("\r\n");
+		
+		if (mbfFlags != weapon.mbfFlags)
+			writer.append("MBF21 Bits = ").append(String.valueOf(mbfFlags)).append("\r\n");
 
 		writer.flush();
 	}

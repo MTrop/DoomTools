@@ -254,7 +254,7 @@ public final class DecoHackMain
 			}
 			
 			// warn export if [Ultimate] Doom 1.9 and last state is replaced.
-			if (context.getFeatureLevel() == DEHFeatureLevel.DOOM19
+			if (context.getSupportedFeatureLevel() == DEHFeatureLevel.DOOM19
 				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
 			))
 			{

@@ -15,6 +15,7 @@ public enum DEHFeatureLevel
 	DOOM19,
 	BOOM,
 	MBF,
+	EXTENDED,
 	MBF21,
 	;
 	

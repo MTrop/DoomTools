@@ -13,7 +13,7 @@ import java.util.TreeMap;
  * @author Xaser Acheron
  * @author Matthew Tropiano 
  */
-public enum DEHWeaponFlag
+public enum DEHWeaponFlag implements DEHFlag
 {
 	NOTHRUST       (0x00000001),
 	SILENT         (0x00000002),

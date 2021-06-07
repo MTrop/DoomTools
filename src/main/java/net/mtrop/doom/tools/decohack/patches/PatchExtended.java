@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.decohack.patches;
 import static net.mtrop.doom.tools.decohack.patches.Constants.*;
 import static net.mtrop.doom.tools.decohack.patches.ConstantsBoom.*;
 import static net.mtrop.doom.tools.decohack.patches.ConstantsMBF.*;
-import static net.mtrop.doom.tools.decohack.patches.ConstantsBoomExtended.*;
+import static net.mtrop.doom.tools.decohack.patches.ConstantsExtended.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +22,7 @@ import net.mtrop.doom.tools.decohack.data.DEHThing;
  * Patch implementation for Extended DeHackEd.
  * @author Matthew Tropiano
  */
-public class PatchDHEExtended extends PatchMBF
+public class PatchExtended extends PatchMBF
 {
 	private static final int SOUND_INDEX_EXTENDED_START = 500;
 

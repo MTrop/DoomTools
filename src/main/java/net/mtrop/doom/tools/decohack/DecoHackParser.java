@@ -21,7 +21,7 @@ import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
-import net.mtrop.doom.tools.decohack.contexts.PatchDHEExtendedContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
@@ -129,6 +129,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_RADIUS = "radius";
 	private static final String KEYWORD_SPEED = "speed";
 	private static final String KEYWORD_FASTSPEED = "fastspeed";
+	private static final String KEYWORD_DROPITEM = "dropitem";
 	private static final String KEYWORD_HEALTH = "health";
 	private static final String KEYWORD_SEESOUND = "seesound";
 	private static final String KEYWORD_ATTACKSOUND = "attacksound";
@@ -235,23 +236,23 @@ public final class DecoHackParser extends Lexer.Parser
 	 */
 	private AbstractPatchContext<?> parseUsing()
 	{
-		if (!matchIdentifierLexemeIgnoreCase(KEYWORD_USING))
+		if (!matchIdentifierIgnoreCase(KEYWORD_USING))
 		{
 			addErrorMessage("Expected \"using\" clause to set the patch format.");
 			return null;
 		}
 		
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_DOOM19))
+		if (matchIdentifierIgnoreCase(KEYWORD_DOOM19))
 			return new PatchDoom19Context();
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_UDOOM19))
+		else if (matchIdentifierIgnoreCase(KEYWORD_UDOOM19))
 			return new PatchUltimateDoom19Context();
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BOOM))
+		else if (matchIdentifierIgnoreCase(KEYWORD_BOOM))
 			return new PatchBoomContext();
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MBF))
+		else if (matchIdentifierIgnoreCase(KEYWORD_MBF))
 			return new PatchMBFContext();
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EXTENDED))
-			return new PatchDHEExtendedContext();
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MBF21))
+		else if (matchIdentifierIgnoreCase(KEYWORD_EXTENDED))
+			return new PatchExtendedContext();
+		else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
 			return new PatchMBF21Context();
 		else
 		{
@@ -267,21 +268,21 @@ public final class DecoHackParser extends Lexer.Parser
 	 */
 	private boolean parseEntry(AbstractPatchContext<?> context)
 	{
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STRINGS))
+		if (matchIdentifierIgnoreCase(KEYWORD_STRINGS))
 			return parseStringBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMO))
+		else if (matchIdentifierIgnoreCase(KEYWORD_AMMO))
 			return parseAmmoBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
+		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 			return parseStateBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PARS))
+		else if (matchIdentifierIgnoreCase(KEYWORD_PARS))
 			return parseParBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponBlock(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MISC))
+		else if (matchIdentifierIgnoreCase(KEYWORD_MISC))
 			return parseMiscellaneousBlock(context);
 		else if (currentToken() != null)
 		{
@@ -408,7 +409,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX))
+			if (matchIdentifierIgnoreCase(KEYWORD_MAX))
 			{
 				Integer value;
 				if ((value = matchPositiveInteger()) == null)
@@ -418,7 +419,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				ammo.setMax(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PICKUP))
+			else if (matchIdentifierIgnoreCase(KEYWORD_PICKUP))
 			{
 				Integer value;
 				if ((value = matchPositiveInteger()) == null)
@@ -473,7 +474,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_PRIORITY))
+			if (matchIdentifierIgnoreCase(KEYWORD_PRIORITY))
 			{
 				Integer value;
 				if ((value = matchPositiveInteger()) == null)
@@ -483,7 +484,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				sound.setPriority(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SINGULAR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_SINGULAR))
 			{
 				Boolean value;
 				if ((value = matchBoolean()) == null)
@@ -578,7 +579,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_MONSTER_INFIGHTING))
+			if (matchIdentifierIgnoreCase(KEYWORD_MONSTER_INFIGHTING))
 			{
 				if ((flag = matchBoolean()) == null)
 				{
@@ -587,7 +588,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMonsterInfightingEnabled(flag);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INITIAL_BULLETS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_INITIAL_BULLETS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -596,7 +597,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setInitialBullets(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_INITIAL_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_INITIAL_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -605,7 +606,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setInitialHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GREEN_ARMOR_CLASS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_GREEN_ARMOR_CLASS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -614,7 +615,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setGreenArmorClass(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BLUE_ARMOR_CLASS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_BLUE_ARMOR_CLASS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -623,7 +624,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setBlueArmorClass(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOULSPHERE_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_SOULSPHERE_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -632,7 +633,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setSoulsphereHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_SOULSPHERE_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_MAX_SOULSPHERE_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -641,7 +642,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMaxSoulsphereHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MEGASPHERE_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_MEGASPHERE_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -650,7 +651,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMegasphereHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOD_MODE_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_GOD_MODE_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -659,7 +660,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setGodModeHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDFA_ARMOR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_IDFA_ARMOR))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -668,7 +669,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setIDFAArmor(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDFA_ARMOR_CLASS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_IDFA_ARMOR_CLASS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -677,7 +678,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setIDFAArmorClass(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDKFA_ARMOR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_IDKFA_ARMOR))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -686,7 +687,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setIDKFAArmor(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_IDKFA_ARMOR_CLASS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_IDKFA_ARMOR_CLASS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -695,7 +696,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setIDKFAArmorClass(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_BFG_CELLS_PER_SHOT))
+			else if (matchIdentifierIgnoreCase(KEYWORD_BFG_CELLS_PER_SHOT))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -704,7 +705,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setBFGCellsPerShot(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_MAX_HEALTH))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -713,7 +714,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMaxHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MAX_ARMOR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_MAX_ARMOR))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -746,9 +747,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 
 		// thing swap
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_SWAP))
+		if (matchIdentifierIgnoreCase(KEYWORD_SWAP))
 		{
-			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WITH))
+			if (!matchIdentifierIgnoreCase(KEYWORD_WITH))
 			{
 				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_WITH, KEYWORD_SWAP);
 				return false;
@@ -765,9 +766,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return true;
 		}
 		// free states.
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 			{
 				context.freeThingStates(slot);
 				return true;
@@ -781,21 +782,21 @@ public final class DecoHackParser extends Lexer.Parser
 
 			DEHThing thing = context.getThing(slot);
 
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
+			if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
 				context.freeConnectedStates(thing.getSpawnFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SEE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_SEE))
 				context.freeConnectedStates(thing.getWalkFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MELEE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_MELEE))
 				context.freeConnectedStates(thing.getMeleeFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
 				context.freeConnectedStates(thing.getMissileFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_PAIN))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_PAIN))
 				context.freeConnectedStates(thing.getPainFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_DEATH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_DEATH))
 				context.freeConnectedStates(thing.getDeathFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
 				context.freeConnectedStates(thing.getExtremeDeathFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_RAISE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_RAISE))
 				context.freeConnectedStates(thing.getRaiseFrameIndex());
 			else
 			{
@@ -816,7 +817,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (matchType(DecoHackKernel.TYPE_COLON))
 		{
-			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+			if (!matchIdentifierIgnoreCase(KEYWORD_THING))
 			{
 				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
 				return false;
@@ -843,6 +844,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
+			// TODO: Add MBF flags.
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
 				if ((value = matchThingFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
@@ -861,19 +863,19 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setFlags(thing.getFlags() & (~value));
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 			{
 				if (!parseThingStateClause(context, thing))
 					return false;
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 			{
 				if (!parseThingStateBody(context, thing))
 					return false;
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CLEAR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_CLEAR))
 			{
-				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+				if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 				{
 					String labelName;
 					if ((labelName = matchIdentifier()) != null)
@@ -894,11 +896,11 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 				}
-				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 				{
 					thing.clearLabels();
 				}
-				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUNDS))
+				else if (matchIdentifierIgnoreCase(KEYWORD_SOUNDS))
 				{
 					thing
 						.setSeeSoundPosition(0)
@@ -915,7 +917,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_EDNUM))
+			else if (matchIdentifierIgnoreCase(KEYWORD_EDNUM))
 			{
 				if ((value = matchInteger()) == null)
 				{
@@ -932,7 +934,7 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				thing.setEditorNumber(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_HEALTH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_HEALTH))
 			{
 				if ((value = matchInteger()) == null)
 				{
@@ -941,7 +943,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setHealth(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SPEED))
+			else if (matchIdentifierIgnoreCase(KEYWORD_SPEED))
 			{
 				if ((value = matchInteger()) == null)
 				{
@@ -950,16 +952,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setSpeed(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FASTSPEED))
-			{
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", KEYWORD_FASTSPEED);
-					return false;
-				}
-				thing.setFastSpeed(value);
-			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RADIUS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_RADIUS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -968,7 +961,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setRadius(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_HEIGHT))
+			else if (matchIdentifierIgnoreCase(KEYWORD_HEIGHT))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -977,7 +970,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setHeight(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_DAMAGE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_DAMAGE))
 			{
 				if ((value = matchInteger()) == null)
 				{
@@ -986,7 +979,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setDamage(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_REACTIONTIME))
+			else if (matchIdentifierIgnoreCase(KEYWORD_REACTIONTIME))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -995,7 +988,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setReactionTime(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PAINCHANCE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_PAINCHANCE))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -1004,7 +997,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setPainChance(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MASS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_MASS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -1013,16 +1006,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setMass(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_MELEERANGE))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MELEERANGE);
-					return false;
-				}
-				thing.setMeleeRange(value);
-			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 			{
 				if ((value = matchPositiveInteger()) == null)
 				{
@@ -1031,7 +1015,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setFlags(value);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SEESOUND))
+			else if (matchIdentifierIgnoreCase(KEYWORD_SEESOUND))
 			{
 				if ((value = matchSoundIndexName(context)) == null)
 				{
@@ -1040,7 +1024,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setSeeSoundPosition(value + 1);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ATTACKSOUND))
+			else if (matchIdentifierIgnoreCase(KEYWORD_ATTACKSOUND))
 			{
 				if ((value = matchSoundIndexName(context)) == null)
 				{
@@ -1049,7 +1033,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setAttackSoundPosition(value + 1);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PAINSOUND))
+			else if (matchIdentifierIgnoreCase(KEYWORD_PAINSOUND))
 			{
 				if ((value = matchSoundIndexName(context)) == null)
 				{
@@ -1058,7 +1042,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setPainSoundPosition(value + 1);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_DEATHSOUND))
+			else if (matchIdentifierIgnoreCase(KEYWORD_DEATHSOUND))
 			{
 				if ((value = matchSoundIndexName(context)) == null)
 				{
@@ -1067,7 +1051,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setDeathSoundPosition(value + 1);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_ACTIVESOUND))
+			else if (matchIdentifierIgnoreCase(KEYWORD_ACTIVESOUND))
 			{
 				if ((value = matchSoundIndexName(context)) == null)
 				{
@@ -1076,8 +1060,61 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setActiveSoundPosition(value + 1);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_RIPSOUND))
+			// ================= EXTENDED
+			else if (matchIdentifierIgnoreCase(KEYWORD_DROPITEM))
 			{
+				if (!context.supports(DEHFeatureLevel.EXTENDED))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an EXTENDED patch.", KEYWORD_DROPITEM);
+					return false;
+				}
+				
+				if ((value = matchThingIndex(context)) == null)
+				{
+					addErrorMessage("Expected thing index after \"%s\".", KEYWORD_DROPITEM);
+					return false;
+				}
+				thing.setDroppedItem(value);
+			}
+			// ================= MBF21
+			else if (matchIdentifierIgnoreCase(KEYWORD_FASTSPEED))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_FASTSPEED);
+					return false;
+				}
+				
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_FASTSPEED);
+					return false;
+				}
+				thing.setFastSpeed(value);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_MELEERANGE))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_MELEERANGE);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MELEERANGE);
+					return false;
+				}
+				thing.setMeleeRange(value);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_RIPSOUND))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_RIPSOUND);
+					return false;
+				}
+				
 				if ((value = matchSoundIndexName(context)) == null)
 				{
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_RIPSOUND);
@@ -1105,56 +1142,56 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseThingStateClause(AbstractPatchContext<?> context, DEHThing thing) 
 	{
 		Integer value;
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
+		if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setSpawnFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_SEE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_SEE))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setWalkFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MELEE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_MELEE))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setMeleeFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_MISSILE))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setMissileFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_PAIN))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_PAIN))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setPainChance(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_DEATH))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_DEATH))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setDeathFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_XDEATH))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setExtremeDeathFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_THINGSTATE_RAISE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_RAISE))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				thing.setRaiseFrameIndex(value);
@@ -1209,9 +1246,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		
 		// weapon swap
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_SWAP))
+		if (matchIdentifierIgnoreCase(KEYWORD_SWAP))
 		{
-			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WITH))
+			if (!matchIdentifierIgnoreCase(KEYWORD_WITH))
 			{
 				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_WITH, KEYWORD_SWAP);
 				return false;
@@ -1228,9 +1265,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return true;
 		}
 		// free states.
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
 		{
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 			{
 				context.freeWeaponStates(slot);
 				return true;
@@ -1244,15 +1281,15 @@ public final class DecoHackParser extends Lexer.Parser
 
 			DEHWeapon weapon = context.getWeapon(slot);
 
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
+			if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
 				context.freeConnectedStates(weapon.getRaiseFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
+			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
 				context.freeConnectedStates(weapon.getLowerFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_READY))
+			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_READY))
 				context.freeConnectedStates(weapon.getReadyFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
 				context.freeConnectedStates(weapon.getFireFrameIndex());
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
+			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
 				context.freeConnectedStates(weapon.getFlashFrameIndex());
 			else
 			{
@@ -1273,7 +1310,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (matchType(DecoHackKernel.TYPE_COLON))
 		{
-			if (!matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+			if (!matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			{
 				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
 				return false;
@@ -1301,37 +1338,49 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("Setting weapon flags is not available. Not an MBF21 patch.");
+					return false;
+				}
+				
 				Integer flags;
 				if ((flags = matchWeaponFlagMnemonic()) == null && (flags = matchPositiveInteger()) == null)
 				{
 					addErrorMessage("Expected integer after \"+\".");
 					return false;
 				}
-				weapon.setFlags(weapon.getFlags() | flags);
+				weapon.setMBFFlags(weapon.getMBFFlags() | flags);
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("Setting weapon flags is not available. Not an MBF21 patch.");
+					return false;
+				}
+				
 				Integer flags;
 				if ((flags = matchWeaponFlagMnemonic()) == null && (flags = matchPositiveInteger()) == null)
 				{
 					addErrorMessage("Expected integer after \"-\".");
 					return false;
 				}
-				weapon.setFlags(weapon.getFlags() & (~flags));
+				weapon.setMBFFlags(weapon.getMBFFlags() & (~flags));
 			}
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+			if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 			{
 				if (!parseWeaponStateClause(context, weapon))
 					return false;
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 			{
 				if (!parseWeaponStateBody(context, weapon))
 					return false;
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_CLEAR))
+			else if (matchIdentifierIgnoreCase(KEYWORD_CLEAR))
 			{
-				if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATE))
+				if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 				{
 					String labelName;
 					if ((labelName = matchIdentifier()) != null)
@@ -1352,7 +1401,7 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 				}
-				else if (matchIdentifierLexemeIgnoreCase(KEYWORD_STATES))
+				else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 				{
 					weapon.clearLabels();
 				}
@@ -1362,7 +1411,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMOTYPE))
+			else if (matchIdentifierIgnoreCase(KEYWORD_AMMOTYPE))
 			{
 				Ammo ammo;
 				Integer ammoIndex;
@@ -1383,7 +1432,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 				weapon.setAmmoType(ammo);
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_AMMOPERSHOT))
+			else if (matchIdentifierIgnoreCase(KEYWORD_AMMOPERSHOT))
 			{
 				Integer ammoPerShot;
 				if ((ammoPerShot = matchPositiveInteger()) == null)
@@ -1396,8 +1445,14 @@ public final class DecoHackParser extends Lexer.Parser
 					weapon.setAmmoPerShot(ammoPerShot);
 				}
 			}
-			else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FLAGS))
+			else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_FLAGS);
+					return false;
+				}
+				
 				Integer flags;
 				if ((flags = matchPositiveInteger()) == null)
 				{
@@ -1406,7 +1461,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					weapon.setFlags(flags);
+					weapon.setMBFFlags(flags);
 				}
 			}
 			else
@@ -1428,35 +1483,35 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseWeaponStateClause(AbstractPatchContext<?> context, DEHWeapon weapon) 
 	{
 		Integer value;
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_READY))
+		if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_READY))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				weapon.setReadyFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_SELECT))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				weapon.setRaiseFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_DESELECT))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				weapon.setLowerFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_FIRE))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				weapon.setFireFrameIndex(value);
 			else
 				return false;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_FLASH))
 		{
 			if ((value = parseStateIndex(context)) != null)
 				weapon.setFlashFrameIndex(value);
@@ -1569,9 +1624,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor actor)
 	{
 		String labelName;
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
@@ -1730,7 +1785,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return true;
 		}
 		// if fill state...
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FILL))
+		else if (matchIdentifierIgnoreCase(KEYWORD_FILL))
 		{
 			if ((index = matchPositiveInteger()) == null)
 			{
@@ -1761,15 +1816,15 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			return true;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_FREE))
+		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
 		{
 			return parseStateFreeLine(context);
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_PROTECT))
+		else if (matchIdentifierIgnoreCase(KEYWORD_PROTECT))
 		{
 			return parseStateProtectLine(context, true);
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_UNPROTECT))
+		else if (matchIdentifierIgnoreCase(KEYWORD_UNPROTECT))
 		{
 			return parseStateProtectLine(context, false);
 		}
@@ -2001,7 +2056,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		if (state.action != null)
 		{
-			if (!context.isActionPointerTypeSupported(state.action.getType()))
+			if (!context.supports(state.action.getType()))
 			{
 				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
 				return false;
@@ -2100,11 +2155,11 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		Integer value;
 		String labelName;
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_THING))
+		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WEAPON))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_SOUND))
+		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
@@ -2121,15 +2176,15 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_STOP))
+		if (matchIdentifierIgnoreCase(KEYWORD_STOP))
 		{
 			return 0;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_WAIT))
+		else if (matchIdentifierIgnoreCase(KEYWORD_WAIT))
 		{
 			return currentStateIndex;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_LOOP))
+		else if (matchIdentifierIgnoreCase(KEYWORD_LOOP))
 		{
 			if (lastLabelledStateIndex == null)
 			{
@@ -2138,7 +2193,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			return lastLabelledStateIndex;
 		}
-		else if (matchIdentifierLexemeIgnoreCase(KEYWORD_GOTO))
+		else if (matchIdentifierIgnoreCase(KEYWORD_GOTO))
 		{
 			return parseStateIndex(context, actor);
 		}
@@ -2152,7 +2207,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
 	{
 		Integer min, max;
-		if (matchIdentifierLexemeIgnoreCase(KEYWORD_FROM))
+		if (matchIdentifierIgnoreCase(KEYWORD_FROM))
 		{
 			// free chain
 			if ((min = matchPositiveInteger()) != null)
@@ -2175,7 +2230,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			// free range
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_TO))
+			if (matchIdentifierIgnoreCase(KEYWORD_TO))
 			{
 				if ((max = matchPositiveInteger()) != null)
 				{
@@ -2224,7 +2279,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			// protect range
-			if (matchIdentifierLexemeIgnoreCase(KEYWORD_TO))
+			if (matchIdentifierIgnoreCase(KEYWORD_TO))
 			{
 				if ((max = matchPositiveInteger()) != null)
 				{
@@ -2447,7 +2502,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return value;
 		}
 	}
-
 	
 	// Matches a valid thing index number.
 	// If match, advance token and return integer.
@@ -2524,7 +2578,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier with a specific lexeme.
 	// If match, advance token and return true.
 	// Else, return false.
-	private boolean matchIdentifierLexemeIgnoreCase(String lexeme)
+	private boolean matchIdentifierIgnoreCase(String lexeme)
 	{
 		if (!currentIdentifierLexemeIgnoreCase(lexeme))
 			return false;
@@ -2571,7 +2625,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Else, return null.
 	private boolean matchBrightFlag()
 	{
-		return matchIdentifierLexemeIgnoreCase(KEYWORD_BRIGHT);
+		return matchIdentifierIgnoreCase(KEYWORD_BRIGHT);
 	}
 	
 	// Matches an identifier that can be "offset".
@@ -2579,7 +2633,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Else, return null.
 	private boolean matchOffsetDirective()
 	{
-		return matchIdentifierLexemeIgnoreCase(KEYWORD_OFFSET);
+		return matchIdentifierIgnoreCase(KEYWORD_OFFSET);
 	}
 	
 	// Matches an identifier that references a thing flag mnemonic.

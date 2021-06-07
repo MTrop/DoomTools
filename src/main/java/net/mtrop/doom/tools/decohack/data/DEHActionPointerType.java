@@ -7,7 +7,9 @@ package net.mtrop.doom.tools.decohack.data;
 
 /**
  * Enumeration of action pointer types.
+ * Note: DO NOT CHANGE THE ORDERING of the enums! They are ordered in ascending feature set!
  * @author Xaser Acheron
+ * @author Matthew Tropiano 
  */
 public enum DEHActionPointerType
 {
@@ -28,4 +30,16 @@ public enum DEHActionPointerType
 	{
 		return useArgs;
 	}
+	
+	/**
+	 * Checks if the provided pointer type is supported by this one.
+	 * @param type the provided type.
+	 * @return true if so, false if not.
+	 */
+	public boolean supports(DEHActionPointerType type)
+	{
+		return type.ordinal() <= ordinal(); 
+	}
+	
+
 }

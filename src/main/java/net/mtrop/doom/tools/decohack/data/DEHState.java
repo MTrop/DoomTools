@@ -26,6 +26,7 @@ public class DEHState implements DEHObject<DEHState>
 	private int misc1;
 	private int misc2;
 	private int[] args;
+	private int flags;
 	
 	/**
 	 * Creates a new frame.
@@ -40,16 +41,22 @@ public class DEHState implements DEHObject<DEHState>
 			-1,
 			0,
 			0,
-			new int[0]
+			new int[0],
+			0x00
 		);
 	}
 	
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
+		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int flags)
+	{
+		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], flags);
+	}
+
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int flags)
 	{
 		return (new DEHState()).set(
 			spriteIndex,
@@ -59,7 +66,8 @@ public class DEHState implements DEHObject<DEHState>
 			duration,
 			misc1,
 			misc2,
-			args
+			args,
+			flags
 		);
 	}
 
@@ -74,16 +82,17 @@ public class DEHState implements DEHObject<DEHState>
 			source.duration, 
 			source.misc1, 
 			source.misc2,
-			source.args
+			source.args,
+			source.flags
 		);
 	}
 	
 	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
+		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
 	}
 	
-	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args)
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int flags)
 	{
 		setSpriteIndex(spriteIndex);
 		setFrameIndex(frameIndex);
@@ -93,6 +102,7 @@ public class DEHState implements DEHObject<DEHState>
 		setMisc1(misc1);
 		setMisc2(misc2);
 		setArgs(args);
+		setFlags(flags);
 		return this;
 	}
 	
@@ -201,6 +211,17 @@ public class DEHState implements DEHObject<DEHState>
 		return this;
 	}
 	
+	public int getFlags() 
+	{
+		return flags;
+	}
+	
+	public DEHState setFlags(int flags) 
+	{
+		this.flags = flags;
+		return this;
+	}
+	
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -219,6 +240,7 @@ public class DEHState implements DEHObject<DEHState>
 			&& misc1 == obj.misc1
 			&& misc2 == obj.misc2
 			&& Arrays.equals(args, obj.args)
+			&& flags == obj.flags
 		;
 	}	
 		

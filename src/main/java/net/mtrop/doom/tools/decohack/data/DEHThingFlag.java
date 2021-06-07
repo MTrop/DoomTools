@@ -12,7 +12,7 @@ import java.util.TreeMap;
  * Doom Thing flags
  * @author Matthew Tropiano
  */
-public enum DEHThingFlag
+public enum DEHThingFlag implements DEHFlag
 {
 	SPECIAL       (0x00000001),
 	SOLID         (0x00000002),
@@ -63,7 +63,7 @@ public enum DEHThingFlag
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
-	
+
 	private int value;
 
 	private DEHThingFlag(int value)

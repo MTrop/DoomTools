@@ -7,7 +7,9 @@ package net.mtrop.doom.tools.decohack.patches;
 
 import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.*;
 
+import net.mtrop.doom.tools.decohack.data.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 
 /**
@@ -495,19 +497,19 @@ interface ConstantsBoom
 		PatchBoom.State.create(DEHState.create(0, 8, false, 444, 6), NULL),
 		PatchBoom.State.create(DEHState.create(39, 0, false, 476, 10), LOOK),
 		PatchBoom.State.create(DEHState.create(39, 1, false, 475, 10), LOOK),
-		PatchBoom.State.create(DEHState.create(39, 0, false, 478, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 0, false, 479, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 1, false, 480, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 1, false, 481, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 2, false, 482, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 2, false, 483, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 3, false, 484, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 3, false, 477, 2), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 4, false, 486, 8), FACETARGET),
-		PatchBoom.State.create(DEHState.create(39, 5, false, 487, 8), FACETARGET),
-		PatchBoom.State.create(DEHState.create(39, 6, false, 477, 8), SARGATTACK),
-		PatchBoom.State.create(DEHState.create(39, 7, false, 489, 2), NULL),
-		PatchBoom.State.create(DEHState.create(39, 7, false, 477, 2), PAIN),
+		PatchBoom.State.create(DEHState.create(39, 0, false, 478, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 0, false, 479, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 1, false, 480, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 1, false, 481, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 2, false, 482, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 2, false, 483, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 3, false, 484, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 3, false, 477, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 4, false, 486, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), FACETARGET),
+		PatchBoom.State.create(DEHState.create(39, 5, false, 487, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), FACETARGET),
+		PatchBoom.State.create(DEHState.create(39, 6, false, 477, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), SARGATTACK),
+		PatchBoom.State.create(DEHState.create(39, 7, false, 489, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), NULL),
+		PatchBoom.State.create(DEHState.create(39, 7, false, 477, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), PAIN),
 		PatchBoom.State.create(DEHState.create(39, 8, false, 491, 8), NULL),
 		PatchBoom.State.create(DEHState.create(39, 9, false, 492, 8), SCREAM),
 		PatchBoom.State.create(DEHState.create(39, 10, false, 493, 4), NULL),

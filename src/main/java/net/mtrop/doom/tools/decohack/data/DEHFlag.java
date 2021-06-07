@@ -3,13 +3,25 @@
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
-package net.mtrop.doom.tools.decohack.patches;
+package net.mtrop.doom.tools.decohack.data;
 
 /**
- * Patch implementation for MBF21.
- * @author Xaser Acheron
+ * Doom flag type.
+ * @author Matthew Tropiano
  */
-public class PatchMBF21 extends PatchExtended
+public interface DEHFlag
 {
-	// [XA] Just a stub for now.
+	/**
+	 * @return the bit value of this flag.
+	 */
+	int getValue();
+	
+	static int flags(DEHFlag ... flags)
+	{
+		int out = 0;
+		for (DEHFlag flag : flags)
+			out |= flag.getValue();
+		return out;
+	}
+	
 }

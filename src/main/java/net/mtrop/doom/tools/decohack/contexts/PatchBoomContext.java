@@ -25,13 +25,13 @@ public class PatchBoomContext extends AbstractPatchBoomContext
 	}
 
 	@Override
-	public boolean isActionPointerTypeSupported(DEHActionPointerType type)
+	public DEHActionPointerType getSupportedActionPointerType() 
 	{
-		return type == DEHActionPointerType.DOOM19;
+		return DEHActionPointerType.DOOM19;
 	}
-
+	
 	@Override
-	public DEHFeatureLevel getFeatureLevel() 
+	public DEHFeatureLevel getSupportedFeatureLevel() 
 	{
 		return DEHFeatureLevel.BOOM;
 	}

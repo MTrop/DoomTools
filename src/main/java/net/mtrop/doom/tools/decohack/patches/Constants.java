@@ -6,9 +6,11 @@
 package net.mtrop.doom.tools.decohack.patches;
 
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.DEHThingMBFFlag;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
@@ -1177,7 +1179,8 @@ interface Constants
 			.setAttackSoundPosition(1)
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(59)
-			.setActiveSoundPosition(75),
+			.setActiveSoundPosition(75)
+			.setDroppedItem(64),
 		(new DEHThing()).setName("Sargeant")
 			.setEditorNumber(9)
 			.setHealth(30)
@@ -1201,7 +1204,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(60)
-			.setActiveSoundPosition(75),
+			.setActiveSoundPosition(75)
+			.setDroppedItem(78),
 		(new DEHThing()).setName("Archvile")
 			.setEditorNumber(64)
 			.setHealth(700)
@@ -1225,7 +1229,12 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(28)
 			.setDeathSoundPosition(71)
-			.setActiveSoundPosition(80),
+			.setActiveSoundPosition(80)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.SHORTMRANGE,
+				DEHThingMBFFlag.DMGIGNORED,
+				DEHThingMBFFlag.NOTHRESHOLD
+			)),
 		(new DEHThing()).setName("Archvile attack")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1273,7 +1282,11 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(74)
-			.setActiveSoundPosition(105),
+			.setActiveSoundPosition(105)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.LONGMELEE,
+				DEHThingMBFFlag.RANGEHALF
+			)),
 		(new DEHThing()).setName("Revenant fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1345,7 +1358,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(29)
 			.setDeathSoundPosition(100)
-			.setActiveSoundPosition(75),
+			.setActiveSoundPosition(75)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.MAP07BOSS1
+			)),
 		(new DEHThing()).setName("Mancubus fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1393,7 +1409,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(60)
-			.setActiveSoundPosition(75),
+			.setActiveSoundPosition(75)
+			.setDroppedItem(74),
 		(new DEHThing()).setName("Imp")
 			.setEditorNumber(3001)
 			.setHealth(60)
@@ -1513,7 +1530,11 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(67)
-			.setActiveSoundPosition(77),
+			.setActiveSoundPosition(77)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.E1M8BOSS
+			))
+			.setProjectileGroup(1),
 		(new DEHThing()).setName("Baron fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1538,7 +1559,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(17)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setFastSpeed(20),
 		(new DEHThing()).setName("Hell Knight")
 			.setEditorNumber(69)
 			.setHealth(500)
@@ -1562,7 +1584,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(72)
-			.setActiveSoundPosition(77),
+			.setActiveSoundPosition(77)
+			.setProjectileGroup(1),
 		(new DEHThing()).setName("Lost Soul")
 			.setEditorNumber(3006)
 			.setHealth(100)
@@ -1586,7 +1609,10 @@ interface Constants
 			.setAttackSoundPosition(51)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(17)
-			.setActiveSoundPosition(77),
+			.setActiveSoundPosition(77)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.RANGEHALF
+			)),
 		(new DEHThing()).setName("Spiderdemon")
 			.setEditorNumber(7)
 			.setHealth(3000)
@@ -1610,7 +1636,14 @@ interface Constants
 			.setAttackSoundPosition(2)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(69)
-			.setActiveSoundPosition(77),
+			.setActiveSoundPosition(77)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.NORADIUSDMG,
+				DEHThingMBFFlag.RANGEHALF,
+				DEHThingMBFFlag.FULLVOLSOUNDS,
+				DEHThingMBFFlag.E3M8BOSS,
+				DEHThingMBFFlag.E4M8BOSS
+			)),
 		(new DEHThing()).setName("Arachnotron")
 			.setEditorNumber(68)
 			.setHealth(500)
@@ -1634,7 +1667,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(70)
-			.setActiveSoundPosition(78),
+			.setActiveSoundPosition(78)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.MAP07BOSS2
+			)),
 		(new DEHThing()).setName("Cyberdemon")
 			.setEditorNumber(16)
 			.setHealth(4000)
@@ -1658,7 +1694,15 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(68)
-			.setActiveSoundPosition(77),
+			.setActiveSoundPosition(77)
+			.setMBFFlags(DEHFlag.flags(
+				DEHThingMBFFlag.NORADIUSDMG,
+				DEHThingMBFFlag.HIGHERMPROB,
+				DEHThingMBFFlag.RANGEHALF,
+				DEHThingMBFFlag.FULLVOLSOUNDS,
+				DEHThingMBFFlag.E2M8BOSS,
+				DEHThingMBFFlag.E4M6BOSS
+			)),
 		(new DEHThing()).setName("Pain Elemental")
 			.setEditorNumber(71)
 			.setHealth(400)
@@ -1706,7 +1750,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(102)
-			.setActiveSoundPosition(75),
+			.setActiveSoundPosition(75)
+			.setDroppedItem(64),
 		(new DEHThing()).setName("Commander Keen")
 			.setEditorNumber(72)
 			.setHealth(100)
@@ -1899,7 +1944,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(17)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setFastSpeed(20),
 		(new DEHThing()).setName("Caco fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1924,7 +1970,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(17)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setFastSpeed(20),
 		(new DEHThing()).setName("Rocket in flight")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)

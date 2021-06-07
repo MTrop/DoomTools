@@ -8,15 +8,15 @@ package net.mtrop.doom.tools.decohack.contexts;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
-import net.mtrop.doom.tools.decohack.patches.PatchDHEExtended;
+import net.mtrop.doom.tools.decohack.patches.PatchExtended;
 
 /**
  * Patch context for MBF (Marine's Best Friend).
  * @author Matthew Tropiano
  */
-public class PatchDHEExtendedContext extends AbstractPatchBoomContext
+public class PatchExtendedContext extends AbstractPatchBoomContext
 {
-	private static final DEHPatchBoom DHEEXTENDEDPATCH = new PatchDHEExtended();
+	private static final DEHPatchBoom DHEEXTENDEDPATCH = new PatchExtended();
 	
 	@Override
 	public DEHPatchBoom getSourcePatch()
@@ -25,15 +25,15 @@ public class PatchDHEExtendedContext extends AbstractPatchBoomContext
 	}
 
 	@Override
-	public boolean isActionPointerTypeSupported(DEHActionPointerType type)
+	public DEHActionPointerType getSupportedActionPointerType() 
 	{
-		return type == DEHActionPointerType.DOOM19 || type == DEHActionPointerType.MBF;
+		return DEHActionPointerType.MBF;
 	}
-
+	
 	@Override
-	public DEHFeatureLevel getFeatureLevel() 
+	public DEHFeatureLevel getSupportedFeatureLevel() 
 	{
-		return DEHFeatureLevel.MBF;
+		return DEHFeatureLevel.EXTENDED;
 	}
 
 }
