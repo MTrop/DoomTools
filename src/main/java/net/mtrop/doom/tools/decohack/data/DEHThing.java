@@ -32,7 +32,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	public static final int EDITORNUMBER_NONE = -1;
 	public static final int SOUND_NONE = 0;
 	public static final int FRAME_NULL = 0;
-	public static final int NO_ITEM = -1;
+	public static final int NO_ITEM = 0;
 	public static final int DEFAULT_GROUP = 0;
 	public static final int DEFAULT_FASTSPEED = -1;
 	public static final int DEFAULT_MELEE_RANGE = 64;
