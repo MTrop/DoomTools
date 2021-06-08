@@ -1565,6 +1565,7 @@ S_FREE_END      3999
 
 ...classpath:decohack/constants/boom/things.dh, plus:
 
+MT_NULL         0
 MT_PLAYER       1
 MT_POSSESSED    2
 MT_SHOTGUY      3

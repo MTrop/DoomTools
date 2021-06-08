@@ -194,7 +194,7 @@ optional keyword indicating that the state graphic is always painted
 fullbright. Action pointer mnemonics must start with A_.
 
 Some action pointers, especially in MBF and later formats, can be optionally 
-parameterized up to two parameters:
+parameterized up to two parameters (or greater, if MBF21):
 
     A_Die
     A_Die()
@@ -400,12 +400,21 @@ Ready, Select, Deselect, Fire, and Flash state labels set the weapon state
 indices. Other labels are used for arbitrary jump points. "LightDone" is a 
 built-in alias for state 1.
 
-Unlike ZDoom DECORATE, the "Spawn" state is not used, as that is used by the 
-Thing for pickups.
+Unlike ZDoom DECORATE, the "Spawn" state is not used, as that is used by an 
+associated Thing for pickups.
 
     weapon <INTEGER> [ : weapon <INTEGER> ] [ <STRING> ] 
     {
         ammotype ( 0 | 1 | 2 | 3 | 5 )
+        
+		clear flags // If present, clear all flags (both sets, if available)
+
+		// MBF21 Flags (MBF21 feature set only)
+		flags mbf21 <INTEGER>
+        + mbf21 <INTEGER> // set flag(s)
+        - mbf21 <INTEGER> // unset flag(s)
+        + <MBF21WeaponFlagName> // set flag
+        - <MBF21WeaponFlagName> // unset flag
         
         // specific state assignment.
         state <WeaponStateName> <INTEGER>
@@ -535,28 +544,50 @@ the thing state indices. Other labels are used for arbitrary jump points.
 
     thing <INTEGER> [ : thing <INTEGER> ] [ <STRING> ] 
     {
-        EdNum <NUMBER>
+        ednum <NUMBER>
         
-        Health <NUMBER>
-        Speed <NUMBER>
-        Radius <INTEGER>
-        Height <INTEGER>
-        Damage <NUMBER>
-        ReactionTime <INTEGER>
-        PainChance <INTEGER>
-        Mass <INTEGER>
-    
-        Flags <INTEGER>
+        health <NUMBER>
+        speed <NUMBER>
+        radius <INTEGER>
+        height <INTEGER>
+        damage <NUMBER>
+        reactiontime <INTEGER>
+        painchance <INTEGER>
+        mass <INTEGER>
+
+		clear flags // If present, clear all flags (both sets, if available)
+
+        flags <INTEGER>
         + <INTEGER> // set flag(s)
         - <INTEGER> // unset flag(s)
-    
+        + <ThingFlagName> // set flag
+        - <ThingFlagName> // unset flag
+
+		// MBF21 Flags (MBF21 feature set only)
+		flags mbf21 <INTEGER>
+        + mbf21 <INTEGER> // set flag(s)
+        - mbf21 <INTEGER> // unset flag(s)
+        + <MBF21ThingFlagName> // set flag
+        - <MBF21ThingFlagName> // unset flag
+
         clear sounds // if present, clear all sounds.
             
-        SeeSound <STRING>
-        AttackSound <STRING>
-        PainSound <STRING>
-        DeathSound <STRING>
-        ActiveSound <STRING>
+        seesound <STRING>
+        attacksound <STRING>
+        painsound <STRING>
+        deathsound <STRING>
+        activesound <STRING>
+
+		// Extended Properties (Extended/DEHEXTRA feature set only)
+		dropitem <INTEGER>
+        
+		// MBF21 Properties (MBF21 feature set only)
+        fastspeed <INTEGER>
+        meleerange <INTEGER>
+        infightinggroup <INTEGER>
+        projectilegroup <INTEGER>
+        splashgroup <INTEGER>
+        ripsound <STRING>
 
         // specific state assignment.
         state <ThingStateName> <INTEGER>
@@ -615,7 +646,7 @@ Example:
         PainChance 170
         Mass 100
     
-        Flags 0
+        clear flags
         +SOLID
         +SHOOTABLE
         +COUNTKILL
@@ -716,51 +747,86 @@ You can also swap two thing slots:
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-------------------
-Flag Mnemonics
-------------------
 
-Instead of integers, you can use the following mnemonics for thing flags:
+------------------------------------------------------------------------------
+Flag Mnemonics
+------------------------------------------------------------------------------
+
+Instead of integers, you can use the following mnemonics for object flags:
 
 List of valid mnemonics and their values:
 
-    SPECIAL =       0x00000001
-    SOLID =         0x00000002
-    SHOOTABLE =     0x00000004
-    NOSECTOR =      0x00000008
-    NOBLOCKMAP =    0x00000010
-    AMBUSH =        0x00000020
-    JUSTHIT =       0x00000040
-    JUSTATTACKED =  0x00000080
-    SPAWNCEILING =  0x00000100
-    NOGRAVITY =     0x00000200
-    DROPOFF =       0x00000400
-    PICKUP =        0x00000800
-    NOCLIP =        0x00001000
-    SLIDE =         0x00002000
-    FLOAT =         0x00004000
-    TELEPORT =      0x00008000
-    MISSILE =       0x00010000
-    DROPPED =       0x00020000
-    SHADOW =        0x00040000
-    NOBLOOD =       0x00080000
-    CORPSE =        0x00100000
-    INFLOAT =       0x00200000
-    COUNTKILL =     0x00400000
-    COUNTITEM =     0x00800000
-    SKULLFLY =      0x01000000
-    NOTDMATCH =     0x02000000
-    TRANSLATION =   0x04000000
-    UNUSED1 =       0x08000000
-    TRANSLATION2 =  0x08000000
-    TOUCHY =        0x10000000
-    UNUSED2 =       0x10000000
-    BOUNCES =       0x20000000
-    UNUSED3 =       0x20000000
-    FRIEND =        0x40000000
-    FRIENDLY =      0x40000000
-    UNUSED4 =       0x40000000
-    TRANSLUCENT =   0x80000000
+Things (Doom+):
+
+    SPECIAL =        0x00000001
+    SOLID =          0x00000002
+    SHOOTABLE =      0x00000004
+    NOSECTOR =       0x00000008
+    NOBLOCKMAP =     0x00000010
+    AMBUSH =         0x00000020
+    JUSTHIT =        0x00000040
+    JUSTATTACKED =   0x00000080
+    SPAWNCEILING =   0x00000100
+    NOGRAVITY =      0x00000200
+    DROPOFF =        0x00000400
+    PICKUP =         0x00000800
+    NOCLIP =         0x00001000
+    SLIDE =          0x00002000
+    FLOAT =          0x00004000
+    TELEPORT =       0x00008000
+    MISSILE =        0x00010000
+    DROPPED =        0x00020000
+    SHADOW =         0x00040000
+    NOBLOOD =        0x00080000
+    CORPSE =         0x00100000
+    INFLOAT =        0x00200000
+    COUNTKILL =      0x00400000
+    COUNTITEM =      0x00800000
+    SKULLFLY =       0x01000000
+    NOTDMATCH =      0x02000000
+    TRANSLATION =    0x04000000
+    UNUSED1 =        0x08000000
+    TRANSLATION2 =   0x08000000
+    TOUCHY =         0x10000000
+    UNUSED2 =        0x10000000
+    BOUNCES =        0x20000000
+    UNUSED3 =        0x20000000
+    FRIEND =         0x40000000
+    FRIENDLY =       0x40000000
+    UNUSED4 =        0x40000000
+    TRANSLUCENT =    0x80000000
+
+Things (MBF21+):
+
+	LOGRAV =         0x00000001
+	SHORTMRANGE =    0x00000002
+	DMGIGNORED =     0x00000004
+	NORADIUSDMG =    0x00000008
+	FORCERADIUSDMG = 0x00000010
+	HIGHERMPROB =    0x00000020
+	RANGEHALF =      0x00000040
+	NOTHRESHOLD =    0x00000080
+	LONGMELEE =      0x00000100
+	BOSS =           0x00000200
+	MAP07BOSS1 =     0x00000400
+	MAP07BOSS2 =     0x00000800
+	E1M8BOSS =       0x00001000
+	E2M8BOSS =       0x00002000
+	E3M8BOSS =       0x00004000
+	E4M6BOSS =       0x00008000
+	E4M8BOSS =       0x00010000
+	RIP =            0x00020000
+	FULLVOLSOUNDS =  0x00040000
+
+Weapons (MBF21+):
+
+	NOTHRUST =       0x00000001
+	SILENT =         0x00000002
+	NOAUTOFIRE =     0x00000004
+	FLEEMELEE =      0x00000008
+	AUTOSWITCHFROM = 0x00000010
+	NOAUTOSWITCHTO = 0x00000020
+
 
 Monsters tend to have 0x00400006 set (SOLID, SHOOTABLE, COUNTKILL).
 

@@ -10,11 +10,14 @@ import java.util.TreeMap;
 
 /**
  * Enumeration of action pointers for frames.
+ * TODO: Separate Weapon and Thing pointers - check for valid use on parser.
  * @author Matthew Tropiano
  */
 public enum DEHActionPointer
 {
 	NULL            (0,   "NULL"),
+	
+	// Doom Weapon Action Pointers
 	LIGHT0          (1,   "Light0"),
 	WEAPONREADY     (2,   "WeaponReady"),
 	LOWER           (3,   "Lower"),
@@ -38,6 +41,8 @@ public enum DEHActionPointer
 	BFGSOUND        (84,  "BFGsound"),
 	FIREBFG         (86,  "FireBFG"),
 	BFGSPRAY        (119, "BFGSpray"),
+
+	// Doom Thing Action Pointers
 	EXPLODE         (127, "Explode"),
 	PAIN            (157, "Pain"),
 	PLAYERSCREAM    (159, "PlayerScream"),
@@ -90,8 +95,7 @@ public enum DEHActionPointer
 	SPAWNFLY        (788, "SpawnFly"),
 	BRAINEXPLODE    (801, "BrainExplode"),
 	
-	// MBF Action Pointers
-	
+	// MBF Thing Action Pointers
 	DETONATE        (-1, "Detonate", DEHActionPointerType.MBF),
 	MUSHROOM        (-1, "Mushroom", DEHActionPointerType.MBF, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT), // fixed point on both
 	SPAWN           (-1, "Spawn", DEHActionPointerType.MBF, DEHActionPointerParam.UINT, DEHActionPointerParam.INT),
@@ -106,8 +110,7 @@ public enum DEHActionPointer
 	BETASKULLATTACK (-1, "BetaSkullAttack", DEHActionPointerType.MBF),
 	STOP            (-1, "Stop", DEHActionPointerType.MBF),
 
-	// MBF21 Action Pointers
-
+	// MBF21 Thing Action Pointers
 	SPAWNOBJECT         (-1, "SpawnObject", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT, DEHActionPointerParam.INT, DEHActionPointerParam.INT, DEHActionPointerParam.INT, DEHActionPointerParam.INT, DEHActionPointerParam.INT),
 	MONSTERPROJECTILE   (-1, "MonsterProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT, DEHActionPointerParam.INT),
 	MONSTERBULLETATTACK (-1, "MonsterBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT),
@@ -126,6 +129,8 @@ public enum DEHActionPointer
 	JUMPIFFLAGSSET      (-1, "JumpIfFlagsSet", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	ADDFLAGS            (-1, "AddFlags", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	REMOVEFLAGS         (-1, "RemoveFlags", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
+
+	// MBF21 Weapon Action Pointers
 	WEAPONPROJECTILE    (-1, "WeaponProjectile", DEHActionPointerType.MBF21, DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT, DEHActionPointerParam.INT),
 	WEAPONBULLETATTACK  (-1, "WeaponBulletAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT),
 	WEAPONMELEEATTACK   (-1, "WeaponMeleeAttack", DEHActionPointerType.MBF21, DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.INT),
@@ -147,16 +152,17 @@ public enum DEHActionPointer
 	
 	private DEHActionPointerParam[] params;
 
-	private static Map<String, DEHActionPointer> MNEMONIC_MAP = null;
+	private static final Map<String, DEHActionPointer> MNEMONIC_MAP = new TreeMap<String, DEHActionPointer>(String.CASE_INSENSITIVE_ORDER)
+	{
+		private static final long serialVersionUID = -7754048704695925418L;
+		{
+			for (DEHActionPointer val : DEHActionPointer.values())
+				put(val.name(), val);
+		}
+	};
 
 	public static DEHActionPointer getByMnemonic(String mnemonic)
 	{
-		if (MNEMONIC_MAP == null)
-		{
-			MNEMONIC_MAP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-			for (DEHActionPointer ap : values())
-				MNEMONIC_MAP.put(ap.getMnemonic(), ap);
-		}
 		return MNEMONIC_MAP.get(mnemonic);
 	}
 	

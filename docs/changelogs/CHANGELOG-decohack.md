@@ -1,8 +1,9 @@
 DecoHack
 --------
 
-### Changed for 0.10.2
+### Changed for 0.11.0
 
+* `Added` Missing DEHEXTRA thing fields and MBF21 support.
 * `Fixed` Megasphere health misc entry was not parsed! Whoops!
 * `Fixed` Megasphere health not initialized, either!
 

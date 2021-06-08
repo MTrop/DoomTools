@@ -124,13 +124,16 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_MELEERANGE = "meleerange";
 	private static final String KEYWORD_PAINCHANCE = "painchance";
 	private static final String KEYWORD_REACTIONTIME = "reactiontime";
+	private static final String KEYWORD_HEALTH = "health";
 	private static final String KEYWORD_DAMAGE = "damage";
 	private static final String KEYWORD_HEIGHT = "height";
 	private static final String KEYWORD_RADIUS = "radius";
 	private static final String KEYWORD_SPEED = "speed";
 	private static final String KEYWORD_FASTSPEED = "fastspeed";
 	private static final String KEYWORD_DROPITEM = "dropitem";
-	private static final String KEYWORD_HEALTH = "health";
+	private static final String KEYWORD_INFIGHTINGGROUP = "infightinggroup";
+	private static final String KEYWORD_PROJECTILEGROUP = "projectilegroup";
+	private static final String KEYWORD_SPLASHGROUP = "splashgroup";
 	private static final String KEYWORD_SEESOUND = "seesound";
 	private static final String KEYWORD_ATTACKSOUND = "attacksound";
 	private static final String KEYWORD_PAINSOUND = "painsound";
@@ -154,7 +157,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
-	
+
 	/**
 	 * Reads a DECOHack script from a String of text.
 	 * @param text the String to read from.
@@ -844,24 +847,69 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
-			// TODO: Add MBF flags.
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
-				if ((value = matchThingFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				if ((value = matchThingFlagMnemonic()) != null)
+				{
+					thing.setFlags(thing.getFlags() | value);
+				}
+				else if ((value = matchThingMBFFlagMnemonic()) != null)
+				{
+					thing.setMBFFlags(thing.getMBFFlags() | value);
+				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
+				{
+					if ((value = matchPositiveInteger()) != null)
+					{
+						thing.setMBFFlags(thing.getMBFFlags() | value);
+					}
+					else
+					{
+						addErrorMessage("Expected integer after \"+ mbf21\".");
+						return false;
+					}
+				}
+				else if ((value = matchPositiveInteger()) != null)
+				{
+					thing.setFlags(thing.getFlags() | value);
+				}
+				else
 				{
 					addErrorMessage("Expected integer after \"+\".");
 					return false;
 				}
-				thing.setFlags(thing.getFlags() | value);
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
-				if ((value = matchThingFlagMnemonic()) == null && (value = matchPositiveInteger()) == null)
+				if ((value = matchThingFlagMnemonic()) != null)
 				{
-					addErrorMessage("Expected integer after \"-\".");
+					thing.setFlags(thing.getFlags() & (~value));
+				}
+				else if ((value = matchThingMBFFlagMnemonic()) != null)
+				{
+					thing.setMBFFlags(thing.getMBFFlags() & (~value));
+				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
+				{
+					if ((value = matchPositiveInteger()) != null)
+					{
+						thing.setMBFFlags(thing.getMBFFlags() & (~value));
+					}
+					else
+					{
+						addErrorMessage("Expected integer after \"+ mbf21\".");
+						return false;
+					}
+				}
+				else if ((value = matchPositiveInteger()) != null)
+				{
+					thing.setFlags(thing.getFlags() & (~value));
+				}
+				else
+				{
+					addErrorMessage("Expected integer after \"+\".");
 					return false;
 				}
-				thing.setFlags(thing.getFlags() & (~value));
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 			{
@@ -895,6 +943,12 @@ public final class DecoHackParser extends Lexer.Parser
 						addErrorMessage("Expected state label after '%s': %s", KEYWORD_STATE, Arrays.toString(thing.getLabels()));
 						return false;
 					}
+				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
+				{
+					if (context.supports(DEHFeatureLevel.MBF21))
+						thing.setMBFFlags(0);
+					thing.setFlags(0);
 				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 				{
@@ -1121,6 +1175,51 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				thing.setRipSoundPosition(value + 1);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_INFIGHTINGGROUP))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_INFIGHTINGGROUP);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_INFIGHTINGGROUP);
+					return false;
+				}
+				thing.setInfightingGroup(value);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_PROJECTILEGROUP))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_PROJECTILEGROUP);
+					return false;
+				}
+				
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_PROJECTILEGROUP);
+					return false;
+				}
+				thing.setProjectileGroup(value);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_SPLASHGROUP))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_SPLASHGROUP);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_SPLASHGROUP);
+					return false;
+				}
+				thing.setProjectileGroup(value);
 			}
 			else
 			{
@@ -1405,6 +1504,15 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					weapon.clearLabels();
 				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
+				{
+					if (!context.supports(DEHFeatureLevel.MBF21))
+					{
+						addErrorMessage("Can't clear flags. Not an MBF21 patch.");
+						return false;
+					}
+					weapon.setMBFFlags(0);
+				}
 				else
 				{
 					addErrorMessage("Expected '%s' or '%s' after '%s'.", KEYWORD_STATE, KEYWORD_STATES, KEYWORD_CLEAR);
@@ -1450,6 +1558,12 @@ public final class DecoHackParser extends Lexer.Parser
 				if (!context.supports(DEHFeatureLevel.MBF21))
 				{
 					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", KEYWORD_FLAGS);
+					return false;
+				}
+				
+				if (!matchIdentifierIgnoreCase(KEYWORD_MBF21))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_MBF21, KEYWORD_FLAGS);
 					return false;
 				}
 				
@@ -2161,6 +2275,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
+		// TODO: Add easier flag combining.
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
 		else if ((value = matchNumeric()) != null)
