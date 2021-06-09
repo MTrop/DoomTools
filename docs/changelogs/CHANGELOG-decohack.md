@@ -4,6 +4,7 @@ DecoHack
 ### Changed for 0.11.0
 
 * `Added` Missing DEHEXTRA thing fields and MBF21 support.
+* `Added` Correct action pointer use detection on things and weapons.
 * `Fixed` Megasphere health misc entry was not parsed! Whoops!
 * `Fixed` Megasphere health not initialized, either!
 

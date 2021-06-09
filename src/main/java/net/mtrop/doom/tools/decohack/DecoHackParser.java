@@ -2172,9 +2172,23 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (!context.supports(state.action.getType()))
 			{
-				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() +". Patch does not support this action type.");
+				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() + ". Patch does not support this action type.");
 				return false;
 			}
+			
+			if (actor instanceof DEHThing)
+			{
+				if (state.action.isWeapon())
+				{
+					addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a weapon action. Thing action expected.");
+					return false;
+				}
+			}
+			else if (state.action.isWeapon())
+			{
+				addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a thing action. Weapon action expected.");
+				return false;
+			}				
 
 			// MBF args (misc1/misc2)
 			if (!state.action.useArgs())
@@ -2267,7 +2281,6 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a pointer argument value.
 	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor actor)
 	{
-		Integer value;
 		String labelName;
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
@@ -2275,18 +2288,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
-		// TODO: Add easier flag combining.
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
-		else if ((value = matchNumeric()) != null)
-			return value;
 		else
-		{
-			addErrorMessage("Expected parameter.");
-			return null;
-		}
+			return matchNumericExpression();
 	}
-
+	
 	// Parses a next state line.
 	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
@@ -2890,6 +2897,22 @@ public final class DecoHackParser extends Lexer.Parser
 		String out = currentToken().getLexeme();
 		nextToken();
 		return out;
+	}
+
+	// Matches and parses a numeric expression.
+	private Integer matchNumericExpression()
+	{
+		// TODO: Finish this for flag expressions.
+		Integer value;
+		if ((value = matchNumeric()) != null)
+		{
+			return value;
+		}
+		else
+		{
+			addErrorMessage("Expected parameter.");
+			return null;
+		}
 	}
 
 	// Matches a numeric value, and returns an integer or a fixed-point value. 
