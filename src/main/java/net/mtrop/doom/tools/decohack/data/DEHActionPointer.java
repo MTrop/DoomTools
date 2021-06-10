@@ -39,9 +39,9 @@ public enum DEHActionPointer
 	FIREPLASMA          (77,  true,  "FirePlasma"),
 	BFGSOUND            (84,  true,  "BFGsound"),
 	FIREBFG             (86,  true,  "FireBFG"),
-	BFGSPRAY            (119, true,  "BFGSpray"),
 
 	// Doom Thing Action Pointers
+	BFGSPRAY            (119, false, "BFGSpray"),
 	EXPLODE             (127, false, "Explode"),
 	PAIN                (157, false, "Pain"),
 	PLAYERSCREAM        (159, false, "PlayerScream"),

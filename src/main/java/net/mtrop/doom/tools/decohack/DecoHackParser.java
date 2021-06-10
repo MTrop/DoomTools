@@ -2184,11 +2184,15 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else if (state.action.isWeapon())
+			else if (actor instanceof DEHWeapon)
 			{
-				addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a thing action. Weapon action expected.");
-				return false;
-			}				
+				if (!state.action.isWeapon())
+				{
+					addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a thing action. Weapon action expected.");
+					return false;
+				}				
+			}
+			// else, state body.
 
 			// MBF args (misc1/misc2)
 			if (!state.action.useArgs())
@@ -2281,6 +2285,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a pointer argument value.
 	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor actor)
 	{
+		Integer value;
 		String labelName;
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
@@ -2290,8 +2295,13 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseSoundIndex(context);
 		else if ((labelName = matchIdentifier()) != null)
 			return parseActorStateLabelIndex(actor, labelName);
+		else if ((value = matchNumericExpression()) != null)
+			return value;
 		else
-			return matchNumericExpression();
+		{
+			addErrorMessage("Expected parameter.");
+			return null;
+		}
 	}
 	
 	// Parses a next state line.
@@ -2902,17 +2912,44 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches and parses a numeric expression.
 	private Integer matchNumericExpression()
 	{
-		// TODO: Finish this for flag expressions.
 		Integer value;
-		if ((value = matchNumeric()) != null)
+		Integer out = null;
+		while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			return value;
+			if (out == null)
+				out = 0;
+			
+			if (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER))
+			{
+				if ((value = matchNumeric()) == null)
+				{
+					addErrorMessage("Expected numeric value.");
+					return null;
+				}
+			}
+			else if ((value = matchThingFlagMnemonic()) != null)
+			{
+				out |= value;
+			}
+			else if ((value = matchThingMBFFlagMnemonic()) != null)
+			{
+				out |= value;
+			}
+			else if ((value = matchWeaponFlagMnemonic()) != null)
+			{
+				out |= value;
+			}
+			else
+			{
+				addErrorMessage("Expected valid flag mnemonic.");
+				return null;
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_PIPE))
+				break;
 		}
-		else
-		{
-			addErrorMessage("Expected parameter.");
-			return null;
-		}
+		
+		return out;
 	}
 
 	// Matches a numeric value, and returns an integer or a fixed-point value. 
@@ -3201,6 +3238,7 @@ public final class DecoHackParser extends Lexer.Parser
 		public static final int TYPE_PERIOD = 11;
 		public static final int TYPE_PLUS = 12;
 		public static final int TYPE_DASH = 13;
+		public static final int TYPE_PIPE = 14;
 		
 		public static final int TYPE_TRUE = 101;
 		public static final int TYPE_FALSE = 102;
@@ -3226,6 +3264,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 			addDelimiter("+", TYPE_PLUS);
 			addDelimiter("-", TYPE_DASH);
+			addDelimiter("|", TYPE_PIPE);
 			
 			addCaseInsensitiveKeyword("true", TYPE_TRUE);
 			addCaseInsensitiveKeyword("false", TYPE_FALSE);
