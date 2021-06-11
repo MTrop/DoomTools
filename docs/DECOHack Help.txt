@@ -27,7 +27,7 @@ you proceed, as some pieces are similar, and some are not.
 <STRING>     : Any single- or double-quoted set of characters, or a raw string 
                bounded in backticks.
 
-<INTEGER>    : Any positive integer, or hex integer. 
+<INTEGER>    : Any positive integer, or hex integer (e.g. 0x01234abcd). 
 
 <NUMBER>     : <INTEGER>
                - <INTEGER>
@@ -218,6 +218,18 @@ function requires them or understands them (be careful - it is up to the
 function to interpret them as such):
 
     A_Mushroom(-45.0, 16.0)
+
+
+Parameter values can also be a series of flags that get or'ed together. This
+is useful for some functions that manipulate flags. A set of supported flags 
+can be combined via the PIPE operator:
+
+    A_AddFlags(SOLID | DROPPED, 0)
+
+
+Note that this works ANYTWHERE that action parameters are accepted - DECOHack
+calculates a single value from these expressions. The only checking done is
+if those flags are valid for the patch level (i.e. MBF, EXTENDED, or MBF21).  
 
 
 Weapon states have a special characteristic that went unused for the most part
@@ -837,6 +849,7 @@ Example:
 
     +SOLID
     -NOGRAVITY
+    +RANGEHALF
 
 
 ==============================================================================
@@ -1038,13 +1051,13 @@ block.
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Extended-DEH-compatible ports, plus the "using extended" line, AND 
-    freeing up the free extended states immediately for use.
+    freeing up the extra extended states immediately for use.
 
 #include "classpath:decohack/mbf21.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF 2.1-compliant ports (which includes Extended-DEH), plus the 
-    "using mbf21" line, AND freeing up the free extended states 
+    MBF 21-compliant ports (which includes Extended-DEH), plus the 
+    "using mbf21" line, AND freeing up the extra extended states 
     immediately for use.
 
 ..............................................................................

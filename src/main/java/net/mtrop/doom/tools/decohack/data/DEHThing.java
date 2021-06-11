@@ -67,7 +67,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 
 	private int droppedItem;
 
-	private int mbfFlags;
+	private int mbf21Flags;
 	private int infightingGroup;
 	private int projectileGroup;
 	private int splashGroup;
@@ -105,7 +105,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 
 		setDroppedItem(NO_ITEM);
 
-		setMBFFlags(0x00000000);
+		setMBF21Flags(0x00000000);
 		setInfightingGroup(DEFAULT_GROUP);
 		setProjectileGroup(DEFAULT_GROUP);
 		setSplashGroup(DEFAULT_GROUP);
@@ -141,7 +141,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		
 		setDroppedItem(source.droppedItem);
 		
-		setMBFFlags(source.mbfFlags);
+		setMBF21Flags(source.mbf21Flags);
 		setInfightingGroup(source.infightingGroup);
 		setProjectileGroup(source.projectileGroup);
 		setSplashGroup(source.splashGroup);
@@ -288,14 +288,14 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return this;
 	}
 
-	public int getMBFFlags() 
+	public int getMBF21Flags() 
 	{
-		return mbfFlags;
+		return mbf21Flags;
 	}
 
-	public DEHThing setMBFFlags(int bits) 
+	public DEHThing setMBF21Flags(int bits) 
 	{
-		this.mbfFlags = bits;
+		this.mbf21Flags = bits;
 		return this;
 	}
 
@@ -610,7 +610,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
-			&& mbfFlags == obj.mbfFlags
+			&& mbf21Flags == obj.mbf21Flags
 			&& meleeRange == obj.meleeRange
 			&& infightingGroup == obj.infightingGroup
 			&& projectileGroup == obj.projectileGroup
@@ -680,8 +680,8 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			writer.append("Dropped item = ").append(String.valueOf(droppedItem)).append("\r\n");
 
 		// MBF21 features
-		if (mbfFlags != thing.mbfFlags)
-			writer.append("MBF21 Bits = ").append(String.valueOf(mbfFlags)).append("\r\n");
+		if (mbf21Flags != thing.mbf21Flags)
+			writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		if (infightingGroup != thing.infightingGroup)
 			writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
 		if (projectileGroup != thing.projectileGroup)

@@ -10,10 +10,10 @@ import net.mtrop.doom.tools.decohack.data.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
-import net.mtrop.doom.tools.decohack.data.DEHThingMBFFlag;
+import net.mtrop.doom.tools.decohack.data.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-import net.mtrop.doom.tools.decohack.data.DEHWeaponFlag;
+import net.mtrop.doom.tools.decohack.data.DEHWeaponMBF21Flag;
 
 /**
  * Patch constants. 
@@ -1006,14 +1006,14 @@ interface Constants
 
 	static final DEHWeapon[] DEHWEAPON = 
 	{
-		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponFlag.FLEEMELEE, DEHWeaponFlag.AUTOSWITCHFROM, DEHWeaponFlag.NOAUTOSWITCHTO)),
-		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponFlag.AUTOSWITCHFROM)),
+		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.AUTOSWITCHFROM, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)),
+		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.AUTOSWITCHFROM)),
 		DEHWeapon.create("Shotgun",         Ammo.SHELLS,   S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
 		DEHWeapon.create("Chaingun",        Ammo.BULLETS,  S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
-		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponFlag.NOAUTOFIRE)),
+		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE)),
 		DEHWeapon.create("Plasma rifle",    Ammo.CELLS,    S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
-		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponFlag.NOAUTOFIRE)),
-		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponFlag.NOTHRUST, DEHWeaponFlag.FLEEMELEE, DEHWeaponFlag.NOAUTOSWITCHTO)),
+		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE)),
+		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOTHRUST, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)),
 		DEHWeapon.create("Super-shotgun",   Ammo.SHELLS,   S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
 	};
 
@@ -1230,10 +1230,10 @@ interface Constants
 			.setPainSoundPosition(28)
 			.setDeathSoundPosition(71)
 			.setActiveSoundPosition(80)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.SHORTMRANGE,
-				DEHThingMBFFlag.DMGIGNORED,
-				DEHThingMBFFlag.NOTHRESHOLD
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.SHORTMRANGE,
+				DEHThingMBF21Flag.DMGIGNORED,
+				DEHThingMBF21Flag.NOTHRESHOLD
 			)),
 		(new DEHThing()).setName("Archvile attack")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
@@ -1283,9 +1283,9 @@ interface Constants
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(74)
 			.setActiveSoundPosition(105)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.LONGMELEE,
-				DEHThingMBFFlag.RANGEHALF
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.LONGMELEE,
+				DEHThingMBF21Flag.RANGEHALF
 			)),
 		(new DEHThing()).setName("Revenant fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
@@ -1359,8 +1359,8 @@ interface Constants
 			.setPainSoundPosition(29)
 			.setDeathSoundPosition(100)
 			.setActiveSoundPosition(75)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.MAP07BOSS1
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.MAP07BOSS1
 			)),
 		(new DEHThing()).setName("Mancubus fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
@@ -1531,8 +1531,8 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(67)
 			.setActiveSoundPosition(77)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.E1M8BOSS
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.E1M8BOSS
 			))
 			.setProjectileGroup(1),
 		(new DEHThing()).setName("Baron fireball")
@@ -1610,8 +1610,8 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(17)
 			.setActiveSoundPosition(77)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.RANGEHALF
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.RANGEHALF
 			)),
 		(new DEHThing()).setName("Spiderdemon")
 			.setEditorNumber(7)
@@ -1637,12 +1637,12 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(69)
 			.setActiveSoundPosition(77)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.NORADIUSDMG,
-				DEHThingMBFFlag.RANGEHALF,
-				DEHThingMBFFlag.FULLVOLSOUNDS,
-				DEHThingMBFFlag.E3M8BOSS,
-				DEHThingMBFFlag.E4M8BOSS
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.NORADIUSDMG,
+				DEHThingMBF21Flag.RANGEHALF,
+				DEHThingMBF21Flag.FULLVOLSOUNDS,
+				DEHThingMBF21Flag.E3M8BOSS,
+				DEHThingMBF21Flag.E4M8BOSS
 			)),
 		(new DEHThing()).setName("Arachnotron")
 			.setEditorNumber(68)
@@ -1668,8 +1668,8 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(70)
 			.setActiveSoundPosition(78)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.MAP07BOSS2
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.MAP07BOSS2
 			)),
 		(new DEHThing()).setName("Cyberdemon")
 			.setEditorNumber(16)
@@ -1695,13 +1695,13 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(68)
 			.setActiveSoundPosition(77)
-			.setMBFFlags(DEHFlag.flags(
-				DEHThingMBFFlag.NORADIUSDMG,
-				DEHThingMBFFlag.HIGHERMPROB,
-				DEHThingMBFFlag.RANGEHALF,
-				DEHThingMBFFlag.FULLVOLSOUNDS,
-				DEHThingMBFFlag.E2M8BOSS,
-				DEHThingMBFFlag.E4M6BOSS
+			.setMBF21Flags(DEHFlag.flags(
+				DEHThingMBF21Flag.NORADIUSDMG,
+				DEHThingMBF21Flag.HIGHERMPROB,
+				DEHThingMBF21Flag.RANGEHALF,
+				DEHThingMBF21Flag.FULLVOLSOUNDS,
+				DEHThingMBF21Flag.E2M8BOSS,
+				DEHThingMBF21Flag.E4M6BOSS
 			)),
 		(new DEHThing()).setName("Pain Elemental")
 			.setEditorNumber(71)

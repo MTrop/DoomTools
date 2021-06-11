@@ -12,7 +12,7 @@ import java.util.TreeMap;
  * MBF21 Thing Flags.
  * @author Matthew Tropiano 
  */
-public enum DEHThingMBFFlag implements DEHFlag
+public enum DEHThingMBF21Flag implements DEHFlag
 {
 	LOGRAV         (0x00000001),
 	SHORTMRANGE    (0x00000002),
@@ -35,25 +35,25 @@ public enum DEHThingMBFFlag implements DEHFlag
 	FULLVOLSOUNDS  (0x00040000),
 	;
 
-	public static final DEHThingMBFFlag[] VALUES = values();
+	public static final DEHThingMBF21Flag[] VALUES = values();
 
-	private static final Map<String, DEHThingMBFFlag> MNEMONIC_MAP = new TreeMap<String, DEHThingMBFFlag>(String.CASE_INSENSITIVE_ORDER)
+	private static final Map<String, DEHThingMBF21Flag> MNEMONIC_MAP = new TreeMap<String, DEHThingMBF21Flag>(String.CASE_INSENSITIVE_ORDER)
 	{
 		private static final long serialVersionUID = -3232636284673026047L;
 		{
-			for (DEHThingMBFFlag val : DEHThingMBFFlag.values())
+			for (DEHThingMBF21Flag val : DEHThingMBF21Flag.values())
 				put(val.name(), val);
 		}
 	};
 
-	public static DEHThingMBFFlag getByMnemonic(String mnemonic)
+	public static DEHThingMBF21Flag getByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
 	
 	private int value;
 
-	private DEHThingMBFFlag(int value)
+	private DEHThingMBF21Flag(int value)
 	{
 		this.value = value;
 	}

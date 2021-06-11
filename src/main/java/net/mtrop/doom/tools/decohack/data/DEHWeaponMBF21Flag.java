@@ -13,7 +13,7 @@ import java.util.TreeMap;
  * @author Xaser Acheron
  * @author Matthew Tropiano 
  */
-public enum DEHWeaponFlag implements DEHFlag
+public enum DEHWeaponMBF21Flag implements DEHFlag
 {
 	NOTHRUST       (0x00000001),
 	SILENT         (0x00000002),
@@ -23,25 +23,25 @@ public enum DEHWeaponFlag implements DEHFlag
 	NOAUTOSWITCHTO (0x00000020),
 	;
 
-	public static final DEHWeaponFlag[] VALUES = values();
+	public static final DEHWeaponMBF21Flag[] VALUES = values();
 
-	private static final Map<String, DEHWeaponFlag> MNEMONIC_MAP = new TreeMap<String, DEHWeaponFlag>(String.CASE_INSENSITIVE_ORDER)
+	private static final Map<String, DEHWeaponMBF21Flag> MNEMONIC_MAP = new TreeMap<String, DEHWeaponMBF21Flag>(String.CASE_INSENSITIVE_ORDER)
 	{
 		private static final long serialVersionUID = -2813044917550646916L;
 		{
-			for (DEHWeaponFlag val : DEHWeaponFlag.values())
+			for (DEHWeaponMBF21Flag val : DEHWeaponMBF21Flag.values())
 				put(val.name(), val);
 		}
 	};
 
-	public static DEHWeaponFlag getByMnemonic(String mnemonic)
+	public static DEHWeaponMBF21Flag getByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
 	
 	private int value;
 
-	private DEHWeaponFlag(int value)
+	private DEHWeaponMBF21Flag(int value)
 	{
 		this.value = value;
 	}

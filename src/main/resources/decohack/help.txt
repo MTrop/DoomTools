@@ -27,7 +27,7 @@ you proceed, as some pieces are similar, and some are not.
 <STRING>     : Any single- or double-quoted set of characters, or a raw string 
                bounded in backticks.
 
-<INTEGER>    : Any positive integer, or hex integer. 
+<INTEGER>    : Any positive integer, or hex integer (e.g. 0x01234abcd). 
 
 <NUMBER>     : <INTEGER>
                - <INTEGER>
@@ -218,6 +218,18 @@ function requires them or understands them (be careful - it is up to the
 function to interpret them as such):
 
     A_Mushroom(-45.0, 16.0)
+
+
+Parameter values can also be a series of flags that get or'ed together. This
+is useful for some functions that manipulate flags. A set of supported flags 
+can be combined via the PIPE operator:
+
+    A_AddFlags(SOLID | DROPPED, 0)
+
+
+Note that this works ANYTWHERE that action parameters are accepted - DECOHack
+calculates a single value from these expressions. The only checking done is
+if those flags are valid for the patch level (i.e. MBF, EXTENDED, or MBF21).  
 
 
 Weapon states have a special characteristic that went unused for the most part
@@ -499,16 +511,12 @@ To flag all states as "free" that are connected to a weapon, type the
 following:
 
     weapon <INTEGER> free states
-    
-Or from a single state:
-    
     weapon <INTEGER> free <WeaponStateName>
 
 
 And the same result will happen if you freed from each defined weapon frame 
-individually. Freeing states is based on the current weapon's state settings. 
-Best used before redefining a weapon. NOTE: "Freeing" is NOT the same as 
-clearing the state definitions!
+individually. Best used before redefining a weapon. NOTE: "Freeing" is NOT
+the same as clearing the state definitions!
 
 You can copy from another weapon slot by adding the [ : weapon <INTEGER> ] 
 clause:
@@ -715,16 +723,13 @@ To flag all states as "free" that are connected to a thing, type the
 following:
 
     thing <INTEGER> free states
-
-Or from a single state:
-
     thing <INTEGER> free <ThingStateName>
 
 
 And the same result will happen if you freed from each defined thing frame 
-individually. Freeing states is based on the current thing's state settings. 
-Best used before redefining a thing. NOTE: "Freeing" is NOT the same as 
-clearing the state definitions!
+individually. Based on the current thing definition. Best used before 
+redefining a thing. NOTE: "Freeing" is NOT the same as clearing the state 
+definitions!
 
 The following editor numbers cannot be used: 1, 2, 3, 4, or 11, as they have
 a special purpose: Player Starts, plus Deathmatch.
@@ -844,6 +849,7 @@ Example:
 
     +SOLID
     -NOGRAVITY
+    +RANGEHALF
 
 
 ==============================================================================
@@ -1045,13 +1051,13 @@ block.
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Extended-DEH-compatible ports, plus the "using extended" line, AND 
-    freeing up the free extended states immediately for use.
+    freeing up the extra extended states immediately for use.
 
 #include "classpath:decohack/mbf21.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF 2.1-compliant ports (which includes Extended-DEH), plus the 
-    "using mbf21" line, AND freeing up the free extended states 
+    MBF 21-compliant ports (which includes Extended-DEH), plus the 
+    "using mbf21" line, AND freeing up the extra extended states 
     immediately for use.
 
 ..............................................................................
