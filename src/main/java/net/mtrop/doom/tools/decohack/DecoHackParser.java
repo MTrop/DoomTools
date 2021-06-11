@@ -2926,6 +2926,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected numeric value.");
 					return null;
 				}
+				out |= value;
 			}
 			else if ((value = matchThingFlagMnemonic()) != null)
 			{
