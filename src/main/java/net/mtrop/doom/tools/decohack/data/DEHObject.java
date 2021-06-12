@@ -18,16 +18,18 @@ public interface DEHObject<SELF>
 	/**
 	 * Copies this object's values.
 	 * @param source the source object.
+	 * @param level the highest feature level to copy over.
 	 * @return this object.
 	 */
-	SELF copyFrom(SELF source);
+	SELF copyFrom(SELF source, DEHFeatureLevel level);
 	
 	/**
 	 * Writes this object to a DeHackEd file stream.
 	 * @param writer the writer to write to.
 	 * @param original the original object to compare to for writing changed fields.
+	 * @param level the highest feature level to export for.
 	 * @throws IOException if a write error occurs.
 	 */
-	void writeObject(Writer writer, SELF original) throws IOException;
+	void writeObject(Writer writer, SELF original, DEHFeatureLevel level) throws IOException;
 	
 }

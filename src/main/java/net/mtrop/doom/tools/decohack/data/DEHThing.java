@@ -117,7 +117,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}
 
 	@Override
-	public DEHThing copyFrom(DEHThing source) 
+	public DEHThing copyFrom(DEHThing source, DEHFeatureLevel level) 
 	{
 		setName(source.name);
 		setEditorNumber(source.editorNumber);
@@ -139,15 +139,19 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
 		
-		setDroppedItem(source.droppedItem);
-		
-		setMBF21Flags(source.mbf21Flags);
-		setInfightingGroup(source.infightingGroup);
-		setProjectileGroup(source.projectileGroup);
-		setSplashGroup(source.splashGroup);
-		setFastSpeed(source.fastSpeed);
-		setMeleeRange(source.meleeRange);
-		setRipSoundPosition(source.ripSoundPosition);
+		if (level.supports(DEHFeatureLevel.EXTENDED))
+			setDroppedItem(source.droppedItem);
+
+		if (level.supports(DEHFeatureLevel.MBF21))
+		{
+			setMBF21Flags(source.mbf21Flags);
+			setInfightingGroup(source.infightingGroup);
+			setProjectileGroup(source.projectileGroup);
+			setSplashGroup(source.splashGroup);
+			setFastSpeed(source.fastSpeed);
+			setMeleeRange(source.meleeRange);
+			setRipSoundPosition(source.ripSoundPosition);
+		}
 
 		clearLabels();
 		for (String label : source.getLabels())
@@ -620,7 +624,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}	
 	
 	@Override
-	public void writeObject(Writer writer, DEHThing thing) throws IOException
+	public void writeObject(Writer writer, DEHThing thing, DEHFeatureLevel level) throws IOException
 	{
 		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0;
 		int speedVal = isProjectile ? speed << 16 : speed;
@@ -676,24 +680,30 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
 
 		// Extended features
-		if (droppedItem != thing.droppedItem)
-			writer.append("Dropped item = ").append(String.valueOf(droppedItem)).append("\r\n");
+		if (level.supports(DEHFeatureLevel.EXTENDED))
+		{
+			if (droppedItem != thing.droppedItem)
+				writer.append("Dropped item = ").append(String.valueOf(droppedItem)).append("\r\n");
+		}
 
 		// MBF21 features
-		if (mbf21Flags != thing.mbf21Flags)
-			writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
-		if (infightingGroup != thing.infightingGroup)
-			writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
-		if (projectileGroup != thing.projectileGroup)
-			writer.append("Projectile group = ").append(String.valueOf(projectileGroup)).append("\r\n");
-		if (splashGroup != thing.splashGroup)
-			writer.append("Splash group = ").append(String.valueOf(splashGroup)).append("\r\n");
-		if (fastSpeedVal != thing.fastSpeed)
-			writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
-		if (meleeRange != thing.meleeRange)
-			writer.append("Melee range = ").append(String.valueOf(meleeRange)).append("\r\n");
-		if (ripSoundPosition != thing.ripSoundPosition)
-			writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
+		if (level.supports(DEHFeatureLevel.MBF21))
+		{
+			if (mbf21Flags != thing.mbf21Flags)
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+			if (infightingGroup != thing.infightingGroup)
+				writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
+			if (projectileGroup != thing.projectileGroup)
+				writer.append("Projectile group = ").append(String.valueOf(projectileGroup)).append("\r\n");
+			if (splashGroup != thing.splashGroup)
+				writer.append("Splash group = ").append(String.valueOf(splashGroup)).append("\r\n");
+			if (fastSpeedVal != thing.fastSpeed)
+				writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
+			if (meleeRange != thing.meleeRange)
+				writer.append("Melee range = ").append(String.valueOf(meleeRange)).append("\r\n");
+			if (ripSoundPosition != thing.ripSoundPosition)
+				writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
+		}
 
 		writer.flush();
 	}

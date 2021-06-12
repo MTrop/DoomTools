@@ -49,7 +49,7 @@ public class DEHSound implements DEHObject<DEHSound>
 	}
 	
 	@Override
-	public DEHSound copyFrom(DEHSound source) 
+	public DEHSound copyFrom(DEHSound source, DEHFeatureLevel level) 
 	{
 		setPriority(source.priority);
 		setSingular(source.singular);
@@ -112,7 +112,7 @@ public class DEHSound implements DEHObject<DEHSound>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHSound sound) throws IOException
+	public void writeObject(Writer writer, DEHSound sound, DEHFeatureLevel level) throws IOException
 	{
 		if (priority != sound.priority)
 			writer.append("Value = ").append(String.valueOf(priority)).append("\r\n");

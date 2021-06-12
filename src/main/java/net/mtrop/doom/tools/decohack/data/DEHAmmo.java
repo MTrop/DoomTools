@@ -32,7 +32,7 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	}
 	
 	@Override
-	public DEHAmmo copyFrom(DEHAmmo source) 
+	public DEHAmmo copyFrom(DEHAmmo source, DEHFeatureLevel level) 
 	{
 		setName(source.name);
 		setMax(source.max);
@@ -117,7 +117,7 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHAmmo ammo) throws IOException
+	public void writeObject(Writer writer, DEHAmmo ammo, DEHFeatureLevel level) throws IOException
 	{
 		if (max != ammo.max)
 			writer.append("Max ammo = ").append(String.valueOf(max)).append("\r\n");

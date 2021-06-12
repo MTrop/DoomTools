@@ -72,19 +72,21 @@ public class DEHState implements DEHObject<DEHState>
 	}
 
 	@Override
-	public DEHState copyFrom(DEHState source) 
+	public DEHState copyFrom(DEHState source, DEHFeatureLevel level) 
 	{
-		return set(
-			source.spriteIndex,
-			source.frameIndex, 
-			source.bright, 
-			source.nextStateIndex, 
-			source.duration, 
-			source.misc1, 
-			source.misc2,
-			source.args,
-			source.mbf21Flags
-		);
+		setSpriteIndex(source.spriteIndex);
+		setFrameIndex(source.frameIndex);
+		setBright(source.bright);
+		setNextStateIndex(source.nextStateIndex);
+		setDuration(source.duration);
+		setMisc1(source.misc1);
+		setMisc2(source.misc2);
+		if (level.supports(DEHFeatureLevel.MBF21))
+		{
+			setArgs(source.args);
+			setMBF21Flags(source.mbf21Flags);
+		}
+		return this;
 	}
 	
 	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
@@ -245,7 +247,7 @@ public class DEHState implements DEHObject<DEHState>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHState frame) throws IOException
+	public void writeObject(Writer writer, DEHState frame, DEHFeatureLevel level) throws IOException
 	{
 		if (spriteIndex != frame.spriteIndex)
 			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append("\r\n");
@@ -259,11 +261,14 @@ public class DEHState implements DEHObject<DEHState>
 			writer.append("Unknown 1 = ").append(String.valueOf(misc1)).append("\r\n");
 		if (misc2 != frame.misc2)
 			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
-		for (int i = 0; i < args.length; i++)
-			if (i >= frame.args.length || args[i] != frame.args[i])
-				writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
-		if (mbf21Flags != frame.mbf21Flags)
-			writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+		if (level.supports(DEHFeatureLevel.MBF21))
+		{
+			for (int i = 0; i < args.length; i++)
+				if (i >= frame.args.length || args[i] != frame.args[i])
+					writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
+			if (mbf21Flags != frame.mbf21Flags)
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+		}
 		writer.flush();
 	}
 

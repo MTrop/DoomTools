@@ -229,7 +229,7 @@ public final class DecoHackExporter
 					.append(String.valueOf(thing.getName()))
 					.append(")")
 					.append("\r\n");
-				thing.writeObject(writer, original);
+				thing.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");
 			}
 		}
@@ -244,7 +244,7 @@ public final class DecoHackExporter
 			if (!state.equals(original))
 			{
 				writer.append("Frame ").append(String.valueOf(i)).append("\r\n");
-				state.writeObject(writer, original);
+				state.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");
 			}
 		}
@@ -259,7 +259,7 @@ public final class DecoHackExporter
 			if (!sound.equals(original))
 			{
 				writer.append("Sound ").append(String.valueOf(i)).append("\r\n");
-				sound.writeObject(writer, original);
+				sound.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");
 			}
 		}
@@ -279,7 +279,7 @@ public final class DecoHackExporter
 					.append(String.valueOf(weapon.getName()))
 					.append(")")
 					.append("\r\n");
-				weapon.writeObject(writer, original);
+				weapon.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");
 			}
 		}
@@ -299,7 +299,7 @@ public final class DecoHackExporter
 					.append(String.valueOf(ammo.getName()))
 					.append(")")
 					.append("\r\n");
-				ammo.writeObject(writer, original);
+				ammo.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");
 			}
 		}
@@ -310,7 +310,7 @@ public final class DecoHackExporter
 		if (!misc.equals(miscOriginal))
 		{
 			writer.append("Misc ").append(String.valueOf(0)).append("\r\n");
-			misc.writeObject(writer, miscOriginal);
+			misc.writeObject(writer, miscOriginal, patch.getSupportedFeatureLevel());
 			writer.append("\r\n");
 		}
 		writer.flush();

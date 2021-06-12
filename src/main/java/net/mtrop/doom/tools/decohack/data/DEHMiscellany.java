@@ -57,7 +57,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 	}
 	
 	@Override
-	public DEHMiscellany copyFrom(DEHMiscellany source) 
+	public DEHMiscellany copyFrom(DEHMiscellany source, DEHFeatureLevel level) 
 	{
 		setMonsterInfightingEnabled(source.monsterInfightingEnabled);
 		setInitialBullets(source.initialBullets);
@@ -328,7 +328,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHMiscellany misc) throws IOException
+	public void writeObject(Writer writer, DEHMiscellany misc, DEHFeatureLevel level) throws IOException
 	{
 		if (monsterInfightingEnabled != misc.monsterInfightingEnabled)
 			writer.append("Monsters Infight = ").append(String.valueOf(221)).append("\r\n");

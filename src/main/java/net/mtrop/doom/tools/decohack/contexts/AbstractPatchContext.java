@@ -47,34 +47,34 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.ammo = new DEHAmmo[source.getAmmoCount()];
 		for (int i = 0; i < this.ammo.length; i++)
 			if (source.getAmmo(i) != null)
-				this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i));
+				this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i), getSupportedFeatureLevel());
 		
 		this.sounds = new DEHSound[source.getSoundCount()];
 		for (int i = 0; i < this.sounds.length; i++)
 			if (source.getSound(i) != null)
-				this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
+				this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i), getSupportedFeatureLevel());
 		
 		this.weapons = new DEHWeapon[source.getWeaponCount()];
 		for (int i = 0; i < this.weapons.length; i++)
 			if (source.getWeapon(i) != null)
-				this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
+				this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i), getSupportedFeatureLevel());
 		
 		this.things = new DEHThing[source.getThingCount()];
 		for (int i = 1; i < this.things.length; i++)
 			if (source.getThing(i) != null)
-				this.things[i] = (new DEHThing()).copyFrom(source.getThing(i));
+				this.things[i] = (new DEHThing()).copyFrom(source.getThing(i), getSupportedFeatureLevel());
 		
 		this.states = new DEHState[source.getStateCount()];
 		for (int i = 0; i < this.states.length; i++)
 			if (source.getState(i) != null)
-				this.states[i] = (new DEHState()).copyFrom(source.getState(i));
+				this.states[i] = (new DEHState()).copyFrom(source.getState(i), getSupportedFeatureLevel());
 		
 		this.pointers = new DEHActionPointer[source.getActionPointerCount()];
 		for (int i = 0; i < this.pointers.length; i++)
 			if (source.getActionPointer(i) != null)
 				this.pointers[i] = source.getActionPointer(i);		
 		
-		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
+		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany(), getSupportedFeatureLevel());
 		
 		this.freeStates = new boolean[states.length];
 		this.freeStateCount = 0;

@@ -768,9 +768,9 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 
 			DEHThing temp = new DEHThing();
-			temp.copyFrom(context.getThing(other));
-			context.getThing(other).copyFrom(context.getThing(slot));
-			context.getThing(slot).copyFrom(temp);
+			temp.copyFrom(context.getThing(other), context.getSupportedFeatureLevel());
+			context.getThing(other).copyFrom(context.getThing(slot), context.getSupportedFeatureLevel());
+			context.getThing(slot).copyFrom(temp, context.getSupportedFeatureLevel());
 			return true;
 		}
 		// free states.
@@ -835,7 +835,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((slot = matchThingIndex(context)) == null)
 				return false;
 			
-			thing.copyFrom(context.getThing(slot));
+			thing.copyFrom(context.getThing(slot), context.getSupportedFeatureLevel());
 		}
 		
 		if (currentType(DecoHackKernel.TYPE_STRING))
@@ -1363,9 +1363,9 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 
 			DEHWeapon temp = new DEHWeapon();
-			temp.copyFrom(context.getWeapon(other));
-			context.getWeapon(other).copyFrom(context.getWeapon(slot));
-			context.getWeapon(slot).copyFrom(temp);
+			temp.copyFrom(context.getWeapon(other), context.getSupportedFeatureLevel());
+			context.getWeapon(other).copyFrom(context.getWeapon(slot), context.getSupportedFeatureLevel());
+			context.getWeapon(slot).copyFrom(temp, context.getSupportedFeatureLevel());
 			return true;
 		}
 		// free states.
@@ -1424,7 +1424,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((slot = matchWeaponIndex(context)) == null)
 				return false;
 
-			weapon.copyFrom(context.getWeapon(slot));
+			weapon.copyFrom(context.getWeapon(slot), context.getSupportedFeatureLevel());
 		}
 		
 		if (currentType(DecoHackKernel.TYPE_STRING))

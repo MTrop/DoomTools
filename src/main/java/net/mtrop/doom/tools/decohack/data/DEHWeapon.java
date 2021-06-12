@@ -96,12 +96,15 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	}
 	
 	@Override
-	public DEHWeapon copyFrom(DEHWeapon source) 
+	public DEHWeapon copyFrom(DEHWeapon source, DEHFeatureLevel level) 
 	{
 		setName(source.name);
 		setAmmoType(source.ammoType);
 		setAmmoPerShot(source.ammoPerShot);
-		setMBF21Flags(source.mbf21Flags);
+		
+		if (level.supports(DEHFeatureLevel.MBF21))
+			setMBF21Flags(source.mbf21Flags);
+		
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
@@ -341,7 +344,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	}	
 	
 	@Override
-	public void writeObject(Writer writer, DEHWeapon weapon) throws IOException 
+	public void writeObject(Writer writer, DEHWeapon weapon, DEHFeatureLevel level) throws IOException 
 	{
 		if (ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append("\r\n");
@@ -362,8 +365,11 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		if (ammoPerShot != weapon.ammoPerShot)
 			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 		
-		if (mbf21Flags != weapon.mbf21Flags)
-			writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+		if (level.supports(DEHFeatureLevel.MBF21))
+		{
+			if (mbf21Flags != weapon.mbf21Flags)
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+		}
 
 		writer.flush();
 	}
