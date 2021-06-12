@@ -7,6 +7,7 @@ DecoHack
 * `Added` Correct action pointer use detection on things and weapons.
 * `Added` A way to combine flags per function pointer parameter.
 * `Added` `#include` directive aliases for convenience.
+* `Fixed` Sound indices for function calls were off by 1.
 * `Fixed` Megasphere health misc entry was not parsed! Whoops!
 * `Fixed` Megasphere health not initialized, either!
 

@@ -1852,7 +1852,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return stateIndex;
 	}
 	
-	// Parses a sound index.
+	// Parses a sound index (and adds 1, if successful).
 	private Integer parseSoundIndex(AbstractPatchContext<?> context)
 	{
 		Integer value;
@@ -1861,7 +1861,7 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected a valid sound name after '%s'.", KEYWORD_SOUND);
 			return null;
 		}
-		return value;
+		return value + 1;
 	}
 	
 	// Parses a state block.
