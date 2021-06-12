@@ -174,7 +174,7 @@ changes.
 
     state <INTEGER> 
     { 
-        [ <SpriteName> <Frame> <NUMBER> [Bright] [<ActionPointer>|<Offset>] ]
+        [ <SpriteName> <Frame> <NUMBER> [Bright] <StateFlags> [<Offset>] [<ActionPointer>] ]
         ( 
             goto <INTEGER> 
             | goto <IDENTIFIER>
@@ -191,10 +191,23 @@ In this case, "stop" is an alias for "goto 0", and "wait" is an alias for
 string table at the time this is declared. <Frame> must be a single valid 
 character in a sprite frame. <NUMBER> is the duration in tics. [Bright] is an
 optional keyword indicating that the state graphic is always painted 
-fullbright. Action pointer mnemonics must start with A_.
+fullbright.
 
-Some action pointers, especially in MBF and later formats, can be optionally 
-parameterized up to two parameters (or greater, if MBF21):
+<StateFlags>, available in MBF21 or later, are additional flags placed on
+individual states. State flags are only completely overwritten if at least one
+is specified in the state declaration. The only state flags available in this 
+patch type are:
+
+    Fast      This frame's duration is halved in Nightmare.
+
+    NotFast   This frame's duration is NOT halved in Nightmare. This is
+              only useful for states that already had it, but just want
+              to clear flags by specifying at least one flag.
+
+
+Action pointer mnemonics must start with "A_". Some action pointers, 
+especially in MBF and later formats, can be optionally parameterized up to two
+parameters (or greater, if MBF21):
 
     A_Die
     A_Die()
@@ -940,8 +953,27 @@ be included more than once - use this with caution!
 You can include some internal resource files by prefixing the file path with
 "classpath:" and it will attempt to read that file from the Java classpath.
  
-    #include "classpath:decohack/doom19_constants.dh"
+    #include "classpath:decohack/constants/doom19.dh"
  
+
+There are a few #include paths that are aliased in DECOHack for convenience:
+ 
+    <doom19>    "classpath:decohack/doom19.dh"
+    <udoom19>   "classpath:decohack/udoom19.dh"
+    <boom>      "classpath:decohack/boom.dh"
+    <mbf>       "classpath:decohack/mbf.dh"
+    <extended>  "classpath:decohack/extended.dh"
+    <mbf21>     "classpath:decohack/mbf21.dh"
+    <friendly>  "classpath:decohack/constants/friendly_things.dh"
+
+For example:
+
+    #include <mbf21>
+
+...is exactly the same as:
+
+    #include "classpath:decohack/mbf21.dh"
+
 
 ------------------
 #define

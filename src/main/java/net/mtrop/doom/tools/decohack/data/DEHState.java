@@ -26,7 +26,7 @@ public class DEHState implements DEHObject<DEHState>
 	private int misc1;
 	private int misc2;
 	private int[] args;
-	private int flags;
+	private int mbf21Flags;
 	
 	/**
 	 * Creates a new frame.
@@ -51,12 +51,12 @@ public class DEHState implements DEHObject<DEHState>
 		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int flags)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int mbfFlags)
 	{
-		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], flags);
+		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], mbfFlags);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int flags)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags)
 	{
 		return (new DEHState()).set(
 			spriteIndex,
@@ -67,7 +67,7 @@ public class DEHState implements DEHObject<DEHState>
 			misc1,
 			misc2,
 			args,
-			flags
+			mbfFlags
 		);
 	}
 
@@ -83,7 +83,7 @@ public class DEHState implements DEHObject<DEHState>
 			source.misc1, 
 			source.misc2,
 			source.args,
-			source.flags
+			source.mbf21Flags
 		);
 	}
 	
@@ -92,7 +92,7 @@ public class DEHState implements DEHObject<DEHState>
 		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
 	}
 	
-	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int flags)
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags)
 	{
 		setSpriteIndex(spriteIndex);
 		setFrameIndex(frameIndex);
@@ -102,7 +102,7 @@ public class DEHState implements DEHObject<DEHState>
 		setMisc1(misc1);
 		setMisc2(misc2);
 		setArgs(args);
-		setFlags(flags);
+		setMBF21Flags(mbfFlags);
 		return this;
 	}
 	
@@ -211,14 +211,14 @@ public class DEHState implements DEHObject<DEHState>
 		return this;
 	}
 	
-	public int getFlags() 
+	public int getMBF21Flags() 
 	{
-		return flags;
+		return mbf21Flags;
 	}
 	
-	public DEHState setFlags(int flags) 
+	public DEHState setMBF21Flags(int flags) 
 	{
-		this.flags = flags;
+		this.mbf21Flags = flags;
 		return this;
 	}
 	
@@ -240,7 +240,7 @@ public class DEHState implements DEHObject<DEHState>
 			&& misc1 == obj.misc1
 			&& misc2 == obj.misc2
 			&& Arrays.equals(args, obj.args)
-			&& flags == obj.flags
+			&& mbf21Flags == obj.mbf21Flags
 		;
 	}	
 		
@@ -262,6 +262,8 @@ public class DEHState implements DEHObject<DEHState>
 		for (int i = 0; i < args.length; i++)
 			if (i >= frame.args.length || args[i] != frame.args[i])
 				writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
+		if (mbf21Flags != frame.mbf21Flags)
+			writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		writer.flush();
 	}
 

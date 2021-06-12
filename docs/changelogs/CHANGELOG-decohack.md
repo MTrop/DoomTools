@@ -6,6 +6,7 @@ DecoHack
 * `Added` Missing DEHEXTRA thing fields and MBF21 support.
 * `Added` Correct action pointer use detection on things and weapons.
 * `Added` A way to combine flags per function pointer parameter.
+* `Added` `#include` directive aliases for convenience.
 * `Fixed` Megasphere health misc entry was not parsed! Whoops!
 * `Fixed` Megasphere health not initialized, either!
 

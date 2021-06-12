@@ -15,6 +15,8 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
@@ -34,6 +36,7 @@ import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
+import net.mtrop.doom.tools.decohack.data.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThingMBF21Flag;
@@ -142,7 +145,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_RIPSOUND = "ripsound";
 
 	private static final String KEYWORD_OFFSET = "offset";
-	private static final String KEYWORD_BRIGHT = "bright";
+	private static final String KEYWORD_STATE_BRIGHT = "bright";
+	private static final String KEYWORD_STATE_FAST = "fast";
+	private static final String KEYWORD_STATE_NOTFAST = "notfast";
 	
 	private static final String KEYWORD_WITH = "with";
 	private static final String KEYWORD_SWAP = "swap";
@@ -2029,7 +2034,8 @@ public final class DecoHackParser extends Lexer.Parser
 				context.setActionPointer(pointerIndex, parsedState.action);
 			
 			// fill state.
-			context.getState(index)
+			DEHState state = context.getState(index); 
+			state
 				.setSpriteIndex(parsedState.spriteIndex)
 				.setFrameIndex(parsedState.frameList.get(0))
 				.setDuration(parsedState.duration)
@@ -2038,6 +2044,8 @@ public final class DecoHackParser extends Lexer.Parser
 				.setMisc2(parsedState.misc2)
 				.setArgs(parsedState.args)
 			;
+			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
+				context.getState(index).setMBF21Flags(parsedState.mbf21Flags);
 
 			// Try to parse next state clause.
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
@@ -2088,8 +2096,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;				
 		}
 
-		state.bright = matchBrightFlag();
-
+		if (!matchStateFlags(context, state))
+			return false;
+		
 		// Maybe parse offsets
 		state.misc1 = 0;
 		state.misc2 = 0;
@@ -2740,12 +2749,44 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
-	// Matches an identifier that can be "bright".
+	// Matches a series of state flags (including "bright").
 	// If match, advance token and return true plus modified out list.
 	// Else, return null.
-	private boolean matchBrightFlag()
+	private boolean matchStateFlags(AbstractPatchContext<?> context, ParsedState state)
 	{
-		return matchIdentifierIgnoreCase(KEYWORD_BRIGHT);
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_STATE_BRIGHT))
+			{
+				state.bright = true;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_FAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_FAST);
+					return false;
+				}
+				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
+				state.mbf21Flags |= DEHStateFlag.SKILL5FAST.getValue();
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_NOTFAST);
+					return false;
+				}
+				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
+				state.mbf21Flags &= ~DEHStateFlag.SKILL5FAST.getValue();
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		return true;
 	}
 	
 	// Matches an identifier that can be "offset".
@@ -3202,7 +3243,8 @@ public final class DecoHackParser extends Lexer.Parser
 		private Integer spriteIndex;
 		private LinkedList<Integer> frameList;
 		private Integer duration;
-		private Boolean bright;
+		private boolean bright;
+		private Integer mbf21Flags;
 		private DEHActionPointer action;
 		private Integer misc1;
 		private Integer misc2;
@@ -3220,7 +3262,8 @@ public final class DecoHackParser extends Lexer.Parser
 			this.spriteIndex = null;
 			this.frameList.clear();
 			this.duration = null;
-			this.bright = null;
+			this.bright = false;
+			this.mbf21Flags = null;
 			this.action = null;
 			this.misc1 = null;
 			this.misc2 = null;
@@ -3287,7 +3330,36 @@ public final class DecoHackParser extends Lexer.Parser
 		private DecoHackLexer(String streamName, Reader in)
 		{
 			super(KERNEL, streamName, in);
-			setIncluder(DEFAULT_INCLUDER);
+			setIncluder(new PreprocessorLexer.DefaultIncluder() 
+			{
+				private final Map<String, String> SPECIAL_INCLUDES = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
+				{
+					private static final long serialVersionUID = -7828739256854493701L;
+					{
+						put("<doom19>", "classpath:decohack/doom19.dh");
+						put("<udoom19>", "classpath:decohack/udoom19.dh");
+						put("<boom>", "classpath:decohack/boom.dh");
+						put("<mbf>", "classpath:decohack/mbf.dh");
+						put("<extended>", "classpath:decohack/extended.dh");
+						put("<mbf21>", "classpath:decohack/mbf21.dh");
+						put("<friendly>", "classpath:decohack/constants/friendly_things.dh");
+					}
+				};
+				
+				@Override
+				public String getIncludeResourcePath(String streamName, String path) throws IOException 
+				{
+					String foundPath;
+					if ((foundPath = SPECIAL_INCLUDES.get(path)) != null)
+					{
+						return super.getIncludeResourcePath(streamName, foundPath);
+					}
+					else
+					{
+						return super.getIncludeResourcePath(streamName, path);
+					}
+				}
+			});
 		}
 	}
 

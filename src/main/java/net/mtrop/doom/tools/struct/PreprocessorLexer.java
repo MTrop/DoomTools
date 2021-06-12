@@ -81,8 +81,7 @@ public class PreprocessorLexer extends Lexer
 			IS_WINDOWS = System.getProperty("os.name").contains("Windows");
 		}
 		
-		// cannot be instantiated outside of this class.
-		private DefaultIncluder(){}
+		protected DefaultIncluder(){}
 
 		@Override
 		public String getIncludeResourcePath(String streamName, String path) throws IOException
