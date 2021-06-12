@@ -8,7 +8,7 @@ and strings for readability, but only if you "#include" the following files
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/doom19.dh
+---- classpath:decohack/doom19.dh <doom19>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -20,7 +20,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/udoom19.dh
+---- classpath:decohack/udoom19.dh <udoom19>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -32,7 +32,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/boom.dh
+---- classpath:decohack/boom.dh <boom>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -44,7 +44,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/mbf.dh
+---- classpath:decohack/mbf.dh <mbf>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -56,7 +56,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/extended.dh
+---- classpath:decohack/extended.dh <extended>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -68,7 +68,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/mbf21.dh
+---- classpath:decohack/mbf21.dh <mbf21>
 ------------------------------------------------------------------------------
 
 Everything in:
@@ -80,7 +80,7 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/constants/friendly_things.dh
+---- classpath:decohack/constants/friendly_things.dh <friendly>
 ------------------------------------------------------------------------------
 
 MTF_PLAYER                1
