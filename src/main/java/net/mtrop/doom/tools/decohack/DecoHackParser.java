@@ -1752,7 +1752,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if ((value = actor.getLabel(labelName)) == 0)
 		{
-			StringBuilder sb = new StringBuilder("Expected a valid state label for this object: ");
+			StringBuilder sb = new StringBuilder("Expected a valid state label for this object, one of the following: ");
 			sb.append(Arrays.toString(actor.getLabels()));
 			sb.append(".");
 			addErrorMessage(sb.toString());
@@ -2290,7 +2290,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
-		else if ((labelName = matchIdentifier()) != null)
+		else if ((labelName = matchActorLabel(actor)) != null)
 			return parseActorStateLabelIndex(actor, labelName);
 		else if ((value = matchNumericExpression(context)) != null)
 			return value;
@@ -2715,6 +2715,20 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	// Matches a potential actor label.
+	// If match, advance token and return lexeme.
+	// Else, return null.
+	private String matchActorLabel(DEHActor actor)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+		String out = currentToken().getLexeme();
+		if (!actor.hasLabel(out))
+			return null;
+		nextToken();
+		return out;
+	}
+
 	// Matches an identifier or string that references a sprite name.
 	// If match, advance token and return sprite index integer.
 	// Else, return null.
@@ -2979,11 +2993,6 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if ((value = matchWeaponMBF21FlagMnemonic(context)) != null)
 			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("MBF21 weapon flags are not available. Not an MBF21 patch.");
-					return null;
-				}
 				out |= value;
 			}
 			else

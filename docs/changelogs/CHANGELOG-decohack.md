@@ -1,6 +1,12 @@
 DecoHack
 --------
 
+### Changed for 0.11.1
+
+* `Fixed` Flag detection priority.
+* `Changed` An error message for valid states.
+
+
 ### Changed for 0.11.0
 
 * `Added` Missing DEHEXTRA thing fields and MBF21 support.
