@@ -346,7 +346,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	
 	public DEHThing setProjectileGroup(int projectileGroup) 
 	{
-		RangeUtils.checkRange("Projectile group", -1, Integer.MAX_VALUE, splashGroup);
+		RangeUtils.checkRange("Projectile group", -1, Integer.MAX_VALUE, projectileGroup);
 		this.projectileGroup = projectileGroup;
 		return this;
 	}

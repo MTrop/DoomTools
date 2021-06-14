@@ -1224,7 +1224,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_SPLASHGROUP);
 					return false;
 				}
-				thing.setProjectileGroup(value);
+				thing.setSplashGroup(value);
 			}
 			else
 			{

@@ -4,6 +4,7 @@ DecoHack
 ### Changed for 0.11.1
 
 * `Fixed` Flag detection priority.
+* `Fixed` Splashgroup Outputs as Projectilegroup (Issue #27)
 * `Changed` An error message for valid states.
 
 
