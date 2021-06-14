@@ -700,7 +700,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			if (fastSpeedVal != thing.fastSpeed)
 				writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
 			if (meleeRange != thing.meleeRange)
-				writer.append("Melee range = ").append(String.valueOf(meleeRange)).append("\r\n");
+				writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
 			if (ripSoundPosition != thing.ripSoundPosition)
 				writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 		}
