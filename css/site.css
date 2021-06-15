@@ -82,6 +82,19 @@ A:hover {
 	width: 325px;
 }
 
+.markdown-body {
+	background-color: #05161B;
+	color: #dddddd;
+	padding: 16px;
+	max-width: 900px;
+    margin-left: auto;
+	margin-right: auto;
+}
+
+SVG.octicon {
+	display: none;
+}
+
 PRE {
 	font-family: 'Courier New', Courier, monospace;
 	background-color: #05161B;
