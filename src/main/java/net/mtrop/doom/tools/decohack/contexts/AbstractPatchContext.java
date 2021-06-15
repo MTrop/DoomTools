@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.util.function.Function;
+
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
@@ -366,16 +368,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeState(int startingIndex)
 	{
-		int i = startingIndex;
-		while (!isFillableState(i))
-		{
-			i++;
-			if (i == startingIndex)
-				return null;
-			if (i >= getStateCount())
-				i = 0;
-		}
-		return i;
+		return searchNextFreeState(startingIndex, (i) -> !isFillableState(i));
 	}
 	
 	/**
@@ -387,16 +380,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeActionPointerState(int startingIndex)
 	{
-		int i = startingIndex;
-		while (!(isFillableState(i) && getStateActionPointerIndex(i) != null))
-		{
-			i++;
-			if (i == startingIndex)
-				return null;
-			if (i >= getStateCount())
-				i = 0;
-		}
-		return i;
+		return searchNextFreeState(startingIndex, (i) -> 
+			!(isFillableState(i) && getStateActionPointerIndex(i) != null)
+		);
 	}
 	
 	/**
@@ -408,16 +394,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeNonActionPointerState(int startingIndex)
 	{
-		int i = startingIndex;
-		while (!(isFillableState(i) && getStateActionPointerIndex(i) == null))
-		{
-			i++;
-			if (i == startingIndex)
-				return null;
-			if (i >= getStateCount())
-				i = 0;
-		}
-		return i;
+		return searchNextFreeState(startingIndex, (i) -> 
+			!(isFillableState(i) && getStateActionPointerIndex(i) == null)
+		);
 	}
 
 	/**
@@ -432,6 +411,21 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public boolean isFillableState(int index)
 	{
 		return isFreeState(index) && !isProtectedState(index);
+	}
+
+	// Search function for free states.
+	private Integer searchNextFreeState(int startingIndex, Function<Integer, Boolean> func)
+	{
+		int i = startingIndex;
+		while (func.apply(i))
+		{
+			i++;
+			if (i >= getStateCount())
+				i = 0;
+			if (i == startingIndex)
+				return null;
+		}
+		return i;
 	}
 	
 }

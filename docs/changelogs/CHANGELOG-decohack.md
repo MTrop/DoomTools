@@ -6,6 +6,7 @@ DecoHack
 * `Fixed` Flag detection priority.
 * `Fixed` Splashgroup Outputs as Projectilegroup (Issue #27)
 * `Fixed` Melee range not being written correctly (Issue #25)
+* `Fixed` State search looped indefinitely if starting index was 0 with no free states. (Issue #26)
 * `Changed` An error message for valid states.
 
 
