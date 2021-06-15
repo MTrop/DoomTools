@@ -13,6 +13,34 @@ the decisions already made so that more *educated* decisions can be made.
 To do Doom-related things at the command-line, mostly data-related, not game-related.
 
 
+### [DECOHack] Why can't I use "GOTO Label+Offset" like DECORATE?
+
+While it may be possible to one day add support for this sort of thing, a few goals around
+DECOHack's design would be compromised if implemented, despite it being based on DECORATE.
+
+First, since DECOHack is able to change/overwrite existing states and also remap how
+states link to the next, any use of offsetting would be misleading - is the offset amount 
+in *redefined* states, or an offset from an existing label's current index? Also, while 
+DECORATE supported this sort of thing, it eventually became (G)ZDoom's entire actor 
+definition language, and so the concept of "existing states" is not a thing in (G)ZDoom, 
+which needs to be accounted for in DECOHack. The "goto" keyword, in DECOHack's case, is far 
+more flexible in this regard when compared to DECORATE, since you can point to any available
+state defined by Doom.
+
+Of course, needing to handle existing states isn't an issue for EXTENDED or MBF21 patches, 
+given the hundreds of new available states to fill, but it is very much an issue for 
+Vanilla/Boom modding, which DECOHack still needs to support, and why it exists in the
+first place.
+
+Second, I (MTrop) **never** liked the offset mechanic, especially when *state labels* 
+offer a far more readable alternative rather than searching for that label and then 
+*counting each state (and multiple frames)* to find exactly where it jumps to. Besides,
+ever since custom labels were added to DECORATE (a long, long, time ago), offsets became
+entirely obsolete, from a design standpoint.
+
+There's nothing wrong in forcing users to write more readable code!
+
+
 ### [WadScript] Why is there no WADREPLACE() built-in for replacing WAD entries?
 
 "Replacing" an entry is essentially removing and adding at the same index, but you can
