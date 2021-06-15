@@ -432,10 +432,10 @@ associated Thing for pickups.
     {
         ammotype ( 0 | 1 | 2 | 3 | 5 )
         
-		clear flags // If present, clear all flags (both sets, if available)
+        clear flags // If present, clear all flags (both sets, if available)
 
-		// MBF21 Flags (MBF21 feature set only)
-		flags mbf21 <INTEGER>
+        // MBF21 Flags (MBF21 feature set only)
+        flags mbf21 <INTEGER>
         + mbf21 <INTEGER> // set flag(s)
         - mbf21 <INTEGER> // unset flag(s)
         + <MBF21WeaponFlagName> // set flag
@@ -580,7 +580,7 @@ the thing state indices. Other labels are used for arbitrary jump points.
         painchance <INTEGER>
         mass <INTEGER>
 
-		clear flags // If present, clear all flags (both sets, if available)
+        clear flags // If present, clear all flags (both sets, if available)
 
         flags <INTEGER>
         + <INTEGER> // set flag(s)
@@ -588,8 +588,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
         + <ThingFlagName> // set flag
         - <ThingFlagName> // unset flag
 
-		// MBF21 Flags (MBF21 feature set only)
-		flags mbf21 <INTEGER>
+        // MBF21 Flags (MBF21 feature set only)
+        flags mbf21 <INTEGER>
         + mbf21 <INTEGER> // set flag(s)
         - mbf21 <INTEGER> // unset flag(s)
         + <MBF21ThingFlagName> // set flag
@@ -603,10 +603,10 @@ the thing state indices. Other labels are used for arbitrary jump points.
         deathsound <STRING>
         activesound <STRING>
 
-		// Extended Properties (Extended/DEHEXTRA feature set only)
-		dropitem <INTEGER>
+        // Extended Properties (Extended/DEHEXTRA feature set only)
+        dropitem <INTEGER>
         
-		// MBF21 Properties (MBF21 feature set only)
+        // MBF21 Properties (MBF21 feature set only)
         fastspeed <INTEGER>
         meleerange <INTEGER>
         infightinggroup <INTEGER>
@@ -823,34 +823,34 @@ Things (Doom+):
 
 Things (MBF21+):
 
-	LOGRAV =         0x00000001
-	SHORTMRANGE =    0x00000002
-	DMGIGNORED =     0x00000004
-	NORADIUSDMG =    0x00000008
-	FORCERADIUSDMG = 0x00000010
-	HIGHERMPROB =    0x00000020
-	RANGEHALF =      0x00000040
-	NOTHRESHOLD =    0x00000080
-	LONGMELEE =      0x00000100
-	BOSS =           0x00000200
-	MAP07BOSS1 =     0x00000400
-	MAP07BOSS2 =     0x00000800
-	E1M8BOSS =       0x00001000
-	E2M8BOSS =       0x00002000
-	E3M8BOSS =       0x00004000
-	E4M6BOSS =       0x00008000
-	E4M8BOSS =       0x00010000
-	RIP =            0x00020000
-	FULLVOLSOUNDS =  0x00040000
+    LOGRAV =         0x00000001
+    SHORTMRANGE =    0x00000002
+    DMGIGNORED =     0x00000004
+    NORADIUSDMG =    0x00000008
+    FORCERADIUSDMG = 0x00000010
+    HIGHERMPROB =    0x00000020
+    RANGEHALF =      0x00000040
+    NOTHRESHOLD =    0x00000080
+    LONGMELEE =      0x00000100
+    BOSS =           0x00000200
+    MAP07BOSS1 =     0x00000400
+    MAP07BOSS2 =     0x00000800
+    E1M8BOSS =       0x00001000
+    E2M8BOSS =       0x00002000
+    E3M8BOSS =       0x00004000
+    E4M6BOSS =       0x00008000
+    E4M8BOSS =       0x00010000
+    RIP =            0x00020000
+    FULLVOLSOUNDS =  0x00040000
 
 Weapons (MBF21+):
 
-	NOTHRUST =       0x00000001
-	SILENT =         0x00000002
-	NOAUTOFIRE =     0x00000004
-	FLEEMELEE =      0x00000008
-	AUTOSWITCHFROM = 0x00000010
-	NOAUTOSWITCHTO = 0x00000020
+    NOTHRUST =       0x00000001
+    SILENT =         0x00000002
+    NOAUTOFIRE =     0x00000004
+    FLEEMELEE =      0x00000008
+    AUTOSWITCHFROM = 0x00000010
+    NOAUTOSWITCHTO = 0x00000020
 
 
 Monsters tend to have 0x00400006 set (SOLID, SHOOTABLE, COUNTKILL).
