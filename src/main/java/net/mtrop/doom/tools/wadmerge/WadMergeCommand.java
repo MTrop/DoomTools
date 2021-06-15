@@ -52,8 +52,6 @@ public enum WadMergeCommand
 			out.println("ECHO [...]"); 
 			out.println("    Prints tokens to output."); 
 			out.println("    [...]: The tokens to print.");
-			out.println("    ................................");
-			out.println("    Returns: OK if a symbol was created.");
 		}
 		
 		@Override

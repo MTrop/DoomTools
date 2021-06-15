@@ -54,8 +54,6 @@ END
 ECHO [...]
     Prints tokens to output.
     [...]: The tokens to print.
-    ................................
-    Returns: OK if a symbol was created.
 
 CREATE [symbol] [opt:iwad]
     Creates a new in-memory buffer, errors out if the symbol exists.
