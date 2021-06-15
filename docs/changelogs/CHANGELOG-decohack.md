@@ -7,6 +7,7 @@ DecoHack
 * `Fixed` Splashgroup Outputs as Projectilegroup (Issue #27)
 * `Fixed` Melee range not being written correctly (Issue #25)
 * `Fixed` State search looped indefinitely if starting index was 0 with no free states. (Issue #26)
+* `Fixed` Thing speed info being written on no change.
 * `Changed` An error message for valid states.
 
 

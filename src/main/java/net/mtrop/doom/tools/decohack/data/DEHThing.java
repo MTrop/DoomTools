@@ -627,14 +627,18 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	public void writeObject(Writer writer, DEHThing thing, DEHFeatureLevel level) throws IOException
 	{
 		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0;
+		boolean thingIsProjectile = (thing.flags & DEHThingFlag.MISSILE.getValue()) != 0;
+
 		int speedVal = isProjectile ? speed << 16 : speed;
+		int thingSpeedVal = thingIsProjectile ? thing.speed << 16 : thing.speed;
 		int fastSpeedVal = isProjectile && fastSpeed != DEFAULT_FASTSPEED ? fastSpeed << 16 : fastSpeed;
+		int thingFastSpeedVal = thingIsProjectile && thing.fastSpeed != DEFAULT_FASTSPEED ? thing.fastSpeed << 16 : thing.fastSpeed;
 
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		if (health != thing.health)
 			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");
-		if (speedVal != thing.speed)
+		if (speedVal != thingSpeedVal)
 			writer.append("Speed = ").append(String.valueOf(speedVal)).append("\r\n");
 		if (radius != thing.radius)
 			writer.append("Width = ").append(String.valueOf(radius << 16)).append("\r\n");
@@ -697,7 +701,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 				writer.append("Projectile group = ").append(String.valueOf(projectileGroup)).append("\r\n");
 			if (splashGroup != thing.splashGroup)
 				writer.append("Splash group = ").append(String.valueOf(splashGroup)).append("\r\n");
-			if (fastSpeedVal != thing.fastSpeed)
+			if (fastSpeedVal != thingFastSpeedVal)
 				writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
 			if (meleeRange != thing.meleeRange)
 				writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
