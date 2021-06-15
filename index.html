@@ -1,0 +1,176 @@
+<html>
+	<head>
+		<!-- 
+			{{TITLE}} 
+				DoomTools
+			{{DESCRIPTION}} 
+				Doom-related tools for Java. Home of DECOHack, DoomMake, and lots of other utilities.
+			{{GENERATOR}}
+				VSCode
+			{{COPYRIGHT}}
+				Matt "MTrop" Tropiano
+			{{LOGO_PNG}}
+				https://mtrop.github.io/DoomTools/logo.png
+			{{URL}}
+				https://mtrop.github.io/DoomTools/index.html
+		-->
+
+		<title>DoomTools</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="Doom-related tools for Java. Home of DECOHack, DoomMake, and lots of other utilities." />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt "MTrop" Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DoomTools" />
+		<meta itemprop="description" content="Doom-related tools for Java. Home of DECOHack, DoomMake, and lots of other utilities." />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/index.html" />
+		<meta name="twitter:title" content="DoomTools" />
+		<meta name="twitter:description" content="Doom-related tools for Java. Home of DECOHack, DoomMake, and lots of other utilities." />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/index.html" />
+		<meta property="og:title" content="DoomTools" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/logo.png" />
+		<meta property="og:description" content="Doom-related tools for Java. Home of DECOHack, DoomMake, and lots of other utilities." />
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<script type="text/javascript">
+			var REPO_OWNER = 'MTrop';
+			var REPO_NAME = 'DoomTools';
+		</script>
+	</head>
+	<body>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<img class="w3-image site-logo" src="logo.svg"/>
+			</div>
+		</div>
+		<div id="page-links" class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<a id="link-github" href="https://github.com/MTrop/DoomTools">Github</a> | 
+				<a id="link-github-issues" href="https://github.com/MTrop/DoomTools/issues">Issues</a> | 
+				<a id="link-github-releases" href="https://github.com/MTrop/DoomTools/releases">Releases</a>
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				Requires <strong>Java 1.8 or better</strong>. Two flavors of binaries are available.
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div id="releases" class="w3-container site-start-hidden">
+			<div class="w3-row">
+				<div class="w3-col l12 w3-center">
+					<h2>Latest Release: <span id="release-version"></span></h2>
+				</div>
+			</div>
+			<div class="w3-row site-release-links">
+				<!-- Filled Later -->
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<strong>To install,</strong> unzip/untar the release to its own directory, and then 
+				add that directory to the list of directories in your PATH environment variable.
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>What is (or are) DoomTools?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					<strong>DoomTools</strong> is a set of command-line utilities for building projects
+					or for other things related to Doom Engine games. Lots of useful stuff. You're probably
+					here for DoomMake, DECOHack, or WadMerge, though.
+				</p>
+				<p class="site-blurb">
+					You can even use DoomTools (and specifically DoomMake) to build your projects via some
+					kind of Continuous Integration solution. Be the nerd you want to see in the world!
+				</p>
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>You said these tools need Java?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					Yup. <strong>DoomTools</strong> requires Java, and is built on the <a href="https://github.com/MTrop/DoomStruct">DoomStruct</a>
+					library, also made by the guy who made these tools! You can run them anywhere!
+				</p>
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>But I hate Java!</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					<em>Horsefeathers.</em> You know you installed <strong>Minecraft</strong> at some point! That thing
+					was practically the only reason anybody installed a JVM in the past decade or two!
+				</p>
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>But I hate Oracle!</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					Yeah, me too. Luckily, other JDKs exist, like <a href="https://www.azul.com/downloads/">Azul Zulu (OpenJDK)</a> or OpenJDK
+					Builds from <a href="https://docs.microsoft.com/en-us/java/openjdk/download">Microsoft</a>! Fully compatible with 
+					DoomTools - DoomTools was built and tested in OpenJDK.
+				</p>
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div id="readme" class="w3-container">
+			<div class="w3-row">
+				<div class="w3-col l12 w3-center">
+					<h2>README</h2>
+				</div>
+			</div>
+			<div class="w3-row">
+				<div include-html="readme.html" class="w3-col l12">
+				</div>
+			</div>
+		</div>
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+		<script type="text/javascript" src="js/dom.js"></script>
+		<!-- This page's JS. -->
+		<script type="text/javascript" src="site.js"></script>
+	</body>
+</html>
