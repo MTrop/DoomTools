@@ -38,9 +38,9 @@ function display_release_data(release, release_section_element, release_version_
 	const GENTITLE = function(filename) 
 	{
 		if (filename.indexOf('-bash') >= 0)
-			return 'Download Bash Version';
+			return 'Bash (macOS/Linux/Cygwin) Version';
 		else if (filename.indexOf('-cmd') >= 0)
-			return 'Download CMD Version';
+			return 'CMD (Windows) Version';
 		else
 			return 'Download';
 	};
