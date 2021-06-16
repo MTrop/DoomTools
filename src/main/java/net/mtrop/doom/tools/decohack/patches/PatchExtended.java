@@ -345,14 +345,14 @@ public class PatchExtended extends PatchMBF
 			int extstart = SOUND_INDEX_EXTENDED_START;
 			int mbflen = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length;
 			int len = SOUND_INDEX_EXTENDED_START + SOUNDSTRINGSEXTENDED.length;
-			for (int i = 0; i < len; i++)
+			for (int i = 1; i < len; i++)
 			{
 				if (i >= extstart)
-					put(SOUNDSTRINGSEXTENDED[i - extstart], i);
+					put(SOUNDSTRINGSEXTENDED[i - extstart], i); // offset 1 for sfx_None
 				else if (i >= mbflen)
 					continue; // blank until extended
 				else if (i >= SOUNDSTRINGS.length)
-					put(SOUNDSTRINGSMBF[i - SOUNDSTRINGS.length], i);
+					put(SOUNDSTRINGSMBF[i - SOUNDSTRINGS.length], i); // offset 1 for sfx_None
 				else
 					put(SOUNDSTRINGS[i].toUpperCase(), i);
 			}

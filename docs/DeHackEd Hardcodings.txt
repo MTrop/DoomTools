@@ -359,7 +359,7 @@ All objects with the DEAD flag jump to Frame 895 when crushed by a lowering ceil
 Other Reference
 ===============
 
-Actions that only play specific Weapon Sounds (played on owning actor):
+Actions that play specific Weapon Sounds (played on owning actor):
 	A_OpenShotgun2 (Sound 5 DBOPN)
 	A_LoadShotgun2 (Sound 7 DBLOAD)
 	A_BFGsound (Sound 9 BFG)
@@ -367,5 +367,8 @@ Actions that only play specific Weapon Sounds (played on owning actor):
 
 Actions that play Specific Monster Sounds (played on calling actor):
 	A_FatRaise (Sound 99 MANATK) (also calls A_FaceTarget)
-	A_SkelWhoosh (Sound 99 SKESWG) (also calls A_FaceTarget)
+	A_SkelWhoosh (Sound 56 SKESWG) (also calls A_FaceTarget)
+	A_VileStart (Sound 54 VILATK)
+	A_StartFire (Sound 92 FLAMST) (also calls A_Fire)
+	A_FireCrackle (Sound 91 FLAME) (also calls A_Fire)
 

@@ -139,10 +139,10 @@ Examples:
 ===== Sound
 ==============================================================================
 
-Changes a sound entry. `sound` plus the sound index/name. The sound name must 
-match a sound string in the string table (should not start with DS or DP). 
+Changes a sound entry. `sound` plus the sound name. The sound name must 
+match a sound string in the string table (should not start with DS or DP).
 
-    sound ( <INTEGER> | <STRING> )
+    sound <STRING>
     {
         priority <INTEGER>
         singular <BOOLEAN>
@@ -151,17 +151,16 @@ match a sound string in the string table (should not start with DS or DP).
 
 Examples:
 
-    sound 5
-    {
-        priority 200
-        singular true
-    }
-
     sound "barexp"
     {
-        priority 200
-        singular true
+        priority 120
+        singular false
     }
+
+
+This pays attention to the string table's current state - the sound name must 
+be changed (if you want to change it) before it is referred to by name, here.
+Note that you can't change sound names in Boom or higher.
 
 
 ==============================================================================
@@ -260,7 +259,7 @@ argument is nonzero).
       weapon states that use them will cause an error! You can still 
       use Offset with Doom/Ultimate Doom 1.9 pointers - those do not 
       use those fields at all.
-
+      
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 

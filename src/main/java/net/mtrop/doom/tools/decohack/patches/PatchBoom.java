@@ -30,6 +30,7 @@ public class PatchBoom implements DEHPatchBoom
 {
 	protected static final String[] SOUNDSTRINGS = 
 	{
+		null, // None
 		"PISTOL",
 		"SHOTGN",
 		"SGCOCK",
@@ -287,7 +288,7 @@ public class PatchBoom implements DEHPatchBoom
 	{
 		private static final long serialVersionUID = -4513058612574767102L;
 		{
-			for (int i = 0; i < SOUNDSTRINGS.length; i++)
+			for (int i = 1; i < SOUNDSTRINGS.length; i++)
 				put(SOUNDSTRINGS[i], i);
 		}
 	};

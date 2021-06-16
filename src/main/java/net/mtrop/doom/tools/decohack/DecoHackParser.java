@@ -458,15 +458,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		DEHSound sound;
 		Integer soundIndex;
-		if ((soundIndex = matchPositiveInteger()) != null)
-		{
-			if ((sound = context.getSound(soundIndex)) == null)
-			{
-				addErrorMessage("Expected valid sound index after \"%s\": %d is invalid.", KEYWORD_SOUND, soundIndex);
-				return false;
-			}
-		}
-		else if ((soundIndex = matchSoundIndexName(context)) != null)
+		if ((soundIndex = matchSoundIndexName(context)) != null)
 		{
 			if ((sound = context.getSound(soundIndex)) == null)
 			{
@@ -476,7 +468,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected sound index or sound name after \"%s\".", KEYWORD_SOUND);
+			addErrorMessage("Expected sound name after \"%s\".", KEYWORD_SOUND);
 			return false;
 		}
 
@@ -1087,7 +1079,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_SEESOUND);
 					return false;
 				}
-				thing.setSeeSoundPosition(value + 1);
+				thing.setSeeSoundPosition(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_ATTACKSOUND))
 			{
@@ -1096,7 +1088,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ATTACKSOUND);
 					return false;
 				}
-				thing.setAttackSoundPosition(value + 1);
+				thing.setAttackSoundPosition(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_PAINSOUND))
 			{
@@ -1105,7 +1097,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_PAINSOUND);
 					return false;
 				}
-				thing.setPainSoundPosition(value + 1);
+				thing.setPainSoundPosition(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_DEATHSOUND))
 			{
@@ -1114,7 +1106,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_DEATHSOUND);
 					return false;
 				}
-				thing.setDeathSoundPosition(value + 1);
+				thing.setDeathSoundPosition(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_ACTIVESOUND))
 			{
@@ -1123,7 +1115,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_ACTIVESOUND);
 					return false;
 				}
-				thing.setActiveSoundPosition(value + 1);
+				thing.setActiveSoundPosition(value);
 			}
 			// ================= EXTENDED
 			else if (matchIdentifierIgnoreCase(KEYWORD_DROPITEM))
@@ -1185,7 +1177,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected sound name after \"%s\".", KEYWORD_RIPSOUND);
 					return false;
 				}
-				thing.setRipSoundPosition(value + 1);
+				thing.setRipSoundPosition(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_INFIGHTINGGROUP))
 			{
@@ -1864,7 +1856,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return stateIndex;
 	}
 	
-	// Parses a sound index (and adds 1, if successful).
+	// Parses a sound index.
 	private Integer parseSoundIndex(AbstractPatchContext<?> context)
 	{
 		Integer value;
@@ -1873,7 +1865,7 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected a valid sound name after '%s'.", KEYWORD_SOUND);
 			return null;
 		}
-		return value + 1;
+		return value;
 	}
 	
 	// Parses a state block.
@@ -2947,7 +2939,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (currentToken().getLexeme().length() == 0)
 		{
 			nextToken();
-			return -1;
+			return 0;
 		}
 		if ((out = patch.getSoundIndex(currentToken().getLexeme())) == null)
 			return null;

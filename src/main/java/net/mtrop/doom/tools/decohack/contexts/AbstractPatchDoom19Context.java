@@ -38,8 +38,8 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 		
 		int soundStringStart = getSoundStringIndex();
 		this.soundStringIndex = new HashMap<>();
-		for (int i = 0; i < getSoundCount(); i++)
-			this.soundStringIndex.put(strings[i + soundStringStart].toUpperCase(), i);
+		for (int i = 1; i < getSoundCount(); i++)
+			this.soundStringIndex.put(strings[i - 1 + soundStringStart].toUpperCase(), i);
 		
 		int spriteStringStart = getSpriteStringIndex();
 		this.spriteStringIndex = new HashMap<>();

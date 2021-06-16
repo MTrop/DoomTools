@@ -1160,8 +1160,8 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	{
 		private static final long serialVersionUID = 4300586837270362529L;
 		{
-			for (int i = 0; i < DEHSOUND.length; i++)
-				put(DEHSTRINGS[i + STRING_INDEX_SOUNDS].toUpperCase(), i);
+			for (int i = 1; i < DEHSOUND.length; i++)
+				put(DEHSTRINGS[i - 1 + STRING_INDEX_SOUNDS].toUpperCase(), i);
 		}
 	};
 	

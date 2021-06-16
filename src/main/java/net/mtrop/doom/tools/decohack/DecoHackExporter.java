@@ -258,6 +258,7 @@ public final class DecoHackExporter
 				continue;
 			if (!sound.equals(original))
 			{
+				// Sound ids in DeHackEd are off by 1
 				writer.append("Sound ").append(String.valueOf(i)).append("\r\n");
 				sound.writeObject(writer, original, patch.getSupportedFeatureLevel());
 				writer.append("\r\n");

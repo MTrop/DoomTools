@@ -1,6 +1,14 @@
 DecoHack
 --------
 
+### Changed for 0.12.0
+
+**Major compiler change. Do not use numbers for your sound definitions and references!**
+
+* `Changed` Sounds definitions now REQUIRE a name, not a number.
+* `Changed` Some internal sound index/position handling to align with Doom internals rather than DeHackEd's mishandling of sound definitions.
+
+
 ### Changed for 0.11.2
 
 * `Fixed` Extended (and higher) sound slots were not accessible via definition. (Issue #29)

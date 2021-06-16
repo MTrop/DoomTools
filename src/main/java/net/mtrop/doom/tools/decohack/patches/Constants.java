@@ -1019,6 +1019,7 @@ interface Constants
 
 	static final DEHSound[] DEHSOUND = 
 	{
+		null, // for sfx_None
 		DEHSound.create(64, false),
 		DEHSound.create(64, false),
 		DEHSound.create(64, false),
