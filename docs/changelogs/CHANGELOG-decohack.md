@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.11.2
+
+* `Fixed` Extended (and higher) sound slots were not accessible via definition. (Issue #29)
+
+
 ### Changed for 0.11.1
 
 * `Fixed` Flag detection priority.

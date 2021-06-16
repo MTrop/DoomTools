@@ -458,22 +458,28 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		DEHSound sound;
 		Integer soundIndex;
-		if ((soundIndex = matchSoundIndexName(context)) == null)
+		if ((soundIndex = matchPositiveInteger()) != null)
+		{
+			if ((sound = context.getSound(soundIndex)) == null)
+			{
+				addErrorMessage("Expected valid sound index after \"%s\": %d is invalid.", KEYWORD_SOUND, soundIndex);
+				return false;
+			}
+		}
+		else if ((soundIndex = matchSoundIndexName(context)) != null)
+		{
+			if ((sound = context.getSound(soundIndex)) == null)
+			{
+				addErrorMessage("Expected valid sound name after \"%s\".", KEYWORD_SOUND);
+				return false;
+			}
+		}
+		else
 		{
 			addErrorMessage("Expected sound index or sound name after \"%s\".", KEYWORD_SOUND);
 			return false;
 		}
-		else if (soundIndex < 0)
-		{
-			addErrorMessage("Expected valid sound index or sound name after \"%s\".", KEYWORD_SOUND);
-			return false;
-		}
-		else if ((sound = context.getSound(soundIndex)) == null)
-		{
-			addErrorMessage("Expected valid sound index or sound name after \"%s\".", KEYWORD_SOUND);
-			return false;
-		}
-		
+
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_SOUND);

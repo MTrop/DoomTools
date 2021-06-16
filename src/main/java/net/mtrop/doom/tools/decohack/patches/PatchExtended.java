@@ -15,6 +15,7 @@ import java.util.Map;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 
@@ -343,11 +344,13 @@ public class PatchExtended extends PatchMBF
 			// indices, so we need to make the output index relative to that.
 			int extstart = SOUND_INDEX_EXTENDED_START;
 			int mbflen = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length;
-			int len = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length + SOUNDSTRINGSEXTENDED.length;
+			int len = SOUND_INDEX_EXTENDED_START + SOUNDSTRINGSEXTENDED.length;
 			for (int i = 0; i < len; i++)
 			{
-				if (i >= mbflen)
-					put(SOUNDSTRINGSEXTENDED[i - mbflen], i - mbflen + extstart - 1);
+				if (i >= extstart)
+					put(SOUNDSTRINGSEXTENDED[i - extstart], i);
+				else if (i >= mbflen)
+					continue; // blank until extended
 				else if (i >= SOUNDSTRINGS.length)
 					put(SOUNDSTRINGSMBF[i - SOUNDSTRINGS.length], i);
 				else
@@ -402,6 +405,15 @@ public class PatchExtended extends PatchMBF
 	public int getSoundCount()
 	{
 		return SOUND_INDEX_EXTENDED_START + SOUNDSTRINGSEXTENDED.length;
+	}
+
+	@Override
+	public DEHSound getSound(int index)
+	{
+		if (index >= SOUND_INDEX_EXTENDED_START)
+			return Common.arrayElement(DEHSOUNDEXTENDED, index - SOUND_INDEX_EXTENDED_START);
+		else
+			return super.getSound(index);
 	}
 
 	@Override
