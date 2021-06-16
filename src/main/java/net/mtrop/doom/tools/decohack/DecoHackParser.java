@@ -1713,6 +1713,12 @@ public final class DecoHackParser extends Lexer.Parser
 			// Parse next state.
 			if (currentIsNextStateKeyword())
 			{
+				if (stateCursor.lastStateFilled == null)
+				{
+					addErrorMessage("Expected a state definition after label. Cannot have a \"next state clause\" after a label without a state definition.");
+					return false;
+				}
+				
 				Integer nextStateIndex = null;
 				if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
 				{
@@ -2022,14 +2028,16 @@ public final class DecoHackParser extends Lexer.Parser
 			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
 				return false;
 
+			ParsedAction parsedAction = parsedState.parsedActions.get(0);
+			
 			if (isBoom)
 			{
-				if (pointerIndex != null && parsedState.action == null)
-					parsedState.action = DEHActionPointer.NULL;
+				if (pointerIndex != null && parsedAction.action == null)
+					parsedAction.action = DEHActionPointer.NULL;
 			}
-			else if ((pointerIndex == null && parsedState.action != null) || (pointerIndex != null && parsedState.action == null))
+			else if ((pointerIndex == null && parsedAction.action != null) || (pointerIndex != null && parsedAction.action == null))
 			{
-				if (parsedState.action != null)
+				if (parsedAction.action != null)
 					addErrorMessage("Action function specified for state without a function!");
 				else
 					addErrorMessage("Action function not specified for state with a function!");
@@ -2037,7 +2045,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 
 			if (pointerIndex != null)
-				context.setActionPointer(pointerIndex, parsedState.action);
+				context.setActionPointer(pointerIndex, parsedAction.action);
 			
 			// fill state.
 			DEHState state = context.getState(index); 
@@ -2046,9 +2054,9 @@ public final class DecoHackParser extends Lexer.Parser
 				.setFrameIndex(parsedState.frameList.get(0))
 				.setDuration(parsedState.duration)
 				.setBright(parsedState.bright)
-				.setMisc1(parsedState.misc1)
-				.setMisc2(parsedState.misc2)
-				.setArgs(parsedState.args)
+				.setMisc1(parsedAction.misc1)
+				.setMisc2(parsedAction.misc2)
+				.setArgs(parsedAction.args)
 			;
 			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
 				context.getState(index).setMBF21Flags(parsedState.mbf21Flags);
@@ -2105,13 +2113,25 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!matchStateFlags(context, state))
 			return false;
 		
-		// Maybe parse offsets
-		state.misc1 = 0;
-		state.misc2 = 0;
-		state.args.clear();
+		ParsedAction action;
+		state.parsedActions.add(action = new ParsedAction());
+		if (!parseActionClause(context, actor, action, requireAction))
+			return false;
+		
+		return true;
+	}
 
-		boolean useoffsets = matchOffsetDirective();
-		if (useoffsets)
+	// Parse an action into a parsed action.
+	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor actor, ParsedAction parsedAction, Boolean requireAction) 
+	{
+		// Maybe parse offsets
+		parsedAction.offset = false;
+		parsedAction.misc1 = 0;
+		parsedAction.misc2 = 0;
+		parsedAction.args.clear();
+
+		parsedAction.offset = matchOffsetDirective();
+		if (parsedAction.offset)
 		{
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
@@ -2125,7 +2145,7 @@ public final class DecoHackParser extends Lexer.Parser
 						addErrorMessage("Expected integer for X offset value.");
 						return false;
 					}
-					state.misc1 = p;
+					parsedAction.misc1 = p;
 
 					if (!matchType(DecoHackKernel.TYPE_COMMA))
 					{
@@ -2138,7 +2158,7 @@ public final class DecoHackParser extends Lexer.Parser
 						addErrorMessage("Expected integer for Y offset value.");
 						return false;
 					}
-					state.misc2 = p;
+					parsedAction.misc2 = p;
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
 					{
@@ -2155,50 +2175,50 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		// Maybe parse action
-		state.action = matchActionPointerName();
+		parsedAction.action = matchActionPointerName();
 		
 		if (requireAction != null)
 		{
-			if (requireAction && state.action == null)
+			if (requireAction && parsedAction.action == null)
 			{
 				addErrorMessage("Expected an action pointer for this state.");
 				return false;				
 			}
-			if (!requireAction && state.action != null)
+			if (!requireAction && parsedAction.action != null)
 			{
 				addErrorMessage("Expected no action pointer for this state. State definition attempted to set one.");
 				return false;				
 			}
 		}
 
-		if (state.action != null)
+		if (parsedAction.action != null)
 		{
-			if (!context.supports(state.action.getType()))
+			if (!context.supports(parsedAction.action.getType()))
 			{
-				addErrorMessage(state.action.getType().name() + " action pointer used: " + state.action.getMnemonic() + ". Patch does not support this action type.");
+				addErrorMessage(parsedAction.action.getType().name() + " action pointer used: " + parsedAction.action.getMnemonic() + ". Patch does not support this action type.");
 				return false;
 			}
 			
 			if (actor instanceof DEHThing)
 			{
-				if (state.action.isWeapon())
+				if (parsedAction.action.isWeapon())
 				{
-					addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a weapon action. Thing action expected.");
+					addErrorMessage("Action pointer " + parsedAction.action.getMnemonic() + " is a weapon action. Thing action expected.");
 					return false;
 				}
 			}
 			else if (actor instanceof DEHWeapon)
 			{
-				if (!state.action.isWeapon())
+				if (!parsedAction.action.isWeapon())
 				{
-					addErrorMessage("Action pointer " + state.action.getMnemonic() + " is a thing action. Weapon action expected.");
+					addErrorMessage("Action pointer " + parsedAction.action.getMnemonic() + " is a thing action. Weapon action expected.");
 					return false;
 				}				
 			}
 			// else, state body.
 
 			// MBF args (misc1/misc2)
-			if (!state.action.useArgs())
+			if (!parsedAction.action.useArgs())
 			{
 				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
@@ -2208,7 +2228,7 @@ public final class DecoHackParser extends Lexer.Parser
 						return true;
 					}
 
-					if (useoffsets)
+					if (parsedAction.offset)
 					{
 						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
 						return false;
@@ -2219,20 +2239,20 @@ public final class DecoHackParser extends Lexer.Parser
 					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
 
-					if (!checkActionParamValue(state.action, 0, p))
+					if (!checkActionParamValue(parsedAction.action, 0, p))
 						return false;
 
-					state.misc1 = p;
+					parsedAction.misc1 = p;
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
 
-						if (!checkActionParamValue(state.action, 1, p))
+						if (!checkActionParamValue(parsedAction.action, 1, p))
 							return false;
 
-						state.misc2 = p;
+						parsedAction.misc2 = p;
 					}
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
@@ -2258,15 +2278,15 @@ public final class DecoHackParser extends Lexer.Parser
 					while (!done)
 					{
 						// get argument
-						int argIndex = state.args.size();
+						int argIndex = parsedAction.args.size();
 						Integer p;
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
 
-						if (!checkActionParamValue(state.action, argIndex, p))
+						if (!checkActionParamValue(parsedAction.action, argIndex, p))
 							return false;
 
-						state.args.add(p);
+						parsedAction.args.add(p);
 
 						if (matchType(DecoHackKernel.TYPE_RPAREN))
 						{
@@ -2458,10 +2478,13 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer out = null;
 		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
 		
+		ParsedAction parsedAction = state.parsedActions.get(0);
 		while (!state.frameList.isEmpty())
 		{
+			Integer frame = state.frameList.pollFirst();
+			
 			Integer currentIndex;
-			if ((currentIndex = searchNextState(context, state, cursor)) == null)
+			if ((currentIndex = searchNextState(context, parsedAction, cursor)) == null)
 				return null;
 			if (out == null)
 				out = currentIndex;
@@ -2469,7 +2492,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (!isBoom && forceFirst && currentIndex != cursor.lastIndexFilled)
 			{
 				addErrorMessage("Provided state definition would not fill state " + cursor.lastIndexFilled + ". " + (
-					state.action != null 
+					parsedAction.action != null 
 						? "State " + cursor.lastIndexFilled + " cannot have an action pointer."
 						: "State " + cursor.lastIndexFilled + " must have an action pointer."
 				));
@@ -2483,35 +2506,41 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			cursor.lastStateFilled = context.getState(currentIndex)
 				.setSpriteIndex(state.spriteIndex)
-				.setFrameIndex(state.frameList.pollFirst())
+				.setFrameIndex(frame)
 				.setDuration(state.duration)
 				.setBright(state.bright)
-				.setMisc1(state.misc1)
-				.setMisc2(state.misc2)
-				.setArgs(state.args)
+				.setMisc1(parsedAction.misc1)
+				.setMisc2(parsedAction.misc2)
+				.setArgs(parsedAction.args)
 			;
 	
-			if (isBoom && pointerIndex != null && state.action == null)
-				state.action = DEHActionPointer.NULL;
+			if (isBoom && pointerIndex != null && parsedAction.action == null)
+				parsedAction.action = DEHActionPointer.NULL;
 			
 			if (pointerIndex != null)
-				context.setActionPointer(pointerIndex, state.action);
+				context.setActionPointer(pointerIndex, parsedAction.action);
 			
 			context.setFreeState(currentIndex, false);
 			cursor.lastIndexFilled = currentIndex;
 			forceFirst = false;
 		}
 		
+		if (out == null)
+		{
+			addErrorMessage("INTERNAL ERROR: Nothing to fill.");
+			return null;
+		}
+		
 		return out;
 	}
 	
-	private Integer searchNextState(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor) 
+	private Integer searchNextState(AbstractPatchContext<?> context, ParsedAction action, StateFillCursor cursor) 
 	{
 		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
 		
 		Integer index = isBoom 
 			? context.findNextFreeState(cursor.lastIndexFilled)
-			: (state.action != null 
+			: (action.action != null 
 				? context.findNextFreeActionPointerState(cursor.lastIndexFilled)
 				: context.findNextFreeNonActionPointerState(cursor.lastIndexFilled)
 			);
@@ -2524,7 +2553,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				if (state.action != null)
+				if (action.action != null)
 					addErrorMessage("No more free states with an action pointer.");
 				else
 					addErrorMessage("No more free states without an action pointer.");
@@ -3253,6 +3282,30 @@ public final class DecoHackParser extends Lexer.Parser
 		private int lastIndexFilled;
 	}
 	
+	private static class ParsedAction
+	{
+		private boolean offset;
+		private DEHActionPointer action;
+		private Integer misc1;
+		private Integer misc2;
+		private List<Integer> args;
+
+		private ParsedAction()
+		{
+			this.args = new LinkedList<>();
+			reset();
+		}
+		
+		void reset()
+		{
+			this.action = null;
+			this.misc1 = null;
+			this.misc2 = null;
+			this.args.clear();
+		}
+		
+	}
+	
 	private static class ParsedState
 	{
 		private Integer spriteIndex;
@@ -3260,15 +3313,12 @@ public final class DecoHackParser extends Lexer.Parser
 		private Integer duration;
 		private boolean bright;
 		private Integer mbf21Flags;
-		private DEHActionPointer action;
-		private Integer misc1;
-		private Integer misc2;
-		private List<Integer> args;
+		private List<ParsedAction> parsedActions;
 		
 		private ParsedState()
 		{
 			this.frameList = new LinkedList<>();
-			this.args = new LinkedList<>();
+			this.parsedActions = new LinkedList<>();
 			reset();
 		}
 		
@@ -3279,10 +3329,7 @@ public final class DecoHackParser extends Lexer.Parser
 			this.duration = null;
 			this.bright = false;
 			this.mbf21Flags = null;
-			this.action = null;
-			this.misc1 = null;
-			this.misc2 = null;
-			this.args.clear();
+			this.parsedActions.clear();
 		}
 		
 	}
