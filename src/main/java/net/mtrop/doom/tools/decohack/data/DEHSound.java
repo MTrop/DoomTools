@@ -49,7 +49,7 @@ public class DEHSound implements DEHObject<DEHSound>
 	}
 	
 	@Override
-	public DEHSound copyFrom(DEHSound source, DEHFeatureLevel level) 
+	public DEHSound copyFrom(DEHSound source) 
 	{
 		setPriority(source.priority);
 		setSingular(source.singular);

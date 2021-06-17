@@ -117,7 +117,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}
 
 	@Override
-	public DEHThing copyFrom(DEHThing source, DEHFeatureLevel level) 
+	public DEHThing copyFrom(DEHThing source) 
 	{
 		setName(source.name);
 		setEditorNumber(source.editorNumber);
@@ -139,19 +139,15 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
 		
-		if (level.supports(DEHFeatureLevel.EXTENDED))
-			setDroppedItem(source.droppedItem);
+		setDroppedItem(source.droppedItem);
 
-		if (level.supports(DEHFeatureLevel.MBF21))
-		{
-			setMBF21Flags(source.mbf21Flags);
-			setInfightingGroup(source.infightingGroup);
-			setProjectileGroup(source.projectileGroup);
-			setSplashGroup(source.splashGroup);
-			setFastSpeed(source.fastSpeed);
-			setMeleeRange(source.meleeRange);
-			setRipSoundPosition(source.ripSoundPosition);
-		}
+		setMBF21Flags(source.mbf21Flags);
+		setInfightingGroup(source.infightingGroup);
+		setProjectileGroup(source.projectileGroup);
+		setSplashGroup(source.splashGroup);
+		setFastSpeed(source.fastSpeed);
+		setMeleeRange(source.meleeRange);
+		setRipSoundPosition(source.ripSoundPosition);
 
 		clearLabels();
 		for (String label : source.getLabels())

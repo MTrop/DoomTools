@@ -96,14 +96,13 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	}
 	
 	@Override
-	public DEHWeapon copyFrom(DEHWeapon source, DEHFeatureLevel level) 
+	public DEHWeapon copyFrom(DEHWeapon source) 
 	{
 		setName(source.name);
 		setAmmoType(source.ammoType);
 		setAmmoPerShot(source.ammoPerShot);
 		
-		if (level.supports(DEHFeatureLevel.MBF21))
-			setMBF21Flags(source.mbf21Flags);
+		setMBF21Flags(source.mbf21Flags);
 		
 		clearLabels();
 		for (String label : source.getLabels())

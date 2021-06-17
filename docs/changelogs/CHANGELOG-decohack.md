@@ -7,6 +7,7 @@ DecoHack
 
 * `Added` Pre-emptive weapon flag checking on non-MBF21 patches.
 * `Fixed` Weapon MBF21 flags were parsed incorrectly.
+* `Fixed` Ensure blank files are written when no changes are made.
 * `Changed` Sounds definitions now REQUIRE a name, not a number.
 * `Changed` Some internal sound index/position handling to align with Doom internals rather than DeHackEd's mishandling of sound definitions.
 

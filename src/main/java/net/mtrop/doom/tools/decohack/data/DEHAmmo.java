@@ -32,7 +32,7 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	}
 	
 	@Override
-	public DEHAmmo copyFrom(DEHAmmo source, DEHFeatureLevel level) 
+	public DEHAmmo copyFrom(DEHAmmo source) 
 	{
 		setName(source.name);
 		setMax(source.max);

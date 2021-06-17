@@ -21,7 +21,7 @@ public interface DEHObject<SELF>
 	 * @param level the highest feature level to copy over.
 	 * @return this object.
 	 */
-	SELF copyFrom(SELF source, DEHFeatureLevel level);
+	SELF copyFrom(SELF source);
 	
 	/**
 	 * Writes this object to a DeHackEd file stream.

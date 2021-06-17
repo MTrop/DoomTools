@@ -72,7 +72,7 @@ public class DEHState implements DEHObject<DEHState>
 	}
 
 	@Override
-	public DEHState copyFrom(DEHState source, DEHFeatureLevel level) 
+	public DEHState copyFrom(DEHState source) 
 	{
 		setSpriteIndex(source.spriteIndex);
 		setFrameIndex(source.frameIndex);
@@ -81,11 +81,8 @@ public class DEHState implements DEHObject<DEHState>
 		setDuration(source.duration);
 		setMisc1(source.misc1);
 		setMisc2(source.misc2);
-		if (level.supports(DEHFeatureLevel.MBF21))
-		{
-			setArgs(source.args);
-			setMBF21Flags(source.mbf21Flags);
-		}
+		setArgs(source.args);
+		setMBF21Flags(source.mbf21Flags);
 		return this;
 	}
 	

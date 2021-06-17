@@ -57,7 +57,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 	}
 	
 	@Override
-	public DEHMiscellany copyFrom(DEHMiscellany source, DEHFeatureLevel level) 
+	public DEHMiscellany copyFrom(DEHMiscellany source) 
 	{
 		setMonsterInfightingEnabled(source.monsterInfightingEnabled);
 		setInitialBullets(source.initialBullets);
