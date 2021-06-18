@@ -29,7 +29,7 @@ A:hover {
 
 .site-logo {
 	display: block;
-	max-width: 400px;
+	max-width: 100%;
     margin-left: auto;
     margin-right: auto;
 	height: auto;
@@ -79,7 +79,7 @@ A:hover {
 	background-color: #2d4760;
 	color: #dddddd;
 	box-shadow: rgb(8, 37, 46) 0px 5px;
-	width: 325px;
+	white-space: pre-wrap;
 }
 
 .markdown-body {
