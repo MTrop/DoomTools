@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.12.0.1
+
+* `Added` Missing docs for `ammopershot` weapon field.
+
+
 ### Changed for 0.12.0
 
 **Major compiler change. Do not use numbers for your sound definitions and references!**

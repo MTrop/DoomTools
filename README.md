@@ -122,6 +122,12 @@ A utility that exports textures from one WAD into another, including associated 
 A scripting system for doing practically anything with Doom stuff. Also includes Rookscript, a subset script. 
 
 
+### Special Thanks
+
+Special thanks to, in no particular order, **Aurelius**, **Antares031**, **floatRand**, **Xaser**, **kraflab**, 
+and **punchyouinthefaceman** for their incidental QA testing. Lots of bugs were fixed because of all of you!
+
+
 ### Other
 
 These programs and the accompanying materials are made available under the 

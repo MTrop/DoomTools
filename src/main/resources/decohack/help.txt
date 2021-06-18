@@ -431,6 +431,9 @@ associated Thing for pickups.
     {
         ammotype ( 0 | 1 | 2 | 3 | 5 )
         
+        //MBF21 fields
+        ammopershot <INTEGER>
+        
         clear flags // If present, clear all flags (both sets, if available)
 
         // MBF21 Flags (MBF21 feature set only)
