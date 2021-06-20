@@ -1061,12 +1061,12 @@ uses of that macro are treated as though they were never defined.
 
 #define lines can be multi-line, if each line is ended with a backslash:
 
-#define CLEARED_THING { \
-    clear flags \
-    clear sounds \
-    clear states \
-    state spawn thing MTF_CANDLE spawn \
-}
+    #define CLEARED_THING { \
+        clear flags \
+        clear sounds \
+        clear states \
+        state spawn thing MTF_CANDLE spawn \
+    }
 
 
 ------------------
