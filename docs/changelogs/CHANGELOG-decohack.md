@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.13.0
+
+* `Added` Multi-action pointer lines.
+
+
 ### Changed for 0.12.0.1
 
 * `Added` Missing docs for `ammopershot` weapon field.
