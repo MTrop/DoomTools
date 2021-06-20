@@ -283,7 +283,7 @@ one action pointer. Rather, the result is a bunch of states:
 
 
 The duration on every state is 0 except for the last one, which simulates
-several actions on "one" state. This works for action pointer that also
+several actions on "one" state. This works for action pointers that also
 have parameters. The following: 
 
     TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0)
