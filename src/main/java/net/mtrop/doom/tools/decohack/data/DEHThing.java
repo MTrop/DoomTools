@@ -18,7 +18,7 @@ import net.mtrop.doom.util.RangeUtils;
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
  * @author Matthew Tropiano
  */
-public class DEHThing implements DEHObject<DEHThing>, DEHActor
+public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 {
 	public static final String STATE_LABEL_SPAWN = "spawn";
 	public static final String STATE_LABEL_SEE = "see";
@@ -65,14 +65,21 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	/** Active sound position. */
 	private int activeSoundPosition;
 
+	/** Dropped item. */
 	private int droppedItem;
 
+	/** MBF21 flags. */
 	private int mbf21Flags;
+	/** Infighting group. */
 	private int infightingGroup;
+	/** Projectile group. */
 	private int projectileGroup;
+	/** Splash group. */
 	private int splashGroup;
+	/** Nightmare/Fast speed of actor. */
 	private int fastSpeed; // written as fixed point 16.16 if MISSILE
-	private int meleeRange;
+	/** Melee range. */
+	private int meleeRange;  // written as fixed point 16.16
 	/** Ripper sound position. */
 	private int ripSoundPosition;
 
@@ -288,6 +295,20 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 		return this;
 	}
 
+	@Override
+	public DEHThing addFlag(int bits)
+	{
+		this.flags |= bits;
+		return this;
+	}
+
+	@Override
+	public DEHThing removeFlag(int bits)
+	{
+		this.flags &= ~bits;
+		return this;
+	}
+
 	public int getMBF21Flags() 
 	{
 		return mbf21Flags;
@@ -296,6 +317,20 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	public DEHThing setMBF21Flags(int bits) 
 	{
 		this.mbf21Flags = bits;
+		return this;
+	}
+
+	@Override
+	public DEHThing addMBF21Flag(int bits)
+	{
+		this.mbf21Flags |= bits;
+		return this;
+	}
+
+	@Override
+	public DEHThing removeMBF21Flag(int bits)
+	{
+		this.mbf21Flags &= ~bits;
 		return this;
 	}
 
@@ -487,7 +522,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 	}
 
 	@Override
-	public void setLabel(String label, int index)
+	public DEHThing setLabel(String label, int index)
 	{
 		if (index < 0)
 			throw new IllegalArgumentException("index cannot be < 0");
@@ -496,12 +531,14 @@ public class DEHThing implements DEHObject<DEHThing>, DEHActor
 			stateIndexMap.remove(label);
 		else
 			stateIndexMap.put(label, index);
+		return this;
 	}
 
 	@Override
-	public void clearLabels()
+	public DEHThing clearLabels()
 	{
 		stateIndexMap.clear();
+		return this;
 	}
 
 	public int getSeeSoundPosition() 

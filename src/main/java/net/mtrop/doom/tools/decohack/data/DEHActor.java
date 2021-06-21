@@ -8,8 +8,9 @@ package net.mtrop.doom.tools.decohack.data;
 /**
  * Describes all DeHackEd objects that are actors.
  * @author Matthew Tropiano
+ * @param <SELF> this class type.
  */
-public interface DEHActor
+public interface DEHActor<SELF>
 {
 	/**
 	 * Gets all state indices for state labels defined on this actor.
@@ -35,12 +36,14 @@ public interface DEHActor
 	 * Sets a state index for a state label defined on this actor.
 	 * @param label the label.
 	 * @param index the new index.
+	 * @return this object.
 	 */
-	void setLabel(String label, int index);
+	SELF setLabel(String label, int index);
 
 	/**
 	 * Clears/resets state labels defined on this actor.
+	 * @return this object.
 	 */
-	void clearLabels();
+	SELF clearLabels();
 
 }

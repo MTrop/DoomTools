@@ -17,7 +17,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single weapon entry.
  * @author Matthew Tropiano
  */
-public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
+public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapon>
 {
 	public static final String STATE_LABEL_READY = "ready";
 	public static final String STATE_LABEL_SELECT = "select";
@@ -42,13 +42,10 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	
 	/** Weapon name. */
 	private String name;
-	
 	/** Ammo type. */
 	private Ammo ammoType;
-	
 	/** Ammo per shot. */
 	private int ammoPerShot;
-	
 	/** Flags. */
 	private int mbf21Flags;
 
@@ -186,6 +183,20 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 		return this;
 	}
 	
+	@Override
+	public DEHWeapon addMBF21Flag(int bits)
+	{
+		this.mbf21Flags |= bits;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon removeMBF21Flag(int bits)
+	{
+		this.mbf21Flags &= ~bits;
+		return this;
+	}
+
 	/**
 	 * @return the raise frame index.
 	 */
@@ -306,19 +317,21 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHActor
 	}
 
 	@Override
-	public void setLabel(String label, int index)
+	public DEHWeapon setLabel(String label, int index)
 	{
 		if (index == 0)
 			stateIndexMap.remove(label);
 		else
 			stateIndexMap.put(label, index);
+		return this;
 	}
 
 	@Override
-	public void clearLabels()
+	public DEHWeapon clearLabels()
 	{
 		stateIndexMap.clear();
 		setLabel(STATE_LABEL_LIGHTDONE, 1);
+		return this;
 	}
 
 	@Override

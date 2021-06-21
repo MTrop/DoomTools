@@ -41,9 +41,11 @@ import net.mtrop.doom.tools.decohack.data.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThingMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
@@ -815,33 +817,35 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			return parseThingBody(context, context.getThing(slot));
+			DEHThing thing = context.getThing(slot);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				if (!matchIdentifierIgnoreCase(KEYWORD_THING))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
+					return false;
+				}
+				
+				Integer sourceSlot;
+				if ((sourceSlot = matchThingIndex(context)) == null)
+					return false;
+				
+				thing.copyFrom(context.getThing(sourceSlot));
+			}
+			
+			if (currentType(DecoHackKernel.TYPE_STRING))
+			{
+				thing.setName(matchString());
+			}
+			
+			return parseThingBody(context, thing);
 		}
 	}
 
 	// Parses a thing body.
-	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThing thing)
+	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
-		if (matchType(DecoHackKernel.TYPE_COLON))
-		{
-			if (!matchIdentifierIgnoreCase(KEYWORD_THING))
-			{
-				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
-				return false;
-			}
-			
-			Integer slot;
-			if ((slot = matchThingIndex(context)) == null)
-				return false;
-			
-			thing.copyFrom(context.getThing(slot));
-		}
-		
-		if (currentType(DecoHackKernel.TYPE_STRING))
-		{
-			thing.setName(matchString());
-		}
-		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_THING);
@@ -855,17 +859,17 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				if ((value = matchThingFlagMnemonic()) != null)
 				{
-					thing.setFlags(thing.getFlags() | value);
+					thing.addFlag(value);
 				}
 				else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
 				{
-					thing.setMBF21Flags(thing.getMBF21Flags() | value);
+					thing.addMBF21Flag(value);
 				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.setMBF21Flags(thing.getMBF21Flags() | value);
+						thing.addMBF21Flag(value);
 					}
 					else
 					{
@@ -875,7 +879,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((value = matchPositiveInteger()) != null)
 				{
-					thing.setFlags(thing.getFlags() | value);
+					thing.addFlag(value);
 				}
 				else
 				{
@@ -887,17 +891,17 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				if ((value = matchThingFlagMnemonic()) != null)
 				{
-					thing.setFlags(thing.getFlags() & (~value));
+					thing.removeFlag(value);
 				}
 				else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
 				{
-					thing.setMBF21Flags(thing.getMBF21Flags() & (~value));
+					thing.removeMBF21Flag(value);
 				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.setMBF21Flags(thing.getMBF21Flags() & (~value));
+						thing.removeMBF21Flag(value);
 					}
 					else
 					{
@@ -907,7 +911,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((value = matchPositiveInteger()) != null)
 				{
-					thing.setFlags(thing.getFlags() & (~value));
+					thing.removeFlag(value);
 				}
 				else
 				{
@@ -1242,7 +1246,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a thing state clause.
-	private boolean parseThingStateClause(AbstractPatchContext<?> context, DEHThing thing) 
+	private boolean parseThingStateClause(AbstractPatchContext<?> context, DEHThingTarget<?> thing) 
 	{
 		Integer value;
 		if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_SPAWN))
@@ -1321,7 +1325,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a thing state body.
-	private boolean parseThingStateBody(AbstractPatchContext<?> context, final DEHThing thing)
+	private boolean parseThingStateBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
@@ -1404,33 +1408,35 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			return parseWeaponBody(context, context.getWeapon(slot));
+			DEHWeapon weapon = context.getWeapon(slot);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				if (!matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
+					return false;
+				}
+				
+				Integer sourceSlot;
+				if ((sourceSlot = matchWeaponIndex(context)) == null)
+					return false;
+
+				weapon.copyFrom(context.getWeapon(sourceSlot));
+			}
+			
+			if (currentType(DecoHackKernel.TYPE_STRING))
+			{
+				weapon.setName(matchString());
+			}
+			
+			return parseWeaponBody(context, weapon);
 		}
 	}
 
 	// Parses a weapon body.
-	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeapon weapon)
+	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
-		if (matchType(DecoHackKernel.TYPE_COLON))
-		{
-			if (!matchIdentifierIgnoreCase(KEYWORD_WEAPON))
-			{
-				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
-				return false;
-			}
-			
-			Integer slot;
-			if ((slot = matchWeaponIndex(context)) == null)
-				return false;
-
-			weapon.copyFrom(context.getWeapon(slot));
-		}
-		
-		if (currentType(DecoHackKernel.TYPE_STRING))
-		{
-			weapon.setName(matchString());
-		}
-		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_WEAPON);
@@ -1453,7 +1459,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected integer after \"+\".");
 					return false;
 				}
-				weapon.setMBF21Flags(weapon.getMBF21Flags() | flags);
+				weapon.addMBF21Flag(flags);
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
@@ -1469,7 +1475,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected integer after \"-\".");
 					return false;
 				}
-				weapon.setMBF21Flags(weapon.getMBF21Flags() & (~flags));
+				weapon.removeMBF21Flag(flags);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_STATE))
 			{
@@ -1598,7 +1604,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
-	private boolean parseWeaponStateClause(AbstractPatchContext<?> context, DEHWeapon weapon) 
+	private boolean parseWeaponStateClause(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon) 
 	{
 		Integer value;
 		if (matchIdentifierIgnoreCase(KEYWORD_WEAPONSTATE_READY))
@@ -1653,7 +1659,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a weapon state body.
-	private boolean parseWeaponStateBody(AbstractPatchContext<?> context, final DEHWeapon weapon)
+	private boolean parseWeaponStateBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
@@ -1674,7 +1680,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses an actor's state body.
-	private boolean parseActorStateSet(AbstractPatchContext<?> context, DEHActor actor)
+	private boolean parseActorStateSet(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// state label.
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
@@ -1745,7 +1751,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a mandatory state index.
-	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor actor)
+	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		String labelName;
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
@@ -1759,7 +1765,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a label state index.
-	private Integer parseActorStateLabelIndex(DEHActor actor, String labelName) 
+	private Integer parseActorStateLabelIndex(DEHActor<?> actor, String labelName) 
 	{
 		Integer value;
 		if (actor == null)
@@ -2082,14 +2088,14 @@ public final class DecoHackParser extends Lexer.Parser
 
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor actor, ParsedState state)
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state)
 	{
 		return parseStateLine(context, actor, state, false, null);
 	}
 	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
 	{
 		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
 		{
@@ -2205,7 +2211,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parse an action into a parsed action.
-	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor actor, ParsedAction parsedAction, Boolean requireAction) 
+	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction parsedAction, Boolean requireAction) 
 	{
 		// Maybe parse action
 		parsedAction.action = matchActionPointerName();
@@ -2337,7 +2343,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor actor)
+	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		Integer value;
 		String labelName;
@@ -2359,7 +2365,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a next state line.
-	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor actor, Integer lastLabelledStateIndex, int currentStateIndex)
+	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierIgnoreCase(KEYWORD_STOP))
@@ -2790,7 +2796,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches a potential actor label.
 	// If match, advance token and return lexeme.
 	// Else, return null.
-	private String matchActorLabel(DEHActor actor)
+	private String matchActorLabel(DEHActor<?> actor)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
