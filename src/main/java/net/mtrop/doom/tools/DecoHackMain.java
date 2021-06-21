@@ -24,7 +24,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackExporter;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
-import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;

@@ -8,6 +8,8 @@ package net.mtrop.doom.tools.decohack.data;
 import java.io.IOException;
 import java.io.Writer;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+
 /**
  * Describes all DeHackEd objects and how to write them.
  * @author Matthew Tropiano

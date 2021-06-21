@@ -5,12 +5,12 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
-import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.*;
+import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer.*;
 
-import net.mtrop.doom.tools.decohack.data.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.DEHState;
-import net.mtrop.doom.tools.decohack.data.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 
 /**
  * Constants for Boom. 

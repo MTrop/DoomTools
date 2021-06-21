@@ -5,8 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.data.DEHActionPointerType;
-import net.mtrop.doom.tools.decohack.data.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchBoom;
 

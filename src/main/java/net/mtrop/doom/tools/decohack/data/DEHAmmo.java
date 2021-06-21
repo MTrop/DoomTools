@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 import java.io.IOException;
 import java.io.Writer;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.util.RangeUtils;
 
 /**

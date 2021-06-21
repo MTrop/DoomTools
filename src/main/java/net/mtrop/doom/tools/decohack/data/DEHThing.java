@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.util.RangeUtils;
 
 /**

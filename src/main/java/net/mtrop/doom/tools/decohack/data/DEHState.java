@@ -10,6 +10,7 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.util.RangeUtils;
 
 /**

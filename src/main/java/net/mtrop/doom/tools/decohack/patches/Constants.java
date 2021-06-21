@@ -6,14 +6,14 @@
 package net.mtrop.doom.tools.decohack.patches;
 
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
-import net.mtrop.doom.tools.decohack.data.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
-import net.mtrop.doom.tools.decohack.data.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-import net.mtrop.doom.tools.decohack.data.DEHWeaponMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 
 /**
  * Patch constants. 
