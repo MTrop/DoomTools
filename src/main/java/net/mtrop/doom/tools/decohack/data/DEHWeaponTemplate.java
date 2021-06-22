@@ -27,13 +27,17 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	private Map<String, Integer> stateIndexMap;
 	/** Flags. */
 	private Integer mbf21Flags;
-	
+	private int addMBF21Flags;
+	private int remMBF21Flags;
+
 	public DEHWeaponTemplate()
 	{
 		this.ammoType = null;
 		this.ammoPerShot = null;
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.mbf21Flags = null;
+		this.addMBF21Flags = 0;
+		this.remMBF21Flags = 0;
 	}
 	
 	/**
@@ -47,8 +51,15 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 			destination.setAmmoType(ammoType);
 		if (ammoPerShot != null)
 			destination.setAmmoPerShot(ammoPerShot);
+		// if flags altered, replace.
 		if (mbf21Flags != null)
 			destination.setMBF21Flags(mbf21Flags);
+		// else, just alter the adjustments.
+		else
+		{
+			destination.addMBF21Flag(addMBF21Flags);
+			destination.removeMBF21Flag(remMBF21Flags);
+		}
 		
 		for (String label : getLabels())
 			destination.setLabel(label, getLabel(label));
@@ -83,23 +94,29 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setMBF21Flags(int flags)
+	public DEHWeaponTemplate setMBF21Flags(int bits) 
 	{
-		this.mbf21Flags = flags;
+		this.mbf21Flags = bits;
 		return this;
 	}
-	
+
 	@Override
 	public DEHWeaponTemplate addMBF21Flag(int bits)
 	{
-		this.mbf21Flags |= bits;
+		if (this.mbf21Flags != null)
+			this.mbf21Flags |= bits;
+		else
+			this.addMBF21Flags |= bits;
 		return this;
 	}
 
 	@Override
 	public DEHWeaponTemplate removeMBF21Flag(int bits)
 	{
-		this.mbf21Flags &= ~bits;
+		if (this.mbf21Flags != null)
+			this.mbf21Flags &= ~bits;
+		else
+			this.remMBF21Flags |= bits; // removed later
 		return this;
 	}
 

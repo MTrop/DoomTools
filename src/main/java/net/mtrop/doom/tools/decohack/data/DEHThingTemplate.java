@@ -30,7 +30,10 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	private Integer painChance;
 	private Integer flags;
 	private Integer mass;
-
+	
+	private int addFlags;
+	private int remFlags;
+	
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
 	
@@ -50,6 +53,10 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 
 	/** MBF21 flags. */
 	private Integer mbf21Flags;
+	
+	private int addMBF21Flags;
+	private int remMBF21Flags;
+
 	/** Infighting group. */
 	private Integer infightingGroup;
 	/** Projectile group. */
@@ -77,6 +84,8 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.reactionTime = null;
 		this.painChance = null;
 		this.flags = null;
+		this.addFlags = 0;
+		this.remFlags = 0;
 		this.mass = null;
 		
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -90,6 +99,8 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.droppedItem = null;
 		
 		this.mbf21Flags = null;
+		this.addMBF21Flags = 0;
+		this.remMBF21Flags = 0;
 		this.infightingGroup = null;
 		this.projectileGroup = null;
 		this.splashGroup = null;
@@ -124,10 +135,18 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 			destination.setReactionTime(reactionTime);
 		if (painChance != null)
 			destination.setPainChance(painChance);
-		if (editorNumber != null)
-			destination.setFlags(flags);
-		if (editorNumber != null)
+		if (mass != null)
 			destination.setMass(mass);
+
+		// if flags altered, replace.
+		if (flags != null)
+			destination.setFlags(flags);
+		// else, just alter the adjustments.
+		else
+		{
+			destination.addFlag(addFlags);
+			destination.removeFlag(remFlags);
+		}
 			
 		if (seeSoundPosition != null)
 			destination.setSeeSoundPosition(seeSoundPosition);
@@ -143,8 +162,16 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		if (droppedItem != null)
 			destination.setDroppedItem(droppedItem);
 	
+		// if flags altered, replace.
 		if (mbf21Flags != null)
 			destination.setMBF21Flags(mbf21Flags);
+		// else, just alter the adjustments.
+		else
+		{
+			destination.addFlag(addMBF21Flags);
+			destination.removeFlag(remMBF21Flags);
+		}
+		
 		if (infightingGroup != null)
 			destination.setInfightingGroup(infightingGroup);
 		if (projectileGroup != null)
@@ -238,14 +265,20 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	@Override
 	public DEHThingTemplate addFlag(int bits)
 	{
-		this.flags |= bits;
+		if (this.flags != null)
+			this.flags |= bits;
+		else
+			this.addFlags |= bits;
 		return this;
 	}
 
 	@Override
 	public DEHThingTemplate removeFlag(int bits)
 	{
-		this.flags &= ~bits;
+		if (this.flags != null)
+			this.flags &= ~bits;
+		else
+			this.remFlags |= bits; // removed later
 		return this;
 	}
 
@@ -258,14 +291,20 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	@Override
 	public DEHThingTemplate addMBF21Flag(int bits)
 	{
-		this.mbf21Flags |= bits;
+		if (this.mbf21Flags != null)
+			this.mbf21Flags |= bits;
+		else
+			this.addMBF21Flags |= bits;
 		return this;
 	}
 
 	@Override
 	public DEHThingTemplate removeMBF21Flag(int bits)
 	{
-		this.mbf21Flags &= ~bits;
+		if (this.mbf21Flags != null)
+			this.mbf21Flags &= ~bits;
+		else
+			this.remMBF21Flags |= bits; // removed later
 		return this;
 	}
 

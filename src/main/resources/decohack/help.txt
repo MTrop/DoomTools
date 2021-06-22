@@ -596,12 +596,6 @@ clause:
         ...
     }
 
-All weapon characteristics and state labels get copied.
-
-You can also swap two weapon slots:
-
-    weapon 3 swap with 4
-
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -611,6 +605,48 @@ You can also swap two weapon slots:
       "parent" objects of any kind! 
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+All weapon characteristics and state labels get copied.
+
+You can also swap two weapon slots:
+
+    weapon 3 swap with 4
+
+
+Multiple weapons can be edited as though each weapon were changed 
+individually via an "each" clause like so:
+
+    each weapon from <INTEGER> to <INTEGER>
+    {
+        // ... weapon properties ...
+    }
+
+    each weapon in ( <INTEGER> , ... )
+    {
+        // ... weapon properties ...
+    }
+
+
+For example, you can make all of the weapons have infinite ammo:
+
+    each weapon from 0 to 8
+    {
+        ammotype 5
+    }
+
+
+Or maybe just the pistol and chaingun:
+
+    each weapon in (1, 3)
+    {
+        ammotype 5
+    }
+
+
+If states are filled across the set of weapons, any special frame indices
+will set to the EXACT same value across all of the specified weapons (i.e., 
+the same Select state, the same Fire state, etc.). 
 
 
 ==============================================================================
@@ -815,10 +851,6 @@ clause:
 
 All thing characteristics and state labels get copied.
 
-You can also swap two thing slots:
-
-    thing 3 swap with 4
-
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -828,6 +860,47 @@ You can also swap two thing slots:
       "parent" objects of any kind! 
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+You can also swap two thing slots:
+
+    thing 3 swap with 4
+
+
+Multiple things can be edited as though each thing were changed individually 
+via an "each" clause like so:
+
+    each thing from <INTEGER> to <INTEGER>
+    {
+        // ... thing properties ...
+    }
+
+    each thing in ( <INTEGER> , ... )
+    {
+        // ... thing properties ...
+    }
+
+
+For example, you can make all of the hanging bodies non-solid:
+
+    each thing from 129 to 134
+    {
+        -SOLID
+    }
+
+
+Or maybe make some slower projectiles really fast and damaging!
+
+    each thing in (7, 17, 32, 33, 37)
+    {
+        speed 25
+        damage 10
+    }
+
+
+If states are filled across the set of weapons, any special frame indices
+will set to the EXACT same value across all of the specified weapons (i.e., 
+the same Select state, the same Fire state, etc.).
 
 
 ------------------------------------------------------------------------------

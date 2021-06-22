@@ -1,9 +1,14 @@
 DecoHack
 --------
 
+### Changed for 0.14.0
+
+* `Added` Each Thing/Weapon Characteristics Filling. (Enhancement #24)
+
+
 ### Changed for 0.13.0
 
-* `Added` Multi-action pointer lines.
+* `Added` Multi-action pointer lines. (Enhancement #16)
 
 
 ### Changed for 0.12.0.1
