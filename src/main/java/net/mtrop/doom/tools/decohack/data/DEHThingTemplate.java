@@ -83,10 +83,11 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.damage = null;
 		this.reactionTime = null;
 		this.painChance = null;
+		this.mass = null;
+
 		this.flags = null;
 		this.addFlags = 0;
 		this.remFlags = 0;
-		this.mass = null;
 		
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -101,6 +102,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.mbf21Flags = null;
 		this.addMBF21Flags = 0;
 		this.remMBF21Flags = 0;
+		
 		this.infightingGroup = null;
 		this.projectileGroup = null;
 		this.splashGroup = null;
@@ -440,6 +442,15 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	public DEHThingTemplate clearLabels()
 	{
 		stateIndexMap.clear();
+		// If a template clears labels, explicitly set state 0.
+		setSpawnFrameIndex(0);
+		setWalkFrameIndex(0);
+		setPainFrameIndex(0);
+		setMeleeFrameIndex(0);
+		setMissileFrameIndex(0);
+		setDeathFrameIndex(0);
+		setExtremeDeathFrameIndex(0);
+		setRaiseFrameIndex(0);
 		return this;
 	}
 

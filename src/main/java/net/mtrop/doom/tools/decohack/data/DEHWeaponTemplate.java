@@ -35,6 +35,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 		this.ammoType = null;
 		this.ammoPerShot = null;
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		
 		this.mbf21Flags = null;
 		this.addMBF21Flags = 0;
 		this.remMBF21Flags = 0;
@@ -211,6 +212,12 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	public DEHWeaponTemplate clearLabels()
 	{
 		stateIndexMap.clear();
+		// If a template clears labels, explicitly set state 0.
+		setRaiseFrameIndex(0);
+		setLowerFrameIndex(0);
+		setReadyFrameIndex(0);
+		setFireFrameIndex(0);
+		setFlashFrameIndex(0);
 		return this;
 	}
 
