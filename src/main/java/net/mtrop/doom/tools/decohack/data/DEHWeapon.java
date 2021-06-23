@@ -20,15 +20,6 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapon>
 {
-	public static final String STATE_LABEL_READY = "ready";
-	public static final String STATE_LABEL_SELECT = "select";
-	public static final String STATE_LABEL_DESELECT = "deselect";
-	public static final String STATE_LABEL_FIRE = "fire";
-	public static final String STATE_LABEL_FLASH = "flash";
-	public static final String STATE_LABEL_LIGHTDONE = "lightdone";
-
-	public static final int DEFAULT_AMMO_PER_SHOT = -1;
-
 	public static enum Ammo
 	{
 		BULLETS,
@@ -58,9 +49,8 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 		setName("");
-		setAmmoType(null);
-		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
-		setMBF21Flags(0x00000000);
+		clearProperties();
+		clearFlags();
 		clearLabels();
 	}
 	
@@ -108,6 +98,29 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 		return this;
 	}
 	
+	@Override
+	public DEHWeapon clearProperties()
+	{
+		setAmmoType(Ammo.BULLETS);
+		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		return this;
+	}
+
+	@Override
+	public DEHWeapon clearFlags() 
+	{
+		setMBF21Flags(0x00000000);
+		return this;
+	}
+
+	@Override
+	public DEHWeapon clearLabels()
+	{
+		stateIndexMap.clear();
+		setLabel(STATE_LABEL_LIGHTDONE, 1);
+		return this;
+	}
+
 	/**
 	 * @return the weapon name (not used ingame).
 	 */
@@ -324,14 +337,6 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 			stateIndexMap.remove(label);
 		else
 			stateIndexMap.put(label, index);
-		return this;
-	}
-
-	@Override
-	public DEHWeapon clearLabels()
-	{
-		stateIndexMap.clear();
-		setLabel(STATE_LABEL_LIGHTDONE, 1);
 		return this;
 	}
 

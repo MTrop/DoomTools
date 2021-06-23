@@ -193,6 +193,63 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		return this;
 	}
 	
+	@Override
+	public DEHThingTemplate clearProperties() 
+	{
+		setEditorNumber(EDITORNUMBER_NONE);
+		setHealth(0);
+		setSpeed(0);
+		setRadius(0);
+		setHeight(0);
+		setDamage(0);
+		setReactionTime(0);
+		setPainChance(0);
+		setMass(0);
+		setDroppedItem(NO_ITEM);
+		setInfightingGroup(DEFAULT_GROUP);
+		setProjectileGroup(DEFAULT_GROUP);
+		setSplashGroup(DEFAULT_GROUP);
+		setFastSpeed(DEFAULT_FASTSPEED);
+		setMeleeRange(DEFAULT_MELEE_RANGE);
+		return this;
+	}
+
+	@Override
+	public DEHThingTemplate clearSounds() 
+	{
+		setSeeSoundPosition(SOUND_NONE);
+		setAttackSoundPosition(SOUND_NONE);
+		setPainSoundPosition(SOUND_NONE);
+		setDeathSoundPosition(SOUND_NONE);
+		setActiveSoundPosition(SOUND_NONE);
+		setRipSoundPosition(SOUND_NONE);
+		return this;
+	}
+
+	@Override
+	public DEHThingTemplate clearFlags() 
+	{
+		setFlags(0x00000000);
+		setMBF21Flags(0x00000000);
+		return this;
+	}
+
+	@Override
+	public DEHThingTemplate clearLabels()
+	{
+		stateIndexMap.clear();
+		// If a template clears labels, explicitly set state 0.
+		setSpawnFrameIndex(0);
+		setWalkFrameIndex(0);
+		setPainFrameIndex(0);
+		setMeleeFrameIndex(0);
+		setMissileFrameIndex(0);
+		setDeathFrameIndex(0);
+		setExtremeDeathFrameIndex(0);
+		setRaiseFrameIndex(0);
+		return this;
+	}
+
 	public DEHThingTemplate setEditorNumber(int editorNumber)
 	{
 		if (editorNumber == 0)
@@ -436,22 +493,6 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	public int getLabel(String label)
 	{
 		return stateIndexMap.getOrDefault(label, 0);
-	}
-
-	@Override
-	public DEHThingTemplate clearLabels()
-	{
-		stateIndexMap.clear();
-		// If a template clears labels, explicitly set state 0.
-		setSpawnFrameIndex(0);
-		setWalkFrameIndex(0);
-		setPainFrameIndex(0);
-		setMeleeFrameIndex(0);
-		setMissileFrameIndex(0);
-		setDeathFrameIndex(0);
-		setExtremeDeathFrameIndex(0);
-		setRaiseFrameIndex(0);
-		return this;
 	}
 
 	public DEHThingTemplate setSeeSoundPosition(int seeSoundPosition)

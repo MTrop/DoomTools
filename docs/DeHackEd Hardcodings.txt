@@ -2,53 +2,71 @@ Frame/State Hardcodings in Doom/Boom
 ====================================
 
 Frame 0:
-	NULL Frame. Reserved.
+	NULL State. Reserved.
 	Any object that jumps to this frame is removed.
 
 Frame 1:
-	STOP Frame for weapons that reset player light level boost. Reserved for convenience.
+	STOP State for weapons that reset player light level boost. 
+	Reserved for convenience.
 
 Frame 52:
-	Chaingun first firing frame.
+	Chaingun first firing state.
 
 Chaingun Muzzle Flash:
-	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on subsequent calls to A_FireCGun, offset from Frame 52.
-	So, if called from frame 52, [FlashFrame]. If frame 53, [FlashFrame]+1.
+	The chaingun's muzzle flash is [FlashFrame] and [FlashFrame]+1 on 
+	subsequent calls to A_FireCGun, offset from State 52. So, if called from 
+	state 52, [FlashFrame]. If state 53, [FlashFrame]+1.
 
 Frame 67:
-	If A_WeaponReady is called on this frame while the chainsaw is the active weapon, the chainsaw sound is played.
+	If A_WeaponReady is called on this frame while the chainsaw is the active
+	weapon, the chainsaw sound is played.
 
 Frame 91:
-	Blood map object is set to this frame for a bleeding hitscan attack that does between 9 to 12 damage, inclusive.
+	Blood map object is set to this frame for a bleeding hitscan attack that 
+	does between 9 to 12 damage, inclusive.
 
 Frame 92:
-	Blood map object is set to this frame for a bleeding hitscan attack that does strictly less than 9 damage.
+	Blood map object is set to this frame for a bleeding hitscan attack that 
+	does strictly less than 9 damage.
 
 Frame 154:
 	The player's firing frame on weapon fire.
 
 Frame 155:
-	The player's firing frame if a call to A_GunFlash happens directly, or indirectly via some weapon action functions.
+	The player's firing frame if a call to A_GunFlash happens directly, or 
+	indirectly via some weapon action functions.
 
 Frame 266:
-	An actor that calls A_VileChase and encounters a dead object with a Raise frame jumps to this frame on "heal".
+	An actor that calls A_VileChase and encounters a dead object with a Raise 
+	frame jumps to this frame on "heal".
 
 Frames 477-487 (inclusive):
 	On Fast Monsters, these frames get their duration halved.
 
 Frame 799:
-	For A_BrainExplode, a Rocket Projectile (Slot 34) is spawned, but immediately set to frame 799.
-	It would be wise to then call A_BrainExplode at the end to make the next explosion occur at the end of the animation.
+	For A_BrainExplode, a Rocket Projectile (Slot 34) is spawned, but 
+	immediately set to frame 799. It would be wise to then call A_BrainExplode
+	at the end to make the next explosion occur at the end of the animation.
 
 Frame 895:
 	All actors are set to this state when their corpse is crushed.
 
 Plasma Muzzle Flash:
-	The plasma rifle's muzzle flash is called at random between [FlashFrame] and [FlashFrame]+1 on a call to A_FirePlasma.
+	The plasma rifle's muzzle flash is called at random between [FlashFrame] 
+	and [FlashFrame]+1 on a call to A_FirePlasma.
 
 Final Frame:
-	If replaced in a DEH patch, using DeHackEd to patch an original EXE will overwrite the weapon table, due to a bug in DeHackEd 3.0
-	(this is fine in source ports).
+	If replaced in a DEH patch, using DeHackEd to patch an original EXE will 
+	overwrite the weapon table, due to a bug in DeHackEd 3.0 (this is fine 
+	in source ports).
+
+
+More State Stuff
+================
+
+The [SpawnState] state on every thing is SET instead of updated via Thinker
+update, which means that it's action pointer will not be called. The state
+will also NOT ADVANCE if the duration of the that frame is 0 or less.
 
 
 Thing Slot Hardcoding
@@ -78,7 +96,8 @@ Revenant (Slot 6)
 
 Revenant Rocket (Slot 7) 
 	Spawned by A_SkelMissile.
-	Only slot that can use A_Tracer, since A_SkelMissile sets tracer parameters.
+	Only slot that can use A_Tracer, since A_SkelMissile sets tracer 
+	parameters.
 
 Revenant Rocket Trail (Slot 8)
  	Spawned on a seeking A_Tracer call.
@@ -89,10 +108,12 @@ Mancubus (Slot 9)
 		On MAP07, Floor_LowerToLowest all sectors tagged 666. 
 
 Mancubus Fireball (Slot 10)
-	Spawned by A_FatAttack1, A_FatAttack2, and A_FatAttack3, in different angles:
+	Spawned by A_FatAttack1, A_FatAttack2, and A_FatAttack3, in different 
+	angles:
 		A_FatAttack1 - Center and target's right.
 		A_FatAttack2 - Center and target's left.
-		A_FatAttack3 - Akimbo left and right, shallower offset angles than 1 and 2.
+		A_FatAttack3 - Akimbo left and right, shallower offset angles than 1 
+		               and 2.
 
 Chaingun Sergeant (Slot 11)
 	On Death, creates a Chaingun (Slot 74) with a DROPPED flag. 
@@ -137,7 +158,8 @@ Spider Mastermind (Slot 20)
 Arachnotron (Slot 21)
 	Spawnable by A_SpawnFly (Probability: 7.8%).
 	When this calls A_BossDeath:
-		On MAP07, Raise all sectors tagged 667 by the height of their linedefs' highest lower texture. 
+		On MAP07, Raise all sectors tagged 667 by the height of their 
+		linedefs' highest lower texture. 
 
 Cyberdemon (Slot 22)
 	Sight and Death sounds are played at full volume always.
@@ -169,7 +191,8 @@ Caco Fireball (Slot 33)
 
 Rocket Projectile (Slot 34)
 	Spawned by A_FireMissile and A_CyberAttack.
-	Also spawned by A_BrainScream, with a slight adjustment to starting frame.
+	Also spawned by A_BrainScream and A_BrainExplode, with a slight adjustment
+	to starting frame.
 
 Plasma Gun Projectile (Slot 35)
 	Spawned by A_FirePlasma.
@@ -309,8 +332,9 @@ The relevant string on sprite index is [index] + 954.
 Items
 =====
 
-Item Pickups are performed when the player collides with an object that is flagged as "pickup," but the sprite's 
-names dictate what is given (refer to actual string data at the index for the detected name):
+Item Pickups are performed when the player collides with an object that is 
+flagged as "pickup," but the sprite's names dictate what is given (refer to 
+actual string data at the index for the detected name):
 
 Sprite Index 55 -> Green Armor 
 Sprite Index 56 -> Blue Armor 
@@ -353,7 +377,8 @@ Sprite Index 93 -> Super Shotgun
 On Crush
 ========
 
-All objects with the DEAD flag jump to Frame 895 when crushed by a lowering ceiling, and get SOLID removed from them.
+All objects with the DEAD flag jump to Frame 895 when crushed by a lowering 
+ceiling, and get SOLID removed from them.
 
 
 Other Reference
@@ -366,9 +391,12 @@ Actions that play specific Weapon Sounds (played on owning actor):
 	A_CloseShotgun2 (Sound 6 DBCLS) (also calls A_ReFire)
 
 Actions that play Specific Monster Sounds (played on calling actor):
+	A_VileStart (Sound 54 VILATK)
 	A_FatRaise (Sound 99 MANATK) (also calls A_FaceTarget)
 	A_SkelWhoosh (Sound 56 SKESWG) (also calls A_FaceTarget)
-	A_VileStart (Sound 54 VILATK)
 	A_StartFire (Sound 92 FLAMST) (also calls A_Fire)
 	A_FireCrackle (Sound 91 FLAME) (also calls A_Fire)
+
+Actions that play Specific Monster Sounds (played at full volume):
+	A_BrainPain (Sound 97 BOSPN)
 

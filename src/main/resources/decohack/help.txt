@@ -489,6 +489,7 @@ associated Thing for pickups.
         //MBF21 fields
         ammopershot <INTEGER>
         
+        clear properties // If present, clear all properties.
         clear flags // If present, clear all flags (both sets, if available)
 
         // MBF21 Flags (MBF21 feature set only)
@@ -662,6 +663,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
 
     thing <INTEGER> [ : thing <INTEGER> ] [ <STRING> ] 
     {
+        clear properties // If present, clear all properties.
+        
         ednum <NUMBER>
         
         health <NUMBER>

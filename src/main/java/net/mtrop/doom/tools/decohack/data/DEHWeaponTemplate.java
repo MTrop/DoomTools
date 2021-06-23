@@ -68,6 +68,34 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 		return this;
 	}
 	
+	@Override
+	public DEHWeaponTemplate clearProperties()
+	{
+		setAmmoType(Ammo.BULLETS);
+		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate clearFlags() 
+	{
+		setMBF21Flags(0x00000000);
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate clearLabels()
+	{
+		stateIndexMap.clear();
+		// If a template clears labels, explicitly set state 0.
+		setRaiseFrameIndex(0);
+		setLowerFrameIndex(0);
+		setReadyFrameIndex(0);
+		setFireFrameIndex(0);
+		setFlashFrameIndex(0);
+		return this;
+	}
+
 	/**
 	 * Sets the ammo type.
 	 * @param ammoType the type.
@@ -206,19 +234,6 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	public int getLabel(String label)
 	{
 		return stateIndexMap.getOrDefault(label, 0);
-	}
-
-	@Override
-	public DEHWeaponTemplate clearLabels()
-	{
-		stateIndexMap.clear();
-		// If a template clears labels, explicitly set state 0.
-		setRaiseFrameIndex(0);
-		setLowerFrameIndex(0);
-		setReadyFrameIndex(0);
-		setFireFrameIndex(0);
-		setFlashFrameIndex(0);
-		return this;
 	}
 
 }

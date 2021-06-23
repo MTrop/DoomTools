@@ -30,7 +30,7 @@ public class DEHState implements DEHObject<DEHState>
 	private int mbf21Flags;
 	
 	/**
-	 * Creates a new frame.
+	 * Creates a new state.
 	 */
 	public DEHState()
 	{

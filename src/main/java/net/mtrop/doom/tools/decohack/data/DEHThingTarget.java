@@ -13,76 +13,111 @@ package net.mtrop.doom.tools.decohack.data;
  */
 public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHActor<DEHThingTarget<SELF>>
 {
-	public SELF setEditorNumber(int editorNumber);
+	static final String STATE_LABEL_SPAWN = "spawn";
+	static final String STATE_LABEL_SEE = "see";
+	static final String STATE_LABEL_MELEE = "melee";
+	static final String STATE_LABEL_MISSILE = "missile";
+	static final String STATE_LABEL_PAIN = "pain";
+	static final String STATE_LABEL_DEATH = "death";
+	static final String STATE_LABEL_XDEATH = "xdeath";
+	static final String STATE_LABEL_RAISE = "raise";
 
-	public SELF setHealth(int health);
-
-	public SELF setSpeed(int speed);
-
-	public SELF setFastSpeed(int fastSpeed);
-
-	public SELF setRadius(int radius);
-
-	public SELF setHeight(int height);
-
-	public SELF setDamage(int damage);
-
-	public SELF setReactionTime(int reactionTime);
-
-	public SELF setPainChance(int painChance);
-
-	public SELF setFlags(int bits);
-
-	public SELF addFlag(int bits);
+	static final int EDITORNUMBER_NONE = -1;
+	static final int SOUND_NONE = 0;
+	static final int FRAME_NULL = 0;
+	static final int NO_ITEM = 0;
+	static final int DEFAULT_GROUP = 0;
+	static final int DEFAULT_FASTSPEED = -1;
+	static final int DEFAULT_MELEE_RANGE = 64;
 	
-	public SELF removeFlag(int bits);
-
-	public SELF setMBF21Flags(int bits);
-
-	public SELF addMBF21Flag(int bits);
+	/**
+	 * Clears the properties.
+	 * @return this object.
+	 */
+	SELF clearProperties();
 	
-	public SELF removeMBF21Flag(int bits);
+	/**
+	 * Clears the sounds.
+	 * @return this object.
+	 */
+	SELF clearSounds();
 
-	public SELF setMass(int mass);
-
-	public SELF setMeleeRange(int meleeRange);
-
-	public SELF setInfightingGroup(int infightingGroup);
+	/**
+	 * Clears the sounds.
+	 * @return this object.
+	 */
+	SELF clearFlags();
 	
-	public SELF setProjectileGroup(int projectileGroup);
+	SELF setEditorNumber(int editorNumber);
+
+	SELF setHealth(int health);
+
+	SELF setSpeed(int speed);
+
+	SELF setFastSpeed(int fastSpeed);
+
+	SELF setRadius(int radius);
+
+	SELF setHeight(int height);
+
+	SELF setDamage(int damage);
+
+	SELF setReactionTime(int reactionTime);
+
+	SELF setPainChance(int painChance);
+
+	SELF setFlags(int bits);
+
+	SELF addFlag(int bits);
 	
-	public SELF setSplashGroup(int splashGroup);
+	SELF removeFlag(int bits);
+
+	SELF setMBF21Flags(int bits);
+
+	SELF addMBF21Flag(int bits);
 	
-	public SELF setDroppedItem(int droppedItem);
+	SELF removeMBF21Flag(int bits);
+
+	SELF setMass(int mass);
+
+	SELF setMeleeRange(int meleeRange);
+
+	SELF setInfightingGroup(int infightingGroup);
 	
-	public SELF setSpawnFrameIndex(int spawnFrameIndex);
+	SELF setProjectileGroup(int projectileGroup);
+	
+	SELF setSplashGroup(int splashGroup);
+	
+	SELF setDroppedItem(int droppedItem);
+	
+	SELF setSpawnFrameIndex(int spawnFrameIndex);
 
-	public SELF setWalkFrameIndex(int walkFrameIndex);
+	SELF setWalkFrameIndex(int walkFrameIndex);
 
-	public SELF setPainFrameIndex(int painFrameIndex);
+	SELF setPainFrameIndex(int painFrameIndex);
 
-	public SELF setMeleeFrameIndex(int meleeFrameIndex);
+	SELF setMeleeFrameIndex(int meleeFrameIndex);
 
-	public SELF setMissileFrameIndex(int missileFrameIndex);
+	SELF setMissileFrameIndex(int missileFrameIndex);
 
-	public SELF setDeathFrameIndex(int deathFrameIndex);
+	SELF setDeathFrameIndex(int deathFrameIndex);
 
-	public SELF setExtremeDeathFrameIndex(int extremeDeathFrameIndex);
+	SELF setExtremeDeathFrameIndex(int extremeDeathFrameIndex);
 
-	public SELF setRaiseFrameIndex(int raiseFrameIndex);
+	SELF setRaiseFrameIndex(int raiseFrameIndex);
 
-	public SELF setLabel(String label, int index);
+	SELF setLabel(String label, int index);
 
-	public SELF setSeeSoundPosition(int seeSoundPosition);
+	SELF setSeeSoundPosition(int seeSoundPosition);
 
-	public SELF setAttackSoundPosition(int attackSoundPosition);
+	SELF setAttackSoundPosition(int attackSoundPosition);
 
-	public SELF setPainSoundPosition(int painSoundPosition);
+	SELF setPainSoundPosition(int painSoundPosition);
 
-	public SELF setDeathSoundPosition(int deathSoundPosition);
+	SELF setDeathSoundPosition(int deathSoundPosition);
 
-	public SELF setActiveSoundPosition(int activeSoundPosition);
+	SELF setActiveSoundPosition(int activeSoundPosition);
 
-	public SELF setRipSoundPosition(int ripSoundPosition);
+	SELF setRipSoundPosition(int ripSoundPosition);
 
 }

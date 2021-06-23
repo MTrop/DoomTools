@@ -22,23 +22,6 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 {
-	public static final String STATE_LABEL_SPAWN = "spawn";
-	public static final String STATE_LABEL_SEE = "see";
-	public static final String STATE_LABEL_MELEE = "melee";
-	public static final String STATE_LABEL_MISSILE = "missile";
-	public static final String STATE_LABEL_PAIN = "pain";
-	public static final String STATE_LABEL_DEATH = "death";
-	public static final String STATE_LABEL_XDEATH = "xdeath";
-	public static final String STATE_LABEL_RAISE = "raise";
-
-	public static final int EDITORNUMBER_NONE = -1;
-	public static final int SOUND_NONE = 0;
-	public static final int FRAME_NULL = 0;
-	public static final int NO_ITEM = 0;
-	public static final int DEFAULT_GROUP = 0;
-	public static final int DEFAULT_FASTSPEED = -1;
-	public static final int DEFAULT_MELEE_RANGE = 64;
-	
 	private String name;
 	
 	private int editorNumber;
@@ -93,35 +76,9 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		setName("");
-		setEditorNumber(EDITORNUMBER_NONE);
-		
-		setHealth(0);
-		setSpeed(0);
-		setFastSpeed(-1);
-		setRadius(0);
-		setHeight(0);
-		setDamage(0);
-		setReactionTime(0);
-		setPainChance(0);
-		setFlags(0x00000000);
-		setMass(0);
-		
-		setSeeSoundPosition(SOUND_NONE);
-		setAttackSoundPosition(SOUND_NONE);
-		setPainSoundPosition(SOUND_NONE);
-		setDeathSoundPosition(SOUND_NONE);
-		setActiveSoundPosition(SOUND_NONE);
-
-		setDroppedItem(NO_ITEM);
-
-		setMBF21Flags(0x00000000);
-		setInfightingGroup(DEFAULT_GROUP);
-		setProjectileGroup(DEFAULT_GROUP);
-		setSplashGroup(DEFAULT_GROUP);
-		setFastSpeed(DEFAULT_FASTSPEED);
-		setMeleeRange(DEFAULT_MELEE_RANGE);
-		setRipSoundPosition(SOUND_NONE);
-		
+		clearProperties();
+		clearFlags();
+		clearSounds();
 		clearLabels();
 	}
 
@@ -165,6 +122,47 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 		return this;
 	}
 	
+	@Override
+	public DEHThing clearProperties() 
+	{
+		setEditorNumber(EDITORNUMBER_NONE);
+		setHealth(0);
+		setSpeed(0);
+		setRadius(0);
+		setHeight(0);
+		setDamage(0);
+		setReactionTime(0);
+		setPainChance(0);
+		setMass(0);
+		setDroppedItem(NO_ITEM);
+		setInfightingGroup(DEFAULT_GROUP);
+		setProjectileGroup(DEFAULT_GROUP);
+		setSplashGroup(DEFAULT_GROUP);
+		setFastSpeed(DEFAULT_FASTSPEED);
+		setMeleeRange(DEFAULT_MELEE_RANGE);
+		return this;
+	}
+	
+	@Override
+	public DEHThing clearSounds() 
+	{
+		setSeeSoundPosition(SOUND_NONE);
+		setAttackSoundPosition(SOUND_NONE);
+		setPainSoundPosition(SOUND_NONE);
+		setDeathSoundPosition(SOUND_NONE);
+		setActiveSoundPosition(SOUND_NONE);
+		setRipSoundPosition(SOUND_NONE);
+		return this;
+	}
+
+	@Override
+	public DEHThing clearFlags() 
+	{
+		setFlags(0x00000000);
+		setMBF21Flags(0x00000000);
+		return this;
+	}
+
 	public String getName() 
 	{
 		return name;

@@ -14,10 +14,12 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
@@ -92,6 +94,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_FREE = "free";
 	private static final String KEYWORD_PROTECT = "protect";
 	private static final String KEYWORD_UNPROTECT = "unprotect";
+	private static final String KEYWORD_PROPERTIES = "properties";
 
 	private static final String KEYWORD_EACH = "each";
 	private static final String KEYWORD_IN = "in";
@@ -765,6 +768,67 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	// Parses a range of integers and returns them.
+	private List<Integer> parseIntegerRange(String blockName, Supplier<Integer> integerReader)
+	{
+		List<Integer> out = new LinkedList<>();
+		
+		if (matchIdentifierIgnoreCase(KEYWORD_IN))
+		{
+			if (!matchType(DecoHackKernel.TYPE_LPAREN))
+			{
+				addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
+				return null;
+			}
+			
+			while (currentType(DecoHackKernel.TYPE_NUMBER))
+			{
+				Integer id;
+				if ((id = integerReader.get()) == null)
+					return null;
+	
+				out.add(id);
+				
+				if (!matchType(DecoHackKernel.TYPE_COMMA))
+					break;
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_RPAREN))
+			{
+				addErrorMessage("Expected ')' after the list of things.");
+				return null;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
+		{
+			Integer min;
+			if ((min = integerReader.get()) == null)
+				return null;
+	
+			if (!matchIdentifierIgnoreCase(KEYWORD_TO))
+			{
+				addErrorMessage("Expected \"%s\" after starting thing index.", KEYWORD_TO);
+				return null;
+			}
+	
+			Integer max;
+			if ((max = integerReader.get()) == null)
+				return null;
+			
+			int a = Math.min(min, max);
+			int b = Math.max(min, max);
+			while (a <= b)
+				out.add(a++);
+		}
+		else
+		{
+			addErrorMessage("Expected '%s' or '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_FROM, KEYWORD_EACH, blockName);
+			return null;
+		}
+		
+		return out;
+	}
+
 	// Parses a thing block.
 	private boolean parseThingBlock(AbstractPatchContext<?> context)
 	{
@@ -861,62 +925,11 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses an "each thing" block.
-	private boolean parseEachThingBlock(AbstractPatchContext<?> context)
+	private boolean parseEachThingBlock(final AbstractPatchContext<?> context)
 	{
-		List<Integer> thingList = new LinkedList<>();
-		
-		if (matchIdentifierIgnoreCase(KEYWORD_IN))
-		{
-			if (!matchType(DecoHackKernel.TYPE_LPAREN))
-			{
-				addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
-				return false;
-			}
-			
-			while (currentType(DecoHackKernel.TYPE_NUMBER))
-			{
-				Integer id;
-				if ((id = matchThingIndex(context)) == null)
-					return false;
-
-				thingList.add(id);
-				
-				if (!matchType(DecoHackKernel.TYPE_COMMA))
-					break;
-			}
-			
-			if (!matchType(DecoHackKernel.TYPE_RPAREN))
-			{
-				addErrorMessage("Expected ')' after the list of things.");
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
-		{
-			Integer min;
-			if ((min = matchThingIndex(context)) == null)
-				return false;
-
-			if (!matchIdentifierIgnoreCase(KEYWORD_TO))
-			{
-				addErrorMessage("Expected \"%s\" after starting thing index.", KEYWORD_TO);
-				return false;
-			}
-
-			Integer max;
-			if ((max = matchThingIndex(context)) == null)
-				return false;
-			
-			int a = Math.min(min, max);
-			int b = Math.max(min, max);
-			while (a <= b)
-				thingList.add(a++);
-		}
-		else
-		{
-			addErrorMessage("Expected '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_EACH, KEYWORD_THING);
+		List<Integer> thingList;
+		if ((thingList = parseIntegerRange(KEYWORD_THING, () -> matchThingIndex(context))) == null)
 			return false;
-		}
 		
 		if (thingList.isEmpty())
 		{
@@ -1052,11 +1065,13 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_PROPERTIES))
+				{
+					thing.clearProperties();
+				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 				{
-					if (context.supports(DEHFeatureLevel.MBF21))
-						thing.setMBF21Flags(0);
-					thing.setFlags(0);
+					thing.clearFlags();
 				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 				{
@@ -1064,14 +1079,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_SOUNDS))
 				{
-					thing
-						.setSeeSoundPosition(0)
-						.setAttackSoundPosition(0)
-						.setPainSoundPosition(0)
-						.setDeathSoundPosition(0)
-						.setActiveSoundPosition(0)
-						.setRipSoundPosition(0)
-					;
+					thing.clearSounds();
 				}
 				else
 				{
@@ -1537,64 +1545,13 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an "each weapon" block.
 	private boolean parseEachWeaponBlock(AbstractPatchContext<?> context)
 	{
-		List<Integer> weaponList = new LinkedList<>();
-		
-		if (matchIdentifierIgnoreCase(KEYWORD_IN))
-		{
-			if (!matchType(DecoHackKernel.TYPE_LPAREN))
-			{
-				addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
-				return false;
-			}
-			
-			while (currentType(DecoHackKernel.TYPE_NUMBER))
-			{
-				Integer id;
-				if ((id = matchWeaponIndex(context)) == null)
-					return false;
-
-				weaponList.add(id);
-				
-				if (!matchType(DecoHackKernel.TYPE_COMMA))
-					break;
-			}
-			
-			if (!matchType(DecoHackKernel.TYPE_RPAREN))
-			{
-				addErrorMessage("Expected ')' after the list of weapons.");
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
-		{
-			Integer min;
-			if ((min = matchWeaponIndex(context)) == null)
-				return false;
-
-			if (!matchIdentifierIgnoreCase(KEYWORD_TO))
-			{
-				addErrorMessage("Expected \"%s\" after starting weapon index.", KEYWORD_TO);
-				return false;
-			}
-
-			Integer max;
-			if ((max = matchThingIndex(context)) == null)
-				return false;
-			
-			int a = Math.min(min, max);
-			int b = Math.max(min, max);
-			while (a <= b)
-				weaponList.add(a++);
-		}
-		else
-		{
-			addErrorMessage("Expected '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_EACH, KEYWORD_WEAPON);
+		List<Integer> weaponList;
+		if ((weaponList = parseIntegerRange(KEYWORD_WEAPON, () -> matchWeaponIndex(context))) == null)
 			return false;
-		}
-				
+		
 		if (weaponList.isEmpty())
 		{
-			addErrorMessage("Expected at least one weapons in a list of weapons.");
+			addErrorMessage("Expected at least one weapon in a list of things.");
 			return false;
 		}
 		
@@ -1693,6 +1650,10 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 				}
+				else if (matchIdentifierIgnoreCase(KEYWORD_PROPERTIES))
+				{
+					weapon.clearProperties();
+				}
 				else if (matchIdentifierIgnoreCase(KEYWORD_STATES))
 				{
 					weapon.clearLabels();
@@ -1704,7 +1665,7 @@ public final class DecoHackParser extends Lexer.Parser
 						addErrorMessage("Can't clear flags. Not an MBF21 patch.");
 						return false;
 					}
-					weapon.setMBF21Flags(0);
+					weapon.clearFlags();
 				}
 				else
 				{
@@ -2086,6 +2047,12 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 
+			if (context.isProtectedState(index))
+			{
+				addErrorMessage("State index %d is a protected state.", index);
+				return false;
+			}
+			
 			if (!parseStateBody(context, index))
 				return false;
 
@@ -2100,18 +2067,9 @@ public final class DecoHackParser extends Lexer.Parser
 		// if fill state...
 		else if (matchIdentifierIgnoreCase(KEYWORD_FILL))
 		{
-			if ((index = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected state index keyword after \"%s\".", KEYWORD_FILL);
+			if ((index = parseStateIndex(context)) == null)
 				return false;
-			}
 
-			if (index >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", index, context.getStateCount() - 1);
-				return false;
-			}
-			
 			if (!matchType(DecoHackKernel.TYPE_LBRACE))
 			{
 				addErrorMessage("Expected '{' after \"%s %s\" header.", KEYWORD_STATE, KEYWORD_FILL);
@@ -2200,12 +2158,8 @@ public final class DecoHackParser extends Lexer.Parser
 	// Either consists of a next state index clause, a state and next index clause, or just a state.
 	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
 	{
-		if (context.isProtectedState(index))
-		{
-			addErrorMessage("State index %d is a protected state.", index);
-			return false;
-		}
-		
+		DEHState state = context.getState(index); 
+
 		Integer nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{
@@ -2216,7 +2170,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (currentIsSpriteIndex(context))
 		{
 			ParsedState parsedState = new ParsedState();
-			
+
 			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
 			Integer pointerIndex = context.getStateActionPointerIndex(index);
 			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
@@ -2242,10 +2196,9 @@ public final class DecoHackParser extends Lexer.Parser
 				context.setActionPointer(pointerIndex, parsedAction.action);
 			
 			// fill state.
-			DEHState state = context.getState(index); 
 			state
 				.setSpriteIndex(parsedState.spriteIndex)
-				.setFrameIndex(parsedState.frameList.get(0))
+				.setFrameIndex(parsedState.frameList.pollFirst())
 				.setDuration(parsedState.duration)
 				.setBright(parsedState.bright)
 				.setMisc1(parsedAction.misc1)
@@ -2253,7 +2206,7 @@ public final class DecoHackParser extends Lexer.Parser
 				.setArgs(parsedAction.args)
 			;
 			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
-				context.getState(index).setMBF21Flags(parsedState.mbf21Flags);
+				state.setMBF21Flags(parsedState.mbf21Flags);
 
 			// Try to parse next state clause.
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
@@ -2265,7 +2218,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else
 		{
 			addErrorMessage("Expected valid sprite name or next state clause (goto, stop, wait).");
-			return false;				
+			return false;
 		}
 	}
 
@@ -2286,7 +2239,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;				
 		}
 		
-		if (!matchFrameIndices(state.frameList))
+		if ((state.frameList = matchFrameIndices()) == null)
 		{
 			addErrorMessage("Expected valid frame characters after sprite name.");
 			return false;				
@@ -3007,21 +2960,25 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier that is a list of subframe indices.
 	// If match, advance token and return true plus modified out list.
 	// Else, return null.
-	private boolean matchFrameIndices(List<Integer> outList)
+	private Deque<Integer> matchFrameIndices()
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			return false;
+			return null;
 
+		Deque<Integer> frameList = new LinkedList<>();
 		String lexeme = currentToken().getLexeme();
 		for (int i = 0; i < lexeme.length(); i++)
 		{
 			char c = lexeme.charAt(i);
 			if (c < 'A' || c > ']')
-				throw new IllegalArgumentException("Subframe list contains an invalid character: " + c + " Expected A through ].");
-			outList.add(c - 'A');
+			{
+				addErrorMessage("Subframe list contains an invalid character: " + c + " Expected A through ].");
+				return null;
+			}
+			frameList.add(c - 'A');
 		}
 		nextToken();
-		return true;
+		return frameList;
 	}
 	
 	// Matches a series of state flags (including "bright").
@@ -3528,7 +3485,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static class ParsedState
 	{
 		private Integer spriteIndex;
-		private LinkedList<Integer> frameList;
+		private Deque<Integer> frameList;
 		private Integer duration;
 		private boolean bright;
 		private Integer mbf21Flags;
