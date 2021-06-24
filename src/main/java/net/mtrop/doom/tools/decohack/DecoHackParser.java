@@ -95,6 +95,11 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PROTECT = "protect";
 	private static final String KEYWORD_UNPROTECT = "unprotect";
 	private static final String KEYWORD_PROPERTIES = "properties";
+	private static final String KEYWORD_SPRITENAME = "spritename";
+	private static final String KEYWORD_FRAME = "frame";
+	private static final String KEYWORD_DURATION = "duration";
+	private static final String KEYWORD_NEXTSTATE = "nextstate";
+	private static final String KEYWORD_POINTER = "pointer";
 
 	private static final String KEYWORD_EACH = "each";
 	private static final String KEYWORD_IN = "in";
@@ -157,6 +162,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private static final String KEYWORD_OFFSET = "offset";
 	private static final String KEYWORD_STATE_BRIGHT = "bright";
+	private static final String KEYWORD_STATE_NOTBRIGHT = "notbright";
 	private static final String KEYWORD_STATE_FAST = "fast";
 	private static final String KEYWORD_STATE_NOTFAST = "notfast";
 	
@@ -170,6 +176,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_MBF = "mbf";
 	private static final String KEYWORD_EXTENDED = "extended";
 	private static final String KEYWORD_MBF21 = "mbf21";
+	
+	private static final String KEYWORD_NULL = "null";
 
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
@@ -2158,14 +2166,16 @@ public final class DecoHackParser extends Lexer.Parser
 	// Either consists of a next state index clause, a state and next index clause, or just a state.
 	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
 	{
-		DEHState state = context.getState(index); 
+		DEHState state = context.getState(index);
 
 		Integer nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{
-			context.getState(index).setNextStateIndex(nextStateIndex);
+			state.setNextStateIndex(nextStateIndex);
 			return true;
 		}
+		
+		boolean notModified = true;
 		
 		if (currentIsSpriteIndex(context))
 		{
@@ -2211,15 +2221,161 @@ public final class DecoHackParser extends Lexer.Parser
 			// Try to parse next state clause.
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
 			if (nextStateIndex != null)
-				context.getState(index).setNextStateIndex(nextStateIndex);
-
+				state.setNextStateIndex(nextStateIndex);
 			return true;
 		}
-		else
+		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			addErrorMessage("Expected valid sprite name or next state clause (goto, stop, wait).");
+			if (matchIdentifierIgnoreCase(KEYWORD_SPRITENAME))
+			{
+				Integer value;
+				if ((value = matchSpriteIndexName(context)) == null)
+				{
+					addErrorMessage("Expected valid sprite name after \"%s\".", KEYWORD_SPRITENAME);
+					return false;				
+				}
+				
+				state.setSpriteIndex(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_FRAME))
+			{
+				Deque<Integer> value;
+				if ((value = matchFrameIndices()) == null)
+				{
+					addErrorMessage("Expected valid frame characters after \"%s\".", KEYWORD_FRAME);
+					return false;				
+				}
+				
+				if (value.size() > 1)
+				{
+					addErrorMessage("Expected a single frame character after \"%s\".", KEYWORD_FRAME);
+					return false;				
+				}
+				
+				state.setFrameIndex(value.pollFirst());
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_DURATION))
+			{
+				Integer value;
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_DURATION);
+					return false;				
+				}
+				
+				state.setDuration(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_NEXTSTATE))
+			{
+				Integer value;
+				if ((value = parseStateIndex(context)) == null)
+				{
+					addErrorMessage("Expected valid state index clause after \"%s\".", KEYWORD_NEXTSTATE);
+					return false;				
+				}
+				
+				state.setNextStateIndex(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+				Integer pointerIndex = context.getStateActionPointerIndex(index);
+				ParsedAction action = new ParsedAction();
+				Boolean requireAction = isBoom ? null : pointerIndex != null;
+
+				if (matchIdentifierIgnoreCase(KEYWORD_NULL))
+				{
+					if (requireAction != null && requireAction)
+					{
+						addErrorMessage("Expected an action pointer for this state.");
+						return false;
+					}
+					else
+					{
+						action.action = DEHActionPointer.NULL;
+					}
+				}
+				else if (!parseActionClause(context, null, action, requireAction))
+				{
+					return false;
+				}
+
+				if (isBoom && pointerIndex != null && action.action == null)
+					action.action = DEHActionPointer.NULL;
+				
+				if (pointerIndex != null)
+					context.setActionPointer(pointerIndex, action.action);
+
+				state
+					.setMisc1(action.misc1)
+					.setMisc2(action.misc2)
+					.setArgs(action.args)
+				;
+				
+				notModified = false;
+			}
+			else if (currentIdentifierIgnoreCase(KEYWORD_OFFSET))
+			{
+				ParsedAction action = new ParsedAction();
+				if (!parseOffsetClause(action))
+					return false;
+				
+				state
+					.setMisc1(action.misc1)
+					.setMisc2(action.misc2)
+				;
+				
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_BRIGHT))
+			{
+				state.setBright(true);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTBRIGHT))
+			{
+				state.setBright(false);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_FAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_FAST);
+					return false;
+				}
+				
+				state.setMBF21Flags(state.getMBF21Flags() | DEHStateFlag.SKILL5FAST.getValue());
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_NOTFAST);
+					return false;
+				}
+
+				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateFlag.SKILL5FAST.getValue());
+				notModified = false;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		if (notModified)
+		{
+			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
 			return false;
 		}
+		
+		return true;
 	}
 
 	// Parse a single state and if true is returned, the input state is altered.
@@ -2769,7 +2925,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Checks if the current token is an identifier with a specific lexeme.
-	private boolean currentIdentifierLexemeIgnoreCase(String lexeme)
+	private boolean currentIdentifierIgnoreCase(String lexeme)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return false;
@@ -2923,7 +3079,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Else, return false.
 	private boolean matchIdentifierIgnoreCase(String lexeme)
 	{
-		if (!currentIdentifierLexemeIgnoreCase(lexeme))
+		if (!currentIdentifierIgnoreCase(lexeme))
 			return false;
 		nextToken();
 		return true;

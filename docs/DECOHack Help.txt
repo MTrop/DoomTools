@@ -317,6 +317,23 @@ end up doing the same thing for multiple things:
     MANC H 10 Bright A_FatAttack3
 
 
+Individual state manipulation can have partial change to its properties
+instead of using a full state definition line:
+
+    state <INTEGER>
+    {
+        spritename <SpriteName> 
+        frame <Frame> 
+        duration <NUMBER> 
+        [Bright]
+        [NotBright]
+        [Fast]      // MBF21 Only
+        [NotFast]   // MBF21 Only 
+        [<OffsetClause>]
+        pointer [ <ActionPointer> | null ]
+        nextstate <StateIndex>
+    }
+
 
 More examples:
 
@@ -335,7 +352,12 @@ More examples:
     state 16
     {
         PISG C 4
-        goto 16
+        goto 17
+    }
+
+    state 16
+    {
+    	duration 1
     }
 
     state 17
@@ -359,6 +381,12 @@ More examples:
     {
         CAND A -1 Bright
         stop
+    }
+
+    state 911
+    {
+        notbright
+        pointer null
     }
 
 

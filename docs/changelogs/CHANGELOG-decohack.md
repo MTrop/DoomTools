@@ -4,6 +4,8 @@ DecoHack
 ### Changed for 0.14.0
 
 * `Added` Each Thing/Weapon Characteristics Filling. (Enhancement #24)
+* `Added` Individual state property changes.
+* `Fixed` A_AddFlags, A_RemoveFlags, A_JumpIfFlagSet used the wrong parameter type.
 
 
 ### Changed for 0.13.0

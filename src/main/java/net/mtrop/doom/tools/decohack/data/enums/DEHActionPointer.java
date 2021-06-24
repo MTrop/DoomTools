@@ -125,9 +125,9 @@ public enum DEHActionPointer
 	JUMPIFTARGETCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetCloser", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	JUMPIFTRACERINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerInSight", DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED),
 	JUMPIFTRACERCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerCloser", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
-	JUMPIFFLAGSSET      (-1,  false, DEHActionPointerType.MBF21, "JumpIfFlagsSet", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
-	ADDFLAGS            (-1,  false, DEHActionPointerType.MBF21, "AddFlags", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
-	REMOVEFLAGS         (-1,  false, DEHActionPointerType.MBF21, "RemoveFlags", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
+	JUMPIFFLAGSSET      (-1,  false, DEHActionPointerType.MBF21, "JumpIfFlagsSet", DEHActionPointerParam.UINT, DEHActionPointerParam.INT, DEHActionPointerParam.INT),
+	ADDFLAGS            (-1,  false, DEHActionPointerType.MBF21, "AddFlags", DEHActionPointerParam.INT, DEHActionPointerParam.INT),
+	REMOVEFLAGS         (-1,  false, DEHActionPointerType.MBF21, "RemoveFlags", DEHActionPointerParam.INT, DEHActionPointerParam.INT),
 
 	// MBF21 Weapon Action Pointers
 	WEAPONPROJECTILE    (-1,  true,  DEHActionPointerType.MBF21, "WeaponProjectile", DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.INT, DEHActionPointerParam.INT),
