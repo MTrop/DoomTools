@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.14.1
+
+* `Fixed` Lexer bugfix. Fixes inconsistent identifier concatenation. (Issue #32)
+
+
 ### Changed for 0.14.0
 
 * `Added` Each Thing/Weapon Characteristics Filling. (Enhancement #24)
