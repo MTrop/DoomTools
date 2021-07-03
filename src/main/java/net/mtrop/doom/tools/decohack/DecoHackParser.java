@@ -2172,6 +2172,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{
 			state.setNextStateIndex(nextStateIndex);
+			context.setFreeState(index, false);
 			return true;
 		}
 		
@@ -2222,6 +2223,8 @@ public final class DecoHackParser extends Lexer.Parser
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
 			if (nextStateIndex != null)
 				state.setNextStateIndex(nextStateIndex);
+			
+			context.setFreeState(index, false);
 			return true;
 		}
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
@@ -2375,6 +2378,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
+		context.setFreeState(index, false);
 		return true;
 	}
 

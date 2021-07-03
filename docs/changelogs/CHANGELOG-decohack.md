@@ -1,6 +1,12 @@
 DecoHack
 --------
 
+### Changed for 0.15.0
+
+* `Changed` Altering a state directly now removes its "free" status, if set.
+* `Changed` Thing speed now accepts negative values.
+
+
 ### Changed for 0.14.1
 
 * `Fixed` Lexer bugfix. Fixes inconsistent identifier concatenation. (Issue #32)

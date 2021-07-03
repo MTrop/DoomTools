@@ -207,7 +207,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 
 	public DEHThing setSpeed(int speed) 
 	{
-		RangeUtils.checkRange("Speed", 0, 65535, speed);
+		RangeUtils.checkRange("Speed", -32768, 32767, speed);
 		this.speed = speed;
 		return this;
 	}

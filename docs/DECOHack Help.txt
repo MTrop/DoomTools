@@ -460,7 +460,8 @@ Examples:
     }
 
 
-Each state altered or filled this way is no longer "free."
+Each state altered directly (via "state X") or filled in this manner are no 
+longer "free."
 
 You can protect a state from being freed (or an inclusive range of them) by 
 writing the following:

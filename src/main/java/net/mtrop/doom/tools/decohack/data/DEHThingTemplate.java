@@ -268,7 +268,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 
 	public DEHThingTemplate setSpeed(int speed) 
 	{
-		RangeUtils.checkRange("Speed", 0, 65535, speed);
+		RangeUtils.checkRange("Speed", -32768, 32767, speed);
 		this.speed = speed;
 		return this;
 	}
