@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import net.mtrop.doom.tools.common.Common;
@@ -38,6 +40,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	private int freeStateCount;
 	private int freePointerStateCount;
 	private boolean[] protectedStates;
+	
+	private Map<String, Integer> autoStateMapping;
 	
 	/**
 	 * Creates a new patch context.
@@ -81,6 +85,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.freeStates = new boolean[states.length];
 		this.freeStateCount = 0;
 		this.protectedStates = new boolean[states.length];
+		
+		this.autoStateMapping = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -413,6 +419,27 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return isFreeState(index) && !isProtectedState(index);
 	}
 
+	/**
+	 * Sets an auto state identifier.
+	 * The identifier is case-insensitive. 
+	 * @param name the name of the identifier.
+	 * @param index the corresponding state index.
+	 */
+	public void setAutoState(String name, int index)
+	{
+		autoStateMapping.put(name, index);
+	}
+	
+	/**
+	 * Gets the corresponding index for an auto state.
+	 * @param name the name of the identifier.
+	 * @return the corresponding state index, or null if not  
+	 */
+	public Integer getAutoState(String name)
+	{
+		return autoStateMapping.get(name);
+	}
+	
 	// Search function for free states.
 	private Integer searchNextFreeState(int startingIndex, Function<Integer, Boolean> func)
 	{

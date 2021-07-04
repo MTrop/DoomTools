@@ -84,6 +84,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private static final String KEYWORD_PARS = "pars";
 	
+	private static final String KEYWORD_AUTO = "auto";
 	private static final String KEYWORD_CLEAR = "clear";
 	private static final String KEYWORD_STATE = "state";
 	private static final String KEYWORD_FILL = "fill";
