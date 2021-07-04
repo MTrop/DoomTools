@@ -10,6 +10,8 @@ import static net.mtrop.doom.tools.doommake.ProjectModule.fileContentAppend;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +74,73 @@ public final class ProjectGenerator
 	private static final Map<String, String> RELEASE_WADMERGE_LINE;
 	/** The post-release add-on template fragments. */
 	private static final Map<String, ProjectModule> POST_RELEASE;
+	/** The post-release add-on template fragments. */
+	private static final Map<String, List<ProjectTokenReplacer>> REPLACER_LISTS;
+
+	/** Project name replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_NAME = ProjectTokenReplacer.create(
+		"PROJECT_NAME", "What is your project's WAD name (blank for \"PROJECT\")?", "PROJECT"
+	);
+	
+	/** IWAD path replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_IWAD = ProjectTokenReplacer.create(
+		"PROJECT_IWAD", "Path tp project IWAD (blank to skip)?", "", (path) -> {
+			if (path.trim().length() == 0)
+				return null;
+			if (!new File(path).exists())
+				return "IWAD path not found!";
+			return null;
+		}
+	);
+
+	/** DECOHack base type replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_DECOHACK = ProjectTokenReplacer.create(
+		"DECOHACK_BASE", "Patch type for DECOHack (doom19, udoom19, boom, mbf, extended, mbf21) (blank for \"doom19\")?", "doom19", (type) -> {
+			if (type.trim().length() == 0)
+				return null;
+			if (!set("doom19", "udoom19", "boom", "mbf", "extended", "mbf21").contains(type))
+				return "Bad type name.";
+			return null;
+		}
+	);
+
+	/** EXE path replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_PATH = ProjectTokenReplacer.create(
+		"PROJECT_EXE_PATH", "EXE path for testing (blank to skip)?", "", (path) -> {
+			if (path.trim().length() == 0)
+				return null;
+			if (!new File(path).exists())
+				return "EXE path not found!";
+			return null;
+		}
+	);
+
+	/** EXE working directory replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_WORKDIR = ProjectTokenReplacer.create(
+		"PROJECT_EXE_WORKDIR", "EXE working directory (blank to use EXE dir)?", "", (path) -> {
+			if (path.trim().length() == 0)
+				return null;
+			if (!new File(path).isDirectory())
+				return "Path not found, or is not a directory.";
+			return null;
+		}
+	);
+
+	/** EXE IWAD switch replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_SWITCH_IWAD = ProjectTokenReplacer.create(
+		"PROJECT_EXE_SWITCH_IWAD", "EXE IWAD switch (blank to use \"-iwad\")?", ""
+	);
+
+	/** EXE file switch replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_SWITCH_FILE = ProjectTokenReplacer.create(
+		"PROJECT_EXE_SWITCH_FILE", "EXE file switch (blank to use \"-file\")?", ""
+	);
+
+	/** EXE DEH switch replacer. */
+	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_SWITCH_DEH = ProjectTokenReplacer.create(
+		"PROJECT_EXE_SWITCH_DEH", "EXE DEH file switch (blank to use \"-deh\")?", ""
+	);
+
 
 	static
 	{
@@ -81,6 +150,7 @@ public final class ProjectGenerator
 		RELEASE_SCRIPT_MERGE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		RELEASE_WADMERGE_LINE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		POST_RELEASE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		REPLACER_LISTS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 		// ................................................................
 
@@ -134,6 +204,9 @@ public final class ProjectGenerator
 					"doommake/doommake-target.script"
 				)
 			)
+		);
+		REPLACER_LISTS.put(MODULE_INIT,
+			list(REPLACER_PROJECT_NAME, REPLACER_PROJECT_IWAD)
 		);
 		
 		// ................................................................
@@ -191,7 +264,10 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		
+		REPLACER_LISTS.put(MODULE_DECOHACK,
+			list(REPLACER_PROJECT_DECOHACK)
+		);
+
 		// ................................................................
 
 		// A module that builds a set of maps.
@@ -420,7 +496,17 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		
+		REPLACER_LISTS.put(MODULE_RUN,
+			list(
+				REPLACER_PROJECT_RUN_EXE_PATH, 
+				REPLACER_PROJECT_RUN_EXE_WORKDIR, 
+				REPLACER_PROJECT_RUN_SWITCH_IWAD, 
+				REPLACER_PROJECT_RUN_SWITCH_FILE, 
+				REPLACER_PROJECT_RUN_SWITCH_DEH
+			)
+		);
+
+
 		// ................................................................
 
 		TEMPLATES.put(TEMPLATE_GIT, template(
@@ -494,6 +580,24 @@ public final class ProjectGenerator
 		));
 
 	}
+	
+	@SafeVarargs
+	public static <T> List<T> list(T ... items)
+	{
+		List<T> out =  new LinkedList<>();
+		for (T t : items)
+			out.add(t);
+		return out;
+	}
+
+	@SafeVarargs
+	public static <T> Set<T> set(T ... items)
+	{
+		Set<T> out =  new HashSet<>();
+		for (T t : items)
+			out.add(t);
+		return out;
+	}
 
 	public static Set<Map.Entry<String, ProjectTemplate>> getTemplates()
 	{
@@ -535,6 +639,8 @@ public final class ProjectGenerator
 				selected.add(modfound);
 			}
 		}
+		
+		// TODO: Gather up replacers, get inputs, and then build a map to use for each ReplacerReader
 		
 		// Modules.
 		for (ProjectModule module : selected)

@@ -3,13 +3,8 @@
  * Main
  ****************************************************************************/
 
-// NOTE: Right now, these lines use Doom 1.9 as the starting patch
-//       and includes the "friendly" thing define macros. You may
-//       wish to change these, depending on your project.
-//       See "docs/DECOHack Help.txt" for more info.
-
-#include "classpath:decohack/doom19.dh"
-#include "classpath:decohack/constants/friendly_things.dh"
+#include <{{DECOHACK_BASE}}>
+#include <friendly>
 
 // Your DECOHack code here ...
 

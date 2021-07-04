@@ -5,7 +5,7 @@ Advanced engine needed  : Source Port that This is Targeting
 Primary purpose         : Single play / Co-op / Deathmatch / Other
 ===========================================================================
 Title                   : Title of this Mod
-Filename                : The main filename
+Filename                : {{PROJECT_NAME}}.WAD
 Release date            : Mnth. Day, Year 
 Author                  : Your Name or Pen Name
 Email Address           : email@yourdomain.com (must match uploader)
