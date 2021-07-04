@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.4.0
+
+* `Added` A wizard during project creation.
+
+
 ### Changed for 0.3.0
 
 * `Added` All scripts can now make use of a global scope called `global`.
