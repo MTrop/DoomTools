@@ -10,14 +10,18 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
+import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
+import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -248,7 +252,10 @@ public final class DoomMakeMain
 				}
 
 				try {
-					ProjectGenerator.createProject(options.createProject, new File(options.targetName));
+					SortedSet<ProjectModule> selectedModules = ProjectGenerator.getSelectedProjects(options.createProject);
+					List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
+					Map<String, String> replacerMap = ProjectGenerator.consoleReplacer(projectReplacers, options.stdout, options.stdin);
+					ProjectGenerator.createProject(selectedModules, replacerMap, new File(options.targetName));
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Project creation error: " + e.getLocalizedMessage());
 					return ERROR_BAD_PROJECT;

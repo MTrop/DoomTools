@@ -3,13 +3,15 @@ package net.mtrop.doom.tools.doommake;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.struct.ReplacerReader;
 
 /**
  * A project module definition for DoomMake. 
@@ -196,9 +198,10 @@ public final class ProjectModule implements Comparable<ProjectModule>
 	/**
 	 * Creates this module in a target directory.
 	 * @param directory the directory.
+	 * @param replacerMap the parameter map for replace tokens.
 	 * @throws IOException if a problem happens while creating the module.
 	 */
-	public void createIn(File directory) throws IOException
+	public void createIn(File directory, Map<String, String> replacerMap) throws IOException
 	{
 		if (directory.exists())
 		{
@@ -236,11 +239,23 @@ public final class ProjectModule implements Comparable<ProjectModule>
 					{
 						for (String resourcePath : e.resourcePaths)
 						{
-							try (InputStream in = Common.openResource(resourcePath))
+							try (Reader in = Common.openResourceReader(resourcePath))
 							{
 								if (in == null)
 									throw new IOException("INTERNAL ERROR: Could not find resource: " + resourcePath);
-								IOUtils.relay(in, fos);
+								
+								@SuppressWarnings("resource")
+								Reader reader = new ReplacerReader(in, "{{", "}}").replace(replacerMap);
+								
+								int b;
+								char[] cbuf = new char[8192];
+								OutputStreamWriter writer = new OutputStreamWriter(fos);
+								
+								while ((b = reader.read(cbuf)) >= 0)
+								{
+									writer.write(cbuf, 0, b);
+									writer.flush();
+								}
 							}
 						}
 					}

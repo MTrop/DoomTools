@@ -8,8 +8,12 @@ import static net.mtrop.doom.tools.doommake.ProjectModule.file;
 import static net.mtrop.doom.tools.doommake.ProjectModule.fileAppend;
 import static net.mtrop.doom.tools.doommake.ProjectModule.fileContentAppend;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +24,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.UtilityException;
 
 /**
@@ -84,7 +89,9 @@ public final class ProjectGenerator
 	
 	/** IWAD path replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_IWAD = ProjectTokenReplacer.create(
-		"PROJECT_IWAD", "Path tp project IWAD (blank to skip)?", "", (path) -> {
+		"PROJECT_IWAD", "Path to project IWAD (blank to skip)?", "", (path) -> {
+			return path.replace("\\", "/");
+		}, (path) -> {
 			if (path.trim().length() == 0)
 				return null;
 			if (!new File(path).exists())
@@ -107,6 +114,8 @@ public final class ProjectGenerator
 	/** EXE path replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_PATH = ProjectTokenReplacer.create(
 		"PROJECT_EXE_PATH", "EXE path for testing (blank to skip)?", "", (path) -> {
+			return path.replace("\\", "/");
+		}, (path) -> {
 			if (path.trim().length() == 0)
 				return null;
 			if (!new File(path).exists())
@@ -118,6 +127,8 @@ public final class ProjectGenerator
 	/** EXE working directory replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_WORKDIR = ProjectTokenReplacer.create(
 		"PROJECT_EXE_WORKDIR", "EXE working directory (blank to use EXE dir)?", "", (path) -> {
+			return path.replace("\\", "/");
+		}, (path) -> {
 			if (path.trim().length() == 0)
 				return null;
 			if (!new File(path).isDirectory())
@@ -610,13 +621,12 @@ public final class ProjectGenerator
 		return MODULES.entrySet();
 	}
 
-	// Creates a project.
-	public static void createProject(List<String> templateNameList, File targetDirectory) throws UtilityException, IOException
+
+	public static SortedSet<ProjectModule> getSelectedProjects(List<String> templateNameList) throws UtilityException
 	{
 		// Get Modules.
 		SortedSet<ProjectModule> selected = new TreeSet<>();
 		Set<String> selectedCategories = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
-		boolean includedInit = false;
 		
 		// Get Templates.
 		for (String name : templateNameList)
@@ -634,17 +644,99 @@ public final class ProjectGenerator
 				ProjectModule modfound;
 				if ((modfound = MODULES.get(modname)) == null)
 					throw new UtilityException("INTERNAL: No such project module: " + modname + "!!");
-				if (modname.equals(MODULE_INIT))
-					includedInit = true;
 				selected.add(modfound);
 			}
 		}
 		
-		// TODO: Gather up replacers, get inputs, and then build a map to use for each ReplacerReader
+		return selected;
+	}
+
+	/**
+	 * Get all replacers to use. 
+	 * @param selected the selected modules.
+	 * @return the list of replacers.
+	 */
+	public static List<ProjectTokenReplacer> getReplacers(SortedSet<ProjectModule> selected)
+	{
+		List<ProjectTokenReplacer> out = new LinkedList<>();
 		
+		for (ProjectModule module : selected)
+		{
+			List<ProjectTokenReplacer> replacers = REPLACER_LISTS.get(module.getName());
+			if (replacers != null) for (ProjectTokenReplacer replacer : replacers)
+			{
+				if (!out.contains(replacer))
+					out.add(replacer);
+			}
+		}
+		
+		return out;
+	}
+
+	public static void insertReplacer(ProjectTokenReplacer replacer, PrintStream out, BufferedReader reader, Map<String, String> outputMap) throws IOException
+	{
+		String value;
+		String key = replacer.getToken();
+		while (true)
+		{
+			out.print(replacer.getPrompt() + " ");
+			if ((value = reader.readLine()) != null)
+			{
+				value = replacer.getSanitizer().apply(value.trim());
+				
+				String error;
+				if ((error = replacer.getValidator().apply(value)) != null)
+				{
+					out.println("ERROR: " + error);
+				}
+				else if (value.length() == 0)
+				{
+					outputMap.put(key, replacer.getDefaultValue());
+					return; 
+				}
+				else
+				{
+					outputMap.put(key, value);
+					return; 
+				}
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	
+	// 
+	public static Map<String, String> consoleReplacer(List<ProjectTokenReplacer> replacerList, PrintStream stdout, InputStream stdin) throws IOException
+	{
+		Map<String, String> out = new HashMap<>();
+		try (BufferedReader br = Common.openTextStream(stdin))
+		{
+			for (ProjectTokenReplacer replacer : replacerList)
+				insertReplacer(replacer, stdout, br, out);
+		}
+		return out;
+	}
+	
+	/**
+	 * Creates a project.
+	 * @param selected the selected set project modules.
+	 * @param targetDirectory the target directory.
+	 * @param replacerMap the replacer token map.
+	 * @throws IOException
+	 */
+	public static void createProject(SortedSet<ProjectModule> selected, Map<String, String> replacerMap, File targetDirectory) throws IOException
+	{
+		boolean includedInit = false;
+
 		// Modules.
 		for (ProjectModule module : selected)
-			module.createIn(targetDirectory);
+		{
+			module.createIn(targetDirectory, replacerMap);
+			if (module.getName().equals(MODULE_INIT))
+				includedInit = true;
+		}
 
 		if (includedInit)
 		{
@@ -652,14 +744,14 @@ public final class ProjectGenerator
 			module(
 				fileAppend("doommake.script",
 					"doommake/projects/doommake-header.script")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 
 			// Project Modules.
 			for (ProjectModule module : selected)
 			{
 				ProjectModule found;
 				if ((found = RELEASE_SCRIPT.get(module.getName())) != null)
-					found.createIn(targetDirectory);
+					found.createIn(targetDirectory, replacerMap);
 			}
 
 			// WadMerge Properties Start
@@ -674,13 +766,13 @@ public final class ProjectGenerator
 	        		"\t\tgetBuildDirectory()",
 	        		"\t\t,getProjectWad()"
 	        	)
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 			// Add merge script.
 			module(
 				file("scripts/merge-release.txt",
 					"doommake/projects/wadmerge-header.txt")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 
 			// Project Modules.
 			int x = 2;
@@ -689,14 +781,14 @@ public final class ProjectGenerator
 				ProjectModule found;
 				if ((found = RELEASE_SCRIPT_MERGE.get(module.getName())) != null)
 				{
-					found.createIn(targetDirectory);
+					found.createIn(targetDirectory, replacerMap);
 					
 					String line;
 					if ((line = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
 					{
 						module(
 							fileContentAppend("scripts/merge-release.txt", line + (x++))
-						).createIn(targetDirectory);
+						).createIn(targetDirectory, replacerMap);
 					}
 				}
 			}
@@ -706,26 +798,26 @@ public final class ProjectGenerator
 				fileContentAppend("doommake.script", 
 					"\t]);"
 	        	)
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 			// Add release script footer.
 			module(
 				fileAppend("doommake.script",
 					"doommake/projects/doommake-footer.script")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 			// Add merge script ending.
 			module(
 				fileContentAppend("scripts/merge-release.txt",
 					"\nfinish out $0/$1",
 					"end")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 			// Finish README
 			module(
 				fileAppend("README.md",
 					"doommake/projects/README.md")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 			// ===============================================================
 			
@@ -733,14 +825,14 @@ public final class ProjectGenerator
 			{
 				ProjectModule found;
 				if ((found = POST_RELEASE.get(module.getName())) != null)
-					found.createIn(targetDirectory);
+					found.createIn(targetDirectory, replacerMap);
 			}
 
 			// Add release targets.
 			module(
 				fileAppend("doommake.script",
 					"doommake/projects/doommake-target.script")
-			).createIn(targetDirectory);
+			).createIn(targetDirectory, replacerMap);
 			
 		}
 		

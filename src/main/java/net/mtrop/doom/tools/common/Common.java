@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,6 +62,18 @@ public final class Common
 	public static InputStream openResource(String pathString)
 	{
 		return Thread.currentThread().getContextClassLoader().getResourceAsStream(pathString);
+	}
+
+	/**
+	 * Opens an {@link InputStream} to a resource using the current thread's {@link ClassLoader}.
+	 * @param pathString the resource pathname.
+	 * @return an open {@link InputStream} for reading the resource or null if not found.
+	 * @see ClassLoader#getResourceAsStream(String)
+	 */
+	public static Reader openResourceReader(String pathString)
+	{
+		InputStream in = openResource(pathString);
+		return in != null ? new InputStreamReader(in) : null;
 	}
 
 	/**

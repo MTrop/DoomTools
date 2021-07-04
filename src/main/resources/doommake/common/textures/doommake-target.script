@@ -8,3 +8,13 @@ check entry textures(args) {
 	doTextures();
 }
 
+/*****************************************************************************
+ * TARGET: rebuildtextures
+ *****************************************************************************
+ * Rebuilds the texture listings in src/textures.
+ * doommake rebuildtextures
+ ****************************************************************************/
+check entry rebuildtextures(args) {
+	doRebuildTextures();
+}
+

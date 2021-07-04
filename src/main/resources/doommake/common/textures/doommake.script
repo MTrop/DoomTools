@@ -28,4 +28,40 @@ check function doTextures() {
 	]);
 }
 
+function exportTextureLump(iwadPath, textureFilePath) {
+	if (empty(iwadPath))
+		return error("ToolError", "IWAD file not specified.");
+	if (empty(textureFilePath))
+		return error("ToolError", "Texture listing output file path not specified.");
+	if (tool::wadtex({
+        sourcefile: file(textureFilePath), 
+        wadfile: file(iwadPath), 
+        exportmode: true,
+        verbose: false 
+	})) return error("ToolError", "WADTex threw an error.");
+}
+
+
+/**
+ * Rebuilds the texture WAD.  
+ * Creates texture listings if they do not exist.
+ */
+check function doRebuildTextures() {
+	initBuild();
+	
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	
+	if (fileexists(SRC_DIR_TEXTURES + "/texture1.txt"))
+		println(SRC_DIR_TEXTURES + "/texture1.txt exists. Skipping rebuild.");
+	else
+		exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture1.txt");
+
+	if (fileexists(SRC_DIR_TEXTURES + "/texture2.txt"))
+		println(SRC_DIR_TEXTURES + "/texture2.txt exists. Skipping rebuild.");
+	else
+		exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture2.txt");
+}
+
 
