@@ -28,6 +28,7 @@ check function doTextures() {
 	]);
 }
 
+
 function exportTextureLump(iwadPath, textureFilePath) {
 	if (empty(iwadPath))
 		return error("ToolError", "IWAD file not specified.");
@@ -53,15 +54,38 @@ check function doRebuildTextures() {
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 	
-	if (fileexists(SRC_DIR_TEXTURES + "/texture1.txt"))
-		println(SRC_DIR_TEXTURES + "/texture1.txt exists. Skipping rebuild.");
-	else
-		exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture1.txt");
+	check (err) {
+		iwad = wadfile(baseIwadPath);
+		texture1exists = iwad->wadentryindex("texture1") != null;
+		texture2exists = iwad->wadentryindex("texture2") != null;
+	}
+	close(iwad);
+	if (err) {
+		return err;
+	}
+	
+	if (texture1exists) {
+		if (fileexists(SRC_DIR_TEXTURES + "/texture1.txt"))
+			println(SRC_DIR_TEXTURES + "/texture1.txt exists. Skipping rebuild.");
+		else
+			exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture1.txt");
+	} else {
+		println("No TEXTURE1. Skipping rebuild of TEXTURE1.");
+	}
 
-	if (fileexists(SRC_DIR_TEXTURES + "/texture2.txt"))
-		println(SRC_DIR_TEXTURES + "/texture2.txt exists. Skipping rebuild.");
-	else
-		exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture2.txt");
+	if (texture2exists) {
+		if (fileexists(SRC_DIR_TEXTURES + "/texture2.txt"))
+			println(SRC_DIR_TEXTURES + "/texture2.txt exists. Skipping rebuild.");
+		else
+			exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture2.txt");
+	} else {
+		println("No TEXTURE2. Skipping rebuild of TEXTURE2.");
+	}
+	
+	if (!texture1exists && !texture2exists) {
+		println("IWAD does not have texture entries. Can't rebuild.");		
+	}
+
 }
 
 
