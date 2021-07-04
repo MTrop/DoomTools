@@ -15,7 +15,7 @@
 
 ; You can rebuild this file from the project's IWAD by running:
 ; doommake rebuildtextures
-; ... but only if you delete this file (and texture2.txt). 
+; ... but only if you delete this file (and/or texture2.txt). 
 
 ; First texture is the NULL texture.
 AASTINKY 24 72
