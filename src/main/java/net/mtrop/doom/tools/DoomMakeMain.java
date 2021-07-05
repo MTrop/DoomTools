@@ -238,34 +238,7 @@ public final class DoomMakeMain
 
 			if (options.createProject != null)
 			{
-				if (Common.isEmpty(options.targetName))
-				{
-					options.stderr.println("ERROR: No directory path.");
-					return ERROR_BAD_PROJECT;
-				}
-				
-				File targetDirectory = new File(options.targetName);
-				if (targetDirectory.exists() && targetDirectory.listFiles().length > 0)
-				{
-					options.stderr.println("ERROR: Target directory contains files. Project creation aborted.");
-					return ERROR_BAD_PROJECT;
-				}
-
-				try {
-					SortedSet<ProjectModule> selectedModules = ProjectGenerator.getSelectedProjects(options.createProject);
-					List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
-					Map<String, String> replacerMap = ProjectGenerator.consoleReplacer(projectReplacers, options.stdout, options.stdin);
-					ProjectGenerator.createProject(selectedModules, replacerMap, new File(options.targetName));
-				} catch (IOException e) {
-					options.stderr.println("ERROR: Project creation error: " + e.getLocalizedMessage());
-					return ERROR_BAD_PROJECT;
-				} catch (UtilityException e) {
-					options.stderr.println("ERROR: " + e.getLocalizedMessage());
-					return ERROR_BAD_PROJECT;
-				}
-				
-				options.stdout.println("Created project: " + options.targetName);
-				return ERROR_NONE;
+				return createProject();
 			}
 
 			if (options.mode == Mode.EXECUTE && !options.scriptFile.exists())
@@ -295,6 +268,50 @@ public final class DoomMakeMain
 				/** Will not be thrown. */
 				return ERROR_UNKNOWN;
 			}
+		}
+
+		private int createProject()
+		{
+			if (Common.isEmpty(options.targetName))
+			{
+				options.stderr.println("ERROR: No directory path.");
+				return ERROR_BAD_PROJECT;
+			}
+			
+			File targetDirectory = new File(options.targetName);
+			if (targetDirectory.exists() && targetDirectory.listFiles().length > 0)
+			{
+				options.stderr.println("ERROR: Target directory contains files. Project creation aborted.");
+				return ERROR_BAD_PROJECT;
+			}
+
+			try {
+				SortedSet<ProjectModule> selectedModules = ProjectGenerator.getSelectedProjects(options.createProject);
+				List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
+				Map<String, String> replacerMap = ProjectGenerator.consoleReplacer(projectReplacers, options.stdout, options.stdin);
+
+				options.stdout.println("Creating...");
+				ProjectGenerator.createProject(selectedModules, replacerMap, targetDirectory);
+				options.stdout.println("SUCCESSFULLY Created project: " + options.targetName);
+				options.stdout.println();
+				
+				List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
+				if (!todoList.isEmpty())
+				{
+					options.stdout.println("You should also probably do the following:");
+					int i = 1;
+					for (String t : todoList)
+						options.stdout.println((i++) + ") " + t);
+				}
+			} catch (IOException e) {
+				options.stderr.println("ERROR: Project creation error: " + e.getLocalizedMessage());
+				return ERROR_BAD_PROJECT;
+			} catch (UtilityException e) {
+				options.stderr.println("ERROR: " + e.getLocalizedMessage());
+				return ERROR_BAD_PROJECT;
+			}
+			
+			return ERROR_NONE;
 		}
 
 		// Load a properties file into System.properties.

@@ -79,8 +79,10 @@ public final class ProjectGenerator
 	private static final Map<String, String> RELEASE_WADMERGE_LINE;
 	/** The post-release add-on template fragments. */
 	private static final Map<String, ProjectModule> POST_RELEASE;
-	/** The post-release add-on template fragments. */
+	/** The replacer list for each module. */
 	private static final Map<String, List<ProjectTokenReplacer>> REPLACER_LISTS;
+	/** TODOs for included modules. */
+	private static final Map<String, List<String>> POST_CREATE_TODOS;
 
 	/** Project name replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_NAME = ProjectTokenReplacer.create(
@@ -162,28 +164,35 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		POST_RELEASE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		REPLACER_LISTS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		POST_CREATE_TODOS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 		// ................................................................
 
 		// Adds files for Git repository support.
 		MODULES.put(MODULE_GIT,
-			module(-1, MODULE_GIT,
+			module(200, MODULE_GIT,
 				file(".gitignore", 
 					"doommake/git/gitignore.txt"),
 				file(".gitattributes", 
 					"doommake/git/gitattributes.txt")
 			)
 		);
+		POST_CREATE_TODOS.put(MODULE_GIT, list(
+			"Open `.gitignore` and verify what you want ignored in the project."
+		));
 
 		// ................................................................
 
 		// Adds files for Mercurial repository support.
 		MODULES.put(MODULE_MERCURIAL,
-			module(-1, MODULE_MERCURIAL,
+			module(200, MODULE_MERCURIAL,
 				file(".hgignore", 
 					"doommake/hg/hgignore.txt")
 			)
 		);
+		POST_CREATE_TODOS.put(MODULE_MERCURIAL, list(
+			"Open `.hgignore` and verify what you want ignored in the project."
+		));
 
 		// ................................................................
 
@@ -216,9 +225,13 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		REPLACER_LISTS.put(MODULE_INIT,
-			list(REPLACER_PROJECT_NAME, REPLACER_PROJECT_IWAD)
-		);
+		REPLACER_LISTS.put(MODULE_INIT, list(
+			REPLACER_PROJECT_NAME, 
+			REPLACER_PROJECT_IWAD
+		));
+		POST_CREATE_TODOS.put(MODULE_INIT, list(
+			"Modify README.md and describe your project."
+		));
 		
 		// ................................................................
 
@@ -235,6 +248,10 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE.put(MODULE_BASE,
 			"# Add resource merging here."
 		);
+		POST_CREATE_TODOS.put(MODULE_BASE, list(
+			"Add resources to merge to the WadMerge script."
+			,"Add targets to the doommake.script script."
+		));
 
 		// ................................................................
 
@@ -275,9 +292,12 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		REPLACER_LISTS.put(MODULE_DECOHACK,
-			list(REPLACER_PROJECT_DECOHACK)
-		);
+		REPLACER_LISTS.put(MODULE_DECOHACK, list(
+			REPLACER_PROJECT_DECOHACK
+		));
+		POST_CREATE_TODOS.put(MODULE_DECOHACK, list(
+			"Modify `src/decohack/main.dh` to your liking."
+		));
 
 		// ................................................................
 
@@ -319,7 +339,10 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		
+		POST_CREATE_TODOS.put(MODULE_MAPS, list(
+			"Add maps to `src/maps`."
+		));
+
 		// ................................................................
 
 		// A module that builds maps and non-texture assets together.
@@ -364,7 +387,10 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		
+		POST_CREATE_TODOS.put(MODULE_ASSETS, list(
+			"Add assets to `src/assets` into the appropriate folders."
+		));
+
 		// ................................................................
 
 		// A module that adds MapTex stuff.
@@ -413,6 +439,12 @@ public final class ProjectGenerator
 				)
 			)
 		);
+		POST_CREATE_TODOS.put(MODULE_TEXTURES, list(
+			"Add flats to `src/textures/flats`."
+			,"Add patches to `src/textures/patches`."
+			,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
+			,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
+		));
 		
 		// ................................................................
 
@@ -451,7 +483,10 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		
+		POST_CREATE_TODOS.put(MODULE_TEXTUREWADS, list(
+			"Add texture WADs to `src/wads/textures`."
+		));
+
 		// ................................................................
 
 		// A module that adds map texture exports for texture WAD stuff.
@@ -507,15 +542,16 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		REPLACER_LISTS.put(MODULE_RUN,
-			list(
-				REPLACER_PROJECT_RUN_EXE_PATH, 
-				REPLACER_PROJECT_RUN_EXE_WORKDIR, 
-				REPLACER_PROJECT_RUN_SWITCH_IWAD, 
-				REPLACER_PROJECT_RUN_SWITCH_FILE, 
-				REPLACER_PROJECT_RUN_SWITCH_DEH
-			)
-		);
+		REPLACER_LISTS.put(MODULE_RUN, list(
+			REPLACER_PROJECT_RUN_EXE_PATH, 
+			REPLACER_PROJECT_RUN_EXE_WORKDIR, 
+			REPLACER_PROJECT_RUN_SWITCH_IWAD, 
+			REPLACER_PROJECT_RUN_SWITCH_FILE, 
+			REPLACER_PROJECT_RUN_SWITCH_DEH
+		));
+		POST_CREATE_TODOS.put(MODULE_RUN, list(
+			"Open `doommake.script`, search for `entry run`, and build folder files to run."
+		));
 
 
 		// ................................................................
@@ -649,6 +685,19 @@ public final class ProjectGenerator
 		}
 		
 		return selected;
+	}
+
+	// Returns modules.
+	public static List<String> getTODOs(SortedSet<ProjectModule> selected)
+	{
+		List<String> out = new LinkedList<>();
+		for (ProjectModule module : selected)
+		{
+			List<String> todos = POST_CREATE_TODOS.get(module.getName());
+			if (todos != null)
+				out.addAll(todos);
+		}
+		return out;
 	}
 
 	/**
