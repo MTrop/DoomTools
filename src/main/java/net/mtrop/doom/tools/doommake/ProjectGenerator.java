@@ -550,7 +550,7 @@ public final class ProjectGenerator
 			REPLACER_PROJECT_RUN_SWITCH_DEH
 		));
 		POST_CREATE_TODOS.put(MODULE_RUN, list(
-			"Open `doommake.script`, search for `entry run`, and build folder files to run."
+			"Open `doommake.script`, search for `entry run`, and add build folder files to run."
 		));
 
 
