@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.4.0
 
 * `Added` A wizard during project creation.
+* `Added` "TODOs" afterward when a project is made.
 * `Added` A target for texture projects that can rebuild the TEXTUREx definition lists.
 
 

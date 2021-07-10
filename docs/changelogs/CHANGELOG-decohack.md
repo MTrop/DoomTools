@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.16.0
+
+* `Changed` Label-Goto-Label syntax in state bodies now supported. (Issue #37)
+
+
 ### Changed for 0.15.0
 
 * `Changed` Altering a state directly now removes its "free" status, if set.
