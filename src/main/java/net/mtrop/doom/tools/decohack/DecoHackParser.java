@@ -1878,18 +1878,36 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				if (stateCursor.lastStateFilled == null)
 				{
-					addErrorMessage("Expected a state definition after label. Cannot have a \"next state clause\" after a label without a state definition.");
-					return false;
+					if (matchIdentifierIgnoreCase(KEYWORD_GOTO))
+					{
+						Integer index;
+						if ((index = parseStateIndex(context, actor)) == null)
+							return false;
+						while (!label.isEmpty())
+							actor.setLabel(label.pollFirst(), index);
+					}
+					else if (matchIdentifierIgnoreCase(KEYWORD_STOP))
+					{
+						while (!label.isEmpty())
+							actor.setLabel(label.pollFirst(), 0);
+					}
+					else
+					{
+						addErrorMessage("Expected a state definition after label, or a \"%s\" clause, or \"%s\".", KEYWORD_GOTO, KEYWORD_STOP);
+						return false;
+					}
 				}
-				
-				Integer nextStateIndex = null;
-				if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
+				else
 				{
-					addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
-					return false;
+					Integer nextStateIndex = null;
+					if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
+					{
+						addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
+						return false;
+					}
+					stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
+					stateCursor.lastStateFilled = null;
 				}
-				stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
-				stateCursor.lastStateFilled = null;
 			}
 		}
 		
