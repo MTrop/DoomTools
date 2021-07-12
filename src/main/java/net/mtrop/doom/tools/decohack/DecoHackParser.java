@@ -312,6 +312,11 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponBlock(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_MISC))
 			return parseMiscellaneousBlock(context);
+		else if (matchIdentifierIgnoreCase(KEYWORD_AUTO))
+		{
+			// TODO: Add Junk
+			return false;
+		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_EACH))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_THING))
@@ -2134,17 +2139,20 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a sequence of auto-fill states.
-	private boolean parseStateFillSequence(AbstractPatchContext<?> context, int startIndex)
+	private boolean parseStateFillSequence(AbstractPatchContext<?> context, Integer startIndex)
 	{
-		if (!context.isFreeState(startIndex))
+		if (startIndex != null)
 		{
-			addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
-			return false;
-		}
-		if (context.isProtectedState(startIndex))
-		{
-			addErrorMessage("Starting state index for state fill, %d, is a protected state.", startIndex);
-			return false;
+			if (!context.isFreeState(startIndex))
+			{
+				addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
+				return false;
+			}
+			if (context.isProtectedState(startIndex))
+			{
+				addErrorMessage("Starting state index for state fill, %d, is a protected state.", startIndex);
+				return false;
+			}
 		}
 		
 		// First frame must match state, and the block must contain at least one state.
