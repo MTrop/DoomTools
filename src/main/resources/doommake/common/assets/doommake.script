@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DIR_ASSETS     "src/assets" 
+#define SRC_DIR_ASSETS     "/assets" 
 #define MERGESCRIPT_ASSETS "scripts/merge-assets.txt"
 
 /**
@@ -27,14 +27,18 @@ check function cleanUpAssetWAD(wadpath) {
 check function doAssets() {
 	
 	initBuild();
-	verifydirs(SRC_DIR_ASSETS + "/_global");
-	verifydirs(SRC_DIR_ASSETS + "/graphics");
-	verifydirs(SRC_DIR_ASSETS + "/music");
-	verifydirs(SRC_DIR_ASSETS + "/sounds");
-	verifydirs(SRC_DIR_ASSETS + "/sprites");
+	
+	assetsDir = getSourceDirectory() + SRC_DIR_ASSETS;
+	
+	verifydirs(assetsDir + "/_global");
+	verifydirs(assetsDir + "/graphics");
+	verifydirs(assetsDir + "/music");
+	verifydirs(assetsDir + "/sounds");
+	verifydirs(assetsDir + "/sprites");
 	
 	wadmerge(file(MERGESCRIPT_ASSETS), [
 		getBuildDirectory(),
+		getSourceDirectory(),
 		getAssetsWAD()
 	]);
 	

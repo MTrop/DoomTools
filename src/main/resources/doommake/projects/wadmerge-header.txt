@@ -1,8 +1,13 @@
 # ===========================================================================
 # WadMerge Script for Release
 # ===========================================================================
+#
+# Argument 0: The build directory.
+# Argument 1: The source directory.
+# Argument 2: The output WAD.
+#
 
 create out
 datemarker out __VER__
-mergefile  out src/wadinfo.txt
-mergefile  out src/credits.txt
+mergefile  out $1/wadinfo.txt
+mergefile  out $1/credits.txt

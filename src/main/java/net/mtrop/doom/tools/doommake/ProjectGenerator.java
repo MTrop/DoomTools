@@ -550,7 +550,7 @@ public final class ProjectGenerator
 			REPLACER_PROJECT_RUN_SWITCH_DEH
 		));
 		POST_CREATE_TODOS.put(MODULE_RUN, list(
-			"Open `doommake.script`, search for `entry run`, and add build folder files to run."
+			"Open `doommake.script`, search for `entry run`, and double-check the files added for the run script."
 		));
 
 
@@ -813,6 +813,7 @@ public final class ProjectGenerator
 					"check function doRelease() {",
 					"\n\twadmerge(file(MERGESCRIPT_RELEASE), [",
 	        		"\t\tgetBuildDirectory()",
+	        		"\t\t,getSourceDirectory()",
 	        		"\t\t,getProjectWad()"
 	        	)
 			).createIn(targetDirectory, replacerMap);
@@ -824,7 +825,7 @@ public final class ProjectGenerator
 			).createIn(targetDirectory, replacerMap);
 
 			// Project Modules.
-			int x = 2;
+			int x = 3;
 			for (ProjectModule module : selected)
 			{
 				ProjectModule found;
@@ -858,7 +859,7 @@ public final class ProjectGenerator
 			// Add merge script ending.
 			module(
 				fileContentAppend("scripts/merge-release.txt",
-					"\nfinish out $0/$1",
+					"\nfinish out $0/$2",
 					"end")
 			).createIn(targetDirectory, replacerMap);
 			

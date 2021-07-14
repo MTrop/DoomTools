@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DECOHACK        "src/decohack/main.dh"
+#define SRC_DECOHACK        "/decohack/main.dh"
 
 /**
  * Calls DECOHack.
@@ -9,7 +9,7 @@
 check function doPatch(budget) {
 	initBuild();
 	decohack(
-		file(SRC_DECOHACK), 
+		file(getSourceDirectory() + SRC_DECOHACK), 
 		file(getBuildDirectory() + "/" + getPatchFile()), 
 		budget
 	);

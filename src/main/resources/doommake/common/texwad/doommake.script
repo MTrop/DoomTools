@@ -1,12 +1,12 @@
 /* ------------------------------------------------------------------------ */
 
+#define SRC_DIR_TEXTUREWADS "/wads/textures"
+
 /**
  * Scans the project for available texture WADs.
  */
-#define SRC_DIR_TEXTUREWADS "src/wads/textures"
-
 function scanTextureWADList() {
-	return filelist(SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
+	return filelist(getSourceDirectory() + SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -17,7 +17,8 @@ function scanTextureWADList() {
  */
 check function doMapTextures() {
 	initBuild();
-	verifydirs(SRC_DIR_TEXTUREWADS);
+	textureWadDir = getSourceDirectory() + SRC_DIR_TEXTUREWADS;
+	verifydirs(textureWadDir);
 
 	// Only do if maps were compiled.
 	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
@@ -27,7 +28,7 @@ check function doMapTextures() {
 
 	textureWadFiles = scanTextureWadList();
 	if (empty(textureWadFiles)) {
-		println("WARNING: No texture WADs found in: " + SRC_DIR_TEXTUREWADS + ". Skipping texture extraction step.");
+		println("WARNING: No texture WADs found in: " + textureWadDir + ". Skipping texture extraction step.");
 		return;
 	}
 	

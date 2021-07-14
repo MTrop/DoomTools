@@ -3,10 +3,11 @@
 # ===========================================================================
 #
 # Argument 0: The build directory.
-# Argument 1: The output WAD.
+# Argument 1: The source directory.
+# Argument 2: The output WAD.
 #
 
 create out
-mergewaddir out src/maps
-finish out $0/$1
+mergewaddir out $1/maps
+finish out $0/$2
 end

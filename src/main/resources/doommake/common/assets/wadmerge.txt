@@ -3,27 +3,28 @@
 # ===========================================================================
 #
 # Argument 0: The build directory.
-# Argument 1: The output WAD.
+# Argument 1: The source directory.
+# Argument 2: The output WAD.
 #
 
 create out
 
 # Globals
-mergedir  out src/assets/_global nomarkers
+mergedir  out $1/assets/_global nomarkers
 
 # Graphics
-mergedir  out src/assets/graphics nomarkers
+mergedir  out $1/assets/graphics nomarkers
 
 # Sprites
 marker    out ss_start
-mergedir  out src/assets/sprites nomarkers
+mergedir  out $1/assets/sprites nomarkers
 marker    out ss_end
 
 # Sounds
-mergedir  out src/assets/sounds nomarkers
+mergedir  out $1/assets/sounds nomarkers
 
 # Music
-mergedir  out src/assets/music nomarkers
+mergedir  out $1/assets/music nomarkers
 
-finish out $0/$1
+finish out $0/$2
 end

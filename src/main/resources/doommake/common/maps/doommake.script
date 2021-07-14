@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DIR_MAPS     "src/maps"
+#define SRC_DIR_MAPS     "/maps"
 #define MERGESCRIPT_MAPS "scripts/merge-maps.txt"
 
 /**
@@ -9,9 +9,10 @@
  */
 function doMaps() {
 	initBuild();
-	verifydirs(SRC_DIR_MAPS);
+	verifydirs(getSourceDirectory() + SRC_DIR_MAPS);
 	wadmerge(file(MERGESCRIPT_MAPS), [
 		getBuildDirectory(),
+		getSourceDirectory(),
 		getMapsWAD()
 	]);
 }

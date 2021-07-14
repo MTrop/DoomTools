@@ -44,6 +44,13 @@ function getProjectPK3() {
 }
 
 /**
+ * Return the project PKE file name.
+ */
+function getProjectPKE() {
+	return getProjectName() + ".pke"; 
+}
+
+/**
  * Return the project TXT file name.
  */
 function getProjectTXT() {
@@ -65,6 +72,8 @@ function getProjectZip() {
 #define DEFAULT_BUILDDIR    "build"
 #define PROP_DISTDIR        "doommake.dir.dist"
 #define DEFAULT_DISTDIR     "dist"
+#define PROP_SRCDIR         "doommake.dir.src"
+#define DEFAULT_SRCDIR      "src"
 #define PROP_IWADPATH       "doommake.iwad"
 
 /**
@@ -79,6 +88,13 @@ function getBuildDirectory() {
  */
 function getDistDirectory() {
 	return prop(PROP_DISTDIR, DEFAULT_DISTDIR); 
+}
+
+/**
+ * Return the source directory path.
+ */
+function getSourceDirectory() {
+	return prop(PROP_SRCDIR, DEFAULT_SRCDIR); 
 }
 
 /**
@@ -98,6 +114,8 @@ function getIWAD() {
 #define DEFAULT_MAPSWAD     "maps.wad"
 #define PROP_MAPTEXWAD      "doommake.file.maptex"
 #define DEFAULT_MAPTEXWAD   "maptex.wad"
+#define PROP_TEXWAD         "doommake.file.textures"
+#define DEFAULT_TEXWAD      "textures.wad"
 #define PROP_PATCHFILE      "doommake.file.patch"
 #define DEFAULT_PATCHFILE   "dehacked.deh"
 
@@ -113,6 +131,13 @@ function getAssetsWAD() {
  */
 function getMapsWAD() {
 	return prop(PROP_MAPSWAD, DEFAULT_MAPSWAD); 
+}
+
+/**
+ * Return the output textures WAD.
+ */
+function getTextureWAD() {
+	return prop(PROP_TEXWAD, DEFAULT_TEXWAD); 
 }
 
 /**

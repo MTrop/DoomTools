@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------------------ */
 
 #define MERGESCRIPT_RELEASE "scripts/merge-release.txt"
-#define SRC_WADINFO "src/wadinfo.txt"
+#define SRC_WADINFO "/wadinfo.txt"
 
 /**
  * Initializes the build directory.
@@ -15,7 +15,7 @@ function initDist() {
  * Throws error if unsuccessful.
  */
 function copyProjectTXT(destfile) {
-	srcfile = file(SRC_WADINFO);
+	srcfile = file(getSourceDirectory() + SRC_WADINFO);
 	println("Copying " + srcfile + " to " + destfile + "...");
 	return copyfile(srcfile, destfile, true);
 }

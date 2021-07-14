@@ -1,16 +1,8 @@
 /* ------------------------------------------------------------------------ */
 
-#define PROP_TEXWAD         "doommake.file.textures"
-#define DEFAULT_TEXWAD      "textures.wad"
-#define SRC_DIR_TEXTURES    "src/textures"
+#define SRC_DIR_TEXTURES    "/textures"
 #define MERGESCRIPT_TEXTURE "scripts/merge-textures.txt"
 
-/**
- * Return the output textures WAD.
- */
-function getTextureWad() {
-	return prop(PROP_TEXWAD, DEFAULT_TEXWAD); 
-}
 
 /* ------------------------------------------------------------------------ */
 
@@ -20,10 +12,12 @@ function getTextureWad() {
  */
 check function doTextures() {
 	initBuild();
-	verifydirs(SRC_DIR_TEXTURES + "/flats");
-	verifydirs(SRC_DIR_TEXTURES + "/patches");
+	texturesDir = getSourceDirectory() + SRC_DIR_TEXTURES;
+	verifydirs(texturesDir + "/flats");
+	verifydirs(texturesDir + "/patches");
 	wadmerge(file(MERGESCRIPT_TEXTURE), [
-		getBuildDirectory(), 
+		getBuildDirectory(),
+		getSourceDirectory(),
 		getTextureWad()
 	]);
 }
@@ -64,20 +58,24 @@ check function doRebuildTextures() {
 		return err;
 	}
 	
+	texturesDir = getSourceDirectory() + SRC_DIR_TEXTURES;
+	tex1filename = texturesDir + "/texture1.txt";
+	tex2filename = texturesDir + "/texture2.txt";
+	
 	if (texture1exists) {
-		if (fileexists(SRC_DIR_TEXTURES + "/texture1.txt"))
-			println(SRC_DIR_TEXTURES + "/texture1.txt exists. Skipping rebuild.");
+		if (fileexists(tex1filename))
+			println(tex1filename + " exists. Skipping rebuild.");
 		else
-			exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture1.txt");
+			exportTextureLump(baseIwadPath, tex1filename);
 	} else {
 		println("No TEXTURE1. Skipping rebuild of TEXTURE1.");
 	}
 
 	if (texture2exists) {
-		if (fileexists(SRC_DIR_TEXTURES + "/texture2.txt"))
-			println(SRC_DIR_TEXTURES + "/texture2.txt exists. Skipping rebuild.");
+		if (fileexists(tex2filename))
+			println(tex2filename + " exists. Skipping rebuild.");
 		else
-			exportTextureLump(baseIwadPath, SRC_DIR_TEXTURES + "/texture2.txt");
+			exportTextureLump(baseIwadPath, tex2filename);
 	} else {
 		println("No TEXTURE2. Skipping rebuild of TEXTURE2.");
 	}
