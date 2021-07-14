@@ -286,7 +286,8 @@ TOOL::DECOHACK(options)
         (ERROR:BadOptions) If the options map could not be applied.
 
 TOOL::DIMGCONVERT(options)
-    Calls the DImgConv tool. Inherits STDOUT/STDERR of this script unless overridden (see options).
+    Calls the DImgConv tool. Inherits STDOUT/STDERR of this script unless 
+    overridden (see options).
     options:
         (MAP:{
             stdout:OBJECTREF(OutputStream), 

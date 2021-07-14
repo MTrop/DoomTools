@@ -114,6 +114,16 @@ public final class Common
 
 	/**
 	 * Returns the file's name, no extension.
+	 * @param filename the file name.
+	 * @return the file's name without extension.
+	 */
+	public static String getFileNameWithoutExtension(String filename)
+	{
+		return getFileNameWithoutExtension(filename, ".");
+	}
+
+	/**
+	 * Returns the file's name, no extension.
 	 * @param file the file.
 	 * @return the file's name without extension.
 	 */
@@ -134,6 +144,17 @@ public final class Common
 		if (extindex >= 0)
 			return filename.substring(extindex+1);
 		return "";
+	}
+
+	/**
+	 * Returns the extension of a file's name.
+	 * Assumes the separator to be ".".
+	 * @param filename the file name.
+	 * @return the file's extension, or an empty string for no extension.
+	 */
+	public static String getFileExtension(String filename)
+	{
+		return getFileExtension(filename, ".");
 	}
 
 	/**

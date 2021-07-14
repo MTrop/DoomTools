@@ -3,7 +3,7 @@ DoomMake
 
 ### Changed for 0.5.0
 
-* `Added` Relocation of `src` directory via project property.
+* `Added` Relocation of `src` directory via project property. (Enhancement #38)
 * `Changed` The run module checks for default files generated and runs them automatically.
 
 

@@ -413,7 +413,7 @@ public final class DoomImageConvertMain
 					{
 						final File dest = outputDir;
 						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
-							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + path))
+							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + Common.getFileNameWithoutExtension(path) + ".lmp"))
 						);
 					}
 					catch (IOException e)
