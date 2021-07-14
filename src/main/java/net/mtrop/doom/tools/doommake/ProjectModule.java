@@ -28,6 +28,10 @@ public final class ProjectModule implements Comparable<ProjectModule>
 	/** Module file entries. */
 	private List<Entry> entries;
 	
+	/** Entries for the addition of release script lines. */
+	private List<Entry> releaseScriptEntries;
+	
+	
 	/**
 	 * A module entry.
 	 */
@@ -150,58 +154,14 @@ public final class ProjectModule implements Comparable<ProjectModule>
 		return new ProjectModule(sort, name, entries);
 	}
 
-	// New project module.
-	private ProjectModule(int sort, String name, Entry... entries)
-	{
-		this.sort = sort;
-		this.name = name;
-		this.entries = new LinkedList<>();
-		addEntries(entries);
-	}
-	
-	// Add module entries to this one.
-	private void addEntries(Entry... entries)
-	{
-		for (Entry entry : entries)
-			this.entries.add(entry);
-	}
-	
-	// Add module entries to this one.
-	private void addEntries(Iterable<Entry> entries)
-	{
-		for (Entry entry : entries)
-			this.entries.add(entry);
-	}
-	
-	/**
-	 * Adds a module's entries to this one.
-	 * @param module the module to combine with this one.
-	 * @return this module.
-	 */
-	public ProjectModule add(ProjectModule module)
-	{
-		addEntries(module.entries);
-		return this;
-	}
-	
-	public String getName()
-	{
-		return name;
-	}
-	
-	@Override
-	public int compareTo(ProjectModule module) 
-	{
-		return sort - module.sort;
-	}
-	
 	/**
 	 * Creates this module in a target directory.
+	 * @param entries the list of module entries.
 	 * @param directory the directory.
 	 * @param replacerMap the parameter map for replace tokens.
 	 * @throws IOException if a problem happens while creating the module.
 	 */
-	public void createIn(File directory, Map<String, String> replacerMap) throws IOException
+	public static void createIn(List<Entry> entries, File directory, Map<String, String> replacerMap) throws IOException
 	{
 		if (directory.exists())
 		{
@@ -262,6 +222,50 @@ public final class ProjectModule implements Comparable<ProjectModule>
 				}
 			}
 		}
+	}
+	
+	// New project module.
+	private ProjectModule(int sort, String name, Entry... entries)
+	{
+		this.sort = sort;
+		this.name = name;
+		this.entries = new LinkedList<>();
+		addEntries(entries);
+	}
+	
+	// Add module entries to this one.
+	private void addEntries(Entry... entries)
+	{
+		for (Entry entry : entries)
+			this.entries.add(entry);
+	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	@Override
+	public int compareTo(ProjectModule module) 
+	{
+		return sort - module.sort;
+	}
+	
+	public ProjectModule releaseScriptLineEntry(Entry entry)
+	{
+		this.releaseScriptEntries.add(entry);
+		return this;
+	}
+	
+	/**
+	 * Creates this module in a target directory.
+	 * @param directory the directory.
+	 * @param replacerMap the parameter map for replace tokens.
+	 * @throws IOException if a problem happens while creating the module.
+	 */
+	public void createIn(File directory, Map<String, String> replacerMap) throws IOException
+	{
+		createIn(entries, directory, replacerMap);
 	}
 
 }
