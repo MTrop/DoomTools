@@ -16,10 +16,20 @@ function scanTextureWADList() {
  * Creates maptex WAD.
  */
 check function doMapTextures() {
+	
 	initBuild();
-	textureWadDir = getSourceDirectory() + SRC_DIR_TEXTUREWADS;
-	verifydirs(textureWadDir);
+	
+	sourceDir = getSourceDirectory() + SRC_DIR_TEXTUREWADS;
+	verifydirs(sourceDir);
 
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		if (!wasBuilt("maps")) {
+			println("Maps were not built and texture WADs were not changed. Skipping map texture rebuild.");
+			return;
+		}
+	}
+	
 	// Only do if maps were compiled.
 	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
 		println("No maps in `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Skipping texture extraction.");
@@ -44,6 +54,8 @@ check function doMapTextures() {
 		textureWadFiles, 
 		outputWad
 	);
+	
+	setBuilt("maptextures");
 }
 
 

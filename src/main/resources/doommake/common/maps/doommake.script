@@ -7,14 +7,27 @@
  * Merges maps together.
  * Creates map WAD.
  */
-function doMaps() {
+check function doMaps() {
+
 	initBuild();
-	verifydirs(getSourceDirectory() + SRC_DIR_MAPS);
+	
+	sourceDir = getSourceDirectory() + SRC_DIR_MAPS;
+	verifydirs(sourceDir);
+
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Maps directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+
 	wadmerge(file(MERGESCRIPT_MAPS), [
 		getBuildDirectory(),
 		getSourceDirectory(),
 		getMapsWAD()
 	]);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("maps");
 }
 
 

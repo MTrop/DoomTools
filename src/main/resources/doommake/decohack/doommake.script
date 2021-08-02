@@ -1,17 +1,32 @@
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DECOHACK        "/decohack/main.dh"
+#define SRC_DECOHACK        "/decohack"
+#define SRC_DECOHACK_MAIN   "/main.dh"
 
 /**
  * Calls DECOHack.
  * Creates patch.
  */
 check function doPatch(budget) {
+
 	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DECOHACK;
+	verifydirs(sourceDir);
+
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("DECOHack directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+
 	decohack(
-		file(getSourceDirectory() + SRC_DECOHACK), 
+		file(getSourceDirectory() + SRC_DECOHACK + SRC_DECOHACK_MAIN), 
 		file(getBuildDirectory() + "/" + getPatchFile()), 
 		budget
 	);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("patch");
 }
 

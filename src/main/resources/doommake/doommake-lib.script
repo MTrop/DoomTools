@@ -106,6 +106,81 @@ function getIWAD() {
 
 
 /* ------------------------------------------------------------------------ */
+// Build lock.
+
+#define PROP_LOCKJSON       "/lock.json"
+
+/**
+ * Returns the build JSON file.
+ */
+function getBuildLockFile() {
+	return file(getBuildDirectory() + PROP_LOCKJSON);
+}
+
+/**
+ * Initialize the build lock.
+ */
+check function initBuildLock() {
+	if (typeof(global::lock) === "null") {
+		lockfile = getBuildLockFile();
+		global::lock = fileExists(lockfile) ? readjson(lockfile) : {};
+		if (typeof(global::lock.dirHashes) !== "map") {
+			global::lock.dirHashes = {};
+		}
+	}
+	return global::lock;
+}
+
+/**
+ * Checks if a directory changed since last build.
+ * Returns error if an error happened.
+ * Returns null if no change.
+ * Returns a hash string if a change happened.
+ */
+check function directoryHasChanged(dirpath) {
+	lockhash = initBuildLock().dirHashes->mapget(dirpath);
+	dirhash = hashdir(dirpath, true)->bufstr();
+	return (lockhash === null || lockhash !== dirhash) ? dirhash : null;
+}
+
+/**
+ * Sets if a directory changed since last build.
+ * Returns error if an error happened.
+ * Returns null if no change.
+ * Returns a hash string if a change happened.
+ */
+check function storeDirectoryChanged(dirpath, hash) {
+	lock = initBuildLock();
+	(lock.dirHashes)->mapset(dirpath, hash);
+	getBuildLockFile()->writejson(lock, "\t");
+}
+
+/**
+ * Initialize the build state.
+ */
+check function initBuildState() {
+	if (global::buildState === null) {
+		global::buildState = [];
+	}
+	return global::buildState;
+}
+
+/**
+ * Sets if a target was built.
+ */
+check function setBuilt(target) {
+	initBuildState()->setAdd(target);
+}
+
+/**
+ * Checks if a target was built.
+ */
+check function wasBuilt(target) {
+	return initBuildState()->setContains(target);
+}
+
+
+/* ------------------------------------------------------------------------ */
 // Build-specific.
 
 #define PROP_ASSETWAD       "doommake.file.assets"

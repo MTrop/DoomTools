@@ -2,6 +2,7 @@ package net.mtrop.doom.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -63,6 +64,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
 	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
 	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
+	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
 	/**
 	 * Program options.
@@ -295,13 +297,22 @@ public final class DoomMakeMain
 				options.stdout.println("SUCCESSFULLY Created project: " + options.targetName);
 				options.stdout.println();
 				
+				File todoPath = new File(targetDirectory.getPath() + File.separator + "todo.txt");
 				List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
+				
 				if (!todoList.isEmpty())
 				{
 					options.stdout.println("You should also probably do the following:");
-					int i = 1;
-					for (String t : todoList)
-						options.stdout.println((i++) + ") " + t);
+					try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
+					{
+						int i = 1;
+						for (String t : todoList)
+						{
+							options.stdout.println(i + ") " + t);
+							todoPrinter.println(i + ") " + t);
+							i++;
+						}
+					}
 				}
 			} catch (IOException e) {
 				options.stderr.println("ERROR: Project creation error: " + e.getLocalizedMessage());
@@ -311,6 +322,7 @@ public final class DoomMakeMain
 				return ERROR_BAD_PROJECT;
 			}
 			
+			options.stdout.println("Project created.");
 			return ERROR_NONE;
 		}
 
@@ -384,6 +396,8 @@ public final class DoomMakeMain
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
+					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
+						options.mode = Mode.DISASSEMBLE;
 					else if (SWITCH_SCRIPTFILE.equalsIgnoreCase(arg) || SWITCH_SCRIPTFILE2.equalsIgnoreCase(arg))
 						state = STATE_SCRIPTFILE;
 					else if (SWITCH_PROPERTYFILE.equalsIgnoreCase(arg) || SWITCH_PROPERTYFILE2.equalsIgnoreCase(arg))
@@ -534,6 +548,7 @@ public final class DoomMakeMain
 		out.println("                [--list-templates | -t]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
+		out.println("                [--disassemble] [filename]");
 	}
 	
 	/**
@@ -563,6 +578,8 @@ public final class DoomMakeMain
 		out.println("    --function-help                Prints all available function usages.");
 		out.println("    --function-help-markdown       Prints all available function usages in");
 		out.println("                                       Markdown format.");
+		out.println("    --disassemble                  Prints the disassembly for the make script");
+		out.println("                                       in use and exits.");
 		out.println("    --list-templates, -t           Lists all available project templates.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");

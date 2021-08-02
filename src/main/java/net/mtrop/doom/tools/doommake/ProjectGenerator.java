@@ -231,6 +231,8 @@ public final class ProjectGenerator
 		));
 		POST_CREATE_TODOS.put(MODULE_INIT, list(
 			"Modify README.md and describe your project."
+			,"Modify src/wadinfo.txt, especially the license section. It will become your text file."
+			,"Add extended credits to src/credits.txt."
 		));
 		
 		// ................................................................

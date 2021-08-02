@@ -232,6 +232,23 @@ UNZIP(zipFile, destDir, entries)
         (ERROR:IOError) If a read or write error occurs.
         (ERROR:Security) If the OS is preventing the read or write.
 
+HASHDIR(path, recursive, algorithm)
+    Hashes file information in a directory. No data content is hashed, just 
+    file paths, length, and modified date.
+    path:
+        (STRING) Directory path.
+        (OBJECTREF:File) Directory path.
+    recursive:
+        (BOOLEAN) If true, scan recursively.
+    algorithm:
+        (NULL) Use "SHA-1".
+        (STRING) The name of the hashing algorithm to use.
+    Returns:
+        (NULL) If the provided directory is null.
+        (BUFFER) A buffer containing the resultant hash digest.
+        (ERROR:BadPath) If the provided path is not a directory.
+        (ERROR:Security) If the OS is preventing file inspection.
+
 
 ==============================================================================
 ==== Tool Invocation

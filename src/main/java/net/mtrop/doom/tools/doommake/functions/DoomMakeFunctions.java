@@ -1,7 +1,5 @@
 package net.mtrop.doom.tools.doommake.functions;
 
-import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -13,6 +11,9 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,6 +26,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptValue;
+import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
 import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionUsage;
@@ -34,6 +36,9 @@ import com.blackrook.rookscript.struct.PatternUtils;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
+
+import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
+
 
 /**
  * Script functions specific to DoomMake.
@@ -669,6 +674,90 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		}
 	},
 
+	HASHDIR(3)
+	{
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Hashes file information in a directory. " +
+					"No data content is hashed, just file paths, length, and modified date."
+				)
+				.parameter("path", 
+					type(Type.STRING, "Directory path."),
+					type(Type.OBJECTREF, "File", "Directory path.")
+				)
+				.parameter("recursive",
+					type(Type.BOOLEAN, "If true, scan recursively.")
+				)
+				.parameter("algorithm",
+					type(Type.NULL, "Use \"SHA-1\"."),
+					type(Type.STRING, "The name of the hashing algorithm to use.")
+				)
+				.returns(
+					type(Type.NULL, "If the provided directory is null."),
+					type(Type.BUFFER, "A buffer containing the resultant hash digest."),
+					type(Type.ERROR, "BadPath", "If the provided path is not a directory."),
+					type(Type.ERROR, "Security", "If the OS is preventing file inspection.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String algo = temp.isNull() ? "SHA-1" : temp.asString();
+				scriptInstance.popStackValue(temp);
+				boolean recursive = temp.asBoolean();
+				File pathDir = popFile(scriptInstance, temp);
+				
+				if (pathDir == null)
+				{
+					returnValue.setNull();
+					return true;
+				}
+				else if (!pathDir.exists())
+				{
+					returnValue.setError("BadPath", "Provided path does not exist.");
+					return true;
+				}
+				else if (!pathDir.isDirectory())
+				{
+					returnValue.setError("BadPath", "Provided path is not a directory.");
+					return true;
+				}
+
+				MessageDigest digest;
+				try {
+					digest = MessageDigest.getInstance(algo);
+					digestDirectory(digest, recursive, pathDir, returnValue);
+				} catch (NoSuchAlgorithmException e) {
+					returnValue.setError("BadAlgorithm", "Hash algorithm is not available: " + algo);
+					return true;
+				}
+
+				if (returnValue.isError())
+					return true;
+
+				byte[] hash = digest.digest();
+				returnValue.setEmptyBuffer(hash.length);
+				returnValue.asObjectType(BufferType.class).readBytes(0, hash, 0, hash.length);
+
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+		
+	},
+	
 	;
 	
 	private final int parameterCount;
@@ -678,6 +767,8 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		this.parameterCount = parameterCount;
 		this.usage = null;
 	}
+	
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 	
 	/**
 	 * @return a function resolver that handles all of the functions in this enum.
@@ -922,6 +1013,55 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		{
 			returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
 		}
+		catch (SecurityException e) 
+		{
+			returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+		}
+	}
+
+	private static void digestDirectory(MessageDigest digest, boolean recursive, File directory, ScriptValue returnValue) 
+	{
+		for (File f : directory.listFiles())
+		{
+			if (f.isDirectory() && recursive)
+			{
+				digestDirectory(digest, recursive, f, returnValue);
+				if (returnValue.isError())
+					return;
+			}
+			else 
+			{
+				digestFileInfo(digest, f, returnValue);
+				if (returnValue.isError())
+					return;
+			}
+		}
+	}
+	
+	private static void digestFileInfo(MessageDigest digest, File file, ScriptValue returnValue) 
+	{
+		try
+		{
+			long len = file.length();
+			long date = file.lastModified();
+			digest.update(file.getPath().getBytes(UTF8));
+			digest.update((byte)((len >> 0)  & 0x0ff));
+			digest.update((byte)((len >> 8)  & 0x0ff));
+			digest.update((byte)((len >> 16) & 0x0ff));
+			digest.update((byte)((len >> 24) & 0x0ff));
+			digest.update((byte)((len >> 32) & 0x0ff));
+			digest.update((byte)((len >> 40) & 0x0ff));
+			digest.update((byte)((len >> 48) & 0x0ff));
+			digest.update((byte)((len >> 56) & 0x0ff));
+			digest.update((byte)((date >> 0)  & 0x0ff));
+			digest.update((byte)((date >> 8)  & 0x0ff));
+			digest.update((byte)((date >> 16) & 0x0ff));
+			digest.update((byte)((date >> 24) & 0x0ff));
+			digest.update((byte)((date >> 32) & 0x0ff));
+			digest.update((byte)((date >> 40) & 0x0ff));
+			digest.update((byte)((date >> 48) & 0x0ff));
+			digest.update((byte)((date >> 56) & 0x0ff));
+		} 
 		catch (SecurityException e) 
 		{
 			returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());

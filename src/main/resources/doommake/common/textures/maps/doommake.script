@@ -4,6 +4,11 @@
  */
 function doMapTextures() {
 
+	if (!wasBuilt("maps") && !wasBuilt("textures")) {
+		println("Both maps and textures were not built. Skipping map texture rebuild.");
+		return;
+	}
+
 	// Only do if maps were compiled.
 	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
 		println("No maps at `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Maps WAD not built. Skipping texture extraction.");
@@ -26,6 +31,9 @@ function doMapTextures() {
 		[getBuildDirectory() + "/" + getTextureWad()],
 		getBuildDirectory() + "/" + getMapTexWad()
 	);
+	if (!err) {
+		setBuilt("maptextures");
+	}
 	return err;
 }
 

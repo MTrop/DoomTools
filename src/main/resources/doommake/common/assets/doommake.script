@@ -27,22 +27,29 @@ check function cleanUpAssetWAD(wadpath) {
 check function doAssets() {
 	
 	initBuild();
-	
-	assetsDir = getSourceDirectory() + SRC_DIR_ASSETS;
-	
-	verifydirs(assetsDir + "/_global");
-	verifydirs(assetsDir + "/graphics");
-	verifydirs(assetsDir + "/music");
-	verifydirs(assetsDir + "/sounds");
-	verifydirs(assetsDir + "/sprites");
+
+	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
+	verifydirs(sourceDir + "/_global");
+	verifydirs(sourceDir + "/graphics");
+	verifydirs(sourceDir + "/music");
+	verifydirs(sourceDir + "/sounds");
+	verifydirs(sourceDir + "/sprites");
+		
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Assets directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
 	
 	wadmerge(file(MERGESCRIPT_ASSETS), [
 		getBuildDirectory(),
 		getSourceDirectory(),
 		getAssetsWAD()
 	]);
-	
 	cleanUpAssetWAD(getBuildDirectory() + "/" + getAssetsWAD());
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("assets");
 }
 
 

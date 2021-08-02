@@ -2170,23 +2170,29 @@ READJSON(jsoninput)
         (ERROR:Security) If [json] is a file and the OS is preventing the read.
         (ERROR:IOError) If a read or write error occurs.
 
-WRITEJSON(output, value)
-    Converts a script value to JSON and writes it to a provided output. Objects will be reflection-exported as JS objects, and buffers as arrays of unsigned byte values.
+WRITEJSON(output, value, indentation)
+    Converts a script value to JSON and writes it to a provided output. Objects will be reflection-exported as JS objects, and buffers as arrays of unsigned byte values. You can optionally export JSON with indentation for prettifying.
     output:
         (OBJECTREF:File) The file to write the JSON to (encoding is UTF-8, file is overwritten, and then closed).
         (OBJECTREF:OutputStream) The output stream to write the JSON to (encoding is UTF-8).
         (OBJECTREF:Writer) The Writer to write the JSON to.
     value:
         (ANY) The value to export as JSON. Objects will be reflection-exported as maps, and buffers as arrays of unsigned byte values.
+    indentation:
+        (NULL) No indentation.
+        (STRING) The indentation string for exporting members.
     Returns:
         (OBJECTREF) output.
         (ERROR:Security) If [output] is a file and the OS is preventing the creation/write.
         (ERROR:IOError) If a write error occurs.
 
-JSONSTR(value)
+JSONSTR(value, indentation)
     Converts a script value to JSON and returns it as a string. Objects will be reflection-exported as maps, and buffers as arrays of unsigned byte values.
     value:
         (ANY) The value to export as JSON.
+    indentation:
+        (NULL) No indentation.
+        (STRING) The indentation string for exporting members.
     Returns:
         (STRING) The resultant string.
         (ERROR:IOError) If a write error occurs.

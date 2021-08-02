@@ -1,6 +1,14 @@
 DoomMake
 --------
 
+### Changed for 0.6.0
+
+* `Added` HASHDIR() host function for detecting folder changes.
+* `Added` The "disassemble" function. Not many people will use this.
+* `Changed` New projects now auto-detect project changes on build.
+* `Changed` The "TODO" list that gets printed at the end is now added to the project.
+
+
 ### Changed for 0.5.0
 
 * `Added` Relocation of `src` directory via project property. (Enhancement #38)
@@ -21,7 +29,7 @@ DoomMake
 
 ### Changed for 0.2.0
 
-- `Added` Ability to invoke DImgConv.
+* `Added` Ability to invoke DImgConv.
 
 
 ### Changed for 0.1.1

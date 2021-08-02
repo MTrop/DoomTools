@@ -11,15 +11,27 @@
  * Creates texture WAD.
  */
 check function doTextures() {
+
 	initBuild();
-	texturesDir = getSourceDirectory() + SRC_DIR_TEXTURES;
-	verifydirs(texturesDir + "/flats");
-	verifydirs(texturesDir + "/patches");
+
+	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
+	verifydirs(sourceDir + "/flats");
+	verifydirs(sourceDir + "/patches");
+
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Textures directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+
 	wadmerge(file(MERGESCRIPT_TEXTURE), [
 		getBuildDirectory(),
 		getSourceDirectory(),
 		getTextureWad()
 	]);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("textures");
 }
 
 
@@ -42,6 +54,7 @@ function exportTextureLump(iwadPath, textureFilePath) {
  * Creates texture listings if they do not exist.
  */
 check function doRebuildTextures() {
+	
 	initBuild();
 	
 	baseIwadPath = getIwad();
@@ -58,9 +71,9 @@ check function doRebuildTextures() {
 		return err;
 	}
 	
-	texturesDir = getSourceDirectory() + SRC_DIR_TEXTURES;
-	tex1filename = texturesDir + "/texture1.txt";
-	tex2filename = texturesDir + "/texture2.txt";
+	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
+	tex1filename = sourceDir + "/texture1.txt";
+	tex2filename = sourceDir + "/texture2.txt";
 	
 	if (texture1exists) {
 		if (fileexists(tex1filename))
