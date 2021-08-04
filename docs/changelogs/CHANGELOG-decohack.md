@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.16.1
+
+* `Fixed` Things did not have TRANSLUCENT set. (Issue #41)
+
+
 ### Changed for 0.16.0
 
 * `Changed` Label-Goto-Label syntax in state bodies now supported. (Issue #37)

@@ -11,6 +11,7 @@ import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 
 /**
  * Constants for Boom. 
@@ -1001,7 +1002,9 @@ interface ConstantsBoom
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(16)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.NOBLOCKMAP
+			))
 			.setMass(10)
 			.setSpawnFrameIndex(967)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1025,7 +1028,9 @@ interface ConstantsBoom
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(16)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.NOBLOCKMAP
+			))
 			.setMass(10)
 			.setSpawnFrameIndex(967)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)

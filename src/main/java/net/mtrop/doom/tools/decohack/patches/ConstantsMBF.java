@@ -10,6 +10,8 @@ import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer.*;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 
 /**
  * Constants for MBF. 
@@ -149,7 +151,11 @@ interface ConstantsMBF
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(180)
-			.setFlags(4194310)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.SOLID,
+				DEHThingFlag.SHOOTABLE,
+				DEHThingFlag.COUNTKILL
+			))
 			.setMass(100)
 			.setSpawnFrameIndex(972)
 			.setWalkFrameIndex(974)
@@ -173,7 +179,13 @@ interface ConstantsMBF
 			.setDamage(4)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(536938000)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.NOBLOCKMAP,
+				DEHThingFlag.NOGRAVITY,
+				DEHThingFlag.DROPOFF,
+				DEHThingFlag.MISSILE,
+				DEHThingFlag.BOUNCES
+			))
 			.setMass(100)
 			.setSpawnFrameIndex(1042)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -197,7 +209,13 @@ interface ConstantsMBF
 			.setDamage(4)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(536938000)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.NOBLOCKMAP,
+				DEHThingFlag.NOGRAVITY,
+				DEHThingFlag.DROPOFF,
+				DEHThingFlag.MISSILE,
+				DEHThingFlag.BOUNCES
+			))
 			.setMass(100)
 			.setSpawnFrameIndex(1049)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -221,7 +239,10 @@ interface ConstantsMBF
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(8388609)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.SPECIAL,
+				DEHThingFlag.COUNTITEM
+			))
 			.setMass(100)
 			.setSpawnFrameIndex(1054)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -245,7 +266,10 @@ interface ConstantsMBF
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(8388609)
+			.setFlags(DEHFlag.flags(
+				DEHThingFlag.SPECIAL,
+				DEHThingFlag.COUNTITEM
+			))
 			.setMass(100)
 			.setSpawnFrameIndex(1055)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
