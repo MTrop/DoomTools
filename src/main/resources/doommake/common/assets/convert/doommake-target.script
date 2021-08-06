@@ -1,0 +1,13 @@
+/*****************************************************************************
+ * TARGET: convert
+ *****************************************************************************
+ * Converts assets to Doom assets and puts them in the asset directories.
+ * doommake convert
+ ****************************************************************************/
+check entry convert(args) {
+	doConvertSounds();
+	doConvertGraphics();
+	doConvertSprites();
+}
+
+

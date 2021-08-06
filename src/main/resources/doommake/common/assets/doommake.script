@@ -21,7 +21,7 @@ check function cleanUpAssetWAD(wadpath) {
 }
 
 /**
- * Calls the merge script for merging maps.
+ * Calls the merge script for merging assets.
  * Creates assets WAD.
  */
 check function doAssets() {

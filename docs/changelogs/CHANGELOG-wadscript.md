@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.2.2
+
+* `Changed` WadScript will now dump a stacktrace if a script host function produces an unhandled exception.
+
+
 ### Changed for 1.2.1
 
 * `Fixed` WADSETTYPE() did not accept two parameters, as described.

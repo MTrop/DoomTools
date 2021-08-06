@@ -108,13 +108,21 @@ function getIWAD() {
 /* ------------------------------------------------------------------------ */
 // Build lock.
 
-#define PROP_LOCKJSON       "/lock.json"
+#define PROP_LOCKFILE          "doommake.file.lock"
+#define DEFAULT_LOCKFILE       "lock.json"
 
 /**
- * Returns the build JSON file.
+ * Return the lock file from properties.
+ */
+function getLockFile() {
+	return prop(PROP_LOCKFILE, DEFAULT_LOCKFILE); 
+}
+
+/**
+ * Returns the build lock JSON file path.
  */
 function getBuildLockFile() {
-	return file(getBuildDirectory() + PROP_LOCKJSON);
+	return getBuildDirectory() + "/" + getLockFile();
 }
 
 /**
@@ -122,7 +130,7 @@ function getBuildLockFile() {
  */
 check function initBuildLock() {
 	if (typeof(global::lock) === "null") {
-		lockfile = getBuildLockFile();
+		lockfile = file(getBuildLockFile());
 		global::lock = fileExists(lockfile) ? readjson(lockfile) : {};
 		if (typeof(global::lock.dirHashes) !== "map") {
 			global::lock.dirHashes = {};
@@ -152,7 +160,7 @@ check function directoryHasChanged(dirpath) {
 check function storeDirectoryChanged(dirpath, hash) {
 	lock = initBuildLock();
 	(lock.dirHashes)->mapset(dirpath, hash);
-	getBuildLockFile()->writejson(lock, "\t");
+	file(getBuildLockFile())->writejson(lock, "\t");
 }
 
 /**

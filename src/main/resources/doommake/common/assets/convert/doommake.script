@@ -1,0 +1,107 @@
+/* ------------------------------------------------------------------------ */
+
+#define SRC_DIR_CONVERT    "/convert" 
+
+/**
+ * Fetches the source for the palette used for image conversion.
+ * Edit this function if you create the palette yourself.
+ */
+check function getConvertPaletteSource() {
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	return baseIwadPath;
+}
+
+/**
+ * Converts sound assets in the conversion directories.
+ * Puts them in the sound assets folder.
+ */
+check function doConvertSounds() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sounds";
+	verifydirs(sourceDir);
+		
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Sound conversion directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+	
+	outdir = file(SRC_DIR_ASSETS + "/sounds");
+	
+	verifydirs(outdir);
+	if (tool::dmxconvert({
+		files: filelist(sourceDir), 
+		outputdirectory: outdir
+	})) return error("ToolError", "DMXConv threw an error.");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-sound");
+}
+
+/**
+ * Converts graphics assets in the conversion directories.
+ * Puts them in the graphics assets folder.
+ */
+check function doConvertGraphics() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/graphics";
+	verifydirs(sourceDir);
+		
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Graphic conversion directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+
+	outdir = file(SRC_DIR_ASSETS + "/graphics");
+	
+	verifydirs(outdir);
+	if (tool::dimgconvert({
+		sourcePath: file(sourceDir), 
+		outputPath: outdir,
+		recursive: true,
+		paletteSourcePath: getConvertPaletteSource()
+	})) return error("ToolError", "DImgConvert threw an error.");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-graphics");
+}
+
+/**
+ * Converts sprite assets in the conversion directories.
+ * Puts them in the sprite assets folder.
+ */
+check function doConvertSprites() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sprites";
+	verifydirs(sourceDir);
+		
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("Graphic conversion directory (" + sourceDir + ") up to date. Skipping.");
+		return;
+	}
+
+	outdir = file(SRC_DIR_ASSETS + "/sprites");
+	
+	verifydirs(outdir);
+	if (tool::dimgconvert({
+		sourcePath: file(sourceDir), 
+		outputPath: outdir,
+		recursive: true,
+		paletteSourcePath: getConvertPaletteSource()
+	})) return error("ToolError", "DImgConvert threw an error.");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-sprites");
+}
+
+

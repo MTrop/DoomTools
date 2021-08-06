@@ -688,6 +688,7 @@ public final class WadScriptMain
 					return retval.asInt();
 				} catch (ScriptExecutionException e) {
 					options.stderr.println("Script ERROR: " + e.getLocalizedMessage());
+					e.printStackTrace(options.stderr);
 					return ERROR_SCRIPT_EXECUTION_ERROR;
 				} catch (ClassCastException e) {
 					options.stderr.println("Script return ERROR: " + e.getLocalizedMessage());
