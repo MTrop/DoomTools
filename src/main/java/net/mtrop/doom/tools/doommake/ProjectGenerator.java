@@ -62,7 +62,9 @@ public final class ProjectGenerator
 	private static final String MODULE_MAPS = "maps";
 	private static final String MODULE_MAPTEX = "maptex";
 	private static final String MODULE_ASSETS = "assets";
+	private static final String MODULE_ASSETS_CONVERT = "assets-convert";
 	private static final String MODULE_TEXTURES = "textures";
+	private static final String MODULE_TEXTURES_CONVERT = "textures-convert";
 	private static final String MODULE_TEXTURES_MAPS = "textures-maps";
 	private static final String MODULE_TEXTUREWADS = "texturewads";
 	private static final String MODULE_RUN = "run";
@@ -347,9 +349,45 @@ public final class ProjectGenerator
 
 		// ................................................................
 
+		// A module that converts assets.
+		MODULES.put(MODULE_ASSETS_CONVERT,
+			module(4, MODULE_ASSETS_CONVERT,
+				dir("src/convert/graphics"),
+				dir("src/convert/sounds"),
+				dir("src/convert/sprites"),
+				fileAppend("doommake.script",
+					"doommake/common/assets/convert/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/assets/convert/README.md")
+			)
+		);
+		RELEASE_SCRIPT.put(MODULE_ASSETS_CONVERT,
+			module(
+				fileContentAppend("doommake.script",
+					"\tdoConvertSounds();"
+					,"\tdoConvertGraphics();"
+					,"\tdoConvertSprites();"
+				)
+			)
+		);
+		POST_RELEASE.put(MODULE_ASSETS_CONVERT,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/assets/convert/doommake-target.script"
+				)
+			)
+		);
+		POST_CREATE_TODOS.put(MODULE_ASSETS_CONVERT, list(
+			"Add BMP, GIF, or PNG files to `src/convert/graphics`."
+			,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
+			,"Add sound files to `src/convert/sounds`."
+		));
+
+		// ................................................................
+
 		// A module that builds maps and non-texture assets together.
 		MODULES.put(MODULE_ASSETS,
-			module(3, MODULE_ASSETS,
+			module(5, MODULE_ASSETS,
 				dir("src/assets/_global"),
 				dir("src/assets/graphics"),
 				dir("src/assets/music"),
@@ -397,7 +435,7 @@ public final class ProjectGenerator
 
 		// A module that adds MapTex stuff.
 		MODULES.put(MODULE_MAPTEX,
-			module(4, MODULE_MAPTEX,
+			module(8, MODULE_MAPTEX,
 				fileAppend("doommake.properties",
 					"doommake/common/maptex/doommake.properties"),
 				fileAppend("doommake.script", 
@@ -409,8 +447,42 @@ public final class ProjectGenerator
 
 		// A module that builds texture WADs.
 		// If this is used, do NOT use the "texturewads" module.
+		MODULES.put(MODULE_TEXTURES_CONVERT,
+			module(9, MODULE_TEXTURES_CONVERT,
+				dir("src/convert/flats"),
+				dir("src/convert/patches"),
+				fileAppend("doommake.script", 
+					"doommake/common/textures/convert/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/textures/convert/README.md")
+			)
+		);
+		RELEASE_SCRIPT.put(MODULE_TEXTURES_CONVERT,
+			module(
+				fileContentAppend("doommake.script",
+					"\tdoConvertFlats();"
+					,"\tdoConvertPatches();"
+				)
+			)
+		);
+		POST_RELEASE.put(MODULE_TEXTURES_CONVERT,
+			module(
+				fileAppend("doommake.script",
+					"doommake/common/textures/convert/doommake-target.script"
+				)
+			)
+		);
+		POST_CREATE_TODOS.put(MODULE_TEXTURES_CONVERT, list(
+			"Add BMP, GIF, or PNG files to `src/convert/flats`."
+			,"Add BMP, GIF, or PNG files to `src/convert/patches`."
+		));
+		
+		// ................................................................
+
+		// A module that builds texture WADs.
+		// If this is used, do NOT use the "texturewads" module.
 		MODULES.put(MODULE_TEXTURES,
-			module(5, MODULE_TEXTURES,
+			module(10, MODULE_TEXTURES,
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
 				file("scripts/merge-textures.txt",
@@ -453,7 +525,7 @@ public final class ProjectGenerator
 		// A module that uses textures from a set of provided texture WADs.
 		// If this is used, do NOT use the "textures" module.
 		MODULES.put(MODULE_TEXTUREWADS,
-			module(5, MODULE_TEXTUREWADS,
+			module(15, MODULE_TEXTUREWADS,
 				dir("src/wads/textures"),
 				fileAppend("doommake.script",
 					"doommake/common/texwad/doommake.script"),
@@ -493,7 +565,7 @@ public final class ProjectGenerator
 
 		// A module that adds map texture exports for texture WAD stuff.
 		MODULES.put(MODULE_TEXTURES_MAPS,
-			module(6, MODULE_TEXTURES_MAPS,
+			module(15, MODULE_TEXTURES_MAPS,
 				fileAppend("doommake.script", 
 					"doommake/common/textures/maps/doommake.script")
 			)
@@ -528,7 +600,7 @@ public final class ProjectGenerator
 		// A module that allows running this project.
 		// Stub for validity.
 		MODULES.put(MODULE_RUN,
-			module(7, MODULE_RUN,
+			module(20, MODULE_RUN,
 				fileAppend("doommake.properties",
 					"doommake/run/doommake.properties"),
 				fileAppend("doommake.script",
@@ -590,22 +662,22 @@ public final class ProjectGenerator
 		
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS, template(
 			TEMPLATE_MAPS_ASSETS, CATEGORY_ASSETS, "A project for merging maps and assets together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTURES, template(
 			TEMPLATE_MAPS_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps, assets, and textures together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTUREWADS, template(
 			TEMPLATE_MAPS_ASSETS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps, assets, and used textures from texture WADs together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
+			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTURES, template(
 			TEMPLATE_MAPS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps and textures together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
+			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTUREWADS, template(
@@ -615,17 +687,17 @@ public final class ProjectGenerator
 
 		TEMPLATES.put(TEMPLATE_ASSETS, template(
 			TEMPLATE_ASSETS, CATEGORY_ASSETS, "A project for merging just non-texture assets together.",
-			MODULE_INIT, MODULE_ASSETS
+			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
 		));
 		
 		TEMPLATES.put(TEMPLATE_ASSETS_TEXTURES, template(
 			TEMPLATE_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging assets together, including a from-scratch texture set.",
-			MODULE_INIT, MODULE_ASSETS, MODULE_TEXTURES
+			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES
 		));
 		
 		TEMPLATES.put(TEMPLATE_TEXTURES, template(
 			TEMPLATE_TEXTURES, CATEGORY_ASSETS, "A project for merging a texture WAD together.",
-			MODULE_INIT, MODULE_TEXTURES
+			MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES
 		));
 
 	}

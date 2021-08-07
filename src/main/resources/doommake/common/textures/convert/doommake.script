@@ -1,0 +1,57 @@
+/* ------------------------------------------------------------------------ */
+
+#define SRC_DIR_CONVERT    "/convert" 
+#define SRC_DIR_TEXTURES   "/textures"
+
+/**
+ * Converts flat assets in the conversion directories.
+ * Puts them in the texture flats folder.
+ */
+check function doConvertFlats() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/flats";
+	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/flats";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Flat conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	convert(sourceDir, targetDir, "flats");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-flats");
+	println("Flats converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
+ * Converts patch assets in the conversion directories.
+ * Puts them in the texture patches folder.
+ */
+check function doConvertPatches() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/patches";
+	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/patches";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Patch conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	convert(sourceDir, targetDir, "flats");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-patches");
+	println("Patches converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+

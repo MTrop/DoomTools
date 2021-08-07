@@ -1,14 +1,13 @@
 /*****************************************************************************
- * TARGET: assets
+ * TARGET: converttextures
  *****************************************************************************
- * Converts and merges the assets WAD.
- * doommake assets
+ * Converts texture flats and patches to Doom formats and puts them in the 
+ * texture directories.
+ * doommake converttextures
  ****************************************************************************/
-check entry assets(args) {
-	doConvertSounds();
-	doConvertGraphics();
-	doConvertSprites();
-	doAssets();
+check entry converttextures(args) {
+	doConvertFlats();
+	doConvertPatches();
 }
 
 

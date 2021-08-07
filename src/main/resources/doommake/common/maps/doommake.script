@@ -11,19 +11,25 @@ check function doMaps() {
 
 	initBuild();
 	
+	outWad = getBuildDirectory() + "/" + getMapsWad();
+
 	sourceDir = getSourceDirectory() + SRC_DIR_MAPS;
 	verifydirs(sourceDir);
 
-	hash = directoryHasChanged(sourceDir);
-	if (hash === null) {
-		println("Maps directory (" + sourceDir + ") up to date. Skipping.");
-		return;
+	if (fileExists(outWad)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Maps directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
 	}
 
 	wadmerge(file(MERGESCRIPT_MAPS), [
 		getBuildDirectory(),
 		getSourceDirectory(),
-		getMapsWAD()
+		getMapsWad()
 	]);
 	
 	storeDirectoryChanged(sourceDir, hash);

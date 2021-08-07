@@ -6,6 +6,9 @@
  ****************************************************************************/
 check entry run(args) {
 
+	doInit();
+	doAll();
+	
 	// Must use native separator for args passed to program.
 	fs = prop("file.separator", "/");
 	

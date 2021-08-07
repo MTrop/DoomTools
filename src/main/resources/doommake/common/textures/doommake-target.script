@@ -1,10 +1,12 @@
 /*****************************************************************************
  * TARGET: textures
  *****************************************************************************
- * Reads the texture assets and merges them into a WAD.
+ * Converts and reads the texture assets and merges them into a WAD.
  * doommake textures
  ****************************************************************************/
 check entry textures(args) {
+	doConvertFlats();
+	doConvertPatches();
 	doTextures();
 }
 

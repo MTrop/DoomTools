@@ -14,20 +14,26 @@ check function doTextures() {
 
 	initBuild();
 
+	outWad = getBuildDirectory() + "/" + getTextureWAD();
+
 	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
 	verifydirs(sourceDir + "/flats");
 	verifydirs(sourceDir + "/patches");
 
-	hash = directoryHasChanged(sourceDir);
-	if (hash === null) {
-		println("Textures directory (" + sourceDir + ") up to date. Skipping.");
-		return;
+	if (fileExists(outWad)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Textures directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
 	}
 
 	wadmerge(file(MERGESCRIPT_TEXTURE), [
 		getBuildDirectory(),
 		getSourceDirectory(),
-		getTextureWad()
+		getTextureWAD()
 	]);
 	
 	storeDirectoryChanged(sourceDir, hash);

@@ -4,7 +4,7 @@ DoomMake
 ### Changed for 0.6.0
 
 * `Added` HASHDIR() host function for detecting folder changes.
-* `Added` A module/template for auto-converting graphics and sound assets.
+* `Added` Modules added for asset and texture auto-conversion of graphics and sound assets.
 * `Added` The "--disassemble" switch. Not many people will use this.
 * `Changed` New projects now auto-detect project changes on build.
 * `Changed` The "TODO" list that gets printed at the end is now added to the project.

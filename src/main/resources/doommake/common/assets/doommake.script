@@ -28,6 +28,8 @@ check function doAssets() {
 	
 	initBuild();
 
+	outWad = getBuildDirectory() + "/" + getAssetsWAD();
+
 	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
 	verifydirs(sourceDir + "/_global");
 	verifydirs(sourceDir + "/graphics");
@@ -35,10 +37,14 @@ check function doAssets() {
 	verifydirs(sourceDir + "/sounds");
 	verifydirs(sourceDir + "/sprites");
 		
-	hash = directoryHasChanged(sourceDir);
-	if (hash === null) {
-		println("Assets directory (" + sourceDir + ") up to date. Skipping.");
-		return;
+	if (fileExists(outWad)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Assets directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
 	}
 	
 	wadmerge(file(MERGESCRIPT_ASSETS), [
@@ -46,7 +52,7 @@ check function doAssets() {
 		getSourceDirectory(),
 		getAssetsWAD()
 	]);
-	cleanUpAssetWAD(getBuildDirectory() + "/" + getAssetsWAD());
+	cleanUpAssetWAD(outWad);
 	
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("assets");

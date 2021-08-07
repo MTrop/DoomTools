@@ -4,32 +4,38 @@
  */
 function doMapTextures() {
 
-	if (!wasBuilt("maps") && !wasBuilt("textures")) {
-		println("Both maps and textures were not built. Skipping map texture rebuild.");
-		return;
-	}
-
-	// Only do if maps were compiled.
-	if (!fileexists(getBuildDirectory() + "/" + getMapsWad())) {
-		println("No maps at `" + (getBuildDirectory() + "/" + getMapsWad()) + "`. Maps WAD not built. Skipping texture extraction.");
-		return;
-	}
-
-	// Only do if textures were compiled.
-	if (!fileexists(getBuildDirectory() + "/" + getTextureWad())) {
-		println("No texture WAD at `" + (getBuildDirectory() + "/" + getTextureWad()) + "`. Texture WAD not built. Skipping texture extraction.");
-		return;
-	}
-
 	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
+	outWad = getBuildDirectory() + "/" + getMapTexWad();
+	outMapsWad = getBuildDirectory() + "/" + getMapsWad();
+	outTextureWad = getBuildDirectory() + "/" + getTextureWad();
+
+	if (fileExists(outWad)) {
+		if (!wasBuilt("maps") && !wasBuilt("textures")) {
+			println("[Skipped] Both maps and textures were not built. Skipping map texture rebuild.");
+			return;
+		}
+	
+		// Only do if maps were compiled.
+		if (!fileExists(outMapsWad)) {
+			println("[Skipped] No maps at `" + outMapsWad + "`. Maps WAD not built. Skipping texture extraction.");
+			return;
+		}
+	
+		// Only do if textures were compiled.
+		if (!fileExists(outTextureWad)) {
+			println("[Skipped] No texture WAD at `" + outTextureWad + "`. Texture WAD not built. Skipping texture extraction.");
+			return;
+		}
+	}
+
 	check (err) extractUsedMapTextures(
 		baseIwadPath,
-		[getBuildDirectory() + "/" + getMapsWad()],
-		[getBuildDirectory() + "/" + getTextureWad()],
-		getBuildDirectory() + "/" + getMapTexWad()
+		[outMapsWad],
+		[outTextureWad],
+		outWad
 	);
 	if (!err) {
 		setBuilt("maptextures");

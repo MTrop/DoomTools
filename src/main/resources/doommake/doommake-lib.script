@@ -246,6 +246,62 @@ function initBuild() {
 }
 
 /****************************************************************************
+ * Fetches the source for the palette used for image conversion.
+ * Edit this function if you create the palette yourself.
+ *
+ ****************************************************************************/
+check function getConvertPaletteSource() {
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	return baseIwadPath;
+}
+
+/****************************************************************************
+ * Calls DImgConvert and throws an error if something bad happens.
+ * 
+ * sourceDir: The source directory path.
+ * targetDir: The target directory path.
+ * mode: One of 'palettes', 'colormaps', 'graphics', 'flats'.
+ ****************************************************************************/
+check function convert(sourceDir, targetDir, mode) {
+	if (empty(sourceDir))
+		return error("ToolError", "Source directory path not specified.");
+	if (empty(targetDir))
+		return error("ToolError", "Target directory path not specified.");
+		
+	if (tool::dimgconvert({
+		modeType: mode ?? "graphics",
+		paletteSourcePath: file(getConvertPaletteSource()),
+		sourcePath: file(sourceDir), 
+		outputPath: file(targetDir),
+		recursive: true,
+		verbose: false
+	})) return error("ToolError", "DImgConvert threw an error.");
+}
+
+/****************************************************************************
+ * Calls DMXConvert and throws an error if something bad happens.
+ * 
+ * sourceDir: The source directory path.
+ * targetDir: The target directory path.
+ ****************************************************************************/
+check function convertdmx(sourceDir, targetDir) {
+
+	files = filelist(sourceDir);
+	if (empty(files)) {
+		println("No sounds to convert.");
+		return;
+	}
+
+	if (tool::dmxconvert({
+		files: files,
+		outputdirectory: file(targetDir),
+		verbose: false
+	})) return error("ToolError", "DMXConvert threw an error.");
+}
+
+/****************************************************************************
  * Calls WadMerge and throws an error if something bad happens.
  * 
  * scriptFilePath: Path to script file to execute.

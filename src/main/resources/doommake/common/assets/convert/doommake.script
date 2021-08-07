@@ -1,17 +1,7 @@
 /* ------------------------------------------------------------------------ */
 
+#define SRC_DIR_ASSETS     "/assets" 
 #define SRC_DIR_CONVERT    "/convert" 
-
-/**
- * Fetches the source for the palette used for image conversion.
- * Edit this function if you create the palette yourself.
- */
-check function getConvertPaletteSource() {
-	baseIwadPath = getIwad();
-	if (empty(baseIwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
-	return baseIwadPath;
-}
 
 /**
  * Converts sound assets in the conversion directories.
@@ -22,24 +12,21 @@ check function doConvertSounds() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sounds";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sounds";
 	verifydirs(sourceDir);
+	verifydirs(targetDir);
 		
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
-		println("Sound conversion directory (" + sourceDir + ") up to date. Skipping.");
+		println("[Skipped] Sound conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
 	
-	outdir = file(SRC_DIR_ASSETS + "/sounds");
-	
-	verifydirs(outdir);
-	if (tool::dmxconvert({
-		files: filelist(sourceDir), 
-		outputdirectory: outdir
-	})) return error("ToolError", "DMXConv threw an error.");
+	convertdmx(sourceDir, targetDir);
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-sound");
+	println("Sounds converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
 /**
@@ -51,26 +38,21 @@ check function doConvertGraphics() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/graphics";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/graphics";
 	verifydirs(sourceDir);
-		
+	verifydirs(targetDir);
+			
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
-		println("Graphic conversion directory (" + sourceDir + ") up to date. Skipping.");
+		println("[Skipped] Graphic conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
 
-	outdir = file(SRC_DIR_ASSETS + "/graphics");
-	
-	verifydirs(outdir);
-	if (tool::dimgconvert({
-		sourcePath: file(sourceDir), 
-		outputPath: outdir,
-		recursive: true,
-		paletteSourcePath: getConvertPaletteSource()
-	})) return error("ToolError", "DImgConvert threw an error.");
+	convert(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-graphics");
+	println("Graphics converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
 /**
@@ -82,26 +64,21 @@ check function doConvertSprites() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sprites";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sprites";
 	verifydirs(sourceDir);
-		
+	verifydirs(targetDir);
+			
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
-		println("Graphic conversion directory (" + sourceDir + ") up to date. Skipping.");
+		println("[Skipped] Sprite conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
 
-	outdir = file(SRC_DIR_ASSETS + "/sprites");
-	
-	verifydirs(outdir);
-	if (tool::dimgconvert({
-		sourcePath: file(sourceDir), 
-		outputPath: outdir,
-		recursive: true,
-		paletteSourcePath: getConvertPaletteSource()
-	})) return error("ToolError", "DImgConvert threw an error.");
+	convert(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-sprites");
+	println("Sprites converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
 

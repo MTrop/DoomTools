@@ -11,22 +11,24 @@ check function doPatch(budget) {
 
 	initBuild();
 
+	outFile = getBuildDirectory() + "/" + getPatchFile();
+	
 	sourceDir = getSourceDirectory() + SRC_DECOHACK;
 	verifydirs(sourceDir);
 
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
-		println("DECOHack directory (" + sourceDir + ") up to date. Skipping.");
+		println("[Skipped] DECOHack directory (" + sourceDir + ") up to date.");
 		return;
 	}
 
 	decohack(
 		file(getSourceDirectory() + SRC_DECOHACK + SRC_DECOHACK_MAIN), 
-		file(getBuildDirectory() + "/" + getPatchFile()), 
+		file(outFile), 
 		budget
 	);
 	
 	storeDirectoryChanged(sourceDir, hash);
-	setBuilt("patch");
+	setBuilt("dehacked");
 }
 

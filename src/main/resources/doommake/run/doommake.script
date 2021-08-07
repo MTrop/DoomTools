@@ -17,6 +17,10 @@
  */
 check function doRun(portType, wadList, dehFile) {
 
+	iwadPath = getIwad();
+	if (empty(iwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+
 	portType = empty(portType) ? "" : "." + portType;
 
 	exepath =    prop(PROP_RUN_EXE + portType);
@@ -41,10 +45,6 @@ check function doRun(portType, wadList, dehFile) {
 		return error("RunError", "DEH switch not specified. Requires a property to be set: " + PROP_RUN_SWITCH_DEH + portType);
 
 	arguments = [];
-
-	iwadPath = getIwad();
-	if (empty(iwadPath))
-		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
 
 	arguments->listadd(iwadSwitch);
 	arguments->listadd(iwadPath->filecanonpath());

@@ -5,6 +5,7 @@
  * doommake all
  ****************************************************************************/
 check entry all(args) {
+	doInit();
 	doAll();
 }
 
@@ -16,6 +17,8 @@ check entry all(args) {
  * doommake release
  ****************************************************************************/
 check entry release(args) {
+	doInit();
+	doAll();
 	doRelease();
 }
 
