@@ -2667,7 +2667,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
-		else if ((labelName = matchActorLabel(actor)) != null)
+		else if (actor != null && (labelName = matchActorLabel(actor)) != null)
 			return parseActorStateLabelIndex(actor, labelName);
 		else if ((value = matchNumericExpression(context)) != null)
 			return value;

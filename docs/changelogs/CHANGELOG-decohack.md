@@ -4,6 +4,7 @@ DecoHack
 ### Changed for 0.16.1
 
 * `Fixed` Things did not have TRANSLUCENT set. (Issue #41)
+* `Fixed` NPE on actorless state fill.
 
 
 ### Changed for 0.16.0
