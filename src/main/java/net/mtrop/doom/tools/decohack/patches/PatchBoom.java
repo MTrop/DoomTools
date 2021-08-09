@@ -420,7 +420,7 @@ public class PatchBoom implements DEHPatchBoom
 			put("GOTREDCARD", "Picked up a red keycard.");
 			put("GOTBLUESKUL", "Picked up a blue skull key.");
 			put("GOTYELWSKUL", "Picked up a yellow skull key.");
-			put("GOTREDSKUL", "Picked up a red skull key.");
+			put("GOTREDSKULL", "Picked up a red skull key."); // Yes, two Ls.
 			put("GOTINVUL", "Invulnerability!");
 			put("GOTBERSERK", "Berserk!");
 			put("GOTINVIS", "Partial Invisibility");
@@ -751,6 +751,12 @@ public class PatchBoom implements DEHPatchBoom
 	public Set<String> getStringKeys()
 	{
 		return MAP_STRINGS.keySet();
+	}
+
+	@Override
+	public boolean isValidStringKey(String key)
+	{
+		return MAP_STRINGS.containsKey(key);
 	}
 
 	@Override

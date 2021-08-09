@@ -71,6 +71,13 @@ public interface DEHPatchBoom extends DEHPatch
 	}
 	
 	/**
+	 * Checks if a string key is correct.
+	 * @param key the key.
+	 * @return true if valid, false if not.
+	 */
+	boolean isValidStringKey(String key);
+	
+	/**
 	 * Gets a string by its macro key.
 	 * @param key the key.
 	 * @return the corresponding string.

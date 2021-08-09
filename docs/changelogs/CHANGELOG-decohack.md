@@ -1,6 +1,12 @@
 DecoHack
 --------
 
+### Changed for 0.16.2
+
+* `Fixed` The "Red Skull" pickup string should be `GOTREDSKULL`, with two Ls.
+* `Changed` An error is now thrown if a string name is invalid (Boom and higher).
+
+
 ### Changed for 0.16.1
 
 * `Fixed` Things did not have TRANSLUCENT set. (Issue #41)

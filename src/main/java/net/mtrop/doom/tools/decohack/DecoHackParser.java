@@ -401,6 +401,12 @@ public final class DecoHackParser extends Lexer.Parser
 		String stringKey;
 		while ((stringKey = matchIdentifier()) != null)
 		{
+			if (!context.isValidStringKey(stringKey))
+			{
+				addErrorMessage("String name \"" + stringKey + "\" is not a valid string name.");
+				return false;
+			}
+			
 			String replacementString;
 			if ((replacementString = matchString()) != null)
 			{

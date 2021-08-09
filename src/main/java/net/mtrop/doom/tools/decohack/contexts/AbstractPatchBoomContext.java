@@ -60,6 +60,12 @@ public abstract class AbstractPatchBoomContext extends AbstractPatchContext<DEHP
 	}
 
 	@Override
+	public boolean isValidStringKey(String key)
+	{
+		return getSourcePatch().isValidStringKey(key);
+	}
+
+	@Override
 	public Integer getSoundIndex(String name)
 	{
 		return getSourcePatch().getSoundIndex(name.toUpperCase());
