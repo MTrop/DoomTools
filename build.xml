@@ -36,6 +36,9 @@
 	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
 	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
 
+	<property name="txtmark.lib.version" value="0.13" />
+	<property name="txtmark.jar" value="txtmark-${txtmark.lib.version}.jar" />
+
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
@@ -159,8 +162,13 @@
 		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar}" dest="${dependencies.dir}" />
 		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar.src}" dest="${dependencies.dir}" />
 	</target>
+
+	<target name="dependency.txtmark">
+		<maven-jar-dl group-path="com/github/rjeschke" artifact="txtmark" version="${txtmark.lib.version}" />
+		<maven-jar-sources-dl group-path="com/github/rjeschke" artifact="txtmark" version="${txtmark.lib.version}" />
+	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependencies" depends="init.dependencies, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.txtmark, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx784M" />

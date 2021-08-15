@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<project name="markdown">
+
+	<!-- Markdown Processor Macros -->
+
+	<macrodef name="markdown-compile">
+		<attribute name="src" />
+		<attribute name="dest" />
+		<attribute name="jarname" />
+		<sequential>
+			<!-- TODO: Add Java Task -->
+		</sequential>
+	</macrodef>
+
+	<macrodef name="markdown-page">
+		<attribute name="src" />
+		<attribute name="dest" />
+		<attribute name="jarname" />
+		<sequential>
+			<!-- TODO: Add Java Task -->
+		</sequential>
+	</macrodef>
+	
+</project>
