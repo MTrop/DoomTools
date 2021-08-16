@@ -91,10 +91,6 @@ A:hover {
 	margin-right: auto;
 }
 
-SVG.octicon {
-	display: none;
-}
-
 PRE {
 	font-family: 'Courier New', Courier, monospace;
 	background-color: #020f0c;

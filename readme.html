@@ -1,190 +1,608 @@
-<article class="markdown-body entry-content container-lg" itemprop="text"><h1><a id="user-content-doom-tools" class="anchor" aria-hidden="true" href="#doom-tools"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Doom Tools</h1>
-<p>Copyright (c) 2019-2021 Matt Tropiano</p>
-<h3><a id="user-content-required-libraries" class="anchor" aria-hidden="true" href="#required-libraries"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Required Libraries</h3>
-<p><a href="https://github.com/MTrop/DoomStruct">Doom Struct</a> 2.13.0+<br>
-<a href="https://blackrooksoftware.github.io/RookScript/" rel="nofollow">RookScript</a> 1.11.0+<br>
-<a href="https://blackrooksoftware.github.io/RookScript/" rel="nofollow">RookScript-Desktop</a> 1.10.2.1+</p>
-<h3><a id="user-content-required-modules" class="anchor" aria-hidden="true" href="#required-modules"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Required Modules</h3>
-<p><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html" rel="nofollow">java.desktop</a></p>
-<ul>
-<li><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.xml/module-summary.html" rel="nofollow">java.xml</a></li>
-<li><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.datatransfer/module-summary.html" rel="nofollow">java.datatransfer</a></li>
-<li><a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/module-summary.html" rel="nofollow">java.base</a></li>
-</ul>
-<h3><a id="user-content-source" class="anchor" aria-hidden="true" href="#source"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Source</h3>
-<p>The <code>master</code> branch contains stable code. Until a release is cut, the <code>master</code> branch will be shifting.</p>
-<h3><a id="user-content-introduction" class="anchor" aria-hidden="true" href="#introduction"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Introduction</h3>
-<p>A bunch of command-line utilities for Doom stuff. This time, they're useful.</p>
-<h3><a id="user-content-why" class="anchor" aria-hidden="true" href="#why"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Why?</h3>
-<p>Because they are all super useful, and can run anywhere (that runs Java). This also enables authors to
-create a Continuous Integration path for building ongoing WAD projects. How cool would it be to always
-have a demo copy buildable at all times?</p>
-<h3><a id="user-content-compiling-with-ant" class="anchor" aria-hidden="true" href="#compiling-with-ant"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Compiling with Ant</h3>
-<p>To download dependencies for this project, type (<code>build.properties</code> will also be altered/created):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant dependencies
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant dependencies
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To compile this library with Apache Ant, type:</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant compile
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant compile
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To make Maven-compatible JARs of this library (placed in the <em>build/jar</em> directory), type:</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant jar
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant jar
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To make Javadocs (placed in the <em>build/docs</em> directory):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant javadoc
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant javadoc
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To compile main and test code and run tests (if any):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant test
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant test
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To make Zip archives of everything (main src/resources, bin, javadocs, placed in the <em>build/zip</em> directory):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant zip
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant zip
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To compile, JAR, test, and Zip up everything:</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant release
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant release
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To create a distribution (Bash and CMD):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant dist
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant dist
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY):</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
-ant deploy.bash -Ddeploy.dir=[TARGETPATH]
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
-ant deploy.bash -Ddeploy.dir=[TARGETPATH]
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<p>To clean up everything:</p>
-<div class="snippet-clipboard-content position-relative"><pre><code>ant clean
-</code></pre><div class="zeroclipboard-container position-absolute right-0 top-0">
-    <clipboard-copy aria-label="Copy" class="ClipboardButton btn js-clipboard-copy m-2 p-0 tooltipped-no-delay" data-copy-feedback="Copied!" data-tooltip-direction="w" value="ant clean
-" tabindex="0" role="button">
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-clippy js-clipboard-clippy-icon m-2">
-    <path fill-rule="evenodd" d="M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
-</svg>
-      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
-    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
-</svg>
-    </clipboard-copy>
-  </div></div>
-<h3><a id="user-content-utilities" class="anchor" aria-hidden="true" href="#utilities"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Utilities</h3>
-<h4><a id="user-content-doomtools" class="anchor" aria-hidden="true" href="#doomtools"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>DoomTools</h4>
-<p>A program that just displays info about the toolset that you are using (or manage other things, in the future).</p>
-<h4><a id="user-content-decohack" class="anchor" aria-hidden="true" href="#decohack"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>DecoHack</h4>
-<p>A utility that uses a DECORATE-like language scheme for creating DeHackEd patches.</p>
-<h4><a id="user-content-dimgconv" class="anchor" aria-hidden="true" href="#dimgconv"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>DImgConv</h4>
-<p>A utility that bulk converts images to Doom formats.</p>
-<h4><a id="user-content-dmxconv" class="anchor" aria-hidden="true" href="#dmxconv"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>DMXConv</h4>
-<p>A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.</p>
-<h4><a id="user-content-doommake" class="anchor" aria-hidden="true" href="#doommake"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>DoomMake</h4>
-<p>A project build utility that is agnostic to all operating systems (for the most part).</p>
-<h4><a id="user-content-wadmerge" class="anchor" aria-hidden="true" href="#wadmerge"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WadMerge</h4>
-<p>A utility that performs Script-based WAD compilation and merging.</p>
-<h4><a id="user-content-wswantbl" class="anchor" aria-hidden="true" href="#wswantbl"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WSwAnTbl</h4>
-<p>A utility that reads DEFSWANI/SWANTBLS data files and compiles it into ANIMATED and SWITCHES lumps.
-Can also export a set of ANIMATED and SWITCHES lumps to a definition file.</p>
-<h4><a id="user-content-wadtex" class="anchor" aria-hidden="true" href="#wadtex"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WadTex</h4>
-<p>A utility that reads a DEUTEX-style texture file and imports it into a WAD file as TEXTUREx and PNAMES lumps.
-Can also export TEXTUREx/PNAMES in the same way.</p>
-<h4><a id="user-content-wtexscan" class="anchor" aria-hidden="true" href="#wtexscan"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WTexScan</h4>
-<p>A utility that scans maps in a WAD and outputs a list of found textures and flats, suitable for import into the next program...</p>
-<h4><a id="user-content-wtexport" class="anchor" aria-hidden="true" href="#wtexport"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WTEXport</h4>
-<p>A utility that exports textures from one WAD into another, including associated ANIMATED and SWITCHES textures.</p>
-<h4><a id="user-content-wadscript" class="anchor" aria-hidden="true" href="#wadscript"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>WadScript</h4>
-<p>A scripting system for doing practically anything with Doom stuff. Also includes Rookscript, a subset script.</p>
-<h3><a id="user-content-special-thanks" class="anchor" aria-hidden="true" href="#special-thanks"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Special Thanks</h3>
-<p>Special thanks to, in no particular order, <strong>Aurelius</strong>, <strong>Antares031</strong>, <strong>floatRand</strong>, <strong>Xaser</strong>, <strong>kraflab</strong>,
-and <strong>punchyouinthefaceman</strong> for their incidental QA testing. Lots of bugs were fixed because of all of you!</p>
-<h3><a id="user-content-other" class="anchor" aria-hidden="true" href="#other"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z"></path></svg></a>Other</h3>
-<p>These programs and the accompanying materials are made available under the
-terms of the MIT License, which accompanies this distribution.</p>
-<p>A copy of the MIT License should have been included in this release (LICENSE.txt).
-If it was not, please contact us for a copy, or to notify us of a distribution
-that has not included it.</p>
-<p>This contains code copied from Black Rook Base, under the terms of the MIT License (docs/LICENSE-BlackRookBase.txt).</p>
-</article>
+<h1>Rookscript Language Quick Guide</h1>
+<h3>Comments</h3>
+<pre><code>// This is a single-line comment.
+/*
+    This is a multi
+    line comment.
+*/
+/* You can even write them like this. */
+</code></pre>
+<p>All comments are ignored, and are not preserved after compilation.</p>
+<h3>Value Types</h3>
+<p>Null</p>
+<pre><code>null
+</code></pre>
+<p>Booleans</p>
+<pre><code>true
+false
+</code></pre>
+<p>Integers (64-bit)</p>
+<pre><code>0
+5
+34
+0xff        // hexadecimal notation
+0X0ff       // hexadecimal notation
+0x6767      // hexadecimal notation
+0x00fd34dd  // hexadecimal notation
+</code></pre>
+<p>Floating-point (64-bit, must start with a number)</p>
+<pre><code>0.0
+0.456
+1.467
+1e2         // exponent notation
+0.5e6       // exponent notation
+1.545E7     // exponent notation
+4.605e-7    // exponent notation
+0.44444e+3  // exponent notation
+infinity    // floating-point, IEEE positive infinity
+NaN         // floating-point, IEEE not-a-number ("nan" also works - it is case-insensitive)
+</code></pre>
+<p>Strings (wrapped in double quotes)</p>
+<pre><code>""
+"apple"
+"104"
+"Matt Tropiano"
+"abracadabra"
+</code></pre>
+<p>Lists</p>
+<pre><code>[]            // empty list
+[5]           // one element
+[1, 2, 3]
+["apple", "orange", "pear", "kumquat"]
+[1, 1.0, "apple", false, null]            // can hold multiple types
+[[1,2,3],[4,5,6]]                        // can hold nested lists
+</code></pre>
+<p>Maps</p>
+<pre><code>{}              // empty map
+{x: 5, y: 6}    // map with two fields
+{               // map with several fields and types (values can be any type)
+    name: "Bob", 
+    age: 23,
+    gender: "Male",
+    likes: ["Golf", "Baseball"],
+    dislikes: ["Writing documentation", "Cold weather", "mean people"],
+    rating: 9.5
+}
+</code></pre>
+<p>Map keys do not need to be identifier names - they can also be numbers or string literals.</p>
+<pre><code>{
+    "first name": "Bob", 
+    "last name": "Smith",
+    0: "Zero", 
+    1: "One", 
+    2: "Two"
+}
+</code></pre>
+<p><strong>Buffers</strong>, <strong>Errors</strong>, <strong>Objects</strong>, three additional types, have no literal representation, but are storable as variables.</p>
+<h3>Logical Equivalence</h3>
+<p>Some parts of Rookscript evaluate values logically. For those cases, the following values are considered <code>false</code>:</p>
+<pre><code>null
+false
+0
+0.0
+NaN
+""      // empty string
+</code></pre>
+<p>Everything else is considered <code>true</code>.</p>
+<h3>Variables</h3>
+<p>All variables/identifiers must not start with a number (since numbers do), and must be comprised
+of alphanumeric characters plus the underscore <code>_</code>.</p>
+<pre><code>x
+arg0
+VARNAME
+this_is_a_variable_too
+</code></pre>
+<p>List contents are read via 0-based index:</p>
+<pre><code>x = [4,5,6,7]
+x[0]            //  4
+x[1]            //  5
+x[2]            //  6
+x[3]            //  7
+x[3.5]          //  7 (3.5 is chopped to 3)
+x[-1]           //  null (values outside of a list are null)
+x[4]            //  null (values outside of a list are null)
+</code></pre>
+<p>Map contents are read via the <code>.</code> operator:</p>
+<pre><code>m = {x: 5, y: -3}
+m.x     // 5
+m.y     // -3
+m.z     // null (invalid key)
+</code></pre>
+<h3>Statements</h3>
+<p>Each script is a series of <strong>statements</strong>. Statements are usually function calls or expressions that assign values to variables. All statements are terminated with a semicolon (<code>;</code>).</p>
+<p>Some statements look like this:</p>
+<pre><code>y = 9;                      // assigns 9 to y
+age = 24;                   // assigns 24 to age
+x = 4.0 + 5.0;              // assigns 9.0 to x
+b = double(4);              // calls the function "double" with 4 as its only parameter, and assigns the result to b.
+tagPerson("Bob", "old");    // calls the function "tagPerson" with "Bob" and "old" as parameters.
+doWork();                   // calls the function "doWork" with no parameters.
+</code></pre>
+<p>A <em>block</em> of statements, executed in the order written, are placed between <em>braces</em>:</p>
+<pre><code>{
+    x = 24;         // assign 24 to x
+    y = 9;          // assign 9 to y
+    z = x + y;      // assign the result of x + y (33) to z
+}
+</code></pre>
+<h3>Expressions</h3>
+<p>Expressions are infix-notated (like how humans write it) and are comprised of values and operators.</p>
+<pre><code>5 + 4
+x - 3 / 6
+9 + -4 - (x * 3.0)
+!false
+"apple" + "sauce"
+</code></pre>
+<p>There are <strong>unary</strong> operators:</p>
+<pre><code>!       // logical not     (!false !4.0)
+~       // bitwise not     (~5)
+-       // negation        (-3)
++       // absolute        (+(-16) +9.02)
+</code></pre>
+<p>and there are <strong>binary</strong> operators:</p>
+<pre><code>+       // addition
+-       // subtraction
+*       // multiplication
+/       // division
+%       // modulo division
+&amp;       // bitwise and
+|       // bitwise or
+^       // bitwise xor
+==      // logical equals
+===     // logical strict equals (type and value)
+!=      // logical not equal
+!==     // logical strict not equals (type and value)
+&lt;       // logical less than
+&gt;       // logical greater than
+&lt;=      // logical less than or equal
+&gt;=      // logical greater than or equal
+&lt;&lt;      // left bit shift
+&gt;&gt;      // right bit shift
+&gt;&gt;&gt;     // right bit shift (zero-padded)
+</code></pre>
+<p>All operators have a defined precedence:</p>
+<pre><code>4 + 5 * 3       // equals 19, not 27
+</code></pre>
+<p>In order of precedence (same row is same precedence):</p>
+<pre><code>Unary
+    ! ~ - +        // logical not, bitwise not, negate, absolute
+
+Binary
+    * / %          // multiply, divide, modulo
+    + -            // add, subtract
+    &gt;&gt; &gt;&gt;&gt; &lt;&lt;      // right shift, padded right shift, left shift
+    &gt; &gt;= &lt; &lt;=      // greater, greater-equal, less, less-equal
+    == === != !==  // equal, strict equal, not equal, strict not equal
+    &amp;              // bitwise and
+    ^              // exclusive or
+    |              // bitwise or
+</code></pre>
+<p>The following binary operators <strong>short-circuit</strong> their logic:</p>
+<pre><code>&amp;&amp;      // logical and - short circuit if left side is false
+||      // logical or - short circuit if left side is true
+?:      // false coalesce - short circuit if left side is not false, return first non-false-equivalent.
+??      // null coalesce - short circuit if left side is not null, return first non-null.
+</code></pre>
+<p>Assignment operators:</p>
+<pre><code>=       // equals
++=      // plus equals
+-=      // minus equals
+*=      // multiply equals
+/=      // divide equals
+%=      // modulo equals
+&amp;=      // bitwise-and equals
+|=      // bitwise-or equals
+&gt;&gt;=     // right-shift equals
+&gt;&gt;&gt;=    // padded right-shift equals
+&lt;&lt;=     // left-shift equals
+</code></pre>
+<p>The aforementioned short-circuiters have <strong>lowest</strong> precedence.</p>
+<pre><code>4 + 7 &amp;&amp; 3 - 3 &amp;&amp; 12.0     // returns false (11 &amp;&amp; 0). 0 is false-equivalent. 12.0 is not even evaluated.
+</code></pre>
+<p>Precedence can be altered using parenthesis - these essentially create sub-expressions within expressions:</p>
+<pre><code>4 + 5 * 3       // equals 19, not 27
+4 + (5 * 3)     // equals 19, not 27
+(4 + 5) * 3     // equals 27, not 19
+</code></pre>
+<p>When using operators, some either result in implicit type promotion, or reduction. This is critical to think about for comparisions later!</p>
+<pre><code>4 + 5.0         // result is 9.0 - floating-point
+!3              // result is false - boolean
+</code></pre>
+<p>There is also a <strong>ternary</strong> operator:</p>
+<pre><code>? :         // if before the '?' is true-equivalent, evaluate before the colon, else after.
+
+x ? 5 : 7   // returns 5 if x is true-equivalent, else returns 7
+</code></pre>
+<h3>Control Statements</h3>
+<p>There are a few special types of statements that control execution.</p>
+<h4>The &ldquo;If&rdquo; Statement</h4>
+<p>&ldquo;If&rdquo; statements represent a branch in logic - if the expression in the parenthesis evaluates to <code>true</code>, the subsequent block is executed.</p>
+<pre><code>if (x == 4)
+{
+    println("x is 4!");
+}
+</code></pre>
+<p>If an &ldquo;if&rdquo; statement is followed up by an &ldquo;else&rdquo; block, that block will be executed instead.</p>
+<pre><code>if (x == 4)
+{
+    println("x is 4!");
+}
+else
+{
+    println("x is not 4!");
+}
+</code></pre>
+<p>A block of statements can have the braces omitted if it is just one statement (this is also true for all control statements expecting a block of statements).</p>
+<pre><code>if (x == 4)
+    println("x is 4!");
+else
+    println("x is not 4!");
+</code></pre>
+<p>For this reason, you can chain together if-elses&hellip;</p>
+<pre><code>if (x == 4)
+{
+    println("x is 4!");
+}
+else if (x == 5)
+{
+    println("x is 5!");
+}
+else
+{
+    println("x is neither 4 nor 5!");
+}
+</code></pre>
+<p>&hellip;since this is equivalent:</p>
+<pre><code>if (x == 4)
+{
+    println("x is 4!");
+}
+else 
+{
+    if (x == 5)
+    {
+        println("x is 5!");
+    }
+    else
+    {
+        println("x is neither 4 nor 5!");
+    }
+}
+</code></pre>
+<h4>The &ldquo;While&rdquo; Loop</h4>
+<p>&ldquo;While&rdquo; loops execute the following block of statements as long as the conditional expression in the parenthesis still evaluates <code>true</code> after the block completes.</p>
+<pre><code>x = 5;
+// This code will loop 5 times.
+while (x &gt; 0)
+{
+    println("x is " + x);
+    x = x - 1;
+}
+</code></pre>
+<h4>The &ldquo;For&rdquo; Loop</h4>
+<p>&ldquo;For&rdquo; loops execute the following block of statements as long as the conditional expression is still evaluates <code>true</code> after the block completes.</p>
+<p><em>For</em> loops have an <em>initializer</em>, <em>conditional</em>, and <em>step</em> part enclosed in parenthesis that drives the loop. Each of these parts are separated by a semicolon (<code>;</code>), except for the last part.</p>
+<pre><code>// This code will loop 10 times.
+for (x = 0; x &lt; 10; x += 1)
+{
+    println("x is " + x);
+}
+</code></pre>
+<p>Each part can be left out of a <em>for</em> loop, except for the conditional. The previous loop can be rewritten as:</p>
+<pre><code>x = 10;
+for (; x &lt; 10;)
+{
+    println("x is " + x);
+    x += 1;
+}
+</code></pre>
+<h4>The &ldquo;Each&rdquo; Loop</h4>
+<p>&ldquo;Each&rdquo; loops iterate linearly through values that are collections of values. All value types can be iterated through (with varying usefulness).</p>
+<pre><code>numbers = [1, 2, 3, 4, 5];
+// will print each number in "numbers" on its own line.
+each (x : numbers)
+{
+    println(x);
+}
+</code></pre>
+<p>Maps and other map-like objects can have their entries iterated through, as well.</p>
+<pre><code>triple = { x: 3, y: 4, z: -2 };
+// will print each key and value in "triple" on its own line.
+each (k, v : triple)
+{
+    println(k + " is " + v);
+}
+</code></pre>
+<p>Performing a key-value iteration on lists will fill the key with the index:</p>
+<pre><code>numbers = [1, 2, 3, 4, 5];
+// will print each index and value in "numbers" on its own line.
+each (k, v : numbers)
+{
+    println("numbers[" + k + "] is " + v);
+}
+</code></pre>
+<p>Attempting to iterate on a single value will only run the loop once, though:</p>
+<pre><code>a = 3;
+// will just print "3"
+each (x : a)
+{
+    println(x);
+}
+</code></pre>
+<p>A key-value iteration on a single value will return <code>null</code> as the key, and the value as the value.</p>
+<p>Iterators are also smart enough to iterate through Java-native collections that are not RookScript values - any OBJECTREF type that implements Map or Iterable will work (which includes Collections)!</p>
+<h3>Entry Points</h3>
+<p>All starting points in a script's execution are called <em>entry points</em> and are declared as such:</p>
+<pre><code>entry start()
+{
+    // ... statements go here
+}
+</code></pre>
+<p>&hellip;this declares an entry point called <code>start</code> that has no parameters.</p>
+<p>Entry points can declare any number of parameters, declared as identifiers that hold the values that are passed in when they are called from the host. The <code>return</code> keyword returns execution to the host plus a value result, if any.</p>
+<h3>Functions</h3>
+<h4>Local Functions</h4>
+<p><em>Local Functions</em> are simple subroutines. They are declared in the script like so:</p>
+<pre><code>function name(parameter0, parameter1)
+{
+    // ... code
+}
+</code></pre>
+<p>Like <em>entry points</em>, they can declare any number of parameters, declared as identifiers that hold the values that are passed in when they are called. The <code>return</code> keyword returns execution to the caller plus a value result. <em>All local functions return a value.</em> If it never hits a <code>return</code> statement, they return <code>null</code>. <strong>It is good practice to ensure that a function hits a <code>return</code> at every branch in execution if it is supposed to return a value!</strong></p>
+<p>Functions, however, <strong>cannot</strong> be the start of a script's execution, like <em>entry points</em>.</p>
+<p>This is a function that doubles a value and returns it:</p>
+<pre><code>function double(x)
+{
+    return x * 2;
+}
+</code></pre>
+<p>This is a function that calls other functions (and returns <code>null</code>):</p>
+<pre><code>// println is a function that prints a newline-terminated message to STDOUT.
+
+function printUppercase(message)
+{
+    u = strupper(message);
+    println(u);
+}
+</code></pre>
+<p>Functions in Rookscript support <em>recursion</em>, or functions that call themselves.</p>
+<pre><code>function factorial(x)
+{
+    if (x &lt;= 0)
+        return 1;
+    else
+        return x * factorial(x - 1);
+}
+</code></pre>
+<p>If a function is called with less parameters than required, the remaining parameters are filled with <code>null</code>.</p>
+<pre><code>// println is a function that prints a newline-terminated message to STDOUT.
+
+function printStuff(p1, p2, p3)
+{
+    println("p1 is " + p1);
+    println("p2 is " + p2);
+    println("p3 is " + p3);
+}
+
+entry main()
+{
+    printStuff(1, 2);
+
+    /*
+        Will print:
+        p1 is 1
+        p2 is 2
+        p3 is null
+    */
+}
+</code></pre>
+<h4>Host Functions</h4>
+<p><em>Host Functions</em> are functions that are provided by the host implementation. They are not declared in the script. They are called like local functions, and are null-filled like local functions. Also, like local functions, <em>all host functions return a value.</em></p>
+<pre><code>// println is a function that prints a newline-terminated message to STDOUT.
+
+entry main()
+{
+    println("Hello, world!");
+}
+</code></pre>
+<p>Sometimes, a host function is available within a <em>namespace</em>. These functions need to have a prefix before them:</p>
+<pre><code>// println is a function that prints a newline-terminated message to STDOUT, in the std namespace:
+
+entry main()
+{
+    std::println("Hello, world!");    // works.
+    println("Hello, world!");         // does not compile - not found!
+}
+</code></pre>
+<p>How these functions are set up is up to the hosting program that provides them. Host functions (and namespaces) are resolved at compile-time, and must be provided to the script compiler via function resolvers before script compile.</p>
+<h4>Function Chains</h4>
+<p><em>Function Chains</em> are function calls that use the return value of one function to be used as the <em>first parameter</em> of the next function called. The return of that function can also be used as the first parameter of the next function, etc.</p>
+<p>This makes functions that return the object that it operates on more useful, as well as functions that use that object as the first parameter.</p>
+<p>The function chain operator (a.k.a. the &ldquo;partial application&rdquo; operator) is <code>-&gt;</code>. You must also omit the first parameter of the function being called.</p>
+<pre><code>function double(i)
+{
+    return 2 * i;
+}
+
+// println is a function that prints a newline-terminated message to STDOUT.
+
+entry main()
+{
+    x = 2;
+    println(double(x));               // prints "4"
+    println(x-&gt;double());             // also prints "4"
+    println(x-&gt;double()-&gt;double());     // prints "8"
+}
+</code></pre>
+<p>You may use literals as the start of the chain, provided that they are enclosed in parenthesis:</p>
+<pre><code>function double(i)
+{
+    return 2 * i;
+}
+
+// println is a function that prints a newline-terminated message to STDOUT.
+
+entry main()
+{
+    println((double(2));              // prints "4"
+    println((2)-&gt;double());           // also prints "4"
+    println((2)-&gt;double()-&gt;double()); // prints "8"
+    ("Math is fun!")-&gt;println();      // prints "Math is fun!"
+}
+</code></pre>
+<p>It can be really useful!</p>
+<pre><code>function vec2(x, y)
+{
+    return {x: x, y: y};
+}
+
+// Adds components to a vector.
+function vec2Add(v2, x, y)
+{
+    v2.x += x;
+    v2.y += y;
+    return v2;
+}
+
+// Negates a vector.
+function vec2Negate(v2)
+{
+    v2.x = -v2.x;
+    v2.y = -v2.y;
+    return v2;
+}
+
+// println is a function that prints a newline-terminated message to STDOUT.
+
+entry main()
+{
+    v = vec2(0, 0)-&gt;vec2Add(3, 4)-&gt;vec2Negate();
+    println(v);  // prints "{x: -3, y: -4}"
+}
+</code></pre>
+<h3>Scopes</h3>
+<p>The host implementation may provide one or more special namespaces that contain variables that scripts can manipulate called <em>Scopes</em>. Scopes are useful when you want a script to manipulate a state, send several pieces of data to the host implementation, or make a lot of values available to the calling script. Some variables in a scope can be read-only, and will not be changed if a script attempts to set or redefine them. Some scopes allow scripts to add variables to them.</p>
+<pre><code>// "data" is the name of a scope provided to the script.
+
+entry setData()
+{
+    data::x = 4;
+    data::y = 8 + data::x;
+}
+</code></pre>
+<p>What is available and what is changeable is entirely up to the host. Scopes are resolved at compile-time, and must be provided to the script compiler before script compile.</p>
+<p><strong>Note</strong> that the same operator <code>::</code> is used for resolving scope variables and host function namespaces. The compiler differentates this by checking whether a function call is being made or not:</p>
+<pre><code>io::file    // "io" is a scope
+io::file()  // "io" is a namespace for a function, "file"
+</code></pre>
+<h3>Error Handling</h3>
+<p>Errors happen. Sometimes they happen when you don't expect them to. But you can <code>check</code> for them:</p>
+<pre><code>entry main()
+{
+    check (err)
+    {
+        fis = fisopen("stuff.txt");
+        fos = fosopen("stuff2.txt");
+        relay(fis, fos);
+    }
+    close(fis);
+    close(fos);
+    if (err != null)
+        println("ERROR: " + err);
+    else
+        println("Copied file successfully.");
+}
+</code></pre>
+<p>If an <code>Error</code> type is returned for any of the function calls in the <code>check</code> block, the block is broken out of, and the provided variable, <code>err</code>, is set to the error returned. Otherwise, if no error occurs, <code>err</code> will be set to null once execution leaves the block.</p>
+<p>Since <code>check</code> can work on a single line/statement block, checking one line looks like:</p>
+<pre><code>check (err) relay(fis, fos);
+</code></pre>
+<p>Same effects apply.</p>
+<p>You can mark a whole function/entry point as checked - it will return the error if one occurs:</p>
+<pre><code>check function fileContents(fis, len)
+{
+    out = bufnew(len);
+    bos = bosopen(out);
+    relay(fis, bos, 8192, len);
+    return out;
+}
+
+entry main()
+{
+    filename = "stuff.txt";
+    check (err) 
+    { 
+        fis = fisopen(filename);
+        databuf = fileContents(fis, filelen(filename));
+    }
+    close(fis);
+
+    if (err != null)
+        println("ERROR: " + data);
+    else
+        println("Read " + length(databuf) + " bytes");
+}
+</code></pre>
+<p>In this situation, either the <code>fileContents</code> function call will return a buffer on success, or an <code>Error</code> type on error.</p>
+<h4>Some Technical Caveats</h4>
+<p>The <code>check</code> functionality does not have a way to automatically free resources (like how some languages have <code>finally</code>) - you will have to ensure that happens given your program's flow.</p>
+<p>Checking for errors also adds a little overhead to a script (roughly +7% throughput). A check is made each function call and entering/leaving a <code>check</code> block pushes/pops some more objects in/out of the stack. Use discretion with your automatic error detection, especially in real-time applications that call a script constantly!</p>
+<h3>The Preprocessor</h3>
+<p>RookScript has a C-like preprocessor for affecting the token parser stream. All of the directives are below:</p>
+<p>Preprocessor directives must occupy a line - the directive plus parameters are terminated by a newline.</p>
+<h4>#include</h4>
+<p>The #include directive includes the contents of the specified file. The filename is provided as a string parameter, and can either be a relative file path from the file that contains the directive or an absolute path. Files can be included more than once - use this with caution!</p>
+<p>NOTE: The Java implementation of the compiler can also resolve resources off of the classpath by prefixing the path string with <code>classpath:</code>. The include behavior can also be replaced entirely in the Java implementation.</p>
+<pre><code>#include "util.rscript"
+#include "stuff/junk.rscript"
+</code></pre>
+<h4>#define</h4>
+<p>The #define directive defines a single-token macro that expands to a series of other tokens. This is also useful for creating defines and testing if they were defined later. They may also expand to zero tokens. All macro tokens are CASE SENSITIVE!</p>
+<p>NOTE: Unlike the C-language preprocessor, this does not create macro functions.</p>
+<pre><code>#define GREETING_TEXT "Hello."
+#define TWO_PI ( PI() * 2 )
+#define FILE_WAS_INCLUDED
+</code></pre>
+<h4>#undefine</h4>
+<p>The #undefine directive removes a previously defined macro. All subsequent uses of that macro are treated as though they were never defined.</p>
+<pre><code>#define GREETING_TEXT "Hello."
+#undefine GREETING_TEXT
+println(GREETING_TEXT);   // compiler thinks GREETING_TEXT is a variable
+</code></pre>
+<h4>#ifdef</h4>
+<p>The #ifdef directive includes the next series of lines if the following macro was defined, until it reaches an #endif directive.</p>
+<pre><code>#define LINES
+#ifdef LINES
+println("LINES was defined.");
+#endif
+</code></pre>
+<h4>#ifndef</h4>
+<p>The #ifdef directive includes the next series of lines if the following macro was NOT defined, until it reaches an #endif directive.</p>
+<pre><code>#define STUFF
+#ifndef LINES
+println("LINES was not defined.");
+#endif
+</code></pre>
+<h4>#else</h4>
+<p>The #else directive ends the most recently started &ldquo;if&rdquo; directive block and provides an alternate section if the first &ldquo;if&rdquo; is not processed.</p>
+<pre><code>#define LINES
+#ifdef LINES
+println("LINES was defined.");
+#else
+println("LINES was NOT defined.");
+#endif
+</code></pre>
+<h4>#endif</h4>
+<p>The #endif directive ends the most recently started &ldquo;if&rdquo; or &ldquo;else&rdquo; directive block.</p>
+<pre><code>#define LINES
+#ifdef LINES
+println("LINES was defined.");
+#endif
+
+#define LINES
+#ifdef LINES
+println("LINES was defined.");
+#else
+println("LINES was NOT defined.");
+#endif
+</code></pre>

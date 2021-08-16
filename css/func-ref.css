@@ -1,0 +1,41 @@
+.function-section > h1 {
+	font-size: 48px;
+	margin-top: 48px;
+	text-align: center;
+	text-shadow: 4px 4px rgb(3, 15, 20);
+	border-bottom: solid 2px #dddddd;
+}
+
+.function-section > h2 {
+	margin-top: 36px;
+	border-bottom: solid 1px #808080;
+	text-shadow: 2px 2px rgb(3, 15, 20);
+}
+
+.function-section > ul {
+	margin-top: 2px;
+}
+
+.function-section > p {
+	margin-bottom: 2px;
+}
+
+.function-section > ul > li {
+	list-style-type: none;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.function-section > ul > li:not(:last-child) {
+	border-bottom: solid 1px rgb(20, 62, 78);
+}
+
+.function-section > ul > li  > ul > li {
+	list-style-type: none;
+}
+
+.func-return {
+	background-color: rgb(6, 30, 40);
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
