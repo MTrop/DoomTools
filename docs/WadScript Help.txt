@@ -1167,7 +1167,7 @@ ISREGEX(pattern)
     pattern:
         (STRING) The string to test.
     Returns:
-        (BOOLEAN) True if the pattern is malformed, false otherwise.
+        (BOOLEAN) True if the pattern is valid, false otherwise.
 
 REGEXSPLIT(pattern, string)
     Splits a string by a RegEx pattern.

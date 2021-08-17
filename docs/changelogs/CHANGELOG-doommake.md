@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.6.1
+
+* `Fixed` Some tweaks to auto-detecting changes to projects.
+
+
 ### Changed for 0.6.0
 
 * `Added` HASHDIR() host function for detecting folder changes.

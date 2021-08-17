@@ -16,10 +16,14 @@ check function doPatch(budget) {
 	sourceDir = getSourceDirectory() + SRC_DECOHACK;
 	verifydirs(sourceDir);
 
-	hash = directoryHasChanged(sourceDir);
-	if (hash === null) {
-		println("[Skipped] DECOHack directory (" + sourceDir + ") up to date.");
-		return;
+	if (checkFileExistenceAndBuildStatuses(outFile)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] DECOHack directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
 	}
 
 	decohack(

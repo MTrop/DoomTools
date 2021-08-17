@@ -37,7 +37,7 @@ check function doAssets() {
 	verifydirs(sourceDir + "/sounds");
 	verifydirs(sourceDir + "/sprites");
 		
-	if (fileExists(outWad)) {
+	if (checkFileExistenceAndBuildStatuses(outWad)) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Assets directory (" + sourceDir + ") up to date.");

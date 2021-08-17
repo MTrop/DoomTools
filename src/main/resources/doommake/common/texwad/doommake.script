@@ -29,6 +29,12 @@ check function doMapTextures() {
 	sourceDir = getSourceDirectory() + SRC_DIR_TEXTUREWADS;
 	verifydirs(sourceDir);
 
+	// Only do if maps were compiled.
+	if (!fileExists(outMapsWad)) {
+		println("[Skipped] No maps in `" + outMapsWad + "`. Skipping texture extraction.");
+		return;
+	}	
+
 	if(fileExists(outWad)) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
@@ -37,12 +43,6 @@ check function doMapTextures() {
 				return;
 			}
 		}
-		
-		// Only do if maps were compiled.
-		if (!fileExists(outMapsWad)) {
-			println("[Skipped] No maps in `" + outMapsWad + "`. Skipping texture extraction.");
-			return;
-		}	
 	} else {
 		hash = directoryHasChanged(sourceDir);
 	}

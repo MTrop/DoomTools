@@ -33,4 +33,5 @@ check entry make(args) {
 	doInit();
 	doAll();
 	doRelease();
+	doDist();
 }

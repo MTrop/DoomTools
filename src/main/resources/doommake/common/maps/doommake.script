@@ -16,7 +16,7 @@ check function doMaps() {
 	sourceDir = getSourceDirectory() + SRC_DIR_MAPS;
 	verifydirs(sourceDir);
 
-	if (fileExists(outWad)) {
+	if (checkFileExistenceAndBuildStatuses(outWad)) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Maps directory (" + sourceDir + ") up to date.");

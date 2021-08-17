@@ -20,7 +20,7 @@ check function doTextures() {
 	verifydirs(sourceDir + "/flats");
 	verifydirs(sourceDir + "/patches");
 
-	if (fileExists(outWad)) {
+	if (checkFileExistenceAndBuildStatuses(outWad)) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Textures directory (" + sourceDir + ") up to date.");

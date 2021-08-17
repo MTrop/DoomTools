@@ -1,14 +1,31 @@
-
-	// Assemble project archive.
-	initDist();
-	copyProjectTXT(getBuildDirectory() + "/" + getProjectTXT());
-	copyProjectTXT(getDistDirectory() + "/" + getProjectTXT());
-	zipProject([
-		getBuildDirectory() + "/" + getProjectWAD(), 
-		getBuildDirectory() + "/" + getProjectTXT()
-	]);
-	
-	println("Done!");
+	setBuilt("release");
 }
 
+/**
+ * Assembles the distributable.
+ */
+check function doDist() {
 
+	projectFile = getBuildDirectory() + "/" + getProjectWAD();
+	outTextFile = getBuildDirectory() + "/" + getProjectTXT();
+	outDistZipFile = getDistDirectory() + "/" + getProjectZip();
+	outDistTextFile = getDistDirectory() + "/" + getProjectTXT();
+
+	if (checkFileExistenceAndBuildStatuses([outTextFile, outDistZipFile, outDistTextFile], "release")) {
+		println("[Skipped] No release rebuilt - no distributable needs building.");
+		return;
+	}
+
+	println("Assembling distributable...");
+	// Assemble project archive.
+	initDist();
+	copyProjectTXT(outTextFile);
+	copyProjectTXT(outDistTextFile);
+	println("Zipping project to " + outDistZipFile + "...");
+	zipfiles(outDistZipFile, [
+		projectFile, 
+		outTextFile
+	]);
+
+	println("Done!");
+}
