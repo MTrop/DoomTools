@@ -39,3 +39,9 @@
 	padding-top: 4px;
 	padding-bottom: 4px;
 }
+
+.markdown-section > h3 {
+	border-bottom: solid 1px #808080;
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
