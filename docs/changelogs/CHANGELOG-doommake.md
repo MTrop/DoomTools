@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.6.1
 
 * `Fixed` Some tweaks to auto-detecting changes to projects.
+* `Added` The options for `TOOL::DOOMTOOLS`.
 
 
 ### Changed for 0.6.0

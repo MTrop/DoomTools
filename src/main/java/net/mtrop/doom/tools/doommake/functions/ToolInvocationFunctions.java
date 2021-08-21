@@ -46,7 +46,11 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{stdout:OBJECTREF(OutputStream)}", 
+						"{" + Common.joinStrings(", ",
+							"stdout:OBJECTREF(OutputStream)",
+							"stderr:OBJECTREF(OutputStream)",
+							"openWebsite:BOOLEAN"
+						) + "}",
 						"Map of options."
 					)
 				)
