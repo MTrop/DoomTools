@@ -414,7 +414,7 @@ for (x = 0; x < 10; x += 1)
 Each part can be left out of a *for* loop, except for the conditional. The previous loop can be rewritten as:
 
 ```
-x = 10;
+x = 0;
 for (; x < 10;)
 {
     println("x is " + x);
