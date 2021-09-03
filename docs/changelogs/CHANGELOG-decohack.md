@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.17.0
+
+* `Added` Labels can now be used pre-declared in actor (thing/weapon) definitions. (Enhancement #35)
+
+
 ### Changed for 0.16.2
 
 * `Fixed` The "Red Skull" pickup string should be `GOTREDSKULL`, with two Ls.

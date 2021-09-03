@@ -15,10 +15,13 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -181,6 +184,9 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
+
+	private static final FutureLabels EMPTY_LABELS = null;
+	private static final int PLACEHOLDER_LABEL = 1234567890;
 
 	/**
 	 * Reads a DECOHack script from a String of text.
@@ -780,6 +786,193 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		return true;
+	}
+
+	// Parses a state block.
+	private boolean parseStateBlock(AbstractPatchContext<?> context)
+	{
+		Integer index;
+		// if single state...
+		if (currentType(DecoHackKernel.TYPE_NUMBER))
+		{
+			if ((index = parseStateIndex(context)) == null)
+				return false;
+			
+			if (!matchType(DecoHackKernel.TYPE_LBRACE))
+			{
+				addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_STATE);
+				return false;
+			}
+	
+			if (context.isProtectedState(index))
+			{
+				addErrorMessage("State index %d is a protected state.", index);
+				return false;
+			}
+			
+			if (!parseStateBody(context, index))
+				return false;
+	
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected '}' after \"%s\" definition.", KEYWORD_STATE);
+				return false;
+			}
+	
+			return true;
+		}
+		// if fill state...
+		else if (matchIdentifierIgnoreCase(KEYWORD_FILL))
+		{
+			if ((index = parseStateIndex(context)) == null)
+				return false;
+	
+			if (!matchType(DecoHackKernel.TYPE_LBRACE))
+			{
+				addErrorMessage("Expected '{' after \"%s %s\" header.", KEYWORD_STATE, KEYWORD_FILL);
+				return false;
+			}
+	
+			if (!parseStateFillSequence(context, index))
+				return false;
+	
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected '}' after \"%s %s\" block.", KEYWORD_STATE, KEYWORD_FILL);
+				return false;
+			}
+			
+			return true;
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
+		{
+			return parseStateFreeLine(context);
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_PROTECT))
+		{
+			return parseStateProtectLine(context, true);
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_UNPROTECT))
+		{
+			return parseStateProtectLine(context, false);
+		}
+		else
+		{
+			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", KEYWORD_FILL, KEYWORD_STATE);
+			return false;
+		}
+	}
+
+	// Parses a state freeing command.
+	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
+	{
+		Integer min, max;
+		if (matchIdentifierIgnoreCase(KEYWORD_FROM))
+		{
+			// free chain
+			if ((min = matchPositiveInteger()) != null)
+			{
+				context.freeConnectedStates(min);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected state index after \"%s\".", KEYWORD_FROM);
+				return false;
+			}
+		}
+		else if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// free range
+			if (matchIdentifierIgnoreCase(KEYWORD_TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					int a = Math.min(min, max);
+					int b = Math.max(min, max);
+					while (a <= b)
+						context.setFreeState(a++, true);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
+					return false;
+				}
+			}
+			// free single
+			else
+			{
+				context.setFreeState(min, true);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or state index after \"%s\".", KEYWORD_FROM, KEYWORD_FREE);
+			return false;
+		}
+	}
+
+	// Parses a state protection line.
+	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
+	{
+		Integer min, max;
+		if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// protect range
+			if (matchIdentifierIgnoreCase(KEYWORD_TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					int a = Math.min(min, max);
+					int b = Math.max(min, max);
+					while (a <= b)
+						context.setProtectedState(a++, protectedState);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
+					return false;
+				}
+			}
+			// protect single state.
+			else
+			{
+				context.setProtectedState(min, protectedState);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected state index after \"%s\".", protectedState ? KEYWORD_PROTECT : KEYWORD_UNPROTECT);
+			return false;
+		}
 	}
 
 	// Parses a range of integers and returns them.
@@ -1836,7 +2029,11 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		return true;
 	}
-	
+
+	/* ***************************************************************************************** */
+	/*                                START STATE BODY PARSER                                    */
+	/* ***************************************************************************************** */
+
 	// Parses an actor's state body.
 	private boolean parseActorStateSet(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
@@ -1847,13 +2044,14 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		LinkedList<String> label = new LinkedList<>();
+		FutureLabels futureLabels = new FutureLabels();
+		LinkedList<String> labelList = new LinkedList<>();
 		ParsedState parsed = new ParsedState();
 		StateFillCursor stateCursor = new StateFillCursor();
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			label.add(currentToken().getLexeme());
+			labelList.add(currentToken().getLexeme());
 			nextToken();
 			
 			if (!matchType(DecoHackKernel.TYPE_COLON))
@@ -1870,12 +2068,12 @@ public final class DecoHackParser extends Lexer.Parser
 					parsed.reset();
 					if (!parseStateLine(context, actor, parsed))
 						return false;
-					if ((startIndex = fillStates(context, parsed, stateCursor, false)) == null)
+					if ((startIndex = fillStates(context, futureLabels, parsed, stateCursor, false)) == null)
 						return false;
 					if (loopIndex == null)
 						loopIndex = startIndex;
-					while (!label.isEmpty())
-						actor.setLabel(label.pollFirst(), startIndex);
+					while (!labelList.isEmpty())
+						futureLabels.backfill(context, actor, labelList.pollFirst(), startIndex);
 				} while (currentIsSpriteIndex(context));
 			}
 			
@@ -1886,16 +2084,23 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if (matchIdentifierIgnoreCase(KEYWORD_GOTO))
 					{
-						Integer index;
+						Object index;
 						if ((index = parseStateIndex(context, actor)) == null)
 							return false;
-						while (!label.isEmpty())
-							actor.setLabel(label.pollFirst(), index);
+						else if (index instanceof String)
+						{
+							while (!labelList.isEmpty())
+								futureLabels.addAlias(labelList.pollFirst(), (String)index);
+						}
+						else while (!labelList.isEmpty())
+						{
+							futureLabels.backfill(context, actor, labelList.pollFirst(), (Integer)index);
+						}
 					}
 					else if (matchIdentifierIgnoreCase(KEYWORD_STOP))
 					{
-						while (!label.isEmpty())
-							actor.setLabel(label.pollFirst(), 0);
+						while (!labelList.isEmpty())
+							actor.setLabel(labelList.pollFirst(), 0);
 					}
 					else
 					{
@@ -1903,64 +2108,419 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 				}
+				// A previous state was filled.
 				else
 				{
-					Integer nextStateIndex = null;
+					Object nextStateIndex = null;
 					if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
 					{
 						addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
 						return false;
 					}
-					stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
+					else if (nextStateIndex instanceof Integer)
+					{
+						stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
+					}
+					else // String
+					{
+						futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, (String)nextStateIndex);
+					}
 					stateCursor.lastStateFilled = null;
 				}
+			}
+		}
+		
+		// Handle all actor labels un-backfilled. Error out if any left.
+		if (futureLabels.hasLabels())
+		{
+			List<String> unknownLabels = new LinkedList<>();
+			for (String label : futureLabels.getLabels())
+			{
+				if (actor.hasLabel(label))
+					futureLabels.backfill(context, actor, label, actor.getLabel(label));
+				else
+					unknownLabels.add(label);
+			}
+			
+			if (!unknownLabels.isEmpty())
+			{
+				addErrorMessage("Labels on this actor were referenced and not defined: %s", (Object[])(unknownLabels.toArray(new String[unknownLabels.size()])));
+				return false;
 			}
 		}
 		
 		return true;
 	}
 	
-	// Parses a mandatory state index.
-	private Integer parseStateIndex(AbstractPatchContext<?> context)
+	// Parses a sequence of auto-fill states.
+	private boolean parseStateFillSequence(AbstractPatchContext<?> context, int startIndex)
 	{
-		return parseStateIndex(context, null);
+		if (!context.isFreeState(startIndex))
+		{
+			addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
+			return false;
+		}
+		if (context.isProtectedState(startIndex))
+		{
+			addErrorMessage("Starting state index for state fill, %d, is a protected state.", startIndex);
+			return false;
+		}
+		
+		// First frame must match state, and the block must contain at least one state.
+		if (!currentIsSpriteIndex(context))
+		{
+			addErrorMessage("Expected sprite name (for a state description).");
+			return false;
+		}
+	
+		Integer index = startIndex;
+		ParsedState parsed = new ParsedState();
+		StateFillCursor stateCursor = new StateFillCursor();
+		stateCursor.lastIndexFilled = index;
+		boolean first = true;
+		
+		do {
+			parsed.reset();
+			if (!parseStateLine(context, null, parsed))
+				return false;
+			if (fillStates(context, EMPTY_LABELS, parsed, stateCursor, first) == null)
+				return false;
+			first = false;
+		} while (currentIsSpriteIndex(context));
+		
+		// Parse end.
+		Integer nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, startIndex, stateCursor.lastIndexFilled)) == null)
+		{
+			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
+			return false;
+		}
+		
+		stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
+		return true;
+	}
+
+	// Parses a single state definition body.
+	// Either consists of a next state index clause, a state and next index clause, or just a state.
+	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
+	{
+		DEHState state = context.getState(index);
+	
+		Integer nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, index)) != null)
+		{
+			state.setNextStateIndex(nextStateIndex);
+			context.setFreeState(index, false);
+			return true;
+		}
+		
+		boolean notModified = true;
+		
+		if (currentIsSpriteIndex(context))
+		{
+			ParsedState parsedState = new ParsedState();
+	
+			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
+				return false;
+	
+			ParsedAction parsedAction = parsedState.parsedActions.get(0);
+			
+			if (isBoom)
+			{
+				if (pointerIndex != null && parsedAction.pointer == null)
+					parsedAction.pointer = DEHActionPointer.NULL;
+			}
+			else if ((pointerIndex == null && parsedAction.pointer != null) || (pointerIndex != null && parsedAction.pointer == null))
+			{
+				if (parsedAction.pointer != null)
+					addErrorMessage("Action function specified for state without a function!");
+				else
+					addErrorMessage("Action function not specified for state with a function!");
+				return false;
+			}
+	
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, parsedAction.pointer);
+			
+			// fill state.
+			state
+				.setSpriteIndex(parsedState.spriteIndex)
+				.setFrameIndex(parsedState.frameList.pollFirst())
+				.setDuration(parsedState.duration)
+				.setBright(parsedState.bright)
+				.setMisc1(parsedAction.misc1)
+				.setMisc2(parsedAction.misc2)
+				.setArgs(parsedAction.args)
+			;
+			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
+				state.setMBF21Flags(parsedState.mbf21Flags);
+	
+			// Try to parse next state clause.
+			nextStateIndex = parseNextStateIndex(context, null, index);
+			if (nextStateIndex != null)
+				state.setNextStateIndex(nextStateIndex);
+			
+			context.setFreeState(index, false);
+			return true;
+		}
+		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_SPRITENAME))
+			{
+				Integer value;
+				if ((value = matchSpriteIndexName(context)) == null)
+				{
+					addErrorMessage("Expected valid sprite name after \"%s\".", KEYWORD_SPRITENAME);
+					return false;				
+				}
+				
+				state.setSpriteIndex(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_FRAME))
+			{
+				Deque<Integer> value;
+				if ((value = matchFrameIndices()) == null)
+				{
+					addErrorMessage("Expected valid frame characters after \"%s\".", KEYWORD_FRAME);
+					return false;				
+				}
+				
+				if (value.size() > 1)
+				{
+					addErrorMessage("Expected a single frame character after \"%s\".", KEYWORD_FRAME);
+					return false;				
+				}
+				
+				state.setFrameIndex(value.pollFirst());
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_DURATION))
+			{
+				Integer value;
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_DURATION);
+					return false;				
+				}
+				
+				state.setDuration(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_NEXTSTATE))
+			{
+				Integer value;
+				if ((value = parseStateIndex(context)) == null)
+				{
+					addErrorMessage("Expected valid state index clause after \"%s\".", KEYWORD_NEXTSTATE);
+					return false;				
+				}
+				
+				state.setNextStateIndex(value);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+				Integer pointerIndex = context.getStateActionPointerIndex(index);
+				ParsedAction action = new ParsedAction();
+				Boolean requireAction = isBoom ? null : pointerIndex != null;
+	
+				if (matchIdentifierIgnoreCase(KEYWORD_NULL))
+				{
+					if (requireAction != null && requireAction)
+					{
+						addErrorMessage("Expected an action pointer for this state.");
+						return false;
+					}
+					else
+					{
+						action.pointer = DEHActionPointer.NULL;
+					}
+				}
+				else if (!parseActionClause(context, null, action, requireAction))
+				{
+					return false;
+				}
+	
+				if (isBoom && pointerIndex != null && action.pointer == null)
+					action.pointer = DEHActionPointer.NULL;
+				
+				if (pointerIndex != null)
+					context.setActionPointer(pointerIndex, action.pointer);
+	
+				state
+					.setMisc1(action.misc1)
+					.setMisc2(action.misc2)
+					.setArgs(action.args)
+				;
+				
+				notModified = false;
+			}
+			else if (currentIdentifierIgnoreCase(KEYWORD_OFFSET))
+			{
+				ParsedAction action = new ParsedAction();
+				if (!parseOffsetClause(action))
+					return false;
+				
+				state
+					.setMisc1(action.misc1)
+					.setMisc2(action.misc2)
+				;
+				
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_BRIGHT))
+			{
+				state.setBright(true);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTBRIGHT))
+			{
+				state.setBright(false);
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_FAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_FAST);
+					return false;
+				}
+				
+				state.setMBF21Flags(state.getMBF21Flags() | DEHStateFlag.SKILL5FAST.getValue());
+				notModified = false;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
+			{
+				if (!context.supports(DEHFeatureLevel.MBF21))
+				{
+					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_NOTFAST);
+					return false;
+				}
+	
+				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateFlag.SKILL5FAST.getValue());
+				notModified = false;
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		if (notModified)
+		{
+			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
+			return false;
+		}
+		
+		context.setFreeState(index, false);
+		return true;
+	}
+
+	// Parse a single state and if true is returned, the input state is altered.
+	// requireAction is either true, false, or null. If null, no check is performed. 
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state)
+	{
+		return parseStateLine(context, actor, state, false, null);
+	}
+
+	// Parse a single state and if true is returned, the input state is altered.
+	// requireAction is either true, false, or null. If null, no check is performed. 
+	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
+	{
+		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
+		{
+			addErrorMessage("Expected valid sprite name.");
+			return false;				
+		}
+		
+		if ((state.frameList = matchFrameIndices()) == null)
+		{
+			addErrorMessage("Expected valid frame characters after sprite name.");
+			return false;				
+		}
+		
+		if (singleFrame && state.frameList.size() > 1)
+		{
+			addErrorMessage("Expected a single frame character after sprite name.");
+			return false;				
+		}
+		
+		if ((state.duration = matchInteger()) == null)
+		{
+			addErrorMessage("Expected valid state duration after frame.");
+			return false;				
+		}
+	
+		if (!matchStateFlags(context, state))
+			return false;
+		
+		ParsedAction action;
+		if (matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			if (singleFrame || (requireAction != null))
+			{
+				addErrorMessage("You cannot specify many action pointers for a single frame.");
+				return false;
+			}
+			
+			while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			{
+				state.parsedActions.add(action = new ParsedAction());
+				if (!parseActionClause(context, actor, action, null))
+					return false;				
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected a '}' to close an action pointer list.");
+				return false;
+			}
+			else if (state.parsedActions.isEmpty())
+			{
+				// create dummy action.
+				state.parsedActions.add(action = new ParsedAction());
+			}
+		}
+		else
+		{
+			state.parsedActions.add(action = new ParsedAction());
+			if (!parseOffsetClause(action))
+				return false;
+			if (!parseActionClause(context, actor, action, requireAction))
+				return false;
+		}
+		
+		return true;
 	}
 
 	// Parses a mandatory state index.
-	private Integer parseStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Integer parseStateIndex(AbstractPatchContext<?> context)
 	{
-		String labelName;
+		return (Integer)parseStateIndex(context, null);
+	}
+
+	// Parses a mandatory state index.
+	private Object parseStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor)
+	{
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
-		else if ((labelName = matchIdentifier()) != null)
-			return parseActorStateLabelIndex(actor, labelName);
+		else if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			if (actor == null)
+			{
+				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentToken().getLexeme());
+				return null;
+			}
+			return matchIdentifier();
+		}
 		else
 			return matchStateIndex(context);
-	}
-
-	// Parses a label state index.
-	private Integer parseActorStateLabelIndex(DEHActor<?> actor, String labelName) 
-	{
-		Integer value;
-		if (actor == null)
-		{
-			addErrorMessage("Name of label was unexpected after \"%s\". Only valid in thing or weapon.", KEYWORD_GOTO);
-			return null;				
-		}
-		else if ((value = actor.getLabel(labelName)) == 0)
-		{
-			StringBuilder sb = new StringBuilder("Expected a valid state label for this object, one of the following: ");
-			sb.append(Arrays.toString(actor.getLabels()));
-			sb.append(".");
-			addErrorMessage(sb.toString());
-
-			addErrorMessage("Label \"%s\" is invalid or not declared at this moment: " + sb.toString(), labelName);
-			return null;				
-		}
-		
-		return value;
 	}
 
 	// Parses a weapon state index.
@@ -2063,426 +2623,6 @@ public final class DecoHackParser extends Lexer.Parser
 		return value;
 	}
 	
-	// Parses a state block.
-	private boolean parseStateBlock(AbstractPatchContext<?> context)
-	{
-		Integer index;
-		// if single state...
-		if (currentType(DecoHackKernel.TYPE_NUMBER))
-		{
-			if ((index = parseStateIndex(context)) == null)
-				return false;
-			
-			if (!matchType(DecoHackKernel.TYPE_LBRACE))
-			{
-				addErrorMessage("Expected '{' after \"%s\" header.", KEYWORD_STATE);
-				return false;
-			}
-
-			if (context.isProtectedState(index))
-			{
-				addErrorMessage("State index %d is a protected state.", index);
-				return false;
-			}
-			
-			if (!parseStateBody(context, index))
-				return false;
-
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				addErrorMessage("Expected '}' after \"%s\" definition.", KEYWORD_STATE);
-				return false;
-			}
-
-			return true;
-		}
-		// if fill state...
-		else if (matchIdentifierIgnoreCase(KEYWORD_FILL))
-		{
-			if ((index = parseStateIndex(context)) == null)
-				return false;
-
-			if (!matchType(DecoHackKernel.TYPE_LBRACE))
-			{
-				addErrorMessage("Expected '{' after \"%s %s\" header.", KEYWORD_STATE, KEYWORD_FILL);
-				return false;
-			}
-
-			if (!parseStateFillSequence(context, index))
-				return false;
-
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				addErrorMessage("Expected '}' after \"%s %s\" block.", KEYWORD_STATE, KEYWORD_FILL);
-				return false;
-			}
-			
-			return true;
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
-		{
-			return parseStateFreeLine(context);
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_PROTECT))
-		{
-			return parseStateProtectLine(context, true);
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_UNPROTECT))
-		{
-			return parseStateProtectLine(context, false);
-		}
-		else
-		{
-			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", KEYWORD_FILL, KEYWORD_STATE);
-			return false;
-		}
-	}
-
-	// Parses a sequence of auto-fill states.
-	private boolean parseStateFillSequence(AbstractPatchContext<?> context, int startIndex)
-	{
-		if (!context.isFreeState(startIndex))
-		{
-			addErrorMessage("Starting state index for state fill, %d, is not a free state.", startIndex);
-			return false;
-		}
-		if (context.isProtectedState(startIndex))
-		{
-			addErrorMessage("Starting state index for state fill, %d, is a protected state.", startIndex);
-			return false;
-		}
-		
-		// First frame must match state, and the block must contain at least one state.
-		if (!currentIsSpriteIndex(context))
-		{
-			addErrorMessage("Expected sprite name (for a state description).");
-			return false;
-		}
-
-		Integer index = startIndex;
-		ParsedState parsed = new ParsedState();
-		StateFillCursor stateCursor = new StateFillCursor();
-		stateCursor.lastIndexFilled = index;
-		boolean first = true;
-		
-		do {
-			parsed.reset();
-			if (!parseStateLine(context, null, parsed))
-				return false;
-			if (fillStates(context, parsed, stateCursor, first) == null)
-				return false;
-			first = false;
-		} while (currentIsSpriteIndex(context));
-		
-		// Parse end.
-		Integer nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, startIndex, stateCursor.lastIndexFilled)) == null)
-		{
-			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", KEYWORD_STOP, KEYWORD_WAIT, KEYWORD_LOOP, KEYWORD_GOTO);
-			return false;
-		}
-		
-		stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
-		return true;
-	}
-	
-	// Parses a single state definition body.
-	// Either consists of a next state index clause, a state and next index clause, or just a state.
-	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
-	{
-		DEHState state = context.getState(index);
-
-		Integer nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
-		{
-			state.setNextStateIndex(nextStateIndex);
-			context.setFreeState(index, false);
-			return true;
-		}
-		
-		boolean notModified = true;
-		
-		if (currentIsSpriteIndex(context))
-		{
-			ParsedState parsedState = new ParsedState();
-
-			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
-			Integer pointerIndex = context.getStateActionPointerIndex(index);
-			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
-				return false;
-
-			ParsedAction parsedAction = parsedState.parsedActions.get(0);
-			
-			if (isBoom)
-			{
-				if (pointerIndex != null && parsedAction.action == null)
-					parsedAction.action = DEHActionPointer.NULL;
-			}
-			else if ((pointerIndex == null && parsedAction.action != null) || (pointerIndex != null && parsedAction.action == null))
-			{
-				if (parsedAction.action != null)
-					addErrorMessage("Action function specified for state without a function!");
-				else
-					addErrorMessage("Action function not specified for state with a function!");
-				return false;
-			}
-
-			if (pointerIndex != null)
-				context.setActionPointer(pointerIndex, parsedAction.action);
-			
-			// fill state.
-			state
-				.setSpriteIndex(parsedState.spriteIndex)
-				.setFrameIndex(parsedState.frameList.pollFirst())
-				.setDuration(parsedState.duration)
-				.setBright(parsedState.bright)
-				.setMisc1(parsedAction.misc1)
-				.setMisc2(parsedAction.misc2)
-				.setArgs(parsedAction.args)
-			;
-			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
-				state.setMBF21Flags(parsedState.mbf21Flags);
-
-			// Try to parse next state clause.
-			nextStateIndex = parseNextStateIndex(context, null, null, index);
-			if (nextStateIndex != null)
-				state.setNextStateIndex(nextStateIndex);
-			
-			context.setFreeState(index, false);
-			return true;
-		}
-		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			if (matchIdentifierIgnoreCase(KEYWORD_SPRITENAME))
-			{
-				Integer value;
-				if ((value = matchSpriteIndexName(context)) == null)
-				{
-					addErrorMessage("Expected valid sprite name after \"%s\".", KEYWORD_SPRITENAME);
-					return false;				
-				}
-				
-				state.setSpriteIndex(value);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_FRAME))
-			{
-				Deque<Integer> value;
-				if ((value = matchFrameIndices()) == null)
-				{
-					addErrorMessage("Expected valid frame characters after \"%s\".", KEYWORD_FRAME);
-					return false;				
-				}
-				
-				if (value.size() > 1)
-				{
-					addErrorMessage("Expected a single frame character after \"%s\".", KEYWORD_FRAME);
-					return false;				
-				}
-				
-				state.setFrameIndex(value.pollFirst());
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_DURATION))
-			{
-				Integer value;
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", KEYWORD_DURATION);
-					return false;				
-				}
-				
-				state.setDuration(value);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_NEXTSTATE))
-			{
-				Integer value;
-				if ((value = parseStateIndex(context)) == null)
-				{
-					addErrorMessage("Expected valid state index clause after \"%s\".", KEYWORD_NEXTSTATE);
-					return false;				
-				}
-				
-				state.setNextStateIndex(value);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
-			{
-				boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
-				Integer pointerIndex = context.getStateActionPointerIndex(index);
-				ParsedAction action = new ParsedAction();
-				Boolean requireAction = isBoom ? null : pointerIndex != null;
-
-				if (matchIdentifierIgnoreCase(KEYWORD_NULL))
-				{
-					if (requireAction != null && requireAction)
-					{
-						addErrorMessage("Expected an action pointer for this state.");
-						return false;
-					}
-					else
-					{
-						action.action = DEHActionPointer.NULL;
-					}
-				}
-				else if (!parseActionClause(context, null, action, requireAction))
-				{
-					return false;
-				}
-
-				if (isBoom && pointerIndex != null && action.action == null)
-					action.action = DEHActionPointer.NULL;
-				
-				if (pointerIndex != null)
-					context.setActionPointer(pointerIndex, action.action);
-
-				state
-					.setMisc1(action.misc1)
-					.setMisc2(action.misc2)
-					.setArgs(action.args)
-				;
-				
-				notModified = false;
-			}
-			else if (currentIdentifierIgnoreCase(KEYWORD_OFFSET))
-			{
-				ParsedAction action = new ParsedAction();
-				if (!parseOffsetClause(action))
-					return false;
-				
-				state
-					.setMisc1(action.misc1)
-					.setMisc2(action.misc2)
-				;
-				
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_BRIGHT))
-			{
-				state.setBright(true);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTBRIGHT))
-			{
-				state.setBright(false);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_FAST))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_FAST);
-					return false;
-				}
-				
-				state.setMBF21Flags(state.getMBF21Flags() | DEHStateFlag.SKILL5FAST.getValue());
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", KEYWORD_STATE_NOTFAST);
-					return false;
-				}
-
-				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateFlag.SKILL5FAST.getValue());
-				notModified = false;
-			}
-			else
-			{
-				break;
-			}
-		}
-		
-		if (notModified)
-		{
-			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
-			return false;
-		}
-		
-		context.setFreeState(index, false);
-		return true;
-	}
-
-	// Parse a single state and if true is returned, the input state is altered.
-	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state)
-	{
-		return parseStateLine(context, actor, state, false, null);
-	}
-	
-	// Parse a single state and if true is returned, the input state is altered.
-	// requireAction is either true, false, or null. If null, no check is performed. 
-	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
-	{
-		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
-		{
-			addErrorMessage("Expected valid sprite name.");
-			return false;				
-		}
-		
-		if ((state.frameList = matchFrameIndices()) == null)
-		{
-			addErrorMessage("Expected valid frame characters after sprite name.");
-			return false;				
-		}
-		
-		if (singleFrame && state.frameList.size() > 1)
-		{
-			addErrorMessage("Expected a single frame character after sprite name.");
-			return false;				
-		}
-		
-		if ((state.duration = matchInteger()) == null)
-		{
-			addErrorMessage("Expected valid state duration after frame.");
-			return false;				
-		}
-
-		if (!matchStateFlags(context, state))
-			return false;
-		
-		ParsedAction action;
-		if (matchType(DecoHackKernel.TYPE_LBRACE))
-		{
-			if (singleFrame || (requireAction != null))
-			{
-				addErrorMessage("You cannot specify many action pointers for a single frame.");
-				return false;
-			}
-			
-			while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			{
-				state.parsedActions.add(action = new ParsedAction());
-				if (!parseActionClause(context, actor, action, null))
-					return false;				
-			}
-			
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				addErrorMessage("Expected a '}' to close an action pointer list.");
-				return false;
-			}
-			else if (state.parsedActions.isEmpty())
-			{
-				// create dummy action.
-				state.parsedActions.add(action = new ParsedAction());
-			}
-		}
-		else
-		{
-			state.parsedActions.add(action = new ParsedAction());
-			if (!parseOffsetClause(action))
-				return false;
-			if (!parseActionClause(context, actor, action, requireAction))
-				return false;
-		}
-		
-		return true;
-	}
-
 	// Parses and Offset clause.
 	private boolean parseOffsetClause(ParsedAction parsedAction)
 	{
@@ -2531,53 +2671,54 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parse an action into a parsed action.
-	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction parsedAction, Boolean requireAction) 
+	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction action, Boolean requireAction) 
 	{
 		// Maybe parse action
-		parsedAction.action = matchActionPointerName();
+		DEHActionPointer pointer = matchActionPointerName();
+		action.pointer = pointer;
 		
 		if (requireAction != null)
 		{
-			if (requireAction && parsedAction.action == null)
+			if (requireAction && pointer == null)
 			{
 				addErrorMessage("Expected an action pointer for this state.");
 				return false;				
 			}
-			if (!requireAction && parsedAction.action != null)
+			if (!requireAction && pointer != null)
 			{
 				addErrorMessage("Expected no action pointer for this state. State definition attempted to set one.");
 				return false;				
 			}
 		}
 
-		if (parsedAction.action != null)
+		if (pointer != null)
 		{
-			if (!context.supports(parsedAction.action.getType()))
+			if (!context.supports(pointer.getType()))
 			{
-				addErrorMessage(parsedAction.action.getType().name() + " action pointer used: " + parsedAction.action.getMnemonic() + ". Patch does not support this action type.");
+				addErrorMessage(pointer.getType().name() + " action pointer used: " + pointer.getMnemonic() + ". Patch does not support this action type.");
 				return false;
 			}
 			
 			if (actor instanceof DEHThing)
 			{
-				if (parsedAction.action.isWeapon())
+				if (pointer.isWeapon())
 				{
-					addErrorMessage("Action pointer " + parsedAction.action.getMnemonic() + " is a weapon action. Thing action expected.");
+					addErrorMessage("Action pointer " + pointer.getMnemonic() + " is a weapon action. Thing action expected.");
 					return false;
 				}
 			}
 			else if (actor instanceof DEHWeapon)
 			{
-				if (!parsedAction.action.isWeapon())
+				if (!pointer.isWeapon())
 				{
-					addErrorMessage("Action pointer " + parsedAction.action.getMnemonic() + " is a thing action. Weapon action expected.");
+					addErrorMessage("Action pointer " + pointer.getMnemonic() + " is a thing action. Weapon action expected.");
 					return false;
 				}				
 			}
 			// else, state body.
 
 			// MBF args (misc1/misc2)
-			if (!parsedAction.action.useArgs())
+			if (!pointer.useArgs())
 			{
 				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
@@ -2585,31 +2726,44 @@ public final class DecoHackParser extends Lexer.Parser
 					if (matchType(DecoHackKernel.TYPE_RPAREN))
 						return true;
 
-					if (parsedAction.offset)
+					if (action.offset)
 					{
 						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
 						return false;
 					}
 
 					// get first argument
-					Integer p;
+					Object p;
 					if ((p = parseActionPointerParameterValue(context, actor)) == null)
 						return false;
+					else if (p instanceof Integer)
+					{
+						if (!checkActionParamValue(pointer, 0, (Integer)p))
+							return false;
+						action.misc1 = (Integer)p;
+					}
+					else
+					{
+						action.labelFields.add(new FieldSet(FieldType.MISC1, (String)p));
+						action.misc1 = PLACEHOLDER_LABEL;
+					}
 
-					if (!checkActionParamValue(parsedAction.action, 0, p))
-						return false;
-
-					parsedAction.misc1 = p;
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
-
-						if (!checkActionParamValue(parsedAction.action, 1, p))
-							return false;
-
-						parsedAction.misc2 = p;
+						else if (p instanceof Integer)
+						{
+							if (!checkActionParamValue(pointer, 1, (Integer)p))
+								return false;
+							action.misc2 = (Integer)p;
+						}
+						else
+						{
+							action.labelFields.add(new FieldSet(FieldType.MISC2, (String)p));
+							action.misc2 = PLACEHOLDER_LABEL;
+						}
 					}
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
@@ -2635,15 +2789,21 @@ public final class DecoHackParser extends Lexer.Parser
 					while (!done)
 					{
 						// get argument
-						int argIndex = parsedAction.args.size();
-						Integer p;
+						int argIndex = action.args.size();
+						Object p;
 						if ((p = parseActionPointerParameterValue(context, actor)) == null)
 							return false;
-
-						if (!checkActionParamValue(parsedAction.action, argIndex, p))
-							return false;
-
-						parsedAction.args.add(p);
+						else if (p instanceof Integer)
+						{
+							if (!checkActionParamValue(pointer, argIndex, (Integer)p))
+								return false;
+							action.args.add((Integer)p);
+						}
+						else
+						{
+							action.labelFields.add(new FieldSet(FieldType.getArg(argIndex), (String)p));
+							action.args.add(PLACEHOLDER_LABEL);
+						}
 
 						if (matchType(DecoHackKernel.TYPE_RPAREN))
 						{
@@ -2663,29 +2823,53 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Integer parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Object parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
-		Integer value;
-		String labelName;
+		Object value;
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
-		else if (actor != null && (labelName = matchActorLabel(actor)) != null)
-			return parseActorStateLabelIndex(actor, labelName);
 		else if ((value = matchNumericExpression(context)) != null)
-			return value;
+		{
+			if (value instanceof String)
+			{
+				String labelName = (String)value;
+				if (actor != null)
+				{
+					if (actor.hasLabel(labelName))
+						return actor.getLabel(labelName);
+					else
+						return labelName;
+				}
+				else
+				{
+					addErrorMessage("Expected valid parameter value.");
+					return null;
+				}				
+			}
+			else
+			{
+				return (Integer)value;
+			}
+		}
 		else
 		{
 			addErrorMessage("Expected parameter.");
 			return null;
 		}
 	}
+
+	// Parses a next state line.
+	private Integer parseNextStateIndex(AbstractPatchContext<?> context, Integer lastLabelledStateIndex, int currentStateIndex)
+	{
+		return (Integer)parseNextStateIndex(context, null, lastLabelledStateIndex, currentStateIndex);
+	}
 	
 	// Parses a next state line.
-	private Integer parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
+	private Object parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierIgnoreCase(KEYWORD_STOP))
@@ -2696,13 +2880,14 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			return currentStateIndex;
 		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_LOOP))
+		else if (currentIdentifierIgnoreCase(KEYWORD_LOOP))
 		{
 			if (lastLabelledStateIndex == null)
 			{
 				addErrorMessage("Can't use \"%s\" with no declared state labels.", KEYWORD_LOOP);
 				return null;
 			}
+			nextToken();
 			return lastLabelledStateIndex;
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_GOTO))
@@ -2715,122 +2900,10 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 	
-	// Parses a state freeing command.
-	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
-	{
-		Integer min, max;
-		if (matchIdentifierIgnoreCase(KEYWORD_FROM))
-		{
-			// free chain
-			if ((min = matchPositiveInteger()) != null)
-			{
-				context.freeConnectedStates(min);
-				return true;
-			}
-			else
-			{
-				addErrorMessage("Expected state index after \"%s\".", KEYWORD_FROM);
-				return false;
-			}
-		}
-		else if ((min = matchPositiveInteger()) != null)
-		{
-			if (min >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
-				return false;
-			}
-			
-			// free range
-			if (matchIdentifierIgnoreCase(KEYWORD_TO))
-			{
-				if ((max = matchPositiveInteger()) != null)
-				{
-					if (max >= context.getStateCount())
-					{
-						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
-						return false;
-					}
-					
-					int a = Math.min(min, max);
-					int b = Math.max(min, max);
-					while (a <= b)
-						context.setFreeState(a++, true);
-					return true;
-				}
-				else
-				{
-					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
-					return false;
-				}
-			}
-			// free single
-			else
-			{
-				context.setFreeState(min, true);
-				return true;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected \"%s\" or state index after \"%s\".", KEYWORD_FROM, KEYWORD_FREE);
-			return false;
-		}
-	}
-	
-	// Parses a state protection line.
-	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
-	{
-		Integer min, max;
-		if ((min = matchPositiveInteger()) != null)
-		{
-			if (min >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
-				return false;
-			}
-			
-			// protect range
-			if (matchIdentifierIgnoreCase(KEYWORD_TO))
-			{
-				if ((max = matchPositiveInteger()) != null)
-				{
-					if (max >= context.getStateCount())
-					{
-						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
-						return false;
-					}
-					
-					int a = Math.min(min, max);
-					int b = Math.max(min, max);
-					while (a <= b)
-						context.setProtectedState(a++, protectedState);
-					return true;
-				}
-				else
-				{
-					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
-					return false;
-				}
-			}
-			// protect single state.
-			else
-			{
-				context.setProtectedState(min, protectedState);
-				return true;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected state index after \"%s\".", protectedState ? KEYWORD_PROTECT : KEYWORD_UNPROTECT);
-			return false;
-		}
-	}
-	
 	// Attempts to fill states from a starting index.
 	// If forceFirst is true, the state index filled MUST be cursor.lastFilledIndex. 
 	// Returns the FIRST INDEX FILLED or null if error.
-	private Integer fillStates(AbstractPatchContext<?> context, ParsedState state, StateFillCursor cursor, boolean forceFirst)
+	private Integer fillStates(AbstractPatchContext<?> context, FutureLabels labels, ParsedState state, StateFillCursor cursor, boolean forceFirst)
 	{
 		Integer out = null;
 		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
@@ -2852,7 +2925,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if (!isBoom && forceFirst && currentIndex != cursor.lastIndexFilled)
 				{
 					addErrorMessage("Provided state definition would not fill state " + cursor.lastIndexFilled + ". " + (
-						parsedAction.action != null 
+						parsedAction.pointer != null 
 							? "State " + cursor.lastIndexFilled + " cannot have an action pointer."
 							: "State " + cursor.lastIndexFilled + " must have an action pointer."
 					));
@@ -2862,7 +2935,12 @@ public final class DecoHackParser extends Lexer.Parser
 				if (cursor.lastStateFilled != null)
 					cursor.lastStateFilled.setNextStateIndex(currentIndex);
 		
-				cursor.lastStateFilled = context.getState(currentIndex)
+				DEHState fillState = context.getState(currentIndex);
+				
+				if (labels != null)
+					parsedAction.dumpLabels(currentIndex, labels);
+				
+				fillState
 					.setSpriteIndex(state.spriteIndex)
 					.setFrameIndex(frame)
 					.setDuration(i == state.parsedActions.size() - 1 ? state.duration : 0) // only write duration to last state.
@@ -2871,14 +2949,15 @@ public final class DecoHackParser extends Lexer.Parser
 					.setMisc2(parsedAction.misc2)
 					.setArgs(parsedAction.args)
 				;
+				cursor.lastStateFilled = fillState;
 		
 				Integer pointerIndex = context.getStateActionPointerIndex(currentIndex);
 				
-				if (isBoom && pointerIndex != null && parsedAction.action == null)
-					parsedAction.action = DEHActionPointer.NULL;
+				if (isBoom && pointerIndex != null && parsedAction.pointer == null)
+					parsedAction.pointer = DEHActionPointer.NULL;
 				
 				if (pointerIndex != null)
-					context.setActionPointer(pointerIndex, parsedAction.action);
+					context.setActionPointer(pointerIndex, parsedAction.pointer);
 				
 				context.setFreeState(currentIndex, false);
 				cursor.lastIndexFilled = currentIndex;
@@ -2903,7 +2982,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		Integer index = isBoom 
 			? context.findNextFreeState(cursor.lastIndexFilled)
-			: (parsed.action != null 
+			: (parsed.pointer != null 
 				? context.findNextFreeActionPointerState(cursor.lastIndexFilled)
 				: context.findNextFreeNonActionPointerState(cursor.lastIndexFilled)
 			);
@@ -2916,7 +2995,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				if (parsed.action != null)
+				if (parsed.pointer != null)
 					addErrorMessage("No more free states with an action pointer.");
 				else
 					addErrorMessage("No more free states without an action pointer.");
@@ -2924,7 +3003,11 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		return index;
 	}
-
+	
+	/* ***************************************************************************************** */
+	/*                                 END STATE BODY PARSER                                     */
+	/* ***************************************************************************************** */
+	
 	// Tests for an identifier that is a "next state" keyword.
 	private boolean currentIsNextStateKeyword()
 	{
@@ -3111,20 +3194,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		nextToken();
 		return true;
-	}
-
-	// Matches a potential actor label.
-	// If match, advance token and return lexeme.
-	// Else, return null.
-	private String matchActorLabel(DEHActor<?> actor)
-	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			return null;
-		String out = currentToken().getLexeme();
-		if (!actor.hasLabel(out))
-			return null;
-		nextToken();
-		return out;
 	}
 
 	// Matches an identifier or string that references a sprite name.
@@ -3359,10 +3428,11 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches and parses a numeric expression.
-	private Integer matchNumericExpression(AbstractPatchContext<?> context)
+	private Object matchNumericExpression(AbstractPatchContext<?> context)
 	{
 		Integer value;
 		Integer out = null;
+		boolean startedExpression = false;
 		while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			if (out == null)
@@ -3389,14 +3459,20 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				out |= value;
 			}
-			else
+			else if (startedExpression)
 			{
 				addErrorMessage("Expected valid flag mnemonic.");
 				return null;
 			}
+			else
+			{
+				return matchIdentifier(); 
+			}
 			
 			if (!matchType(DecoHackKernel.TYPE_PIPE))
 				break;
+			
+			startedExpression = true;
 		}
 		
 		return out;
@@ -3641,27 +3717,225 @@ public final class DecoHackParser extends Lexer.Parser
 		private int lastIndexFilled;
 	}
 	
+	// State field type.
+	public enum FieldType
+	{
+		NEXTSTATE,
+		MISC1,
+		MISC2,
+		ARG0,
+		ARG1,
+		ARG2,
+		ARG3,
+		ARG4,
+		ARG5,
+		ARG6,
+		ARG7,
+		ARG8,
+		ARG9;
+		
+		private static final FieldType[] VALUES = values();
+		
+		public static FieldType getArg(int i)
+		{
+			return VALUES[i + 3];
+		}
+	}
+	
+	// Field set.
+	private static class FieldSet
+	{
+		private FieldType type;
+		private String label; 
+		
+		private FieldSet(FieldType type, String label)
+		{
+			this.type = type;
+			this.label = label;
+		}
+	}
+	
+	public static class FutureLabels
+	{
+		/** Future label map. */
+		private Map<String, Set<Integer>> futureLabelMap;
+		/** Future label alias. */
+		private Map<String, Set<String>> futureLabelAlias;
+		/** Actual state index to field use. */
+		private Map<Integer, List<FieldSet>> stateFieldMap;
+		
+		private FutureLabels()
+		{
+			this.futureLabelMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			this.futureLabelAlias = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			this.stateFieldMap = new TreeMap<>();
+		}
+		
+		/**
+		 * Adds a field to backfill on a state.
+		 * @param index the index of the state.
+		 * @param type the field type.
+		 * @param label the label for that place.
+		 */
+		public void addStateField(int index, FieldType type, String label)
+		{
+			List<FieldSet> fields;
+			if ((fields = stateFieldMap.get(index)) == null)
+				stateFieldMap.put(index, fields = new LinkedList<>());
+			fields.add(new FieldSet(type, label));
+	
+			Set<Integer> indices;
+			if ((indices = futureLabelMap.get(label)) == null)
+				futureLabelMap.put(label, indices = new TreeSet<>());
+			indices.add(index);
+		}
+		
+		/**
+		 * Adds a label destination alias for another label.
+		 * @param label the label for that place.
+		 * @param destinationAlias the destination label.
+		 */
+		public void addAlias(String label, String destinationAlias)
+		{
+			Set<String> labels;
+			if ((labels = futureLabelAlias.get(destinationAlias)) == null)
+				futureLabelAlias.put(destinationAlias, labels = new TreeSet<>());
+			labels.add(label);
+		}
+
+		/**
+		 * Resolves a single a label and backfills it.
+		 * If the label is not recorded, nothing happens.
+		 * @param context the context to use.
+		 * @param actor the actor to set labels on.
+		 * @param label the label to backfill.
+		 * @param realIndex the real index of the label.
+		 */
+		public void backfill(AbstractPatchContext<?> context, DEHActor<?> actor, String label, int realIndex)
+		{
+			actor.setLabel(label, realIndex);
+
+			if (!futureLabelMap.containsKey(label))
+				return;
+			
+			for (Integer index : futureLabelMap.get(label))
+			{
+				DEHState state = context.getState(index);
+				Iterator<FieldSet> fieldIterator = stateFieldMap.get(index).iterator();
+				while (fieldIterator.hasNext())
+				{
+					FieldSet field = fieldIterator.next();
+					if (!field.label.equalsIgnoreCase(label))
+						continue;
+					switch (field.type)
+					{
+						default:
+							throw new IllegalArgumentException("INTERNAL ERROR: Unsupported field type."); 
+						case NEXTSTATE:
+							state.setNextStateIndex(realIndex);
+							break;
+						case MISC1:
+							state.setMisc1(realIndex);
+							break;
+						case MISC2:
+							state.setMisc2(realIndex);
+							break;
+						case ARG0:
+							state.getArgs()[0] = realIndex;
+							break;
+						case ARG1:
+							state.getArgs()[1] = realIndex;
+							break;
+						case ARG2:
+							state.getArgs()[2] = realIndex;
+							break;
+						case ARG3:
+							state.getArgs()[3] = realIndex;
+							break;
+						case ARG4:
+							state.getArgs()[4] = realIndex;
+							break;
+						case ARG5:
+							state.getArgs()[5] = realIndex;
+							break;
+						case ARG6:
+							state.getArgs()[6] = realIndex;
+							break;
+						case ARG7:
+							state.getArgs()[7] = realIndex;
+							break;
+						case ARG8:
+							state.getArgs()[8] = realIndex;
+							break;
+						case ARG9:
+							state.getArgs()[9] = realIndex;
+							break;
+					}
+					fieldIterator.remove();
+				}
+			}
+			
+			if (futureLabelAlias.containsKey(label)) for (String destLabel : futureLabelAlias.get(label))
+			{
+				actor.setLabel(destLabel, realIndex);
+			}
+
+			futureLabelAlias.remove(label);
+			futureLabelMap.remove(label);
+		}
+		
+		/**
+		 * @return true if there are unresolved labels left over.
+		 */
+		public boolean hasLabels()
+		{
+			return !futureLabelMap.isEmpty();
+		}
+		
+		/**
+		 * @return the list of labels still unresolved.
+		 */
+		public String[] getLabels()
+		{
+			Set<String> keys = futureLabelMap.keySet();
+			return keys.toArray(new String[keys.size()]);
+		}
+		
+	}
+
 	private static class ParsedAction
 	{
 		private boolean offset;
-		private DEHActionPointer action;
+		private DEHActionPointer pointer;
 		private int misc1;
 		private int misc2;
 		private List<Integer> args;
+		private Deque<FieldSet> labelFields;
 
 		private ParsedAction()
 		{
 			this.args = new LinkedList<>();
+			this.labelFields = new LinkedList<>();
 			reset();
 		}
 		
 		void reset()
 		{
 			this.offset = false;
-			this.action = null;
+			this.pointer = null;
 			this.misc1 = 0;
 			this.misc2 = 0;
 			this.args.clear();
+			this.labelFields.clear();
+		}
+		
+		void dumpLabels(int stateIndex, FutureLabels labels)
+		{
+			while (!labelFields.isEmpty())
+			{
+				FieldSet fs = labelFields.pollFirst();
+				labels.addStateField(stateIndex, fs.type, fs.label);
+			}
 		}
 		
 	}
