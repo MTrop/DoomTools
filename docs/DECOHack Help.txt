@@ -243,6 +243,18 @@ Note that this works ANYTWHERE that action parameters are accepted - DECOHack
 calculates a single value from these expressions. The only checking done is
 if those flags are valid for the patch level (i.e. MBF, EXTENDED, or MBF21).  
 
+NOTE: Some flags may share names with valid labels. To force DECOHack to 
+interpret a parameter as a label, wrap it in quotes (it may be a good idea to
+do this anyway, for readability).
+
+	A_RandomJump("missile", 64)
+
+
+Also, similarly, to force DECOHack to interpret a parameter as a flag 
+expression, prefix it with the "flags" keyword:
+
+    A_AddFlags(flags SOLID | DROPPED, 0)
+
 
 Weapon states have a special characteristic that went unused for the most part
 in Doom, but is still modifiable in DECOHack. You can set the offset of the
@@ -310,7 +322,12 @@ end up doing the same thing for multiple things:
     MANC H 10 Bright A_SuperFatAttack
 
 
-...which still compiles down to:
+...which the preprocessor will turn into:
+
+    MANC H 10 Bright { A_FatAttack1 A_FatAttack2 A_FatAttack3 }
+
+
+...and compiles down to:
 
     MANC H 0 Bright A_FatAttack1
     MANC H 0 Bright A_FatAttack2
@@ -600,10 +617,10 @@ Example:
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-      IMPORTANT: Using "goto" to jump to labels/state pointers that 
-      you have not set yet will jump to whatever state is already 
-      declared for that Weapon. To avoid this, you may need to pay 
-      attention to the order of your state labels and declarations!
+      IMPORTANT: Using "goto" or other "jump" actions to jump to 
+      labels/state pointers that you have not set or re-declared 
+      within a "states" block will jump to whatever state is already 
+      declared for that Weapon!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -849,10 +866,10 @@ Example:
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-      IMPORTANT: Using "goto" to jump to labels/state pointers that 
-      you have not set yet will jump to whatever state is already 
-      declared for that Thing. To avoid this, you may need to pay 
-      attention to the order of your state labels and declarations!
+      IMPORTANT: Using "goto" or other "jump" actions to jump to 
+      labels/state pointers that you have not set or re-declared 
+      within a "states" block will jump to whatever state is already 
+      declared for that Thing!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 

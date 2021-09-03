@@ -4,6 +4,7 @@ DecoHack
 ### Changed for 0.17.0
 
 * `Added` Labels can now be used pre-declared in actor (thing/weapon) definitions. (Enhancement #35)
+* `Added` Some keywords/delimiters to force interpretation of some action pointer parameters.
 * `Fixed` Some "next state" clauses did not throw errors properly in state blocks.
 
 

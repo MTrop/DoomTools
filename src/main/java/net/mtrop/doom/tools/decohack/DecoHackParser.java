@@ -1385,7 +1385,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 			{
-				if ((value = matchPositiveInteger()) == null)
+				if ((value = (Integer)matchNumericExpression(context, true)) == null)
 				{
 					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_FLAGS);
 					return false;
@@ -2832,7 +2832,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
-		else if ((value = matchNumericExpression(context)) != null)
+		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
+			return matchNumericExpression(context, true);
+		else if ((value = matchNumericExpression(context, false)) != null)
 		{
 			if (value instanceof String)
 			{
@@ -3428,11 +3430,26 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches and parses a numeric expression.
-	private Object matchNumericExpression(AbstractPatchContext<?> context)
+	// Figure out a better way to force flag interpretation.
+	private Object matchNumericExpression(AbstractPatchContext<?> context, boolean forceFlags)
 	{
 		Integer value;
 		Integer out = null;
-		boolean startedExpression = false;
+		
+		// force label.
+		if (!forceFlags && currentType(DecoHackKernel.TYPE_STRING))
+		{
+			String labelName = currentToken().getLexeme();
+			nextToken();
+			return labelName;
+		}
+		
+		if (forceFlags && currentType(DecoHackKernel.TYPE_STRING))
+		{
+			addErrorMessage("Unexpected label. Not in a thing/weapon block.");
+			return null;
+		}
+		
 		while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			if (out == null)
@@ -3459,12 +3476,12 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				out |= value;
 			}
-			else if (startedExpression)
+			else if (forceFlags)
 			{
 				addErrorMessage("Expected valid flag mnemonic.");
 				return null;
 			}
-			else
+			else // expression not started. Maybe label.
 			{
 				return matchIdentifier(); 
 			}
@@ -3472,7 +3489,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (!matchType(DecoHackKernel.TYPE_PIPE))
 				break;
 			
-			startedExpression = true;
+			forceFlags = true;
 		}
 		
 		return out;
