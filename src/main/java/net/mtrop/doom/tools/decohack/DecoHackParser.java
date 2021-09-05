@@ -2144,7 +2144,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			if (!unknownLabels.isEmpty())
 			{
-				addErrorMessage("Labels on this actor were referenced and not defined: %s", (Object[])(unknownLabels.toArray(new String[unknownLabels.size()])));
+				addErrorMessage("Labels on this actor were referenced and not defined: %s", Arrays.toString(unknownLabels.toArray(new String[unknownLabels.size()])));
 				return false;
 			}
 		}
@@ -3735,7 +3735,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// State field type.
-	public enum FieldType
+	private enum FieldType
 	{
 		NEXTSTATE,
 		MISC1,
@@ -3772,7 +3772,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 	
-	public static class FutureLabels
+	private static class FutureLabels
 	{
 		/** Future label map. */
 		private Map<String, Set<Integer>> futureLabelMap;
