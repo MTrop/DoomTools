@@ -28,6 +28,8 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
  */
 public final class DecoHackExporter
 {
+	private static final String CRLF = "\r\n";
+	
 	/**
 	 * Writes this patch to a DeHackEd file stream.
 	 * @param patch the patch.
@@ -52,7 +54,7 @@ public final class DecoHackExporter
 	 */
 	public static void writePatch(AbstractPatchDoom19Context patch, Writer writer, String comment) throws IOException
 	{
-		writePatchHeader(writer, comment, 19, 6);
+		writePatchHeader(writer, comment, patch.getVersion(), 6);
 		writePatchBody(patch, writer);
 
 		for (int i = 0; i < patch.getActionPointerCount(); i++)
@@ -68,9 +70,9 @@ public final class DecoHackExporter
 					.append(" (Frame ")
 					.append(String.valueOf(patch.getSourcePatch().getActionPointerFrame(i)))
 					.append(")")
-					.append("\r\n");
-				writer.append("Codep Frame = ").append(String.valueOf(action.getFrame())).append("\r\n");
-				writer.append("\r\n");
+					.append(CRLF);
+				writer.append("Codep Frame = ").append(String.valueOf(action.getFrame())).append(CRLF);
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -87,10 +89,10 @@ public final class DecoHackExporter
 					.append(String.valueOf(original.length()))
 					.append(" ")
 					.append(String.valueOf(str.length()))
-					.append("\r\n");
+					.append(CRLF);
 				writer.append(original).append(str);
 				if (i < patch.getStringCount() - 1)
-					writer.append("\r\n");
+					writer.append(CRLF);
 				writer.flush();
 			}
 		}
@@ -105,7 +107,7 @@ public final class DecoHackExporter
 	 */
 	public static void writePatch(AbstractPatchBoomContext patch, Writer writer, String comment) throws IOException
 	{
-		writePatchHeader(writer, comment, 21, 6);
+		writePatchHeader(writer, comment, patch.getVersion(), 6);
 		writePatchBody(patch, writer);
 
 		// CODEPTR
@@ -120,18 +122,18 @@ public final class DecoHackExporter
 			{
 				if (!codeptrHeader)
 				{
-					writer.append("[CODEPTR]").append("\r\n");
+					writer.append("[CODEPTR]").append(CRLF);
 					codeptrHeader = true;
 				}
 				writer.append("FRAME ")
 					.append(String.valueOf(i))
 					.append(" = ")
 					.append(pointer.getMnemonic())
-					.append("\r\n");
+					.append(CRLF);
 			}
 		}
 		if (codeptrHeader)
-			writer.append("\r\n").flush();
+			writer.append(CRLF).flush();
 		
 		// STRINGS
 		boolean stringsHeader = false;
@@ -142,16 +144,16 @@ public final class DecoHackExporter
 			{
 				if (!stringsHeader)
 				{
-					writer.append("[STRINGS]").append("\r\n");
+					writer.append("[STRINGS]").append(CRLF);
 					stringsHeader = true;
 				}
 				writer.append(keys)
 					.append(" = ")
-					.append(Common.withEscChars(value)).append("\r\n");
+					.append(Common.withEscChars(value)).append(CRLF);
 			}
 		}
 		if (stringsHeader)
-			writer.append("\r\n").flush();
+			writer.append(CRLF).flush();
 		
 		// PARS
 		boolean parsHeader = false;
@@ -162,7 +164,7 @@ public final class DecoHackExporter
 			{
 				if (!parsHeader)
 				{
-					writer.append("[PARS]").append("\r\n");
+					writer.append("[PARS]").append(CRLF);
 					parsHeader = true;
 				}
 				
@@ -174,11 +176,11 @@ public final class DecoHackExporter
 				writer.append(String.valueOf(em.getMap()))
 					.append(' ')
 					.append(String.valueOf(seconds))
-					.append("\r\n");
+					.append(CRLF);
 			}
 		}
 		if (parsHeader)
-			writer.append("\r\n").flush();
+			writer.append(CRLF).flush();
 	}
 
 	/**
@@ -192,18 +194,18 @@ public final class DecoHackExporter
 	private static void writePatchHeader(Writer writer, String comment, int version, int formatNumber) throws IOException
 	{
 		// Header
-		writer.append("Patch File for DeHackEd v3.0").append("\r\n");
+		writer.append("Patch File for DeHackEd v3.0").append(CRLF);
 		
 		// Comment Blurb
-		writer.append("# ").append(comment).append("\r\n");
-		writer.append("# Note: Use the pound sign ('#') to start comment lines.").append("\r\n");
-		writer.append("\r\n");
+		writer.append("# ").append(comment).append(CRLF);
+		writer.append("# Note: Use the pound sign ('#') to start comment lines.").append(CRLF);
+		writer.append(CRLF);
 	
 		// Version
-		writer.append("Doom version = " + version).append("\r\n");
-		writer.append("Patch format = " + formatNumber).append("\r\n");
-		writer.append("\r\n");
-		writer.append("\r\n");
+		writer.append("Doom version = " + version).append(CRLF);
+		writer.append("Patch format = " + formatNumber).append(CRLF);
+		writer.append(CRLF);
+		writer.append(CRLF);
 		writer.flush();
 	}
 
@@ -228,9 +230,9 @@ public final class DecoHackExporter
 					.append(" (")
 					.append(String.valueOf(thing.getName()))
 					.append(")")
-					.append("\r\n");
+					.append(CRLF);
 				thing.writeObject(writer, original, patch.getSupportedFeatureLevel());
-				writer.append("\r\n");
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -243,9 +245,9 @@ public final class DecoHackExporter
 				continue;
 			if (!state.equals(original))
 			{
-				writer.append("Frame ").append(String.valueOf(i)).append("\r\n");
+				writer.append("Frame ").append(String.valueOf(i)).append(CRLF);
 				state.writeObject(writer, original, patch.getSupportedFeatureLevel());
-				writer.append("\r\n");
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -259,9 +261,9 @@ public final class DecoHackExporter
 			if (!sound.equals(original))
 			{
 				// Sound ids in DeHackEd are off by 1
-				writer.append("Sound ").append(String.valueOf(i)).append("\r\n");
+				writer.append("Sound ").append(String.valueOf(i)).append(CRLF);
 				sound.writeObject(writer, original, patch.getSupportedFeatureLevel());
-				writer.append("\r\n");
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -279,9 +281,9 @@ public final class DecoHackExporter
 					.append(" (")
 					.append(String.valueOf(weapon.getName()))
 					.append(")")
-					.append("\r\n");
+					.append(CRLF);
 				weapon.writeObject(writer, original, patch.getSupportedFeatureLevel());
-				writer.append("\r\n");
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -299,9 +301,9 @@ public final class DecoHackExporter
 					.append(" (")
 					.append(String.valueOf(ammo.getName()))
 					.append(")")
-					.append("\r\n");
+					.append(CRLF);
 				ammo.writeObject(writer, original, patch.getSupportedFeatureLevel());
-				writer.append("\r\n");
+				writer.append(CRLF);
 			}
 		}
 		writer.flush();
@@ -310,9 +312,9 @@ public final class DecoHackExporter
 		DEHMiscellany miscOriginal = patch.getSourcePatch().getMiscellany();
 		if (!misc.equals(miscOriginal))
 		{
-			writer.append("Misc ").append(String.valueOf(0)).append("\r\n");
+			writer.append("Misc ").append(String.valueOf(0)).append(CRLF);
 			misc.writeObject(writer, miscOriginal, patch.getSupportedFeatureLevel());
-			writer.append("\r\n");
+			writer.append(CRLF);
 		}
 		writer.flush();
 	}

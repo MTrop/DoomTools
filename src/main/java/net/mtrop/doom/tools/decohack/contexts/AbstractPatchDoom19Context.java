@@ -55,6 +55,12 @@ public abstract class AbstractPatchDoom19Context extends AbstractPatchContext<DE
 	public abstract DEHPatchDoom19 getSourcePatch();
 	
 	@Override
+	public int getVersion() 
+	{
+		return 19;
+	}
+	
+	@Override
 	public int getStringCount() 
 	{
 		return strings.length;

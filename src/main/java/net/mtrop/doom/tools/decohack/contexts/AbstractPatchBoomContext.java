@@ -38,6 +38,12 @@ public abstract class AbstractPatchBoomContext extends AbstractPatchContext<DEHP
 	public abstract DEHPatchBoom getSourcePatch();
 	
 	@Override
+	public int getVersion() 
+	{
+		return 21;
+	}
+	
+	@Override
 	public String getString(String key)
 	{
 		return strings.getOrDefault(key, getSourcePatch().getString(key));

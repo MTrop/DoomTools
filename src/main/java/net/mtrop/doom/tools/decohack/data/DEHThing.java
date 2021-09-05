@@ -669,6 +669,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
+		
 		if (health != thing.health)
 			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");
 		if (speedVal != thingSpeedVal)

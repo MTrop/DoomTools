@@ -94,6 +94,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public abstract P getSourcePatch();
 	
+	/**
+	 * @return the Doom Version.
+	 */
+	public abstract int getVersion();
+	
 	@Override
 	public DEHMiscellany getMiscellany() 
 	{
