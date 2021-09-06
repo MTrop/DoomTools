@@ -56,7 +56,6 @@ function exportTextureLump(iwadPath, textureFilePath) {
 
 
 /**
- * Rebuilds the texture WAD.  
  * Creates texture listings if they do not exist.
  */
 check function doRebuildTextures() {
