@@ -190,6 +190,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stderr:OBJECTREF(OutputStream)",
 							"infile:OBJECTREF(File)",
 							"outfile:OBJECTREF(File)",
+							"outsourcefile:OBJECTREF(File)",
 							"outcharsetname:STRING",
 							"outputbudget:BOOLEAN"
 						) + "}",

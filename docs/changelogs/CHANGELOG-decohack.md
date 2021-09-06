@@ -5,7 +5,9 @@ DecoHack
 
 * `Added` Labels can now be used pre-declared in actor (thing/weapon) definitions. (Enhancement #35)
 * `Added` Some keywords/delimiters to force interpretation of some action pointer parameters.
+* `Added` The output source switch for outputting the combined source into one file.
 * `Fixed` Some "next state" clauses did not throw errors properly in state blocks.
+* `Changed` The budget output does not output the action pointer budget if the patch in Boom format or higher.
 
 
 ### Changed for 0.16.2

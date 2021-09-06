@@ -1,10 +1,11 @@
 DoomMake
 --------
 
-### Changed for 0.6.1
+### Changed for 0.7.0
 
-* `Fixed` Some tweaks to auto-detecting changes to projects.
 * `Added` The options for `TOOL::DOOMTOOLS`.
+* `Fixed` Some tweaks to auto-detecting changes to projects.
+* `Changed` The options for `TOOL::DECOHACK` to include the source export.
 
 
 ### Changed for 0.6.0

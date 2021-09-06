@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -22,6 +23,7 @@ import java.nio.charset.UnsupportedCharsetException;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackExporter;
+import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
@@ -69,6 +71,8 @@ public final class DecoHackMain
 	private static final String SWITCH_OUTPUTCHARSET2 = "-oc";
 	private static final String SWITCH_BUDGET = "--budget";
 	private static final String SWITCH_BUDGET2 = "-b";
+	private static final String SWITCH_SOURCE_OUTPUT = "--source-output";
+	private static final String SWITCH_SOURCE_OUTPUT2 = "-s";
 
 	/**
 	 * Program options.
@@ -88,6 +92,8 @@ public final class DecoHackMain
 		private Charset outCharset;
 		private File outFile;
 		private boolean outputBudget;
+
+		private File outSourceFile;
 		
 		private Options()
 		{
@@ -101,6 +107,8 @@ public final class DecoHackMain
 			this.outCharset = ASCII;
 			this.outFile = null;
 			this.outputBudget = false;
+			
+			this.outSourceFile = null;
 		}
 
 		public Options setStdout(OutputStream out) 
@@ -141,6 +149,12 @@ public final class DecoHackMain
 		public Options setOutputBudget(boolean outputBudget) 
 		{
 			this.outputBudget = outputBudget;
+			return this;
+		}
+	
+		public Options setOutSourceFile(File outSourceFile) 
+		{
+			this.outSourceFile = outSourceFile;
 			return this;
 		}
 		
@@ -269,13 +283,36 @@ public final class DecoHackMain
 					context.getStateCount(),
 					context.getFreeStateCount()
 				);
-				options.stdout.printf(
-					"Action Pointers: %d used / %d total (%d remaining).\n", 
-					context.getActionPointerCount() - context.getFreePointerStateCount(), 
-					context.getActionPointerCount(),
-					context.getFreePointerStateCount()
-				);
+				if (!context.supports(DEHFeatureLevel.BOOM))
+				{
+					options.stdout.printf(
+						"Action Pointers: %d used / %d total (%d remaining).\n", 
+						context.getActionPointerCount() - context.getFreePointerStateCount(), 
+						context.getActionPointerCount(),
+						context.getFreePointerStateCount()
+					);
+				}
 				options.stdout.printf("--------------------------\n");
+			}
+			
+			// Combine source.
+			if (options.outSourceFile != null)
+			{
+				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile)), true))
+				{
+					DecoHackJoiner.joinSourceFrom(options.inFile, Charset.defaultCharset(), writer);
+					options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
+				} 
+				catch (FileNotFoundException e) 
+				{
+					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				}
+				catch (IOException e)
+				{
+					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				}
 			}
 			
 			// Write Patch.
@@ -317,6 +354,7 @@ public final class DecoHackMain
 		final int STATE_OUTFILE = 1;
 		final int STATE_OUTCHARSET = 2;
 		final int STATE_DUMPRES = 3;
+		final int STATE_SOURCEOUTFILE = 4;
 		int state = STATE_START;
 
 		for (int i = 0; i < args.length; i++)
@@ -344,6 +382,8 @@ public final class DecoHackMain
 						options.outputBudget = true;
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
 						state = STATE_OUTFILE;
+					else if (arg.equals(SWITCH_SOURCE_OUTPUT) || arg.equals(SWITCH_SOURCE_OUTPUT2))
+						state = STATE_SOURCEOUTFILE;
 					else if (arg.equals(SWITCH_OUTPUTCHARSET) || arg.equals(SWITCH_OUTPUTCHARSET2))
 						state = STATE_OUTCHARSET;
 					else
@@ -377,7 +417,13 @@ public final class DecoHackMain
 					state = STATE_START;
 				}
 				break;
-
+				
+				case STATE_SOURCEOUTFILE:
+				{
+					options.outSourceFile = new File(arg);
+					state = STATE_START;
+				}
+				break;
 			}
 		}
 		
@@ -473,6 +519,9 @@ public final class DecoHackMain
 		out.println();
 		out.println("    --budget                 Prints the state budget after compilation.");
 		out.println("    -b");
+		out.println();
+		out.println("    --source-output [file]   Outputs the combined source to a single file.");
+		out.println("    -s [file]");
 		out.println();
 		if (full)
 		{
