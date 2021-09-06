@@ -48,7 +48,7 @@ check function doConvertPatches() {
 		return;
 	}
 
-	convert(sourceDir, targetDir, "flats");
+	convert(sourceDir, targetDir);
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-patches");
