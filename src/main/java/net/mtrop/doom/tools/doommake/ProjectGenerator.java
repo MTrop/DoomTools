@@ -78,7 +78,7 @@ public final class ProjectGenerator
 	/** The release template fragments. */
 	private static final Map<String, ProjectModule> RELEASE_SCRIPT_MERGE;
 	/** The release WadMerge line. */
-	private static final Map<String, String> RELEASE_WADMERGE_LINE;
+	private static final Map<String, String[]> RELEASE_WADMERGE_LINE;
 	/** The post-release add-on template fragments. */
 	private static final Map<String, ProjectModule> POST_RELEASE;
 	/** The replacer list for each module. */
@@ -249,9 +249,9 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_BASE,
+		RELEASE_WADMERGE_LINE.put(MODULE_BASE, new String[]{
 			"# Add resource merging here."
-		);
+		});
 		POST_CREATE_TODOS.put(MODULE_BASE, list(
 			"Add resources to merge to the WadMerge script."
 			,"Add targets to the doommake.script script."
@@ -283,12 +283,14 @@ public final class ProjectGenerator
 			module(
 				fileContentAppend("doommake.script",
 					"\t\t,getPatchFile()"
+					,"\t\t,getPatchSourceOutputFile()"
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_DECOHACK,
+		RELEASE_WADMERGE_LINE.put(MODULE_DECOHACK, new String[]{
 			"mergefile  out $0/$"
-		);
+			,"mergefile  out $0/$"
+		});
 		POST_RELEASE.put(MODULE_DECOHACK,
 			module(
 				fileAppend("doommake.script",
@@ -333,9 +335,9 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_MAPS,
+		RELEASE_WADMERGE_LINE.put(MODULE_MAPS, new String[]{
 			"mergewad   out $0/$"
-		);
+		});
 		POST_RELEASE.put(MODULE_MAPS,
 			module(
 				fileAppend("doommake.script",
@@ -417,9 +419,9 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_ASSETS,
+		RELEASE_WADMERGE_LINE.put(MODULE_ASSETS, new String[]{
 			"mergewad   out $0/$"
-		);
+		});
 		POST_RELEASE.put(MODULE_ASSETS,
 			module(
 				fileAppend("doommake.script",
@@ -547,9 +549,9 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_TEXTUREWADS,
+		RELEASE_WADMERGE_LINE.put(MODULE_TEXTUREWADS, new String[]{
 			"mergewad   out $0/$"
-		);
+		});
 		POST_RELEASE.put(MODULE_TEXTUREWADS,
 			module(
 				fileAppend("doommake.script",
@@ -584,9 +586,9 @@ public final class ProjectGenerator
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS,
+		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS, new String[]{
 			"mergewad   out $0/$"
-		);
+		});
 		POST_RELEASE.put(MODULE_TEXTURES_MAPS,
 			module(
 				fileAppend("doommake.script",
@@ -912,12 +914,15 @@ public final class ProjectGenerator
 				{
 					found.createIn(targetDirectory, replacerMap);
 					
-					String line;
-					if ((line = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
+					String[] lines;
+					if ((lines = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
 					{
-						module(
-							fileContentAppend("scripts/merge-release.txt", line + (x++))
-						).createIn(targetDirectory, replacerMap);
+						for (String line : lines)
+						{
+							module(
+								fileContentAppend("scripts/merge-release.txt", line + (x++))
+							).createIn(targetDirectory, replacerMap);
+						}
 					}
 				}
 			}

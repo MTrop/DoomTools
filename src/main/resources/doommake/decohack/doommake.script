@@ -12,7 +12,7 @@ check function doPatch(budget) {
 	initBuild();
 
 	outFile = getBuildDirectory() + "/" + getPatchFile();
-	
+	outSourceFile = getBuildDirectory() + "/" + getPatchSourceOutputFile();
 	sourceDir = getSourceDirectory() + SRC_DECOHACK;
 	verifydirs(sourceDir);
 
@@ -29,7 +29,8 @@ check function doPatch(budget) {
 	decohack(
 		file(getSourceDirectory() + SRC_DECOHACK + SRC_DECOHACK_MAIN), 
 		file(outFile), 
-		budget
+		budget,
+		file(outSourceFile)
 	);
 	
 	storeDirectoryChanged(sourceDir, hash);

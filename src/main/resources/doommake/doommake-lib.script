@@ -216,16 +216,18 @@ function checkFileExistenceAndBuildStatuses(filePaths, builtTargetList) {
 /* ------------------------------------------------------------------------ */
 // Build-specific.
 
-#define PROP_ASSETWAD       "doommake.file.assets"
-#define DEFAULT_ASSETWAD    "assets.wad"
-#define PROP_MAPSWAD        "doommake.file.maps"
-#define DEFAULT_MAPSWAD     "maps.wad"
-#define PROP_MAPTEXWAD      "doommake.file.maptex"
-#define DEFAULT_MAPTEXWAD   "maptex.wad"
-#define PROP_TEXWAD         "doommake.file.textures"
-#define DEFAULT_TEXWAD      "textures.wad"
-#define PROP_PATCHFILE      "doommake.file.patch"
-#define DEFAULT_PATCHFILE   "dehacked.deh"
+#define PROP_ASSETWAD         "doommake.file.assets"
+#define DEFAULT_ASSETWAD      "assets.wad"
+#define PROP_MAPSWAD          "doommake.file.maps"
+#define DEFAULT_MAPSWAD       "maps.wad"
+#define PROP_MAPTEXWAD        "doommake.file.maptex"
+#define DEFAULT_MAPTEXWAD     "maptex.wad"
+#define PROP_TEXWAD           "doommake.file.textures"
+#define DEFAULT_TEXWAD        "textures.wad"
+#define PROP_PATCHFILE        "doommake.file.patch"
+#define DEFAULT_PATCHFILE     "dehacked.deh"
+#define PROP_PATCHFILE_SRC    "doommake.file.patch.src"
+#define DEFAULT_PATCHFILE_SRC "dehsrc.dh"
 
 /**
  * Return the output asset wad.
@@ -260,6 +262,13 @@ function getMapTextureWAD() {
  */
 function getPatchFile() {
 	return prop(PROP_PATCHFILE, DEFAULT_PATCHFILE); 
+}
+
+/**
+ * Return the output patch source file name.
+ */
+function getPatchSourceOutputFile() {
+	return prop(PROP_PATCHFILE_SRC, DEFAULT_PATCHFILE_SRC); 
 }
 
 
@@ -348,8 +357,9 @@ function wadmerge(scriptFilePath, args) {
  * rootFilePath: Path to root file.
  * outFilePath: Output file.
  * budget: If true, output budget. False, don't.
+ * outSourceFilePath: Combined source output file.
  ****************************************************************************/
-function decohack(rootFilePath, outFilePath, budget) {
+function decohack(rootFilePath, outFilePath, budget, outSourceFilePath) {
 	if (empty(rootFilePath))
 		return error("ToolError", "Root file not specified.");
 	if (empty(outFilePath))
@@ -360,7 +370,8 @@ function decohack(rootFilePath, outFilePath, budget) {
 	if (tool::decohack({
 		infile: rootFilePath,
 		outfile: outFilePath,
-		outputbudget: budget
+		outputbudget: budget,
+		outsourcefile: outSourceFilePath
 	})) return error("ToolError", "DECOHack threw an error.");
 }
 
