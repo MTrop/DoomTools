@@ -6,6 +6,7 @@ DoomMake
 * `Added` The options for `TOOL::DOOMTOOLS`.
 * `Added` Added including the DECOHack source in the result to DECOHack projects.
 * `Fixed` Some tweaks to auto-detecting changes to projects.
+* `Fixed` "Textures" template: Converting patches used the wrong default mode.
 * `Changed` The options for `TOOL::DECOHACK` to include the source export.
 
 
