@@ -1,0 +1,248 @@
+BODY {
+				background-color: rgb(40, 40, 40);
+				color: rgb(240, 240, 240);
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				font-size: 100%;
+			}
+
+			H1 {
+				font-size: 200%;
+			}
+
+			H2 {
+				font-size: 150%;
+			}
+
+			H4 {
+				font-size: 100%;
+			}
+
+			.main-title {
+				width: 100%;
+				text-align: center;
+			}
+
+			.main-title-name {
+				font-size: 250%;
+				font-weight: 900;
+			}
+
+			.script-docs {
+				background-color: rgb(40, 40, 40);
+				width: 100%;
+			}
+
+			.script-docs > .table-of-contents {
+				background-color: rgb(80, 80, 80);
+				margin: 16px;
+			}
+
+			.script-docs > .category-section {
+				background-color: rgb(80, 80, 80);
+				margin: 16px;
+			}
+
+			.toc-title {
+				background-color: rgb(200, 200, 200);
+				color: rgb(0, 0, 0);
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.toc-content {
+				text-align: center;
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.toc-name {
+				margin: 0;
+			}
+
+			.toc-header {
+				padding-top: 4px;
+				padding-bottom: 4px;
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			.toc-link-section {
+				padding: 8px;
+			}
+
+			.toc-link {
+				color: rgb(240, 240, 240);
+				text-decoration: none;
+			}
+
+			.toc-link:hover {
+				color: rgb(255, 255, 255);
+			}
+
+			.toc-link:visited {
+				color: rgb(240, 240, 240);
+			}
+
+			.category-title {
+				background-color: rgb(200, 200, 200);
+				color: rgb(0, 0, 0);
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.category-content {
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.category-name {
+				margin: 0;
+			}
+
+			.category-navigation {
+				float: right;
+				display: block;
+				font-size: 50%;
+				color: rgb(0, 0, 0);
+			}
+
+			.category-navigation:visited {
+				color: rgb(0, 0, 0);
+			}
+
+			.category-navigation:hover {
+				color: rgb(40, 40, 40);
+			}
+
+			.function-section {
+				margin-top: 16px;
+				margin-bottom: 32px;
+			}
+
+			.function-title {
+				background-color: rgb(60, 60, 60);
+			}
+
+			.function-content {
+				background-color: rgb(45, 45, 45);
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.function-name {
+				margin: 0;
+				padding-top: 8px;
+				padding-bottom: 8px;
+				padding-left: 16px;
+				padding-right: 16px;
+			}
+
+			.function-parameters {
+				color: rgb(180, 180, 180)
+			}
+
+			.function-description {
+				font-weight: 400;
+			}
+
+			.function-navigation {
+				float: right;
+				display: block;
+				font-size: 50%;
+				color: rgb(140, 140, 140);
+			}
+
+			.function-navigation:visited {
+				color: rgb(140, 140, 140);
+			}
+
+			.function-navigation:hover {
+				color: rgb(180, 180, 180);
+			}
+
+			.parameter-section {
+				margin-top: 8px;
+				margin-bottom: 16px;
+				margin-left: 16px;
+				margin-right: 16px;
+				box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
+			}
+
+			.parameter-title {
+				background-color: rgb(30, 30, 30);
+				padding-top: 4px;
+				padding-bottom: 4px;
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			.parameter-title.return {
+				background-color: rgb(200, 200, 200);
+				color: rgb(0, 0, 0);
+				padding-top: 4px;
+				padding-bottom: 4px;
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			.parameter-content {
+				background-color: rgb(70, 70, 70);
+				padding-top: 4px;
+				padding-bottom: 4px;
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+
+			.parameter-name {
+				margin: 0;
+			}
+
+			.parameter-usage {
+				margin-top: 8px;
+				margin-bottom: 8px;
+			}
+
+			.parameter-type {
+				padding-top: 4px;
+				padding-bottom: 4px;
+			}
+
+			.parameter-type-name {
+				background-color: rgb(180, 180, 180);
+				color: rgb(0, 0, 0);
+				display: inline;
+				border-radius: 4px;
+				padding: 2px;
+				font-weight: 800;
+			}
+
+			.parameter-subtype-name {
+				color: rgb(224, 224, 224);
+				display: inline;
+				font-weight: 600;
+			}
+
+			.parameter-description {
+				margin-left: 32px;
+			}
+
+			.parameter-description > p {
+				margin: 0;
+			}
+
+			.return-section {
+				margin-top: 8px;
+				margin-bottom: 8px;
+				margin-left: 16px;
+				margin-right: 16px;
+			}

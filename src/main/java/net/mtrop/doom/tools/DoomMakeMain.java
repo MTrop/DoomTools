@@ -52,6 +52,8 @@ public final class DoomMakeMain
 	private static final String SWITCH_VERSION = "--version";
 	private static final String SWITCH_FUNCHELP1 = "--function-help";
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
+	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
+	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	private static final String SWITCH_LISTMODULES = "--list-templates";
 	private static final String SWITCH_LISTMODULES2 = "-t";
 	private static final String SWITCH_NEWPROJECT = "--new-project";
@@ -255,6 +257,7 @@ public final class DoomMakeMain
 			try {
 				WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
 					.setMode(options.mode)
+					.setDocsTitle("DoomMake Functions")
 					.setEntryPointName(options.targetName)
 					.setStackDepth(options.stackDepth)
 					.setActivationDepth(options.activationDepth)
@@ -396,6 +399,10 @@ public final class DoomMakeMain
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
+					else if (SWITCH_FUNCHELP3.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_HTML;
+					else if (SWITCH_FUNCHELP4.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_HTML_DIV;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
 						options.mode = Mode.DISASSEMBLE;
 					else if (SWITCH_SCRIPTFILE.equalsIgnoreCase(arg) || SWITCH_SCRIPTFILE2.equalsIgnoreCase(arg))
@@ -578,6 +585,10 @@ public final class DoomMakeMain
 		out.println("    --function-help                Prints all available function usages.");
 		out.println("    --function-help-markdown       Prints all available function usages in");
 		out.println("                                       Markdown format.");
+		out.println("    --function-help-html           Prints all available function usages in");
+		out.println("                                       HTML format.");
+		out.println("    --function-help-html-div       Prints all available function usages in");
+		out.println("                                       HTML format, but just the content.");
 		out.println("    --disassemble                  Prints the disassembly for the make script");
 		out.println("                                       in use and exits.");
 		out.println("    --list-templates, -t           Lists all available project templates.");

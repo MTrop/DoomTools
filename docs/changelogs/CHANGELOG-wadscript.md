@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.3.0
+
+* `Added` A switch for dumping documentation as HTML. (Enhancement #45)
+
+
 ### Changed for 1.2.2
 
 * `Changed` WadScript will now dump a stacktrace if a script host function produces an unhandled exception.

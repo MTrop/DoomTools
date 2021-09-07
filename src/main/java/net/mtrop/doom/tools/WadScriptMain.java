@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,6 +50,7 @@ import com.blackrook.rookscript.resolvers.variable.DefaultVariableResolver;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.HTMLWriter;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
 import net.mtrop.doom.tools.wadscript.UtilityFunctions;
@@ -72,6 +74,8 @@ public final class WadScriptMain
 	private static final String VERSION = Common.getVersionString("wadscript");
 
 	private static final int ERROR_NONE = 0;
+	private static final int ERROR_IOERROR = 1;
+	private static final int ERROR_INTERNAL = 2;
 	private static final int ERROR_BAD_SCRIPT = 4;
 	private static final int ERROR_BAD_SCRIPT_ENTRY = 5;
 	private static final int ERROR_SCRIPT_EXECUTION_ERROR = 6;
@@ -84,6 +88,8 @@ public final class WadScriptMain
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_FUNCHELP1 = "--function-help";
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
+	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
+	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 	private static final String SWITCH_ENTRY1 = "--entry";
 	private static final String SWITCH_ENTRY2 = "-e";
@@ -163,27 +169,73 @@ public final class WadScriptMain
 	{
 		/**
 		 * Called on render start.
+		 * @throws IOException if a write error occurs.
 		 */
-		void startRender();
+		void startRender() throws IOException;
 		
 		/**
-		 * Renders a section break.
-		 * @param title the section title.
+		 * Starts the table of contents.
+		 * @param sections the section name list.
+		 * @throws IOException if a write error occurs.
 		 */
-		void renderSection(String title);
+		void startTableOfContents(String[] sections) throws IOException;
 
 		/**
-		 * Renders a single function usage doc.
+		 * Finishes the table of contents.
+		 * @throws IOException if a write error occurs.
+		 */
+		void finishTableOfContents() throws IOException;
+		
+		/**
+		 * Starts rendering a section break.
+		 * @param title the section title.
+		 * @throws IOException if a write error occurs.
+		 */
+		void startSection(String title) throws IOException;
+
+		/**
+		 * Starts rendering a single function usage doc.
 		 * @param namespace the function namespace.
 		 * @param functionName the function name.
-		 * @param usage the usage to render (can be null).
+		 * @param parameterNames the parameters on the function render (can be null).
+		 * @throws IOException if a write error occurs.
 		 */
-		void renderUsage(String namespace, String functionName, Usage usage);
+		void startFunction(String namespace, String functionName, String[] parameterNames) throws IOException;
+
+		/**
+		 * Starts rendering a usage doc.
+		 * @param usage the usage to render.
+		 * @throws IOException if a write error occurs.
+		 */
+		void startUsage(Usage usage) throws IOException;
+
+		/**
+		 * Finishes rendering a usage doc.
+		 * @param usage the usage to render.
+		 * @throws IOException if a write error occurs.
+		 */
+		void finishUsage(Usage usage) throws IOException;
+
+		/**
+		 * Finishes rendering a function break.
+		 * @param namespace the function namespace.
+		 * @param functionName the function name.
+		 * @throws IOException if a write error occurs.
+		 */
+		void finishFunction(String namespace, String functionName) throws IOException;
+
+		/**
+		 * Finishes rendering a section break.
+		 * @param title the section title.
+		 * @throws IOException if a write error occurs.
+		 */
+		void finishSection(String title) throws IOException;
 
 		/**
 		 * Called on render finish.
+		 * @throws IOException if a write error occurs.
 		 */
-		void finishRender();
+		void finishRender() throws IOException;
 		
 	}
 	
@@ -205,26 +257,36 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void renderSection(String title) 
+		public void startTableOfContents(String[] sections) throws IOException
 		{
-			out.println("=================================================================");
-			out.println("==== " + title);
-			out.println("=================================================================");
-			out.println();
-		}
-
-		private void renderTypeUsage(TypeUsage tu)
-		{
-			out.append("        (").append(tu.getType() != null 
-					? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
-					: "ANY"
-				).append(") ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
+			printSectionHeader("Table of Contents");
+			for (int i = 0; i < sections.length; i++)
+				out.println("[" + getTitleCode(sections[i]) + "] " + sections[i]);
 		}
 
 		@Override
-		public void renderUsage(String namespace, String functionName, Usage usage)
+		public void finishTableOfContents() throws IOException 
 		{
-			if (usage == null)
+			out.println();
+			out.println();
+		}
+
+		@Override
+		public void startSection(String title) 
+		{
+			printSectionHeader("[" + getTitleCode(title) + "] " + title);
+		}
+
+		@Override
+		public void finishSection(String title) throws IOException
+		{
+			out.println();
+		}
+
+		@Override
+		public void startFunction(String namespace, String functionName, String[] parameterNames)
+		{
+			if (parameterNames == null)
 			{
 				if (namespace != null)
 					out.append(namespace + "::");
@@ -237,17 +299,20 @@ public final class WadScriptMain
 				out.append(namespace + "::");
 			
 			out.append(functionName).append('(');
-			List<ParameterUsage> pul = usage.getParameterInstructions();
-			for (int i = 0; i < pul.size(); i++)
+			for (int i = 0; i < parameterNames.length; i++)
 			{
-				out.append(pul.get(i).getParameterName());
-				if (i < pul.size() - 1)
+				out.append(parameterNames[i]);
+				if (i < parameterNames.length - 1)
 					out.append(", ");
 			}
 			out.append(')').print('\n');
-			
+		}
+
+		@Override
+		public void startUsage(Usage usage) throws IOException 
+		{
 			out.append("    ").println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
-			if (!pul.isEmpty()) for (ParameterUsage pu : pul)
+			if (!usage.getParameterInstructions().isEmpty()) for (ParameterUsage pu : usage.getParameterInstructions())
 			{
 				out.append("    ").append(pu.getParameterName()).println(":");
 				for (TypeUsage tu : pu.getTypes())
@@ -261,9 +326,43 @@ public final class WadScriptMain
 		}
 
 		@Override
+		public void finishUsage(Usage usage) throws IOException 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void finishFunction(String namespace, String functionName) throws IOException 
+		{
+			// Do nothing.
+		}
+
+		@Override
 		public void finishRender() 
 		{
-			// Do nothing
+			// Do nothing.
+		}
+
+		private void printSectionHeader(String title)
+		{
+			out.println("=================================================================");
+			out.println("==== " + title);
+			out.println("=================================================================");
+			out.println();
+		}
+
+		private String getTitleCode(String title)
+		{
+			String code = title.replaceAll("([^a-zA-Z])+", "");
+			return code.substring(0, Math.min(code.length(), 4)).toUpperCase();
+		}
+
+		private void renderTypeUsage(TypeUsage tu)
+		{
+			out.append("        (").append(tu.getType() != null 
+					? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
+					: "ANY"
+				).append(") ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
 		}
 
 	}
@@ -282,13 +381,32 @@ public final class WadScriptMain
 		@Override
 		public void startRender()
 		{
-			// Do nothing
+			// Do nothing.
 		}
 
 		@Override
-		public void renderSection(String title) 
+		public void startTableOfContents(String[] sections) throws IOException
 		{
-			out.append("# ").println(title);
+			out.println("# Table of Contents");
+			out.println();
+
+			for (int i = 0; i < sections.length; i++)
+			{
+				out.print(i + 1);
+				out.append(". [").append(sections[i]).append("](#").append(getTitleCode(sections[i])).append(")").println();				
+			}
+		}
+
+		@Override
+		public void finishTableOfContents() throws IOException 
+		{
+			out.println();
+		}
+
+		@Override
+		public void startSection(String title)
+		{
+			out.append("# ").append(title).append("<span id=\"").append(getTitleCode(title)).println("\"></span>");
 			out.println();
 		}
 		
@@ -301,9 +419,9 @@ public final class WadScriptMain
 		}
 		
 		@Override
-		public void renderUsage(String namespace, String functionName, Usage usage)
+		public void startFunction(String namespace, String functionName, String[] parameterNames)
 		{
-			if (usage == null)
+			if (parameterNames == null)
 			{
 				out.append("## ");
 				if (namespace != null)
@@ -317,21 +435,24 @@ public final class WadScriptMain
 			if (namespace != null)
 				out.append(namespace + "::");
 			out.append(functionName).append('(');
-			List<ParameterUsage> pul = usage.getParameterInstructions();
-			for (int i = 0; i < pul.size(); i++)
+			for (int i = 0; i < parameterNames.length; i++)
 			{
-				out.append(pul.get(i).getParameterName());
-				if (i < pul.size() - 1)
+				out.append(parameterNames[i]);
+				if (i < parameterNames.length - 1)
 					out.append(", ");
 			}
-			out.append(')').print('\n');
+			out.append(')');
 			out.println();
-			
+		}
+
+		@Override
+		public void startUsage(Usage usage) throws IOException 
+		{
 			out.println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 			out.println();
-			if (!pul.isEmpty())
+			if (!usage.getParameterInstructions().isEmpty())
 			{
-				for (ParameterUsage pu : pul)
+				for (ParameterUsage pu : usage.getParameterInstructions())
 				{
 					out.append("**").append(pu.getParameterName()).append("**").println(":");
 					out.println();
@@ -347,13 +468,247 @@ public final class WadScriptMain
 			for (TypeUsage tu : usage.getReturnTypes())
 				renderTypeUsage(tu);
 			out.println();
+		}
+
+		@Override
+		public void finishUsage(Usage usage) throws IOException 
+		{
 			out.println();
 		}
 
 		@Override
-		public void finishRender() 
+		public void finishFunction(String namespace, String functionName) throws IOException 
 		{
-			// Do nothing
+			out.println();
+		}
+
+		@Override
+		public void finishSection(String title) throws IOException 
+		{
+			out.println();
+		}
+
+		@Override
+		public void finishRender()
+		{
+			// Do nothing.
+		}
+
+		private String getTitleCode(String title)
+		{
+			return title.replaceAll("([^a-zA-Z])+", "-").toLowerCase();
+		}
+
+	}
+	
+	private static class UsageMarkdownHTML implements UsageRendererType
+	{
+		private HTMLWriter htmlout;
+		private boolean contentOnly;
+		private String mainTitle;
+		
+		private UsageMarkdownHTML(PrintStream out, String mainTitle, boolean contentOnly)
+		{
+			this.mainTitle = mainTitle;
+			this.contentOnly = contentOnly;
+			this.htmlout = new HTMLWriter(new PrintWriter(out), 
+				HTMLWriter.Options.PRETTY, 
+				HTMLWriter.Options.SLASHES_IN_SINGLE_TAGS
+			);
+		}
+		
+		@Override
+		public void startRender() throws IOException
+		{
+			if (!contentOnly)
+			{
+				htmlout.start();
+				htmlout.push("head");
+				htmlout.tag("title", mainTitle);
+				try (Reader reader = Common.openResourceReader("wadscript/doc-style.css"))
+				{
+					htmlout.push("style", HTMLWriter.attribute("type", "text/css"))
+						.html(reader)
+					.pop();
+				}
+				htmlout.pop();
+				htmlout.push("body");
+			}
+			htmlout.push("div", HTMLWriter.classes("script-docs"));
+			htmlout.push("div", HTMLWriter.classes("main-title"))
+				.tag("h1", mainTitle, HTMLWriter.classes("main-title-name"))
+			.pop();
+		}
+
+		@Override
+		public void startTableOfContents(String[] sections) throws IOException 
+		{
+			htmlout.push("div", HTMLWriter.id("top"), HTMLWriter.classes("table-of-contents"));
+			htmlout.push("div", HTMLWriter.classes("toc-title"))
+				.push("h1", HTMLWriter.classes("toc-name"))
+					.text("Table of Contents")
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.classes("toc-content"));
+			for (int i = 0; i < sections.length; i++)
+			{
+				htmlout.tag("a", sections[i], HTMLWriter.href("#"+getTitleCode(sections[i])), HTMLWriter.classes("toc-link"));
+				if (i < sections.length - 1)
+					htmlout.text(" | ");
+			}
+			htmlout.pop();
+		}
+
+		@Override
+		public void finishTableOfContents() throws IOException 
+		{
+			htmlout.pop();
+		}
+
+		@Override
+		public void startSection(String title) throws IOException
+		{
+			htmlout.push("div", HTMLWriter.id(getTitleCode(title)), HTMLWriter.classes("category-section"));
+			
+			htmlout.push("div", HTMLWriter.classes("category-title"))
+				.push("h1", HTMLWriter.classes("category-name"))
+					.text(title)
+					.tag("a", "TOP", HTMLWriter.href("#top"), HTMLWriter.classes("category-navigation"))
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.classes("category-content"));
+		}
+
+		@Override
+		public void startFunction(String namespace, String functionName, String[] parameterNames) throws IOException 
+		{
+			htmlout.push("div", HTMLWriter.id(getFunctionNameCode(namespace, functionName)), HTMLWriter.classes("function-section"));
+			
+			htmlout.push("div", HTMLWriter.classes("function-title"))
+				.push("h2", HTMLWriter.classes("function-name"))
+					.text((namespace != null ? namespace.toUpperCase() + "::" : "") + functionName.toUpperCase())
+					.push("span", HTMLWriter.classes("function-parameters"));
+
+					StringBuilder sb = new StringBuilder("(");
+					for (int i = 0; i < parameterNames.length; i++)
+					{
+						sb.append(parameterNames[i]);
+						if (i < parameterNames.length - 1)
+							sb.append(", ");
+					}
+					sb.append(")");
+
+					htmlout.text(sb.toString()).pop();
+					htmlout.tag("a", "TOP", HTMLWriter.href("#top"), HTMLWriter.classes("function-navigation"))
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.classes("function-content"));
+		}
+
+		@Override
+		public void startUsage(Usage usage) throws IOException
+		{
+			htmlout.push("div", HTMLWriter.classes("function-description"))
+				.tag("p", usage.getInstructions())
+			.pop();
+			
+			for (ParameterUsage paramUsage : usage.getParameterInstructions()) 
+				writeParameterUsage(paramUsage);
+			writeParameterReturn(usage.getReturnTypes());
+		}
+
+		private void writeParameterUsage(ParameterUsage paramUsage) throws IOException
+		{
+			htmlout.push("div", HTMLWriter.classes("parameter-section"));
+			htmlout.push("div", HTMLWriter.classes("parameter-title"))
+				.push("h4", HTMLWriter.classes("parameter-name"))
+					.text(paramUsage.getParameterName())
+				.pop()
+			.pop();
+			
+			writeParameterTypeUsage(paramUsage.getTypes());
+			htmlout.pop();
+		}
+
+		private void writeParameterReturn(List<TypeUsage> parameterUsageTypes) throws IOException
+		{
+			htmlout.push("div", HTMLWriter.classes("parameter-section"));
+			htmlout.push("div", HTMLWriter.classes("parameter-title", "return"))
+				.push("h4", HTMLWriter.classes("parameter-name"))
+					.text("RETURNS")
+				.pop()
+			.pop();
+			
+			writeParameterTypeUsage(parameterUsageTypes);
+			htmlout.pop();
+		}
+		
+		private void writeParameterTypeUsage(List<TypeUsage> parameterUsageTypes) throws IOException
+		{
+			htmlout.push("div", HTMLWriter.classes("parameter-content"));
+			for (TypeUsage typeUsage : parameterUsageTypes)
+			{
+				htmlout.push("div", HTMLWriter.classes("parameter-usage"))
+					.push("div", HTMLWriter.classes("parameter-type"));
+				
+					String typeName = typeUsage.getType() != null ? typeUsage.getType().name() : "ANY";
+					String subTypeName = typeUsage.getSubType();
+					String description = typeUsage.getDescription();
+					
+					htmlout.tag("span", typeName, HTMLWriter.classes("parameter-type-name"));
+					if (subTypeName != null)
+						htmlout.tag("span", subTypeName, HTMLWriter.classes("parameter-subtype-name"));
+
+					htmlout.pop();
+				
+				if (description != null)
+				{
+					htmlout.push("div", HTMLWriter.classes("parameter-description"))
+						.push("p")
+							.html(description.replace("\n", "<br/>"))
+						.pop()
+					.pop();
+				}
+				htmlout.pop();
+			}
+			htmlout.pop();
+		}
+		
+		@Override
+		public void finishUsage(Usage usage) throws IOException 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void finishFunction(String namespace, String functionName) throws IOException 
+		{
+			htmlout.pop().pop();
+		}
+
+		@Override
+		public void finishSection(String title) throws IOException
+		{
+			htmlout.pop().pop();
+		}
+
+		@Override
+		public void finishRender() throws IOException
+		{
+			Common.close(htmlout);
+		}
+
+		private String getTitleCode(String title)
+		{
+			return title.replaceAll("([^a-zA-Z])+", "-").toLowerCase();
+		}
+
+		private String getFunctionNameCode(String namespace, String functionName)
+		{
+			return namespace != null ? getTitleCode(namespace + "-" + functionName) : getTitleCode(functionName);
 		}
 
 	}
@@ -364,6 +719,8 @@ public final class WadScriptMain
 		HELP,
 		FUNCTIONHELP,
 		FUNCTIONHELP_MARKDOWN,
+		FUNCTIONHELP_HTML,
+		FUNCTIONHELP_HTML_DIV,
 		DISASSEMBLE,
 		EXECUTE;
 	}
@@ -374,6 +731,7 @@ public final class WadScriptMain
 		private PrintStream stderr;
 		private InputStream stdin;
 		private Mode mode;
+		private String docsTitle;
 		private File scriptFile;
 		private String entryPointName;
 		private Integer runawayLimit;
@@ -390,6 +748,7 @@ public final class WadScriptMain
 			this.stderr = null;
 			this.stdin = null;
 			this.mode = Mode.EXECUTE;
+			this.docsTitle = "WadScript Functions";
 			this.scriptFile = null;
 			this.entryPointName = "main";
 			this.runawayLimit = 0;
@@ -428,6 +787,12 @@ public final class WadScriptMain
 		public Options setMode(Mode mode) 
 		{
 			this.mode = mode;
+			return this;
+		}
+		
+		public Options setDocsTitle(String docsTitle) 
+		{
+			this.docsTitle = docsTitle;
 			return this;
 		}
 		
@@ -519,14 +884,58 @@ public final class WadScriptMain
 			
 			if (options.mode == Mode.FUNCTIONHELP)
 			{
-				printFunctionHelp(new UsageTextRenderer(options.stdout), options.resolvers);
-				return ERROR_NONE;
+				try {
+					printFunctionHelp(new UsageTextRenderer(options.stdout), options.resolvers);
+					return ERROR_NONE;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("Internal ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_INTERNAL;
+				}
 			}
 			
 			if (options.mode == Mode.FUNCTIONHELP_MARKDOWN)
 			{
-				printFunctionHelp(new UsageMarkdownRenderer(options.stdout), options.resolvers);
-				return ERROR_NONE;
+				try {
+					printFunctionHelp(new UsageMarkdownRenderer(options.stdout), options.resolvers);
+					return ERROR_NONE;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("Internal ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_INTERNAL;
+				}
+			}
+			
+			if (options.mode == Mode.FUNCTIONHELP_HTML)
+			{
+				try {
+					printFunctionHelp(new UsageMarkdownHTML(options.stdout, options.docsTitle, false), options.resolvers);
+					return ERROR_NONE;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("Internal ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_INTERNAL;
+				}
+			}
+			
+			if (options.mode == Mode.FUNCTIONHELP_HTML_DIV)
+			{
+				try {
+					printFunctionHelp(new UsageMarkdownHTML(options.stdout, options.docsTitle, true), options.resolvers);
+					return ERROR_NONE;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("Internal ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_INTERNAL;
+				}
 			}
 			
 			if (options.scriptFile == null)
@@ -722,6 +1131,10 @@ public final class WadScriptMain
 			out.println("    --function-help              Prints all available function usages.");
 			out.println("    --function-help-markdown     Prints all available function usages in");
 			out.println("                                     Markdown format.");
+			out.println("    --function-help-html         Prints all available function usages in");
+			out.println("                                     HTML format.");
+			out.println("    --function-help-html-div     Prints all available function usages in");
+			out.println("                                     HTML format, but just the content.");
 			out.println("    --disassemble                Prints the disassembly for this script");
 			out.println("                                     and exits.");
 			out.println("    --entry [name]               Use a different entry point named [name].");
@@ -751,21 +1164,53 @@ public final class WadScriptMain
 			out.println("to initialize once.");
 		}
 
-		private void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver)
+		private void printFunctionUsages(UsageRendererType renderer, String sectionName, String namespace, ScriptFunctionResolver resolver) throws IOException
 		{
-			renderer.renderSection(sectionName);
+			renderer.startSection(sectionName);
 			for (ScriptFunctionType sft : resolver.getFunctions())
-				renderer.renderUsage(namespace, sft.name(), sft.getUsage());
-			options.stdout.println();
+			{
+				List<String> parameters = null;
+				Usage usage = sft.getUsage();
+				if (usage != null)
+				{
+					parameters = new LinkedList<>();
+					for (ParameterUsage pu : usage.getParameterInstructions())
+						parameters.add(pu.getParameterName());
+				}
+				
+				renderer.startFunction(namespace, sft.name(), parameters != null ? parameters.toArray(new String[parameters.size()]) : null);
+				if (usage != null)
+				{
+					renderer.startUsage(usage);
+					renderer.finishUsage(usage);
+				}
+				renderer.finishFunction(namespace, sft.name());
+			}
+			renderer.finishSection(sectionName);
 		}
 
-		private void printFunctionHelp(UsageRendererType renderer, List<Resolver> additionalResolvers)
+		private void printFunctionHelp(UsageRendererType renderer, List<Resolver> additionalResolvers) throws IOException
 		{
 			renderer.startRender();
+
+			List<String> resolverName = new LinkedList<>();
+			List<Resolver> resolverList = new LinkedList<>();
 			for (int i = 0; i < RESOLVERS.length; i++)
-				printFunctionUsages(renderer, RESOLVERS[i].sectionName, RESOLVERS[i].namespace, RESOLVERS[i].resolver);
+			{
+				resolverName.add(RESOLVERS[i].sectionName);
+				resolverList.add(RESOLVERS[i]);
+			}
 			for (Resolver r : additionalResolvers)
+			{
+				resolverName.add(r.sectionName);
+				resolverList.add(r);
+			}
+
+			renderer.startTableOfContents(resolverName.toArray(new String[resolverName.size()]));
+			renderer.finishTableOfContents();
+			for (Resolver r : resolverList)
 				printFunctionUsages(renderer, r.sectionName, r.namespace, r.resolver);
+			
 			renderer.finishRender();
 		}
 		
@@ -817,6 +1262,10 @@ public final class WadScriptMain
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_MARKDOWN;
+					else if (SWITCH_FUNCHELP3.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_HTML;
+					else if (SWITCH_FUNCHELP4.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_HTML_DIV;
 					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg) || SWITCH_ENTRY2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_ENTRY;
 					else if (SWITCH_RUNAWAYLIMIT1.equalsIgnoreCase(arg))
@@ -958,7 +1407,10 @@ public final class WadScriptMain
 	{
 		out.println("Usage: wadscript [filename] [switches | scriptargs]");
 		out.println("                 [--help | -h | --version]");
-		out.println("                 [--function-help | --function-help-markdown]");
+		out.println("                 [--function-help]");
+		out.println("                 [--function-help-markdown]");
+		out.println("                 [--function-help-html]");
+		out.println("                 [--function-help-html-div]");
 		out.println("                 [--disassemble] [filename]");
 	}
 	
