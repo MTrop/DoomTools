@@ -300,7 +300,7 @@ public final class DoomMakeMain
 				options.stdout.println("SUCCESSFULLY Created project: " + options.targetName);
 				options.stdout.println();
 				
-				File todoPath = new File(targetDirectory.getPath() + File.separator + "todo.txt");
+				File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.txt");
 				List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
 				
 				if (!todoList.isEmpty())

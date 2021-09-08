@@ -9,6 +9,7 @@ DoomMake
 * `Fixed` Some tweaks to auto-detecting changes to projects.
 * `Fixed` "Textures" template: Converting patches used the wrong default mode.
 * `Changed` The options for `TOOL::DECOHACK` to include the source export.
+* `Changed` Project TODO text file is now generated in uppercase: `TODO.txt`.
 
 
 ### Changed for 0.6.0
