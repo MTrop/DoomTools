@@ -37,7 +37,6 @@ doommake.properties
 # Generate-able by DoomMake
 build/
 dist/
-gen/
 
 # Doom Builder and Others
 *.dbs
