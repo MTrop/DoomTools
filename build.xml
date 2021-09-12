@@ -14,7 +14,6 @@
 	<!-- Dependencies -->
 	<property name="dev.base" value=".." />
 	<property name="S" value="${path.separator}" />
-	<property name="shell.dir" value="shell" />
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
@@ -60,9 +59,9 @@
 		"
 	/>
 	
-	<import file="build-shell.xml" />
-	<import file="build-dependencies.xml" />
 	<import file="build-import.xml" />
+	<import file="build-dependencies.xml" />
+	<import file="build-shell.xml" />	
 	
 	<!-- Versions -->
 	<property name="wadmerge.version" value="${build.version}" />

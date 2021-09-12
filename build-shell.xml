@@ -2,6 +2,8 @@
 <!DOCTYPE project>
 <project name="shell">
 
+	<property name="shell.dir" value="${resource.dir}/shell" />
+
 	<!-- Shell File Macros -->
 
 	<macrodef name="shell-cmd">

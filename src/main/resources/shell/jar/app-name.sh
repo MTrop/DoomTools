@@ -14,8 +14,8 @@ fi
 DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 
 # Test for Java
-if [ -f "$DOOMTOOLS_PATH/jre/bin/java" ]; then
-	JAVACMD="$DOOMTOOLS_PATH/jre/bin/java"
+if [ -f "${DOOMTOOLS_PATH}/jre/bin/java" ]; then
+	JAVACMD="${DOOMTOOLS_PATH}/jre/bin/java"
 elif hash java 2>/dev/null; then
 	JAVACMD=java
 elif [ -n "${JAVA_HOME}" ]; then
@@ -27,7 +27,7 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	"$JAVACMD" -cp "$DOOMTOOLS_PATH/$JAVAJAR" $JAVAOPTS $MAINCLASS $*
+	"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${JAVAJAR}" $JAVAOPTS $MAINCLASS $*
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."
