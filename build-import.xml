@@ -45,6 +45,53 @@
 	
 	<!-- ====================== Targets ====================== -->
 
+	<!-- Operating System Stuff -->
+
+	<target name="get.os">
+		<condition property="os.isWindows" value="true" else="false">
+			<os family="windows" />
+		</condition>
+		<condition property="os.isWindows32" value="true" else="false">
+			<and>
+				<os family="windows" />
+				<os arch="x86" />
+			</and>
+		</condition>
+		<condition property="os.isWindows64" value="true" else="false">
+			<and>
+				<os family="windows" />
+				<os arch="amd64" />
+			</and>
+		</condition>
+		<condition property="os.isOSX" value="true" else="false">
+			<and>
+				<os family="mac" />
+				<os family="unix" />
+			</and>
+		</condition>
+		<condition property="os.isLinux" value="true" else="false">
+			<os family="unix" />
+		</condition>
+		<condition property="os.isLinux32" value="true" else="false">
+			<and>
+				<os family="unix" />
+				<os arch="x86" />
+			</and>
+		</condition>
+		<condition property="os.isLinux64" value="true" else="false">
+			<and>
+				<os family="unix" />
+				<os arch="amd64" />
+			</and>
+		</condition>
+		<condition property="os.bash" value="true" else="false">
+			<or>
+				<os family="mac" />
+				<os family="unix" />
+			</or>
+		</condition>
+	</target>
+	
 	<!-- Clean -->
 
 	<target name="clean.compile" description="Cleans up the compiled binaries.">

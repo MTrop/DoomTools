@@ -11,11 +11,11 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	}
 	CMD_READLINK="realpath"
 fi
-SCRIPTDIR="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
+DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 
 # Test for Java
-if [ -f "$SCRIPTDIR/jre/bin/java" ]; then
-	JAVACMD="$SCRIPTDIR/jre/bin/java"
+if [ -f "$DOOMTOOLS_PATH/jre/bin/java" ]; then
+	JAVACMD="$DOOMTOOLS_PATH/jre/bin/java"
 elif hash java 2>/dev/null; then
 	JAVACMD=java
 elif [ -n "${JAVA_HOME}" ]; then
@@ -27,7 +27,7 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	"$JAVACMD" -cp "$SCRIPTDIR/$JAVAJAR" $JAVAOPTS $MAINCLASS $*
+	"$JAVACMD" -cp "$DOOMTOOLS_PATH/$JAVAJAR" $JAVAOPTS $MAINCLASS $*
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."
@@ -36,4 +36,10 @@ else
 	echo "your JRE or JDK directories, nor were Java binaries detected on your PATH."
 	echo
 	echo "For help, visit https://www.java.com/."
+	echo "Java can be downloaded from the following places:"
+	echo
+	echo "Azul:      https://www.azul.com/downloads/"
+	echo "Microsoft: https://www.microsoft.com/openjdk"
+	echo "Oracle:    https://java.com/en/download/"
+	echo
 fi
