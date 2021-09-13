@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * sequence of characters. If a token is malformed, it is streamed out as-is.
  * @author Matthew Tropiano
  */
-public class ReplacerReader extends Reader
+public class ReplacerReader extends Reader implements AutoCloseable
 {
 	/** The default string of characters that starts a replacer token. */
 	public static final String DEFAULT_TOKEN_START = "%";

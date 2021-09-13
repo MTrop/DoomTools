@@ -2,11 +2,13 @@ package net.mtrop.doom.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.LinkedList;
@@ -17,6 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
@@ -27,6 +30,7 @@ import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
+import net.mtrop.doom.tools.struct.ReplacerReader;
 
 /**
  * Main class for DoomMake.
@@ -40,11 +44,20 @@ public final class DoomMakeMain
 	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
 
+	private static final String SHELL_RESOURCE_CMD = "shell/jar/app-name.cmd";
+	private static final String SHELL_RESOURCE_SH = "shell/jar/app-name.sh";
+	
+	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
+	private static final String ENVVAR_DOOMTOOLS_JAR = "DOOMTOOLS_JAR";
+
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;
 	private static final int ERROR_BAD_SCRIPT = 3;
 	private static final int ERROR_BAD_PROJECT = 4;
+	private static final int ERROR_SECURITY = 5;
+	private static final int ERROR_BAD_TOOL_PATH = 6;
+	private static final int ERROR_IOERROR = 7;
 	private static final int ERROR_UNKNOWN = 100;
 
 	private static final String SWITCH_HELP = "--help";
@@ -58,6 +71,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_LISTMODULES2 = "-t";
 	private static final String SWITCH_NEWPROJECT = "--new-project";
 	private static final String SWITCH_NEWPROJECT2 = "-n";
+	private static final String SWITCH_EMBED = "--embed";
 	
 	private static final String SWITCH_SCRIPTFILE = "--script";
 	private static final String SWITCH_SCRIPTFILE2 = "-s";
@@ -79,6 +93,7 @@ public final class DoomMakeMain
 		private boolean help;
 		private boolean version;
 		private boolean listModules;
+		private boolean embed;
 
 		private List<String> createProject;
 		
@@ -101,6 +116,7 @@ public final class DoomMakeMain
 			this.help = false;
 			this.version = false;
 			this.listModules = false;
+			this.embed = false;
 			this.createProject = null;
 
 			this.mode = Mode.EXECUTE;
@@ -245,12 +261,18 @@ public final class DoomMakeMain
 				return createProject();
 			}
 
+			// Detect project.
 			if (options.mode == Mode.EXECUTE && !options.scriptFile.exists())
 			{
 				options.stderr.printf("ERROR: Script file \"%s\" could not be found!\n", options.scriptFile.getPath());
 				return ERROR_BAD_SCRIPT;
 			}
 			
+			if (options.embed)
+			{
+				return embedDoomMake();
+			}
+
 			loadProperties(new File("doommake.project.properties"));
 			loadProperties(options.propertiesFile);
 			
@@ -329,6 +351,103 @@ public final class DoomMakeMain
 			return ERROR_NONE;
 		}
 
+		// Copies a shell script.
+		private void copyShellScript(String resourceName, String jarName, File target) throws IOException
+		{
+			try (
+				ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourceName), "{{", "}}");
+				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(target))
+			){
+				reader
+					.replace("JAVA_OPTIONS", "-Xms64M -Xmx784M")
+					.replace("MAIN_CLASSNAME", DoomMakeMain.class.getCanonicalName())
+					.replace("JAR_NAME", jarName);
+				
+				int b;
+				char[] cbuf = new char[8192];
+				while ((b = reader.read(cbuf)) >= 0)
+				{
+					writer.write(cbuf, 0, b);
+					writer.flush();
+				}
+			}
+		}
+		
+		// Embeds DoomMake into the project.
+		private int embedDoomMake()
+		{
+			String path;
+			String jarName;
+			try {
+				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				jarName = System.getenv(ENVVAR_DOOMTOOLS_JAR);
+			} catch (SecurityException e) {
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				return ERROR_SECURITY;
+			}
+			
+			if (Common.isEmpty(path))
+			{
+				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
+				return ERROR_BAD_TOOL_PATH;
+			}
+			
+			if (Common.isEmpty(jarName))
+			{
+				options.stderr.println("ERROR: DOOMTOOLS_JAR ENVVAR not set. Not invoked via shell?");
+				return ERROR_BAD_TOOL_PATH;
+			}
+			
+			if (path.charAt(path.length() - 1) != File.separatorChar)
+				path = path + File.separatorChar;
+			
+			File targetJARFile = new File("tools/" + (new File(jarName)).getName());
+			File targetShellCmdFile = new File("doommake.cmd");
+			File targetShellBashFile = new File("doommake.sh");
+			
+			try 
+			{
+				if (!Common.createPathForFile(targetJARFile))
+				{
+					options.stderr.println("ERROR: Could not create tools directory for embed.");
+					return ERROR_IOERROR;
+				}
+			} 
+			catch (SecurityException e)
+			{
+				options.stderr.println("ERROR: Could not create tools directory for embed. Access denied.");
+				return ERROR_SECURITY;
+			}
+			
+			try (FileInputStream fis = new FileInputStream(new File(path + jarName)); FileOutputStream fos = new FileOutputStream(targetJARFile))
+			{
+				IOUtils.relay(fis, fos);
+				copyShellScript(SHELL_RESOURCE_CMD, targetJARFile.getPath().replace("/", "\\"), targetShellCmdFile);
+				copyShellScript(SHELL_RESOURCE_SH, targetJARFile.getPath().replace("\\", "/"), targetShellBashFile);
+			} 
+			catch (SecurityException e)
+			{
+				options.stderr.println("ERROR: Could not copy DoomTools binaries. Access denied.");
+				return ERROR_SECURITY;
+			}
+			catch (FileNotFoundException e) 
+			{
+				options.stderr.println("ERROR: Could not copy DoomTools binaries. " + e.getLocalizedMessage());
+				return ERROR_IOERROR;
+			} 
+			catch (IOException e) 
+			{
+				options.stderr.println("ERROR: Could not copy DoomTools binaries. " + e.getLocalizedMessage());
+				return ERROR_IOERROR;
+			}
+
+			targetShellBashFile.setExecutable(true, false);
+			
+			options.stdout.println("DoomMake embed complete.");
+			
+			return ERROR_NONE;
+		}
+		
 		// Load a properties file into System.properties.
 		private int loadProperties(File propertiesFile) 
 		{
@@ -390,6 +509,8 @@ public final class DoomMakeMain
 						options.version = true;
 					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
 						options.listModules = true;
+					else if (arg.equalsIgnoreCase(SWITCH_EMBED))
+						options.embed = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
 						options.createProject = new LinkedList<>();
@@ -555,7 +676,8 @@ public final class DoomMakeMain
 		out.println("                [--list-templates | -t]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
-		out.println("                [--disassemble] [filename]");
+		out.println("                [--disassemble]");
+		out.println("                [--embed]");
 	}
 	
 	/**
@@ -613,6 +735,11 @@ public final class DoomMakeMain
 		out.println("                                       Default: 256");
 		out.println("    --stack-depth [num]            Sets the stack value depth to [num].");
 		out.println("                                       Default: 2048");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("    --embed                        Embeds DoomTools/DoomMake into the current");
+		out.println("                                       project.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();

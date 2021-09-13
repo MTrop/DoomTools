@@ -4,8 +4,8 @@ REM ============================[ VARIABLES ]================================
 SETLOCAL
 SET JAVAEXE=
 SET JAVAOPTS={{JAVA_OPTIONS}}
-SET JAVAJAR={{JAR_NAME}}
 SET MAINCLASS={{MAIN_CLASSNAME}}
+SET DOOMTOOLS_JAR={{JAR_NAME}}
 SET DOOMTOOLS_PATH=%~dp0
 REM =========================================================================
 
@@ -49,7 +49,7 @@ goto _end
 REM =========================
 
 :_calljava
-"%JAVAEXE%" -cp "%DOOMTOOLS_PATH%\%JAVAJAR%" %JAVAOPTS% %MAINCLASS% %*
+"%JAVAEXE%" -cp "%DOOMTOOLS_PATH%\%DOOMTOOLS_JAR%" %JAVAOPTS% %MAINCLASS% %*
 
 :_end
 ENDLOCAL

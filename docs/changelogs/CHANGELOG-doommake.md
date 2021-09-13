@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.8.0
+
+* `Added` The ability to embed DoomMake into a project (`--embed` switch).
+
+
 ### Changed for 0.7.0
 
 * `Added` The options for `TOOL::DOOMTOOLS`.

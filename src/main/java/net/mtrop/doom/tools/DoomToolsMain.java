@@ -38,15 +38,19 @@ public final class DoomToolsMain
 	private static final String WTEXPORT_VERSION = Common.getVersionString("wtexport");
 	private static final String WTEXSCAN_VERSION = Common.getVersionString("wtexscan");
 
+	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
+
 	private static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
 	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_DESKTOP_ERROR = 1;
+	private static final int ERROR_SECURITY = 2;
+	private static final int ERROR_NOWHERE = 3;
 	
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_WEBSITE = "--website";
-
+	private static final String SWITCH_WHERE = "--where";
 	
 	/**
 	 * Program options.
@@ -58,12 +62,14 @@ public final class DoomToolsMain
 		
 		private boolean help;
 		private boolean openWebsite;
+		private boolean where;
 		
 		private Options()
 		{
 			this.stdout = null;
 			this.help = false;
 			this.openWebsite = false;
+			this.where = false;
 		}
 		
 		public Options setStdout(OutputStream out) 
@@ -81,6 +87,12 @@ public final class DoomToolsMain
 		public Options setOpenWebsite(boolean value)
 		{
 			this.openWebsite = value;
+			return this;
+		}
+		
+		public Options setWhere(boolean value)
+		{
+			this.where = value;
 			return this;
 		}
 		
@@ -106,6 +118,27 @@ public final class DoomToolsMain
 				options.stdout.println();
 				help(options.stdout);
 				return ERROR_NONE;
+			}
+			else if (options.where)
+			{
+				String path; 
+				try {
+					path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+					return ERROR_SECURITY;
+				}
+				
+				if (Common.isEmpty(path))
+				{
+					options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
+					return ERROR_NOWHERE;
+				}
+				else
+				{
+					options.stdout.println(path);
+					return ERROR_NONE;
+				}
 			}
 			else if (options.openWebsite)
 			{
@@ -190,6 +223,8 @@ public final class DoomToolsMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WEBSITE))
 						options.openWebsite = true;
+					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
+						options.where = true;
 				}
 				break;
 			}
@@ -225,10 +260,12 @@ public final class DoomToolsMain
 	 */
 	private static void help(PrintStream out)
 	{
-		out.println("    --help        Prints help and exits.");
+		out.println("    --help               Prints help and exits.");
 		out.println("    -h");
 		out.println();
-		out.println("    --website     Opens DoomTools's main website.");
+		out.println("    --website            Opens DoomTools's main website.");
+		out.println();
+		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
 	}
 	
 }

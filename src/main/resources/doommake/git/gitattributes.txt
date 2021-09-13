@@ -12,3 +12,9 @@
 *.zscript text
 *.acs text
 *.dh text
+*.cmd text
+*.sh text
+
+# Keep OS-specific line endings.
+*.cmd eol=crlf
+*.sh eol=lf

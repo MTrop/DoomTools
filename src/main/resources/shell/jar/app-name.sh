@@ -1,8 +1,8 @@
 #!/bin/bash
 
 JAVAOPTS="{{JAVA_OPTIONS}}"
-JAVAJAR={{JAR_NAME}}
 MAINCLASS={{MAIN_CLASSNAME}}
+DOOMTOOLS_JAR={{JAR_NAME}}
 
 CMD_READLINK="readlink -f"
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -27,7 +27,7 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${JAVAJAR}" $JAVAOPTS $MAINCLASS $*
+	"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}" $JAVAOPTS $MAINCLASS $*
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."

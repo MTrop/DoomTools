@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -199,18 +198,14 @@ public final class ProjectModule implements Comparable<ProjectModule>
 					{
 						for (String resourcePath : e.resourcePaths)
 						{
-							try (Reader in = Common.openResourceReader(resourcePath))
-							{
-								if (in == null)
-									throw new IOException("INTERNAL ERROR: Could not find resource: " + resourcePath);
-								
-								@SuppressWarnings("resource")
-								Reader reader = new ReplacerReader(in, "{{", "}}").replace(replacerMap);
+							try (
+								ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourcePath), "{{", "}}"); 
+								OutputStreamWriter writer = new OutputStreamWriter(fos)
+							){
+								reader.replace(replacerMap);
 								
 								int b;
 								char[] cbuf = new char[8192];
-								OutputStreamWriter writer = new OutputStreamWriter(fos);
-								
 								while ((b = reader.read(cbuf)) >= 0)
 								{
 									writer.write(cbuf, 0, b);
