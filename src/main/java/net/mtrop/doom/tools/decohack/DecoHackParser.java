@@ -263,7 +263,36 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// =======================================================================
+
+	@Override
+	protected void nextToken() 
+	{
+		do {
+			super.nextToken();
+			
+			/*
+			 * Some line comments are DECORATE Actor editor keys.
+			 * DECOHack should use these to set on things for export later, however,
+			 * any use context that is not inside a "thing" is useless, but should still
+			 * be treated like a comment in other situations. Passive parsing of these
+			 * key comments seems to be the "best of both worlds" approach.
+			 */
+			if (currentType(DecoHackKernel.TYPE_LINE_COMMENT) && currentToken().getLexeme().startsWith("$"))
+			{
+				// Lazily split this thing.
+				String content = currentToken().getLexeme().substring(1).trim();
+				int splitIndex = content.indexOf(' ');
+				if (splitIndex > 0)
+					editorKeys.put(content.substring(0, splitIndex), content.substring(splitIndex).trim());
+				else
+					editorKeys.put(content, "");
+			}
+			
+		} while (currentType(DecoHackKernel.TYPE_COMMENT, DecoHackKernel.TYPE_LINE_COMMENT));
+	}
 	
+	// =======================================================================
+
 	/**
 	 * Parse "using" line (must be first).
 	 */
@@ -1172,6 +1201,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
+		editorKeys.clear();
+		
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
@@ -1555,6 +1586,12 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_THING);
 			return false;
+		}
+		
+		// apply/validate editor keys
+		for (String key : thing.getEditorKeys())
+		{
+			// TODO: Finish this.
 		}
 		
 		return true;
@@ -3650,12 +3687,15 @@ public final class DecoHackParser extends Lexer.Parser
 
 	/** List of errors. */
 	private LinkedList<String> errors;
+	/** Editor directives. */
+	private Map<String, String> editorKeys;
 
 	// Return the exporter for the patch.
 	private DecoHackParser(String streamName, Reader in)
 	{
 		super(new DecoHackLexer(streamName, in));
 		this.errors = new LinkedList<>();
+		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	}
 	
 	private void addErrorMessage(String message, Object... args)
@@ -3990,7 +4030,6 @@ public final class DecoHackParser extends Lexer.Parser
 	 */
 	private static class DecoHackKernel extends Lexer.Kernel
 	{
-		public static final int TYPE_COMMENT = 0;
 		public static final int TYPE_LPAREN = 1;
 		public static final int TYPE_RPAREN = 2;
 		public static final int TYPE_COMMA = 5;
@@ -4001,7 +4040,7 @@ public final class DecoHackParser extends Lexer.Parser
 		public static final int TYPE_PLUS = 12;
 		public static final int TYPE_DASH = 13;
 		public static final int TYPE_PIPE = 14;
-		
+
 		public static final int TYPE_TRUE = 101;
 		public static final int TYPE_FALSE = 102;
 
@@ -4012,9 +4051,8 @@ public final class DecoHackParser extends Lexer.Parser
 			addStringDelimiter('"', '"');
 			addRawStringDelimiter('`', '`');
 			
-			addCommentStartDelimiter("/*", TYPE_COMMENT);
-			addCommentLineDelimiter("//", TYPE_COMMENT);
-			addCommentEndDelimiter("*/", TYPE_COMMENT);
+			addCommentDelimiter("/*", "*/");
+			addCommentLineDelimiter("//");
 
 			addDelimiter("(", TYPE_LPAREN);
 			addDelimiter(")", TYPE_RPAREN);
@@ -4030,6 +4068,8 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			addCaseInsensitiveKeyword("true", TYPE_TRUE);
 			addCaseInsensitiveKeyword("false", TYPE_FALSE);
+			
+			setEmitComments(true); // for directives.
 		}
 	}
 	

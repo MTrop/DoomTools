@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Breaks up a stream of characters into lexicographical tokens.
@@ -156,6 +157,8 @@ public class Lexer
 		int state = Kernel.TYPE_UNKNOWN;
 		boolean breakloop = false;
 		Character stringEnd = null;
+		String commentEnd = null;
+		int commentEndIndex = 0;
 		
 		while (!breakloop)
 		{
@@ -191,7 +194,7 @@ public class Lexer
 					{
 						if (kernel.willEmitNewlines())
 						{
-							state = Kernel.TYPE_DELIM_NEWLINE;
+							state = Kernel.TYPE_NEWLINE;
 							charIndex = readerStack.getCurrentLineCharacterIndex();
 							lineNumber = readerStack.getCurrentLineNumber();
 							breakloop = true;
@@ -201,7 +204,7 @@ public class Lexer
 					{
 						if (kernel.willEmitSpaces())
 						{
-							state = Kernel.TYPE_DELIM_SPACE;
+							state = Kernel.TYPE_SPACE;
 							charIndex = readerStack.getCurrentLineCharacterIndex();
 							lineNumber = readerStack.getCurrentLineNumber();
 							breakloop = true;
@@ -211,7 +214,7 @@ public class Lexer
 					{
 						if (kernel.willEmitTabs())
 						{
-							state = Kernel.TYPE_DELIM_TAB;
+							state = Kernel.TYPE_TAB;
 							charIndex = readerStack.getCurrentLineCharacterIndex();
 							lineNumber = readerStack.getCurrentLineNumber();
 							breakloop = true;
@@ -1058,22 +1061,25 @@ public class Lexer
 				
 				case Kernel.TYPE_DELIMITER:
 				{
+					String lookAheadDelimiter = getCurrentLexeme() + c;
+					
 					if (isStreamEnd(c))
 					{
 						setDelimBreak(c);
 						breakloop = true;
 					}
-					else if (kernel.getCommentStartTable().containsKey(getCurrentLexeme()+c))
+					else if (kernel.getCommentTable().containsKey(lookAheadDelimiter))
 					{
+						commentEnd = kernel.getCommentTable().get(lookAheadDelimiter);
 						clearCurrentLexeme();
 						state = Kernel.TYPE_COMMENT;
 					}
-					else if (kernel.getCommentLineTable().containsKey(getCurrentLexeme()+c))
+					else if (kernel.getCommentLineSet().contains(lookAheadDelimiter))
 					{
 						clearCurrentLexeme();
 						state = Kernel.TYPE_LINE_COMMENT;
 					}
-					else if (kernel.getDelimTable().containsKey(getCurrentLexeme()+c))
+					else if (kernel.getDelimTable().containsKey(lookAheadDelimiter))
 					{
 						saveChar(c);
 					}
@@ -1124,46 +1130,69 @@ public class Lexer
 							clearCurrentLexeme();
 							state = Kernel.TYPE_UNKNOWN;
 						}
-					}
-					else if (kernel.getCommentEndTable().containsKey(getCurrentLexeme()))
-					{
-						if (!kernel.willEmitComments())
+						else
 						{
-							clearCurrentLexeme();
-							state = Kernel.TYPE_UNKNOWN;
+							saveChar(c);
+							breakloop = true;
 						}
 					}
-					else if (isCommentEndDelimiterStart(c))
+					else if (commentEnd.charAt(0) == c)
 					{
-						state = Kernel.TYPE_DELIM_COMMENT;
+						if (commentEnd.length() == 1)
+						{
+							state = Kernel.TYPE_COMMENT;
+						}
+						else
+						{
+							state = Kernel.TYPE_ENDING_COMMENT;
+							commentEndIndex = 1;
+							saveChar(c);
+						}
+					}
+					else
+					{
 						saveChar(c);
 					}
 					break; // end Kernel.TYPE_COMMENT
 				}
 
-				case Kernel.TYPE_DELIM_COMMENT:
+				case Kernel.TYPE_ENDING_COMMENT:
 				{
 					if (isStreamEnd(c))
 					{
-						clearCurrentLexeme();
-						state = Kernel.TYPE_COMMENT;
-					}
-					else if (kernel.getCommentEndTable().containsKey(getCurrentLexeme()+c))
-					{
-						clearCurrentLexeme();
 						state = Kernel.TYPE_UNKNOWN;
+						breakloop = true;
 					}
-					else if (isWhitespace(c))
+					else if (commentEnd.charAt(commentEndIndex) == c)
 					{
-						clearCurrentLexeme();
-						state = Kernel.TYPE_COMMENT;
+						if (commentEndIndex < commentEnd.length() - 1)
+						{
+							commentEndIndex++;
+							saveChar(c);
+						}
+						else if (kernel.willEmitComments())
+						{
+							tokenBuffer.delete(tokenBuffer.length() - commentEnd.length(), tokenBuffer.length());
+							state = Kernel.TYPE_COMMENT;
+							breakloop = true;
+						}
+						else
+						{
+							clearCurrentLexeme();
+							state = Kernel.TYPE_UNKNOWN;
+						}
+					}
+					else if (commentEnd.charAt(0) == c)
+					{
+						commentEndIndex = 1;
+						saveChar(c);
 					}
 					else
 					{
-						clearCurrentLexeme();
+						state = Kernel.TYPE_COMMENT;
 						saveChar(c);
 					}
-					break; // end Kernel.TYPE_DELIM_COMMENT
+					break; // end Kernel.TYPE_ENDING_COMMENT
 				}
 					
 				case Kernel.TYPE_LINE_COMMENT:
@@ -1175,6 +1204,10 @@ public class Lexer
 							clearCurrentLexeme();
 							state = Kernel.TYPE_UNKNOWN;
 						}
+						else
+						{
+							breakloop = true;
+						}
 					}
 					else if (isNewline(c))
 					{
@@ -1183,8 +1216,16 @@ public class Lexer
 							clearCurrentLexeme();
 							state = Kernel.TYPE_UNKNOWN;
 						}
+						else
+						{
+							breakloop = true;
+						}
 					}
-					break; // end Kernel.TYPE_DELIM_COMMENT
+					else
+					{
+						saveChar(c);
+					}
+					break; // end Kernel.TYPE_LINE_COMMENT
 				}
 			}
 		}
@@ -1227,19 +1268,19 @@ public class Lexer
 	{
 		switch (token.getType())
 		{
-			case Kernel.TYPE_DELIM_SPACE:
+			case Kernel.TYPE_SPACE:
 			{
 				token.setLexeme(" ");
 				return true;
 			}
 			
-			case Kernel.TYPE_DELIM_TAB:
+			case Kernel.TYPE_TAB:
 			{
 				token.setLexeme("\t");
 				return true;
 			}
 			
-			case Kernel.TYPE_DELIM_NEWLINE:
+			case Kernel.TYPE_NEWLINE:
 			{
 				token.setLexeme("");
 				return true;
@@ -1248,22 +1289,7 @@ public class Lexer
 			case Kernel.TYPE_DELIMITER:
 			{
 				String lexeme = token.getLexeme();
-				if (kernel.getCommentStartTable().containsKey(lexeme))
-				{
-					token.setType(kernel.getCommentStartTable().get(lexeme));
-					return true;
-				}
-				else if (kernel.getCommentEndTable().containsKey(lexeme))
-				{
-					token.setType(kernel.getCommentEndTable().get(lexeme));
-					return true;
-				}
-				else if (kernel.getCommentLineTable().containsKey(lexeme))
-				{
-					token.setType(kernel.getCommentLineTable().get(lexeme));
-					return true;
-				}
-				else if (kernel.getDelimTable().containsKey(lexeme))
+				if (kernel.getDelimTable().containsKey(lexeme))
 				{
 					token.setType(kernel.getDelimTable().get(lexeme));
 					return true;
@@ -1529,16 +1555,6 @@ public class Lexer
 	protected boolean isDelimiterStart(char c)
 	{
 		return kernel.getDelimStartTable().contains(c);
-	}
-	
-	/**
-	 * Checks if this is a (or the start of a) block-comment-ending delimiter character.
-	 * @param c the character input.
-	 * @return true if so, false if not.
-	 */
-	protected boolean isCommentEndDelimiterStart(char c)
-	{
-		return kernel.getEndCommentDelimStartTable().contains(c);
 	}
 	
 	/**
@@ -1835,63 +1851,53 @@ public class Lexer
 		public static final int TYPE_END_OF_LEXER = 			-1;
 		/** Reserved token type: End of stream. */
 		public static final int TYPE_END_OF_STREAM =			-2;
-		/** Reserved token type: Number. */
-		public static final int TYPE_NUMBER = 					-3;
-		/** Reserved token type: Space. */
-		public static final int TYPE_DELIM_SPACE = 				-4;
-		/** Reserved token type: Tab. */
-		public static final int TYPE_DELIM_TAB = 				-5;
-		/** Reserved token type: New line character. */
-		public static final int TYPE_DELIM_NEWLINE = 			-6;
-		/** Reserved token type: Open comment. */
-		public static final int TYPE_DELIM_OPEN_COMMENT = 		-7;
-		/** Reserved token type: Close comment. */
-		public static final int TYPE_DELIM_CLOSE_COMMENT =	 	-8;
-		/** Reserved token type: Line comment. */
-		public static final int TYPE_DELIM_LINE_COMMENT = 		-9;
-		/** Reserved token type: Identifier. */
-		public static final int TYPE_IDENTIFIER = 				-10;
 		/** Reserved token type: Unknown token. */
-		public static final int TYPE_UNKNOWN = 					-11;
+		public static final int TYPE_UNKNOWN = 					-3;
+		/** Reserved token type: Number. */
+		public static final int TYPE_NUMBER = 					-4;
+		/** Reserved token type: Space. */
+		public static final int TYPE_SPACE = 					-5;
+		/** Reserved token type: Tab. */
+		public static final int TYPE_TAB = 						-6;
+		/** Reserved token type: New line character. */
+		public static final int TYPE_NEWLINE =					-7;
+		/** Reserved token type: Identifier. */
+		public static final int TYPE_IDENTIFIER = 				-8;
 		/** Reserved token type: Illegal token. */
-		public static final int TYPE_ILLEGAL = 					-12;
+		public static final int TYPE_ILLEGAL = 					-9;
 		/** Reserved token type: Comment. */
-		public static final int TYPE_COMMENT = 					-13;
+		public static final int TYPE_COMMENT = 					-10;
 		/** Reserved token type: Line Comment. */
-		public static final int TYPE_LINE_COMMENT = 			-14;
+		public static final int TYPE_LINE_COMMENT = 			-11;
 		/** Reserved token type: String. */
-		public static final int TYPE_STRING = 					-15;
+		public static final int TYPE_STRING = 					-12;
+		
 		/** Reserved token type: Raw String (never returned). */
-		public static final int TYPE_RAWSTRING = 				-16;
+		private static final int TYPE_RAWSTRING = 				-16;
 		/** Reserved token type: Delimiter (never returned). */
-		public static final int TYPE_DELIMITER = 				-17;
+		private static final int TYPE_DELIMITER = 				-17;
 		/** Reserved token type: Point state (never returned). */
-		public static final int TYPE_POINT = 					-19;
+		private static final int TYPE_POINT = 					-18;
 		/** Reserved token type: Floating point state (never returned). */
-		public static final int TYPE_FLOAT = 					-20;
+		private static final int TYPE_FLOAT = 					-19;
 		/** Reserved token type: Delimiter Comment (never returned). */
-		public static final int TYPE_DELIM_COMMENT = 			-21;
+		private static final int TYPE_ENDING_COMMENT = 			-20;
 		/** Reserved token type: hexadecimal integer (never returned). */
-		public static final int TYPE_HEX_INTEGER0 = 			-22;
+		private static final int TYPE_HEX_INTEGER0 = 			-21;
 		/** Reserved token type: hexadecimal integer (never returned). */
-		public static final int TYPE_HEX_INTEGER1 = 			-23;
+		private static final int TYPE_HEX_INTEGER1 = 			-22;
 		/** Reserved token type: hexadecimal integer (never returned). */
-		public static final int TYPE_HEX_INTEGER = 				-24;
+		private static final int TYPE_HEX_INTEGER = 			-23;
 		/** Reserved token type: Exponent state (never returned). */
-		public static final int TYPE_EXPONENT = 				-25;
+		private static final int TYPE_EXPONENT = 				-24;
 		/** Reserved token type: Exponent power state (never returned). */
-		public static final int TYPE_EXPONENT_POWER = 			-26;
+		private static final int TYPE_EXPONENT_POWER = 			-25;
 	
 		/**
 		 * Table of single-character (or beginning character of) significant
 		 * delimiters. Delimiters immediately break the current token if encountered.
 		 */
 		private Set<Character> delimStartTable;
-		/**
-		 * Table of single-character (or beginning character of) significant end comment
-		 * delimiters.
-		 */
-		private Set<Character> endCommentDelimStartTable;
 		/** 
 		 * Table of significant delimiters.
 		 */
@@ -1899,15 +1905,11 @@ public class Lexer
 		/** 
 		 * Table of comment-starting delimiters.
 		 */
-		private Map<String, Integer> commentStartTable;
+		private Map<String, String> commentTable;
 		/** 
 		 * Table of line-comment delimiters.
 		 */
-		private Map<String, Integer> commentLineTable;
-		/** 
-		 * Table of comment-ending delimiters.
-		 */
-		private Map<String, Integer> commentEndTable;
+		private Set<String> commentLineTable;
 		/**
 		 * Table of identifiers mapped to token ids (used for reserved keywords).
 		 */
@@ -1950,11 +1952,9 @@ public class Lexer
 		{
 			decimalSeparator = DecimalFormatSymbols.getInstance().getDecimalSeparator();
 			delimStartTable = new HashSet<Character>();
-			endCommentDelimStartTable = new HashSet<Character>();
 			delimTable = new HashMap<String, Integer>();
-			commentStartTable = new HashMap<String, Integer>(2);
-			commentLineTable = new HashMap<String, Integer>(2);
-			commentEndTable = new HashMap<String, Integer>(2);
+			commentTable = new HashMap<String, String>(2);
+			commentLineTable = new TreeSet<String>();
 			stringDelimTable = new HashMap<Character, Character>();
 			rawStringDelimTable = new HashMap<Character, Character>();
 			keywordTable = new HashMap<String, Integer>();
@@ -2015,29 +2015,16 @@ public class Lexer
 		}
 
 		/**
-		 * Adds a comment-starting delimiter to this lexer.
-		 * @param delimiter		the delimiter lexeme.
-		 * @param type			the type id.
-		 * @throws IllegalArgumentException if type is &lt; 0 or delimiter is null or empty.
+		 * Adds a comment-starting (and ending) delimiter to this lexer.
+		 * @param delimiterStart the comment starting delimiter. 
+		 * @param delimiterEnd the comment ending sequence.
 		 */
-		public void addCommentStartDelimiter(String delimiter, int type)
+		public void addCommentDelimiter(String delimiterStart, String delimiterEnd)
 		{
-			addDelimiter(delimiter, type);
-			commentStartTable.put(delimiter, type);
-		}
-	
-		/**
-		 * Adds a comment-ending delimiter to this lexer.
-		 * @param delimiter		the delimiter lexeme.
-		 * @param type			the type id.
-		 * @throws IllegalArgumentException if type is &lt; 0 or delimiter is null or empty.
-		 */
-		public void addCommentEndDelimiter(String delimiter, int type)
-		{
-			addDelimiter(delimiter, type);
-			if (!endCommentDelimStartTable.contains(delimiter.charAt(0)))
-				endCommentDelimStartTable.add(delimiter.charAt(0));
-			commentEndTable.put(delimiter, type);
+			keyCheck(delimiterStart);
+			commentTable.put(delimiterStart, delimiterEnd);
+			if (!delimStartTable.contains(delimiterStart.charAt(0)))
+				delimStartTable.add(delimiterStart.charAt(0));
 		}
 	
 		/**
@@ -2046,10 +2033,12 @@ public class Lexer
 		 * @param type			the type id.
 		 * @throws IllegalArgumentException if type is &lt; 0 or delimiter is null or empty.
 		 */
-		public void addCommentLineDelimiter(String delimiter, int type)
+		public void addCommentLineDelimiter(String delimiter)
 		{
-			addDelimiter(delimiter, type);
-			commentLineTable.put(delimiter, type);
+			keyCheck(delimiter);
+			commentLineTable.add(delimiter);
+			if (!delimStartTable.contains(delimiter.charAt(0)))
+				delimStartTable.add(delimiter.charAt(0));
 		}
 	
 		/**
@@ -2193,29 +2182,19 @@ public class Lexer
 			return delimStartTable;
 		}
 	
-		private Set<Character> getEndCommentDelimStartTable()
-		{
-			return endCommentDelimStartTable;
-		}
-	
 		private Map<String, Integer> getDelimTable()
 		{
 			return delimTable;
 		}
 	
-		private Map<String, Integer> getCommentStartTable()
+		private Map<String, String> getCommentTable()
 		{
-			return commentStartTable;
+			return commentTable;
 		}
 	
-		private Map<String, Integer> getCommentLineTable()
+		private Set<String> getCommentLineSet()
 		{
 			return commentLineTable;
-		}
-	
-		private Map<String, Integer> getCommentEndTable()
-		{
-			return commentEndTable;
 		}
 	
 		private Map<String, Integer> getKeywordTable()
@@ -2323,6 +2302,16 @@ public class Lexer
 			} catch (IOException e) {
 				throw new Parser.Exception(e.getMessage(), e);
 			}
+		}
+		
+		/**
+		 * Changes the current token's type to a different type.
+		 * Only useful after {@link #nextToken()} but before it is parsed by your parser.
+		 * @param type the new type id.
+		 */
+		protected void changeTokenType(int type)
+		{
+			currentToken.type = type;
 		}
 		
 		/**

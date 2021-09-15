@@ -947,9 +947,29 @@ Or maybe make some slower projectiles really fast and damaging!
     }
 
 
-If states are filled across the set of weapons, any special frame indices
-will set to the EXACT same value across all of the specified weapons (i.e., 
-the same Select state, the same Fire state, etc.).
+If states are filled across the set of things, any special frame indices
+will set to the EXACT same value across all of the specified things (i.e., 
+the same Spawn state, the same Missile state, etc.).
+
+
+------------------------------------------------------------------------------
+Thing Editor Keys
+------------------------------------------------------------------------------
+
+https://zdoom.org/wiki/Editor_keys
+
+DECOHack Things also support the Editor Keys that are read by map editors
+like Ultimate Doom Builder or SLADE, except the supported keys are passed 
+along to the resultant DEHACKED file. The following keys are detected:
+
+//$Angled
+//$Category <String>
+//$Color <Integer>
+//$Colour <Integer>
+//$EditorSprite <String>
+//$Group <String>
+//$NotAngled
+//$Sprite <String>
 
 
 ------------------------------------------------------------------------------

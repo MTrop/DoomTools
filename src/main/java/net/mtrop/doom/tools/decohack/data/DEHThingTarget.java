@@ -50,6 +50,19 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	
 	SELF setEditorNumber(int editorNumber);
 
+	/**
+	 * Sets an editor key on this Thing.
+	 * @param key the key.
+	 * @param value the value.
+	 * @return this thing.
+	 */
+	SELF setEditorKey(String key, String value);
+
+	/**
+	 * @return all set editor keys.
+	 */
+	String[] getEditorKeys();
+	
 	SELF setHealth(int health);
 
 	SELF setSpeed(int speed);

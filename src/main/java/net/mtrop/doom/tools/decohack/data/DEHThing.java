@@ -65,6 +65,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	private int fastSpeed; // written as fixed point 16.16 if MISSILE
 	/** Melee range. */
 	private int meleeRange;  // written as fixed point 16.16
+	
 	/** Ripper sound position. */
 	private int ripSoundPosition;
 
@@ -186,6 +187,22 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 		RangeUtils.checkRange("Editor number", -1, 0x10000, editorNumber);
 		this.editorNumber = editorNumber;
 		return this;
+	}
+
+	private static final String[] NO_STRINGS = new String[0];
+	
+	@Override
+	public DEHThing setEditorKey(String key, String value)
+	{
+		// TODO Auto-generated method stub
+		return this;
+	}
+
+	@Override
+	public String[] getEditorKeys() 
+	{
+		// TODO Auto-generated method stub
+		return NO_STRINGS;
 	}
 
 	public int getHealth() 
