@@ -13,6 +13,15 @@ the decisions already made so that more *educated* decisions can be made.
 To do Doom-related things at the command-line, mostly data-related, not game-related.
 
 
+### [DECOHack] Why keep editor keys on Things as special comments instead of keywords in the parser?
+
+Keeping familiarity between DECOHack and DECORATE.
+
+Also, if identifier keywords were used instead, parsing would need to also be stricter, 
+and since this is metadata-to-metadata translation, the key support is intentionally 
+dumb and only passed along to the exporter for silent verification.
+
+
 ### [DECOHack] Why can't I use "GOTO Label+Offset" like DECORATE?
 
 While it may be possible to one day add support for this sort of thing, a few goals around

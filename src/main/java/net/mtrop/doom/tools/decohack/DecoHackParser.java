@@ -1588,7 +1588,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		// apply/validate editor keys
+		// apply editor keys
 		for (String key : thing.getEditorKeys())
 		{
 			// TODO: Finish this.
