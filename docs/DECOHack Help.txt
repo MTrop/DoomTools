@@ -963,13 +963,13 @@ like Ultimate Doom Builder or SLADE, except the supported keys are passed
 along to the resultant DEHACKED file. The following keys are detected:
 
 //$Angled
+//$NotAngled
 //$Category <String>
+//$Group <String>
 //$Color <Integer>
 //$Colour <Integer>
-//$EditorSprite <String>
-//$Group <String>
-//$NotAngled
 //$Sprite <String>
+//$EditorSprite <String>
 
 
 ------------------------------------------------------------------------------

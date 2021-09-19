@@ -51,6 +51,12 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	SELF setEditorNumber(int editorNumber);
 
 	/**
+	 * Clears/resets editor keys defined on this actor.
+	 * @return this object.
+	 */
+	SELF clearEditorKeys();
+
+	/**
 	 * Sets an editor key on this Thing.
 	 * @param key the key.
 	 * @param value the value.
@@ -62,6 +68,13 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	 * @return all set editor keys.
 	 */
 	String[] getEditorKeys();
+	
+	/**
+	 * Gets an editor key value.
+	 * @param key the key name.
+	 * @return the key value, or null if not set.
+	 */
+	String getEditorKey(String key);
 	
 	SELF setHealth(int health);
 

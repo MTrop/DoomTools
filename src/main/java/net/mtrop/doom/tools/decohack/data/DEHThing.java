@@ -26,6 +26,9 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	
 	private int editorNumber;
 	
+	/** Editor keys. */
+	private Map<String, String> editorKeyMap;
+	
 	private int health;
 	private int speed; // written as fixed point 16.16 if MISSILE
 	private int radius; // written as fixed point 16.16
@@ -75,9 +78,11 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	public DEHThing()
 	{
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		
+		this.editorKeyMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
 		setName("");
 		clearProperties();
+		clearEditorKeys();
 		clearFlags();
 		clearSounds();
 		clearLabels();
@@ -88,7 +93,11 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	{
 		setName(source.name);
 		setEditorNumber(source.editorNumber);
-		
+
+		clearEditorKeys();
+		for (String key : source.getEditorKeys())
+			setEditorKey(key, source.getEditorKey(key));
+
 		setHealth(source.health);
 		setSpeed(source.speed);
 		setFastSpeed(source.fastSpeed);
@@ -127,6 +136,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	public DEHThing clearProperties() 
 	{
 		setEditorNumber(EDITORNUMBER_NONE);
+		editorKeyMap.clear();
 		setHealth(0);
 		setSpeed(0);
 		setRadius(0);
@@ -189,22 +199,33 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 		return this;
 	}
 
-	private static final String[] NO_STRINGS = new String[0];
+	@Override
+	public DEHThing clearEditorKeys() 
+	{
+		editorKeyMap.clear();
+		return this;
+	}
 	
 	@Override
 	public DEHThing setEditorKey(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		editorKeyMap.put(key, value);
 		return this;
 	}
 
 	@Override
 	public String[] getEditorKeys() 
 	{
-		// TODO Auto-generated method stub
-		return NO_STRINGS;
+		Set<String> keySet = editorKeyMap.keySet();
+		return keySet.toArray(new String[keySet.size()]);
 	}
 
+	@Override
+	public String getEditorKey(String key) 
+	{
+		return editorKeyMap.get(key);
+	}
+	
 	public int getHealth() 
 	{
 		return health;
@@ -686,6 +707,39 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 
 		if (editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
+		
+		// Editor keys
+		if (getEditorKey("angled") != null || getEditorKey("notangled") != null)
+		{
+			writer.append("#$Editor angled = ").append(getEditorKey("angled") != null ? "true" : "false").append("\r\n");
+		}
+		if (getEditorKey("category") != null || getEditorKey("group") != null)
+		{
+			writer.append("#$Editor category = ");
+			String value;
+			if ((value = getEditorKey("category")) != null)
+				writer.append(value).append("\r\n");
+			else
+				writer.append(getEditorKey("group")).append("\r\n");
+		}
+		if (getEditorKey("color") != null || getEditorKey("colour") != null)
+		{
+			writer.append("#$Editor color id = ");
+			String value;
+			if ((value = getEditorKey("color")) != null)
+				writer.append(value).append("\r\n");
+			else
+				writer.append(getEditorKey("colour")).append("\r\n");
+		}
+		if (getEditorKey("sprite") != null || getEditorKey("editorsprite") != null)
+		{
+			writer.append("#$Editor sprite = ");
+			String value;
+			if ((value = getEditorKey("sprite")) != null)
+				writer.append(value).append("\r\n");
+			else
+				writer.append(getEditorKey("editorsprite")).append("\r\n");
+		}
 		
 		if (health != thing.health)
 			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");

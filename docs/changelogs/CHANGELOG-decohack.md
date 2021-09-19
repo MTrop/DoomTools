@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.18.0
+
+* `Added` Support for editor keys on Things like DECORATE. (Enhancement #47)
+
+
 ### Changed for 0.17.0
 
 * `Added` Labels can now be used pre-declared in actor (thing/weapon) definitions. (Enhancement #35)

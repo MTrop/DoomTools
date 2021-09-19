@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.decohack.data;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.util.RangeUtils;
@@ -21,6 +22,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 {
 	private Integer editorNumber;
 	
+	/** Editor keys. */
+	private Map<String, String> editorKeyMap;
+
 	private Integer health;
 	private Integer speed; // written as fixed point 16.16 if MISSILE
 	private Integer radius; // written as fixed point 16.16
@@ -77,6 +81,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	public DEHThingTemplate()
 	{
 		this.editorNumber = null;
+		
+		this.editorKeyMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		
 		this.health = null;
 		this.speed = null;
 		this.radius = null;
@@ -121,6 +128,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	{
 		if (editorNumber != null)
 			destination.setEditorNumber(editorNumber);
+		
+		for (Map.Entry<String, String> entry : editorKeyMap.entrySet())
+			destination.setEditorKey(entry.getKey(), entry.getValue());
 		
 		if (health != null)
 			destination.setHealth(health);
@@ -261,22 +271,33 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		return this;
 	}
 
-	private static final String[] NO_STRINGS = new String[0];
+	@Override
+	public DEHThingTemplate clearEditorKeys() 
+	{
+		editorKeyMap.clear();
+		return this;
+	}
 	
 	@Override
 	public DEHThingTemplate setEditorKey(String key, String value)
 	{
-		// TODO Auto-generated method stub
+		editorKeyMap.put(key, value);
 		return this;
 	}
 
 	@Override
 	public String[] getEditorKeys() 
 	{
-		// TODO Auto-generated method stub
-		return NO_STRINGS;
+		Set<String> keySet = editorKeyMap.keySet();
+		return keySet.toArray(new String[keySet.size()]);
 	}
 
+	@Override
+	public String getEditorKey(String key) 
+	{
+		return editorKeyMap.get(key);
+	}
+	
 	@Override
 	public DEHThingTemplate setHealth(int health)
 	{

@@ -283,7 +283,12 @@ public final class DecoHackParser extends Lexer.Parser
 				String content = currentToken().getLexeme().substring(1).trim();
 				int splitIndex = content.indexOf(' ');
 				if (splitIndex > 0)
-					editorKeys.put(content.substring(0, splitIndex), content.substring(splitIndex).trim());
+				{
+					String value = content.substring(splitIndex).trim();
+					if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"')
+						value = value.substring(1, value.length() - 1);
+					editorKeys.put(content.substring(0, splitIndex), value);
+				}
 				else
 					editorKeys.put(content, "");
 			}
@@ -1589,10 +1594,8 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		// apply editor keys
-		for (String key : thing.getEditorKeys())
-		{
-			// TODO: Finish this.
-		}
+		for (Map.Entry<String, String> entry : editorKeys.entrySet())
+			thing.setEditorKey(entry.getKey(), entry.getValue());
 		
 		return true;
 	}
