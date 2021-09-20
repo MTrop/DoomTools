@@ -2,7 +2,6 @@
 
 JAVAOPTS="{{JAVA_OPTIONS}}"
 MAINCLASS={{MAIN_CLASSNAME}}
-DOOMTOOLS_JAR={{JAR_NAME}}
 
 CMD_READLINK="readlink -f"
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -12,6 +11,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	CMD_READLINK="realpath"
 fi
 DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
+DOOMTOOLS_JAR="jar/$(ls -1a ${DOOMTOOLS_PATH}/jar/*.jar | sort | tail -1)"
 
 # Test for Java
 if [ -f "${DOOMTOOLS_PATH}/jre/bin/java" ]; then

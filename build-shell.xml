@@ -9,14 +9,12 @@
 	<macrodef name="shell-cmd">
 		<attribute name="name" />
 		<attribute name="todir" default="." />
-		<attribute name="jarname" />
 		<attribute name="mainclass" />
 		<attribute name="options" default="" />
 		<sequential>
 			<delete file="@{todir}/@{name}.cmd" failonerror="false" />
 			<copy file="${shell.dir}/jar/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_OPTIONS}}" value="@{options}" />
-			<replace file="@{todir}/@{name}.cmd" token="{{JAR_NAME}}" value="@{jarname}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
 		</sequential>
 	</macrodef>
@@ -24,14 +22,12 @@
 	<macrodef name="shell-bash">
 		<attribute name="name" />
 		<attribute name="todir" default="." />
-		<attribute name="jarname" />
 		<attribute name="mainclass" />
 		<attribute name="options" default="" />
 		<sequential>
 			<delete file="@{todir}/@{name}" failonerror="false" />
 			<copy file="${shell.dir}/jar/app-name.sh" tofile="@{todir}/@{name}" />
 			<replace file="@{todir}/@{name}" token="{{JAVA_OPTIONS}}" value="@{options}" />
-			<replace file="@{todir}/@{name}" token="{{JAR_NAME}}" value="@{jarname}" />
 			<replace file="@{todir}/@{name}" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
 			<chmod file="@{todir}/@{name}" perm="ugo+rx"/>
 		</sequential>

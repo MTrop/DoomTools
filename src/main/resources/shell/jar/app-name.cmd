@@ -5,10 +5,19 @@ SETLOCAL
 SET JAVAEXE=
 SET JAVAOPTS={{JAVA_OPTIONS}}
 SET MAINCLASS={{MAIN_CLASSNAME}}
-SET DOOMTOOLS_JAR={{JAR_NAME}}
 SET DOOMTOOLS_PATH=%~dp0
+SET DOOMTOOLS_JAR=
+
+REM ===== Get latest JAR.
+FOR /F %%F in ('dir %DOOMTOOLS_PATH%\jar\*.jar /a/b/n') DO ( SET DOOMTOOLS_JAR=jar\%%F )
+
 REM =========================================================================
 
+if not "%DOOMTOOLS_JAR%"=="" goto _findjava
+echo FATAL ERROR: DoomTools application JAR NOT FOUND!
+goto _end
+
+:_findjava
 REM ===== Java Scan
 
 if exist "%DOOMTOOLS_PATH%\jre\bin\java.exe" SET JAVAEXE=%DOOMTOOLS_PATH%\jre\bin\java.exe

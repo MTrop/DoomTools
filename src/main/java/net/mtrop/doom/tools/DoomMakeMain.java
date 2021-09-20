@@ -44,8 +44,8 @@ public final class DoomMakeMain
 	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
 
-	private static final String SHELL_RESOURCE_CMD = "shell/jar/app-name.cmd";
-	private static final String SHELL_RESOURCE_SH = "shell/jar/app-name.sh";
+	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
+	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	
 	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
 	private static final String ENVVAR_DOOMTOOLS_JAR = "DOOMTOOLS_JAR";
@@ -361,7 +361,8 @@ public final class DoomMakeMain
 				reader
 					.replace("JAVA_OPTIONS", "-Xms64M -Xmx784M")
 					.replace("MAIN_CLASSNAME", DoomMakeMain.class.getCanonicalName())
-					.replace("JAR_NAME", jarName);
+					.replace("JAR_NAME", jarName)
+				;
 				
 				int b;
 				char[] cbuf = new char[8192];
@@ -662,7 +663,7 @@ public final class DoomMakeMain
 	private static void splash(PrintStream out)
 	{
 		out.println("DoomMake v" + VERSION + " by Matt Tropiano");
-		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + " , WadScript v" + WADSCRIPT_VERSION + ")");
+		out.println("(using DoomStruct v" + DOOM_VERSION + " , WadScript v" + WADSCRIPT_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + ")");
 	}
 
 	/**

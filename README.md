@@ -4,7 +4,8 @@ Copyright (c) 2019-2021 Matt Tropiano
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.13.0+  
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.14.0+  
+[Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.1.3+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.11.0+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
