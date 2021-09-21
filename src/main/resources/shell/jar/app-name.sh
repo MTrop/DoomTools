@@ -1,7 +1,6 @@
 #!/bin/bash
 
-JAVAOPTS="{{JAVA_OPTIONS}}"
-MAINCLASS={{MAIN_CLASSNAME}}
+# ===========================================================================
 
 CMD_READLINK="readlink -f"
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -10,9 +9,16 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	}
 	CMD_READLINK="realpath"
 fi
-DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
-DOOMTOOLS_JAR="jar/$(ls -1a ${DOOMTOOLS_PATH}/jar/*.jar | sort | tail -1)"
 
+# ===========================================================================
+
+JAVAOPTS="{{JAVA_OPTIONS}}"
+MAINCLASS={{MAIN_CLASSNAME}}
+
+export DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
+export DOOMTOOLS_JAR="jar/$((cd ${DOOMTOOLS_PATH}/jar && ls -1a *.jar) | sort | tail -1)"
+
+# ===========================================================================
 # Test for Java
 if [ -f "${DOOMTOOLS_PATH}/jre/bin/java" ]; then
 	JAVACMD="${DOOMTOOLS_PATH}/jre/bin/java"
