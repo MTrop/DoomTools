@@ -92,11 +92,17 @@ A:hover {
 
 PRE {
 	font-family: 'Courier New', Courier, monospace;
-	background-color: #020f0c;
+	background-color: #041418;
 	color: #dddddd;
 	padding: 16px;
     overflow: auto;
     font-size: 85%;
     line-height: 1.45;
 	border-radius: 3px;
+}
+.command-line {
+	font-size: 100%;
+	max-width: 400px;
+    margin-left: auto;
+	margin-right: auto;
 }
