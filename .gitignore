@@ -40,6 +40,4 @@ thumbs.db
 /deps
 /dist
 /target
-*.cmd
-*.sh
 *.log
