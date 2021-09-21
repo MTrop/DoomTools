@@ -722,14 +722,13 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 			else
 				writer.append(getEditorKey("group")).append("\r\n");
 		}
-		if (getEditorKey("color") != null || getEditorKey("colour") != null)
+		if (getEditorKey("color") != null)
 		{
-			writer.append("#$Editor color id = ");
-			String value;
-			if ((value = getEditorKey("color")) != null)
-				writer.append(value).append("\r\n");
-			else
-				writer.append(getEditorKey("colour")).append("\r\n");
+			writer.append("#$Editor color id = ").append(getEditorKey("color")).append("\r\n");
+		}
+		if (getEditorKey("colour") != null)
+		{
+			writer.append("#$Editor color rgb = ").append(getEditorKey("colour")).append("\r\n");
 		}
 		if (getEditorKey("sprite") != null || getEditorKey("editorsprite") != null)
 		{
