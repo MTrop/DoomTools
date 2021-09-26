@@ -60,6 +60,9 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 	@Override
 	public DEHMiscellany copyFrom(DEHMiscellany source) 
 	{
+		if (source == this)
+			return this;
+		
 		setMonsterInfightingEnabled(source.monsterInfightingEnabled);
 		setInitialBullets(source.initialBullets);
 		setInitialHealth(source.initialHealth);

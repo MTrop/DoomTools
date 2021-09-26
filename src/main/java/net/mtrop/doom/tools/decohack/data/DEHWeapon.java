@@ -86,6 +86,9 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 	@Override
 	public DEHWeapon copyFrom(DEHWeapon source) 
 	{
+		if (source == this)
+			return this;
+		
 		setName(source.name);
 		setAmmoType(source.ammoType);
 		setAmmoPerShot(source.ammoPerShot);

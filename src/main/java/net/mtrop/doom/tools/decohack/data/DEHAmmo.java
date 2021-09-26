@@ -35,6 +35,9 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 	@Override
 	public DEHAmmo copyFrom(DEHAmmo source) 
 	{
+		if (source == this)
+			return this;
+
 		setName(source.name);
 		setMax(source.max);
 		setPickup(source.pickup);

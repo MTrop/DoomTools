@@ -52,6 +52,9 @@ public class DEHSound implements DEHObject<DEHSound>
 	@Override
 	public DEHSound copyFrom(DEHSound source) 
 	{
+		if (source == this)
+			return this;
+		
 		setPriority(source.priority);
 		setSingular(source.singular);
 		return this;
