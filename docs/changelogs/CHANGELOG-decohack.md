@@ -1,6 +1,12 @@
 DecoHack
 --------
 
+### Changed for 0.18.1
+
+* `Fixed` Editor keys were not being saved if a Thing body didn't have 
+  parse-able content right after body start.
+
+
 ### Changed for 0.18.0
 
 * `Added` Support for editor keys on Things like DECORATE. (Enhancement #47)
