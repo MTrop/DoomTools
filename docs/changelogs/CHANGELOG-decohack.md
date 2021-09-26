@@ -1,6 +1,14 @@
 DecoHack
 --------
 
+### Changed for 0.18.1
+
+* `Fixed` Editor keys were not being saved if a Thing body didn't have 
+  parse-able content right after body start.
+* `Changed` Copying a definition from the exact same one will not perform a copy,
+  as there is nothing to do.
+
+
 ### Changed for 0.18.0
 
 * `Added` Support for editor keys on Things like DECORATE. (Enhancement #47)

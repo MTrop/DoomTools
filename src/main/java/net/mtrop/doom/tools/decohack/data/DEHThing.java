@@ -91,6 +91,9 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 	@Override
 	public DEHThing copyFrom(DEHThing source) 
 	{
+		if (source == this)
+			return this;
+			
 		setName(source.name);
 		setEditorNumber(source.editorNumber);
 

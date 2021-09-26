@@ -75,6 +75,9 @@ public class DEHState implements DEHObject<DEHState>
 	@Override
 	public DEHState copyFrom(DEHState source) 
 	{
+		if (source == this)
+			return this;
+		
 		setSpriteIndex(source.spriteIndex);
 		setFrameIndex(source.frameIndex);
 		setBright(source.bright);

@@ -1200,13 +1200,13 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a thing body.
 	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
+		editorKeys.clear();
+		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" declaration.", KEYWORD_THING);
 			return false;
 		}
-		
-		editorKeys.clear();
 		
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
