@@ -120,7 +120,7 @@ public enum DEHActionPointer
 	SEEKTRACER          (-1,  false, DEHActionPointerType.MBF21, "SeekTracer", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	FINDTRACER          (-1,  false, DEHActionPointerType.MBF21, "FindTracer", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT),
 	CLEARTRACER         (-1,  false, DEHActionPointerType.MBF21, "ClearTracer"),
-	JUMPIFHEALTHBELOW   (-1,  false, DEHActionPointerType.MBF21, "JumpIfHealthBelow", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
+	JUMPIFHEALTHBELOW   (-1,  false, DEHActionPointerType.MBF21, "JumpIfHealthBelow", DEHActionPointerParam.UINT, DEHActionPointerParam.INT),
 	JUMPIFTARGETINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetInSight", DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED),
 	JUMPIFTARGETCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetCloser", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	JUMPIFTRACERINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerInSight", DEHActionPointerParam.UINT, DEHActionPointerParam.ANGLE_FIXED),

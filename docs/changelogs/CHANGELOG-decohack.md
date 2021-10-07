@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.18.2
+
+* `Fixed` `A_JumpIfHealthBelow` did not accept negative values for the health reference value. (Issue #53)
+
+
 ### Changed for 0.18.1
 
 * `Fixed` Editor keys were not being saved if a Thing body didn't have 
