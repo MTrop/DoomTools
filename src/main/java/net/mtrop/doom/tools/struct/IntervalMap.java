@@ -16,15 +16,23 @@ public class IntervalMap<V>
 	private List<Interval> intervalList;
 	
 	/**
+	 * Creates a new interval map.
+	 */
+	public IntervalMap()
+	{
+		this.intervalList = new ArrayList<>(4);
+	}
+
+	/**
 	 * Creates a new interval map with a default value interval.
 	 * @param min the minimum index range (inclusive).
 	 * @param max the maximum index range (inclusive).
 	 * @param value the value (can be null).
 	 */
-	public IntervalMap(int min, int max, V value)
+	public IntervalMap(long min, long max, V value)
 	{
-		this.intervalList = new ArrayList<>(4);
-		this.intervalList.add(new Interval(min, max, value));
+		this();
+		set(min, max, value);
 	}
 
 	/**
@@ -32,7 +40,7 @@ public class IntervalMap<V>
 	 * @param index the index value.
 	 * @param value the value to set (can be null).
 	 */
-	public void set(int index, V value)
+	public void set(long index, V value)
 	{
 		set(index, index, value);
 	}
@@ -43,18 +51,24 @@ public class IntervalMap<V>
 	 * @param min the min index.
 	 * @param max the max index.
 	 */
-	public void set(int min, int max, V value)
+	public void set(long min, long max, V value)
 	{
-		int actualMin = Math.min(min, max);
-		int actualMax = Math.max(min, max);
+		long actualMin = Math.min(min, max);
+		long actualMax = Math.max(min, max);
 		min = actualMin;
 		max = actualMax;
 		int minSlot = search(min);
 		int maxSlot = search(max);
 		int size = intervalList.size();
 		Interval newInterval = new Interval(min, max, value);
-		
-		if (minSlot < 0)
+
+		// empty list.
+		if (intervalList.isEmpty())
+		{
+			intervalList.add(newInterval);
+		}
+		// interval starts before.
+		else if (minSlot < 0)
 		{
 			// completely before
 			if (maxSlot < 0)
@@ -72,6 +86,7 @@ public class IntervalMap<V>
 				else // adjacent
 				{
 					intervalList.add(0, newInterval);
+					reduceRight(0);
 				}
 			}
 			else
@@ -82,22 +97,24 @@ public class IntervalMap<V>
 				if (intervalList.isEmpty())
 				{
 					intervalList.add(newInterval);
-					return;
 				}
-				
-				Interval headInterval = intervalList.get(0);
-				if (Objects.equals(newInterval.value, headInterval.value))
+				else
 				{
-					headInterval.min = newInterval.min;
-					return;
+					Interval headInterval = intervalList.get(0);
+					if (Objects.equals(newInterval.value, headInterval.value))
+					{
+						headInterval.min = newInterval.min;
+					}
+					else
+					{
+						if (newInterval.max >= headInterval.min)
+							headInterval.min = newInterval.max + 1;
+						intervalList.add(0, newInterval);
+					}
 				}
-				
-				if (newInterval.max >= headInterval.min)
-					headInterval.min = newInterval.max + 1;
-				intervalList.add(0, newInterval);
 			}
 		}
-		// completely after
+		// interval starts after.
 		else if (minSlot >= size)
 		{
 			Interval tailInterval = intervalList.get(size - 1);
@@ -110,9 +127,10 @@ public class IntervalMap<V>
 			{
 				tailInterval.max = newInterval.max;
 			}
-			else
+			else // adjacent
 			{
 				intervalList.add(newInterval);
+				reduceLeft(intervalList.size() - 1);
 			}
 		}
 		// new interval goes past the end.
@@ -124,18 +142,19 @@ public class IntervalMap<V>
 			if (intervalList.isEmpty())
 			{
 				intervalList.add(newInterval);
-				return;
-			}
-			
-			Interval tailInterval = intervalList.get(size - 1);
-			if (Objects.equals(newInterval.value, tailInterval.value))
-			{
-				tailInterval.max = newInterval.max;
 			}
 			else
 			{
-				tailInterval.max = newInterval.min - 1;
-				intervalList.add(newInterval);
+				Interval tailInterval = intervalList.get(size - 1);
+				if (Objects.equals(newInterval.value, tailInterval.value))
+				{
+					tailInterval.max = newInterval.max;
+				}
+				else
+				{
+					tailInterval.max = newInterval.min - 1;
+					intervalList.add(newInterval);
+				}
 			}
 		}
 		// inside one interval.
@@ -144,25 +163,33 @@ public class IntervalMap<V>
 			Interval middleInterval = intervalList.get(minSlot);
 			if (Objects.equals(newInterval.value, middleInterval.value))
 			{
-				return;
+				// Do nothing.
 			}
+			// touches min
 			else if (middleInterval.min == newInterval.min)
 			{
+				// complete overlap
 				if (middleInterval.max == newInterval.max)
 				{
 					middleInterval.value = newInterval.value;
+					reduceRight(minSlot);
 				}
-				else // new interval max is less
+				// new interval max is less
+				else
 				{
 					middleInterval.min = newInterval.max + 1;
 					intervalList.add(minSlot, newInterval);
 				}
+				reduceLeft(minSlot);
 			}
+			// touches max
 			else if (middleInterval.max == newInterval.max)
 			{
 				middleInterval.max = newInterval.min - 1;
 				intervalList.add(minSlot + 1, newInterval);
+				reduceRight(minSlot + 1);
 			}
+			// touches max
 			else
 			{
 				Interval splitInterval = new Interval(newInterval.max + 1, middleInterval.max, middleInterval.value);
@@ -179,45 +206,95 @@ public class IntervalMap<V>
 			while (amount-- > 0)
 				intervalList.remove(removeIndex);
 			
-			Interval firstInterval = intervalList.get(minSlot);
-			Interval secondInterval = intervalList.get(minSlot + 1);
+			int firstSlot = minSlot;
+			int secondSlot = minSlot + 1;
+
+			Interval firstInterval = intervalList.get(firstSlot);
+			Interval secondInterval = intervalList.get(secondSlot);
 			
+			// touches first min
 			if (newInterval.min == firstInterval.min)
 			{
+				// touches second max
 				if (newInterval.max == secondInterval.max)
 				{
-					// delete both
-					intervalList.get(minSlot);
-					intervalList.get(minSlot);
-					intervalList.add(minSlot, newInterval);
+					// delete both and add into the same slot
+					intervalList.remove(firstSlot);
+					intervalList.remove(firstSlot); // second shuffled down into first
+					intervalList.add(firstSlot, newInterval);
+					reduceRight(firstSlot);
 				}
+				// absorb into first interval.
 				else if (Objects.equals(newInterval.value, firstInterval.value))
 				{
 					secondInterval.min = newInterval.max + 1;
 				}
+				// absorb into second interval.
 				else if (Objects.equals(newInterval.value, secondInterval.value))
 				{
+					// overlaps first completely - delete.
+					intervalList.remove(firstSlot);
 					secondInterval.min = newInterval.min;
-					intervalList.get(minSlot);
 				}
 				else
 				{
 					secondInterval.min = newInterval.max + 1;
-					intervalList.remove(minSlot);
-					intervalList.add(minSlot, newInterval);
+					intervalList.remove(firstSlot);
+					intervalList.add(firstSlot, newInterval);
 				}
+				reduceLeft(firstSlot);
 			}
+			// touches second max
 			else if (newInterval.max == secondInterval.max)
 			{
-				
+				// absorb into first interval.
+				if (Objects.equals(newInterval.value, firstInterval.value))
+				{
+					// overlaps second completely - delete.
+					intervalList.remove(secondSlot);
+					firstInterval.max = newInterval.max;
+				}
+				// absorb into second interval.
+				else if (Objects.equals(newInterval.value, secondInterval.value))
+				{
+					firstInterval.max = newInterval.min - 1;
+				}
+				else
+				{
+					firstInterval.max = newInterval.min - 1;
+					intervalList.remove(secondSlot);
+					intervalList.add(secondSlot, newInterval);
+				}
+				reduceRight(secondSlot);
 			}
-			
-			// new.mix = second.max
-				// equal value
-			
-			
-			// TODO: Finish. 
+			// overlap, no touch.
+			else
+			{
+				// absorb into first interval.
+				if (Objects.equals(newInterval.value, firstInterval.value))
+				{
+					secondInterval.min = newInterval.max + 1;
+				}
+				// absorb into second interval.
+				else if (Objects.equals(newInterval.value, secondInterval.value))
+				{
+					firstInterval.min = newInterval.min - 1;
+				}
+				// adjust and insert.
+				else
+				{
+					firstInterval.max = newInterval.min - 1;
+					secondInterval.min = newInterval.max + 1;
+					intervalList.add(secondSlot, newInterval);
+				}
+			}
 		}
+		
+		// clean up end nulls.
+		while (!intervalList.isEmpty() && intervalList.get(intervalList.size() - 1).value == null)
+			intervalList.remove(intervalList.size() - 1);
+		while (!intervalList.isEmpty() && intervalList.get(0).value == null)
+			intervalList.remove(0);
 	}
 	
 	/**
@@ -225,7 +302,7 @@ public class IntervalMap<V>
 	 * @param index the index.
 	 * @return the corresponding value.
 	 */
-	public V get(int index)
+	public V get(long index)
 	{
 		int idx = search(index);
 		if (idx < 0)
@@ -236,15 +313,57 @@ public class IntervalMap<V>
 			return intervalList.get(idx).value;
 	}
 	
-	// Attempts to merge intervals by same value going backwards in the list.
-	private void attemptLeftMerge(int startSlot)
+	/**
+	 * @return the lowest index in the map (if any).
+	 */
+	public Long getMinIndex()
 	{
-		// TODO: Finish.
+		return intervalList.isEmpty() ? null : intervalList.get(0).min;
 	}
 	
+	/**
+	 * @return the highest index in the map (if any).
+	 */
+	public Long getMaxIndex()
+	{
+		return intervalList.isEmpty() ? null : intervalList.get(intervalList.size() - 1).max;
+	}
+	
+	// Attempts to merge intervals by same value going backwards in the list.
+	private void reduceLeft(int startSlot)
+	{
+		if (startSlot <= 0)
+			return;
+		if (!Objects.equals(intervalList.get(startSlot - 1).value, intervalList.get(startSlot).value))
+			return;
+		
+		Interval newLeft = intervalList.get(startSlot);
+		Interval oldLeft = intervalList.get(startSlot - 1);
+		
+		newLeft.min = oldLeft.min;
+		intervalList.remove(startSlot - 1);
+		reduceLeft(startSlot - 1);
+	}
+
+	// Attempts to merge intervals by same value going forwards in the list.
+	private void reduceRight(int startSlot)
+	{
+		if (startSlot >= intervalList.size() - 1)
+			return;
+		if (!Objects.equals(intervalList.get(startSlot + 1).value, intervalList.get(startSlot).value))
+			return;
+
+		Interval newRight = intervalList.get(startSlot);
+		Interval oldRight = intervalList.get(startSlot + 1);
+		
+		newRight.max = oldRight.max;
+		intervalList.remove(startSlot + 1);
+		reduceRight(startSlot);
+	}
+
 	// Searches for a suitable interval index to fetch or start an insert.
 	// Returns index, -1 to insert at the beginning, the list size to add at the end.
-	private int search(int index)
+	private int search(long index)
 	{
 		final int size = intervalList.size();
 		
@@ -279,17 +398,23 @@ public class IntervalMap<V>
 		return slot;
 	}
 	
+	@Override
+	public String toString() 
+	{
+		return intervalList.toString();
+	}
+	
 	/**
 	 * Interval object.
 	 * Bounds values are inclusive.
 	 */
 	private class Interval
 	{
-		private int min;
-		private int max;
+		private long min;
+		private long max;
 		private V value;
 		
-		private Interval(int min, int max, V value)
+		private Interval(long min, long max, V value)
 		{
 			this.min = min;
 			this.max = max;
@@ -301,15 +426,15 @@ public class IntervalMap<V>
 		 * @param index the index.
 		 * @return true if the provided index is in this interval or touching a boundary.
 		 */
-		public boolean includes(int index)
+		public boolean includes(long index)
 		{
-			return min >= index && index <= max;
+			return min <= index && index <= max;
 		}
 		
 		@Override
 		public String toString() 
 		{
-			return "[" + min + ", " + max + "]: " + String.valueOf(value);
+			return "([" + min + ", " + max + "]: " + String.valueOf(value) + ")";
 		}
 	}
 	
