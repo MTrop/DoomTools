@@ -67,7 +67,7 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	public Integer getSpriteIndex(String name)
 	{
 		Integer out;
-		if ((out = copy(name, spriteIndexMap, (n) -> getSourcePatch().getSoundIndex(name))) == null)
+		if ((out = copy(name, spriteIndexMap, (n) -> getSourcePatch().getSpriteIndex(name))) == null)
 			spriteIndexMap.put(name.toUpperCase(), out = nextSpriteIndex++);
 		return out;
 	}
