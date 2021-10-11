@@ -283,6 +283,8 @@ public class PatchBoom implements DEHPatchBoom
 		"TLP2",
 		"TNT1",
 	};
+	
+	protected static final int SPRITE_INDEX_TNT1 = 138;
 
 	private static final Map<String, Integer> MAP_SOUNDINDEX = new HashMap<String, Integer>()
 	{

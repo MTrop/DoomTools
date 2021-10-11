@@ -25,7 +25,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
  */
 public class PatchExtended extends PatchMBF
 {
-	private static final int SOUND_INDEX_EXTENDED_START = 500;
+	protected static final int SOUND_INDEX_EXTENDED_START = 500;
 
 	protected static final String[] SOUNDSTRINGSEXTENDED = 
 	{
@@ -338,24 +338,12 @@ public class PatchExtended extends PatchMBF
 
 	private static final Map<String, Integer> MAP_SOUNDINDEX = new HashMap<String, Integer>()
 	{
-		private static final long serialVersionUID = -4513058612574767103L;
+		private static final long serialVersionUID = -7553004515926177315L;
 		{
 			// the extended sound range expliticly starts at 500, skipping several
 			// indices, so we need to make the output index relative to that.
-			int extstart = SOUND_INDEX_EXTENDED_START;
-			int mbflen = SOUNDSTRINGS.length + SOUNDSTRINGSMBF.length;
-			int len = SOUND_INDEX_EXTENDED_START + SOUNDSTRINGSEXTENDED.length;
-			for (int i = 1; i < len; i++)
-			{
-				if (i >= extstart)
-					put(SOUNDSTRINGSEXTENDED[i - extstart], i); // offset 1 for sfx_None
-				else if (i >= mbflen)
-					continue; // blank until extended
-				else if (i >= SOUNDSTRINGS.length)
-					put(SOUNDSTRINGSMBF[i - SOUNDSTRINGS.length], i); // offset 1 for sfx_None
-				else
-					put(SOUNDSTRINGS[i].toUpperCase(), i);
-			}
+			for (int i = 1; i <= SOUNDSTRINGSEXTENDED.length; i++) // offset 1 for sfx_None
+				put(SOUNDSTRINGSEXTENDED[i - 1], SOUND_INDEX_EXTENDED_START + i);
 		}
 	};
 
@@ -363,29 +351,11 @@ public class PatchExtended extends PatchMBF
 	{
 		private static final long serialVersionUID = -5790149102738250549L;
 		{
-			int mbflen = SPRITESTRINGS.length + SPRITESTRINGSMBF.length;
-			int len = SPRITESTRINGS.length + SPRITESTRINGSMBF.length + SPRITESTRINGSEXTENDED.length;
-			for (int i = 0; i < len; i++)
-			{
-				if (i >= mbflen)
-					put(SPRITESTRINGSEXTENDED[i - mbflen], i);
-				else if (i >= SPRITESTRINGS.length)
-					put(SPRITESTRINGSMBF[i - SPRITESTRINGS.length], i);
-				else
-					put(SPRITESTRINGS[i], i);
-			}
+			int start = SPRITESTRINGS.length + SPRITESTRINGSMBF.length;
+			for (int i = 0; i < SPRITESTRINGSEXTENDED.length; i++)
+				put(SPRITESTRINGSEXTENDED[i], start + i);
 		}
 	};
-	
-	private static final Map<Integer, State> MAP_POSTEXTENDEDSTATECACHE = new HashMap<Integer, State>();
-	
-	private static State getPostExtendedState(int index)
-	{
-		State state;
-		if ((state = MAP_POSTEXTENDEDSTATECACHE.get(index)) == null)
-			MAP_POSTEXTENDEDSTATECACHE.put(index, state = PatchBoom.State.create(DEHState.create(138, 0, false, index, -1), DEHActionPointer.NULL));
-		return state;
-	}
 	
 	// ======================================================================
 
@@ -446,7 +416,7 @@ public class PatchExtended extends PatchMBF
 		if (index >= getStateCount())
 			return null;
 		else if (index >= extlen)
-			return getPostExtendedState(index);
+			return PatchBoom.State.create(DEHState.create(SPRITE_INDEX_TNT1, 0, false, index, -1), DEHActionPointer.NULL);
 		else if (index >= mbflen)
 			return Common.arrayElement(DEHSTATEEXTENDED, index - mbflen);
 		else

@@ -22,6 +22,8 @@ public class DEHSound implements DEHObject<DEHSound>
 	/** Sound is singular. */
 	private boolean singular;
 	
+	// TODO: Add DSDA-Doom fields.
+	
 	/**
 	 * Creates a new DEHSound.
 	 * @param priority the sound priority.

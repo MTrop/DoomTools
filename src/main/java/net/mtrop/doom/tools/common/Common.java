@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -318,6 +319,38 @@ public final class Common
 		return index < 0 || index >= arr.length ? def : arr[index];
 	}
 
+	/**
+	 * Creates a new instance of a class from a class type.
+	 * This essentially calls {@link Class#getDeclaredConstructor(Class...)} with no arguments 
+	 * and {@link Class#newInstance()}, but wraps the call in a try/catch block that only throws an exception if something goes wrong.
+	 * @param <T> the return object type.
+	 * @param clazz the class type to instantiate.
+	 * @return a new instance of an object.
+	 * @throws RuntimeException if instantiation cannot happen, either due to
+	 * a non-existent constructor or a non-visible constructor.
+	 */
+	public static <T> T create(Class<T> clazz)
+	{
+		Object out = null;
+		try {
+			out = clazz.getDeclaredConstructor().newInstance();
+		} catch (SecurityException ex) {
+			throw new RuntimeException(ex);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		}
+		
+		return clazz.cast(out);
+	}
+	
 	/**
 	 * Attempts to close an {@link AutoCloseable} object.
 	 * If the object is null, this does nothing.

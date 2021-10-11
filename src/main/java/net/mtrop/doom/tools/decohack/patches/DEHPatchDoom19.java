@@ -30,4 +30,5 @@ public interface DEHPatchDoom19 extends DEHPatch
 	 * @return the original frame index, or null if invalid index.
 	 */
 	Integer getActionPointerFrame(int index);
+	
 }

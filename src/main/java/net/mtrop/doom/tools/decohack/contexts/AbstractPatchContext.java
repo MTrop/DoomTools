@@ -5,11 +5,15 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.data.DEHObject;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
@@ -18,6 +22,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
+import net.mtrop.doom.tools.struct.IntervalMap;
 
 /**
  * Abstract patch context.
@@ -26,19 +31,62 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatch;
  */
 public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPatch
 {
-	private DEHAmmo[] ammo;
-	private DEHSound[] sounds;
-	private DEHWeapon[] weapons;
-	private DEHThing[] things;
-	private DEHState[] states;
-	private DEHActionPointer[] pointers;
+	private Map<Integer, DEHAmmo> ammo;
+	private Map<Integer, DEHSound> sounds;
+	private Map<Integer, DEHWeapon> weapons;
+	private Map<Integer, DEHThing> things;
+	private Map<Integer, DEHState> states;
+	private Map<Integer, DEHActionPointer> pointers;
 	private DEHMiscellany miscellany;
 
-	private boolean[] freeStates;
 	private int freeStateCount;
 	private int freePointerStateCount;
-	private boolean[] protectedStates;
+	private IntervalMap<Boolean> freeStates;
+	private IntervalMap<Boolean> protectedStates;
 	
+	/**
+	 * Shadows a DEH object from the source patch to the editable object,
+	 * returning it if it has already been shadowed.
+	 * @param <T> the object type.
+	 * @param index the object index.
+	 * @param targetMap the target map to put the object into.
+	 * @param fetcher the fetcher function, called if not found.
+	 * @return the object or null if not valid.
+	 */
+	@SuppressWarnings("unchecked")
+	protected static <T extends DEHObject<T>> T shadow(int index, Map<Integer, T> targetMap, Function<Integer, T> fetcher)
+	{
+		T obj;
+		if ((obj = targetMap.get(index)) == null)
+		{
+			T srcObj;
+			if ((srcObj = fetcher.apply(index)) != null)
+				targetMap.put(index, obj = ((T)Common.create(srcObj.getClass())).copyFrom(srcObj));
+		}
+		return obj;
+	}
+
+	/**
+	 * Copies an object from the source patch to the editable object,
+	 * returning it if it has already been copied.
+	 * @param <T> the object type.
+	 * @param key the object key.
+	 * @param targetMap the target map to put the object into.
+	 * @param fetcher the fetcher function, called if not found.
+	 * @return the object or null if not valid.
+	 */
+	protected static <K, T> T copy(K key, Map<K, T> targetMap, Function<K, T> fetcher)
+	{
+		T obj;
+		if ((obj = targetMap.get(key)) == null)
+		{
+			T srcObj;
+			if ((srcObj = fetcher.apply(key)) != null)
+				targetMap.put(key, obj = srcObj);
+		}
+		return obj;
+	}
+
 	/**
 	 * Creates a new patch context.
 	 */
@@ -46,41 +94,18 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		DEHPatch source = getSourcePatch();
 		
-		this.ammo = new DEHAmmo[source.getAmmoCount()];
-		for (int i = 0; i < this.ammo.length; i++)
-			if (source.getAmmo(i) != null)
-				this.ammo[i] = (new DEHAmmo()).copyFrom(source.getAmmo(i));
-		
-		this.sounds = new DEHSound[source.getSoundCount()];
-		for (int i = 0; i < this.sounds.length; i++)
-			if (source.getSound(i) != null)
-				this.sounds[i] = (new DEHSound()).copyFrom(source.getSound(i));
-		
-		this.weapons = new DEHWeapon[source.getWeaponCount()];
-		for (int i = 0; i < this.weapons.length; i++)
-			if (source.getWeapon(i) != null)
-				this.weapons[i] = (new DEHWeapon()).copyFrom(source.getWeapon(i));
-		
-		this.things = new DEHThing[source.getThingCount()];
-		for (int i = 1; i < this.things.length; i++)
-			if (source.getThing(i) != null)
-				this.things[i] = (new DEHThing()).copyFrom(source.getThing(i));
-		
-		this.states = new DEHState[source.getStateCount()];
-		for (int i = 0; i < this.states.length; i++)
-			if (source.getState(i) != null)
-				this.states[i] = (new DEHState()).copyFrom(source.getState(i));
-		
-		this.pointers = new DEHActionPointer[source.getActionPointerCount()];
-		for (int i = 0; i < this.pointers.length; i++)
-			if (source.getActionPointer(i) != null)
-				this.pointers[i] = source.getActionPointer(i);		
+		this.ammo = new TreeMap<>();
+		this.sounds = new HashMap<>(128, 1f);
+		this.weapons = new TreeMap<>();
+		this.things = new HashMap<>(128, 1f);
+		this.states = new HashMap<>(1024, 1f);
+		this.pointers = new HashMap<>(512, 1f);
 		
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
-		this.freeStates = new boolean[states.length];
 		this.freeStateCount = 0;
-		this.protectedStates = new boolean[states.length];
+		this.freeStates = new IntervalMap<>(0, getSourcePatch().getStateCount() - 1, false);
+		this.protectedStates = new IntervalMap<>(0, getSourcePatch().getStateCount() - 1, false);
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -108,61 +133,61 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public int getAmmoCount() 
 	{
-		return ammo.length;
+		return getSourcePatch().getAmmoCount();
 	}
 
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
-		return Common.arrayElement(ammo, index);
+		return shadow(index, ammo, (i) -> getSourcePatch().getAmmo(i));
 	}
 
 	@Override
 	public int getSoundCount() 
 	{
-		return sounds.length;
+		return getSourcePatch().getSoundCount();
 	}
 
 	@Override
 	public DEHSound getSound(int index)
 	{
-		return Common.arrayElement(sounds, index);
+		return shadow(index, sounds, (i) -> getSourcePatch().getSound(i));
 	}
 
 	@Override
 	public int getThingCount() 
 	{
-		return things.length;
+		return getSourcePatch().getThingCount();
 	}
 
 	@Override
 	public DEHThing getThing(int index)
 	{
-		return Common.arrayElement(things, index);
+		return shadow(index, things, (i) -> getSourcePatch().getThing(i));
 	}
 
 	@Override
 	public int getWeaponCount()
 	{
-		return weapons.length;
+		return getSourcePatch().getWeaponCount();
 	}
 
 	@Override
 	public DEHWeapon getWeapon(int index)
 	{
-		return Common.arrayElement(weapons, index);
+		return shadow(index, weapons, (i) -> getSourcePatch().getWeapon(i));
 	}
 
 	@Override
 	public int getStateCount()
 	{
-		return states.length;
+		return getSourcePatch().getStateCount();
 	}
 
 	@Override
 	public DEHState getState(int index) 
 	{
-		return Common.arrayElement(states, index);
+		return shadow(index, states, (i) -> getSourcePatch().getState(i));
 	}
 
 	@Override
@@ -174,13 +199,13 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	@Override
 	public int getActionPointerCount() 
 	{
-		return pointers.length;
+		return getSourcePatch().getActionPointerCount();
 	}
 
 	@Override
 	public DEHActionPointer getActionPointer(int index)
 	{
-		return Common.arrayElement(pointers, index);
+		return copy(index, pointers, (i) -> getSourcePatch().getActionPointer(i));
 	}
 
 	/**
@@ -223,7 +248,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		if (pointer == null)
 			throw new IllegalArgumentException("Pointer cannot be null.");
-		pointers[index] = pointer;
+		pointers.put(index, pointer);
 	}
 
 	/**
@@ -252,7 +277,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isFreeState(int index)
 	{
-		return freeStates[index];
+		return freeStates.get(index);
 	}
 	
 	/**
@@ -267,8 +292,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		if (isProtectedState(index))
 			throw new IllegalStateException("State " + index + " is a protected state.");
-		boolean prev = freeStates[index]; 
-		freeStates[index] = state;
+		boolean prev = freeStates.get(index); 
+		freeStates.set(index, state);
 		if (prev && !state)
 		{
 			freeStateCount--;
@@ -291,7 +316,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isProtectedState(int index)
 	{
-		return protectedStates[index];
+		return protectedStates.get(index);
 	}
 
 	/**
@@ -302,7 +327,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setProtectedState(int index, boolean state)
 	{
-		protectedStates[index] = state;
+		protectedStates.set(index, state);
 	}
 
 	/**
