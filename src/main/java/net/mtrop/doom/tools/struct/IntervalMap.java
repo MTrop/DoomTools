@@ -1,8 +1,11 @@
 package net.mtrop.doom.tools.struct;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A sorted map of exclusive intervals used for defining values over a large contiguous range.
@@ -25,14 +28,14 @@ public class IntervalMap<V>
 
 	/**
 	 * Creates a new interval map with a default value interval.
-	 * @param min the minimum index range (inclusive).
-	 * @param max the maximum index range (inclusive).
+	 * @param minIndex the minimum index range (inclusive).
+	 * @param maxIndex the maximum index range (inclusive).
 	 * @param value the value (can be null).
 	 */
-	public IntervalMap(long min, long max, V value)
+	public IntervalMap(long minIndex, long maxIndex, V value)
 	{
 		this();
-		set(min, max, value);
+		set(minIndex, maxIndex, value);
 	}
 
 	/**
@@ -47,20 +50,20 @@ public class IntervalMap<V>
 	
 	/**
 	 * Sets a value interval.
+	 * @param minIndex the min index.
+	 * @param maxIndex the max index.
 	 * @param value the value to set.
-	 * @param min the min index.
-	 * @param max the max index.
 	 */
-	public void set(long min, long max, V value)
+	public void set(long minIndex, long maxIndex, V value)
 	{
-		long actualMin = Math.min(min, max);
-		long actualMax = Math.max(min, max);
-		min = actualMin;
-		max = actualMax;
-		int minSlot = search(min);
-		int maxSlot = search(max);
+		long actualMin = Math.min(minIndex, maxIndex);
+		long actualMax = Math.max(minIndex, maxIndex);
+		minIndex = actualMin;
+		maxIndex = actualMax;
+		int minSlot = search(minIndex);
+		int maxSlot = search(maxIndex);
 		int size = intervalList.size();
-		Interval newInterval = new Interval(min, max, value);
+		Interval newInterval = new Interval(minIndex, maxIndex, value);
 
 		// empty list.
 		if (intervalList.isEmpty())
@@ -314,6 +317,65 @@ public class IntervalMap<V>
 	}
 	
 	/**
+	 * Fetches a value at an interval index, returning a default value if the value is null.
+	 * @param index the index.
+	 * @param ifNull if <code>get(index)</code> would return <code>null</code>, return this.
+	 * @return the corresponding value, or <code>ifNull</code> if the value would be null.
+	 */
+	public V get(long index, V ifNull)
+	{
+		V out;
+		if ((out = get(index)) == null)
+			return ifNull;
+		return out;
+	}
+	
+	/**
+	 * Gets a set of values across an inclusive interval.
+	 * Since this is a set, the order is undefined and there will not be any repeats.
+	 * @param minIndex the min index.
+	 * @param maxIndex the max index.
+	 * @return a set of values. Can be empty.
+	 */
+	public Set<V> getValueSet(long minIndex, long maxIndex)
+	{
+		return getValueCollection(minIndex, maxIndex, new TreeSet<V>()); 
+	}
+	
+	/**
+	 * Gets a list of values across an inclusive interval.
+	 * Since this is a list, the order is in interval order and there may be repeats.
+	 * @param minIndex the min index.
+	 * @param maxIndex the max index.
+	 * @return a list of values. Can be empty.
+	 */
+	public List<V> getValueList(long minIndex, long maxIndex)
+	{
+		return getValueCollection(minIndex, maxIndex, new ArrayList<V>()); 
+	}
+	
+	// Gets a set of values across an interval and returns them in the collection.
+	private <U extends Collection<V>> U getValueCollection(long minIndex, long maxIndex, U collection)
+	{
+		int slotA = search(Math.min(minIndex, maxIndex));
+		int slotB = search(Math.max(minIndex, maxIndex));
+		
+		if (slotB >= 0)
+		{
+			slotA = slotA < 0 ? 0 : slotA;
+			slotB = slotB >= intervalList.size() ? intervalList.size() - 1 : slotB;
+			for (int i = slotA; i <= slotB; i++)
+			{
+				V value = intervalList.get(i).value;
+				if (value != null)
+					collection.add(value);
+			}
+		}
+		
+		return collection;
+	}
+	
+	/**
 	 * @return the lowest index in the map (if any).
 	 */
 	public Long getMinIndex()
@@ -327,6 +389,20 @@ public class IntervalMap<V>
 	public Long getMaxIndex()
 	{
 		return intervalList.isEmpty() ? null : intervalList.get(intervalList.size() - 1).max;
+	}
+	
+	/**
+	 * Gets how many indices are occupied by a value.
+	 * @param value the value. Cannot be null.
+	 * @return the amount of indices, or 0 if not found.
+	 */
+	public long getIndexWidth(V value)
+	{
+		long out = 0L;
+		for (int i = 0; i < intervalList.size(); i++)
+			if (Objects.equals(intervalList.get(i).value, value))
+				out += intervalList.get(i).width();
+		return out;
 	}
 	
 	// Attempts to merge intervals by same value going backwards in the list.
@@ -429,6 +505,11 @@ public class IntervalMap<V>
 		public boolean includes(long index)
 		{
 			return min <= index && index <= max;
+		}
+		
+		public long width()
+		{
+			return max - min + 1;
 		}
 		
 		@Override

@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
@@ -179,6 +179,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_MBF = "mbf";
 	private static final String KEYWORD_EXTENDED = "extended";
 	private static final String KEYWORD_MBF21 = "mbf21";
+	private static final String KEYWORD_DSDHACKED = "dsdhacked";
 	
 	private static final String KEYWORD_NULL = "null";
 
@@ -321,10 +322,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return new PatchExtendedContext();
 		else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
 			return new PatchMBF21Context();
+		else if (matchIdentifierIgnoreCase(KEYWORD_DSDHACKED))
+			return new PatchDSDHackedContext();
 		else
 		{
-			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s, %s).", 
-				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED, KEYWORD_MBF21
+			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s, %s, %s).", 
+				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED, KEYWORD_MBF21, KEYWORD_DSDHACKED
 			);
 			return null;
 		}
@@ -354,9 +357,9 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(KEYWORD_EACH))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_THING))
-				return parseEachThingBlock(context);
+				return parseThingEachBlock(context);
 			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
-				return parseEachWeaponBlock(context);
+				return parseWeaponEachBlock(context);
 			else
 			{
 				addErrorMessage("Unknown section or command \"%s\".", currentToken().getLexeme());
@@ -934,10 +937,7 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 					
-					int a = Math.min(min, max);
-					int b = Math.max(min, max);
-					while (a <= b)
-						context.setFreeState(a++, true);
+					context.setFreeState(min, max, true);
 					return true;
 				}
 				else
@@ -983,10 +983,7 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 					
-					int a = Math.min(min, max);
-					int b = Math.max(min, max);
-					while (a <= b)
-						context.setProtectedState(a++, protectedState);
+					context.setProtectedState(min, max, protectedState);
 					return true;
 				}
 				else
@@ -1007,67 +1004,6 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected state index after \"%s\".", protectedState ? KEYWORD_PROTECT : KEYWORD_UNPROTECT);
 			return false;
 		}
-	}
-
-	// Parses a range of integers and returns them.
-	private List<Integer> parseIntegerRange(String blockName, Supplier<Integer> integerReader)
-	{
-		List<Integer> out = new LinkedList<>();
-		
-		if (matchIdentifierIgnoreCase(KEYWORD_IN))
-		{
-			if (!matchType(DecoHackKernel.TYPE_LPAREN))
-			{
-				addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
-				return null;
-			}
-			
-			while (currentType(DecoHackKernel.TYPE_NUMBER))
-			{
-				Integer id;
-				if ((id = integerReader.get()) == null)
-					return null;
-	
-				out.add(id);
-				
-				if (!matchType(DecoHackKernel.TYPE_COMMA))
-					break;
-			}
-			
-			if (!matchType(DecoHackKernel.TYPE_RPAREN))
-			{
-				addErrorMessage("Expected ')' after the list of things.");
-				return null;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
-		{
-			Integer min;
-			if ((min = integerReader.get()) == null)
-				return null;
-	
-			if (!matchIdentifierIgnoreCase(KEYWORD_TO))
-			{
-				addErrorMessage("Expected \"%s\" after starting thing index.", KEYWORD_TO);
-				return null;
-			}
-	
-			Integer max;
-			if ((max = integerReader.get()) == null)
-				return null;
-			
-			int a = Math.min(min, max);
-			int b = Math.max(min, max);
-			while (a <= b)
-				out.add(a++);
-		}
-		else
-		{
-			addErrorMessage("Expected '%s' or '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_FROM, KEYWORD_EACH, blockName);
-			return null;
-		}
-		
-		return out;
 	}
 
 	// Parses a thing block.
@@ -1166,20 +1102,60 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses an "each thing" block.
-	private boolean parseEachThingBlock(final AbstractPatchContext<?> context)
+	private boolean parseThingEachBlock(final AbstractPatchContext<?> context)
 	{
-		List<Integer> thingList;
-		if ((thingList = parseIntegerRange(KEYWORD_THING, () -> matchThingIndex(context))) == null)
+		if (matchIdentifierIgnoreCase(KEYWORD_IN))
+		{
+			return parseThingEachInBlock(context);
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
+		{
+			return parseThingEachFromBlock(context);
+		}
+		else
+		{
+			addErrorMessage("Expected '%s' or '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_FROM, KEYWORD_EACH, KEYWORD_THING);
 			return false;
+		}
+	}
+	
+	// Parses an "each thing in" block.
+	private boolean parseThingEachInBlock(final AbstractPatchContext<?> context)
+	{
+		List<Integer> thingList = new LinkedList<>();
 		
+		if (!matchType(DecoHackKernel.TYPE_LPAREN))
+		{
+			addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
+			return false;
+		}
+
+		while (currentType(DecoHackKernel.TYPE_NUMBER))
+		{
+			Integer id;
+			if ((id = matchThingIndex(context)) == null)
+				return false;
+
+			thingList.add(id);
+			
+			if (!matchType(DecoHackKernel.TYPE_COMMA))
+				break;
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RPAREN))
+		{
+			addErrorMessage("Expected ')' after the list of things.");
+			return false;
+		}
+
 		if (thingList.isEmpty())
 		{
 			addErrorMessage("Expected at least one thing in a list of things.");
 			return false;
 		}
 		
-		DEHThingTemplate thingTemplate = new DEHThingTemplate();
-		if (!parseThingBody(context, thingTemplate))
+		DEHThingTemplate template = new DEHThingTemplate();
+		if (!parseThingBody(context, template))
 			return false;
 		
 		for (Integer id : thingList)
@@ -1191,7 +1167,47 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			thingTemplate.applyTo(thing);
+			template.applyTo(thing);
+		}
+
+		return true;
+	}
+	
+	// Parses an "each thing from" block.
+	private boolean parseThingEachFromBlock(final AbstractPatchContext<?> context)
+	{
+		Integer min;
+		if ((min = matchThingIndex(context)) == null)
+			return false;
+
+		if (!matchIdentifierIgnoreCase(KEYWORD_TO))
+		{
+			addErrorMessage("Expected \"%s\" after starting thing index.", KEYWORD_TO);
+			return false;
+		}
+
+		Integer max;
+		if ((max = matchThingIndex(context)) == null)
+			return false;
+		
+		DEHThingTemplate template = new DEHThingTemplate();
+		if (!parseThingBody(context, template))
+			return false;
+		
+		int a = Math.min(min, max);
+		int b = Math.max(min, max);
+		while (a <= b)
+		{
+			int id = a++;
+			
+			DEHThing thing;
+			if ((thing = context.getThing(id)) == null)
+			{
+				addErrorMessage("INTERNAL ERROR. Thing id %d invalid, but passed parsing.", id);
+				return false;
+			}
+			
+			template.applyTo(thing);
 		}
 		
 		return true;
@@ -1790,20 +1806,60 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses an "each weapon" block.
-	private boolean parseEachWeaponBlock(AbstractPatchContext<?> context)
+	private boolean parseWeaponEachBlock(final AbstractPatchContext<?> context)
 	{
-		List<Integer> weaponList;
-		if ((weaponList = parseIntegerRange(KEYWORD_WEAPON, () -> matchWeaponIndex(context))) == null)
+		if (matchIdentifierIgnoreCase(KEYWORD_IN))
+		{
+			return parseWeaponEachInBlock(context);
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_FROM))
+		{
+			return parseWeaponEachFromBlock(context);
+		}
+		else
+		{
+			addErrorMessage("Expected '%s' or '%s' after \"%s %s\" declaration.", KEYWORD_IN, KEYWORD_FROM, KEYWORD_EACH, KEYWORD_THING);
 			return false;
+		}
+	}
+	
+	// Parses an "each weapon in" block.
+	private boolean parseWeaponEachInBlock(final AbstractPatchContext<?> context)
+	{
+		List<Integer> weaponList = new LinkedList<>();
 		
+		if (!matchType(DecoHackKernel.TYPE_LPAREN))
+		{
+			addErrorMessage("Expected '(' after \"%s\".", KEYWORD_IN);
+			return false;
+		}
+
+		while (currentType(DecoHackKernel.TYPE_NUMBER))
+		{
+			Integer id;
+			if ((id = matchWeaponIndex(context)) == null)
+				return false;
+
+			weaponList.add(id);
+			
+			if (!matchType(DecoHackKernel.TYPE_COMMA))
+				break;
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RPAREN))
+		{
+			addErrorMessage("Expected ')' after the list of weapons.");
+			return false;
+		}
+
 		if (weaponList.isEmpty())
 		{
-			addErrorMessage("Expected at least one weapon in a list of things.");
+			addErrorMessage("Expected at least one weapon in a list of weapons.");
 			return false;
 		}
 		
-		DEHWeaponTemplate weaponTemplate = new DEHWeaponTemplate();
-		if (!parseWeaponBody(context, weaponTemplate))
+		DEHWeaponTemplate template = new DEHWeaponTemplate();
+		if (!parseWeaponBody(context, template))
 			return false;
 		
 		for (Integer id : weaponList)
@@ -1815,7 +1871,47 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			weaponTemplate.applyTo(weapon);
+			template.applyTo(weapon);
+		}
+
+		return true;
+	}
+	
+	// Parses an "each weapon from" block.
+	private boolean parseWeaponEachFromBlock(final AbstractPatchContext<?> context)
+	{
+		Integer min;
+		if ((min = matchWeaponIndex(context)) == null)
+			return false;
+
+		if (!matchIdentifierIgnoreCase(KEYWORD_TO))
+		{
+			addErrorMessage("Expected \"%s\" after starting weapon index.", KEYWORD_TO);
+			return false;
+		}
+
+		Integer max;
+		if ((max = matchWeaponIndex(context)) == null)
+			return false;
+		
+		DEHWeaponTemplate template = new DEHWeaponTemplate();
+		if (!parseWeaponBody(context, template))
+			return false;
+		
+		int a = Math.min(min, max);
+		int b = Math.max(min, max);
+		while (a <= b)
+		{
+			int id = a++;
+			
+			DEHWeapon weapon;
+			if ((weapon = context.getWeapon(id)) == null)
+			{
+				addErrorMessage("INTERNAL ERROR. Weapon id %d invalid, but passed parsing.", id);
+				return false;
+			}
+			
+			template.applyTo(weapon);
 		}
 		
 		return true;

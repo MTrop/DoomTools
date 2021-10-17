@@ -22,7 +22,6 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
-import net.mtrop.doom.tools.struct.IntervalMap;
 
 /**
  * Abstract patch context.
@@ -41,8 +40,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	private int freeStateCount;
 	private int freePointerStateCount;
-	private IntervalMap<Boolean> freeStates;
-	private IntervalMap<Boolean> protectedStates;
+	private boolean[] freeStates;
+	private boolean[] protectedStates;
+
+	private int freeThingCount;
+	private boolean[] freeThings;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -104,8 +106,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
 		this.freeStateCount = 0;
-		this.freeStates = new IntervalMap<>(0, getSourcePatch().getStateCount() - 1, false);
-		this.protectedStates = new IntervalMap<>(0, getSourcePatch().getStateCount() - 1, false);
+		this.freeStates = new boolean[getSourcePatch().getStateCount()];
+		this.protectedStates = new boolean[getSourcePatch().getStateCount()];
+
+		this.freeThingCount = 0;
+		this.freeThings = new boolean[getSourcePatch().getThingCount()];
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -277,12 +282,12 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isFreeState(int index)
 	{
-		return freeStates.get(index);
+		return freeStates[index];
 	}
 	
 	/**
-	 * Marks a state as "free" - painting thing/weapon states will be written to these.
-	 * @param index the index to mark as free.
+	 * Marks a state as "free" or not.
+	 * @param index the state index to mark as free.
 	 * @param state true to set as "free", false to unset.
 	 * @throws IllegalStateException if the target state is protected.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
@@ -292,8 +297,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		if (isProtectedState(index))
 			throw new IllegalStateException("State " + index + " is a protected state.");
-		boolean prev = freeStates.get(index); 
-		freeStates.set(index, state);
+		
+		boolean prev = freeStates[index]; 
+		freeStates[index] = state;
 		if (prev && !state)
 		{
 			freeStateCount--;
@@ -307,6 +313,23 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 				freePointerStateCount++;
 		}
 	}
+
+	/**
+	 * Marks a series of states as "free" or not.
+	 * @param min the starting state index. 
+	 * @param max the ending state index (inclusive).
+	 * @param state true to set as "free", false to unset.
+	 * @throws IllegalStateException if the target state is protected.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 * @see #protectState(int)
+	 */
+	public void setFreeState(int min, int max, boolean state)
+	{
+		int a = Math.min(min, max);
+		int b = Math.max(min, max);
+		while (a <= b)
+			setFreeState(a++, state);
+	}
 	
 	/**
 	 * Gets if a state is flagged as "protected".
@@ -316,7 +339,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isProtectedState(int index)
 	{
-		return protectedStates.get(index);
+		return protectedStates[index];
 	}
 
 	/**
@@ -327,7 +350,22 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setProtectedState(int index, boolean state)
 	{
-		protectedStates.set(index, state);
+		protectedStates[index] = state;
+	}
+
+	/**
+	 * Marks a state as "protected" - attempting to free this state or alter it
+	 * directly will throw an exception.
+	 * @param min the starting state index. 
+	 * @param max the ending state index (inclusive).
+	 * @param state true to set as "protected", false to unset.
+	 */
+	public void setProtectedState(int min, int max, boolean state)
+	{
+		int a = Math.min(min, max);
+		int b = Math.max(min, max);
+		while (a <= b)
+			setProtectedState(a++, state);
 	}
 
 	/**
@@ -398,7 +436,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeState(int startingIndex)
 	{
-		return searchNextFreeState(startingIndex, (i) -> !isFillableState(i));
+		return searchNextFree(startingIndex, getStateCount(), (i) -> 
+			isFillableState(i)
+		);
 	}
 	
 	/**
@@ -410,8 +450,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeActionPointerState(int startingIndex)
 	{
-		return searchNextFreeState(startingIndex, (i) -> 
-			!(isFillableState(i) && getStateActionPointerIndex(i) != null)
+		return searchNextFree(startingIndex, getStateCount(), (i) -> 
+			isFillableState(i) && getStateActionPointerIndex(i) != null
 		);
 	}
 	
@@ -424,8 +464,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public Integer findNextFreeNonActionPointerState(int startingIndex)
 	{
-		return searchNextFreeState(startingIndex, (i) -> 
-			!(isFillableState(i) && getStateActionPointerIndex(i) == null)
+		return searchNextFree(startingIndex, getStateCount(), (i) -> 
+			isFillableState(i) && getStateActionPointerIndex(i) == null
 		);
 	}
 
@@ -443,14 +483,79 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return isFreeState(index) && !isProtectedState(index);
 	}
 
+	/**
+	 * Gets how many free things there are.
+	 * @return the amount of things flagged as "free."
+	 */
+	public int getFreeThingCount() 
+	{
+		return freeThingCount;
+	}
+	
+	/**
+	 * Gets if a thing is flagged as "free".
+	 * @param index the index.
+	 * @return true if so, false if not.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public boolean isFreeThing(int index)
+	{
+		return freeThings[index];
+	}
+
+	/**
+	 * Sets a thing as "free" or not. 
+	 * @param index the thing index.
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeThing(int index, boolean state)
+	{
+		boolean prev = freeThings[index]; 
+		freeThings[index] = state;
+		if (prev && !state)
+			freeThingCount--;
+		else if (!prev && state)
+			freeThingCount++;
+	}
+
+	/**
+	 * Sets a contiguous set of things as "free" or not. 
+	 * @param min the minimum thing index.
+	 * @param max the maximum thing index (inclusive).
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeThing(int min, int max, boolean state)
+	{
+		int a = Math.min(min, max);
+		int b = Math.max(min, max);
+		while (a <= b)
+			setFreeThing(a++, state);
+	}
+
+	/**
+	 * Searches linearly for the next free thing in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free state, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeThing(int startingIndex)
+	{
+		return searchNextFree(startingIndex, getThingCount(), (i) -> 
+			isFreeThing(i)
+		);
+	}
+	
 	// Search function for free states.
-	private Integer searchNextFreeState(int startingIndex, Function<Integer, Boolean> func)
+	private Integer searchNextFree(int startingIndex, int maxIndex, Function<Integer, Boolean> isFreeFunc)
 	{
 		int i = startingIndex;
-		while (func.apply(i))
+		while (!isFreeFunc.apply(i))
 		{
 			i++;
-			if (i >= getStateCount())
+			if (i >= maxIndex)
 				i = 0;
 			if (i == startingIndex)
 				return null;
