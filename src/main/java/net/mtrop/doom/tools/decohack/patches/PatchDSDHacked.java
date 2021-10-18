@@ -70,7 +70,7 @@ public class PatchDSDHacked extends PatchMBF21
 		if (index < 0)
 			return null;
 
-		return index >= 151 ? DEFAULT_THING : super.getThing(index);
+		return index >= 251 ? DEFAULT_THING : super.getThing(index);
 	}
 
 	@Override

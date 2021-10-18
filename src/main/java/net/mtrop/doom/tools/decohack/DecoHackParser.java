@@ -104,6 +104,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_NEXTSTATE = "nextstate";
 	private static final String KEYWORD_POINTER = "pointer";
 
+	private static final String KEYWORD_AUTO = "auto";
 	private static final String KEYWORD_EACH = "each";
 	private static final String KEYWORD_IN = "in";
 	private static final String KEYWORD_TO = "to";
@@ -362,7 +363,17 @@ public final class DecoHackParser extends Lexer.Parser
 				return parseWeaponEachBlock(context);
 			else
 			{
-				addErrorMessage("Unknown section or command \"%s\".", currentToken().getLexeme());
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_WEAPON, KEYWORD_EACH);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_AUTO))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_THING))
+				return parseThingAutoBlock(context);
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_AUTO);
 				return false;
 			}
 		}
@@ -1030,9 +1041,14 @@ public final class DecoHackParser extends Lexer.Parser
 			temp.copyFrom(context.getThing(other));
 			context.getThing(other).copyFrom(context.getThing(slot));
 			context.getThing(slot).copyFrom(temp);
+			
+			// Affected things are no longer "free"
+			context.setFreeThing(slot, false);
+			context.setFreeThing(other, false);
+			
 			return true;
 		}
-		// free states.
+		// free things or thing states.
 		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_STATES))
@@ -1040,10 +1056,30 @@ public final class DecoHackParser extends Lexer.Parser
 				context.freeThingStates(slot);
 				return true;
 			}
+			
+			Integer min;
+			if ((min = matchPositiveInteger()) != null)
+			{
+				if ((min = verifyThingIndex(context, min)) == null)
+					return false;
+				
+				if (!matchIdentifierIgnoreCase(KEYWORD_TO))
+				{
+					context.setFreeThing(min, true);
+					return true;
+				}
+				
+				Integer max;
+				if ((max = matchThingIndex(context)) == null)
+					return false;
+				
+				context.setFreeThing(min, max, true);
+				return true;
+			}
 
 			if (!currentIsThingState())
 			{
-				addErrorMessage("Expected thing state name or \"%s\" after \"%s\".", KEYWORD_STATES, KEYWORD_FREE);
+				addErrorMessage("Expected thing state name or \"%s\" or a thing index after \"%s\".", KEYWORD_STATES, KEYWORD_FREE);
 				return false;
 			}
 
@@ -1097,6 +1133,7 @@ public final class DecoHackParser extends Lexer.Parser
 				thing.setName(matchString());
 			}
 			
+			context.setFreeThing(slot, false);
 			return parseThingBody(context, thing);
 		}
 	}
@@ -1168,6 +1205,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			template.applyTo(thing);
+			context.setFreeThing(id, false);
 		}
 
 		return true;
@@ -1208,9 +1246,18 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			template.applyTo(thing);
+			context.setFreeThing(id, false);
 		}
 		
 		return true;
+	}
+	
+	// Parses an "auto thing" block.
+	private boolean parseThingAutoBlock(final AbstractPatchContext<?> context)
+	{
+		// TODO: Finish this.
+		addErrorMessage("UNFINISHED");
+		return false;
 	}
 	
 	// Parses a thing body.
@@ -3263,6 +3310,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		}
 		
+		return verifyThingIndex(context, slot);
+	}
+	
+	// Verifies a valid thing index number.
+	private Integer verifyThingIndex(AbstractPatchContext<?> context, int slot)
+	{
 		if (slot == 0)
 		{
 			addErrorMessage("Invalid thing index: %d.", slot);
@@ -3295,7 +3348,13 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_WEAPON);
 			return null;
 		}
-		
+
+		return verifyWeaponIndex(context, slot);
+	}
+
+	// Verifies a valid weapon index number.
+	private Integer verifyWeaponIndex(AbstractPatchContext<?> context, int slot)
+	{
 		if (slot >= context.getWeaponCount())
 		{
 			addErrorMessage("Invalid weapon index: %d. Max is %d.", slot, context.getWeaponCount() - 1);
@@ -3310,7 +3369,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		return slot;
 	}
-
+	
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -4194,6 +4253,7 @@ public final class DecoHackParser extends Lexer.Parser
 						put("<mbf>", "classpath:decohack/mbf.dh");
 						put("<extended>", "classpath:decohack/extended.dh");
 						put("<mbf21>", "classpath:decohack/mbf21.dh");
+						put("<dsdhacked>", "classpath:decohack/dsdhacked.dh");
 						put("<friendly>", "classpath:decohack/constants/friendly_things.dh");
 					}
 				};

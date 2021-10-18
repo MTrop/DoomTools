@@ -1,0 +1,19 @@
+#ifndef __DECOHACK_CONSTANTS_DSDHACKED__
+#define __DECOHACK_CONSTANTS_DSDHACKED__
+
+// "Unlimited" things and states.
+#define THINGS_MAX 0x7fffffff
+#define STATES_MAX 0x7fffffff
+
+// Overlap with Boom for weapons/ammo.
+#include "doom19/weapons.dh"
+#include "doom19/ammo.dh"
+
+// ...but not strings...
+#include "boom/strings.dh"
+
+// ...and not states nor things
+#include "extended/states.dh"
+#include "extended/things.dh"
+
+#endif

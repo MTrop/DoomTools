@@ -34,10 +34,24 @@ public final class DecoHackJoiner
 	 */
 	public static void joinSourceFrom(File sourceFile, Charset charset, PrintWriter writer) throws IOException
 	{
-		try (BufferedReader reader = openReader(new FileInputStream(sourceFile), charset))
+		try (InputStream input = new FileInputStream(sourceFile))
 		{
-			includeStream(sourceFile.getPath(), charset, reader, writer);
+			joinSourceFrom(input, sourceFile.getPath(), charset, writer);
 		}
+	}
+	
+	/**
+	 * Reads the source from an input stream.
+	 * The input stream is not closed.
+	 * @param input the input stream.
+	 * @param path the stream path.
+	 * @param charset the stream charset.
+	 * @param writer the output writer.
+	 * @throws IOException if a read or write error occurs.
+	 */
+	public static void joinSourceFrom(InputStream input, String path, Charset charset, PrintWriter writer) throws IOException
+	{
+		includeStream(path, charset, new BufferedReader(new InputStreamReader(input, charset)), writer);
 	}
 	
 	/**

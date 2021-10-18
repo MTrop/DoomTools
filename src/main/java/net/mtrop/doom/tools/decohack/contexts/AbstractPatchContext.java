@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -30,6 +32,8 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatch;
  */
 public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPatch
 {
+	protected static final String CRLF = "\r\n";
+
 	private Map<Integer, DEHAmmo> ammo;
 	private Map<Integer, DEHSound> sounds;
 	private Map<Integer, DEHWeapon> weapons;
@@ -45,6 +49,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	private int freeThingCount;
 	private boolean[] freeThings;
+	
+	private Map<String, Integer> autoThingMap;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -111,6 +117,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 		this.freeThingCount = 0;
 		this.freeThings = new boolean[getSourcePatch().getThingCount()];
+		
+		this.autoThingMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -548,6 +556,173 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		);
 	}
 	
+	/**
+	 * Sets an auto-allocated thing index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @param index the corresponding index.
+	 */
+	public void setAutoThingIndex(String identifier, int index)
+	{
+		autoThingMap.put(identifier, index);
+	}
+	
+	/**
+	 * Gets an auto-allocated thing index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @return the corresponding index, or null if no corresponding index.
+	 */
+	public Integer getAutoThingIndex(String identifier)
+	{
+		return autoThingMap.get(identifier);
+	}
+
+	/**
+	 * Writes the patch data to a writer.
+	 * @param writer the output writer.
+	 * @param comment a comment line (containing the version line).
+	 * @throws IOException if a write error occurs.
+	 */
+	public void writePatch(Writer writer, String comment) throws IOException
+	{
+		writePatchHeader(writer, comment);
+		writeCommonPatchBody(writer);
+	}
+	
+	/**
+	 * Writes the patch header.
+	 * @param writer the output writer.
+	 * @param comment a comment line (containing the version line).
+	 * @param formatNumber the patch format number.
+	 * @throws IOException if a write error occurs.
+	 */
+	protected void writePatchHeader(Writer writer, String comment) throws IOException
+	{
+		// Header
+		writer.append("Patch File for DeHackEd v3.0").append(CRLF);
+		
+		// Comment Blurb
+		writer.append("# ").append(comment).append(CRLF);
+		writer.append("# Note: Use the pound sign ('#') to start comment lines.").append(CRLF);
+		writer.append(CRLF);
+	
+		// Version
+		writer.append("Doom version = " + getVersion()).append(CRLF);
+		writer.append("Patch format = 6").append(CRLF);
+		writer.append(CRLF);
+		writer.append(CRLF);
+		writer.flush();
+	}
+
+	/**
+	 * Writes the common patch body.
+	 * @param patch the patch.
+	 * @param writer the output writer.
+	 * @throws IOException if a write error occurs.
+	 */
+	protected void writeCommonPatchBody(Writer writer) throws IOException
+	{
+		for (int i = 1; i < getThingCount(); i++)
+		{
+			DEHThing thing = getThing(i);
+			DEHThing original = getSourcePatch().getThing(i);
+			if (thing == null)
+				continue;
+			if (!thing.equals(original))
+			{
+				writer.append("Thing ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(thing.getName()))
+					.append(")")
+					.append(CRLF);
+				thing.writeObject(writer, original, getSupportedFeatureLevel());
+				writer.append(CRLF);
+			}
+		}
+		writer.flush();
+	
+		for (int i = 0; i < getStateCount(); i++)
+		{
+			DEHState state = getState(i);
+			DEHState original = getSourcePatch().getState(i);
+			if (state == null)
+				continue;
+			if (!state.equals(original))
+			{
+				writer.append("Frame ").append(String.valueOf(i)).append(CRLF);
+				state.writeObject(writer, original, getSupportedFeatureLevel());
+				writer.append(CRLF);
+			}
+		}
+		writer.flush();
+	
+		for (int i = 0; i < getSoundCount(); i++)
+		{
+			DEHSound sound = getSound(i);
+			DEHSound original = getSourcePatch().getSound(i);
+			if (sound == null)
+				continue;
+			if (!sound.equals(original))
+			{
+				// Sound ids in DeHackEd are off by 1
+				writer.append("Sound ").append(String.valueOf(i)).append(CRLF);
+				sound.writeObject(writer, original, getSupportedFeatureLevel());
+				writer.append(CRLF);
+			}
+		}
+		writer.flush();
+	
+		for (int i = 0; i < getWeaponCount(); i++)
+		{
+			DEHWeapon weapon = getWeapon(i);
+			DEHWeapon original = getSourcePatch().getWeapon(i);
+			if (weapon == null)
+				continue;
+			if (!weapon.equals(original))
+			{
+				writer.append("Weapon ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(weapon.getName()))
+					.append(")")
+					.append(CRLF);
+				weapon.writeObject(writer, original, getSupportedFeatureLevel());
+				writer.append(CRLF);
+			}
+		}
+		writer.flush();
+	
+		for (int i = 0; i < getAmmoCount(); i++)
+		{
+			DEHAmmo ammo = getAmmo(i);
+			DEHAmmo original = getSourcePatch().getAmmo(i);
+			if (ammo == null)
+				continue;
+			if (!ammo.equals(original))
+			{
+				writer.append("Ammo ")
+					.append(String.valueOf(i))
+					.append(" (")
+					.append(String.valueOf(ammo.getName()))
+					.append(")")
+					.append(CRLF);
+				ammo.writeObject(writer, original, getSupportedFeatureLevel());
+				writer.append(CRLF);
+			}
+		}
+		writer.flush();
+	
+		DEHMiscellany misc = getMiscellany();
+		DEHMiscellany miscOriginal = getSourcePatch().getMiscellany();
+		if (!misc.equals(miscOriginal))
+		{
+			writer.append("Misc ").append(String.valueOf(0)).append(CRLF);
+			misc.writeObject(writer, miscOriginal, getSupportedFeatureLevel());
+			writer.append(CRLF);
+		}
+		writer.flush();
+	}
+
 	// Search function for free states.
 	private Integer searchNextFree(int startingIndex, int maxIndex, Function<Integer, Boolean> isFreeFunc)
 	{

@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -232,7 +234,19 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	 */
 	public void setFreeThing(int min, int max, boolean state)
 	{
+		if (min < 0 || max < 0)
+			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
 		freeThingsMap.set(min, max, state);
+	}
+	
+	@Override
+	public void writePatch(Writer writer, String comment) throws IOException
+	{
+		super.writePatch(writer, comment);
+		
+		// TODO: Finish this.
+		// I'm gonna need to find a way to scan though things or sounds 
+		// that may have been touched instead of... ya know... 2 billion of them.
 	}
 	
 }

@@ -80,6 +80,21 @@ Everything in:
 
 
 ------------------------------------------------------------------------------
+---- classpath:decohack/dsdhacked.dh <dsdhacked>
+------------------------------------------------------------------------------
+
+Everything in:
+	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/ammo.dh
+	decohack/constants/boom/strings.dh
+	decohack/constants/extended/states.dh
+    decohack/constants/extended/things.dh
+
+THINGS_MAX                0x7fffffff
+STATES_MAX                0x7fffffff
+
+
+------------------------------------------------------------------------------
 ---- classpath:decohack/constants/friendly_things.dh <friendly>
 ------------------------------------------------------------------------------
 

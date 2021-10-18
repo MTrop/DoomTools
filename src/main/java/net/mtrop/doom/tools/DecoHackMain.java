@@ -22,7 +22,6 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.decohack.DecoHackExporter;
 import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
@@ -318,7 +317,7 @@ public final class DecoHackMain
 			// Write Patch.
 			try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
 			{
-				DecoHackExporter.writePatch(context, writer, "Created with " + VERSION_LINE);
+				context.writePatch(writer, "Created with " + VERSION_LINE);
 				options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
 			} 
 			catch (IOException e) 

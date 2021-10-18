@@ -5,10 +5,15 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 
 /**
@@ -124,6 +129,84 @@ public abstract class AbstractPatchBoomContext extends AbstractPatchContext<DEHP
 	public void setParSeconds(EpisodeMap episodeMap, int seconds)
 	{
 		pars.put(episodeMap, seconds);
+	}
+	
+	@Override
+	public void writePatch(Writer writer, String comment) throws IOException 
+	{
+		super.writePatch(writer, comment);
+		
+		// CODEPTR
+		boolean codeptrHeader = false;
+		for (int i = 0; i < getStateCount(); i++)
+		{
+			DEHActionPointer pointer = getActionPointer(i);
+			DEHActionPointer original = getSourcePatch().getActionPointer(i);
+			if (pointer == null)
+				continue;
+			if (!pointer.equals(original))
+			{
+				if (!codeptrHeader)
+				{
+					writer.append("[CODEPTR]").append(CRLF);
+					codeptrHeader = true;
+				}
+				writer.append("FRAME ")
+					.append(String.valueOf(i))
+					.append(" = ")
+					.append(pointer.getMnemonic())
+					.append(CRLF);
+			}
+		}
+		if (codeptrHeader)
+			writer.append(CRLF).flush();
+		
+		// STRINGS
+		boolean stringsHeader = false;
+		for (String keys : getStringKeys())
+		{
+			String value;
+			if (!Objects.equals(value = getString(keys), getSourcePatch().getString(keys)))
+			{
+				if (!stringsHeader)
+				{
+					writer.append("[STRINGS]").append(CRLF);
+					stringsHeader = true;
+				}
+				writer.append(keys)
+					.append(" = ")
+					.append(Common.withEscChars(value)).append(CRLF);
+			}
+		}
+		if (stringsHeader)
+			writer.append(CRLF).flush();
+		
+		// PARS
+		boolean parsHeader = false;
+		for (EpisodeMap em : getParEntries())
+		{
+			Integer seconds;
+			if ((seconds = getParSeconds(em)) != getSourcePatch().getParSeconds(em))
+			{
+				if (!parsHeader)
+				{
+					writer.append("[PARS]").append(CRLF);
+					parsHeader = true;
+				}
+				
+				writer.append("par ");
+				
+				if (em.getEpisode() != 0)
+					writer.append(String.valueOf(em.getEpisode())).append(' ');
+				
+				writer.append(String.valueOf(em.getMap()))
+					.append(' ')
+					.append(String.valueOf(seconds))
+					.append(CRLF);
+			}
+		}
+		if (parsHeader)
+			writer.append(CRLF).flush();
 	}
 	
 }

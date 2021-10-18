@@ -1,0 +1,11 @@
+#ifndef __DECOHACK_DSDHACKED__
+#define __DECOHACK_DSDHACKED__
+
+using dsdhacked
+
+#include "constants/dsdhacked.dh"
+
+state free S_FREE_START to STATES_MAX // free the "free" states immediately
+thing free MT_EXTRA00 to THINGS_MAX   // free the "free" things immediately
+
+#endif
