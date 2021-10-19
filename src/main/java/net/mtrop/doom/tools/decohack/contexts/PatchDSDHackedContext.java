@@ -243,10 +243,9 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	public void writePatch(Writer writer, String comment) throws IOException
 	{
 		super.writePatch(writer, comment);
-		
 		// TODO: Finish this.
-		// I'm gonna need to find a way to scan though things or sounds 
-		// that may have been touched instead of... ya know... 2 billion of them.
+		// Write new sounds
+		// Write new sprites.
 	}
 	
 }

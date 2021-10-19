@@ -1111,30 +1111,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			DEHThing thing = context.getThing(slot);
-			
-			if (matchType(DecoHackKernel.TYPE_COLON))
-			{
-				if (!matchIdentifierIgnoreCase(KEYWORD_THING))
-				{
-					addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
-					return false;
-				}
-				
-				Integer sourceSlot;
-				if ((sourceSlot = matchThingIndex(context)) == null)
-					return false;
-				
-				thing.copyFrom(context.getThing(sourceSlot));
-			}
-			
-			if (currentType(DecoHackKernel.TYPE_STRING))
-			{
-				thing.setName(matchString());
-			}
-			
-			context.setFreeThing(slot, false);
-			return parseThingBody(context, thing);
+			return parseThingDefinitionBlock(context, slot);
 		}
 	}
 
@@ -1255,11 +1232,40 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an "auto thing" block.
 	private boolean parseThingAutoBlock(final AbstractPatchContext<?> context)
 	{
-		// TODO: Finish this.
+		// TODO: Finish this, call parseThingDefinitionBlock()
 		addErrorMessage("UNFINISHED");
 		return false;
 	}
 	
+	// Parses the thing copy clauses, marks the thing as not free, and parses the body.
+	private boolean parseThingDefinitionBlock(AbstractPatchContext<?> context, int slot)
+	{
+		DEHThing thing = context.getThing(slot);
+		
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierIgnoreCase(KEYWORD_THING))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_THING);
+				return false;
+			}
+			
+			Integer sourceSlot;
+			if ((sourceSlot = matchThingIndex(context)) == null)
+				return false;
+			
+			thing.copyFrom(context.getThing(sourceSlot));
+		}
+		
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			thing.setName(matchString());
+		}
+		
+		context.setFreeThing(slot, false);
+		return parseThingBody(context, thing);
+	}
+
 	// Parses a thing body.
 	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
@@ -1826,29 +1832,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			DEHWeapon weapon = context.getWeapon(slot);
-			
-			if (matchType(DecoHackKernel.TYPE_COLON))
-			{
-				if (!matchIdentifierIgnoreCase(KEYWORD_WEAPON))
-				{
-					addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
-					return false;
-				}
-				
-				Integer sourceSlot;
-				if ((sourceSlot = matchWeaponIndex(context)) == null)
-					return false;
-
-				weapon.copyFrom(context.getWeapon(sourceSlot));
-			}
-			
-			if (currentType(DecoHackKernel.TYPE_STRING))
-			{
-				weapon.setName(matchString());
-			}
-			
-			return parseWeaponBody(context, weapon);
+			return parseWeaponDefinitionBlock(context, slot);
 		}
 	}
 
@@ -1964,6 +1948,34 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parses the weapon copy clauses, marks the weapon as not free, and parses the body.
+	private boolean parseWeaponDefinitionBlock(AbstractPatchContext<?> context, int slot)
+	{
+		DEHWeapon weapon = context.getWeapon(slot);
+		
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", KEYWORD_WEAPON);
+				return false;
+			}
+			
+			Integer sourceSlot;
+			if ((sourceSlot = matchWeaponIndex(context)) == null)
+				return false;
+	
+			weapon.copyFrom(context.getWeapon(sourceSlot));
+		}
+		
+		if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			weapon.setName(matchString());
+		}
+		
+		return parseWeaponBody(context, weapon);
+	}
+
 	// Parses a weapon body.
 	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
@@ -3304,13 +3316,29 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer matchThingIndex(AbstractPatchContext<?> context)
 	{
 		Integer slot;
-		if ((slot = matchPositiveInteger()) == null)
-		{
-			addErrorMessage("Expected positive integer for the thing slot number.");
-			return null;
-		}
+		String autoThingName;
 		
-		return verifyThingIndex(context, slot);
+		if ((autoThingName = matchIdentifier()) != null)
+		{
+			if ((slot = context.getAutoThingIndex(autoThingName)) == null)
+			{
+				addErrorMessage("Expected valid auto-thing identifier: " + autoThingName + " is not a valid auto-thing.");
+				return null;
+			}
+			else
+			{
+				return slot;
+			}
+		}
+		else if ((slot = matchPositiveInteger()) != null)
+		{
+			return verifyThingIndex(context, slot);
+		}
+		else
+		{
+			addErrorMessage("Expected positive integer or auto-thing identifier for the thing slot number.");
+			return null;
+		}		
 	}
 	
 	// Verifies a valid thing index number.
@@ -3847,6 +3875,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private LinkedList<String> errors;
 	/** Editor directives. */
 	private Map<String, String> editorKeys;
+	/** Last auto thing index (for slightly better search continuation). */
+	private int lastAutoThingIndex;
 
 	// Return the exporter for the patch.
 	private DecoHackParser(String streamName, Reader in)
@@ -3854,6 +3884,7 @@ public final class DecoHackParser extends Lexer.Parser
 		super(new DecoHackLexer(streamName, in));
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.lastAutoThingIndex = 0;
 	}
 	
 	private void addErrorMessage(String message, Object... args)

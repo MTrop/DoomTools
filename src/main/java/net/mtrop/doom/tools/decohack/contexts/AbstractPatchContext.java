@@ -7,7 +7,6 @@ package net.mtrop.doom.tools.decohack.contexts;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
@@ -103,11 +102,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		DEHPatch source = getSourcePatch();
 		
 		this.ammo = new TreeMap<>();
-		this.sounds = new HashMap<>(128, 1f);
+		this.sounds = new TreeMap<>();
 		this.weapons = new TreeMap<>();
-		this.things = new HashMap<>(128, 1f);
-		this.states = new HashMap<>(1024, 1f);
-		this.pointers = new HashMap<>(512, 1f);
+		this.things = new TreeMap<>();
+		this.states = new TreeMap<>();
+		this.pointers = new TreeMap<>();
 		
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
@@ -547,7 +546,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * If the start index is free, it is returned. If a full search completes without finding
 	 * a free index, <code>null</code> is returned.
 	 * @param startingIndex the starting index.
-	 * @return the next free state, or <code>null</code> if none found.
+	 * @return the next free thing index, or <code>null</code> if none found.
 	 */
 	public Integer findNextFreeThing(int startingIndex)
 	{
@@ -621,9 +620,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	protected void writeCommonPatchBody(Writer writer) throws IOException
 	{
-		for (int i = 1; i < getThingCount(); i++)
+		for (Map.Entry<Integer, DEHThing> entry : things.entrySet())
 		{
-			DEHThing thing = getThing(i);
+			Integer i = entry.getKey();
+			DEHThing thing = entry.getValue();
 			DEHThing original = getSourcePatch().getThing(i);
 			if (thing == null)
 				continue;
@@ -641,9 +641,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (int i = 0; i < getStateCount(); i++)
+		for (Map.Entry<Integer, DEHState> entry : states.entrySet())
 		{
-			DEHState state = getState(i);
+			Integer i = entry.getKey();
+			DEHState state = entry.getValue();
 			DEHState original = getSourcePatch().getState(i);
 			if (state == null)
 				continue;
@@ -656,9 +657,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (int i = 0; i < getSoundCount(); i++)
+		for (Map.Entry<Integer, DEHSound> entry : sounds.entrySet())
 		{
-			DEHSound sound = getSound(i);
+			Integer i = entry.getKey();
+			DEHSound sound = entry.getValue();
 			DEHSound original = getSourcePatch().getSound(i);
 			if (sound == null)
 				continue;
@@ -672,9 +674,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (int i = 0; i < getWeaponCount(); i++)
+		for (Map.Entry<Integer, DEHWeapon> entry : weapons.entrySet())
 		{
-			DEHWeapon weapon = getWeapon(i);
+			Integer i = entry.getKey();
+			DEHWeapon weapon = entry.getValue();
 			DEHWeapon original = getSourcePatch().getWeapon(i);
 			if (weapon == null)
 				continue;
@@ -692,9 +695,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (int i = 0; i < getAmmoCount(); i++)
+		for (Map.Entry<Integer, DEHAmmo> entry : ammo.entrySet())
 		{
-			DEHAmmo ammo = getAmmo(i);
+			Integer i = entry.getKey();
+			DEHAmmo ammo = entry.getValue();
 			DEHAmmo original = getSourcePatch().getAmmo(i);
 			if (ammo == null)
 				continue;
