@@ -14,7 +14,7 @@ import net.mtrop.doom.tools.decohack.patches.PatchMBF21;
  * Patch context for MBF21.
  * @author Xaser Acheron
  */
-public class PatchMBF21Context extends AbstractPatchBoomContext
+public class PatchMBF21Context extends PatchExtendedContext
 {
 	private static final DEHPatchBoom MBF21PATCH = new PatchMBF21();
 	

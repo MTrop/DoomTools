@@ -1,9 +1,11 @@
 DecoHack
 --------
 
-### Changed for 0.18.2
+### Changed for 0.19.0
 
 * `Fixed` `A_JumpIfHealthBelow` did not accept negative values for the health reference value. (Issue #53)
+* `Added` Auto-things and free-able things (all patches). (Enhancement #50)
+* `Added` DSDHACKED patch support. (Enhancement #42)
 
 
 ### Changed for 0.18.1

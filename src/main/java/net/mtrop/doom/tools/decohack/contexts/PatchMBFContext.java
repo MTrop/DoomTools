@@ -14,7 +14,7 @@ import net.mtrop.doom.tools.decohack.patches.PatchMBF;
  * Patch context for MBF (Marine's Best Friend).
  * @author Matthew Tropiano
  */
-public class PatchMBFContext extends AbstractPatchBoomContext
+public class PatchMBFContext extends PatchBoomContext
 {
 	private static final DEHPatchBoom MBFPATCH = new PatchMBF();
 	

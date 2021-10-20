@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.contexts;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -53,7 +54,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
-	 * returning it if it has already been shadowed.
+	 * or returning it if it has already been shadowed.
 	 * @param <T> the object type.
 	 * @param index the object index.
 	 * @param targetMap the target map to put the object into.
@@ -75,7 +76,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	/**
 	 * Copies an object from the source patch to the editable object,
-	 * returning it if it has already been copied.
+	 * or returning it if it has already been copied.
 	 * @param <T> the object type.
 	 * @param key the object key.
 	 * @param targetMap the target map to put the object into.
@@ -153,6 +154,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		return shadow(index, ammo, (i) -> getSourcePatch().getAmmo(i));
 	}
+	
+	/**
+	 * @return the set of used/fetched ammo indices.
+	 */
+	public Set<Integer> getUsedAmmoIndices()
+	{
+		return ammo.keySet();
+	}
 
 	@Override
 	public int getSoundCount() 
@@ -164,6 +173,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public DEHSound getSound(int index)
 	{
 		return shadow(index, sounds, (i) -> getSourcePatch().getSound(i));
+	}
+
+	/**
+	 * @return the set of used/fetched sound indices.
+	 */
+	public Set<Integer> getUsedSoundIndices()
+	{
+		return sounds.keySet();
 	}
 
 	@Override
@@ -178,6 +195,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return shadow(index, things, (i) -> getSourcePatch().getThing(i));
 	}
 
+	/**
+	 * @return the set of used/fetched thing indices.
+	 */
+	public Set<Integer> getUsedThingIndices()
+	{
+		return things.keySet();
+	}
+
 	@Override
 	public int getWeaponCount()
 	{
@@ -190,6 +215,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return shadow(index, weapons, (i) -> getSourcePatch().getWeapon(i));
 	}
 
+	/**
+	 * @return the set of used/fetched weapon indices.
+	 */
+	public Set<Integer> getUsedWeaponIndices()
+	{
+		return weapons.keySet();
+	}
+
 	@Override
 	public int getStateCount()
 	{
@@ -200,6 +233,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public DEHState getState(int index) 
 	{
 		return shadow(index, states, (i) -> getSourcePatch().getState(i));
+	}
+
+	/**
+	 * @return the set of used/fetched state indices.
+	 */
+	public Set<Integer> getUsedStateIndices()
+	{
+		return states.keySet();
 	}
 
 	@Override
@@ -218,6 +259,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public DEHActionPointer getActionPointer(int index)
 	{
 		return copy(index, pointers, (i) -> getSourcePatch().getActionPointer(i));
+	}
+
+	/**
+	 * @return the set of used/fetched pointer indices.
+	 */
+	public Set<Integer> getUsedActionPointerIndices()
+	{
+		return pointers.keySet();
 	}
 
 	/**
@@ -605,7 +654,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		writer.append(CRLF);
 	
 		// Version
-		writer.append("Doom version = " + getVersion()).append(CRLF);
+		writer.append("Doom version = ").append(String.valueOf(getVersion())).append(CRLF);
 		writer.append("Patch format = 6").append(CRLF);
 		writer.append(CRLF);
 		writer.append(CRLF);
@@ -620,10 +669,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	protected void writeCommonPatchBody(Writer writer) throws IOException
 	{
-		for (Map.Entry<Integer, DEHThing> entry : things.entrySet())
+		for (Integer i : getUsedThingIndices())
 		{
-			Integer i = entry.getKey();
-			DEHThing thing = entry.getValue();
+			DEHThing thing = getThing(i);
 			DEHThing original = getSourcePatch().getThing(i);
 			if (thing == null)
 				continue;
@@ -641,10 +689,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (Map.Entry<Integer, DEHState> entry : states.entrySet())
+		for (Integer i : getUsedStateIndices())
 		{
-			Integer i = entry.getKey();
-			DEHState state = entry.getValue();
+			DEHState state = getState(i);
 			DEHState original = getSourcePatch().getState(i);
 			if (state == null)
 				continue;
@@ -657,10 +704,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (Map.Entry<Integer, DEHSound> entry : sounds.entrySet())
+		for (Integer i : getUsedSoundIndices())
 		{
-			Integer i = entry.getKey();
-			DEHSound sound = entry.getValue();
+			DEHSound sound = getSound(i);
 			DEHSound original = getSourcePatch().getSound(i);
 			if (sound == null)
 				continue;
@@ -674,10 +720,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (Map.Entry<Integer, DEHWeapon> entry : weapons.entrySet())
+		for (Integer i : getUsedWeaponIndices())
 		{
-			Integer i = entry.getKey();
-			DEHWeapon weapon = entry.getValue();
+			DEHWeapon weapon = getWeapon(i);
 			DEHWeapon original = getSourcePatch().getWeapon(i);
 			if (weapon == null)
 				continue;
@@ -695,10 +740,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		}
 		writer.flush();
 	
-		for (Map.Entry<Integer, DEHAmmo> entry : ammo.entrySet())
+		for (Integer i : getUsedAmmoIndices())
 		{
-			Integer i = entry.getKey();
-			DEHAmmo ammo = entry.getValue();
+			DEHAmmo ammo = getAmmo(i);
 			DEHAmmo original = getSourcePatch().getAmmo(i);
 			if (ammo == null)
 				continue;

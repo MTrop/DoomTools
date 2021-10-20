@@ -21,7 +21,7 @@ import net.mtrop.doom.tools.struct.IntervalMap;
  * Patch context for DSDHacked.
  * @author Matthew Tropiano
  */
-public class PatchDSDHackedContext extends AbstractPatchBoomContext
+public class PatchDSDHackedContext extends PatchMBF21Context
 {
 	private static final DEHPatchBoom DSDHACKEDPATCH = new PatchDSDHacked();
 	
@@ -38,8 +38,8 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	public PatchDSDHackedContext()
 	{
 		super();
-		this.soundIndexMap = new TreeMap<>();
-		this.spriteIndexMap = new TreeMap<>();
+		this.soundIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.spriteIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.nextSoundIndex = PatchDSDHacked.NEW_SOUND_INDEX_START;
 		this.nextSpriteIndex = PatchDSDHacked.NEW_SPRITE_INDEX_START;
 		this.freeStatesMap = new IntervalMap<>(0, Integer.MAX_VALUE, false);
@@ -68,7 +68,7 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	@Override
 	public DEHFeatureLevel getSupportedFeatureLevel() 
 	{
-		return DEHFeatureLevel.MBF21;
+		return DEHFeatureLevel.DSDHACKED;
 	}
 
 	@Override
@@ -243,9 +243,42 @@ public class PatchDSDHackedContext extends AbstractPatchBoomContext
 	public void writePatch(Writer writer, String comment) throws IOException
 	{
 		super.writePatch(writer, comment);
-		// TODO: Finish this.
-		// Write new sounds
-		// Write new sprites.
+		
+		// SPRITES
+		boolean spritesHeader = false;
+		for (Map.Entry<String, Integer> entry : spriteIndexMap.entrySet())
+		{
+			if (!spritesHeader)
+			{
+				writer.append("[SPRITES]").append(CRLF);
+				spritesHeader = true;
+			}
+
+			writer.append(String.valueOf(entry.getValue()))
+				.append(" = ")
+				.append(String.valueOf(entry.getKey().toUpperCase()))
+				.append(CRLF);
+		}
+		if (spritesHeader)
+			writer.append(CRLF).flush();
+
+		// SOUNDS
+		boolean soundHeader = false;
+		for (Map.Entry<String, Integer> entry : soundIndexMap.entrySet())
+		{
+			if (!soundHeader)
+			{
+				writer.append("[SOUNDS]").append(CRLF);
+				soundHeader = true;
+			}
+
+			writer.append(String.valueOf(entry.getValue()))
+				.append(" = ")
+				.append(String.valueOf(entry.getKey().toUpperCase()))
+				.append(CRLF);
+		}
+		if (soundHeader)
+			writer.append(CRLF).flush();
 	}
 	
 }

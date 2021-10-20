@@ -15,7 +15,7 @@ import net.mtrop.doom.tools.decohack.patches.PatchUDoom19;
  * Biggest difference to {@link PatchDoom19Context} is the string table.
  * @author Matthew Tropiano
  */
-public class PatchUltimateDoom19Context extends AbstractPatchDoom19Context
+public class PatchUltimateDoom19Context extends PatchDoom19Context
 {
 	private static final DEHPatchDoom19 UDOOM19PATCH = new PatchUDoom19();
 	

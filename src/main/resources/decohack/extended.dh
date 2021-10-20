@@ -6,5 +6,6 @@ using extended
 #include "constants/extended.dh"
 
 state free S_FREE_START to S_FREE_END // free the "free" states immediately
+thing free MT_EXTRA00 to MT_EXTRA99   // free the "free" things immediately
 
 #endif

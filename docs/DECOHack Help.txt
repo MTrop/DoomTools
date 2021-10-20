@@ -298,19 +298,19 @@ The duration on every state is 0 except for the last one, which simulates
 several actions on "one" state. This works for action pointers that also
 have parameters. The following: 
 
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0)
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0)
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0)
-    TNT1 A 4 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0)
+    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
+    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
+    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
+    TNT1 A 4 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
 
 
 ...could be collapsed to:
 
     TNT1 A 4 { 
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0)
+        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
+        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
+        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
+        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
     }
 
 
@@ -334,7 +334,7 @@ end up doing the same thing for multiple things:
     MANC H 10 Bright A_FatAttack3
 
 
-Individual state manipulation can have partial change to its properties
+Individual state manipulation can have partial changes to its properties
 instead of using a full state definition line:
 
     state <INTEGER>
@@ -953,6 +953,85 @@ the same Spawn state, the same Missile state, etc.).
 
 
 ------------------------------------------------------------------------------
+Auto-Things
+------------------------------------------------------------------------------
+
+Things can be freed and filled automatically like states. To free a single
+thing slot:
+
+    thing free <INTEGER>
+
+
+To free an explicit range (inclusive):
+
+    thing free <INTEGER> to <INTEGER>
+
+
+Examples:
+
+    thing free 151
+    thing free 151 to 250
+
+
+In order to fill the next free Thing, you need to define Things using the 
+"auto" keyword:  
+
+    auto thing <IDENTIFIER> [ : thing ( <INTEGER> | <IDENTIFIER> ) ] [ <STRING> ]
+    {
+    	// ... same thing body like always ...
+    }
+
+
+Note that you'll need to use an unused identifier to represent the new Thing
+when you need to refer to its index later. The identifiers are 
+case-insensitive.
+
+Examples:
+
+    auto thing NewImp "New Imp"
+    {
+    	// ... code ...
+    }
+
+    auto thing BetterImp : thing NewImp "Better Imp"
+    {
+    	// ... code ...
+    }
+
+
+...then in action pointer functions (and other places that use thing 
+references), you can refer to them later by using:
+
+	A_SpawnThing(thing NewImp)
+	A_RandomJump(thing NewImp death, 128)    // Thing state label
+
+
+Any place that would ordinarily use a Thing index can use an auto-thing 
+identifier in place of the index.
+
+Things that are edited directly or auto-filled this way are not "free" 
+anymore, similar to "free" states.
+
+You can modify auto-filled Things later (remember, definitions cascade!) by
+writing a normal Thing definition body:
+
+    thing BetterImp
+    {
+    	// ... code ...
+    }
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack will not warn you about Thing slots with a
+      special purpose being filled this way! Most of the time, auto-
+      things are useful for EXTENDED and higher patch types. Be
+      VERY careful if you use this feature in Vanilla or Boom!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+------------------------------------------------------------------------------
 Thing Editor Keys
 ------------------------------------------------------------------------------
 
@@ -1130,6 +1209,26 @@ Miscellaneous data is in the miscellaneous block:
 
 
 ==============================================================================
+===== SPECIAL: DSDHACKED Patch Behavior 
+==============================================================================
+
+DSDHACKED patches introduce a way to extend sprite names and sounds. DECOHack
+will extend these automatically whenever a new sprite is referred to in state
+definitions or a new sound is referred to in parameters or in sound 
+definitions as though they already exist.
+
+If any sprite name uses characters that are not available (or legal) in an 
+identifier, you need to wrap the name in quotes:
+
+	"TR-X" ABCD 5 A_Chase  
+	"00BF" G 10 Bright
+	
+
+These features are only enabled for patches that employ a DSDHACKED feature 
+set!
+
+
+==============================================================================
 ===== Preprocessor
 ==============================================================================
 
@@ -1163,6 +1262,7 @@ There are a few #include paths that are aliased in DECOHack for convenience:
     <mbf>       "classpath:decohack/mbf.dh"
     <extended>  "classpath:decohack/extended.dh"
     <mbf21>     "classpath:decohack/mbf21.dh"
+    <dsdhacked> "classpath:decohack/dsdhacked.dh"
     <friendly>  "classpath:decohack/constants/friendly_things.dh"
 
 For example:
@@ -1292,14 +1392,25 @@ block.
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Extended-DEH-compatible ports, plus the "using extended" line, AND 
-    freeing up the extra extended states immediately for use.
+    freeing up the extra extended states immediately for use, AND freeing 
+    the things from 151 to 250 (the extended things) for auto-thing fill.
 
 #include "classpath:decohack/mbf21.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF 21-compliant ports (which includes Extended-DEH), plus the 
+    MBF21-compliant ports (which includes Extended-DEH), plus the 
     "using mbf21" line, AND freeing up the extra extended states 
-    immediately for use.
+    immediately for use, AND freeing the things from 151 to 250 (the
+    extended things) for auto-thing fill. 
+
+#include "classpath:decohack/dsdhacked.dh"
+
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    DSDHACKED-compliant ports (which includes MBF21), plus the 
+    "using dsdhacked" line, AND freeing up the states from 1100 to the
+    state max, freeing the things from 151 to the thing max for 
+    auto-thing fill, and allows new sound and sprite definitions 
+    automatically. 
 
 ..............................................................................
 

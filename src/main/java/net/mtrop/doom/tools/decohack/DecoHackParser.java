@@ -24,9 +24,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import net.mtrop.doom.tools.decohack.contexts.AbstractPatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
-import net.mtrop.doom.tools.decohack.contexts.AbstractPatchDoom19Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
@@ -397,7 +395,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		if (context.supports(DEHFeatureLevel.BOOM))
 		{
-			if (!parseStringEntryList((AbstractPatchBoomContext)context))
+			if (!parseStringEntryList((PatchBoomContext)context))
 				return false;
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
@@ -408,7 +406,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (context.supports(DEHFeatureLevel.DOOM19))
 		{
-			if (!parseStringEntryList((AbstractPatchDoom19Context)context))
+			if (!parseStringEntryList((PatchDoom19Context)context))
 				return false;
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
@@ -424,7 +422,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a string block (Doom 1.9 entries).
-	private boolean parseStringEntryList(AbstractPatchDoom19Context context)
+	private boolean parseStringEntryList(PatchDoom19Context context)
 	{
 		Integer stringIndex;
 		while ((stringIndex = matchPositiveInteger()) != null)
@@ -450,7 +448,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a string block (Boom mnemonic entries).
-	private boolean parseStringEntryList(AbstractPatchBoomContext context) 
+	private boolean parseStringEntryList(PatchBoomContext context) 
 	{
 		String stringKey;
 		while ((stringKey = matchIdentifier()) != null)
@@ -649,7 +647,7 @@ public final class DecoHackParser extends Lexer.Parser
 				seconds = (minutes * 60) + seconds;
 			}
 			
-			((AbstractPatchBoomContext)context).setParSeconds(map, seconds);
+			((PatchBoomContext)context).setParSeconds(map, seconds);
 		}
 
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
@@ -3228,8 +3226,16 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return false;
+		else if (currentIsNextStateKeyword()) // Exclude control keywords if identifier token type.
+			return false;
 		else
-			return patch.getSpriteIndex(currentToken().getLexeme()) != null;
+		{
+			String sprite = currentToken().getLexeme();
+			if (sprite.length() != 4)
+				return false;
+			
+			return patch.getSpriteIndex(sprite) != null;
+		}
 	}
 
 	// Checks if the current token is an identifier with a specific lexeme.
