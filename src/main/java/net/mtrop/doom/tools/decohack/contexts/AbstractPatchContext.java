@@ -24,6 +24,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
+import net.mtrop.doom.tools.struct.IntervalMap;
 
 /**
  * Abstract patch context.
@@ -44,13 +45,12 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	private int freeStateCount;
 	private int freePointerStateCount;
-	private boolean[] freeStates;
-	private boolean[] protectedStates;
-
 	private int freeThingCount;
-	private boolean[] freeThings;
-	
-	private Map<String, Integer> autoThingMap;
+
+	protected IntervalMap<Boolean> freeStatesMap;
+	protected IntervalMap<Boolean> protectedStatesMap;
+	protected IntervalMap<Boolean> freeThingsMap;
+	protected Map<String, Integer> autoThingMap;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -112,12 +112,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
 		this.freeStateCount = 0;
-		this.freeStates = new boolean[getSourcePatch().getStateCount()];
-		this.protectedStates = new boolean[getSourcePatch().getStateCount()];
+		this.freeStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
+		this.protectedStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 
 		this.freeThingCount = 0;
-		this.freeThings = new boolean[getSourcePatch().getThingCount()];
-		
+		this.freeThingsMap = new IntervalMap<>(0, getThingCount() - 1, false);
 		this.autoThingMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		// Protect first two states from clear.
@@ -338,9 +337,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isFreeState(int index)
 	{
-		return freeStates[index];
+		checkIndexRange(index, freeStatesMap);
+		return freeStatesMap.getOrDefault(index, false);
 	}
-	
+
 	/**
 	 * Marks a state as "free" or not.
 	 * @param index the state index to mark as free.
@@ -354,8 +354,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		if (isProtectedState(index))
 			throw new IllegalStateException("State " + index + " is a protected state.");
 		
-		boolean prev = freeStates[index]; 
-		freeStates[index] = state;
+		checkIndexRange(index, freeStatesMap);
+
+		boolean prev = freeStatesMap.get(index); 
+		freeStatesMap.set(index, state);
 		if (prev && !state)
 		{
 			freeStateCount--;
@@ -381,6 +383,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setFreeState(int min, int max, boolean state)
 	{
+		checkIndexRange(min, freeStatesMap);
+		checkIndexRange(max, freeStatesMap);
 		int a = Math.min(min, max);
 		int b = Math.max(min, max);
 		while (a <= b)
@@ -395,7 +399,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public boolean isProtectedState(int index)
 	{
-		return protectedStates[index];
+		checkIndexRange(index, protectedStatesMap);
+		return protectedStatesMap.getOrDefault(index, false);
 	}
 
 	/**
@@ -406,7 +411,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setProtectedState(int index, boolean state)
 	{
-		protectedStates[index] = state;
+		checkIndexRange(index, protectedStatesMap);
+		protectedStatesMap.set(index, state);
 	}
 
 	/**
@@ -418,6 +424,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setProtectedState(int min, int max, boolean state)
 	{
+		checkIndexRange(min, protectedStatesMap);
+		checkIndexRange(max, protectedStatesMap);
 		int a = Math.min(min, max);
 		int b = Math.max(min, max);
 		while (a <= b)
@@ -550,13 +558,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 	/**
 	 * Gets if a thing is flagged as "free".
-	 * @param index the index.
+	 * @param thingIndex the index.
 	 * @return true if so, false if not.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 */
-	public boolean isFreeThing(int index)
+	public boolean isFreeThing(int thingIndex)
 	{
-		return freeThings[index];
+		checkIndexRange(thingIndex, freeThingsMap);
+		return freeThingsMap.get(thingIndex);
 	}
 
 	/**
@@ -567,8 +576,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setFreeThing(int index, boolean state)
 	{
-		boolean prev = freeThings[index]; 
-		freeThings[index] = state;
+		checkIndexRange(index, freeThingsMap);
+		
+		boolean prev = freeThingsMap.get(index); 
+		freeThingsMap.set(index, state);
 		if (prev && !state)
 			freeThingCount--;
 		else if (!prev && state)
@@ -584,6 +595,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 */
 	public void setFreeThing(int min, int max, boolean state)
 	{
+		checkIndexRange(min, freeThingsMap);
+		checkIndexRange(max, freeThingsMap);
+		
 		int a = Math.min(min, max);
 		int b = Math.max(min, max);
 		while (a <= b)
@@ -608,9 +622,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * Sets an auto-allocated thing index via an identifier (case-insensitive).
 	 * @param identifier the identifier.
 	 * @param index the corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 */
 	public void setAutoThingIndex(String identifier, int index)
 	{
+		checkIndexRange(index, freeThingsMap);
 		autoThingMap.put(identifier, index);
 	}
 	
@@ -618,6 +634,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * Gets an auto-allocated thing index via an identifier (case-insensitive).
 	 * @param identifier the identifier.
 	 * @return the corresponding index, or null if no corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 */
 	public Integer getAutoThingIndex(String identifier)
 	{
@@ -636,6 +653,13 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		writeCommonPatchBody(writer);
 	}
 	
+	// Throws IndexOutOfBoundsException if out of range.
+	protected void checkIndexRange(int index, IntervalMap<?> map)
+	{
+		if (index < 0 || index > map.getMaxIndex())
+			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + map.getMaxIndex());
+	}
+
 	/**
 	 * Writes the patch header.
 	 * @param writer the output writer.

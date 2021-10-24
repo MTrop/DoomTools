@@ -15,7 +15,6 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchDSDHacked;
-import net.mtrop.doom.tools.struct.IntervalMap;
 
 /**
  * Patch context for DSDHacked.
@@ -31,10 +30,6 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	private int nextSoundIndex;
 	private int nextSpriteIndex;
 	
-	private IntervalMap<Boolean> freeStatesMap;
-	private IntervalMap<Boolean> protectedStatesMap;
-	private IntervalMap<Boolean> freeThingsMap;
-	
 	public PatchDSDHackedContext()
 	{
 		super();
@@ -42,9 +37,6 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		this.spriteIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.nextSoundIndex = PatchDSDHacked.NEW_SOUND_INDEX_START;
 		this.nextSpriteIndex = PatchDSDHacked.NEW_SPRITE_INDEX_START;
-		this.freeStatesMap = new IntervalMap<>(0, Integer.MAX_VALUE, false);
-		this.protectedStatesMap = new IntervalMap<>(0, Integer.MAX_VALUE, false);
-		this.freeThingsMap = new IntervalMap<>(0, Integer.MAX_VALUE, false);
 	}
 	
 	@Override
@@ -102,14 +94,6 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	}
 
 	@Override
-	public boolean isFreeState(int index)
-	{
-		if (index < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
-		return freeStatesMap.get(index, false);
-	}
-
-	@Override
 	public void setFreeState(int index, boolean state)
 	{
 		if (isProtectedState(index))
@@ -120,6 +104,8 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	@Override
 	public void setFreeState(int min, int max, boolean state)
 	{
+		checkIndexRange(min, freeStatesMap);
+		checkIndexRange(max, freeStatesMap);
 		if (min < 0 || max < 0)
 			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
 		if (protectedStatesMap.getValueSet(min, max).contains(true))
@@ -128,26 +114,17 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	}
 
 	@Override
-	public boolean isProtectedState(int index)
-	{
-		if (index < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
-		return protectedStatesMap.get(index, false);
-	}
-
-	@Override
 	public void setProtectedState(int index, boolean state)
 	{
-		if (index < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
-		protectedStatesMap.get(index, state);
+		checkIndexRange(index, protectedStatesMap);
+		protectedStatesMap.set(index, state);
 	}
 
 	@Override
 	public void setProtectedState(int min, int max, boolean state)
 	{
-		if (min < 0 || max < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
+		checkIndexRange(min, protectedStatesMap);
+		checkIndexRange(max, protectedStatesMap);
 		protectedStatesMap.set(min, max, state);
 	}
 	
@@ -200,19 +177,6 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	}
 
 	/**
-	 * Gets if a thing is flagged as "free".
-	 * @param thingIndex the index.
-	 * @return true if so, false if not.
-	 * @throws IndexOutOfBoundsException if the index is out of bounds.
-	 */
-	public boolean isFreeThing(int thingIndex)
-	{
-		if (thingIndex < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
-		return freeThingsMap.get(thingIndex);
-	}
-
-	/**
 	 * Sets a thing as "free" or not. 
 	 * @param index the thing index.
 	 * @param state true to set as "free", false to unset.
@@ -220,8 +184,7 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	 */
 	public void setFreeThing(int index, boolean state)
 	{
-		if (index < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
+		checkIndexRange(index, freeThingsMap);
 		freeThingsMap.set(index, state);
 	}
 
@@ -234,8 +197,8 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 	 */
 	public void setFreeThing(int min, int max, boolean state)
 	{
-		if (min < 0 || max < 0)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0.");
+		checkIndexRange(min, freeThingsMap);
+		checkIndexRange(max, freeThingsMap);
 		freeThingsMap.set(min, max, state);
 	}
 	
@@ -248,6 +211,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		boolean spritesHeader = false;
 		for (Map.Entry<String, Integer> entry : spriteIndexMap.entrySet())
 		{
+			if (entry.getValue() == getSourcePatch().getSpriteIndex(entry.getKey()))
+				continue;
+			
 			if (!spritesHeader)
 			{
 				writer.append("[SPRITES]").append(CRLF);
@@ -266,6 +232,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		boolean soundHeader = false;
 		for (Map.Entry<String, Integer> entry : soundIndexMap.entrySet())
 		{
+			if (entry.getValue() == getSourcePatch().getSoundIndex(entry.getKey()))
+				continue;
+
 			if (!soundHeader)
 			{
 				writer.append("[SOUNDS]").append(CRLF);

@@ -620,7 +620,7 @@ Example:
       IMPORTANT: Using "goto" or other "jump" actions to jump to 
       labels/state pointers that you have not set or re-declared 
       within a "states" block will jump to whatever state is already 
-      declared for that Weapon!
+      declared for that label!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -869,7 +869,7 @@ Example:
       IMPORTANT: Using "goto" or other "jump" actions to jump to 
       labels/state pointers that you have not set or re-declared 
       within a "states" block will jump to whatever state is already 
-      declared for that Thing!
+      declared for that label!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -1010,7 +1010,7 @@ Any place that would ordinarily use a Thing index can use an auto-thing
 identifier in place of the index.
 
 Things that are edited directly or auto-filled this way are not "free" 
-anymore, similar to "free" states.
+anymore, similar to how "free" states work.
 
 You can modify auto-filled Things later (remember, definitions cascade!) by
 writing a normal Thing definition body:
@@ -1224,8 +1224,8 @@ identifier, you need to wrap the name in quotes:
 	"00BF" G 10 Bright
 	
 
-These features are only enabled for patches that employ a DSDHACKED feature 
-set!
+NOTE: These features are only enabled for patches that employ a DSDHACKED 
+feature set!
 
 
 ==============================================================================

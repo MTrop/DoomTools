@@ -186,7 +186,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
 
 	private static final FutureLabels EMPTY_LABELS = null;
-	private static final int PLACEHOLDER_LABEL = 1234567890;
+	private static final int PLACEHOLDER_LABEL = -1234567890;
 
 	/**
 	 * Reads a DECOHack script from a String of text.
@@ -1018,6 +1018,35 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a thing block.
 	private boolean parseThingBlock(AbstractPatchContext<?> context)
 	{
+		// free things?
+		if (matchIdentifierIgnoreCase(KEYWORD_FREE))
+		{
+			Integer min;
+			if ((min = matchPositiveInteger()) != null)
+			{
+				if ((min = verifyThingIndex(context, min)) == null)
+					return false;
+				
+				if (!matchIdentifierIgnoreCase(KEYWORD_TO))
+				{
+					context.setFreeThing(min, true);
+					return true;
+				}
+				
+				Integer max;
+				if ((max = matchThingIndex(context)) == null)
+					return false;
+				
+				context.setFreeThing(min, max, true);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected thing index after \"%s\".", KEYWORD_FREE);
+				return false;
+			}
+		}
+		
 		Integer slot;
 		if ((slot = matchThingIndex(context)) == null)
 			return false;
@@ -1046,7 +1075,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			return true;
 		}
-		// free things or thing states.
+		// free thing states.
 		else if (matchIdentifierIgnoreCase(KEYWORD_FREE))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_STATES))
@@ -1055,26 +1084,6 @@ public final class DecoHackParser extends Lexer.Parser
 				return true;
 			}
 			
-			Integer min;
-			if ((min = matchPositiveInteger()) != null)
-			{
-				if ((min = verifyThingIndex(context, min)) == null)
-					return false;
-				
-				if (!matchIdentifierIgnoreCase(KEYWORD_TO))
-				{
-					context.setFreeThing(min, true);
-					return true;
-				}
-				
-				Integer max;
-				if ((max = matchThingIndex(context)) == null)
-					return false;
-				
-				context.setFreeThing(min, max, true);
-				return true;
-			}
-
 			if (!currentIsThingState())
 			{
 				addErrorMessage("Expected thing state name or \"%s\" or a thing index after \"%s\".", KEYWORD_STATES, KEYWORD_FREE);
@@ -1142,7 +1151,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		while (currentType(DecoHackKernel.TYPE_NUMBER))
+		while (currentType(DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			Integer id;
 			if ((id = matchThingIndex(context)) == null)
@@ -1784,7 +1793,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 
 			Integer other;
-			if ((other = matchThingIndex(context)) == null)
+			if ((other = matchWeaponIndex(context)) == null)
 				return false;
 
 			DEHWeapon temp = new DEHWeapon();
@@ -2231,7 +2240,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseActorStateSet(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// state label.
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 		{
 			addErrorMessage("Expected state label.");
 			return false;
@@ -2242,33 +2251,54 @@ public final class DecoHackParser extends Lexer.Parser
 		ParsedState parsed = new ParsedState();
 		StateFillCursor stateCursor = new StateFillCursor();
 		
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		Integer loopIndex = null;
+		boolean startedWithLabel = false;
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 		{
-			labelList.add(currentToken().getLexeme());
-			nextToken();
+			String label = null;
 			
-			if (!matchType(DecoHackKernel.TYPE_COLON))
+			// accumulate labels
+			do {
+				if (label != null)
+				{
+					loopIndex = null;
+					labelList.add(label);
+				}
+				
+				label = currentToken().getLexeme();
+				nextToken();
+				
+			} while (matchType(DecoHackKernel.TYPE_COLON) && currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING));
+			
+			if (!startedWithLabel && labelList.isEmpty())
 			{
-				addErrorMessage("Expected ':' after state label.");
+				addErrorMessage("Expected ':' after \"%s\" - a state label is required, here.", label);
 				return false;
+			}
+			else
+			{
+				startedWithLabel = true;
 			}
 
 			Integer startIndex;
-			Integer loopIndex = null;
-			if (currentIsSpriteIndex(context))
+			Integer spriteIndex;
+			
+			parsed.reset();
+			
+			if ((spriteIndex = context.getSpriteIndex(label)) == null)
 			{
-				do {
-					parsed.reset();
-					if (!parseStateLine(context, actor, parsed))
-						return false;
-					if ((startIndex = fillStates(context, futureLabels, parsed, stateCursor, false)) == null)
-						return false;
-					if (loopIndex == null)
-						loopIndex = startIndex;
-					while (!labelList.isEmpty())
-						futureLabels.backfill(context, actor, labelList.pollFirst(), startIndex);
-				} while (currentIsSpriteIndex(context));
+				addErrorMessage("Expected valid sprite name. \"%s\" is not a valid name.", label);
+				return false;
 			}
+			
+			if (!parseStateLineData(spriteIndex, context, actor, parsed, false, null))
+				return false;
+			if ((startIndex = fillStates(context, futureLabels, parsed, stateCursor, false)) == null)
+				return false;
+			if (loopIndex == null)
+				loopIndex = startIndex;
+			while (!labelList.isEmpty())
+				futureLabels.backfill(context, actor, labelList.pollFirst(), startIndex);
 			
 			// Parse next state.
 			if (currentIsNextStateKeyword())
@@ -2624,11 +2654,21 @@ public final class DecoHackParser extends Lexer.Parser
 	// requireAction is either true, false, or null. If null, no check is performed. 
 	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state, boolean singleFrame, Boolean requireAction) 
 	{
-		if ((state.spriteIndex = matchSpriteIndexName(context)) == null)
+		Integer spriteIndex;
+		if ((spriteIndex = matchSpriteIndexName(context)) == null)
 		{
-			addErrorMessage("Expected valid sprite name.");
-			return false;				
+			addErrorMessage("Expected valid sprite name. \"%s\" is not a valid name.", currentToken().getLexeme());
+			return false;
 		}
+		
+		return parseStateLineData(spriteIndex, context, actor, state, singleFrame, requireAction);
+	}
+
+	// Parses the rest of the state line. If true is returned, the input state is altered.
+	// requireAction is either true, false, or null. If null, no check is performed. 
+	private boolean parseStateLineData(int spriteIndex, AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state, boolean singleFrame, Boolean requireAction)
+	{
+		state.spriteIndex = spriteIndex;
 		
 		if ((state.frameList = matchFrameIndices()) == null)
 		{
@@ -2689,7 +2729,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		return true;
 	}
-
+	
 	// Parses a mandatory state index.
 	private Integer parseStateIndex(AbstractPatchContext<?> context)
 	{
@@ -2711,6 +2751,15 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			}
 			return matchIdentifier();
+		}
+		else if (currentType(DecoHackKernel.TYPE_STRING))
+		{
+			if (actor == null)
+			{
+				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentToken().getLexeme());
+				return null;
+			}
+			return matchString();
 		}
 		else
 			return matchStateIndex(context);
@@ -3233,7 +3282,6 @@ public final class DecoHackParser extends Lexer.Parser
 			String sprite = currentToken().getLexeme();
 			if (sprite.length() != 4)
 				return false;
-			
 			return patch.getSpriteIndex(sprite) != null;
 		}
 	}
@@ -3328,7 +3376,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if ((slot = context.getAutoThingIndex(autoThingName)) == null)
 			{
-				addErrorMessage("Expected valid auto-thing identifier: " + autoThingName + " is not a valid auto-thing.");
+				addErrorMessage("Expected valid auto-thing identifier: \"" + autoThingName + "\" is not a valid auto-thing.");
 				return null;
 			}
 			else

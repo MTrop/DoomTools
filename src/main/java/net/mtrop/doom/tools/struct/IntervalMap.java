@@ -322,7 +322,7 @@ public class IntervalMap<V>
 	 * @param ifNull if <code>get(index)</code> would return <code>null</code>, return this.
 	 * @return the corresponding value, or <code>ifNull</code> if the value would be null.
 	 */
-	public V get(long index, V ifNull)
+	public V getOrDefault(long index, V ifNull)
 	{
 		V out;
 		if ((out = get(index)) == null)
