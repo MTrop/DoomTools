@@ -50,6 +50,14 @@ entirely obsolete, from a design standpoint.
 There's nothing wrong in forcing users to write more readable code!
 
 
+### [DECOHack] The parser will "match" tokens, and other times merely checks token types before manually advancing. Why?
+
+Error message manipulation. *Whenever possible,* it's better to point out to the user 
+the exact location of where the problem lies, and not after. The parser ingests tokens in
+a way that facilitates this, most of the time. If you modify the parser, err on the side of
+what makes an informative, convey-able error!
+
+
 ### [WadScript] Why is there no WADREPLACE() built-in for replacing WAD entries?
 
 "Replacing" an entry is essentially removing and adding at the same index, but you can

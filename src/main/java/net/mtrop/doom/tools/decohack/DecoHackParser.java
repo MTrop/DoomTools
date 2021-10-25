@@ -1239,9 +1239,39 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses an "auto thing" block.
 	private boolean parseThingAutoBlock(final AbstractPatchContext<?> context)
 	{
-		// TODO: Finish this, call parseThingDefinitionBlock()
-		addErrorMessage("UNFINISHED");
-		return false;
+		String thingName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected thing name after \"%s\".", KEYWORD_THING);
+			return false;			
+		}
+		
+		if ((thingName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR THING.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getAutoThingIndex(thingName)) != null)
+		{
+			addErrorMessage("Expected valid thing identifier for new auto-thing: \"%s\" is already in use!", thingName);
+			return false;
+		}
+		
+		if ((slot = context.findNextFreeThing(lastAutoThingIndex)) == null)
+		{
+			addErrorMessage("No more free things for a new auto-thing.");
+			return false;
+		}
+		
+		// Save hint.
+		lastAutoThingIndex = slot;
+
+		// set thing.
+		context.setAutoThingIndex(thingName, slot);
+		
+		return parseThingDefinitionBlock(context, slot);
 	}
 	
 	// Parses the thing copy clauses, marks the thing as not free, and parses the body.
@@ -1658,7 +1688,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_STATE);
+				addErrorMessage("Expected Thing property, \"%s\" directive, or state block start.", KEYWORD_CLEAR);
 				return false;
 			}
 		} // while
@@ -2143,7 +2173,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected '%s', '%s', '%s', or state block start.", KEYWORD_AMMOTYPE, KEYWORD_AMMOPERSHOT, KEYWORD_STATE);
+				addErrorMessage("Expected Weapon property, \"%s\" directive, or state block start.", KEYWORD_CLEAR);
 				return false;
 			}
 		}		
@@ -3650,13 +3680,21 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
+		
+		String name = currentToken().getLexeme();
+		
 		Integer out;
-		if (currentToken().getLexeme().length() == 0)
+		if (name.length() == 0)
 		{
 			nextToken();
 			return 0;
 		}
-		if ((out = patch.getSoundIndex(currentToken().getLexeme())) == null)
+		if (name.length() > 6)
+		{
+			addErrorMessage("Sound name \"%s\" is invalid - sounds cannot exceed 6 characters.", name);
+			return null;
+		}
+		if ((out = patch.getSoundIndex(name)) == null)
 			return null;
 		nextToken();
 		return out;
@@ -3683,10 +3721,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (MAPLUMP_MAPXX.matcher(lexeme).matches())
 		{
-			EpisodeMap out = EpisodeMap.create(
-				0,
-				Integer.parseInt(lexeme.substring(3, lexeme.length()))
-			);
+			EpisodeMap out = EpisodeMap.create(0, Integer.parseInt(lexeme.substring(3, lexeme.length())));
 			nextToken();
 			return out;
 		}
