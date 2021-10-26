@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import net.mtrop.doom.tools.common.Common;
@@ -50,7 +52,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected IntervalMap<Boolean> freeStatesMap;
 	protected IntervalMap<Boolean> protectedStatesMap;
 	protected IntervalMap<Boolean> freeThingsMap;
-	protected Map<String, Integer> autoThingMap;
+	
+	protected Map<String, Integer> thingAliasMap;
+	protected Map<String, Integer> weaponAliasMap;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -117,7 +121,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 		this.freeThingCount = 0;
 		this.freeThingsMap = new IntervalMap<>(0, getThingCount() - 1, false);
-		this.autoThingMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.thingAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -624,10 +629,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param index the corresponding index.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 */
-	public void setAutoThingIndex(String identifier, int index)
+	public void setThingAlias(String identifier, int index)
 	{
 		checkIndexRange(index, freeThingsMap);
-		autoThingMap.put(identifier, index);
+		thingAliasMap.put(identifier, index);
 	}
 	
 	/**
@@ -636,11 +641,58 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @return the corresponding index, or null if no corresponding index.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 */
-	public Integer getAutoThingIndex(String identifier)
+	public Integer getThingAlias(String identifier)
 	{
-		return autoThingMap.get(identifier);
+		return thingAliasMap.get(identifier);
 	}
 
+	/**
+	 * Gets the set of available thing aliases.
+	 * The returned set is a copy and can be manipulated without affecting the main set.
+	 * @return the set of thing alias names.
+	 */
+	public SortedSet<String> getThingAliases()
+	{
+		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		out.addAll(thingAliasMap.keySet());
+		return out;
+	}
+	
+	/**
+	 * Sets an auto-allocated weapon index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @param index the corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setWeaponAlias(String identifier, int index)
+	{
+		checkIndexRange(index, getWeaponCount());
+		weaponAliasMap.put(identifier, index);
+	}
+	
+	/**
+	 * Gets an auto-allocated weapon index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @return the corresponding index, or null if no corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public Integer getWeaponAlias(String identifier)
+	{
+		return weaponAliasMap.get(identifier);
+	}
+
+	/**
+	 * Gets the set of available weapon aliases.
+	 * The returned set is a copy and can be manipulated without affecting the main set.
+	 * @return the set of thing alias names.
+	 */
+	public SortedSet<String> getWeaponAliases()
+	{
+		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		out.addAll(weaponAliasMap.keySet());
+		return out;
+	}
+	
 	/**
 	 * Writes the patch data to a writer.
 	 * @param writer the output writer.
@@ -658,6 +710,13 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		if (index < 0 || index > map.getMaxIndex())
 			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + map.getMaxIndex());
+	}
+
+	// Throws IndexOutOfBoundsException if out of range.
+	protected void checkIndexRange(int index, int count)
+	{
+		if (index < 0 || index >= count)
+			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + (count - 1));
 	}
 
 	/**

@@ -4,7 +4,9 @@ DecoHack
 ### Changed for 0.19.0
 
 * `Fixed` `A_JumpIfHealthBelow` did not accept negative values for the health reference value. (Issue #53)
+* `Fixed` Actor label values were not backfilled properly if the action that used them needed applying to many frames on one line.
 * `Added` Auto-things and free-able things (all patches). (Enhancement #50)
+* `Added` Aliases for things and weapons via `alias thing` and `alias weapon` statements.
 * `Added` DSDHACKED patch support. (Enhancement #42)
 
 

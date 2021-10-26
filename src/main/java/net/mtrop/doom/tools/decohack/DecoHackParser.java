@@ -102,6 +102,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_NEXTSTATE = "nextstate";
 	private static final String KEYWORD_POINTER = "pointer";
 
+	private static final String KEYWORD_ALIAS = "alias";
 	private static final String KEYWORD_AUTO = "auto";
 	private static final String KEYWORD_EACH = "each";
 	private static final String KEYWORD_IN = "in";
@@ -372,6 +373,18 @@ public final class DecoHackParser extends Lexer.Parser
 			else
 			{
 				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_AUTO);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_ALIAS))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_THING))
+				return parseThingAliasLine(context);
+			else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+				return parseWeaponAliasLine(context);
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_WEAPON, KEYWORD_ALIAS);
 				return false;
 			}
 		}
@@ -1015,6 +1028,43 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Parses a thing alias line.
+	private boolean parseThingAliasLine(AbstractPatchContext<?> context)
+	{
+		String thingName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected thing name after \"%s\".", KEYWORD_THING);
+			return false;			
+		}
+		
+		if ((thingName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR THING.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getThingAlias(thingName)) != null)
+		{
+			addErrorMessage("Expected valid thing identifier for alias: \"%s\" is already in use!", thingName);
+			return false;
+		}
+		
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected a positive integer for the thing slot number after \"%s\".", thingName);
+			return false;
+		}
+		else if ((slot = verifyThingIndex(context, slot)) == null)
+		{
+			return false;
+		}
+		
+		context.setThingAlias(thingName, slot);
+		return true;
+	}
+	
 	// Parses a thing block.
 	private boolean parseThingBlock(AbstractPatchContext<?> context)
 	{
@@ -1199,8 +1249,15 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseThingEachFromBlock(final AbstractPatchContext<?> context)
 	{
 		Integer min;
-		if ((min = matchThingIndex(context)) == null)
+		if ((min = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected starting thing index.");
 			return false;
+		}
+		else if ((min = verifyThingIndex(context, min)) == null)
+		{
+			return false;
+		}
 
 		if (!matchIdentifierIgnoreCase(KEYWORD_TO))
 		{
@@ -1209,8 +1266,15 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		Integer max;
-		if ((max = matchThingIndex(context)) == null)
+		if ((max = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected ending thing index after \"%s\".", KEYWORD_TO);
 			return false;
+		}
+		else if ((max = verifyThingIndex(context, max)) == null)
+		{
+			return false;
+		}
 		
 		DEHThingTemplate template = new DEHThingTemplate();
 		if (!parseThingBody(context, template))
@@ -1253,7 +1317,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		Integer slot;
-		if ((slot = context.getAutoThingIndex(thingName)) != null)
+		if ((slot = context.getThingAlias(thingName)) != null)
 		{
 			addErrorMessage("Expected valid thing identifier for new auto-thing: \"%s\" is already in use!", thingName);
 			return false;
@@ -1269,7 +1333,7 @@ public final class DecoHackParser extends Lexer.Parser
 		lastAutoThingIndex = slot;
 
 		// set thing.
-		context.setAutoThingIndex(thingName, slot);
+		context.setThingAlias(thingName, slot);
 		
 		return parseThingDefinitionBlock(context, slot);
 	}
@@ -1806,6 +1870,43 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parses a weapon alias line.
+	private boolean parseWeaponAliasLine(AbstractPatchContext<?> context)
+	{
+		String weaponName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected weapon name after \"%s\".", KEYWORD_THING);
+			return false;			
+		}
+		
+		if ((weaponName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR WEAPON.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getWeaponAlias(weaponName)) != null)
+		{
+			addErrorMessage("Expected valid weapon identifier for alias: \"%s\" is already in use!", weaponName);
+			return false;
+		}
+		
+		if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected a positive integer for the weapon slot number after \"%s\".", weaponName);
+			return false;
+		}
+		else if ((slot = verifyWeaponIndex(context, slot)) == null)
+		{
+			return false;
+		}
+		
+		context.setWeaponAlias(weaponName, slot);
+		return true;
+	}
+	
 	// Parses a weapon block.
 	private boolean parseWeaponBlock(AbstractPatchContext<?> context)
 	{
@@ -1949,8 +2050,15 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseWeaponEachFromBlock(final AbstractPatchContext<?> context)
 	{
 		Integer min;
-		if ((min = matchWeaponIndex(context)) == null)
+		if ((min = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected starting weapon index.");
 			return false;
+		}
+		else if ((min = verifyWeaponIndex(context, min)) == null)
+		{
+			return false;
+		}
 
 		if (!matchIdentifierIgnoreCase(KEYWORD_TO))
 		{
@@ -1959,8 +2067,15 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		Integer max;
-		if ((max = matchWeaponIndex(context)) == null)
+		if ((max = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected ending weapon index after \"%s\".", KEYWORD_TO);
 			return false;
+		}
+		else if ((max = verifyWeaponIndex(context, max)) == null)
+		{
+			return false;
+		}
 		
 		DEHWeaponTemplate template = new DEHWeaponTemplate();
 		if (!parseWeaponBody(context, template))
@@ -3212,7 +3327,7 @@ public final class DecoHackParser extends Lexer.Parser
 				DEHState fillState = context.getState(currentIndex);
 				
 				if (labels != null)
-					parsedAction.dumpLabels(currentIndex, labels);
+					parsedAction.applyLabels(currentIndex, labels);
 				
 				fillState
 					.setSpriteIndex(state.spriteIndex)
@@ -3404,9 +3519,9 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		if ((autoThingName = matchIdentifier()) != null)
 		{
-			if ((slot = context.getAutoThingIndex(autoThingName)) == null)
+			if ((slot = context.getThingAlias(autoThingName)) == null)
 			{
-				addErrorMessage("Expected valid auto-thing identifier: \"" + autoThingName + "\" is not a valid auto-thing.");
+				addErrorMessage("Expected valid thing alias: \"%s\" is not a valid alias.", autoThingName);
 				return null;
 			}
 			else
@@ -3420,7 +3535,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected positive integer or auto-thing identifier for the thing slot number.");
+			addErrorMessage("Expected positive integer or alias after \"%s\" for the thing slot.", KEYWORD_THING);
 			return null;
 		}		
 	}
@@ -3455,9 +3570,23 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer matchWeaponIndex(AbstractPatchContext<?> context) 
 	{
 		Integer slot;
-		if ((slot = matchPositiveInteger()) == null)
+		String autoWeaponName;
+		
+		if ((autoWeaponName = matchIdentifier()) != null)
 		{
-			addErrorMessage("Expected positive integer after \"%s\" for the weapon slot number.", KEYWORD_WEAPON);
+			if ((slot = context.getWeaponAlias(autoWeaponName)) == null)
+			{
+				addErrorMessage("Expected valid weapon identifier: \"%s\" is not a valid alias.", autoWeaponName);
+				return null;
+			}
+			else
+			{
+				return slot;
+			}
+		}
+		else if ((slot = matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected positive integer or alias after \"%s\" for the weapon slot.", KEYWORD_WEAPON);
 			return null;
 		}
 
@@ -4264,11 +4393,10 @@ public final class DecoHackParser extends Lexer.Parser
 			this.labelFields.clear();
 		}
 		
-		void dumpLabels(int stateIndex, FutureLabels labels)
+		void applyLabels(int stateIndex, FutureLabels labels)
 		{
-			while (!labelFields.isEmpty())
+			for (FieldSet fs : labelFields)
 			{
-				FieldSet fs = labelFields.pollFirst();
 				labels.addStateField(stateIndex, fs.type, fs.label);
 			}
 		}

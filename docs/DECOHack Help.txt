@@ -247,7 +247,7 @@ NOTE: Some flags may share names with valid labels. To force DECOHack to
 interpret a parameter as a label, wrap it in quotes (it may be a good idea to
 do this anyway, for readability).
 
-	A_RandomJump("missile", 64)
+    A_RandomJump("missile", 64)
 
 
 Also, similarly, to force DECOHack to interpret a parameter as a flag 
@@ -374,7 +374,7 @@ More examples:
 
     state 16
     {
-    	duration 1
+        duration 1
     }
 
     state 17
@@ -696,6 +696,36 @@ will set to the EXACT same value across all of the specified weapons (i.e.,
 the same Select state, the same Fire state, etc.). 
 
 
+------------------------------------------------------------------------------
+Weapon Aliases
+------------------------------------------------------------------------------
+
+You can specify identifier aliases for weapon slots by using the following:
+
+    alias weapon Shotgun 2
+
+
+...so the next time you refer to it, you can write:
+
+    weapon Shotgun
+    {
+        // ... code
+    }
+
+
+The alias works in every place you can use a weapon reference:  
+
+    weapon Shotgun free states
+
+    weapon 4 : weapon Shotgun "Shotgun Copy"
+    {
+        // ... weapon body
+    }
+
+
+Weapon alias identifiers are case-insensitive.
+
+
 ==============================================================================
 ===== Thing
 ==============================================================================
@@ -953,6 +983,38 @@ the same Spawn state, the same Missile state, etc.).
 
 
 ------------------------------------------------------------------------------
+Thing Aliases
+------------------------------------------------------------------------------
+
+You can specify identifier aliases for thing slots by using the following:
+
+    alias thing DoomImp 12
+
+
+...so the next time you refer to it, you can write:
+
+    thing DoomImp
+    {
+        // ... code
+    }
+
+
+The alias works in every place you can use a thing reference or slot:  
+
+    thing DoomImp free states
+    
+    A_Jump(thing DoomImp death)
+
+    thing 200 : thing DoomImp "Imp Copy"
+    {
+        // ... thing body
+    }
+
+
+Thing alias identifiers are case-insensitive.
+
+
+------------------------------------------------------------------------------
 Auto-Things
 ------------------------------------------------------------------------------
 
@@ -978,32 +1040,32 @@ In order to fill the next free Thing, you need to define Things using the
 
     auto thing <IDENTIFIER> [ : thing ( <INTEGER> | <IDENTIFIER> ) ] [ <STRING> ]
     {
-    	// ... same thing body like always ...
+        // ... same thing body like always ...
     }
 
 
-Note that you'll need to use an unused identifier to represent the new Thing
-when you need to refer to its index later. The identifiers are 
+Note that you'll need to use an unused identifier (or alias) to represent the 
+new Thing when you need to refer to its index later. The identifiers are 
 case-insensitive.
 
 Examples:
 
     auto thing NewImp "New Imp"
     {
-    	// ... code ...
+        // ... code ...
     }
 
     auto thing BetterImp : thing NewImp "Better Imp"
     {
-    	// ... code ...
+        // ... code ...
     }
 
 
 ...then in action pointer functions (and other places that use thing 
-references), you can refer to them later by using:
+references), you can refer to them later since they are now aliased:
 
-	A_SpawnThing(thing NewImp)
-	A_RandomJump(thing NewImp death, 128)    // Thing state label
+    A_SpawnThing(thing NewImp)
+    A_RandomJump(thing NewImp death, 128)    // Thing state label
 
 
 Any place that would ordinarily use a Thing index can use an auto-thing 
@@ -1017,7 +1079,7 @@ writing a normal Thing definition body:
 
     thing BetterImp
     {
-    	// ... code ...
+        // ... code ...
     }
 
 
@@ -1220,9 +1282,9 @@ definitions as though they already exist.
 If any sprite name uses characters that are not available (or legal) in an 
 identifier, you need to wrap the name in quotes:
 
-	"TR-X" ABCD 5 A_Chase  
-	"00BF" G 10 Bright
-	
+    "TR-X" ABCD 5 A_Chase  
+    "00BF" G 10 Bright
+
 
 NOTE: These features are only enabled for patches that employ a DSDHACKED 
 feature set!
