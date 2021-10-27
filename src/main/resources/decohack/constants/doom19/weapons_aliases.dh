@@ -1,0 +1,19 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Weapon Aliases
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_DOOM19_WEAPONS_ALIASES__
+#define __DECOHACK_CONSTANTS_DOOM19_WEAPONS_ALIASES__
+
+alias weapon Fist 0
+alias weapon Pistol 1
+alias weapon Shotgun 2
+alias weapon Chaingun 3
+alias weapon RocketLauncher 4
+alias weapon PlasmaRifle 5
+alias weapon BFG9000 6
+alias weapon Chainsaw 7
+alias weapon SuperShotgun 8
+
+#endif

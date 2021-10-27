@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.9.0
+
+* `Added` `dsdhacked` as a valid DECOHack patch type.
+
+
 ### Changed for 0.8.0
 
 * `Added` The ability to embed DoomMake into a project (`--embed` switch).

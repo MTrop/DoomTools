@@ -14,9 +14,11 @@ and strings for readability, but only if you "#include" the following files
 Everything in:
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/strings.dh
 	decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
+    decohack/constants/doom19/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -26,9 +28,11 @@ Everything in:
 Everything in:
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/udoom19/strings.dh
 	decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
+    decohack/constants/doom19/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -37,10 +41,12 @@ Everything in:
 
 Everything in:
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/boom/strings.dh
 	decohack/constants/boom/states.dh
     decohack/constants/boom/things.dh
+    decohack/constants/boom/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -49,10 +55,12 @@ Everything in:
 
 Everything in:
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/boom/strings.dh
 	decohack/constants/mbf/states.dh
     decohack/constants/mbf/things.dh
+    decohack/constants/mbf/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -61,10 +69,12 @@ Everything in:
 
 Everything in:
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/boom/strings.dh
 	decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
+    decohack/constants/mbf/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -73,10 +83,12 @@ Everything in:
 
 Everything in:
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/boom/strings.dh
 	decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
+    decohack/constants/mbf/things_aliases.dh
 
 
 ------------------------------------------------------------------------------
@@ -85,10 +97,12 @@ Everything in:
 
 Everything in:
 	decohack/constants/doom19/weapons.dh
+	decohack/constants/doom19/weapons_aliases.dh
 	decohack/constants/doom19/ammo.dh
 	decohack/constants/boom/strings.dh
 	decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
+    decohack/constants/mbf/things_aliases.dh
 
 THINGS_MAX                0x7fffffff
 STATES_MAX                0x7fffffff
@@ -448,6 +462,21 @@ WP_PLASMA       5
 WP_BFG          6
 WP_CHAINSAW     7
 WP_SUPERSHOTGUN 8
+
+
+------------------------------------------------------------------------------
+---- classpath:decohack/constants/doom19/weapons_aliases.dh
+------------------------------------------------------------------------------
+
+Fist           0
+Pistol         1
+Shotgun        2
+Chaingun       3
+RocketLauncher 4
+PlasmaRifle    5
+BFG9000        6
+Chainsaw       7
+SuperShotgun   8
 
 
 ------------------------------------------------------------------------------
@@ -1721,6 +1750,149 @@ MT_MISC86       137
 
 
 ------------------------------------------------------------------------------
+---- classpath:decohack/constants/doom19/things_aliases.dh
+------------------------------------------------------------------------------
+
+DoomPlayer            1
+ZombieMan             2
+ShotgunGuy            3
+Archvile              4
+ArchvileFire          5
+Revenant              6
+RevenantTracer        7
+RevenantTracerSmoke   8
+Fatso                 9
+FatShot               10
+ChaingunGuy           11
+DoomImp               12
+Demon                 13
+Spectre               14
+Cacodemon             15
+BaronOfHell           16
+BaronBall             17
+HellKnight            18
+LostSoul              19
+SpiderMastermind      20
+Arachnotron           21
+Cyberdemon            22
+PainElemental         23
+WolfensteinSS         24
+CommanderKeen         25
+BossBrain             26
+BossEye               27
+BossTarget            28
+SpawnShot             29
+SpawnFire             30
+ExplosiveBarrel       31
+DoomImpBall           32
+CacodemonBall         33
+Rocket                34
+PlasmaBall            35
+BFGBall               36
+ArachnotronPlasma     37
+BulletPuff            38
+Blood                 39
+TeleportFog           40
+ItemFog               41
+TeleportDest          42
+BFGExtra              43
+GreenArmor            44
+BlueArmor             45
+HealthBonus           46
+ArmorBonus            47
+BlueCard              48
+RedCard               49
+YellowCard            50
+YellowSkull           51
+RedSkull              52
+BlueSkull             53
+Stimpack              54
+Medikit               55
+Soulsphere            56
+InvulnerabilitySphere 57
+Berserk               58
+BlurSphere            59
+RadSuit               60
+Allmap                61
+Infrared              62
+Megasphere            63
+Clip                  64
+ClipBox               65
+RocketAmmo            66
+RocketBox             67
+Cell                  68
+CellPack              69
+Shell                 70
+ShellBox              71
+Backpack              72
+BFG9000               73
+Chaingun              74
+Chainsaw              75
+RocketLauncher        76
+PlasmaRifle           77
+Shotgun               78
+SuperShotgun          79
+TechLamp              80
+TechLamp2             81
+Column                82
+TallGreenColumn       83
+ShortGreenColumn      84
+TallRedColumn         85
+ShortRedColumn        86
+SkullColumn           87
+HeartColumn           88
+EvilEye               89
+FloatingSkull         90
+TorchTree             91
+BlueTorch             92
+GreenTorch            93
+RedTorch              94
+ShortBlueTorch        95
+ShortGreenTorch       96
+ShortRedTorch         97
+Stalagtite            98
+TechPillar            99
+Candlestick           100
+Candelabra            101
+BloodyTwitch          102
+Meat2                 103
+Meat3                 104
+Meat4                 105
+Meat5                 106
+NonsolidMeat2         107
+NonsolidMeat4         108
+NonsolidMeat3         109
+NonsolidMeat5         110
+NonsolidTwitch        111
+DeadCacodemon         112
+DeadMarine            113
+DeadZombieMan         114
+DeadDemon             115
+DeadLostSoul          116
+DeadDoomImp           117
+DeadShotgunGuy        118
+GibbedMarine          119
+GibbedMarineExtra     120
+HeadsOnAStick         121
+Gibs                  122
+HeadOnAStick          123
+HeadCandles           124
+DeadStick             125
+LiveStick             126
+BigTree               127
+BurningBarrel         128
+HangNoGuts            129
+HangBNoBrain          130
+HangTLookingDown      131
+HangTSkull            132
+HangTLookingUp        133
+HangTNoBrain          134
+ColonGibs             135
+SmallBloodPool        136
+BrainStem             137
+
+
+------------------------------------------------------------------------------
 ---- classpath:decohack/constants/boom/things.dh
 ------------------------------------------------------------------------------
 
@@ -1728,6 +1900,14 @@ MT_MISC86       137
 
 MT_PUSH         138
 MT_PULL         139
+
+
+------------------------------------------------------------------------------
+---- classpath:decohack/constants/boom/things_aliases.dh
+------------------------------------------------------------------------------
+
+PointPusher 138
+PointPuller 139
 
 
 ------------------------------------------------------------------------------
@@ -1741,6 +1921,17 @@ MT_PLASMA1      141
 MT_PLASMA2      142
 MT_SCEPTRE      143
 MT_BIBLE        144
+
+
+------------------------------------------------------------------------------
+---- classpath:decohack/constants/mbf/things_aliases.dh
+------------------------------------------------------------------------------
+
+MBFHelperDog    140
+PlasmaBall1     141
+PlasmaBall2     142
+EvilSceptre     143
+UnholyBible     144
 
 
 ------------------------------------------------------------------------------

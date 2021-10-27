@@ -4,6 +4,8 @@
 using dsdhacked
 
 #include "constants/dsdhacked.dh"
+#include "constants/mbf/things_aliases.dh"
+#include "constants/doom19/weapons_aliases.dh"
 
 state free S_FREE_START to STATES_MAX // free the "free" states immediately
 thing free MT_EXTRA00 to THINGS_MAX   // free the "free" things immediately

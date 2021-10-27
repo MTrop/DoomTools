@@ -1,0 +1,14 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Thing Aliases
+ *****************************************************************************/
+
+#include "classpath:decohack/constants/doom19/things_aliases.dh"
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_BOOM_THINGS_ALIASES__
+#define __DECOHACK_CONSTANTS_BOOM_THINGS_ALIASES__
+
+alias thing PointPusher 138
+alias thing PointPuller 139
+
+#endif

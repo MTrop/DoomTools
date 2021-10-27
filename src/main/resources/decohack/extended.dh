@@ -4,6 +4,8 @@
 using extended
 
 #include "constants/extended.dh"
+#include "constants/mbf/things_aliases.dh"
+#include "constants/doom19/weapons_aliases.dh"
 
 state free S_FREE_START to S_FREE_END // free the "free" states immediately
 thing free MT_EXTRA00 to MT_EXTRA99   // free the "free" things immediately

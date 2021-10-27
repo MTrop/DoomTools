@@ -1433,22 +1433,26 @@ block.
 #include "classpath:decohack/doom19.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Doom 1.9 EXEs, plus the "using doom19" line.
+    Doom 1.9 EXEs, plus the "using doom19" line. Also adds ZDoom thing and
+    weapon aliases.
 
 #include "classpath:decohack/udoom19.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Ultimate Doom 1.9 EXEs, plus the "using udoom19" line.
+    Ultimate Doom 1.9 EXEs, plus the "using udoom19" line. Also adds ZDoom 
+    thing and weapon aliases.
 
 #include "classpath:decohack/boom.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    Boom-compatible ports, plus the "using boom" line.
+    Boom-compatible ports, plus the "using boom" line. Also adds ZDoom 
+    thing and weapon aliases.
 
 #include "classpath:decohack/mbf.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
-    MBF-compatible ports, plus the "using mbf" line.
+    MBF-compatible ports, plus the "using mbf" line. Also adds ZDoom thing 
+    and weapon aliases.
 
 #include "classpath:decohack/extended.dh"
 
@@ -1456,6 +1460,7 @@ block.
     Extended-DEH-compatible ports, plus the "using extended" line, AND 
     freeing up the extra extended states immediately for use, AND freeing 
     the things from 151 to 250 (the extended things) for auto-thing fill.
+    Also adds ZDoom thing and weapon aliases.
 
 #include "classpath:decohack/mbf21.dh"
 
@@ -1463,7 +1468,8 @@ block.
     MBF21-compliant ports (which includes Extended-DEH), plus the 
     "using mbf21" line, AND freeing up the extra extended states 
     immediately for use, AND freeing the things from 151 to 250 (the
-    extended things) for auto-thing fill. 
+    extended things) for auto-thing fill. Also adds ZDoom thing and
+    weapon aliases.
 
 #include "classpath:decohack/dsdhacked.dh"
 
@@ -1472,7 +1478,7 @@ block.
     "using dsdhacked" line, AND freeing up the states from 1100 to the
     state max, freeing the things from 151 to the thing max for 
     auto-thing fill, and allows new sound and sprite definitions 
-    automatically. 
+    automatically. Also adds ZDoom thing and weapon aliases.
 
 ..............................................................................
 

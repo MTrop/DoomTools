@@ -4,5 +4,7 @@
 using udoom19
 
 #include "constants/udoom19.dh"
+#include "constants/doom19/things_aliases.dh"
+#include "constants/doom19/weapons_aliases.dh"
 
 #endif

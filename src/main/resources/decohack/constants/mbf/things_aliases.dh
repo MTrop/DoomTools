@@ -1,0 +1,17 @@
+/*****************************************************************************
+ * DECOHack MBF Thing Aliases
+ *****************************************************************************/
+
+#include "classpath:decohack/constants/boom/things_aliases.dh"
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_MBF_THINGS_ALIASES__
+#define __DECOHACK_CONSTANTS_MBF_THINGS_ALIASES__
+
+alias thing MBFHelperDog 140
+alias thing PlasmaBall1  141
+alias thing PlasmaBall2  142
+alias thing EvilSceptre  143
+alias thing UnholyBible  144
+
+#endif
