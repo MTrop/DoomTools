@@ -2910,58 +2910,33 @@ public final class DecoHackParser extends Lexer.Parser
 			return matchStateIndex(context);
 	}
 
-	// Parses a weapon state index.
-	private Integer parseWeaponStateIndex(AbstractPatchContext<?> context)
+	// Parses a thing or thing state index.
+	private Integer parseThingOrThingStateIndex(AbstractPatchContext<?> context) 
 	{
-		String labelName;
-		Integer index;
-		if ((index = matchWeaponIndex(context)) == null)
-			return null;
-		
-		DEHWeapon weapon = context.getWeapon(index);
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			addErrorMessage("Expected weapon label name.");
-			return null;
-		}
-		
-		labelName = currentToken().getLexeme();
-
-		Integer stateIndex;
-		if ((stateIndex = weapon.getLabel(labelName)) == 0)
-		{
-			String[] labels = weapon.getLabels();
-			StringBuilder sb;
-			if (labels.length == 0)
-			{
-				sb = new StringBuilder("Expected a valid thing state label for weapon ");
-				sb.append(index);
-				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
-			}
-			else
-			{
-				sb = new StringBuilder("Expected a valid thing state label for weapon ");
-				sb.append(index).append(": ");
-				sb.append(Arrays.toString(labels));
-				sb.append(".");
-			}
-			addErrorMessage(sb.toString());
-			return null;
-		}
-
-		nextToken();
-
-		return stateIndex;
-	}
-
-	// Parses a thing state index.
-	private Integer parseThingStateIndex(AbstractPatchContext<?> context) 
-	{
-		String labelName;
 		Integer index;
 		if ((index = matchThingIndex(context)) == null)
 			return null;
 		
+		if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return parseThingLabel(context, index);
+		
+		return index;
+	}
+	
+	// Parses a thing state index.
+	private Integer parseThingStateIndex(AbstractPatchContext<?> context) 
+	{
+		Integer index;
+		if ((index = matchThingIndex(context)) == null)
+			return null;
+		
+		return parseThingLabel(context, index);
+	}
+
+	// Parses a thing's label.
+	private Integer parseThingLabel(AbstractPatchContext<?> context, Integer index) 
+	{
+		String labelName;
 		DEHThing thing = context.getThing(index);
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
@@ -2998,6 +2973,50 @@ public final class DecoHackParser extends Lexer.Parser
 		return stateIndex;
 	}
 	
+	// Parses a weapon state index.
+	private Integer parseWeaponStateIndex(AbstractPatchContext<?> context)
+	{
+		String labelName;
+		Integer index;
+		if ((index = matchWeaponIndex(context)) == null)
+			return null;
+		
+		DEHWeapon weapon = context.getWeapon(index);
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected weapon label name.");
+			return null;
+		}
+		
+		labelName = currentToken().getLexeme();
+	
+		Integer stateIndex;
+		if ((stateIndex = weapon.getLabel(labelName)) == 0)
+		{
+			String[] labels = weapon.getLabels();
+			StringBuilder sb;
+			if (labels.length == 0)
+			{
+				sb = new StringBuilder("Expected a valid thing state label for weapon ");
+				sb.append(index);
+				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+			}
+			else
+			{
+				sb = new StringBuilder("Expected a valid thing state label for weapon ");
+				sb.append(index).append(": ");
+				sb.append(Arrays.toString(labels));
+				sb.append(".");
+			}
+			addErrorMessage(sb.toString());
+			return null;
+		}
+	
+		nextToken();
+	
+		return stateIndex;
+	}
+
 	// Parses a sound index.
 	private Integer parseSoundIndex(AbstractPatchContext<?> context)
 	{
@@ -3214,7 +3233,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		Object value;
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
-			return parseThingStateIndex(context);
+			return parseThingOrThingStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 			return parseWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))

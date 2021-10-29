@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.19.1
+
+* `Fixed` Thing indices were not being parsed properly in action pointer parameters.
+
+
 ### Changed for 0.19.0
 
 * `Fixed` `A_JumpIfHealthBelow` did not accept negative values for the health reference value. (Issue #53)
