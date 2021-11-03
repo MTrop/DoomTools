@@ -112,8 +112,9 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 	public void setString(int index, String value)
 	{
 		String original = getSourcePatch().getString(index);
-		if (value.length() > original.length())
-			throw new IllegalArgumentException(String.format("Incoming string value for index %d is longer than the original string length: %d", index, original.length()));
+		int maxLength = calculateMaxStringLength(original);
+		if (value.length() > maxLength)
+			throw new IllegalArgumentException(String.format("Incoming string value for index %d is longer than the original string length: %d", index, maxLength));
 		
 		// if sprite.
 		if (index >= getSoundStringIndex() && index < getSoundStringIndex() + getSoundCount())
@@ -193,6 +194,15 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 				writer.flush();
 			}
 		}
+	}
+	
+	// Calculates the max length for a new string.
+	// Assumes the characters are already ASCII-encodable.
+	private static int calculateMaxStringLength(String str)
+	{
+		int len = str.length() + 1; // length plus null
+		len += (4 - (len % 4)) % 4; // pad to next DWORD
+		return len - 1;             // minus the null 
 	}
 	
 }

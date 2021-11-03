@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.19.2
+
+* `Fixed` Changed maximum string lengths for Vanilla patches (doom19, udoom19). (Issue #56)
+
+
 ### Changed for 0.19.1
 
 * `Fixed` Thing indices were not being parsed properly in action pointer parameters.
