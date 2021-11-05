@@ -1,0 +1,524 @@
+<html>
+	<head>
+		<!-- 
+			{{TITLE}} 
+				DoomMake Tutorial
+			{{DESCRIPTION}} 
+				The tutorial page for DoomMake.
+			{{GENERATOR}}
+				VSCode
+			{{COPYRIGHT}}
+				Matt "MTrop" Tropiano
+			{{LOGO_PNG}}
+				https://mtrop.github.io/DoomTools/images/logo.png
+			{{URL}}
+				https://mtrop.github.io/DoomTools/doommake-tutorial.html
+		-->
+
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="The tutorial page for DoomMake." />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DoomTools" />
+		<meta itemprop="description" content="The tutorial page for DoomMake." />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/doommake-tutorial.html" />
+		<meta name="twitter:title" content="DoomTools" />
+		<meta name="twitter:description" content="The tutorial page for DoomMake." />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/doommake-tutorial.html" />
+		<meta property="og:title" content="DoomTools" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta property="og:description" content="The tutorial page for DoomMake." />
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+
+		<title>DoomMake Quickstart</title>
+
+		<style type="text/css">
+			.project-selection {
+				max-width: 700px;
+				background-color: rgb(4, 20, 24);
+				border: solid 1px rgb(2, 10, 12);
+				border-radius: 8px;
+				padding: 8px;
+				margin-left: auto;
+    			margin-right: auto;
+			}
+			input.category-selection {
+				text-align: center;
+				transform: scale(2);
+				margin: 4px;
+			}
+			label.category-selection {
+				display: block;
+			}
+			.category-row {
+				background-color: rgb(2, 10, 12);
+				border-radius: 8px;
+				padding: 12px;
+			}
+			.main-heading {
+				background-color: #030d0f;
+				padding: 8px;
+				border-radius: 8px;
+				margin-left: auto;
+				margin-right: auto;
+				max-width: 850px;
+				margin-top: 24px;
+			}
+			.template-section {
+				display: none;
+			}
+			.visible-section {
+				display: block !important;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<img class="w3-image site-logo" src="images/logo.svg"/>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<a href="index.html">Go Back to Home</a>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h1 class="w3-xxxlarge"><strong>DoomMake Quickstart</strong></h1>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p>
+					This already assumes that you've installed <strong>DoomTools</strong>. If you haven't, go <a href="index.html">here</a>!
+				</p>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12">
+				<p class="site-blurb">
+					So, you want to make a Doom project? Do you want to make it so that you don't have to worry
+					about needing to painstakingly throw together everything you made, also perhaps worrying 
+					that you may have included more than you needed to?
+				</p>
+				<p class="site-blurb">
+					Well, you're in luck!
+				</p>
+				<p class="site-blurb">
+					<strong>DoomMake</strong> is a <em>project builder for Doom mods</em>. It's a program 
+					that builds a file system scaffolding where you throw everything in the correct 
+					directories and your wonderful WAD file pops out! Whether you are making something by 
+					yourself or with others, DoomMake does the heavy lifting when it comes time to package 
+					up your work before you send it out into the world!
+				</p>
+			</div>
+		</div>
+		<noscript>  
+		<!-- NOSCRIPT CHUNK -->
+		<div class="w3-row">
+			<div class="w3-col l12">
+				<p class="site-blurb">
+					<strong>NOTE:</strong> This page changes as you change what you want to make! Turn on JS
+					or this stuff won't work! I worked real hard on this! <strong><em>DON'T YOU WANT TO LEARN?!</em></strong>
+				</p>
+			</div>
+		</div>
+		<!-- NOSCRIPT CHUNK -->
+		</noscript>
+
+		<!-- Command Line -->
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>What are you going to make?</h2>
+				<div class="project-selection">
+					<div class="w3-row w3-center">
+						<form id="project-form" onsubmit="return false;">
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>My project folder is named...</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s12">
+									<input type="text" class="category-selection" id="project-name" name="project" value="project"/>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>My project will contain...</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s4">
+									<input type="checkbox" class="category-selection" id="template-maps" name="maps" value="maps"/>
+									<label for="template-maps" class="category-selection">Maps</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="checkbox" class="category-selection" id="template-assets" name="assets" value="assets"/>
+									<label for="template-assets" class="category-selection">Assets</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="checkbox" class="category-selection" id="template-decohack" name="decohack" value="decohack"/>
+									<label for="template-decohack" class="category-selection">A DECOHack Patch</label>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>New Textures?</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" checked="true" id="template-textures-none" name="textures" value=""/>
+									<label for="template-textures-none" class="category-selection">None</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="template-textures-wads" name="textures" value="texturewads"/>
+									<label for="template-textures-wads" class="category-selection">From Texture WADs</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="template-textures-loose" name="textures" value="textures"/>
+									<label for="template-textures-loose" class="category-selection">From the Project</label>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>Want to run your project for testing?</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s6">
+									<input type="radio" class="category-selection" checked="true" id="run-no" name="run" value=""/>
+									<label for="run-no" class="category-selection">No</label>
+								</div>
+								<div class="w3-col s6">
+									<input type="radio" class="category-selection" id="run-yes" name="run" value="run"/>
+									<label for="run-yes" class="category-selection">Yes</label>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>Version control?</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" checked="true" id="scm-none" name="scm" value=""/>
+									<label for="scm-none" class="category-selection">None</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="scm-git" name="scm" value="git"/>
+									<label for="scm-git" class="category-selection">Git</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="scm-hg" name="scm" value="hg"/>
+									<label for="scm-hg" class="category-selection">Mercurial</label>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Command Line -->
+		<div class="w3-row">
+			<div class="w3-col l12">
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p>
+							To create your project, type this at the command prompt: 
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line" style="max-width: 900px;"><code>doommake <span id="cmd-name"></span> --new-project <span id="cmd-assets"></span><span id="cmd-patch"></span><span id="cmd-run"></span><span id="cmd-scm"></span></code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							...and the project folder will be created in the current directory. The directory must be
+							empty or non-existant. You will probably also be asked a few questions to fill in a bunch
+							of critical pieces, like the resultant WAD name and such.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- All Projects -->
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h3>First Thing's First!</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Modify the <kbd>README.md</kbd> file in the project and describe it briefly, especially if you 
+							make this project public.
+						</p>
+						<p class="site-blurb">
+							Look for the <kbd>src/wadinfo.txt</kbd> and the <kbd>src/credits.txt</kbd> files in the project.
+							The Wad Info file is your text file that will packaged with the project WAD. The credits are for
+							maintaining author and extended credits. Both of these files will also end up in your resultant WAD 
+							file as <kbd>WADINFO</kbd> and <kbd>CREDITS</kbd> lumps, respectively.
+						</p>
+						<p class="site-blurb">
+							Every project has a file called <kbd>doommake.project.properties</kbd> in the top project folder
+							that contains project-specific settings. If you are maintaining this project in version control, this
+							file is automatically included.
+						</p>
+						<p class="site-blurb">
+							Every project also has a file called <kbd>doommake.properties</kbd> in the top project folder
+							that contains build-specific settings for your <em>local copy</em>. If you are maintaining this project 
+							in version control, this file is NOT included (and it shouldn't be added).
+						</p>
+						<p class="site-blurb">
+							If you edit files like graphics/sprites in this project, you should open the <kbd>src</kbd> folder in
+							the project in <a href="https://slade.mancubus.net/">SLADE</a> if you need to edit in bulk. Be aware
+							that there are some folders that auto-convert some resources and add them to other project folders.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Assets -->
+		<div class="w3-row template-section section-assets">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h3>Project Assets</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The project's loose non-texture assets like graphics, sprites, music, and sound should be
+							placed in the folders off of <kbd>src/assets</kbd>.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							<kbd>src/assets/_global</kbd> should contain anything that is to be added into the global 
+							WAD namespace as-is. Subfolders are searched and imported, but no markers are added per 
+							subfolder.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/assets/graphics</kbd> should contain graphics that are added into the global 
+							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/assets/music</kbd> should contain music lumps that are added in the global
+							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/assets/sounds</kbd> should contain sound lumps that are added in the global
+							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/assets/sprites</kbd> should contain sprite graphics that are added into the
+							WAD's sprite namespace (<kbd>SS_START</kbd> / <kbd>SS_END</kbd>) as-is. No conversions 
+							are applied to these files on import. Subfolders are searched and imported, but no markers 
+							are added per subfolder.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Files that need conversion before asset merge are placed in the <kbd>src/convert</kbd> folder's
+							subfolders.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/convert/graphics</kbd> should contain graphics that get converted from formats like PNG, GIF,
+							BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. If PNG files have offset
+							information in them, they are preserved.
+						</p>
+						<p class="site-blurb">
+							<kbd>src/convert/sounds</kbd> should contain sounds that get converted from formats like WAV or AIFF
+							and end up as DMX-formatted sounds in <kbd>src/assets/sounds</kbd>. Stereo sounds are mixed to mono,
+							but their sampling rate is preserved. If you need to convert from other formats, you need to have
+							<a href="https://ffmpeg.org/">FFmpeg</a> on your system PATH (or point to it some other way).
+						</p>
+						<p class="site-blurb">
+							<kbd>src/convert/sprites</kbd> should contain sprite graphics that get converted from formats like PNG, GIF,
+							BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. If PNG files have offset
+							information in them, they are preserved.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-assets.txt</kbd> govern how the 
+							<kbd>src/assets</kbd> folder's files are merged together. By default, this will create the 
+							<kbd>build/assets.wad</kbd> file.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Maps -->
+		<div class="w3-row template-section section-maps">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h3>Project Maps</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The project's maps should be in individual WAD files and placed in <kbd>src/maps</kbd>.
+							You can edit and save maps directly into this directory - <kbd>DBS</kbd> and other backup
+							files made by Doom Builder-family editors are ignored by version control by default, if you 
+							use it.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-maps.txt</kbd> govern how the 
+							<kbd>src/maps</kbd> folder's files are merged together. By default, this will create the 
+							<kbd>build/maps.wad</kbd> file.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- DECOHack -->
+		<div class="w3-row template-section section-decohack">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h3>DECOHack Patch</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The source file for compiling a DECOHack patch is in <kbd>src/decohack/main.dh</kbd>.
+							By default, the patch is compiled and placed in the build folder as <kbd>build/dehacked.deh</kbd>.
+							The patch's source data is merged together into one file as <kbd>build/dehsrc.dh</kbd>.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affect how the 
+							patches make their way into the final WAD file, imported as-is.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h3>Building Everything</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							To build your project, just type:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>doommake</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							...and everything will be compiled together into the project.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							To clean the build directory, type:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>doommake clean</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							...and the contents of the <kbd>build</kbd> directory will be deleted.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							DoomMake is usually smart enough to detect changes to the project and skip all unchanged 
+							steps, but in case something goes wrong, you can delete the <kbd>build/lock.json</kbd> file
+							to force a rebuild of everything, or change/alter the hashes to force rebuilds.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p>
+					That's it! Make some projects!
+				</p>
+			</div>
+		</div>
+
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+		<script type="text/javascript" src="js/domjunk.min.js"></script>
+		<!-- This page's JS. -->
+		<script type="text/javascript" src="js/doommake-quickstart.js"></script>
+	</body>
+</html>

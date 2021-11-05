@@ -1,3 +1,62 @@
+const BodyElement = $DJ.tag('body')[0];
+
+var $INC = $INC || function(srcurl)
+{
+	fetch(srcurl)
+	    .then(resp => resp.text())
+	    .then(content => {
+	    	BodyElement.appendChild($DJU.E('script', {
+			    "type": 'text/javascript'
+		    }, [$DJU.T(content)]));
+		});
+};
+
+var $INCCALL = $INCCALL || function(srcurl, callback)
+{
+	fetch(srcurl)
+	    .then(resp => resp.json())
+	    .then(json => {
+	    	callback(json);
+		});
+};
+
+// W3Schools Include Hook, 
+// ...but tweaked a little 
+// https://www.w3schools.com/howto/howto_html_include.asp
+function $IncludeHTML() 
+{
+	let z, i, elmnt, file, xhttp;
+	// Loop through a collection of all HTML DIVs:
+	z = document.getElementsByTagName("div");
+	for (i = 0; i < z.length; i++) 
+	{
+		elmnt = z[i];
+		// search for elements with a certain atrribute:
+		file = elmnt.getAttribute("include-html");
+		if (file)
+		{
+			// Make an HTTP request using the attribute value as the file name:
+			xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function()
+			{
+				if (this.readyState == 4)
+				{
+					if (this.status == 200)
+						elmnt.innerHTML = this.responseText;
+					if (this.status == 404)
+						elmnt.innerHTML = "Page not found.";
+					// Remove the attribute, and call this function once more:
+					elmnt.removeAttribute("include-html");
+					$IncludeHTML();
+				}
+			}
+			xhttp.open("GET", file, true);
+			xhttp.send();
+			return;
+		}
+	}
+}
+
 function github_api_start(data)
 {
 	let repourl = data.repository_url
@@ -8,7 +67,7 @@ function github_api_start(data)
 
 // ================================================================================
 
-$Q1('body').onload = function()
+BodyElement.onload = function()
 {
 	$INCCALL("https://api.github.com/", github_api_start);
 	$IncludeHTML();
@@ -18,7 +77,7 @@ $Q1('body').onload = function()
 
 function display_release(response)
 {
-	display_release_data(response.data[0], $Q1('#releases'), $Q1('#release-version'), $Q1('.site-release-links'));
+	display_release_data(response.data[0], $DJ.id('releases'), $DJ.id('release-version'), $DJ('.site-release-links'));
 }
 
 function display_release_data(release, release_section_element, release_version_element, release_links_element)
@@ -47,22 +106,22 @@ function display_release_data(release, release_section_element, release_version_
 
 	release.assets = release.assets.sort((a,b) => {return SORTASSET(a) - SORTASSET(b)});
 
-	$E(release.assets, (asset)=>{
+	$DJU.each(release.assets, (asset)=>{
 		let linkhtml = [
 			GENTITLE(asset.name),
 			'<span class="w3-small">'+asset.name+'</span>',
 			parseInt(asset.size / 1024) + ' KB',
 		].join('<br/>');
 
-		let link = $Element('a', {
+		let link = $DJU.E('a', {
 			"href": asset.browser_download_url, 
 			"class": 'w3-button w3-round-large w3-margin download-link'
 		});
 		link.innerHTML = linkhtml;
 
-		release_links_element.appendChild($Element('div', {"class":'w3-col l6 w3-center'}, [link]));
+		release_links_element.append($DJU.E('div', {"class":'w3-col l6 w3-center'}, [link]));
 	});
 
-	release_version_element.innerHTML = version;
-	$ClassRemove(release_section_element, 'site-start-hidden');
+	release_version_element[0].innerHTML = version;
+	release_section_element.classRemove('site-start-hidden');
 }
