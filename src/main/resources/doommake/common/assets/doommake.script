@@ -47,6 +47,8 @@ check function doAssets() {
 		hash = directoryHasChanged(sourceDir);
 	}
 	
+	println("Building assets...");
+	
 	wadmerge(file(MERGESCRIPT_ASSETS), [
 		getBuildDirectory(),
 		getSourceDirectory(),

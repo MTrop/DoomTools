@@ -42,6 +42,9 @@ doommake.properties
 *.bak
 *.backup*
 
+# Local WhackEd Config for Patch  
+*.whacked
+
 
 ###############################
 ########## Platforms ##########

@@ -29,6 +29,8 @@ function doMapTextures() {
 		return;
 	}
 
+	println("Extracting map textures...");
+
 	check (err) extractUsedMapTextures(
 		baseIwadPath,
 		[outMapsWad],

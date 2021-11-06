@@ -26,6 +26,8 @@ check function doMaps() {
 		hash = directoryHasChanged(sourceDir);
 	}
 
+	println("Building maps...");
+
 	wadmerge(file(MERGESCRIPT_MAPS), [
 		getBuildDirectory(),
 		getSourceDirectory(),

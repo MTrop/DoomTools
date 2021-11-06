@@ -1,0 +1,9 @@
+Patch File for DeHackEd v3.0
+# Blank stub DeHackEd Patch for Doom 1.9 made by DoomMake. 
+# CHANGE OR OVERWRITE THIS FILE!
+# Note: Use the pound sign ('#') to start comment lines.
+
+Doom version = 19
+Patch format = 6
+
+

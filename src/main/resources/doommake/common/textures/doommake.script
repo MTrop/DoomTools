@@ -30,6 +30,8 @@ check function doTextures() {
 		hash = directoryHasChanged(sourceDir);
 	}
 
+	println("Building textures...");
+
 	wadmerge(file(MERGESCRIPT_TEXTURE), [
 		getBuildDirectory(),
 		getSourceDirectory(),

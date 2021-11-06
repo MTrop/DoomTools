@@ -12,11 +12,14 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Cleans the build directory found in the properties.
+ * Cleans the build directory and distro directory found in the properties.
  */
 function doClean() {
 	initBuild();
-	return cleandir(getBuildDirectory());
+	println("Cleaning build and dist...");
+	out = cleandir(getBuildDirectory()) && cleandir(getDistDirectory());	
+	println("Done.");
+	return out; 
 }
 
 

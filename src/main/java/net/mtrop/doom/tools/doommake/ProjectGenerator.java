@@ -52,6 +52,7 @@ public final class ProjectGenerator
 	private static final String TEMPLATE_MAPS_ASSETS_TEXTURES = "maps-assets-textures";
 	private static final String TEMPLATE_MAPS_ASSETS_TEXTUREWADS = "maps-assets-texturewads";
 	private static final String TEMPLATE_DECOHACK = "decohack";
+	private static final String TEMPLATE_PATCH = "patch";
 	private static final String TEMPLATE_RUN = "run";
 
 	private static final String MODULE_GIT = "git";
@@ -59,6 +60,7 @@ public final class ProjectGenerator
 	private static final String MODULE_INIT = "init";
 	private static final String MODULE_BASE = "bare";
 	private static final String MODULE_DECOHACK = "decohack";
+	private static final String MODULE_PATCH = "patch";
 	private static final String MODULE_MAPS = "maps";
 	private static final String MODULE_MAPTEX = "maptex";
 	private static final String MODULE_ASSETS = "assets";
@@ -303,6 +305,49 @@ public final class ProjectGenerator
 		));
 		POST_CREATE_TODOS.put(MODULE_DECOHACK, list(
 			"Modify `src/decohack/main.dh` to your liking."
+		));
+
+		// ................................................................
+
+		// A module that compiles a DeHackEd patch.
+		MODULES.put(MODULE_PATCH,
+			module(1, MODULE_PATCH,
+				file("src/patch/dehacked.deh",
+					"doommake/patch/dehacked.deh"),
+				fileAppend("doommake.properties",
+					"doommake/patch/doommake.properties"),
+				fileAppend("doommake.script", 
+					"doommake/patch/doommake.script"),
+				fileAppend("README.md",
+					"doommake/patch/README.md")
+			)
+		);
+		RELEASE_SCRIPT.put(MODULE_PATCH,
+			module(
+				fileContentAppend("doommake.script",
+					"\tdoPatch();"
+				)
+			)
+		);
+		RELEASE_SCRIPT_MERGE.put(MODULE_PATCH,
+			module(
+				fileContentAppend("doommake.script",
+					"\t\t,getPatchFile()"
+				)
+			)
+		);
+		RELEASE_WADMERGE_LINE.put(MODULE_PATCH, new String[]{
+			"mergefile  out $0/$"
+		});
+		POST_RELEASE.put(MODULE_PATCH,
+			module(
+				fileAppend("doommake.script",
+					"doommake/patch/doommake-target.script"
+				)
+			)
+		);
+		POST_CREATE_TODOS.put(MODULE_PATCH, list(
+			"Create and save your DeHackEd patch file in the `src/patch` directory."
 		));
 
 		// ................................................................
@@ -645,6 +690,11 @@ public final class ProjectGenerator
 		TEMPLATES.put(TEMPLATE_DECOHACK, template(
 			TEMPLATE_DECOHACK, CATEGORY_PATCHES, "Adds a DECOHack stub for a DeHackEd patch.",
 			MODULE_INIT, MODULE_DECOHACK
+		));
+
+		TEMPLATES.put(TEMPLATE_PATCH, template(
+			TEMPLATE_PATCH, CATEGORY_PATCHES, "Adds a source folder for importing a DeHackEd patch (for external programs like WhackEd).",
+			MODULE_INIT, MODULE_PATCH
 		));
 
 		TEMPLATES.put(TEMPLATE_RUN, template(

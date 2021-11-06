@@ -21,6 +21,8 @@ check function doConvertSounds() {
 		println("[Skipped] Sound conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
+
+	println("Converting sounds...");
 	
 	convertdmx(sourceDir, targetDir);
 
@@ -48,6 +50,8 @@ check function doConvertGraphics() {
 		return;
 	}
 
+	println("Converting graphics...");
+	
 	convert(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);
@@ -74,6 +78,8 @@ check function doConvertSprites() {
 		return;
 	}
 
+	println("Converting sprites...");
+	
 	convert(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);

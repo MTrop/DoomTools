@@ -26,6 +26,8 @@ check function doPatch(budget) {
 		hash = directoryHasChanged(sourceDir);
 	}
 
+	println("Compiling patch...");
+
 	decohack(
 		file(getSourceDirectory() + SRC_DECOHACK + SRC_DECOHACK_MAIN), 
 		file(outFile), 

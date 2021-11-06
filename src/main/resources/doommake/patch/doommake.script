@@ -1,0 +1,36 @@
+/* ------------------------------------------------------------------------ */
+
+#define PROP_PATCH_INPUT  "doommake.file.patch.input"
+#define SRC_PATCH         "/patch"
+#define SRC_PATCH_FILE    "dehacked.deh"
+
+/**
+ * Copies a patch.
+ */
+check function doPatch() {
+
+	initBuild();
+
+	outFile = getBuildDirectory() + "/" + getPatchFile();
+	inFile = getSourceDirectory() + SRC_PATCH + "/" + prop(PROP_PATCH_INPUT, SRC_PATCH_FILE);
+	sourceDir = getSourceDirectory() + SRC_PATCH;
+	verifydirs(sourceDir);
+
+	if (checkFileExistenceAndBuildStatuses(outFile)) {
+		hash = directoryHasChanged(sourceDir);
+		if (hash === null) {
+			println("[Skipped] Patch directory (" + sourceDir + ") up to date.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir);
+	}
+
+	println("Copying patch...");
+
+	copyfile(inFile, outFile, true);
+	
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("dehacked");
+}
+

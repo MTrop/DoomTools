@@ -1,6 +1,13 @@
 DoomMake
 --------
 
+### Changed for 0.10.0
+
+* `Added` A patch source module for patches made in "not DECOHack".
+* `Changed` `doClean()` will clean the build directory and distribution directories (new projects).
+* `Changed` More informational output (new projects).
+
+
 ### Changed for 0.9.0
 
 * `Added` `dsdhacked` as a valid DECOHack patch type.

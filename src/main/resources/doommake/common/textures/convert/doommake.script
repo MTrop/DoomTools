@@ -22,6 +22,8 @@ check function doConvertFlats() {
 		return;
 	}
 
+	println("Converting flats...");
+
 	convert(sourceDir, targetDir, "flats");
 
 	storeDirectoryChanged(sourceDir, hash);
@@ -47,6 +49,8 @@ check function doConvertPatches() {
 		println("[Skipped] Patch conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
+
+	println("Converting patches...");
 
 	convert(sourceDir, targetDir);
 
