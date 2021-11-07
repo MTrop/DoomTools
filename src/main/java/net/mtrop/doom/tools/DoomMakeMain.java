@@ -246,6 +246,9 @@ public final class DoomMakeMain
 					options.stdout.println(categoryEntry.getKey() + ":");
 					for (ProjectTemplate template : categoryEntry.getValue())
 					{
+						if (ProjectGenerator.TEMPLATE_BASE.equals(template.getName()))
+							continue;
+						
 						String description = template.getDescription();
 						options.stdout.println("    " + template.getName());
 						Common.printWrapped(options.stdout, 0, 8, 72, Common.isEmpty(description) ? "" : description);
@@ -312,6 +315,11 @@ public final class DoomMakeMain
 				return ERROR_BAD_PROJECT;
 			}
 
+			if (options.createProject.isEmpty())
+			{
+				options.createProject.add(ProjectGenerator.TEMPLATE_BASE);
+			}
+			
 			try {
 				SortedSet<ProjectModule> selectedModules = ProjectGenerator.getSelectedProjects(options.createProject);
 				List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);

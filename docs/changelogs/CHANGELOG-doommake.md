@@ -1,6 +1,13 @@
 DoomMake
 --------
 
+### Changed for 0.11.0
+
+* `Fixed` Some generated script documentation.
+* `Changed` Attempting to reduce map textures without any texture WADs errors out (new projects).
+* `Changed` Assets are now a separate template category.
+
+
 ### Changed for 0.10.0
 
 * `Added` A patch source module for patches made in "not DECOHack".

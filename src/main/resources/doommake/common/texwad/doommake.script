@@ -51,8 +51,7 @@ check function doMapTextures() {
 
 	textureWadFiles = scanTextureWadList();
 	if (empty(textureWadFiles)) {
-		println("[Skipped] WARNING: No texture WADs found in: " + textureWadDir + ". Skipping texture extraction step.");
-		return;
+		return error("NoTextureWADs", "No texture WADs found in: " + sourceDir + ".");
 	}
 	
 	extractUsedMapTextures(

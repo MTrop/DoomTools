@@ -37,20 +37,18 @@ public final class ProjectGenerator
 	private static final String CATEGORY_REPOSITORY = "Repositories";
 	private static final String CATEGORY_PATCHES = "Patches";
 	private static final String CATEGORY_ASSETS = "Assets";
+	private static final String CATEGORY_MAPSTEXTURES = "Maps and Textures";
 	private static final String CATEGORY_EXECUTION = "Execution";
+
+	public static final String TEMPLATE_BASE = "base";
 
 	private static final String TEMPLATE_GIT = "git";
 	private static final String TEMPLATE_MERCURIAL = "hg";
-	private static final String TEMPLATE_BASE = "base";
-	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_ASSETS = "assets";
+	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_TEXTURES = "textures";
-	private static final String TEMPLATE_ASSETS_TEXTURES = "assets-textures";
-	private static final String TEMPLATE_MAPS_ASSETS = "maps-assets";
 	private static final String TEMPLATE_MAPS_TEXTURES = "maps-textures";
 	private static final String TEMPLATE_MAPS_TEXTUREWADS = "maps-texturewads";
-	private static final String TEMPLATE_MAPS_ASSETS_TEXTURES = "maps-assets-textures";
-	private static final String TEMPLATE_MAPS_ASSETS_TEXTUREWADS = "maps-assets-texturewads";
 	private static final String TEMPLATE_DECOHACK = "decohack";
 	private static final String TEMPLATE_PATCH = "patch";
 	private static final String TEMPLATE_RUN = "run";
@@ -677,14 +675,19 @@ public final class ProjectGenerator
 
 		// ................................................................
 
+		TEMPLATES.put(TEMPLATE_BASE, template(
+			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.",
+			MODULE_INIT, MODULE_BASE
+		));
+		
 		TEMPLATES.put(TEMPLATE_GIT, template(
 			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository ignores/attributes to the project.",
-			MODULE_GIT
+			MODULE_INIT, MODULE_GIT
 		));
 		
 		TEMPLATES.put(TEMPLATE_MERCURIAL, template(
 			TEMPLATE_MERCURIAL, CATEGORY_REPOSITORY, "Adds Mercurial repository ignores to the project.",
-			MODULE_MERCURIAL
+			MODULE_INIT, MODULE_MERCURIAL
 		));
 		
 		TEMPLATES.put(TEMPLATE_DECOHACK, template(
@@ -698,57 +701,32 @@ public final class ProjectGenerator
 		));
 
 		TEMPLATES.put(TEMPLATE_RUN, template(
-			TEMPLATE_RUN, CATEGORY_EXECUTION, "Adds the ability to run this project.",
+			TEMPLATE_RUN, CATEGORY_EXECUTION, "Adds the ability to run this project from DoomMake.",
 			MODULE_INIT, MODULE_RUN
 		));
 			
-		TEMPLATES.put(TEMPLATE_BASE, template(
-			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.",
-			MODULE_INIT, MODULE_BASE
+		TEMPLATES.put(TEMPLATE_ASSETS, template(
+			TEMPLATE_ASSETS, CATEGORY_ASSETS, "Adds non-texture assets.",
+			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
 		));
 		
 		TEMPLATES.put(TEMPLATE_MAPS, template(
-			TEMPLATE_MAPS, CATEGORY_ASSETS, "A project for merging just maps together.",
+			TEMPLATE_MAPS, CATEGORY_MAPSTEXTURES, "A project for merging just maps together.",
 			MODULE_INIT, MODULE_MAPS
 		));
 		
-		TEMPLATES.put(TEMPLATE_MAPS_ASSETS, template(
-			TEMPLATE_MAPS_ASSETS, CATEGORY_ASSETS, "A project for merging maps and assets together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS
-		));
-
-		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTURES, template(
-			TEMPLATE_MAPS_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps, assets, and textures together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
-		));
-
-		TEMPLATES.put(TEMPLATE_MAPS_ASSETS_TEXTUREWADS, template(
-			TEMPLATE_MAPS_ASSETS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps, assets, and used textures from texture WADs together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_MAPTEX, MODULE_TEXTUREWADS
-		));
-
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTURES, template(
-			TEMPLATE_MAPS_TEXTURES, CATEGORY_ASSETS, "A project for merging maps and textures together.",
+			TEMPLATE_MAPS_TEXTURES, CATEGORY_MAPSTEXTURES, "A project for merging maps and textures together.",
 			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
 		));
 
 		TEMPLATES.put(TEMPLATE_MAPS_TEXTUREWADS, template(
-			TEMPLATE_MAPS_TEXTUREWADS, CATEGORY_ASSETS, "A project for merging maps and used textures from texture WADs together.",
+			TEMPLATE_MAPS_TEXTUREWADS, CATEGORY_MAPSTEXTURES, "A project for merging maps and used textures from texture WADs together.",
 			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTUREWADS
 		));
 
-		TEMPLATES.put(TEMPLATE_ASSETS, template(
-			TEMPLATE_ASSETS, CATEGORY_ASSETS, "A project for merging just non-texture assets together.",
-			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
-		));
-		
-		TEMPLATES.put(TEMPLATE_ASSETS_TEXTURES, template(
-			TEMPLATE_ASSETS_TEXTURES, CATEGORY_ASSETS, "A project for merging assets together, including a from-scratch texture set.",
-			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES
-		));
-		
 		TEMPLATES.put(TEMPLATE_TEXTURES, template(
-			TEMPLATE_TEXTURES, CATEGORY_ASSETS, "A project for merging a texture WAD together.",
+			TEMPLATE_TEXTURES, CATEGORY_MAPSTEXTURES, "A project for merging a texture WAD together.",
 			MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES
 		));
 

@@ -13,7 +13,7 @@ check entry all(args) {
 /****************************************************************************
  * TARGET: release
  ****************************************************************************
- * Creates a release and distribution.
+ * Creates a release WAD.
  * doommake release
  ****************************************************************************/
 check entry release(args) {
@@ -27,6 +27,7 @@ check entry release(args) {
  * TARGET: make
  ****************************************************************************
  * Default make target.
+ * Creates a release and packages up the distribution.
  * doommake
  ****************************************************************************/
 check entry make(args) {

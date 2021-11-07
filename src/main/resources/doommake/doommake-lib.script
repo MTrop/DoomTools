@@ -195,7 +195,7 @@ check function wasBuilt(target) {
  * If both conditions are true, this returns true. This is used for checking
  * if a build target needs running.
  * 
- * filePaths: Path to the base IWAD file.
+ * filePaths: The list of files to verify file existence.
  * builtTargetList: The list of built target names to check for.
  ****************************************************************************/
 function checkFileExistenceAndBuildStatuses(filePaths, builtTargetList) {
