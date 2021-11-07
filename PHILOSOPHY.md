@@ -58,6 +58,16 @@ a way that facilitates this, most of the time. If you modify the parser, err on 
 what makes an informative, convey-able error!
 
 
+### [DECOHack] Why add Thing/Weapon aliases as a feature? Isn't #define good enough?
+
+Very good question! 
+
+Defines are lexer-wide, and are replaced at the token level before DECOHack has a chance to 
+read them. Aliases are DECOHack-centric, and are contextual to Thing and Weapon clauses and 
+definitions. You are better off using aliases or the pre-packaged defines via the patch 
+type #includes.
+
+
 ### [WadScript] Why is there no WADREPLACE() built-in for replacing WAD entries?
 
 "Replacing" an entry is essentially removing and adding at the same index, but you can
