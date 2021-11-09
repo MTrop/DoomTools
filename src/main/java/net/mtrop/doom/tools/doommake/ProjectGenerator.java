@@ -34,10 +34,11 @@ import net.mtrop.doom.tools.exception.UtilityException;
  */
 public final class ProjectGenerator
 {
+	private static final String CATEGORY_ASSETS = "Assets";
+	private static final String CATEGORY_MAPS = "Maps";
+	private static final String CATEGORY_TEXTURES = "Textures";
 	private static final String CATEGORY_REPOSITORY = "Repositories";
 	private static final String CATEGORY_PATCHES = "Patches";
-	private static final String CATEGORY_ASSETS = "Assets";
-	private static final String CATEGORY_MAPSTEXTURES = "Maps and Textures";
 	private static final String CATEGORY_EXECUTION = "Execution";
 
 	public static final String TEMPLATE_BASE = "base";
@@ -47,8 +48,8 @@ public final class ProjectGenerator
 	private static final String TEMPLATE_ASSETS = "assets";
 	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_TEXTURES = "textures";
-	private static final String TEMPLATE_MAPS_TEXTURES = "maps-textures";
-	private static final String TEMPLATE_MAPS_TEXTUREWADS = "maps-texturewads";
+	private static final String TEMPLATE_TEXTURES_BOOM = "texturesboom";
+	private static final String TEMPLATE_TEXTUREWADS = "texturewads";
 	private static final String TEMPLATE_DECOHACK = "decohack";
 	private static final String TEMPLATE_PATCH = "patch";
 	private static final String TEMPLATE_RUN = "run";
@@ -60,12 +61,12 @@ public final class ProjectGenerator
 	private static final String MODULE_DECOHACK = "decohack";
 	private static final String MODULE_PATCH = "patch";
 	private static final String MODULE_MAPS = "maps";
-	private static final String MODULE_MAPTEX = "maptex";
 	private static final String MODULE_ASSETS = "assets";
 	private static final String MODULE_ASSETS_CONVERT = "assets-convert";
 	private static final String MODULE_TEXTURES = "textures";
+	private static final String MODULE_TEXTURES_VANILLA = "textures-vanilla";
+	private static final String MODULE_TEXTURES_BOOM = "textures-boom";
 	private static final String MODULE_TEXTURES_CONVERT = "textures-convert";
-	private static final String MODULE_TEXTURES_MAPS = "textures-maps";
 	private static final String MODULE_TEXTUREWADS = "texturewads";
 	private static final String MODULE_RUN = "run";
 
@@ -232,9 +233,9 @@ public final class ProjectGenerator
 			REPLACER_PROJECT_IWAD
 		));
 		POST_CREATE_TODOS.put(MODULE_INIT, list(
-			"Modify README.md and describe your project."
-			,"Modify src/wadinfo.txt, especially the license section. It will become your text file."
-			,"Add extended credits to src/credits.txt."
+			"Modify `README.md` and describe your project."
+			,"Modify `src/wadinfo.txt`, especially the license section. It will become your text file."
+			,"Add extended credits to `src/credits.txt`."
 		));
 		
 		// ................................................................
@@ -350,50 +351,6 @@ public final class ProjectGenerator
 
 		// ................................................................
 
-		// A module that builds a set of maps.
-		MODULES.put(MODULE_MAPS,
-			module(2, MODULE_MAPS,
-				dir("src/maps"),
-				file("scripts/merge-maps.txt",
-					"doommake/common/maps/wadmerge.txt"),
-				fileAppend("doommake.properties",
-					"doommake/common/maps/doommake.properties"),
-				fileAppend("doommake.script", 
-					"doommake/common/maps/doommake.script"),
-				fileAppend("README.md",
-					"doommake/common/maps/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_MAPS,
-			module(
-				fileContentAppend("doommake.script",
-					"\tdoMaps();"
-				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_MAPS,
-			module(
-				fileContentAppend("doommake.script",
-					"\t\t,getMapsWad()"
-				)
-			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_MAPS, new String[]{
-			"mergewad   out $0/$"
-		});
-		POST_RELEASE.put(MODULE_MAPS,
-			module(
-				fileAppend("doommake.script",
-					"doommake/common/maps/doommake-target.script"
-				)
-			)
-		);
-		POST_CREATE_TODOS.put(MODULE_MAPS, list(
-			"Add maps to `src/maps`."
-		));
-
-		// ................................................................
-
 		// A module that converts assets.
 		MODULES.put(MODULE_ASSETS_CONVERT,
 			module(4, MODULE_ASSETS_CONVERT,
@@ -478,18 +435,6 @@ public final class ProjectGenerator
 
 		// ................................................................
 
-		// A module that adds MapTex stuff.
-		MODULES.put(MODULE_MAPTEX,
-			module(8, MODULE_MAPTEX,
-				fileAppend("doommake.properties",
-					"doommake/common/maptex/doommake.properties"),
-				fileAppend("doommake.script", 
-					"doommake/common/maptex/doommake.script")
-			)
-		);
-
-		// ................................................................
-
 		// A module that builds texture WADs.
 		// If this is used, do NOT use the "texturewads" module.
 		MODULES.put(MODULE_TEXTURES_CONVERT,
@@ -530,12 +475,12 @@ public final class ProjectGenerator
 			module(10, MODULE_TEXTURES,
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
-				file("scripts/merge-textures.txt",
-					"doommake/common/textures/wadmerge.txt"),
 				file("src/textures/texture1.txt", 
 					"doommake/common/textures/texture1.txt"),
 				file("src/textures/texture2.txt", 
 					"doommake/common/textures/texture2.txt"),
+				file("src/textures/animflats.wad", 
+					"doommake/common/textures/animflats.wad"),
 				fileAppend("doommake.properties", 
 					"doommake/common/textures/doommake.properties"),
 				fileAppend("doommake.script", 
@@ -561,8 +506,34 @@ public final class ProjectGenerator
 		POST_CREATE_TODOS.put(MODULE_TEXTURES, list(
 			"Add flats to `src/textures/flats`."
 			,"Add patches to `src/textures/patches`."
+			,"Edit `src/textures/animflats.wad` for flats that need to be in a specific order."
 			,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
 			,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
+		));
+		
+		// ................................................................
+
+		// A module that builds vanilla texture WADs.
+		MODULES.put(MODULE_TEXTURES_VANILLA,
+			module(11, MODULE_TEXTURES_VANILLA,
+				file("scripts/merge-textures.txt",
+					"doommake/common/textures/vanilla/wadmerge.txt")
+			)
+		);
+		
+		// ................................................................
+
+		// A module that builds Boom texture WADs.
+		MODULES.put(MODULE_TEXTURES_BOOM,
+			module(11, MODULE_TEXTURES_BOOM,
+				file("src/textures/defswani.txt",
+					"doommake/common/textures/boom/defswani.txt"),
+				file("scripts/merge-textures.txt",
+					"doommake/common/textures/boom/wadmerge.txt")
+			)
+		);
+		POST_CREATE_TODOS.put(MODULE_TEXTURES_BOOM, list(
+			"Edit `src/textures/defswani.txt` for defining ANIMATED and SWITCHES."
 		));
 		
 		// ................................................................
@@ -571,18 +542,7 @@ public final class ProjectGenerator
 		// If this is used, do NOT use the "textures" module.
 		MODULES.put(MODULE_TEXTUREWADS,
 			module(15, MODULE_TEXTUREWADS,
-				dir("src/wads/textures"),
-				fileAppend("doommake.script",
-					"doommake/common/texwad/doommake.script"),
-				fileAppend("README.md",
-					"doommake/common/texwad/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_TEXTUREWADS,
-			module(
-				fileContentAppend("doommake.script",
-					"\tdoMapTextures();"
-				)
+				dir("src/wads/textures")
 			)
 		);
 		RELEASE_SCRIPT_MERGE.put(MODULE_TEXTUREWADS,
@@ -595,51 +555,57 @@ public final class ProjectGenerator
 		RELEASE_WADMERGE_LINE.put(MODULE_TEXTUREWADS, new String[]{
 			"mergewad   out $0/$"
 		});
-		POST_RELEASE.put(MODULE_TEXTUREWADS,
-			module(
-				fileAppend("doommake.script",
-					"doommake/common/texwad/doommake-target.script"
-				)
-			)
-		);
 		POST_CREATE_TODOS.put(MODULE_TEXTUREWADS, list(
 			"Add texture WADs to `src/wads/textures`."
 		));
 
 		// ................................................................
 
-		// A module that adds map texture exports for texture WAD stuff.
-		MODULES.put(MODULE_TEXTURES_MAPS,
-			module(15, MODULE_TEXTURES_MAPS,
+		// A module that builds a set of maps.
+		MODULES.put(MODULE_MAPS,
+			module(18, MODULE_MAPS,
+				dir("src/maps"),
+				file("scripts/merge-maps.txt",
+					"doommake/common/maps/wadmerge.txt"),
+				fileAppend("doommake.properties",
+					"doommake/common/maps/doommake.properties"),
 				fileAppend("doommake.script", 
-					"doommake/common/textures/maps/doommake.script")
+					"doommake/common/maps/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/maps/README.md")
 			)
 		);
-		RELEASE_SCRIPT.put(MODULE_TEXTURES_MAPS,
+		RELEASE_SCRIPT.put(MODULE_MAPS,
 			module(
 				fileContentAppend("doommake.script",
-					"\tdoMapTextures();"
+					"\tdoMaps();"
+					,"\tdoMapTextures();"
 				)
 			)
 		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_TEXTURES_MAPS,
+		RELEASE_SCRIPT_MERGE.put(MODULE_MAPS,
 			module(
 				fileContentAppend("doommake.script",
-					"\t\t,getMapTexWad()"
+					"\t\t,getMapsWad()"
+					,"\t\t,getMapTexWad()"
 				)
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_TEXTURES_MAPS, new String[]{
+		RELEASE_WADMERGE_LINE.put(MODULE_MAPS, new String[]{
 			"mergewad   out $0/$"
+			,"mergewad   out $0/$"
 		});
-		POST_RELEASE.put(MODULE_TEXTURES_MAPS,
+		POST_RELEASE.put(MODULE_MAPS,
 			module(
 				fileAppend("doommake.script",
-					"doommake/common/textures/maps/doommake-target.script"
+					"doommake/common/maps/doommake-target.script"
 				)
 			)
 		);
-		
+		POST_CREATE_TODOS.put(MODULE_MAPS, list(
+			"Add maps to `src/maps`."
+		));
+
 		// ................................................................
 
 		// A module that allows running this project.
@@ -710,26 +676,26 @@ public final class ProjectGenerator
 			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
 		));
 		
+		TEMPLATES.put(TEMPLATE_TEXTURES, template(
+			TEMPLATE_TEXTURES, CATEGORY_TEXTURES, "Adds the ability to merge a texture WAD together as the project's texture pool.",
+			MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_VANILLA
+		));
+
+		TEMPLATES.put(TEMPLATE_TEXTURES_BOOM, template(
+				TEMPLATE_TEXTURES_BOOM, CATEGORY_TEXTURES, "Adds the ability to merge a texture WAD together (with Boom additions) as the project's texture pool.",
+				MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_BOOM
+			));
+
+		TEMPLATES.put(TEMPLATE_TEXTUREWADS, template(
+			TEMPLATE_TEXTUREWADS, CATEGORY_TEXTURES, "Adds the ability to add texture WADs as the project's texture pool.",
+			MODULE_INIT, MODULE_TEXTUREWADS
+		));
+
 		TEMPLATES.put(TEMPLATE_MAPS, template(
-			TEMPLATE_MAPS, CATEGORY_MAPSTEXTURES, "A project for merging just maps together.",
+			TEMPLATE_MAPS, CATEGORY_MAPS, "Adds the ability to merge maps together.",
 			MODULE_INIT, MODULE_MAPS
 		));
 		
-		TEMPLATES.put(TEMPLATE_MAPS_TEXTURES, template(
-			TEMPLATE_MAPS_TEXTURES, CATEGORY_MAPSTEXTURES, "A project for merging maps and textures together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_MAPS
-		));
-
-		TEMPLATES.put(TEMPLATE_MAPS_TEXTUREWADS, template(
-			TEMPLATE_MAPS_TEXTUREWADS, CATEGORY_MAPSTEXTURES, "A project for merging maps and used textures from texture WADs together.",
-			MODULE_INIT, MODULE_MAPS, MODULE_MAPTEX, MODULE_TEXTUREWADS
-		));
-
-		TEMPLATES.put(TEMPLATE_TEXTURES, template(
-			TEMPLATE_TEXTURES, CATEGORY_MAPSTEXTURES, "A project for merging a texture WAD together.",
-			MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES
-		));
-
 	}
 	
 	@SafeVarargs

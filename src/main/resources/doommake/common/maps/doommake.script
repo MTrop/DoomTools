@@ -38,4 +38,84 @@ check function doMaps() {
 	setBuilt("maps");
 }
 
+/* ------------------------------------------------------------------------ */
+
+#define PROP_MAPTEXWAD      "doommake.file.maptex"
+#define DEFAULT_MAPTEXWAD   "maptex.wad"
+
+/**
+ * Return the output map textures WAD.
+ */
+function getMapTexWad() {
+	return prop(PROP_MAPTEXWAD, DEFAULT_MAPTEXWAD); 
+}
+
+
+/* ------------------------------------------------------------------------ */
+
+#define SRC_DIR_TEXTUREWADS "/wads/textures"
+
+/**
+ * Scans the project for available texture WADs.
+ */
+function scanTextureWADList() {
+	return filelist(getSourceDirectory() + SRC_DIR_TEXTUREWADS, false, REGEX_WADFILES);
+}
+
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Extracts textures from the project texture WADs using the maps.
+ * Creates maptex WAD.
+ */
+check function doMapTextures() {
+	
+	initBuild();
+
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+		
+	// Figure out where the textures are.
+	textureWad = getBuildDirectory() + "/" + getTextureWad();
+
+	mapsWadPath = getBuildDirectory() + "/" + getMapsWad();
+	outWad = getBuildDirectory() + "/" + getMapTexWad();
+
+	// Gather all WADs.
+	textureWadPathList = scanTextureWADList() ?? [];
+	if (fileexists(textureWad)) {
+		textureWadPathList->listAdd(textureWad);
+	}
+
+	if (empty(textureWadPathList)) {
+		println("[Skipped] No textures to extract for maps. Skipping texture extraction.");
+		return;
+	}
+	
+	// Only do if maps were compiled.
+	if (!fileExists(mapsWadPath)) {
+		println("[Skipped] No maps at `" + mapsWadPath + "`. Maps WAD not built. Skipping texture extraction.");
+		wadfilecreate(outWad);
+		return;
+	}
+
+	// Texture extraction.
+	if (checkFileExistenceAndBuildStatuses(outWad, ["maps", "textures"])) {
+		println("[Skipped] Both maps and textures were not built. Skipping map texture rebuild.");
+		wadfilecreate(outWad);
+		return;
+	}
+
+	println("Extracting map textures...");
+
+	extractUsedMapTextures(
+		baseIwadPath,
+		[mapsWadPath],
+		textureWadPathList,
+		outWad
+	);
+	
+	setBuilt("maptextures");
+}
 

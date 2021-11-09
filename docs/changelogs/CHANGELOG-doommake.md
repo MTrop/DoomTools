@@ -1,6 +1,13 @@
 DoomMake
 --------
 
+### Changed for 0.12.0
+
+* `Added` Some texture template types for Vanilla and Boom.
+* `Changed` Template ordering and setup for other texture templates (new projects).
+* `Changed` The project "TODO" list is now a Markdown file.
+
+
 ### Changed for 0.11.0
 
 * `Fixed` Some generated script documentation.

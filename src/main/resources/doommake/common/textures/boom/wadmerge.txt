@@ -1,0 +1,30 @@
+# ===========================================================================
+# WadMerge Script for Textures
+# ===========================================================================
+#
+# Argument 0: The build directory.
+# Argument 1: The source directory.
+# Argument 2: The output WAD.
+#
+
+create out
+
+# Create texture 
+mergedeutexfile    out $1/textures/texture1.txt
+mergedeutexfile    out $1/textures/texture2.txt
+mergeswantbls      out $1/textures/defswani.txt
+
+# Merge Flats
+marker             out ff_start
+mergenamespacefile out $1/textures/animflats.wad ff
+mergedir           out $1/textures/flats
+marker             out ff_end
+
+# Merge Patches
+marker             out pp_start
+mergedir           out $1/textures/patches
+marker             out pp_end
+
+
+finish out $0/$2
+end

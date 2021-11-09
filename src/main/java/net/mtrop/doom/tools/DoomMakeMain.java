@@ -330,7 +330,7 @@ public final class DoomMakeMain
 				options.stdout.println("SUCCESSFULLY Created project: " + options.targetName);
 				options.stdout.println();
 				
-				File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.txt");
+				File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.md");
 				List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
 				
 				if (!todoList.isEmpty())
@@ -338,6 +338,7 @@ public final class DoomMakeMain
 					options.stdout.println("You should also probably do the following:");
 					try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
 					{
+						todoPrinter.println("# Stuff To Do\n");
 						int i = 1;
 						for (String t : todoList)
 						{

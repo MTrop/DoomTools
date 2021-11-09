@@ -8,3 +8,14 @@ check entry maps(args) {
 	doMaps();
 }
 
+/*****************************************************************************
+ * TARGET: maptextures
+ *****************************************************************************
+ * Reads the map WADs and available texture resources and exports 
+ * a WAD of used textures.
+ * doommake maptextures
+ ****************************************************************************/
+check entry maptextures(args) {
+	doMapTextures();
+}
+
