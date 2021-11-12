@@ -165,17 +165,32 @@
 								</div>
 							</div>
 							<div class="w3-row category-row">
-								<div class="w3-col s4">
+								<div class="w3-col s6">
 									<input type="checkbox" class="category-selection" id="template-maps" name="maps" value="maps"/>
 									<label for="template-maps" class="category-selection">Maps</label>
 								</div>
-								<div class="w3-col s4">
+								<div class="w3-col s6">
 									<input type="checkbox" class="category-selection" id="template-assets" name="assets" value="assets"/>
-									<label for="template-assets" class="category-selection">Assets</label>
+									<label for="template-assets" class="category-selection">Assets (Graphics, Sounds, etc.)</label>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>Will it use a DeHackEd patch?</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" checked="true" id="template-patch-none" name="patch" value=""/>
+									<label for="template-patch-none" class="category-selection">No</label>
 								</div>
 								<div class="w3-col s4">
-									<input type="checkbox" class="category-selection" id="template-decohack" name="decohack" value="decohack"/>
-									<label for="template-decohack" class="category-selection">A DECOHack Patch</label>
+									<input type="radio" class="category-selection" id="template-patch-decohack" name="patch" value="decohack"/>
+									<label for="template-patch-decohack" class="category-selection">Yes, from DECOHack</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="template-patch-other" name="patch" value="patch"/>
+									<label for="template-patch-other" class="category-selection">Yes, from another editor (i.e. WhackEd, DEH9000)</label>
 								</div>
 							</div>
 							<div class="w3-row">
@@ -184,17 +199,40 @@
 								</div>
 							</div>
 							<div class="w3-row category-row">
-								<div class="w3-col s4">
+								<div class="w3-col s3">
 									<input type="radio" class="category-selection" checked="true" id="template-textures-none" name="textures" value=""/>
 									<label for="template-textures-none" class="category-selection">None</label>
 								</div>
-								<div class="w3-col s4">
+								<div class="w3-col s3">
 									<input type="radio" class="category-selection" id="template-textures-wads" name="textures" value="texturewads"/>
 									<label for="template-textures-wads" class="category-selection">From Texture WADs</label>
 								</div>
-								<div class="w3-col s4">
+								<div class="w3-col s3">
 									<input type="radio" class="category-selection" id="template-textures-loose" name="textures" value="textures"/>
 									<label for="template-textures-loose" class="category-selection">From the Project</label>
+								</div>
+								<div class="w3-col s3">
+									<input type="radio" class="category-selection" id="template-textures-loose" name="textures" value="texturesboom"/>
+									<label for="template-textures-loose" class="category-selection">From the Project, with Boom extensions</label>
+								</div>
+							</div>
+							<div class="w3-row">
+								<div class="w3-col s12">
+									<h4>Are you going to use Version control?</h4>
+								</div>
+							</div>
+							<div class="w3-row category-row">
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" checked="true" id="scm-none" name="scm" value=""/>
+									<label for="scm-none" class="category-selection">No</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="scm-git" name="scm" value="git"/>
+									<label for="scm-git" class="category-selection">Yes, Git</label>
+								</div>
+								<div class="w3-col s4">
+									<input type="radio" class="category-selection" id="scm-hg" name="scm" value="hg"/>
+									<label for="scm-hg" class="category-selection">Yes, Mercurial</label>
 								</div>
 							</div>
 							<div class="w3-row">
@@ -210,25 +248,6 @@
 								<div class="w3-col s6">
 									<input type="radio" class="category-selection" id="run-yes" name="run" value="run"/>
 									<label for="run-yes" class="category-selection">Yes</label>
-								</div>
-							</div>
-							<div class="w3-row">
-								<div class="w3-col s12">
-									<h4>Version control?</h4>
-								</div>
-							</div>
-							<div class="w3-row category-row">
-								<div class="w3-col s4">
-									<input type="radio" class="category-selection" checked="true" id="scm-none" name="scm" value=""/>
-									<label for="scm-none" class="category-selection">None</label>
-								</div>
-								<div class="w3-col s4">
-									<input type="radio" class="category-selection" id="scm-git" name="scm" value="git"/>
-									<label for="scm-git" class="category-selection">Git</label>
-								</div>
-								<div class="w3-col s4">
-									<input type="radio" class="category-selection" id="scm-hg" name="scm" value="hg"/>
-									<label for="scm-hg" class="category-selection">Mercurial</label>
 								</div>
 							</div>
 						</form>
@@ -249,7 +268,7 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
-						<pre class="command-line" style="max-width: 900px;"><code>doommake <span id="cmd-name"></span> --new-project <span id="cmd-assets"></span><span id="cmd-patch"></span><span id="cmd-run"></span><span id="cmd-scm"></span></code></pre>
+						<pre class="command-line" style="max-width: 900px;"><code>doommake <span id="cmd-name"></span> --new-project <span id="cmd-templates"></span></code></pre>
 					</div>
 				</div>
 				<div class="w3-row">
@@ -269,7 +288,7 @@
 			<div class="w3-col l12 w3-center">
 				<div class="w3-row main-heading">
 					<div class="w3-col l12 w3-center">
-						<h3>First Thing's First!</h3>
+						<h2>First Thing's First!</h2>
 					</div>
 				</div>
 				<div class="w3-row">
@@ -304,157 +323,27 @@
 			</div>
 		</div>
 
-		<!-- Assets -->
-		<div class="w3-row template-section section-assets">
-			<div class="w3-col l12 w3-center">
-				<div class="w3-row main-heading">
-					<div class="w3-col l12 w3-center">
-						<h3>Project Assets</h3>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The project's loose non-texture assets like graphics, sprites, music, and sound should be
-							placed in the folders off of <kbd>src/assets</kbd>.
-						</p>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							<kbd>src/assets/_global</kbd> should contain anything that is to be added into the global 
-							WAD namespace as-is. Subfolders are searched and imported, but no markers are added per 
-							subfolder.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/assets/graphics</kbd> should contain graphics that are added into the global 
-							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
-							are searched and imported, but no markers are added per subfolder.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/assets/music</kbd> should contain music lumps that are added in the global
-							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
-							are searched and imported, but no markers are added per subfolder.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/assets/sounds</kbd> should contain sound lumps that are added in the global
-							WAD namespace as-is. No conversions are applied to these files on import. Subfolders
-							are searched and imported, but no markers are added per subfolder.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/assets/sprites</kbd> should contain sprite graphics that are added into the
-							WAD's sprite namespace (<kbd>SS_START</kbd> / <kbd>SS_END</kbd>) as-is. No conversions 
-							are applied to these files on import. Subfolders are searched and imported, but no markers 
-							are added per subfolder.
-						</p>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							Files that need conversion before asset merge are placed in the <kbd>src/convert</kbd> folder's
-							subfolders.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/convert/graphics</kbd> should contain graphics that get converted from formats like PNG, GIF,
-							BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. If PNG files have offset
-							information in them, they are preserved.
-						</p>
-						<p class="site-blurb">
-							<kbd>src/convert/sounds</kbd> should contain sounds that get converted from formats like WAV or AIFF
-							and end up as DMX-formatted sounds in <kbd>src/assets/sounds</kbd>. Stereo sounds are mixed to mono,
-							but their sampling rate is preserved. If you need to convert from other formats, you need to have
-							<a href="https://ffmpeg.org/">FFmpeg</a> on your system PATH (or point to it some other way).
-						</p>
-						<p class="site-blurb">
-							<kbd>src/convert/sprites</kbd> should contain sprite graphics that get converted from formats like PNG, GIF,
-							BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. If PNG files have offset
-							information in them, they are preserved.
-						</p>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The <strong>WadMerge</strong> script file <kbd>scripts/merge-assets.txt</kbd> govern how the 
-							<kbd>src/assets</kbd> folder's files are merged together. By default, this will create the 
-							<kbd>build/assets.wad</kbd> file.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Maps -->
-		<div class="w3-row template-section section-maps">
-			<div class="w3-col l12 w3-center">
-				<div class="w3-row main-heading">
-					<div class="w3-col l12 w3-center">
-						<h3>Project Maps</h3>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The project's maps should be in individual WAD files and placed in <kbd>src/maps</kbd>.
-							You can edit and save maps directly into this directory - <kbd>DBS</kbd> and other backup
-							files made by Doom Builder-family editors are ignored by version control by default, if you 
-							use it.
-						</p>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The <strong>WadMerge</strong> script file <kbd>scripts/merge-maps.txt</kbd> govern how the 
-							<kbd>src/maps</kbd> folder's files are merged together. By default, this will create the 
-							<kbd>build/maps.wad</kbd> file.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- DECOHack -->
-		<div class="w3-row template-section section-decohack">
-			<div class="w3-col l12 w3-center">
-				<div class="w3-row main-heading">
-					<div class="w3-col l12 w3-center">
-						<h3>DECOHack Patch</h3>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The source file for compiling a DECOHack patch is in <kbd>src/decohack/main.dh</kbd>.
-							By default, the patch is compiled and placed in the build folder as <kbd>build/dehacked.deh</kbd>.
-							The patch's source data is merged together into one file as <kbd>build/dehsrc.dh</kbd>.
-						</p>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affect how the 
-							patches make their way into the final WAD file, imported as-is.
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-
+		<!-- BUILD -->
 		<div class="w3-row">
 			<div class="w3-col l12 w3-center">
 				<div class="w3-row main-heading">
 					<div class="w3-col l12 w3-center">
-						<h3>Building Everything</h3>
+						<h2>Building Everything</h2>
 					</div>
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
-							To build your project, just type:
+							After you created your project, you'll need to switch to the project's directory (make
+							it the "current" directory), or else DoomMake will complain that it can't find the project's
+							scripts.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							To build the full project, type:
 						</p>
 					</div>
 				</div>
@@ -466,7 +355,8 @@
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
-							...and everything will be compiled together into the project.
+							...and everything will be compiled together into the project, and distributable archives 
+							will also be made.
 						</p>
 					</div>
 				</div>
@@ -485,16 +375,288 @@
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
-							...and the contents of the <kbd>build</kbd> directory will be deleted.
+							...and the contents of the <kbd>build</kbd> and <kbd>dist</kbd> directory will be deleted.
 						</p>
 					</div>
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
-							DoomMake is usually smart enough to detect changes to the project and skip all unchanged 
-							steps, but in case something goes wrong, you can delete the <kbd>build/lock.json</kbd> file
-							to force a rebuild of everything, or change/alter the hashes to force rebuilds.
+							The contents of your build folder (and perhaps the texture WAD folder) are more 
+							than likely going to be where you get the resources for your project when making maps.
+							Using those folders in this way will keep your editing environment stable for when you
+							or others make changes to your project. All you'll need to do is rebuild!
+						</p>
+						<p class="site-blurb">
+							<strong>NOTE:</strong> DoomMake is usually smart enough to detect changes to the 
+							project and skip all unchanged pieces and steps, but in case something goes wrong, 
+							you can delete the <kbd>build/lock.json</kbd> file to force a rebuild of everything, 
+							or change/alter the hashes to force rebuilds.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- SEPARATOR -->
+		<div class="w3-row template-section section-all">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h3>More Stuff</h3>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						Below are some other things to note about the project layout.
+					</div>
+				</div>
+				<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+			</div>
+		</div>
+
+		<!-- Maps -->
+		<div class="w3-row template-section section-maps">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Project Maps</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The project's maps should be in individual WAD files and placed in <kbd>src/maps</kbd>.
+							You can edit and save maps directly into this directory - <kbd>DBS</kbd> and other backup
+							files made by Doom Builder-family editors are ignored by version control by default, if you 
+							use it.
+						</p>
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-maps.txt</kbd> govern how the 
+							<kbd>src/maps</kbd> folder's files are merged together. By default, this will create the 
+							<kbd>build/maps.wad</kbd> file.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Assets -->
+		<div class="w3-row template-section section-assets">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Project Assets</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The project's loose non-texture assets like graphics, sprites, music, and sound should be
+							placed in the folders off of <kbd>src/assets</kbd>.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The folder <kbd>src/assets/_global</kbd> should contain anything that is to be added into the 
+							global WAD namespace as-is. Subfolders are searched and imported, but no markers are added per 
+							subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/graphics</kbd> should contain graphics that are added into the 
+							global WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/music</kbd> should contain music lumps that are added in the 
+							global WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/sounds</kbd> should contain sound lumps that are added in the 
+							global WAD namespace as-is. No conversions are applied to these files on import. Subfolders
+							are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/sprites</kbd> should contain sprite graphics that are added into the
+							WAD's sprite namespace (<kbd>SS_START</kbd> / <kbd>SS_END</kbd>) as-is. No conversions 
+							are applied to these files on import. Subfolders are searched and imported, but no markers 
+							are added per subfolder.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Files that need conversion before asset merge are placed in the <kbd>src/convert</kbd> folder's
+							subfolders.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/graphics</kbd> should contain graphics that get converted from formats 
+							like PNG, GIF, BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. If 
+							PNG files have offset information in them (grAb), it is preserved on conversion. Target files are 
+							overwritten.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/sounds</kbd> should contain sounds that get converted from formats 
+							like WAV or AIFF and end up as DMX-formatted sounds in <kbd>src/assets/sounds</kbd>. Stereo sounds 
+							are mixed to mono, but their sampling rate is preserved. If you need to convert from other formats, 
+							you need to have <a href="https://ffmpeg.org/">FFmpeg</a> on your system PATH (or point to it some 
+							other way). Target files are overwritten.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/sprites</kbd> should contain sprite graphics that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as Doom Patch formats in <kbd>src/assets/graphics</kbd>. 
+							If PNG files have offset information in them (grAb), it is preserved on conversion. Target files are 
+							overwritten.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-assets.txt</kbd> govern how the 
+							<kbd>src/assets</kbd> folder's files are merged together. By default, this will create the 
+							<kbd>build/assets.wad</kbd> file.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- DECOHack -->
+		<div class="w3-row template-section section-decohack">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>DECOHack Patch</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The source file for compiling a DECOHack patch is in <kbd>src/decohack/main.dh</kbd>.
+							By default, the patch is compiled and placed in the build folder as <kbd>build/dehacked.deh</kbd>.
+							The patch's source data is merged together into one file as <kbd>build/dehsrc.dh</kbd>.
+						</p>
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affects how
+							patches make their way into the final WAD file, imported as-is.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Other Patch -->
+		<div class="w3-row template-section section-patch">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Other Patch Type</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The DeHackEd file that gets copied to the <kbd>build</kbd> folder is copied from the
+							<kbd>src/patch</kbd> folder. By default, the patch is copied from <kbd>src/patch/dehacked.deh</kbd>.
+							You can change this in <kbd>doommake.project.properties</kbd>.
+						</p>
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affects how the 
+							patch makes its way into the final WAD file, imported as-is.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Textures -->
+		<div class="w3-row template-section section-textures section-texturesboom">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Texture Data</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Textures that are created and used by the project come from the <kbd>src/textures</kbd> folder.
+							The files <kbd>texture1.txt</kbd> and/or <kbd>texture2.txt</kbd> are the source files that create
+							the TEXTURE1 and TEXTURE2 lumps, and the PNAMES lump is assembled by the names of the patches in 
+							those files.
+						</p>
+						<p class="site-blurb">
+							When the project is first created, these files contain only one texture and nothing else. If you
+							want to pre-populate the <kbd>texture1.txt</kbd> and/or <kbd>texture2.txt</kbd> files with
+							textures from the main IWAD as a base, delete those files, make sure the path to your IWAD in 
+							<kbd>doommake.properties</kbd> is valid and type the following:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>doommake rebuildtextures</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb template-section section-texturesboom">
+							The <kbd>defswani.txt</kbd> file in the <kbd>src/textures</kbd> folder will be read and converted
+							into <kbd>ANIMATED</kbd> and <kbd>SWITCHES</kbd> lumps for animated and switch textures.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/textures/patches</kbd> should contain the patch graphics that are added 
+							into the WAD's patch namespace (<kbd>PP_START</kbd> / <kbd>PP_END</kbd>) as-is. No conversions 
+							are applied to these files on import. Subfolders are searched and imported, with markers added
+							per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/textures/flats</kbd> should contain the flat graphics that are added 
+							into the WAD's flat namespace (<kbd>FF_START</kbd> / <kbd>FF_END</kbd>) as-is. No conversions 
+							are applied to these files on import. Subfolders are searched and imported, with markers added
+							per subfolder.
+						</p>
+						<p class="site-blurb">
+							The file <kbd>src/textures/animflats.wad</kbd> is a little special - it should contain flat
+							graphics that get added into the WAD's flat namespace (<kbd>FF_START</kbd> / <kbd>FF_END</kbd>) 
+							as-is, but in the order that they are in this WAD. This for flats that need to be in a specific
+							order in order to make animations work properly. Be careful not to put the same flats in this
+							WAD and the flats folder!
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Files that need conversion before asset merge are placed in the <kbd>src/convert</kbd> folder's
+							subfolders.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/patches</kbd> should contain graphics that get converted from formats 
+							like PNG, GIF, BMP, or JPG and end up as Doom Patch formats in <kbd>src/textures/patches</kbd>. If 
+							PNG files have offset information in them (grAb), it is preserved on conversion. Target files are 
+							overwritten.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/flats</kbd> should contain graphics that get converted from formats 
+							like PNG, GIF, BMP, or JPG and end up as raw Doom Flat formats in <kbd>src/textures/flats</kbd>. If 
+							PNG files have offset information in them (grAb), it is NOT preserved on conversion (flats do 
+							not have this info). Target files are overwritten.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-textures.txt</kbd> affects how 
+							the texture data gets merged into the source texture WAD in the build folder (as 
+							<kbd>build/textures.wad</kbd>, by default).
 						</p>
 					</div>
 				</div>
@@ -504,7 +666,7 @@
 		<div class="w3-row">
 			<div class="w3-col l12 w3-center">
 				<p>
-					That's it! Make some projects!
+					<strong>That's it! Make some projects!</strong>
 				</p>
 			</div>
 		</div>

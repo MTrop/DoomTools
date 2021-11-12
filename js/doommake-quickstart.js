@@ -3,52 +3,38 @@ const djProjectForm = $DJ.id('project-form');
 const djProjectName = $DJ.id('project-name');
 
 const djCMDName = $DJ.id('cmd-name');
-const djCMDAssets = $DJ.id('cmd-assets');
-const djCMDPatch = $DJ.id('cmd-patch');
-const djCMDRun = $DJ.id('cmd-run');
-const djCMDSCM = $DJ.id('cmd-scm');
+const djCMDTemplates = $DJ.id('cmd-templates');
 
 function call(funcRef) {
 	return () => { funcRef(); };
 }
 
 function refreshView() {
-
-	const assets = [];
-	const sections = [];
 	const projectForm = djProjectForm.form();
+	const args = [];
 
-	projectForm.maps && assets.push(projectForm.maps) && sections.push(projectForm.maps);
-	projectForm.assets && assets.push(projectForm.assets) && sections.push(projectForm.assets);
-	projectForm.textures && assets.push(projectForm.textures) && sections.push(projectForm.textures);
-	projectForm.decohack && sections.push(projectForm.decohack);
-	projectForm.run && sections.push(projectForm.run);
-	projectForm.scm && sections.push(projectForm.scm);
-
-	if (assets.length === 0)
-		assets.push('base');
+	projectForm.assets && args.push(projectForm.assets);
+	projectForm.patch && args.push(projectForm.patch);
+	projectForm.textures && args.push(projectForm.textures);
+	projectForm.maps && args.push(projectForm.maps);
+	projectForm.scm && args.push(projectForm.scm);
+	projectForm.run && args.push(projectForm.run);
 
 	djCMDName.each(function(){
 		const n = projectForm.project;
-		this.innerHTML = n.indexOf(' ') > 0 || n.length === 0
-			? '"' + n + '"' : n;
+		this.innerHTML = n.indexOf(' ') > 0 || n.length === 0 ? '"' + n + '"' : n;
 	});
-	djCMDAssets.each(function(){
-		this.innerHTML = assets.join('-') + ' ';
-	});
-	djCMDPatch.each(function(){
-		this.innerHTML = projectForm.decohack ? projectForm.decohack + ' ' : '';
-	});
-	djCMDRun.each(function(){
-		this.innerHTML = projectForm.run ? projectForm.run + ' ' : '';
-	});
-	djCMDSCM.each(function(){
-		this.innerHTML = projectForm.scm ? projectForm.scm + ' ' : '';
+
+	djCMDTemplates.each(function(){
+		this.innerHTML = args.join(' ');
 	});
 
 	djTemplateSections.classRemove('visible-section');
-	for (let x in sections) {
-		$DJ.class('section-'+sections[x]).classAdd('visible-section');
+	if (args.length) {
+		$DJ.class('section-all').classAdd('visible-section');
+	}
+	for (let x in args) {
+		$DJ.class('section-' + args[x]).classAdd('visible-section');
 	}
 }
 
