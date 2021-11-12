@@ -1,13 +1,5 @@
 package net.mtrop.doom.tools.doommake;
 
-import static net.mtrop.doom.tools.doommake.ProjectTemplate.template;
-
-import static net.mtrop.doom.tools.doommake.ProjectModule.module;
-import static net.mtrop.doom.tools.doommake.ProjectModule.dir;
-import static net.mtrop.doom.tools.doommake.ProjectModule.file;
-import static net.mtrop.doom.tools.doommake.ProjectModule.fileAppend;
-import static net.mtrop.doom.tools.doommake.ProjectModule.fileContentAppend;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +18,17 @@ import java.util.TreeSet;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.UtilityException;
+
+import static net.mtrop.doom.tools.doommake.ProjectTemplate.template;
+
+import static net.mtrop.doom.tools.doommake.ProjectModule.module;
+
+import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.descriptor;
+import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.dir;
+import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.file;
+import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.fileAppend;
+import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.fileContentAppend;
+
 
 /**
  * Class used for generating project structures.
@@ -74,18 +77,6 @@ public final class ProjectGenerator
 	private static final SortedMap<String, ProjectTemplate> TEMPLATES;
 	/** The main modules. */
 	private static final Map<String, ProjectModule> MODULES;
-	/** The release template fragments. */
-	private static final Map<String, ProjectModule> RELEASE_SCRIPT;
-	/** The release template fragments. */
-	private static final Map<String, ProjectModule> RELEASE_SCRIPT_MERGE;
-	/** The release WadMerge line. */
-	private static final Map<String, String[]> RELEASE_WADMERGE_LINE;
-	/** The post-release add-on template fragments. */
-	private static final Map<String, ProjectModule> POST_RELEASE;
-	/** The replacer list for each module. */
-	private static final Map<String, List<ProjectTokenReplacer>> REPLACER_LISTS;
-	/** TODOs for included modules. */
-	private static final Map<String, List<String>> POST_CREATE_TODOS;
 
 	/** Project name replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_NAME = ProjectTokenReplacer.create(
@@ -162,45 +153,34 @@ public final class ProjectGenerator
 	{
 		TEMPLATES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		MODULES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		RELEASE_SCRIPT = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		RELEASE_SCRIPT_MERGE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		RELEASE_WADMERGE_LINE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		POST_RELEASE = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		REPLACER_LISTS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		POST_CREATE_TODOS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
 		// ................................................................
 
-		// Adds files for Git repository support.
-		MODULES.put(MODULE_GIT,
-			module(200, MODULE_GIT,
+		MODULES.put(MODULE_GIT, module(200)
+			.base(descriptor(
 				file(".gitignore", 
 					"doommake/git/gitignore.txt"),
 				file(".gitattributes", 
 					"doommake/git/gitattributes.txt")
-			)
+			))
+			.todos("Open `.gitignore` and verify what you want ignored in the project.")
 		);
-		POST_CREATE_TODOS.put(MODULE_GIT, list(
-			"Open `.gitignore` and verify what you want ignored in the project."
-		));
 
 		// ................................................................
 
 		// Adds files for Mercurial repository support.
-		MODULES.put(MODULE_MERCURIAL,
-			module(200, MODULE_MERCURIAL,
+		MODULES.put(MODULE_MERCURIAL, module(200)
+			.base(descriptor(
 				file(".hgignore", 
 					"doommake/hg/hgignore.txt")
-			)
+			))
+			.todos("Open `.hgignore` and verify what you want ignored in the project.")
 		);
-		POST_CREATE_TODOS.put(MODULE_MERCURIAL, list(
-			"Open `.hgignore` and verify what you want ignored in the project."
-		));
 
 		// ................................................................
 
-		MODULES.put(MODULE_INIT, 
-			module(0, MODULE_INIT,
+		MODULES.put(MODULE_INIT, module(0)
+			.base(descriptor(
 				dir("build"),
 				dir("dist"),
 				file("src/wadinfo.txt", 
@@ -219,50 +199,46 @@ public final class ProjectGenerator
 					"doommake/doommake.project.properties"),
 				file("README.md",
 					"doommake/README.md")
-			)
-		);
-		POST_RELEASE.put(MODULE_INIT,
-			module(
+			))
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/doommake-target.script"
 				)
+			))
+			.replacers(
+				REPLACER_PROJECT_NAME, 
+				REPLACER_PROJECT_IWAD
+			)
+			.todos(
+				"Modify `README.md` and describe your project."
+				,"Modify `src/wadinfo.txt`, especially the license section. It will become your text file."
+				,"Add extended credits to `src/credits.txt`."
 			)
 		);
-		REPLACER_LISTS.put(MODULE_INIT, list(
-			REPLACER_PROJECT_NAME, 
-			REPLACER_PROJECT_IWAD
-		));
-		POST_CREATE_TODOS.put(MODULE_INIT, list(
-			"Modify `README.md` and describe your project."
-			,"Modify `src/wadinfo.txt`, especially the license section. It will become your text file."
-			,"Add extended credits to `src/credits.txt`."
-		));
 		
 		// ................................................................
 
-		MODULES.put(MODULE_BASE, 
-			module(100, MODULE_BASE)
-		);
-		RELEASE_SCRIPT.put(MODULE_BASE,
-			module(
+		MODULES.put(MODULE_BASE, module(100)
+			.base(descriptor())
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\t// Add other resource constructors here."
 				)
+			))
+			.releaseWadMergeLines(
+				"# Add resource merging here."
+			)
+			.todos(
+				"Add resources to merge to the WadMerge script."
+				,"Add targets to the doommake.script script."
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_BASE, new String[]{
-			"# Add resource merging here."
-		});
-		POST_CREATE_TODOS.put(MODULE_BASE, list(
-			"Add resources to merge to the WadMerge script."
-			,"Add targets to the doommake.script script."
-		));
 
 		// ................................................................
 
 		// A module that compiles a DeHackEd patch.
-		MODULES.put(MODULE_DECOHACK,
-			module(1, MODULE_DECOHACK,
+		MODULES.put(MODULE_DECOHACK, module(1)
+			.base(descriptor(
 				file("src/decohack/main.dh",
 					"doommake/decohack/main.dh"),
 				fileAppend("doommake.properties",
@@ -271,89 +247,79 @@ public final class ProjectGenerator
 					"doommake/decohack/doommake.script"),
 				fileAppend("README.md",
 					"doommake/decohack/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_DECOHACK,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoPatch(false);"
 				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_DECOHACK,
-			module(
+			))
+			.releaseScriptMerge(descriptor(
 				fileContentAppend("doommake.script",
 					"\t\t,getPatchFile()"
 					,"\t\t,getPatchSourceOutputFile()"
 				)
+			))
+			.releaseWadMergeLines(
+				"mergefile  out $0/$"
+				,"mergefile  out $0/$"
 			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_DECOHACK, new String[]{
-			"mergefile  out $0/$"
-			,"mergefile  out $0/$"
-		});
-		POST_RELEASE.put(MODULE_DECOHACK,
-			module(
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/decohack/doommake-target.script"
 				)
+			))
+			.replacers(
+				REPLACER_PROJECT_DECOHACK
+			)
+			.todos(
+				"Modify `src/decohack/main.dh` to your liking."
 			)
 		);
-		REPLACER_LISTS.put(MODULE_DECOHACK, list(
-			REPLACER_PROJECT_DECOHACK
-		));
-		POST_CREATE_TODOS.put(MODULE_DECOHACK, list(
-			"Modify `src/decohack/main.dh` to your liking."
-		));
 
 		// ................................................................
 
-		// A module that compiles a DeHackEd patch.
-		MODULES.put(MODULE_PATCH,
-			module(1, MODULE_PATCH,
+		// A module that copies a DeHackEd patch.
+		MODULES.put(MODULE_PATCH, module(1)
+			.base(descriptor(
 				file("src/patch/dehacked.deh",
 					"doommake/patch/dehacked.deh"),
 				fileAppend("doommake.properties",
 					"doommake/patch/doommake.properties"),
+				fileAppend("doommake.project.properties",
+					"doommake/patch/doommake.project.properties"),
 				fileAppend("doommake.script", 
 					"doommake/patch/doommake.script"),
 				fileAppend("README.md",
 					"doommake/patch/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_PATCH,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoPatch();"
 				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_PATCH,
-			module(
+			))
+			.releaseScriptMerge(descriptor(
 				fileContentAppend("doommake.script",
 					"\t\t,getPatchFile()"
 				)
+			))
+			.releaseWadMergeLines(
+				"mergefile  out $0/$"
 			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_PATCH, new String[]{
-			"mergefile  out $0/$"
-		});
-		POST_RELEASE.put(MODULE_PATCH,
-			module(
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/patch/doommake-target.script"
 				)
+			))
+			.todos(
+				"Create and save your DeHackEd patch file in the `src/patch` directory."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_PATCH, list(
-			"Create and save your DeHackEd patch file in the `src/patch` directory."
-		));
 
 		// ................................................................
 
 		// A module that converts assets.
-		MODULES.put(MODULE_ASSETS_CONVERT,
-			module(4, MODULE_ASSETS_CONVERT,
+		MODULES.put(MODULE_ASSETS_CONVERT, module(4)
+			.base(descriptor(
 				dir("src/convert/graphics"),
 				dir("src/convert/sounds"),
 				dir("src/convert/sprites"),
@@ -361,35 +327,31 @@ public final class ProjectGenerator
 					"doommake/common/assets/convert/doommake.script"),
 				fileAppend("README.md",
 					"doommake/common/assets/convert/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_ASSETS_CONVERT,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoConvertSounds();"
 					,"\tdoConvertGraphics();"
 					,"\tdoConvertSprites();"
 				)
-			)
-		);
-		POST_RELEASE.put(MODULE_ASSETS_CONVERT,
-			module(
+			))
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/common/assets/convert/doommake-target.script"
 				)
+			))
+			.todos(
+				"Add BMP, GIF, or PNG files to `src/convert/graphics`."
+				,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
+				,"Add sound files to `src/convert/sounds`."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_ASSETS_CONVERT, list(
-			"Add BMP, GIF, or PNG files to `src/convert/graphics`."
-			,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
-			,"Add sound files to `src/convert/sounds`."
-		));
 
 		// ................................................................
 
 		// A module that builds maps and non-texture assets together.
-		MODULES.put(MODULE_ASSETS,
-			module(5, MODULE_ASSETS,
+		MODULES.put(MODULE_ASSETS, module(5)
+			.base(descriptor(
 				dir("src/assets/_global"),
 				dir("src/assets/graphics"),
 				dir("src/assets/music"),
@@ -403,76 +365,66 @@ public final class ProjectGenerator
 					"doommake/common/assets/doommake.script"),
 				fileAppend("README.md",
 					"doommake/common/assets/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_ASSETS,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoAssets();"
 				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_ASSETS,
-			module(
+			))
+			.releaseScriptMerge(descriptor(
 				fileContentAppend("doommake.script",
 					"\t\t,getAssetsWAD()"
 				)
+			))
+			.releaseWadMergeLines(
+				"mergewad   out $0/$"
 			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_ASSETS, new String[]{
-			"mergewad   out $0/$"
-		});
-		POST_RELEASE.put(MODULE_ASSETS,
-			module(
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/common/assets/doommake-target.script"
 				)
+			))
+			.todos(
+				"Add assets to `src/assets` into the appropriate folders."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_ASSETS, list(
-			"Add assets to `src/assets` into the appropriate folders."
-		));
 
 		// ................................................................
 
 		// A module that builds texture WADs.
 		// If this is used, do NOT use the "texturewads" module.
-		MODULES.put(MODULE_TEXTURES_CONVERT,
-			module(9, MODULE_TEXTURES_CONVERT,
+		MODULES.put(MODULE_TEXTURES_CONVERT, module(9)
+			.base(descriptor(
 				dir("src/convert/flats"),
 				dir("src/convert/patches"),
 				fileAppend("doommake.script", 
 					"doommake/common/textures/convert/doommake.script"),
 				fileAppend("README.md",
 					"doommake/common/textures/convert/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_TEXTURES_CONVERT,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoConvertFlats();"
 					,"\tdoConvertPatches();"
 				)
-			)
-		);
-		POST_RELEASE.put(MODULE_TEXTURES_CONVERT,
-			module(
+			))
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/common/textures/convert/doommake-target.script"
 				)
+			))
+			.todos(
+				"Add BMP, GIF, or PNG files to `src/convert/flats`."
+				,"Add BMP, GIF, or PNG files to `src/convert/patches`."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_TEXTURES_CONVERT, list(
-			"Add BMP, GIF, or PNG files to `src/convert/flats`."
-			,"Add BMP, GIF, or PNG files to `src/convert/patches`."
-		));
 		
 		// ................................................................
 
 		// A module that builds texture WADs.
 		// If this is used, do NOT use the "texturewads" module.
-		MODULES.put(MODULE_TEXTURES,
-			module(10, MODULE_TEXTURES,
+		MODULES.put(MODULE_TEXTURES, module(10)
+			.base(descriptor(
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
 				file("src/textures/texture1.txt", 
@@ -487,83 +439,77 @@ public final class ProjectGenerator
 					"doommake/common/textures/doommake.script"),
 				fileAppend("README.md",
 					"doommake/common/textures/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_TEXTURES,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoTextures();"
 				)
-			)
-		);
-		POST_RELEASE.put(MODULE_TEXTURES,
-			module(
+			))
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/common/textures/doommake-target.script"
 				)
+			))
+			.todos(
+				"Add flats to `src/textures/flats`."
+				,"Add patches to `src/textures/patches`."
+				,"Edit `src/textures/animflats.wad` for flats that need to be in a specific order."
+				,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
+				,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_TEXTURES, list(
-			"Add flats to `src/textures/flats`."
-			,"Add patches to `src/textures/patches`."
-			,"Edit `src/textures/animflats.wad` for flats that need to be in a specific order."
-			,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
-			,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
-		));
 		
 		// ................................................................
 
 		// A module that builds vanilla texture WADs.
-		MODULES.put(MODULE_TEXTURES_VANILLA,
-			module(11, MODULE_TEXTURES_VANILLA,
+		MODULES.put(MODULE_TEXTURES_VANILLA, module(11)
+			.base(descriptor(
 				file("scripts/merge-textures.txt",
 					"doommake/common/textures/vanilla/wadmerge.txt")
-			)
+			))
 		);
 		
 		// ................................................................
 
 		// A module that builds Boom texture WADs.
-		MODULES.put(MODULE_TEXTURES_BOOM,
-			module(11, MODULE_TEXTURES_BOOM,
+		MODULES.put(MODULE_TEXTURES_BOOM, module(11)
+			.base(descriptor(
 				file("src/textures/defswani.txt",
 					"doommake/common/textures/boom/defswani.txt"),
 				file("scripts/merge-textures.txt",
 					"doommake/common/textures/boom/wadmerge.txt")
+			))
+			.todos(
+				"Edit `src/textures/defswani.txt` for defining ANIMATED and SWITCHES."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_TEXTURES_BOOM, list(
-			"Edit `src/textures/defswani.txt` for defining ANIMATED and SWITCHES."
-		));
 		
 		// ................................................................
 
 		// A module that uses textures from a set of provided texture WADs.
 		// If this is used, do NOT use the "textures" module.
-		MODULES.put(MODULE_TEXTUREWADS,
-			module(15, MODULE_TEXTUREWADS,
+		MODULES.put(MODULE_TEXTUREWADS, module(15)
+			.base(descriptor(
 				dir("src/wads/textures")
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_TEXTUREWADS,
-			module(
+			))
+			.releaseScriptMerge(descriptor(
 				fileContentAppend("doommake.script",
 					"\t\t,getMapTexWad()"
 				)
+			))
+			.releaseWadMergeLines(
+				"mergewad   out $0/$"
+			)
+			.todos(
+				"Add texture WADs to `src/wads/textures`."
 			)
 		);
-		RELEASE_WADMERGE_LINE.put(MODULE_TEXTUREWADS, new String[]{
-			"mergewad   out $0/$"
-		});
-		POST_CREATE_TODOS.put(MODULE_TEXTUREWADS, list(
-			"Add texture WADs to `src/wads/textures`."
-		));
 
 		// ................................................................
 
 		// A module that builds a set of maps.
-		MODULES.put(MODULE_MAPS,
-			module(18, MODULE_MAPS,
+		MODULES.put(MODULE_MAPS, module(18)
+			.base(descriptor(
 				dir("src/maps"),
 				file("scripts/merge-maps.txt",
 					"doommake/common/maps/wadmerge.txt"),
@@ -573,71 +519,62 @@ public final class ProjectGenerator
 					"doommake/common/maps/doommake.script"),
 				fileAppend("README.md",
 					"doommake/common/maps/README.md")
-			)
-		);
-		RELEASE_SCRIPT.put(MODULE_MAPS,
-			module(
+			))
+			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
 					"\tdoMaps();"
 					,"\tdoMapTextures();"
 				)
-			)
-		);
-		RELEASE_SCRIPT_MERGE.put(MODULE_MAPS,
-			module(
+			))
+			.releaseScriptMerge(descriptor(
 				fileContentAppend("doommake.script",
 					"\t\t,getMapsWad()"
 					,"\t\t,getMapTexWad()"
 				)
+			))
+			.releaseWadMergeLines(
+				"mergewad   out $0/$"
+				,"mergewad   out $0/$"
 			)
-		);
-		RELEASE_WADMERGE_LINE.put(MODULE_MAPS, new String[]{
-			"mergewad   out $0/$"
-			,"mergewad   out $0/$"
-		});
-		POST_RELEASE.put(MODULE_MAPS,
-			module(
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/common/maps/doommake-target.script"
 				)
+			))
+			.todos(
+				"Add maps to `src/maps`."
 			)
 		);
-		POST_CREATE_TODOS.put(MODULE_MAPS, list(
-			"Add maps to `src/maps`."
-		));
 
 		// ................................................................
 
 		// A module that allows running this project.
 		// Stub for validity.
-		MODULES.put(MODULE_RUN,
-			module(20, MODULE_RUN,
+		MODULES.put(MODULE_RUN, module(20)
+			.base(descriptor(
 				fileAppend("doommake.properties",
 					"doommake/run/doommake.properties"),
 				fileAppend("doommake.script",
 					"doommake/run/doommake.script"),
 				fileAppend("README.md",
 					"doommake/run/README.md")
-			)
-		);
-		POST_RELEASE.put(MODULE_RUN,
-			module(
+			))
+			.postRelease(descriptor(
 				fileAppend("doommake.script",
 					"doommake/run/doommake-target.script"
 				)
+			))
+			.replacers(
+				REPLACER_PROJECT_RUN_EXE_PATH, 
+				REPLACER_PROJECT_RUN_EXE_WORKDIR, 
+				REPLACER_PROJECT_RUN_SWITCH_IWAD, 
+				REPLACER_PROJECT_RUN_SWITCH_FILE, 
+				REPLACER_PROJECT_RUN_SWITCH_DEH
+			)
+			.todos(
+				"Open `doommake.script`, search for `entry run`, and double-check the files added for the run script."
 			)
 		);
-		REPLACER_LISTS.put(MODULE_RUN, list(
-			REPLACER_PROJECT_RUN_EXE_PATH, 
-			REPLACER_PROJECT_RUN_EXE_WORKDIR, 
-			REPLACER_PROJECT_RUN_SWITCH_IWAD, 
-			REPLACER_PROJECT_RUN_SWITCH_FILE, 
-			REPLACER_PROJECT_RUN_SWITCH_DEH
-		));
-		POST_CREATE_TODOS.put(MODULE_RUN, list(
-			"Open `doommake.script`, search for `entry run`, and double-check the files added for the run script."
-		));
-
 
 		// ................................................................
 
@@ -682,9 +619,9 @@ public final class ProjectGenerator
 		));
 
 		TEMPLATES.put(TEMPLATE_TEXTURES_BOOM, template(
-				TEMPLATE_TEXTURES_BOOM, CATEGORY_TEXTURES, "Adds the ability to merge a texture WAD together (with Boom additions) as the project's texture pool.",
-				MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_BOOM
-			));
+			TEMPLATE_TEXTURES_BOOM, CATEGORY_TEXTURES, "Adds the ability to merge a texture WAD together (with Boom additions) as the project's texture pool.",
+			MODULE_INIT, MODULE_TEXTURES_CONVERT, MODULE_TEXTURES, MODULE_TEXTURES_BOOM
+		));
 
 		TEMPLATES.put(TEMPLATE_TEXTUREWADS, template(
 			TEMPLATE_TEXTUREWADS, CATEGORY_TEXTURES, "Adds the ability to add texture WADs as the project's texture pool.",
@@ -763,7 +700,7 @@ public final class ProjectGenerator
 		List<String> out = new LinkedList<>();
 		for (ProjectModule module : selected)
 		{
-			List<String> todos = POST_CREATE_TODOS.get(module.getName());
+			List<String> todos = module.getTodos();
 			if (todos != null)
 				out.addAll(todos);
 		}
@@ -781,7 +718,7 @@ public final class ProjectGenerator
 		
 		for (ProjectModule module : selected)
 		{
-			List<ProjectTokenReplacer> replacers = REPLACER_LISTS.get(module.getName());
+			List<ProjectTokenReplacer> replacers = module.getReplacers();
 			if (replacers != null) for (ProjectTokenReplacer replacer : replacers)
 			{
 				if (!out.contains(replacer))
@@ -847,122 +784,112 @@ public final class ProjectGenerator
 	 */
 	public static void createProject(SortedSet<ProjectModule> selected, Map<String, String> replacerMap, File targetDirectory) throws IOException
 	{
-		boolean includedInit = false;
-
 		// Modules.
 		for (ProjectModule module : selected)
+			module.getDescriptor().createIn(targetDirectory, replacerMap);
+
+		// Add release script header.
+		descriptor(
+			fileAppend("doommake.script",
+				"doommake/projects/doommake-header.script")
+		).createIn(targetDirectory, replacerMap);
+
+		// Project Modules.
+		for (ProjectModule module : selected)
 		{
-			module.createIn(targetDirectory, replacerMap);
-			if (module.getName().equals(MODULE_INIT))
-				includedInit = true;
+			ProjectModuleDescriptor found;
+			if ((found = module.getReleaseScript()) != null)
+				found.createIn(targetDirectory, replacerMap);
 		}
 
-		if (includedInit)
+		// WadMerge Properties Start
+		descriptor(
+			fileContentAppend("doommake.script",
+				"}\n",
+				"/**",
+				" * Merges all components into the project file and creates the distributable.",
+				" */",
+				"check function doRelease() {\n",
+				"\toutFile = getBuildDirectory() + \"/\" + getProjectWAD();\n",
+				"\tif (checkFileExistenceAndBuildStatuses(outFile, [\"dehacked\", \"maps\", \"assets\", \"maptextures\"])) {",
+				"\t\tprintln(\"[Skipped] No pertinent project data built.\");",
+				"\t\treturn;",
+				"\t}\n",
+				"\twadmerge(file(MERGESCRIPT_RELEASE), [",
+        		"\t\tgetBuildDirectory()",
+        		"\t\t,getSourceDirectory()",
+        		"\t\t,getProjectWad()"
+        	)
+		).createIn(targetDirectory, replacerMap);
+		
+		// Add merge script.
+		descriptor(
+			file("scripts/merge-release.txt",
+				"doommake/projects/wadmerge-header.txt")
+		).createIn(targetDirectory, replacerMap);
+
+		// Project Modules.
+		int x = 3;
+		for (ProjectModule module : selected)
 		{
-			// Add release script header.
-			module(
-				fileAppend("doommake.script",
-					"doommake/projects/doommake-header.script")
-			).createIn(targetDirectory, replacerMap);
-
-			// Project Modules.
-			for (ProjectModule module : selected)
+			ProjectModuleDescriptor found;
+			if ((found = module.getReleaseScriptMerge()) != null)
 			{
-				ProjectModule found;
-				if ((found = RELEASE_SCRIPT.get(module.getName())) != null)
-					found.createIn(targetDirectory, replacerMap);
-			}
-
-			// WadMerge Properties Start
-			module(
-				fileContentAppend("doommake.script",
-					"}\n",
-					"/**",
-					" * Merges all components into the project file and creates the distributable.",
-					" */",
-					"check function doRelease() {\n",
-					"\toutFile = getBuildDirectory() + \"/\" + getProjectWAD();\n",
-					"\tif (checkFileExistenceAndBuildStatuses(outFile, [\"dehacked\", \"maps\", \"assets\", \"maptextures\"])) {",
-					"\t\tprintln(\"[Skipped] No pertinent project data built.\");",
-					"\t\treturn;",
-					"\t}\n",
-					"\twadmerge(file(MERGESCRIPT_RELEASE), [",
-	        		"\t\tgetBuildDirectory()",
-	        		"\t\t,getSourceDirectory()",
-	        		"\t\t,getProjectWad()"
-	        	)
-			).createIn(targetDirectory, replacerMap);
-			
-			// Add merge script.
-			module(
-				file("scripts/merge-release.txt",
-					"doommake/projects/wadmerge-header.txt")
-			).createIn(targetDirectory, replacerMap);
-
-			// Project Modules.
-			int x = 3;
-			for (ProjectModule module : selected)
-			{
-				ProjectModule found;
-				if ((found = RELEASE_SCRIPT_MERGE.get(module.getName())) != null)
+				found.createIn(targetDirectory, replacerMap);
+				
+				List<String> lines;
+				if ((lines = module.getReleaseWadMergeLines()) != null)
 				{
-					found.createIn(targetDirectory, replacerMap);
-					
-					String[] lines;
-					if ((lines = RELEASE_WADMERGE_LINE.get(module.getName())) != null)
+					for (String line : lines)
 					{
-						for (String line : lines)
-						{
-							module(
-								fileContentAppend("scripts/merge-release.txt", line + (x++))
-							).createIn(targetDirectory, replacerMap);
-						}
+						descriptor(
+							fileContentAppend("scripts/merge-release.txt", line + (x++))
+						).createIn(targetDirectory, replacerMap);
 					}
 				}
 			}
-
-			// WadMerge Properties End
-			module(
-				fileContentAppend("doommake.script", 
-					"\t]);"
-	        	)
-			).createIn(targetDirectory, replacerMap);
-			
-			// Add release script footer.
-			module(
-				fileAppend("doommake.script",
-					"doommake/projects/doommake-footer.script")
-			).createIn(targetDirectory, replacerMap);
-			
-			// Add merge script ending.
-			module(
-				fileContentAppend("scripts/merge-release.txt",
-					"\nfinish out $0/$2",
-					"end")
-			).createIn(targetDirectory, replacerMap);
-			
-			// Finish README
-			module(
-				fileAppend("README.md",
-					"doommake/projects/README.md")
-			).createIn(targetDirectory, replacerMap);
-			
-			// ===============================================================
-			
-			for (ProjectModule module : selected)
-			{
-				ProjectModule found;
-				if ((found = POST_RELEASE.get(module.getName())) != null)
-					found.createIn(targetDirectory, replacerMap);
-			}
-
-			// Add release targets.
-			module(
-				fileAppend("doommake.script",
-					"doommake/projects/doommake-target.script")
-			).createIn(targetDirectory, replacerMap);
-			
 		}
+
+		// WadMerge Properties End
+		descriptor(
+			fileContentAppend("doommake.script", 
+				"\t]);"
+        	)
+		).createIn(targetDirectory, replacerMap);
+		
+		// Add release script footer.
+		descriptor(
+			fileAppend("doommake.script",
+				"doommake/projects/doommake-footer.script")
+		).createIn(targetDirectory, replacerMap);
+		
+		// Add merge script ending.
+		descriptor(
+			fileContentAppend("scripts/merge-release.txt",
+				"\nfinish out $0/$2",
+				"end")
+		).createIn(targetDirectory, replacerMap);
+		
+		// Finish README
+		descriptor(
+			fileAppend("README.md",
+				"doommake/projects/README.md")
+		).createIn(targetDirectory, replacerMap);
+		
+		// ===============================================================
+		
+		for (ProjectModule module : selected)
+		{
+			ProjectModuleDescriptor found;
+			if ((found = module.getPostRelease()) != null)
+				found.createIn(targetDirectory, replacerMap);
+		}
+
+		// Add release targets.
+		descriptor(
+			fileAppend("doommake.script",
+				"doommake/projects/doommake-target.script")
+		).createIn(targetDirectory, replacerMap);
 		
 	}
 	

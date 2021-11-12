@@ -5,7 +5,9 @@ DoomMake
 
 * `Added` Some texture template types for Vanilla and Boom.
 * `Changed` Template ordering and setup for other texture templates (new projects).
+* `Changed` Some tweaks to default `.gitattributes` on Git template (new projects).
 * `Changed` The project "TODO" list is now a Markdown file.
+* `Changed` (Internal) Project Generator organization changes. (Issue #36)
 
 
 ### Changed for 0.11.0

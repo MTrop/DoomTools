@@ -90,6 +90,7 @@ check function doMapTextures() {
 
 	if (empty(textureWadPathList)) {
 		println("[Skipped] No textures to extract for maps. Skipping texture extraction.");
+		wadfilecreate(outWad);
 		return;
 	}
 	
@@ -103,7 +104,6 @@ check function doMapTextures() {
 	// Texture extraction.
 	if (checkFileExistenceAndBuildStatuses(outWad, ["maps", "textures"])) {
 		println("[Skipped] Both maps and textures were not built. Skipping map texture rebuild.");
-		wadfilecreate(outWad);
 		return;
 	}
 
