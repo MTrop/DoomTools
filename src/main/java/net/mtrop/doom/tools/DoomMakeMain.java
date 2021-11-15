@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -28,6 +29,7 @@ import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
+import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.struct.ReplacerReader;
@@ -83,6 +85,25 @@ public final class DoomMakeMain
 	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
 	/**
+	 * Project types.
+	 */
+	public enum ProjectType
+	{
+		WAD(WADProjectGenerator.class);
+		
+		final Class<? extends ProjectGenerator> generatorClass; 
+		private ProjectType(Class<? extends ProjectGenerator> generatorClass)
+		{
+			this.generatorClass = generatorClass;
+		}
+		
+		public ProjectGenerator createGenerator()
+		{
+			return Common.create(generatorClass);
+		}
+	}
+	
+	/**
 	 * Program options.
 	 */
 	public static class Options
@@ -95,7 +116,8 @@ public final class DoomMakeMain
 		private boolean listModules;
 		private boolean embed;
 
-		private List<String> createProject;
+		private ProjectType projectType;
+		private List<String> templateNames;
 		
 		private Mode mode;
 		private Integer runawayLimit;
@@ -117,7 +139,9 @@ public final class DoomMakeMain
 			this.version = false;
 			this.listModules = false;
 			this.embed = false;
-			this.createProject = null;
+			
+			this.projectType = null;
+			this.templateNames = null;
 
 			this.mode = Mode.EXECUTE;
 			this.runawayLimit = 0;
@@ -228,42 +252,49 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 
-			if (options.listModules)
+			if (options.projectType != null)
 			{
-				TreeMap<String, TreeSet<ProjectTemplate>> categoryList = new TreeMap<>(); 
-				for (Entry<String, ProjectTemplate> entry : ProjectGenerator.getTemplates())
-				{
-					String category = entry.getValue().getCategory();
-					TreeSet<ProjectTemplate> set;
-					if ((set = categoryList.get(category)) == null)
-						categoryList.put(category, (set = new TreeSet<ProjectTemplate>()));
-					set.add(entry.getValue());
-				}
+				ProjectGenerator generator = options.projectType.createGenerator();
 				
-				options.stdout.println("List of templates by category:");
-				for (Entry<String, TreeSet<ProjectTemplate>> categoryEntry : categoryList.entrySet())
+				if (options.listModules)
 				{
-					options.stdout.println(categoryEntry.getKey() + ":");
-					for (ProjectTemplate template : categoryEntry.getValue())
+					Set<String> templateNames = generator.getTemplateNames();
+					TreeMap<String, TreeSet<ProjectTemplate>> categoryList = new TreeMap<>(); 
+					for (String name : templateNames)
 					{
-						if (ProjectGenerator.TEMPLATE_BASE.equals(template.getName()))
-							continue;
+						ProjectTemplate template = generator.getTemplate(name);
 						
-						String description = template.getDescription();
-						options.stdout.println("    " + template.getName());
-						Common.printWrapped(options.stdout, 0, 8, 72, Common.isEmpty(description) ? "" : description);
+						String category = template.getCategory();
+						TreeSet<ProjectTemplate> set;
+						if ((set = categoryList.get(category)) == null)
+							categoryList.put(category, (set = new TreeSet<ProjectTemplate>()));
+						set.add(template);
+					}
+					
+					options.stdout.println("List of templates by category:");
+					for (Entry<String, TreeSet<ProjectTemplate>> categoryEntry : categoryList.entrySet())
+					{
+						options.stdout.println(categoryEntry.getKey() + ":");
+						for (ProjectTemplate template : categoryEntry.getValue())
+						{
+							if (ProjectGenerator.TEMPLATE_BASE.equals(template.getName()))
+								continue;
+							
+							String description = template.getDescription();
+							options.stdout.println("    " + template.getName());
+							Common.printWrapped(options.stdout, 0, 8, 72, Common.isEmpty(description) ? "" : description);
+							options.stdout.println();
+						}
 						options.stdout.println();
 					}
-					options.stdout.println();
+					return ERROR_NONE;
 				}
-				return ERROR_NONE;
+				else if (options.templateNames != null)
+				{
+					return createProject(generator);
+				}
 			}
-
-			if (options.createProject != null)
-			{
-				return createProject();
-			}
-
+			
 			// Detect project.
 			if (options.mode == Mode.EXECUTE && !options.scriptFile.exists())
 			{
@@ -300,7 +331,7 @@ public final class DoomMakeMain
 			}
 		}
 
-		private int createProject()
+		private int createProject(ProjectGenerator generator)
 		{
 			if (Common.isEmpty(options.targetName))
 			{
@@ -315,18 +346,18 @@ public final class DoomMakeMain
 				return ERROR_BAD_PROJECT;
 			}
 
-			if (options.createProject.isEmpty())
+			if (options.templateNames.isEmpty())
 			{
-				options.createProject.add(ProjectGenerator.TEMPLATE_BASE);
+				options.templateNames.add(ProjectGenerator.TEMPLATE_BASE);
 			}
 			
 			try {
-				SortedSet<ProjectModule> selectedModules = ProjectGenerator.getSelectedProjects(options.createProject);
+				SortedSet<ProjectModule> selectedModules = generator.getSelectedModules(options.templateNames);
 				List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
 				Map<String, String> replacerMap = ProjectGenerator.consoleReplacer(projectReplacers, options.stdout, options.stdin);
 
 				options.stdout.println("Creating...");
-				ProjectGenerator.createProject(selectedModules, replacerMap, targetDirectory);
+				generator.createProject(selectedModules, replacerMap, targetDirectory);
 				options.stdout.println("SUCCESSFULLY Created project: " + options.targetName);
 				options.stdout.println();
 				
@@ -517,13 +548,17 @@ public final class DoomMakeMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
 						options.version = true;
-					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
-						options.listModules = true;
 					else if (arg.equalsIgnoreCase(SWITCH_EMBED))
 						options.embed = true;
+					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
+					{
+						options.projectType = ProjectType.WAD;
+						options.listModules = true;
+					}
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
-						options.createProject = new LinkedList<>();
+						options.projectType = ProjectType.WAD;
+						options.templateNames = new LinkedList<>();
 						state = STATE_MODULENAME;
 					}
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
@@ -572,7 +607,7 @@ public final class DoomMakeMain
 				
 				case STATE_MODULENAME:
 				{
-					options.createProject.add(arg);
+					options.templateNames.add(arg);
 				}
 				break;
 				

@@ -3,12 +3,14 @@ package net.mtrop.doom.tools.doommake;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.ReplacerReader;
 
@@ -32,14 +34,16 @@ public final class ProjectModuleDescriptor
 	public static class Entry
 	{
 		private boolean appending;
+		private boolean binary;
 		private String outputPath;
 		private boolean pathsAreContentLines;
 		private String[] resourcePaths;
 		
-		private Entry(boolean appending, String outputPath, boolean pathsAreContentLines, String[] resourcePaths) 
+		private Entry(boolean appending, boolean binary, String outputPath, boolean pathsAreContentLines, String[] resourcePaths) 
 		{
 			super();
 			this.appending = appending;
+			this.binary = binary;
 			this.outputPath = outputPath;
 			this.pathsAreContentLines = pathsAreContentLines;
 			this.resourcePaths = resourcePaths;
@@ -58,7 +62,7 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry dir(String directoryPath)
 	{
-		return new Entry(false, directoryPath, false, null);
+		return new Entry(false, false, directoryPath, false, null);
 	}
 	
 	/**
@@ -68,7 +72,7 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry file(String filePath)
 	{
-		return new Entry(false, filePath, false, BLANK_RESOURCES);
+		return new Entry(false, false, filePath, false, BLANK_RESOURCES);
 	}
 
 	/**
@@ -79,7 +83,18 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry file(String filePath, String... resources)
 	{
-		return new Entry(false, filePath, false, resources);
+		return new Entry(false, false, filePath, false, resources);
+	}
+	
+	/**
+	 * Creates an entry for a module file (binary, not put through the replacer).
+	 * @param filePath the output file.
+	 * @param resources the series of resources to read and combine into a file.
+	 * @return the new entry.
+	 */
+	public static Entry fileData(String filePath, String... resources)
+	{
+		return new Entry(false, true, filePath, false, resources);
 	}
 	
 	/**
@@ -90,7 +105,7 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry fileContent(String filePath, String... lines)
 	{
-		return new Entry(false, filePath, true, lines);
+		return new Entry(false, false, filePath, true, lines);
 	}
 	
 	/**
@@ -101,7 +116,7 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry fileAppend(String filePath, String... resources)
 	{
-		return new Entry(true, filePath, false, resources);
+		return new Entry(true, false, filePath, false, resources);
 	}
 	
 	/**
@@ -112,7 +127,7 @@ public final class ProjectModuleDescriptor
 	 */
 	public static Entry fileContentAppend(String filePath, String... lines)
 	{
-		return new Entry(true, filePath, true, lines);
+		return new Entry(true, false, filePath, true, lines);
 	}
 	
 	/**
@@ -138,8 +153,6 @@ public final class ProjectModuleDescriptor
 		{
 			if (!directory.isDirectory())
 				throw new IOException("Target is not a directory: " + directory.getPath());
-			if (directory.listFiles().length == 0)
-				throw new IOException("Target is not an empty directory: " + directory.getPath());
 		}
 		
 		for (Entry e : entries)
@@ -170,18 +183,29 @@ public final class ProjectModuleDescriptor
 					{
 						for (String resourcePath : e.resourcePaths)
 						{
-							try (
-								ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourcePath), "{{", "}}"); 
-								OutputStreamWriter writer = new OutputStreamWriter(fos)
-							){
-								reader.replace(replacerMap);
-								
-								int b;
-								char[] cbuf = new char[8192];
-								while ((b = reader.read(cbuf)) >= 0)
-								{
-									writer.write(cbuf, 0, b);
-									writer.flush();
+							if (e.binary)
+							{
+								try (
+									InputStream fin = Common.openResource(resourcePath); 
+								){
+									IOUtils.relay(fin, fos);
+								}
+							}
+							else
+							{
+								try (
+									ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourcePath), "{{", "}}"); 
+									OutputStreamWriter writer = new OutputStreamWriter(fos)
+								){
+									reader.replace(replacerMap);
+									
+									int b;
+									char[] cbuf = new char[8192];
+									while ((b = reader.read(cbuf)) >= 0)
+									{
+										writer.write(cbuf, 0, b);
+										writer.flush();
+									}
 								}
 							}
 						}
