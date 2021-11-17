@@ -237,7 +237,7 @@
 							</div>
 							<div class="w3-row">
 								<div class="w3-col s12">
-									<h4>Want to run your project for testing?</h4>
+									<h4>Do you want to run your project from DoomMake?</h4>
 								</div>
 							</div>
 							<div class="w3-row category-row">
@@ -409,36 +409,10 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
-						Below are some other things to note about the project layout.
+						Below is some more information about the selected project pieces.
 					</div>
 				</div>
 				<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
-			</div>
-		</div>
-
-		<!-- Maps -->
-		<div class="w3-row template-section section-maps">
-			<div class="w3-col l12 w3-center">
-				<div class="w3-row main-heading">
-					<div class="w3-col l12 w3-center">
-						<h2>Project Maps</h2>
-					</div>
-				</div>
-				<div class="w3-row">
-					<div class="w3-col l12 w3-center">
-						<p class="site-blurb">
-							The project's maps should be in individual WAD files and placed in <kbd>src/maps</kbd>.
-							You can edit and save maps directly into this directory - <kbd>DBS</kbd> and other backup
-							files made by Doom Builder-family editors are ignored by version control by default, if you 
-							use it.
-						</p>
-						<p class="site-blurb">
-							The <strong>WadMerge</strong> script file <kbd>scripts/merge-maps.txt</kbd> govern how the 
-							<kbd>src/maps</kbd> folder's files are merged together. By default, this will create the 
-							<kbd>build/maps.wad</kbd> file.
-						</p>
-					</div>
-				</div>
 			</div>
 		</div>
 
@@ -456,6 +430,11 @@
 							The project's loose non-texture assets like graphics, sprites, music, and sound should be
 							placed in the folders off of <kbd>src/assets</kbd>.
 						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Asset Folders</h4>
 					</div>
 				</div>
 				<div class="w3-row">
@@ -490,6 +469,11 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
+						<h4>Asset Conversion</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
 							Files that need conversion before asset merge are placed in the <kbd>src/convert</kbd> folder's
 							subfolders.
@@ -517,10 +501,18 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
+						<h4>Final Merge</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
 							The <strong>WadMerge</strong> script file <kbd>scripts/merge-assets.txt</kbd> govern how the 
 							<kbd>src/assets</kbd> folder's files are merged together. By default, this will create the 
 							<kbd>build/assets.wad</kbd> file.
+						</p>
+						<p class="site-blurb">
+							When editing your project's maps, it is recommended to use this output WAD file as a resource.
 						</p>
 					</div>
 				</div>
@@ -567,8 +559,35 @@
 							You can change this in <kbd>doommake.project.properties</kbd>.
 						</p>
 						<p class="site-blurb">
+							If you are committing this project to a code versioning system, <kbd>.whacked</kbd> files will
+							be ignored by default, so you can edit and save the file in-directory.
+						</p>
+						<p class="site-blurb">
 							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affects how the 
 							patch makes its way into the final WAD file, imported as-is.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Texture WADs -->
+		<div class="w3-row template-section section-texturewads">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Texture WADs</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Your source texture WADs to use for the project should be placed in the <kbd>src/wads/textures</kbd>
+							folder.
+						</p>
+						<p class="site-blurb">
+							When editing your project's maps, it is recommended to use these WAD files as resources,
+							especially since the textures referenced by the maps will be exported on make.
 						</p>
 					</div>
 				</div>
@@ -604,12 +623,26 @@
 						<pre class="command-line"><code>doommake rebuildtextures</code></pre>
 					</div>
 				</div>
+				<div class="w3-row template-section section-texturesboom">
+					<div class="w3-col l12 w3-center">
+						<h4>ANIMATED and SWITCHES</h4>
+					</div>
+				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb template-section section-texturesboom">
 							The <kbd>defswani.txt</kbd> file in the <kbd>src/textures</kbd> folder will be read and converted
 							into <kbd>ANIMATED</kbd> and <kbd>SWITCHES</kbd> lumps for animated and switch textures.
 						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Patches and Flats</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
 							The folder <kbd>src/textures/patches</kbd> should contain the patch graphics that are added 
 							into the WAD's patch namespace (<kbd>PP_START</kbd> / <kbd>PP_END</kbd>) as-is. No conversions 
@@ -629,6 +662,11 @@
 							order in order to make animations work properly. Be careful not to put the same flats in this
 							WAD and the flats folder!
 						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Graphic Conversion</h4>
 					</div>
 				</div>
 				<div class="w3-row">
@@ -653,10 +691,62 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
+						<h4>Merging</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
 							The <strong>WadMerge</strong> script file <kbd>scripts/merge-textures.txt</kbd> affects how 
 							the texture data gets merged into the source texture WAD in the build folder (as 
 							<kbd>build/textures.wad</kbd>, by default).
+						</p>
+						<p class="site-blurb">
+							When editing your project's maps, it is recommended to use this output WAD file as a resource.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Maps -->
+		<div class="w3-row template-section section-maps">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Project Maps</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The project's maps should be in individual WAD files and placed in <kbd>src/maps</kbd>.
+							You can edit and save maps directly into this directory - <kbd>.dbs</kbd> and other backup
+							files made by Doom Builder-family editors (<kbd>.backup*</kbd>) are ignored by version 
+							control by default, if you use it.
+						</p>
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-maps.txt</kbd> govern how the 
+							<kbd>src/maps</kbd> folder's files are merged together. By default, this will create the 
+							<kbd>build/maps.wad</kbd> file.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Map Textures</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							When the project WAD gets built, the textures used in all of the maps in <kbd>src/maps</kbd>
+							Get exported to <kbd>build/maptex.wad</kbd> by default. The contents of <em>that</em> output
+							WAD get merged into the final WAD.
+						</p>
+						<p class="site-blurb">
+							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affects how the 
+							output texture WAD makes its way into the final WAD file, imported as-is.
 						</p>
 					</div>
 				</div>

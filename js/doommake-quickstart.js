@@ -1,9 +1,11 @@
-const djTemplateSections = $DJ.class('template-section');
 const djProjectForm = $DJ.id('project-form');
 const djProjectName = $DJ.id('project-name');
-
 const djCMDName = $DJ.id('cmd-name');
 const djCMDTemplates = $DJ.id('cmd-templates');
+const djMoreStuffToggle = $DJ.id('more-stuff-toggle');
+const djMoreStuffContent = $DJ.id('more-stuff-content');
+
+const djTemplateSections = $DJ.class('template-section');
 
 function call(funcRef) {
 	return () => { funcRef(); };
@@ -11,8 +13,8 @@ function call(funcRef) {
 
 function refreshView() {
 	const projectForm = djProjectForm.form();
-	const args = [];
 
+	const args = [];
 	projectForm.assets && args.push(projectForm.assets);
 	projectForm.patch && args.push(projectForm.patch);
 	projectForm.textures && args.push(projectForm.textures);
