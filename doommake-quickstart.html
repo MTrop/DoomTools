@@ -2,9 +2,9 @@
 	<head>
 		<!-- 
 			{{TITLE}} 
-				DoomMake Tutorial
+				DoomMake Quickstart
 			{{DESCRIPTION}} 
-				The tutorial page for DoomMake.
+				The quickstart page for DoomMake.
 			{{GENERATOR}}
 				VSCode
 			{{COPYRIGHT}}
@@ -12,34 +12,34 @@
 			{{LOGO_PNG}}
 				https://mtrop.github.io/DoomTools/images/logo.png
 			{{URL}}
-				https://mtrop.github.io/DoomTools/doommake-tutorial.html
+				https://mtrop.github.io/DoomTools/doommake-quickstart.html
 		-->
 
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
 		<!-- Standard -->
-		<meta name="description" content="The tutorial page for DoomMake." />
+		<meta name="description" content="The quickstart page for DoomMake." />
 		<meta name="generator" content="VSCode" />
 		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
 
 		<!-- Schema.org markup for Google+ -->
 		<meta itemprop="name" content="DoomTools" />
-		<meta itemprop="description" content="The tutorial page for DoomMake." />
+		<meta itemprop="description" content="The quickstart page for DoomMake." />
 		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
 
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/doommake-tutorial.html" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/doommake-quickstart.html" />
 		<meta name="twitter:title" content="DoomTools" />
-		<meta name="twitter:description" content="The tutorial page for DoomMake." />
+		<meta name="twitter:description" content="The quickstart page for DoomMake." />
 		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
 
 		<!-- Open Graph -->
 		<meta property="og:type" content="article" />
-		<meta property="og:url" content="https://mtrop.github.io/DoomTools/doommake-tutorial.html" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/doommake-quickstart.html" />
 		<meta property="og:title" content="DoomTools" />
 		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
-		<meta property="og:description" content="The tutorial page for DoomMake." />
+		<meta property="og:description" content="The quickstart page for DoomMake." />
 
 		<!-- Style and Scripts -->
 		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
@@ -84,6 +84,15 @@
 			}
 			.visible-section {
 				display: block !important;
+			}
+			.section-all {
+				border-top: solid 1px #969ca8;
+				border-bottom: solid 1px #969ca8;
+				max-width: 550px;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 32px;
+				margin-bottom: 32px;
 			}
 		</style>
 	</head>
@@ -401,7 +410,6 @@
 		<!-- SEPARATOR -->
 		<div class="w3-row template-section section-all">
 			<div class="w3-col l12 w3-center">
-				<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<h3>More Stuff</h3>
@@ -409,7 +417,14 @@
 				</div>
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
-						Below is some more information about the selected project pieces.
+						<p>
+							Below is some more information about the selected project pieces.
+						</p>
+						<p>
+							Note that all of the following information is valid for project structures 
+							created out-of-the-box with DoomMake. If you change the scripts and structure, 
+							you're on your own!
+						</p>
 					</div>
 				</div>
 				<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
@@ -740,13 +755,209 @@
 				<div class="w3-row">
 					<div class="w3-col l12 w3-center">
 						<p class="site-blurb">
-							When the project WAD gets built, the textures used in all of the maps in <kbd>src/maps</kbd>
-							Get exported to <kbd>build/maptex.wad</kbd> by default. The contents of <em>that</em> output
-							WAD get merged into the final WAD.
+							When the project WAD gets built, the non-stock textures used in all of the maps in <kbd>src/maps</kbd>
+							that are found in the project textures get exported to <kbd>build/maptex.wad</kbd> by default. 
+							The contents of <em>that</em> output WAD are merged into the final WAD.
 						</p>
 						<p class="site-blurb">
 							The <strong>WadMerge</strong> script file <kbd>scripts/merge-release.txt</kbd> affects how the 
 							output texture WAD makes its way into the final WAD file, imported as-is.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Git -->
+		<div class="w3-row template-section section-git">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Git</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							By including the <strong>Git</strong> template in your project, the files <kbd>.gitattributes</kbd> and 
+							<kbd>.gitignore</kbd> will be added to the project. These files will automatically be 
+							filled with information about the files that could possibly be added to your project, 
+							such as which files are guaranteed to be text or binary (in <kbd>.gitattributes</kbd>)
+							and which files are going to be ignored by automatic addition (in <kbd>.gitignore</kbd>).
+						</p>
+						<p class="site-blurb">
+							The <kbd>.gitignore</kbd> file will also exclude some IDE files and local configuration by default.
+							If you use exclusively converted assets, you may also want to exclude the destination <kbd>src</kbd>
+							folders for those assets.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Init the Git</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Preparing your first commit is going to be the easy part. If you have a remote repo (such as via 
+							<a href="https://github.com">Github</a> or <a href="https://bitbucket.org/">Bitbucket</a>), you're
+							going to want to create an empty repo first on your favorite service (make sure it contains NO FILES
+							NOR BRANCHES - you'll push your project in full).
+						</p>
+						<p class="site-blurb">
+							Either way, the first couple of steps are the same:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>git init</code></pre>
+						<pre class="command-line"><code>git add -A</code></pre>
+						<pre class="command-line"><code>git commit -m "Initial commit."</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Pushing to your remote will be a little different for your target service, and they
+							should provide directions for it.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Mercurial -->
+		<div class="w3-row template-section section-hg">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Mercurial</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							By including the <strong>Hg</strong> (Mercurial) template in your project, the file
+							<kbd>.hgignore</kbd> will be added to the project. This file will automatically be 
+							filled with information about the files that could possibly be added to your project, 
+							such as which files are going to be ignored by automatic addition.
+						</p>
+						<p class="site-blurb">
+							The <kbd>.hgignore</kbd> file will also exclude some IDE files and local configuration by default.
+							If you use exclusively converted assets, you may also want to exclude the destination <kbd>src</kbd>
+							folders for those assets.
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Get going with Mercurial</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Preparing your first commit is going to be the easy part. If you have a remote repo, you're
+							going to want to create an empty repo first on your favorite service (make sure it contains 
+							NO FILES NOR BRANCHES - you'll push your project in full).
+						</p>
+						<p class="site-blurb">
+							Either way, the first couple of steps are the same:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>hg init</code></pre>
+						<pre class="command-line"><code>hg add</code></pre>
+						<pre class="command-line"><code>hg commit -m "Initial commit."</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Pushing to your remote will be a little different for your target service, and they
+							should provide directions for it.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Run -->
+		<div class="w3-row template-section section-run">
+			<div class="w3-col l12 w3-center">
+				<div class="w3-row main-heading">
+					<div class="w3-col l12 w3-center">
+						<h2>Running from DoomMake</h2>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							Running your project from DoomMake takes a tiny bit of configuring, but a lot of the
+							setup should be finished from the questionnaire on project creation.
+						</p>
+						<p class="site-blurb">
+							You can run the default port that you set up via the command:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>doommake run</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							The properties in <kbd>doommake.properties</kbd> should explain each of the fields used
+							for running a source port for testing. The <kbd>doommake run</kbd> command will attempt
+							a build and then, depending on what it finds: adds the IWAD in the <kbd>doommake.properties</kbd>
+							via the IWAD switch, the <kbd>maps.wad</kbd>, <kbd>maptex.wad</kbd> (or <kbd>textures.wad</kbd> 
+							if not found), and <kbd>assets.wad</kbd> via the file switch, and the DeHackEd file <kbd>dehacked.deh</kbd>
+							using the DEH switch.
+						</p>
+						<p class="site-blurb">
+							Certain ports may require you to use different switches - Chocolate Doom, for instance,
+							may require you to use <kbd>-merge</kbd> for the file switch (see the <kbd>doommake.run.switch.file</kbd>
+							project property). For most other ports, though, you can leave them unchanged.
+						</p>
+						<p class="site-blurb">
+							Running a project is more useful when you aren't actively testing maps via a map editor. For
+							tweaking patches and graphics, though, it will reduce your testing turnaround!
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<h4>Running Multiple Ports</h4>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							DoomMake can support more than one port for running in one project. All you need to do
+							is create additional corresponding properties for a port name.
+						</p>
+						<p class="site-blurb">
+							For example, if you want to run a port by typing:
+						</p>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<pre class="command-line"><code>doommake run choco</code></pre>
+					</div>
+				</div>
+				<div class="w3-row">
+					<div class="w3-col l12 w3-center">
+						<p class="site-blurb">
+							You'll have to at least create a <kbd>doommake.run.exe.choco</kbd> property
+							that points to the port EXE, plus other corresponding fields if you don't want
+							to use the defaults (e.g. <kbd>doommake.run.switch.file.choco</kbd>, etc.).
 						</p>
 					</div>
 				</div>
