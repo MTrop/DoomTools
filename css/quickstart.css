@@ -1,0 +1,66 @@
+.project-selection {
+    max-width: 500px;
+    background-color: rgb(4, 20, 24);
+    border: solid 1px rgb(2, 10, 12);
+    border-radius: 8px;
+    padding: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.form-junk {
+    display: grid;
+    grid-template-columns: 32px auto;
+}
+input[type=checkbox].category-selection {
+    width: 24px;
+    height: 24px;
+    margin: 4px;
+}
+input[type=text].category-selection, select.category-selection {
+    width: 100%;
+    color: #dddddd;
+    background-color:rgb(2, 10, 12);
+    border: none;
+}
+select.category-selection {
+    cursor: pointer;
+}
+label.category-selection {
+    display: inline;
+    vertical-align: middle;
+    text-align: left;
+}
+.category-row {
+    background-color: rgb(2, 10, 12);
+    border-radius: 8px;
+    padding: 12px;
+}
+.main-heading {
+    background-color: #030d0f;
+    padding: 8px;
+    border-radius: 8px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 850px;
+    margin-top: 24px;
+}
+.template-section {
+    display: none;
+}
+.visible-section {
+    display: block !important;
+}
+.intermission-blurb {
+    border-top: solid 1px #969ca8;
+    border-bottom: solid 1px #969ca8;
+    max-width: 550px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+.label-adjust {
+    font-size: 100%;
+    position: relative;
+    top: 15%;
+}
