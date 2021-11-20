@@ -7,9 +7,11 @@ package net.mtrop.doom.tools.common;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +19,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.mtrop.doom.tools.struct.ReplacerReader;
 
 /**
  * Common shared functions.
@@ -27,11 +31,18 @@ public final class Common
 	/** Version number map. */
 	private static Map<String, String> VERSION_MAP = new HashMap<>();
 	
-	/**
-	 * A null file stream.
-	 */
-	public static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
+	/** Is this Windows? */
+	public static final boolean IS_WINDOWS;
 	
+	/** A null file. */
+	public static final File NULL_FILE;
+	
+	static
+	{
+		IS_WINDOWS = System.getProperty("os.name").contains("Windows");
+		NULL_FILE = new File(IS_WINDOWS ? "NUL" : "/dev/null");
+	}
+
 	/**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
@@ -600,6 +611,38 @@ public final class Common
 			sb.append("${").append(token.toString());
 			
 		return sb.toString();
+	}
+	
+	/**
+	 * Exports a shell script to a directory.
+	 * @param resourceName the source resource to read from.
+	 * @param mainClass the main class to invoke.
+	 * @param options the JVM options.
+	 * @param jarName the JAR file name to invoke, if embedded JAR script.
+	 * @param target the target file to write to.
+	 * @throws IOException if the file could not be written.
+	 * @throws SecurityException if file could not be created due to permissioning.
+	 */
+	public static void copyShellScript(String resourceName, Class<?> mainClass, String options, String jarName, File target) throws IOException
+	{
+		try (
+			ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourceName), "{{", "}}");
+			OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(target))
+		){
+			reader
+				.replace("JAVA_OPTIONS", options)
+				.replace("MAIN_CLASSNAME", mainClass.getCanonicalName())
+				.replace("JAR_NAME", jarName)
+			;
+			
+			int b;
+			char[] cbuf = new char[8192];
+			while ((b = reader.read(cbuf)) >= 0)
+			{
+				writer.write(cbuf, 0, b);
+				writer.flush();
+			}
+		}
 	}
 	
 	/**

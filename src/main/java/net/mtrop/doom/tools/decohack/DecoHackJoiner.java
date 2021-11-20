@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.TokenScanner;
 
 /**
@@ -17,13 +18,7 @@ import net.mtrop.doom.tools.struct.TokenScanner;
  */
 public final class DecoHackJoiner 
 {
-	private static final boolean IS_WINDOWS;
 	private static final String INCLUDE_LINE = "#include";
-
-	static
-	{
-		IS_WINDOWS = System.getProperty("os.name").contains("Windows");
-	}
 
 	/**
 	 * Reads the source from a file.
@@ -114,7 +109,7 @@ public final class DecoHackJoiner
 
 	private static String getNextPath(String streamName, String path)
 	{
-		if (IS_WINDOWS && streamName.contains("\\")) // check for Windows paths.
+		if (Common.IS_WINDOWS && streamName.contains("\\")) // check for Windows paths.
 			streamName = streamName.replace('\\', '/');
 		return getParentPath(streamName) + path;
 	}

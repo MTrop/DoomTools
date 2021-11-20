@@ -19,12 +19,14 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
+import com.blackrook.rookscript.tools.ScriptExecutor;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
@@ -64,7 +66,23 @@ public final class DoomToolsMain
 	private static final String UPDATE_GITHUB_API = "https://api.github.com/";
 	private static final String UPDATE_REPO_NAME = "DoomTools";
 	private static final String UPDATE_REPO_OWNER = "MTrop";
-	
+
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx784M";
+	private static final Map<String, Class<?>> SHELL_DATA = Common.map(
+		Common.keyValue("doomtools",  DoomToolsMain.class),
+		Common.keyValue("wadmerge",   WadMergeMain.class),
+		Common.keyValue("wswantbl",   WSwAnTablesMain.class),
+		Common.keyValue("wadtex",     WADTexMain.class),
+		Common.keyValue("wtexscan",   WTexScanMain.class),
+		Common.keyValue("wtexport",   WTExportMain.class),
+		Common.keyValue("wadscript",  WadScriptMain.class),
+		Common.keyValue("decohack",   DecoHackMain.class),
+		Common.keyValue("dmxconv",    DMXConvertMain.class),
+		Common.keyValue("dimgconv",   DoomImageConvertMain.class),
+		Common.keyValue("doommake",   DoomMakeMain.class),
+		Common.keyValue("rookscript", ScriptExecutor.class)
+	);
+		
 	private static final FileFilter JAR_FILES = (f) -> {
 		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
@@ -88,6 +106,7 @@ public final class DoomToolsMain
 	private static final String SWITCH_WHERE = "--where";
 	private static final String SWITCH_UPDATE = "--update";
 	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
+	private static final String SWITCH_UPDATE_SHELL = "--update-shell";
 	
 	/**
 	 * Program options.
@@ -100,6 +119,7 @@ public final class DoomToolsMain
 		private boolean help;
 		private boolean update;
 		private boolean updateCleanup;
+		private boolean updateShell;
 		private boolean openWebsite;
 		private boolean where;
 		
@@ -109,6 +129,7 @@ public final class DoomToolsMain
 			this.help = false;
 			this.update = false;
 			this.updateCleanup = false;
+			this.updateShell = false;
 			this.openWebsite = false;
 			this.where = false;
 		}
@@ -184,10 +205,50 @@ public final class DoomToolsMain
 				return String.format(" ... %d KB", current / 1024);
 			}
 		}
+
+		public int doUpdateShell()
+		{
+			final String path; 
+			try {
+				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+			} catch (SecurityException e) {
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				return ERROR_SECURITY;
+			}
+			if (Common.isEmpty(path))
+			{
+				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
+				return ERROR_NOWHERE;
+			}
+			
+			final String shellSourceFile = Common.IS_WINDOWS ? "app-name.cmd" : "app-name.sh";
+			final String shellExtension = Common.IS_WINDOWS ? ".cmd" : "";
+			
+			// Export shell scripts.
+			for (Map.Entry<String, Class<?>> entry : SHELL_DATA.entrySet())
+			{
+				File outputFilePath = new File(path + "/" + entry.getKey() + shellExtension);
+				try {
+					Common.copyShellScript("shell/jar/" + shellSourceFile, entry.getValue(), SHELL_OPTIONS, "", outputFilePath);
+					if (!Common.IS_WINDOWS)
+						outputFilePath.setExecutable(true, false);
+					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not create `" + outputFilePath.getPath() + "`.");
+					return ERROR_IOERROR;
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Could not create `" + outputFilePath.getPath() + "`. Access denied by OS.");
+					return ERROR_SECURITY;
+				}
+			}
+			
+			options.stdout.println("Done!");
+			return ERROR_NONE;
+		}
 		
 		public int doUpdateCleanup()
 		{
-			String path; 
+			final String path; 
 			try {
 				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
 			} catch (SecurityException e) {
@@ -218,7 +279,7 @@ public final class DoomToolsMain
 		
 		public int doUpdate()
 		{
-			String path; 
+			final String path; 
 			try {
 				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
 			} catch (SecurityException e) {
@@ -380,6 +441,10 @@ public final class DoomToolsMain
 				help(options.stdout);
 				return ERROR_NONE;
 			}
+			else if (options.updateShell)
+			{
+				return doUpdateShell();
+			}
 			else if (options.updateCleanup)
 			{
 				return doUpdateCleanup();
@@ -499,6 +564,8 @@ public final class DoomToolsMain
 						options.update = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_CLEANUP))
 						options.updateCleanup = true;
+					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_SHELL))
+						options.updateShell = true;
 				}
 				break;
 			}
@@ -547,6 +614,10 @@ public final class DoomToolsMain
 		out.println("    --update-cleanup     Deletes all previous versions downloaded via update");
 		out.println("                             except for the latest (may require permission");
 		out.println("                             elevation on some operating systems).");
+		out.println();
+		out.println("    --update-shell       Updates the shell commands that invoke the tools.");
+		out.println("                             If you are missing one, run DoomTools with this");
+		out.println("                             switch.");
 	}
 	
 }

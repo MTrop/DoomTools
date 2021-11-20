@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.LinkedList;
@@ -32,7 +31,6 @@ import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
-import net.mtrop.doom.tools.struct.ReplacerReader;
 
 /**
  * Main class for DoomMake.
@@ -46,6 +44,7 @@ public final class DoomMakeMain
 	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
 
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx784M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	
@@ -391,29 +390,6 @@ public final class DoomMakeMain
 			return ERROR_NONE;
 		}
 
-		// Copies a shell script.
-		private void copyShellScript(String resourceName, String jarName, File target) throws IOException
-		{
-			try (
-				ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourceName), "{{", "}}");
-				OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(target))
-			){
-				reader
-					.replace("JAVA_OPTIONS", "-Xms64M -Xmx784M")
-					.replace("MAIN_CLASSNAME", DoomMakeMain.class.getCanonicalName())
-					.replace("JAR_NAME", jarName)
-				;
-				
-				int b;
-				char[] cbuf = new char[8192];
-				while ((b = reader.read(cbuf)) >= 0)
-				{
-					writer.write(cbuf, 0, b);
-					writer.flush();
-				}
-			}
-		}
-		
 		// Embeds DoomMake into the project.
 		private int embedDoomMake()
 		{
@@ -463,8 +439,8 @@ public final class DoomMakeMain
 			try (FileInputStream fis = new FileInputStream(new File(path + jarName)); FileOutputStream fos = new FileOutputStream(targetJARFile))
 			{
 				IOUtils.relay(fis, fos);
-				copyShellScript(SHELL_RESOURCE_CMD, targetJARFile.getPath().replace("/", "\\"), targetShellCmdFile);
-				copyShellScript(SHELL_RESOURCE_SH, targetJARFile.getPath().replace("\\", "/"), targetShellBashFile);
+				Common.copyShellScript(SHELL_RESOURCE_CMD, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("/", "\\"), targetShellCmdFile);
+				Common.copyShellScript(SHELL_RESOURCE_SH, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("\\", "/"), targetShellBashFile);
 			} 
 			catch (SecurityException e)
 			{
@@ -482,6 +458,7 @@ public final class DoomMakeMain
 				return ERROR_IOERROR;
 			}
 
+			// Will always fail on Windows, but not super important for local Windows use.
 			targetShellBashFile.setExecutable(true, false);
 			
 			options.stdout.println("DoomMake embed complete.");
