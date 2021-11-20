@@ -1,6 +1,11 @@
 DecoHack
 --------
 
+### Changed for 0.19.3
+
+* `Fixed` Bad tokens in action pointer blocks no longer hang the parser (Issue #59)
+
+
 ### Changed for 0.19.2
 
 * `Fixed` Changed maximum string lengths for Vanilla patches (doom19, udoom19). (Issue #56)

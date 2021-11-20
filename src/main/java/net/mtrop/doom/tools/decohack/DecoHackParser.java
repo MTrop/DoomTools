@@ -2849,12 +2849,14 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				state.parsedActions.add(action = new ParsedAction());
 				if (!parseActionClause(context, actor, action, null))
-					return false;				
+					return false;
+				if (action.pointer == null)
+					break;
 			}
 			
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
-				addErrorMessage("Expected a '}' to close an action pointer list.");
+				addErrorMessage("Expected a '}' to close a list of valid action pointers.");
 				return false;
 			}
 			else if (state.parsedActions.isEmpty())
