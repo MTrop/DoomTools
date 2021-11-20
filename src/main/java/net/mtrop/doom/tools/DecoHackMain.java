@@ -20,6 +20,9 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackJoiner;
@@ -86,7 +89,7 @@ public final class DecoHackMain
 		private boolean version;
 		private String dumpResource;
 
-		private File inFile;
+		private List<File> inFiles;
 		
 		private Charset outCharset;
 		private File outFile;
@@ -101,7 +104,7 @@ public final class DecoHackMain
 			this.help = false;
 			this.version = false;
 
-			this.inFile = null;
+			this.inFiles = new LinkedList<>();
 			
 			this.outCharset = ASCII;
 			this.outFile = null;
@@ -124,7 +127,12 @@ public final class DecoHackMain
 
 		public Options setInFile(File inFile) 
 		{
-			this.inFile = inFile;
+			return setInFiles(new File[]{inFile});
+		}
+		
+		public Options setInFiles(File[] inFiles) 
+		{
+			this.inFiles = Arrays.asList(inFiles);
 			return this;
 		}
 		
@@ -214,17 +222,19 @@ public final class DecoHackMain
 				return ERROR_NONE;
 			}
 
-		
-			if (options.inFile == null)
+			if (options.inFiles.isEmpty())
 			{
 				options.stderr.println("ERROR: Missing input file.");
 				return ERROR_MISSING_INPUT;
 			}
 
-			if (!options.inFile.exists())
+			for (File f : options.inFiles)
 			{
-				options.stderr.println("ERROR: Input file does not exist.");
-				return ERROR_MISSING_INPUT_FILE;
+				if (!f.exists())
+				{
+					options.stderr.println("ERROR: Input file `" + f.getPath() + "` does not exist.");
+					return ERROR_MISSING_INPUT_FILE;
+				}
 			}
 
 			if (options.outFile == null)
@@ -237,7 +247,7 @@ public final class DecoHackMain
 			AbstractPatchContext<?> context;
 			try 
 			{
-				context = DecoHackParser.read(options.inFile);
+				context = DecoHackParser.read(options.inFiles);
 			} 
 			catch (PreprocessorException e) 
 			{
@@ -299,7 +309,10 @@ public final class DecoHackMain
 			{
 				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile)), true))
 				{
-					DecoHackJoiner.joinSourceFrom(options.inFile, Charset.defaultCharset(), writer);
+					for (File file : options.inFiles)
+					{
+						DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+					}
 					options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
 				} 
 				catch (FileNotFoundException e) 
@@ -386,7 +399,7 @@ public final class DecoHackMain
 					else if (arg.equals(SWITCH_OUTPUTCHARSET) || arg.equals(SWITCH_OUTPUTCHARSET2))
 						state = STATE_OUTCHARSET;
 					else
-						options.inFile = new File(arg);
+						options.inFiles.add(new File(arg));
 				}
 				break;
 				
@@ -505,8 +518,9 @@ public final class DecoHackMain
 		out.println("    --dump-resource [path]   Dumps an internal resource (starting with");
 		out.println("                             \"decohack/\" ) to STDOUT.");
 		out.println();
-		out.println("[filename]:");
-		out.println("    <filename>               The input filename.");
+		out.println("[filenames]:");
+		out.println("    <filename> ...           The input filenames. One or more can be added,");
+		out.println("                             parsed in the order specified.");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output [file]          Outputs the resultant patch to [file].");

@@ -288,12 +288,14 @@ TOOL::DOOMMAKE(options)
 
 TOOL::DECOHACK(options)
     Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless 
-    overridden (see options).
+    overridden (see options). Do not use both [infile] and [infiles] as 
+    options. Use one or the other.
     options:
         (MAP:{
 	        stdout:OBJECTREF(OutputStream), 
 	        stderr:OBJECTREF(OutputStream), 
 	        infile:OBJECTREF(File), 
+	        infiles:LIST[OBJECTREF(File), ...], 
 	        outfile:OBJECTREF(File), 
 	        outcharsetname:STRING, 
 	        outputbudget:BOOLEAN

@@ -181,7 +181,8 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless overridden (see options)."
+					"Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless overridden (see options). " +
+					"Do not use both [infile] and [infiles] as options. Use one or the other."
 				)
 				.parameter("options", 
 					type(Type.MAP, 
@@ -189,6 +190,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"infile:OBJECTREF(File)",
+							"infiles:LIST[OBJECTREF(File), ...]",
 							"outfile:OBJECTREF(File)",
 							"outsourcefile:OBJECTREF(File)",
 							"outcharsetname:STRING",

@@ -186,6 +186,16 @@ public class PreprocessorLexer extends Lexer
 	 * Creates a new preprocessor lexer around a String, that will be wrapped into a StringReader.
 	 * This will also assign this lexer a default name.
 	 * @param kernel the lexer kernel to use for defining how to parse the input text.
+	 */
+	public PreprocessorLexer(Kernel kernel)
+	{
+		this(kernel, null, (Reader)null);
+	}
+	
+	/**
+	 * Creates a new preprocessor lexer around a String, that will be wrapped into a StringReader.
+	 * This will also assign this lexer a default name.
+	 * @param kernel the lexer kernel to use for defining how to parse the input text.
 	 * @param in the string to read from.
 	 */
 	public PreprocessorLexer(Kernel kernel, String in)

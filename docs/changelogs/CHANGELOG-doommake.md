@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.13.0
+
+* `Added` `infiles` as a valid option field for `TOOL::DECOHACK`.
+
+
 ### Changed for 0.12.0
 
 * `Added` Some texture template types for Vanilla and Boom.

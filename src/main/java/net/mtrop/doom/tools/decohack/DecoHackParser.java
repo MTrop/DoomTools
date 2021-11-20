@@ -218,19 +218,29 @@ public final class DecoHackParser extends Lexer.Parser
 
 	/**
 	 * Reads a DECOHack script from a starting text file.
-	 * @param file the file to read from.
+	 * @param files the files to read from (as though each file is included, in order).
 	 * @return an exportable patch.
 	 * @throws DecoHackParseException if one or more parse errors happen.
 	 * @throws IOException if the stream can't be read.
 	 * @throws SecurityException if a read error happens due to OS permissioning.
 	 * @throws NullPointerException if file is null. 
 	 */
-	public static AbstractPatchContext<?> read(File file) throws IOException
+	public static AbstractPatchContext<?> read(Iterable<File> files) throws IOException
 	{
-		try (FileInputStream fis = new FileInputStream(file))
+		DecoHackParser parser = new DecoHackParser(null, null);
+		Lexer lexer = parser.getLexer();
+		
+		// Lexer streams are a stack, so add files backwards for the correct order.
+		Deque<File> backwards = new LinkedList<>();
+		for (File file : files)
+			backwards.push(file);
+		while (!backwards.isEmpty())
 		{
-			return read(file.getPath(), fis);
+			File file = backwards.pollFirst();
+			lexer.pushStream(file.getPath(), new InputStreamReader(new FileInputStream(file)));
 		}
+
+		return parser.parse();
 	}
 
 	/**
