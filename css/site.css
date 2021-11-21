@@ -34,6 +34,10 @@ A:hover {
     margin-left: auto;
     margin-right: auto;
 }
+#releases-loading {
+	display: block;
+	height: 176px;
+}
 
 .site-logo {
 	display: block;

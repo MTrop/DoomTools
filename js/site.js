@@ -123,5 +123,8 @@ function display_release_data(release, release_section_element, release_version_
 	});
 
 	release_version_element[0].innerHTML = version;
-	release_section_element.classRemove('site-start-hidden');
+	release_section_element
+		.classRemove('site-start-hidden')
+		.classAdd('w3-animate-opacity');
+	$DJ.id('releases-loading').classAdd('w3-hide');
 }
