@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.3.1
+
+* `Changed` Improved HTML documentation output.
+
+
 ### Changed for 1.3.0
 
 * `Added` A switch for dumping documentation as HTML. (Enhancement #45)

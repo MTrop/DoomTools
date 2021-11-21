@@ -553,7 +553,7 @@ public final class WadScriptMain
 			htmlout.push("div", HTMLWriter.classes("toc-content"));
 			for (int i = 0; i < sections.length; i++)
 			{
-				htmlout.tag("a", sections[i], HTMLWriter.href("#"+getTitleCode(sections[i])), HTMLWriter.classes("toc-link"));
+				htmlout.tag("a", sections[i], HTMLWriter.href("#category-"+getTitleCode(sections[i])), HTMLWriter.classes("toc-link"));
 				if (i < sections.length - 1)
 					htmlout.text(" | ");
 			}
@@ -569,24 +569,26 @@ public final class WadScriptMain
 		@Override
 		public void startSection(String title) throws IOException
 		{
-			htmlout.push("div", HTMLWriter.id(getTitleCode(title)), HTMLWriter.classes("category-section"));
+			String titleCode = getTitleCode(title);
+			htmlout.push("div", HTMLWriter.id("category-" + titleCode), HTMLWriter.classes("category-section"));
 			
-			htmlout.push("div", HTMLWriter.classes("category-title"))
+			htmlout.push("div", HTMLWriter.classes("category-title"), HTMLWriter.attribute("section-code", titleCode))
 				.push("h1", HTMLWriter.classes("category-name"))
 					.text(title)
 					.tag("a", "TOP", HTMLWriter.href("#top"), HTMLWriter.classes("category-navigation"))
 				.pop()
 			.pop();
 			
-			htmlout.push("div", HTMLWriter.classes("category-content"));
+			htmlout.push("div", HTMLWriter.id("category-content-" + titleCode), HTMLWriter.classes("category-content"));
 		}
 
 		@Override
 		public void startFunction(String namespace, String functionName, String[] parameterNames) throws IOException 
 		{
-			htmlout.push("div", HTMLWriter.id(getFunctionNameCode(namespace, functionName)), HTMLWriter.classes("function-section"));
+			String functionNameCode = getFunctionNameCode(namespace, functionName);
+			htmlout.push("div", HTMLWriter.id("function-" + functionNameCode), HTMLWriter.classes("function-section"));
 			
-			htmlout.push("div", HTMLWriter.classes("function-title"))
+			htmlout.push("div", HTMLWriter.classes("function-title"), HTMLWriter.attribute("section-code", functionNameCode))
 				.push("h2", HTMLWriter.classes("function-name"))
 					.text((namespace != null ? namespace.toUpperCase() + "::" : "") + functionName.toUpperCase())
 					.push("span", HTMLWriter.classes("function-parameters"));
@@ -605,7 +607,7 @@ public final class WadScriptMain
 				.pop()
 			.pop();
 			
-			htmlout.push("div", HTMLWriter.classes("function-content"));
+			htmlout.push("div", HTMLWriter.id("function-content-" + functionNameCode), HTMLWriter.classes("function-content"));
 		}
 
 		@Override
