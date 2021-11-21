@@ -49,7 +49,8 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 						"{" + Common.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
-							"openWebsite:BOOLEAN"
+							"openWebsite:BOOLEAN",
+							"openDocs:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)

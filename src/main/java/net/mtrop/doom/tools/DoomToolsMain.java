@@ -103,6 +103,7 @@ public final class DoomToolsMain
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_WEBSITE = "--website";
+	private static final String SWITCH_DOCS = "--docs";
 	private static final String SWITCH_WHERE = "--where";
 	private static final String SWITCH_UPDATE = "--update";
 	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
@@ -121,6 +122,7 @@ public final class DoomToolsMain
 		private boolean updateCleanup;
 		private boolean updateShell;
 		private boolean openWebsite;
+		private boolean openDocs;
 		private boolean where;
 		
 		private Options()
@@ -149,6 +151,12 @@ public final class DoomToolsMain
 		public Options setOpenWebsite(boolean value)
 		{
 			this.openWebsite = value;
+			return this;
+		}
+		
+		public Options setOpenDocs(boolean value)
+		{
+			this.openDocs = value;
 			return this;
 		}
 		
@@ -474,6 +482,41 @@ public final class DoomToolsMain
 					return ERROR_NONE;
 				}
 			}
+			else if (options.openDocs)
+			{
+				String path; 
+				try {
+					path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+					return ERROR_SECURITY;
+				}
+				
+				if (!Desktop.isDesktopSupported())
+				{
+					options.stderr.println("ERROR: No desktop support. Cannot open website.");
+					return ERROR_DESKTOP_ERROR;
+				}
+
+				if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+				{
+					options.stderr.println("ERROR: No support for opening files/folders. Cannot open documentation folder.");
+					return ERROR_DESKTOP_ERROR;
+				}				
+				
+				try {
+					options.stdout.println("Opening the DoomTools documentation folder...");
+					Desktop.getDesktop().open(new File(path + File.separator + "docs"));
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Cannot open documentation folder. I/O Error.");
+					return ERROR_DESKTOP_ERROR;
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Cannot open documentation folder. OS is preventing folder access.");
+					return ERROR_DESKTOP_ERROR;
+				}
+
+				return ERROR_NONE;
+			}
 			else if (options.openWebsite)
 			{
 				if (!Desktop.isDesktopSupported())
@@ -558,6 +601,8 @@ public final class DoomToolsMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WEBSITE))
 						options.openWebsite = true;
+					else if (arg.equalsIgnoreCase(SWITCH_DOCS))
+						options.openDocs = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
 						options.where = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE))
@@ -605,6 +650,8 @@ public final class DoomToolsMain
 		out.println("    -h");
 		out.println();
 		out.println("    --website            Opens DoomTools's main website.");
+		out.println();
+		out.println("    --docs               Opens DoomTools's documentation folder.");
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
 		out.println();
