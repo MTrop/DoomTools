@@ -59,3 +59,42 @@ check function doConvertPatches() {
 	println("Patches converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
+check function doConvertTextureDirectory(sourceDir, targetDir) {
+	
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Texture conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting textures...");
+
+	convert(sourceDir, targetDir);
+
+	storeDirectoryChanged(sourceDir, hash);
+	println("Textures converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
+ * Converts texture assets in the conversion directories.
+ * Puts them in the corresponding texture folders.
+ */
+check function doConvertTextures() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/texture1";
+	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/texture1";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+	doConvertTextureDirectory(sourceDir, targetDir);
+	setBuilt("convert-texture1");
+	
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/texture2";
+	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/texture2";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+	doConvertTextureDirectory(sourceDir, targetDir);
+	setBuilt("convert-texture2");
+}
+

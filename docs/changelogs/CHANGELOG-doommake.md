@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.13.0
 
 * `Added` `infiles` as a valid option field for `TOOL::DECOHACK`.
+* `Changed` Improved HTML documentation output.
 
 
 ### Changed for 0.12.0

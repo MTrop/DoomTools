@@ -392,6 +392,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/convert/flats"),
 				dir("src/convert/patches"),
+				dir("src/convert/textures1"),
+				dir("src/convert/textures2"),
 				fileAppend("doommake.script", 
 					"doommake/common/textures/convert/doommake.script"),
 				fileAppend("README.md",
@@ -401,6 +403,7 @@ public class WADProjectGenerator extends ProjectGenerator
 				fileContentAppend("doommake.script",
 					"\tdoConvertFlats();"
 					,"\tdoConvertPatches();"
+					,"\tdoConvertTextures();"
 				)
 			))
 			.postRelease(descriptor(
@@ -411,6 +414,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add BMP, GIF, or PNG files to `src/convert/flats`."
 				,"Add BMP, GIF, or PNG files to `src/convert/patches`."
+				,"Add BMP, GIF, or PNG files to `src/convert/textures1`."
+				,"Add BMP, GIF, or PNG files to `src/convert/textures2`."
 			)
 		);
 		
@@ -422,6 +427,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
+				dir("src/textures/textures1"),
+				dir("src/textures/textures2"),
 				file("src/textures/texture1.txt", 
 					"doommake/common/textures/texture1.txt"),
 				file("src/textures/texture2.txt", 

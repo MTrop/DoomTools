@@ -25,6 +25,9 @@ marker             out pp_start
 mergedir           out $1/textures/patches
 marker             out pp_end
 
+# Merge Additional Single-Patch Textures
+mergetexturedir    out $1/textures/texture1 texture1
+mergetexturedir    out $1/textures/texture2 texture2
 
 finish out $0/$2
 end

@@ -19,6 +19,8 @@ check function doTextures() {
 	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
 	verifydirs(sourceDir + "/flats");
 	verifydirs(sourceDir + "/patches");
+	verifydirs(sourceDir + "/texture1");
+	verifydirs(sourceDir + "/texture2");
 
 	if (checkFileExistenceAndBuildStatuses(outWad)) {
 		hash = directoryHasChanged(sourceDir);
@@ -42,6 +44,8 @@ check function doTextures() {
 	setBuilt("textures");
 }
 
+
+/* ------------------------------------------------------------------------ */
 
 function exportTextureLump(iwadPath, textureFilePath) {
 	if (empty(iwadPath))
