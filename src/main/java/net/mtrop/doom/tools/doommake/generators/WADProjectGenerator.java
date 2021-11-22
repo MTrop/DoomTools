@@ -455,8 +455,7 @@ public class WADProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add flats to `src/textures/flats`."
 				,"Add patches to `src/textures/patches`."
-				,"Add patches to `src/textures/texture1`."
-				,"Add patches to `src/textures/texture2`."
+				,"Add patches to `src/textures/texture1` and `src/textures/texture2`."
 				,"Edit `src/textures/animflats.wad` for flats that need to be in a specific order."
 				,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
 				,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
