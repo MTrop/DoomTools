@@ -3,7 +3,7 @@ DecoHack
 
 ### Changed for 0.20.0
 
-* `Added` Multiple input files can be added, parsed in the order provided. (Issue #57)
+* `Added` Multiple input files can be added, parsed in the order provided. (Enhancement #57)
 * `Fixed` Bad tokens in action pointer blocks no longer hang the parser. (Issue #59)
 
 

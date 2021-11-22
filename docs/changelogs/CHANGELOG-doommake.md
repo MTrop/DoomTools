@@ -5,6 +5,7 @@ DoomMake
 
 * `Added` `infiles` as a valid option field for `TOOL::DECOHACK`.
 * `Changed` Improved HTML documentation output.
+* `Changed` Single-patch texture generation added to the `textures` and `texturesboom` templates (new projects). (Enhancement #58)
 
 
 ### Changed for 0.12.0
