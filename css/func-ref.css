@@ -131,11 +131,6 @@ A:visited {
 	padding-bottom: 8px;
 	padding-left: 16px;
 	padding-right: 16px;
-	cursor: pointer;
-}
-
-.category-title:hover {
-	background-color: rgb(200, 200, 200);
 }
 
 .category-content {
@@ -143,7 +138,6 @@ A:visited {
 	padding-bottom: 8px;
 	margin-left: 16px;
 	margin-right: 16px;
-	display: none;
 }
 
 .category-name {
@@ -151,7 +145,10 @@ A:visited {
 }
 
 .category-navigation {
-	display: none;
+	float: right;
+	display: block;
+	font-size: 50%;
+	color: rgb(0, 0, 0);
 }
 
 .category-navigation:visited {
