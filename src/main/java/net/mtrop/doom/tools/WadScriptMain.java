@@ -705,7 +705,7 @@ public final class WadScriptMain
 
 		private String getTitleCode(String title)
 		{
-			return title.replaceAll("([^a-zA-Z])+", "-").toLowerCase();
+			return title.replaceAll("([^a-zA-Z0-9])+", "-").toLowerCase();
 		}
 
 		private String getFunctionNameCode(String namespace, String functionName)
