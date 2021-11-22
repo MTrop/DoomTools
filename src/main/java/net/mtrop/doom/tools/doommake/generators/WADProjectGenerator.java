@@ -392,8 +392,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/convert/flats"),
 				dir("src/convert/patches"),
-				dir("src/convert/textures1"),
-				dir("src/convert/textures2"),
+				dir("src/convert/texture1"),
+				dir("src/convert/texture2"),
 				fileAppend("doommake.script", 
 					"doommake/common/textures/convert/doommake.script"),
 				fileAppend("README.md",
@@ -414,8 +414,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add BMP, GIF, or PNG files to `src/convert/flats`."
 				,"Add BMP, GIF, or PNG files to `src/convert/patches`."
-				,"Add BMP, GIF, or PNG files to `src/convert/textures1`."
-				,"Add BMP, GIF, or PNG files to `src/convert/textures2`."
+				,"Add BMP, GIF, or PNG files to `src/convert/texture1`."
+				,"Add BMP, GIF, or PNG files to `src/convert/texture2`."
 			)
 		);
 		
@@ -427,8 +427,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/textures/flats"),
 				dir("src/textures/patches"),
-				dir("src/textures/textures1"),
-				dir("src/textures/textures2"),
+				dir("src/textures/texture1"),
+				dir("src/textures/texture2"),
 				file("src/textures/texture1.txt", 
 					"doommake/common/textures/texture1.txt"),
 				file("src/textures/texture2.txt", 
@@ -455,6 +455,8 @@ public class WADProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add flats to `src/textures/flats`."
 				,"Add patches to `src/textures/patches`."
+				,"Add patches to `src/textures/texture1`."
+				,"Add patches to `src/textures/texture2`."
 				,"Edit `src/textures/animflats.wad` for flats that need to be in a specific order."
 				,"Edit `src/textures/texture1.txt` or `src/textures/texture2.txt`."
 				,"...OR delete those files and type `doommake rebuildtextures` to build them from IWAD."
