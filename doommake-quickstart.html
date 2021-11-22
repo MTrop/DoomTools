@@ -605,6 +605,12 @@
 							per subfolder.
 						</p>
 						<p class="site-blurb">
+							The folders <kbd>src/textures/texture1</kbd> and <kbd>src/textures/texture2</kbd> should contain 
+							the graphics that are added into the WAD's patch namespace (<kbd>PP_START</kbd> / <kbd>PP_END</kbd>) 
+							as-is, but they are also added to the <kbd>TEXTUREx</kbd> lump of their same name as single-patch 
+							textures. No conversions are applied to these files on import.
+						</p>
+						<p class="site-blurb">
 							The file <kbd>src/textures/animflats.wad</kbd> is a little special - it should contain flat
 							graphics that get added into the WAD's flat namespace (<kbd>FF_START</kbd> / <kbd>FF_END</kbd>) 
 							as-is, but in the order that they are in this WAD. This for flats that need to be in a specific
@@ -635,6 +641,13 @@
 							like PNG, GIF, BMP, or JPG and end up as raw Doom Flat formats in <kbd>src/textures/flats</kbd>. If 
 							PNG files have offset information in them (grAb), it is NOT preserved on conversion (flats do 
 							not have this info). Target files are overwritten.
+						</p>
+						<p class="site-blurb">
+							The folders <kbd>src/convert/texture1</kbd> and <kbd>src/convert/texture2</kbd> should contain 
+							graphics that get converted from formats like PNG, GIF, BMP, or JPG and end up as Doom Patch 
+							formats in <kbd>src/textures/texture1</kbd> and <kbd>src/textures/texture2</kbd>, respectively. 
+							If PNG files have offset information in them (grAb), it is preserved on conversion. Target files 
+							are overwritten.
 						</p>
 					</div>
 				</div>
