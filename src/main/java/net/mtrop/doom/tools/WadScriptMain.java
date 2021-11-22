@@ -1410,9 +1410,6 @@ public final class WadScriptMain
 		out.println("Usage: wadscript [filename] [switches | scriptargs]");
 		out.println("                 [--help | -h | --version]");
 		out.println("                 [--function-help]");
-		out.println("                 [--function-help-markdown]");
-		out.println("                 [--function-help-html]");
-		out.println("                 [--function-help-html-div]");
 		out.println("                 [--disassemble] [filename]");
 	}
 	
