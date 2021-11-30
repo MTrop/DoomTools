@@ -342,8 +342,8 @@ public class PatchExtended extends PatchMBF
 		{
 			// the extended sound range expliticly starts at 500, skipping several
 			// indices, so we need to make the output index relative to that.
-			for (int i = 1; i <= SOUNDSTRINGSEXTENDED.length; i++) // offset 1 for sfx_None
-				put(SOUNDSTRINGSEXTENDED[i - 1], SOUND_INDEX_EXTENDED_START + i);
+			for (int i = 0; i < SOUNDSTRINGSEXTENDED.length; i++)
+				put(SOUNDSTRINGSEXTENDED[i], SOUND_INDEX_EXTENDED_START + i);
 		}
 	};
 

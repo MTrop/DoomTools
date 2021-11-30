@@ -1,5 +1,10 @@
-DecoHack
+DECOHack
 --------
+
+### Changed for 0.20.1
+
+* `Fixed` Extended sounds were off by 1. (Issue #60)
+
 
 ### Changed for 0.20.0
 

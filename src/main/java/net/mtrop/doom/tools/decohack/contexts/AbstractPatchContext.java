@@ -796,7 +796,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			if (!sound.equals(original))
 			{
 				// Sound ids in DeHackEd are off by 1
-				writer.append("Sound ").append(String.valueOf(i)).append(CRLF);
+				writer.append("Sound ").append(String.valueOf(i - 1)).append(CRLF);
 				sound.writeObject(writer, original, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
