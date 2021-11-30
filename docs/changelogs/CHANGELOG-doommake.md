@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.13.1
+
+* `Fixed` The `texturewads` template added script lines that duped the extracted textures on export.
+
+
 ### Changed for 0.13.0
 
 * `Added` `infiles` as a valid option field for `TOOL::DECOHACK`.

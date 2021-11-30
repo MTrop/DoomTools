@@ -495,14 +495,6 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/wads/textures")
 			))
-			.releaseScriptMerge(descriptor(
-				fileContentAppend("doommake.script",
-					"\t\t,getMapTexWad()"
-				)
-			))
-			.releaseWadMergeLines(
-				"mergewad   out $0/$"
-			)
 			.todos(
 				"Add texture WADs to `src/wads/textures`."
 			)
