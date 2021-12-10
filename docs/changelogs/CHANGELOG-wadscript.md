@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.4.0
+
+* `Added` A switch for printing the entry points for a script.
+
+
 ### Changed for 1.3.1
 
 * `Changed` Improved HTML documentation output.

@@ -165,7 +165,7 @@ public final class DMXConvertMain
 				else
 				{
 					options.stdout.println("FFmpeg not found on the PATH.");
-					options.stdout.println("Either it is not named \"ffmpeg\", or the executible was not found on the");
+					options.stdout.println("Either it is not named \"ffmpeg\", or the executable was not found on the");
 					options.stdout.println("current PATH.");
 					return ERROR_NO_FFMPEG;
 				}

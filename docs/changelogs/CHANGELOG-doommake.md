@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.14.0
+
+* `Added` A switch for printing the targets for a project.
+
+
 ### Changed for 0.13.1
 
 * `Fixed` The `texturewads` template added script lines that duped the extracted textures on export.

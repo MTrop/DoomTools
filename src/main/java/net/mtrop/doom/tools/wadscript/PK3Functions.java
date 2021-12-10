@@ -188,7 +188,7 @@ public enum PK3Functions implements ScriptFunctionType
 			return ScriptFunctionUsage.create()
 				.instructions(
 					"Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource). " +
-					"This is a rebrand of ZFENTRY - same function."
+					"This is a rebrand of ZFEOPEN - same function."
 				)
 				.parameter("zip", 
 					type(Type.OBJECTREF, "ZipFile", "The open zip/PK3/PKE file.")

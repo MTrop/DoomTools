@@ -68,6 +68,7 @@ public final class DoomMakeMain
 	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
+	private static final String SWITCH_TARGETS = "--targets";
 	private static final String SWITCH_LISTMODULES = "--list-templates";
 	private static final String SWITCH_LISTMODULES2 = "-t";
 	private static final String SWITCH_NEWPROJECT = "--new-project";
@@ -538,6 +539,8 @@ public final class DoomMakeMain
 						options.templateNames = new LinkedList<>();
 						state = STATE_MODULENAME;
 					}
+					else if (SWITCH_TARGETS.equalsIgnoreCase(arg))
+						options.mode = Mode.ENTRYPOINTS;
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))
@@ -758,6 +761,11 @@ public final class DoomMakeMain
 		out.println("                                       Default: 256");
 		out.println("    --stack-depth [num]            Sets the stack value depth to [num].");
 		out.println("                                       Default: 2048");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("    --targets                      Displays all available targets for this");
+		out.println("                                       project.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();
