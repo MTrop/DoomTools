@@ -1,0 +1,20 @@
+/*****************************************************************************
+ * TARGET: rebuildpalettes
+ *****************************************************************************
+ * Rebuilds a palette image from the available IWAD.
+ * doommake rebuildpalettes
+ ****************************************************************************/
+check entry rebuildpalettes(args) {
+	doRebuildPalettes();
+}
+
+/*****************************************************************************
+ * TARGET: convertpalettes
+ *****************************************************************************
+ * Converts a palette images to a palettes and colormaps.
+ * doommake convertpalettes
+ ****************************************************************************/
+check entry convertpalettes(args) {
+	doConvertPalettes();
+}
+

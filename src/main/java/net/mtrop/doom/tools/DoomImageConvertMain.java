@@ -400,6 +400,8 @@ public final class DoomImageConvertMain
 				}
 			}
 			
+			// FIXME: palette may be null here!
+			
 			if (options.sourcePath.isDirectory())
 			{
 				if (outputFile != null)

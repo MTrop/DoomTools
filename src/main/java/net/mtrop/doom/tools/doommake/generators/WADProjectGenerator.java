@@ -35,6 +35,7 @@ import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.fileContentA
 public class WADProjectGenerator extends ProjectGenerator
 {
 	private static final String CATEGORY_ASSETS = "Assets";
+	private static final String CATEGORY_PALETTES = "Palettes";
 	private static final String CATEGORY_MAPS = "Maps";
 	private static final String CATEGORY_TEXTURES = "Textures";
 	private static final String CATEGORY_REPOSITORY = "Repositories";
@@ -44,6 +45,7 @@ public class WADProjectGenerator extends ProjectGenerator
 	private static final String TEMPLATE_GIT = "git";
 	private static final String TEMPLATE_MERCURIAL = "hg";
 	private static final String TEMPLATE_ASSETS = "assets";
+	private static final String TEMPLATE_PALETTES = "palettes";
 	private static final String TEMPLATE_MAPS = "maps";
 	private static final String TEMPLATE_TEXTURES = "textures";
 	private static final String TEMPLATE_TEXTURES_BOOM = "texturesboom";
@@ -61,6 +63,7 @@ public class WADProjectGenerator extends ProjectGenerator
 	private static final String MODULE_MAPS = "maps";
 	private static final String MODULE_ASSETS = "assets";
 	private static final String MODULE_ASSETS_CONVERT = "assets-convert";
+	private static final String MODULE_PALETTE_CONVERT = "palette-convert";
 	private static final String MODULE_TEXTURES = "textures";
 	private static final String MODULE_TEXTURES_VANILLA = "textures-vanilla";
 	private static final String MODULE_TEXTURES_BOOM = "textures-boom";
@@ -344,7 +347,7 @@ public class WADProjectGenerator extends ProjectGenerator
 
 		// ................................................................
 
-		// A module that builds maps and non-texture assets together.
+		// A module that builds non-texture assets together.
 		MODULES.put(MODULE_ASSETS, module(5)
 			.base(descriptor(
 				dir("src/assets/_global"),
@@ -381,6 +384,36 @@ public class WADProjectGenerator extends ProjectGenerator
 			))
 			.todos(
 				"Add assets to `src/assets` into the appropriate folders."
+			)
+		);
+
+		// ................................................................
+
+		// A module that converts palette data.
+		MODULES.put(MODULE_PALETTE_CONVERT, module(6)
+			.base(descriptor(
+				dir("src/assets/_global"),
+				dir("src/convert/palettes"),
+				file("src/convert/palettes/dimgconv.txt",
+					"doommake/common/palette/dimgconv.txt"),
+				fileAppend("doommake.script",
+					"doommake/common/palette/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/palette/README.md")
+			))
+			.releaseScript(descriptor(
+				fileContentAppend("doommake.script",
+					"\tdoConvertPalettes();"
+				)
+			))
+			.postRelease(descriptor(
+				fileAppend("doommake.script",
+					"doommake/common/palette/doommake-target.script"
+				)
+			))
+			.todos(
+				"Add convertable palette images to `src/convert/palettes`.",
+				"OR, delete the contents of that directory (except for dimgconv.txt) and type `doommake rebuildpalettes`."
 			)
 		);
 
@@ -606,6 +639,11 @@ public class WADProjectGenerator extends ProjectGenerator
 		TEMPLATES.put(TEMPLATE_ASSETS, template(
 			TEMPLATE_ASSETS, CATEGORY_ASSETS, "Adds non-texture assets.",
 			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
+		));
+		
+		TEMPLATES.put(TEMPLATE_PALETTES, template(
+			TEMPLATE_PALETTES, CATEGORY_PALETTES, "Adds custom palette conversion steps.",
+			MODULE_INIT, MODULE_PALETTE_CONVERT
 		));
 		
 		TEMPLATES.put(TEMPLATE_TEXTURES, template(
