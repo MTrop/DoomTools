@@ -8,6 +8,7 @@ check entry assets(args) {
 	doConvertSounds();
 	doConvertGraphics();
 	doConvertSprites();
+	doConvertColormaps();
 	doAssets();
 }
 

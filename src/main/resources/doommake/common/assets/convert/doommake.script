@@ -87,4 +87,32 @@ check function doConvertSprites() {
 	println("Sprites converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
+/**
+ * Converts colormap assets in the conversion directories.
+ * Puts them in the colormap assets folder.
+ */
+check function doConvertColormaps() {
+	
+	initBuild();
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/colormaps";
+	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/colormaps";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Colormap conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting colormaps...");
+	
+	convert(sourceDir, targetDir, "colormaps");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-colormaps");
+	println("Colormaps converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
 

@@ -17,6 +17,14 @@ check function cleanUpAssetWAD(wadpath) {
 		wf->waddelete(wf->wadentryindex("SS_END"));
 	}
 	
+	// Remove the colormap namespace if empty.
+	sx = wadentryindex(wf, "C_START");
+	sy = wadentryindex(wf, "C_END");
+	if (sx !== null && (sy - sx === 1)) {
+		wf->waddelete(wf->wadentryindex("C_START"));
+		wf->waddelete(wf->wadentryindex("C_END"));
+	}
+	
 	close(wf);
 }
 
@@ -32,6 +40,7 @@ check function doAssets() {
 
 	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
 	verifydirs(sourceDir + "/_global");
+	verifydirs(sourceDir + "/colormaps");
 	verifydirs(sourceDir + "/graphics");
 	verifydirs(sourceDir + "/music");
 	verifydirs(sourceDir + "/sounds");

@@ -15,16 +15,21 @@ mergedir  out $1/assets/_global nomarkers
 # Graphics
 mergedir  out $1/assets/graphics nomarkers
 
-# Sprites
-marker    out ss_start
-mergedir  out $1/assets/sprites nomarkers
-marker    out ss_end
-
 # Sounds
 mergedir  out $1/assets/sounds nomarkers
 
 # Music
 mergedir  out $1/assets/music nomarkers
+
+# Sprites
+marker    out ss_start
+mergedir  out $1/assets/sprites nomarkers
+marker    out ss_end
+
+# Colormap
+marker    out c_start
+mergedir  out $1/assets/colormaps nomarkers
+marker    out c_end
 
 finish out $0/$2
 end

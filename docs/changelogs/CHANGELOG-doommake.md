@@ -4,8 +4,7 @@ DoomMake
 ### Changed for 0.14.0
 
 * `Added` A switch for printing the targets for a project.
-* `Added` The `palettes` template for palette conversion functions.
-* `Changed` The conversion function in graphics conversions now looks for loose palette assets for source palettes (in asset global folder) (new projects).
+* `Changed` The conversion function in graphics conversions now looks for (and prioritizes) loose palette assets for source palettes (in asset global folder) (new projects).
 
 
 ### Changed for 0.13.1

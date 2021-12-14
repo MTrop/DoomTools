@@ -403,8 +403,9 @@ check function getConvertPaletteSource() {
  * sourceDir: The source directory path.
  * targetDir: The target directory path.
  * mode: One of 'palettes', 'colormaps', 'graphics', 'flats'. Default: 'graphics'
+ * recurse: true to recurse directory, false to not. Default = true.
  ****************************************************************************/
-check function convert(sourceDir, targetDir, mode) {
+check function convert(sourceDir, targetDir, mode, recurse) {
 	if (empty(sourceDir))
 		return error("ToolError", "Source directory path not specified.");
 	if (empty(targetDir))
@@ -415,7 +416,7 @@ check function convert(sourceDir, targetDir, mode) {
 		paletteSourcePath: mode !== "palettes" ? file(getConvertPaletteSource()) : null,
 		sourcePath: file(sourceDir), 
 		outputPath: file(targetDir),
-		recursive: true,
+		recursive: recurse ?? true,
 		verbose: false
 	})) return error("ToolError", "DImgConvert threw an error.");
 }

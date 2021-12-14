@@ -400,8 +400,6 @@ public final class DoomImageConvertMain
 				}
 			}
 			
-			// FIXME: palette may be null here!
-			
 			if (options.sourcePath.isDirectory())
 			{
 				if (outputFile != null)
@@ -470,7 +468,9 @@ public final class DoomImageConvertMain
 				{
 					try
 					{
-						readFile(options.sourcePath, palette, options.metaInfoFallback, outputFile);
+						int err;
+						if ((err = readFile(options.sourcePath, palette, options.metaInfoFallback, outputFile)) != ERROR_NONE)
+							return err;
 					}
 					catch (IOException e)
 					{
@@ -488,7 +488,9 @@ public final class DoomImageConvertMain
 					try
 					{
 						File file = new File(outputDir.getPath() + File.separator + Common.getFileNameWithoutExtension(options.sourcePath) + ".lmp");
-						readFile(options.sourcePath, palette, options.metaInfoFallback, file);
+						int err;
+						if ((err = readFile(options.sourcePath, palette, options.metaInfoFallback, file)) != ERROR_NONE)
+							return err;
 					}
 					catch (IOException e)
 					{
@@ -532,10 +534,10 @@ public final class DoomImageConvertMain
 		@FunctionalInterface
 		private interface FileAdder
 		{
-			void addFile(File input, Palette palette, MetaInfo info, String path) throws IOException;
+			int addFile(File input, Palette palette, MetaInfo info, String path) throws IOException;
 		}
 		
-		private void processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, FileAdder adder) throws IOException, SecurityException, UtilityException
+		private int processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, FileAdder adder) throws IOException, SecurityException, UtilityException
 		{
 			options.verboseln("Scanning directory " + srcDir.getPath() + "...");
 			File metaFile = new File(srcDir.getPath() + File.separator + options.metaInfoFilename);
@@ -545,6 +547,7 @@ public final class DoomImageConvertMain
 			else
 				metaMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			
+			int err;
 			for (File f : srcDir.listFiles())
 			{
 				String treeName = f.getPath().substring(base.getPath().length());
@@ -560,12 +563,15 @@ public final class DoomImageConvertMain
 					String fileName = Common.getFileNameWithoutExtension(f);
 					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
 					info = info == null ? fallback : info;
-					adder.addFile(f, palette, info, treeName);
+					if ((err = adder.addFile(f, palette, info, treeName)) != ERROR_NONE)
+						return err;
 				}
 			}
+			
+			return ERROR_NONE;
 		}
 				
-		private void readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
+		private int readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
 		{
 			switch (info.mode)
 			{
@@ -582,6 +588,11 @@ public final class DoomImageConvertMain
 				
 				case COLORMAP:
 				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert COLORMAP " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					Colormap[] colormaps = readColormaps(palette, input);
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
@@ -593,6 +604,11 @@ public final class DoomImageConvertMain
 
 				case FLAT:
 				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert FLAT " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					Flat flat = readFlat(palette, input);
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
@@ -604,6 +620,11 @@ public final class DoomImageConvertMain
 				default:
 				case GRAPHIC:
 				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert GRAPHIC " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					Picture picture = readPictureFile(input, palette, info);
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
@@ -613,34 +634,57 @@ public final class DoomImageConvertMain
 				break;
 			}
 			options.verboseln("Wrote " + output.getPath() + ".");
+			return ERROR_NONE;
 		}
 
-		private void readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
+		private int readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
 		{
 			String entryName = NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input));
 			switch (info.mode)
 			{
 				case PALETTE:
+				{
 					output.addData(entryName, readPalette(input));
-					break;
+				}
+				break;
 				
 				case COLORMAP:
+				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert COLORMAP " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					output.addData(entryName, readColormaps(palette, input));
-					break;
+				}
+				break;
 	
 				case FLAT:
+				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert FLAT " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					output.addData(entryName, readFlat(palette, input));
-					break;
+				}
+				break;
 				
 				default:
 				case GRAPHIC:
 				{
+					if (palette == null)
+					{
+						options.stderr.println("ERROR: Attempt to convert GRAPHIC " + input.getPath() + " without a provided palette!");
+						return ERROR_NO_PALETTE;
+					}
 					Picture picture = readPictureFile(input, palette, info);
 					output.addData(entryName, picture);
 				}
 				break;
 			}
 			options.verboseln("Added " + input.getPath() + " to WAD as " + entryName);
+			return ERROR_NONE;
 		}
 		
 		private Picture readPictureFile(File input, Palette palette, MetaInfo info) throws IOException, FileNotFoundException
