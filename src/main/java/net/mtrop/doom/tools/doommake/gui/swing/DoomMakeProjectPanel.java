@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.doommake.gui.swing;
 
 import java.io.File;
 

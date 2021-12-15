@@ -18,7 +18,7 @@ import net.mtrop.doom.tools.struct.OSUtils;
  */
 public final class DoomMakeSettings 
 {
-    /** DoomMake Config folder base. */
+	/** DoomMake Config folder base. */
     public static final String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + "/DoomMake/";
 
     /** The instance encapsulator. */
@@ -27,6 +27,7 @@ public final class DoomMakeSettings
     private static final String SETTINGS_FILENAME = "settings.properties";
     /** Configuration file. */
     private static final File CONFIG_FILE = new File(APPDATA_PATH + SETTINGS_FILENAME);
+
     /** Logger. */
     private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeSettings.class); 
     
@@ -62,6 +63,8 @@ public final class DoomMakeSettings
 	
 	/* ==================================================================== */
 	
+    private static final String DOOMMAKE_PATH_LAST_PROJECT = "doommake.path.lastProject";
+
 	private Properties properties;
 	
 	private DoomMakeSettings()
@@ -69,17 +72,6 @@ public final class DoomMakeSettings
 		this.properties = new Properties();
 	}
 	
-	public void setLastProjectDirectory(String lastProjectDirectory) 
-	{
-		properties.setProperty("doommake.path.lastProject", lastProjectDirectory);
-		saveSettings();
-	}
-	
-	public String getLastProjectDirectory() 
-	{
-		return properties.getProperty("doommake.path.lastProject");
-	}
-
 	private void loadSettings()
 	{
 		try (FileInputStream fis = new FileInputStream(CONFIG_FILE)) 
@@ -116,4 +108,23 @@ public final class DoomMakeSettings
 		}
 	}
 	
+	/**
+	 * Sets the last project directory opened.
+	 * @param lastProjectDirectory the last project directory.
+	 */
+	public void setLastProjectDirectory(File lastProjectDirectory) 
+	{
+		properties.setProperty(DOOMMAKE_PATH_LAST_PROJECT, lastProjectDirectory.getAbsolutePath());
+		saveSettings();
+	}
+
+	/**
+	 * @return the last project directory opened.
+	 */
+	public File getLastProjectDirectory() 
+	{
+		String path = properties.getProperty(DOOMMAKE_PATH_LAST_PROJECT);
+		return path != null ? new File(path) : null;
+	}
+
 }

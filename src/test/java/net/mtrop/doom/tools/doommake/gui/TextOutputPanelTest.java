@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import net.mtrop.doom.tools.doommake.gui.swing.TextOutputPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 public final class TextOutputPanelTest 
