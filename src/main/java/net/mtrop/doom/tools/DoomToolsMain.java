@@ -31,8 +31,8 @@ import com.blackrook.rookscript.tools.ScriptExecutor;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
-import net.mtrop.doom.tools.struct.HTTPUtils;
 import net.mtrop.doom.tools.struct.HTTPUtils.HTTPReader;
+import net.mtrop.doom.tools.struct.HTTPUtils.HTTPRequest;
 import net.mtrop.doom.tools.struct.HTTPUtils.HTTPResponse;
 
 /**
@@ -87,7 +87,7 @@ public final class DoomToolsMain
 		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
 
-	private static final HTTPReader<JSONObject> JSON_READER = (response) -> {
+	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel) -> {
 		String json = HTTPReader.STRING_CONTENT_READER.onHTTPResponse(response);
 		return JSONReader.readJSON(json);
 	};
@@ -189,7 +189,7 @@ public final class DoomToolsMain
 		
 		private JSONObject getJSONResponse(String url) throws IOException
 		{
-			return HTTPUtils.httpGet(url, JSON_READER);
+			return HTTPRequest.get(url).send(JSON_READER);
 		}
 		
 		private String getProgressBar(long current, Long max)
@@ -363,7 +363,7 @@ public final class DoomToolsMain
 
 			options.stdout.println("New version found:  " + releaseVersion);
 			
-			try (HTTPResponse response = HTTPUtils.httpGet(assetJSON.get("browser_download_url").getString()))
+			try (HTTPResponse response = HTTPRequest.get(assetJSON.get("browser_download_url").getString()).send())
 			{
 				File tempFile = Files.createTempFile("doomtools-tmp-", ".zip").toFile(); 
 				try 

@@ -6,11 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.OSUtils;
+import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
  * DoomMake GUI settings singleton.
@@ -20,10 +20,7 @@ public final class DoomMakeSettings
 {
 	/** DoomMake Config folder base. */
     public static final String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + "/DoomMake/";
-
-    /** The instance encapsulator. */
-	private static final AtomicReference<DoomMakeSettings> INSTANCE = new AtomicReference<>(null);
-    /** Settings filename. */
+	/** Settings filename. */
     private static final String SETTINGS_FILENAME = "settings.properties";
     /** Configuration file. */
     private static final File CONFIG_FILE = new File(APPDATA_PATH + SETTINGS_FILENAME);
@@ -31,34 +28,24 @@ public final class DoomMakeSettings
     /** Logger. */
     private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeSettings.class); 
     
+    /** The instance encapsulator. */
+    private static final SingletonProvider<DoomMakeSettings> INSTANCE = new SingletonProvider<>(() -> 
+    {
+    	DoomMakeSettings out = new DoomMakeSettings();
+		if (!CONFIG_FILE.exists())
+			LOG.infof("No settings file %s - using defaults.", CONFIG_FILE.getPath());
+		else
+			out.loadSettings();
+		
+		return out;
+    });
+    
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
 	public static DoomMakeSettings get()
 	{
-		DoomMakeSettings out;
-		if ((out = INSTANCE.get()) != null)
-			return out;
-		
-		synchronized (INSTANCE) 
-		{
-			// short-circuit.
-			if ((out = INSTANCE.get()) != null)
-				return out;
-			
-			out = new DoomMakeSettings();
-			
-			if (!CONFIG_FILE.exists())
-			{
-				LOG.infof("No settings file %s - using defaults.", CONFIG_FILE.getPath());
-			}
-			else
-			{
-				out.loadSettings();
-			}
-			
-			return out;
-		}
+		return INSTANCE.get();
 	}
 	
 	/* ==================================================================== */

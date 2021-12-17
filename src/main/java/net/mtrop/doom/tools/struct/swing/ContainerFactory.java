@@ -31,6 +31,10 @@ public final class ContainerFactory
 {
 	private ContainerFactory() {}
 	
+	/* ==================================================================== */
+	/* ==== Containers                                                 ==== */
+	/* ==================================================================== */
+
 	/**
 	 * Starts a layout tree, returns a container.
 	 * @param container the root container.
@@ -201,6 +205,83 @@ public final class ContainerFactory
 		return new NodeLeaf(null, component);
 	}
 
+	/**
+	 * Common Swing node.
+	 */
+	public static abstract class Node
+	{
+		/** Constraints on the layout. */
+		protected Object constraints;
+		protected Node(Object constraints)
+		{
+			this.constraints = constraints;
+		}
+		
+		protected abstract void addTo(Container container); 
+	}
+
+	/**
+	 * Leaf node in Swing.
+	 */
+	private static class NodeLeaf extends Node
+	{
+		private Component component;
+		private NodeLeaf(Object constraints, Component component)
+		{
+			super(constraints);
+			this.component = component;
+		}
+		
+		@Override
+		protected void addTo(Container parent)
+		{
+			parent.add(component, constraints);
+		}
+	}
+
+	/**
+	 * Branch node in Swing.
+	 */
+	private static class NodeBranch extends Node
+	{
+		private Border border;
+		private Dimension preferredSize;
+		private LayoutManager layout; 
+		private Node[] edges;
+		
+		private NodeBranch(LayoutManager layout, Border border, Dimension preferredSize, Object constraints, Node[] edges)
+		{
+			super(constraints);
+			this.border = border;
+			this.preferredSize = preferredSize;
+			this.layout = layout;
+			this.edges = edges;
+		}
+		
+		@Override
+		protected void addTo(Container container)
+		{
+			JPanel branchPanel = new JPanel();
+			
+			if (layout != null)
+				branchPanel.setLayout(layout);
+	
+			if (preferredSize != null)
+				branchPanel.setPreferredSize(preferredSize);
+			
+			if (border != null)
+				branchPanel.setBorder(border);
+			
+			for (Node edge : edges)
+				edge.addTo(branchPanel);
+			
+			container.add(branchPanel, constraints);
+		}
+		
+	}
+
+	/* ==================================================================== */
+	/* ==== Tabs                                                       ==== */
 	/* ==================================================================== */
 
 	/**
@@ -293,6 +374,26 @@ public final class ContainerFactory
 		return out;
 	}
 
+	/**
+	 * A single tab entry.
+	 */
+	public static class Tab
+	{
+		private Icon icon;
+		private String name;
+		private Component component;
+		private String tooltip;
+		private Tab(Icon icon, String name, String tooltip, Component component)
+		{
+			this.icon = icon;
+			this.name = name;
+			this.component = component;
+			this.tooltip = tooltip;
+		}
+	}
+
+	/* ==================================================================== */
+	/* ==== Split Panes                                                ==== */
 	/* ==================================================================== */
 
 	/**
@@ -320,6 +421,8 @@ public final class ContainerFactory
 		return new JSplitPane(orientation, true, first, second);
 	}
 
+	/* ==================================================================== */
+	/* ==== Scroll Panes                                               ==== */
 	/* ==================================================================== */
 
 	/**
@@ -355,6 +458,8 @@ public final class ContainerFactory
 		return scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, container);
 	}
 
+	/* ==================================================================== */
+	/* ==== Frames                                                     ==== */
 	/* ==================================================================== */
 
 	/**
@@ -419,101 +524,6 @@ public final class ContainerFactory
 		out.setContentPane(content);
 		out.pack();
 		return out;
-	}
-	
-	/* ==================================================================== */
-
-	/**
-	 * A single tab entry.
-	 */
-	public static class Tab
-	{
-		private Icon icon;
-		private String name;
-		private Component component;
-		private String tooltip;
-		private Tab(Icon icon, String name, String tooltip, Component component)
-		{
-			this.icon = icon;
-			this.name = name;
-			this.component = component;
-			this.tooltip = tooltip;
-		}
-	}
-
-	/**
-	 * Common Swing node.
-	 */
-	public static abstract class Node
-	{
-		/** Constraints on the layout. */
-		protected Object constraints;
-		protected Node(Object constraints)
-		{
-			this.constraints = constraints;
-		}
-		
-		protected abstract void addTo(Container container); 
-	}
-
-	/**
-	 * Leaf node in Swing.
-	 */
-	private static class NodeLeaf extends Node
-	{
-		private Component component;
-		private NodeLeaf(Object constraints, Component component)
-		{
-			super(constraints);
-			this.component = component;
-		}
-		
-		@Override
-		protected void addTo(Container parent)
-		{
-			parent.add(component, constraints);
-		}
-	}
-
-	/**
-	 * Branch node in Swing.
-	 */
-	private static class NodeBranch extends Node
-	{
-		private Border border;
-		private Dimension preferredSize;
-		private LayoutManager layout; 
-		private Node[] edges;
-		
-		private NodeBranch(LayoutManager layout, Border border, Dimension preferredSize, Object constraints, Node[] edges)
-		{
-			super(constraints);
-			this.border = border;
-			this.preferredSize = preferredSize;
-			this.layout = layout;
-			this.edges = edges;
-		}
-		
-		@Override
-		protected void addTo(Container container)
-		{
-			JPanel branchPanel = new JPanel();
-			
-			if (layout != null)
-				branchPanel.setLayout(layout);
-
-			if (preferredSize != null)
-				branchPanel.setPreferredSize(preferredSize);
-			
-			if (border != null)
-				branchPanel.setBorder(border);
-			
-			for (Node edge : edges)
-				edge.addTo(branchPanel);
-			
-			container.add(branchPanel, constraints);
-		}
-		
 	}
 	
 }
