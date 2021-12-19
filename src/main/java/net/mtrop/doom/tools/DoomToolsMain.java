@@ -31,9 +31,9 @@ import com.blackrook.rookscript.tools.ScriptExecutor;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
-import net.mtrop.doom.tools.struct.HTTPUtils.HTTPReader;
-import net.mtrop.doom.tools.struct.HTTPUtils.HTTPRequest;
-import net.mtrop.doom.tools.struct.HTTPUtils.HTTPResponse;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 
 /**
  * Main class for DoomTools.
@@ -173,25 +173,25 @@ public final class DoomToolsMain
 			this.options = options;
 		}
 		
-		private File[] getSortedJarList(File dir)
+		private static File[] getSortedJarList(File dir)
 		{
 			File[] jars = dir.listFiles(JAR_FILES);
 			Arrays.sort(jars, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
 			return jars;
 		}
 		
-		private File getLatestJarFile(File dir)
+		private static File getLatestJarFile(File dir)
 		{
 			File[] jars = getSortedJarList(dir);
 			return jars.length == 0 ? null : jars[jars.length - 1];
 		}
 		
-		private JSONObject getJSONResponse(String url) throws IOException
+		private static JSONObject getJSONResponse(String url) throws IOException
 		{
 			return HTTPRequest.get(url).send(JSON_READER);
 		}
 		
-		private String getProgressBar(long current, Long max)
+		private static String getProgressBar(long current, Long max)
 		{
 			final int MAXPIPS = 40;
 			if (max != null)

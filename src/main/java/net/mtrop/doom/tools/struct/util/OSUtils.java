@@ -3,7 +3,7 @@
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
-package net.mtrop.doom.tools.struct;
+package net.mtrop.doom.tools.struct.util;
 
 import java.io.File;
 import java.io.IOException;

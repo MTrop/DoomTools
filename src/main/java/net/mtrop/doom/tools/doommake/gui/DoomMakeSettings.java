@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.struct.OSUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**

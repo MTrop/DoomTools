@@ -3,7 +3,7 @@
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
-package net.mtrop.doom.tools.struct;
+package net.mtrop.doom.tools.struct.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -87,7 +87,7 @@ public final class HTTPUtils
 	private static final String[] VALID_HTTP = new String[]{"http", "https"};
 	private static final byte[] URL_RESERVED = "!#$%&'()*+,/:;=?@[]".getBytes(UTF8);
 	private static final byte[] URL_UNRESERVED = "-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~".getBytes(UTF8);
-	private static final ThreadLocal<SimpleDateFormat> ISO_DATE = ThreadLocal.withInitial(()->
+	private static final ThreadLocal<SimpleDateFormat> ISO_DATE = ThreadLocal.withInitial(() ->
 	{
 		SimpleDateFormat out = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		out.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -103,7 +103,7 @@ public final class HTTPUtils
 		
 		private static final int CORE_SIZE = 0;
 		private static final int MAX_SIZE = 20;
-		private static final long KEEPALIVE = 5L;
+		private static final long KEEPALIVE = 30L;
 		private static final TimeUnit KEEPALIVE_UNIT = TimeUnit.SECONDS;
 
 		private static final AtomicLong REQUEST_ID = new AtomicLong(0L);
@@ -1312,7 +1312,7 @@ public final class HTTPUtils
 	{
 		private FormContent(HTTPParameters parameters)
 		{
-			super("x-www-form-urlencoded", Charset.defaultCharset().displayName(), null, parameters.toString().getBytes());
+			super("x-www-form-urlencoded", UTF8.displayName(), null, parameters.toString().getBytes(UTF8));
 		}
 	}
 
@@ -1432,7 +1432,7 @@ public final class HTTPUtils
 		public String toString()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.append(key).append('=').append(toURLEncoding(value));
+			sb.append(key).append('=').append(uriEncode(value));
 			for (String flag : flags)
 				sb.append("; ").append(flag);
 			return sb.toString();
@@ -1586,9 +1586,9 @@ public final class HTTPUtils
 				{
 					if (sb.length() > 0)
 						sb.append('&');
-					sb.append(toURLEncoding(key));
+					sb.append(uriEncode(key));
 					sb.append('=');
-					sb.append(toURLEncoding(value));
+					sb.append(uriEncode(value));
 				}
 			}
 			return sb.toString();
@@ -2608,6 +2608,28 @@ public final class HTTPUtils
 	}
 	
 	/**
+	 * Encodes a string for use in a URI path, such that special and extended characters get escaped into "percent" bytes. 
+	 * @param s the input string.
+	 * @return the resultant string.
+	 */
+	public static String uriEncode(String s)
+	{
+		StringBuilder sb = new StringBuilder();
+		byte[] bytes = s.getBytes(UTF8);
+		for (int i = 0; i < s.length(); i++)
+		{
+			byte b = bytes[i];
+			if (Arrays.binarySearch(URL_UNRESERVED, b) >= 0)
+				sb.append((char)b);
+			else if (Arrays.binarySearch(URL_RESERVED, b) >= 0)
+				writePercentChar(sb, b);
+			else
+				writePercentChar(sb, b);
+		}
+		return sb.toString();
+	}
+	
+	/**
 	 * Creates a simple key-value pair.
 	 * @param key the pair key.
 	 * @param value the pair value (converted to a string via {@link String#valueOf(Object)}).
@@ -2616,6 +2638,29 @@ public final class HTTPUtils
 	public static Map.Entry<String, String> entry(String key, Object value)
 	{
 		return new AbstractMap.SimpleEntry<>(key, String.valueOf(value));
+	}
+	
+	/**
+	 * Takes, presumably, a URL path and replaces segments of it with other values.
+	 * <p> This is intended to be used on strings that are REST endpoints that use URL paths and arguments/parameters, such as:
+	 * <p><pre>/collection/{id}</pre>
+	 * <p> An appropriate call to replace the <code>{id}</code> substring would be:
+	 * <p><pre>replaceURL("/collection/{id}", entry("{id}", 1234))</pre>
+	 * @param url the input URL.
+	 * @param entries the list of replacers, mapping.
+	 * @return the resultant replaced and encoded URL.
+	 * @see #entry(String, Object)
+	 * @see #urlEncode(String)
+	 */
+	@SafeVarargs
+	public static String replaceURL(String url, Map.Entry<String, String> ... entries)
+	{
+		for (int i = 0; i < entries.length; i++)
+		{
+			Map.Entry<String, String> entry = entries[i];
+			url = url.replace(entry.getKey(), entry.getValue());
+		}
+		return url;
 	}
 	
 	/**
@@ -2794,15 +2839,13 @@ public final class HTTPUtils
 	
 	/**
 	 * Sets the ThreadPoolExecutor to use for asynchronous requests.
-	 * The previous executor, if any, is forcibly shut down.
+	 * The previous executor, if any, is returned.
 	 * @param executor the thread pool executor to use for async request handling.
-	 * @see ThreadPoolExecutor#shutdownNow()
+	 * @return the old executor, if any. Can be null.
 	 */
-	public static void setAsyncExecutor(ThreadPoolExecutor executor)
+	public static ThreadPoolExecutor setAsyncExecutor(ThreadPoolExecutor executor)
 	{
-		ThreadPoolExecutor old;
-		if ((old = HTTP_THREAD_POOL.getAndSet(executor)) != null)
-			old.shutdownNow();
+		return HTTP_THREAD_POOL.getAndSet(executor);
 	}
 	
 	/**
@@ -2906,23 +2949,6 @@ public final class HTTPUtils
 		target.append('%');
 		target.append(HEX_NYBBLE[(b & 0x0f0) >> 4]);
 		target.append(HEX_NYBBLE[b & 0x00f]);
-	}
-	
-	private static String toURLEncoding(String s)
-	{
-		StringBuilder sb = new StringBuilder();
-		byte[] bytes = s.getBytes(UTF8);
-		for (int i = 0; i < s.length(); i++)
-		{
-			byte b = bytes[i];
-			if (Arrays.binarySearch(URL_UNRESERVED, b) >= 0)
-				sb.append((char)b);
-			else if (Arrays.binarySearch(URL_RESERVED, b) >= 0)
-				writePercentChar(sb, b);
-			else
-				writePercentChar(sb, b);
-		}
-		return sb.toString();
 	}
 	
 	private static String urlParams(String url, HTTPParameters params)
