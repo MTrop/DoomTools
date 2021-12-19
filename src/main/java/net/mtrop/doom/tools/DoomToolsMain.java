@@ -87,9 +87,8 @@ public final class DoomToolsMain
 		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
 
-	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel) -> {
-		String json = HTTPReader.STRING_CONTENT_READER.onHTTPResponse(response);
-		return JSONReader.readJSON(json);
+	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel, monitor) -> {
+		return JSONReader.readJSON(HTTPReader.STRING_CONTENT_READER.onHTTPResponse(response, cancel, monitor));
 	};
 
 	private static final int ERROR_NONE = 0;

@@ -10,18 +10,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -32,6 +37,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -41,8 +47,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * HTTP Utilities.
@@ -52,9 +60,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class HTTPUtils
 {
-	/** Default timeout in milliseconds. */
-	public static int DEFAULT_TIMEOUT_MILLIS = 5000; 
-	
 	/** HTTP Method: GET. */
 	public static final String HTTP_METHOD_GET = "GET"; 
 	/** HTTP Method: HEAD. */
@@ -70,6 +75,8 @@ public final class HTTPUtils
 	/** HTTP Method: PUT. */
 	public static final String HTTP_METHOD_PUT = "PUT";
 
+	/** Default timeout in milliseconds. */
+	public static final AtomicInteger DEFAULT_TIMEOUT_MILLIS = new AtomicInteger(5000); 
 	/** Thread pool for async requests. */
 	private static final AtomicReference<ThreadPoolExecutor> HTTP_THREAD_POOL = new AtomicReference<ThreadPoolExecutor>(null);
 	
@@ -114,6 +121,385 @@ public final class HTTPUtils
 	}
 	
 	/**
+	 * A single instance of a spawned, asynchronous executable task.
+	 * Note that this class is a type of {@link RunnableFuture} - this can be used in places
+	 * that {@link Future}s can also be used.
+	 * @param <T> the result type.
+	 */
+	public static abstract class HTTPRequestFuture<T> implements RunnableFuture<T>
+	{
+		// Source request.
+		protected HTTPRequest request;
+		protected HTTPResponse response;
+		protected AtomicBoolean cancelSwitch;
+	
+		// Locks
+		private Object waitMutex;
+	
+		// State
+		private Thread executor;
+		private boolean done;
+		private boolean running;
+		private Throwable exception;
+		private T finishedResult;
+	
+		private HTTPRequestFuture(HTTPRequest request)
+		{
+			this.request = request;
+			this.response = null;
+			this.cancelSwitch = new AtomicBoolean(false);
+			this.waitMutex = new Object();
+	
+			this.executor = null;
+			this.done = false;
+			this.running = false;
+			this.exception = null;
+			this.finishedResult = null;
+		}
+		
+		@Override
+		public final void run()
+		{
+			executor = Thread.currentThread();
+			running = true;
+	
+			try {
+				finishedResult = execute();
+			} catch (Throwable e) {
+				exception = e;
+			}
+			
+			running = false;
+			done = true;
+			executor = null;
+			synchronized (waitMutex)
+			{
+				waitMutex.notifyAll();
+			}
+		}
+	
+		/**
+		 * Checks if this task instance is being worked on by a thread.
+		 * @return true if so, false if not.
+		 */
+		public final boolean isRunning()
+		{
+			return running;
+		}
+	
+		@Override
+		public final boolean isDone()
+		{
+			return done;
+		}
+	
+		/**
+		 * Gets the thread that is currently executing this future.
+		 * If this is done or waiting for execution, this returns null.
+		 * @return the executor thread, or null.
+		 */
+		public final Thread getExecutor()
+		{
+			return executor;
+		}
+		
+		/**
+		 * Makes the calling thread wait indefinitely for this task instance's completion.
+		 * @throws InterruptedException if the current thread was interrupted while waiting.
+		 */
+		public final void waitForDone() throws InterruptedException
+		{
+			while (!isDone())
+			{
+				liveLockCheck();
+				synchronized (waitMutex)
+				{
+					waitMutex.wait();
+				}
+			}
+		}
+
+		/**
+		 * Makes the calling thread wait for this task instance's completion for, at most, the given interval of time.
+		 * @param time the time to wait.
+		 * @param unit the time unit of the timeout argument.
+		 * @throws InterruptedException if the current thread was interrupted while waiting.
+		 */
+		public final void waitForDone(long time, TimeUnit unit) throws InterruptedException
+		{
+			if (!isDone())
+			{
+				liveLockCheck();
+				synchronized (waitMutex)
+				{
+					unit.timedWait(waitMutex, time);
+				}
+			}
+		}
+
+		/**
+		 * Gets the response encapsulation from a call, waiting for the call to be in a "done" state.
+		 * <p> If the call errored out or was cancelled before the request was sent, this will be null.
+		 * <p> <strong>NOTE:</strong> The response may be open if this call is supposed to return an open response to be read by the application.
+		 * @return the response, or null if no response was captured due to an error.
+		 * @see #join()
+		 * @see #getException()
+		 * @see #result()
+		 */
+		public final HTTPResponse getResponse()
+		{
+			join();
+			return response;
+		}
+
+		/**
+		 * Gets the exception thrown as a result of this instance completing, making the calling thread wait for its completion.
+		 * @return the exception thrown by the encapsulated task, or null if no exception.
+		 */
+		public final Throwable getException()
+		{
+			join();
+			return exception;
+		}
+
+		@Override
+		public final T get() throws InterruptedException, ExecutionException
+		{
+			liveLockCheck();
+			waitForDone();
+			if (isCancelled())
+				throw new CancellationException("task was cancelled");
+			if (getException() != null)
+				throw new ExecutionException(getException());
+			return finishedResult;
+		}
+
+		@Override
+		public final T get(long time, TimeUnit unit) throws TimeoutException, InterruptedException, ExecutionException
+		{
+			liveLockCheck();
+			waitForDone(time, unit);
+			if (!isDone())
+				throw new TimeoutException("wait timed out");
+			if (isCancelled())
+				throw new CancellationException("task was cancelled");
+			if (getException() != null)
+				throw new ExecutionException(getException());
+			return finishedResult;
+		}
+
+		/**
+		 * Performs a {@link #get()} and on success, calls the success function.
+		 * If an exception would have happened, the success function is not called.
+		 * @param <R> the return type after the function call.
+		 * @param onSuccess the function to call on success with the result object, returning the return object. 
+		 * 		If null when this would be called, this returns null.
+		 * @return the result from the success function, or null if an exception happened.
+		 */
+		public final <R> R getAndThen(Function<T, R> onSuccess)
+		{
+			return getAndThen(onSuccess, null);
+		}
+
+		/**
+		 * Performs a {@link #get()} and on success, calls the success function, or calls the exception function on an exception.
+		 * @param <R> the return type after the function.
+		 * @param onSuccess the function to call on success with the result object, returning the return object. 
+		 * 		If null when this would be called, this returns null.
+		 * @param onException the function to call on exception. If null when this would be called, this returns null.
+		 * @return the result from the success function, or the result from the exception function if an exception happened.
+		 */
+		public final <R> R getAndThen(Function<T, R> onSuccess, Function<Throwable, R> onException)
+		{
+			try {
+				return onSuccess.apply(get());
+			} catch (Exception e) {
+				return onException != null ? onException.apply(exception) : null;
+			}
+		}
+
+		/**
+		 * Performs a {@link #get()} and on success, calls the success function.
+		 * If an exception would have happened, the success function is not called.
+		 * @param <R> the return type after the function call.
+		 * @param time the maximum time to wait.
+		 * @param unit the time unit of the timeout argument.
+		 * @param onSuccess the function to call on success with the result object, returning the return object. 
+		 * 		If null when this would be called, this returns null.
+		 * @return the result from the success function, or null if an exception happened or a timeout occurred.
+		 */
+		public final <R> R getAndThen(long time, TimeUnit unit, Function<T, R> onSuccess)
+		{
+			return getAndThen(time, unit, onSuccess, null, null);
+		}
+
+		/**
+		 * Performs a {@link #get()} and on success, calls the success function.
+		 * If an exception would have happened, the success function is not called.
+		 * @param <R> the return type after the function call.
+		 * @param time the maximum time to wait.
+		 * @param unit the time unit of the timeout argument.
+		 * @param onSuccess the function to call on success with the result object, returning the return object. 
+		 * 		If null when this would be called, this returns null.
+		 * @param onTimeout the function to call on wait timeout. First Parameter is the timeout in milliseconds. If null when this would be called, this returns null.
+		 * @return the result from the success function, or null if an exception happened.
+		 */
+		public final <R> R getAndThen(long time, TimeUnit unit, Function<T, R> onSuccess, Function<Long, R> onTimeout)
+		{
+			return getAndThen(time, unit, onSuccess, onTimeout, null);
+		}
+
+		/**
+		 * Performs a {@link #get()} and on success, calls the success function, or calls the exception function on an exception.
+		 * @param <R> the return type after the function.
+		 * @param time the maximum time to wait.
+		 * @param unit the time unit of the timeout argument.
+		 * @param onSuccess the function to call on success with the result object, returning the return object.
+		 * @param onTimeout the function to call on wait timeout. First Parameter is the timeout in milliseconds. If null when this would be called, this returns null.
+		 * @param onException the function to call on exception. If null when this would be called, this returns null.
+		 * @return the result from the success function, or the result from the exception function if an exception happened.
+		 */
+		public final <R> R getAndThen(long time, TimeUnit unit, Function<T, R> onSuccess, Function<Long, R> onTimeout, Function<Throwable, R> onException)
+		{
+			try {
+				return onSuccess != null ? onSuccess.apply(get(time, unit)) : null;
+			} catch (TimeoutException e) {
+				return onTimeout != null ? onTimeout.apply(TimeUnit.MILLISECONDS.convert(time, unit)) : null;
+			} catch (Exception e) {
+				return onException != null ? onException.apply(exception) : null;
+			}
+		}
+
+		/**
+		 * Attempts to return the result of this instance, making the calling thread wait for its completion.
+		 * <p>This is for convenience - this is like calling {@link #get()}, except it will only throw an
+		 * encapsulated {@link RuntimeException} with an exception that {@link #get()} would throw as a cause.
+		 * @return the result. Can be null if no result is returned, or this was cancelled before the return.
+		 * @throws RuntimeException if a call to {@link #get()} instead of this would throw an exception.
+		 * @throws IllegalStateException if the thread processing this future calls this method.
+		 */
+		public final T result()
+		{
+			liveLockCheck();
+			try {
+				waitForDone();
+			} catch (InterruptedException e) {
+				throw new RuntimeException("wait was interrupted", getException());
+			}
+			if (getException() != null)
+				throw new RuntimeException("exception on result", getException());
+			return finishedResult;
+		}
+
+		/**
+		 * Attempts to return the result of this instance, without waiting for its completion.
+		 * <p>If {@link #isDone()} is false, this is guaranteed to return <code>null</code>.
+		 * @return the current result, or <code>null</code> if not finished.
+		 */
+		public final T resultNonBlocking()
+		{
+			return finishedResult;
+		}
+
+		/**
+		 * Makes the calling thread wait until this task has finished, returning nothing.
+		 * This differs from {@link #waitForDone()} such that it eats a potential {@link InterruptedException}.
+		 * @throws IllegalStateException if the thread processing this future calls this method.
+		 */
+		public final void join()
+		{
+			try {
+				waitForDone();
+			} catch (Exception e) {
+				// Eat exception.
+			}
+		}
+
+		/**
+	     * Convenience method for: <code>cancel(false)</code>.
+	     * @return {@code false} if the task could not be cancelled,
+	     * typically because it has already completed normally;
+	     * {@code true} otherwise
+	     */
+		public final boolean cancel()
+		{
+			return cancel(false);
+		}
+	
+		@Override
+		public final boolean cancel(boolean mayInterruptIfRunning)
+		{
+			if (isDone())
+			{
+				return false;
+			}
+			else
+			{
+				if (mayInterruptIfRunning && executor != null)
+					executor.interrupt();
+				cancelSwitch.set(true);
+				return true;
+			}
+		}
+	
+		@Override
+		public final boolean isCancelled() 
+		{
+			return cancelSwitch.get();
+		}
+		
+		// Checks for livelocks.
+		private void liveLockCheck()
+		{
+			if (executor == Thread.currentThread())
+				throw new IllegalStateException("Attempt to make executing thread wait for this result.");
+		}
+		
+		/**
+		 * Executes this instance's callable payload.
+		 * @return the result from the execution.
+		 * @throws Throwable for any exception that may occur.
+		 */
+		protected abstract T execute() throws Throwable;
+	
+		/** Sends request and gets a response. */
+		private static class Response extends HTTPRequestFuture<HTTPResponse>
+		{
+			private Response(HTTPRequest request)
+			{
+				super(request);
+			}
+	
+			@Override
+			protected HTTPResponse execute() throws Throwable
+			{
+				return response = request.send(cancelSwitch);
+			}
+		}
+		
+		/** Sends request and gets an object. */
+		private static class ObjectResponse<T> extends HTTPRequestFuture<T>
+		{
+			private HTTPReader<T> reader;
+			
+			private ObjectResponse(HTTPRequest request, HTTPReader<T> reader)
+			{
+				super(request);
+				this.reader = reader;
+			}
+	
+			@Override
+			protected T execute() throws Throwable
+			{
+				try (HTTPResponse resp = (response = request.send(cancelSwitch)))
+				{
+					return resp.read(reader, cancelSwitch);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Interface for monitoring change in a data transfer.
 	 */
 	@FunctionalInterface
@@ -125,6 +511,11 @@ public final class HTTPUtils
 		 * @param max the maximum amount/target in bytes, if any.
 		 */
 		void onProgressChange(long current, Long max);
+		
+		/**
+		 * A transfer monitor that does nothing.
+		 */
+		static TransferMonitor NULL_MONITOR = (current, max) -> {};
 	}
 	
 	/**
@@ -135,36 +526,11 @@ public final class HTTPUtils
 	public interface HTTPReader<R>
 	{
 		/**
-		 * Called to read the HTTP response from an HTTP call.
-		 * <p> The policy of this reader is to keep reading from the open response stream until
-		 * the end is reached.
-		 * @param response the response object.
-		 * @return the returned decoded object.
-		 * @throws IOException if a read error occurs.
-		 */
-		default R onHTTPResponse(HTTPResponse response) throws IOException
-		{
-			return onHTTPResponse(response, new AtomicBoolean(false));
-		}
-		
-		/**
-		 * Called to read the HTTP response from an HTTP call.
-		 * <p> The policy of this reader is to keep reading from the open response stream until
-		 * the end is reached or until the cancel switch is set to true (from outside the reading
-		 * mechanism). There is no policy for what to return upon canceling this reader's read.
-		 * @param response the response object.
-		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
-		 * @return the returned decoded object.
-		 * @throws IOException if a read error occurs.
-		 */
-		R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch) throws IOException;
-		
-		/**
 		 * An HTTP Reader that reads byte content and returns a decoded String.
 		 * Gets the string contents of the response, decoded using the response's charset.
 		 * <p> If the read is cancelled, this returns null.
 		 */
-		static HTTPReader<String> STRING_CONTENT_READER = (response, cancelSwitch) ->
+		static HTTPReader<String> STRING_CONTENT_READER = (response, cancelSwitch, monitor) ->
 		{
 			String charset;
 			if ((charset = response.getCharset()) == null)
@@ -182,17 +548,118 @@ public final class HTTPUtils
 		};
 		
 		/**
-		 * An HTTP Reader that reads byte content and returns a decoded String.
-		 * Gets the string contents of the response, decoded using the response's charset.
+		 * An HTTP Reader that reads the response body as byte content and returns a byte array.
 		 * <p> If the read is cancelled, this returns null.
 		 */
-		static HTTPReader<byte[]> BYTE_CONTENT_READER = (response, cancelSwitch) ->
+		static HTTPReader<byte[]> BYTE_CONTENT_READER = (response, cancelSwitch, monitor) ->
 		{
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			long length = response.getLength() != null ? response.getLength() : -1L;
-			relay(response.getContentStream(), bos, 8192, length, cancelSwitch, null);
+			relay(response.getContentStream(), bos, 8192, response.getLength(), cancelSwitch, monitor);
 			return cancelSwitch.get() ? null : bos.toByteArray();
 		};
+		
+		/**
+		 * An HTTP Reader that reads byte content and puts it in a temporary file.
+		 * Gets the string contents of the response, decoded using the response's charset.
+		 * <p> If the read is cancelled, the file is closed and deleted, and this returns null.
+		 */
+		static HTTPReader<File> TEMPORARY_FILE_READER = (response, cancelSwitch, monitor) ->
+		{
+			File out = File.createTempFile("httpTempRead", null);
+			try (FileOutputStream fos = new FileOutputStream(out))
+			{
+				relay(response.getContentStream(), fos, 8192, response.getLength(), cancelSwitch, monitor);
+			}
+			if (cancelSwitch.get())
+			{
+				out.delete();
+				return null;
+			}
+			else
+			{
+				return out;
+			}
+		};
+		
+		/**
+		 * Called to read the HTTP response from an HTTP call.
+		 * <p> The policy of this reader is to keep reading from the open response stream until
+		 * the end is reached.
+		 * @param response the response object.
+		 * @return the returned decoded object.
+		 * @throws IOException if a read error occurs.
+		 */
+		default R onHTTPResponse(HTTPResponse response) throws IOException
+		{
+			return onHTTPResponse(response, new AtomicBoolean(false), TransferMonitor.NULL_MONITOR);
+		}
+		
+		/**
+		 * Called to read the HTTP response from an HTTP call.
+		 * <p> The policy of this reader is to keep reading from the open response stream until
+		 * the end is reached.
+		 * @param response the response object.
+		 * @param monitor the transfer monitor to use to monitor the read.
+		 * @return the returned decoded object.
+		 * @throws IOException if a read error occurs.
+		 */
+		default R onHTTPResponse(HTTPResponse response, TransferMonitor monitor) throws IOException
+		{
+			return onHTTPResponse(response, new AtomicBoolean(false), monitor);
+		}
+		
+		/**
+		 * Called to read the HTTP response from an HTTP call.
+		 * <p> The policy of this reader is to keep reading from the open response stream until
+		 * the end is reached.
+		 * @param response the response object.
+		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
+		 * @return the returned decoded object.
+		 * @throws IOException if a read error occurs.
+		 */
+		default R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch) throws IOException
+		{
+			return onHTTPResponse(response, cancelSwitch, TransferMonitor.NULL_MONITOR);
+		}
+		
+		/**
+		 * Called to read the HTTP response from an HTTP call.
+		 * <p> The policy of this reader is to keep reading from the open response stream until
+		 * the end is reached or until the cancel switch is set to true (from outside the reading
+		 * mechanism). There is no policy for what to return upon canceling this reader's read.
+		 * @param response the response object.
+		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
+		 * @param monitor the transfer monitor to use to monitor the read.
+		 * @return the returned decoded object.
+		 * @throws IOException if a read error occurs.
+		 */
+		R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException;
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content written to it.
+		 * The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @return a reader for the file.
+		 */
+		static HTTPReader<File> createFileDownloader(final File targetFile)
+		{
+			return (response, cancelSwitch, monitor) ->
+			{
+				try (FileOutputStream fos = new FileOutputStream(targetFile))
+				{
+					relay(response.getContentStream(), fos, 8192, response.getLength(), cancelSwitch, monitor);
+				}
+				if (cancelSwitch.get())
+				{
+					targetFile.delete();
+					return null;
+				}
+				else
+				{
+					return targetFile;
+				}
+			};
+		}
 		
 	}
 
@@ -345,7 +812,7 @@ public final class HTTPUtils
 		 * @param mimeType the mimeType of the file part.
 		 * @param data the file data.
 		 * @return itself, for chaining.
-		 * @throws IllegalArgumentException if data is null or the file cannot be found.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
 		 */
 		public MultipartFormContent addFilePart(String name, String mimeType, final File data)
 		{
@@ -359,7 +826,7 @@ public final class HTTPUtils
 		 * @param fileName the file name to send (overridden).
 		 * @param data the file data.
 		 * @return itself, for chaining.
-		 * @throws IllegalArgumentException if data is null or the file cannot be found.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
 		 */
 		public MultipartFormContent addFilePart(String name, final String mimeType, final String fileName, final File data)
 		{
@@ -367,6 +834,8 @@ public final class HTTPUtils
 				throw new IllegalArgumentException("data cannot be null.");
 			if (!data.exists())
 				throw new IllegalArgumentException("File " + data.getPath() + " cannot be found.");
+			if (data.isDirectory())
+				throw new IllegalArgumentException("File " + data.getPath() + " cannot be a directory.");
 			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
 			try {
@@ -858,7 +1327,7 @@ public final class HTTPUtils
 			LAX,
 			NONE;
 		}
-		
+
 		private String key;
 		private String value;
 		private List<String> flags;
@@ -958,12 +1427,12 @@ public final class HTTPUtils
 		}
 
 		/**
-		 * @return the parameter string to add to header values.
+		 * @return the cookie string to add to header values.
 		 */
 		public String toString()
 		{
 			StringBuilder sb = new StringBuilder();
-			sb.append(key).append('=').append(value);
+			sb.append(key).append('=').append(toURLEncoding(value));
 			for (String flag : flags)
 				sb.append("; ").append(flag);
 			return sb.toString();
@@ -1131,32 +1600,38 @@ public final class HTTPUtils
 	 */
 	public static class HTTPResponse implements AutoCloseable
 	{
+		private HTTPRequest request;
+		
 		private Map<String, List<String>> headers;
+		
 		private int statusCode;
 		private String statusMessage;
+		
 		private Long length;
 		private InputStream contentStream;
 		private String charset;
-		private String contentType;
 		private String contentTypeHeader;
-		
+		private String contentType;
 		private String encoding;
+		
 		private String contentDisposition;
 		private String filename;
 		
-		private HTTPResponse(HttpURLConnection conn, String defaultResponseCharset) throws IOException
+		private HTTPResponse(HTTPRequest request, HttpURLConnection conn, String defaultResponseCharset) throws IOException
 		{
-			statusCode = conn.getResponseCode();
-			statusMessage = conn.getResponseMessage();
+			this.request = request;
+			this.statusCode = conn.getResponseCode();
+			this.statusMessage = conn.getResponseMessage();
 
 			long conlen = conn.getContentLengthLong();
-			length = conlen < 0 ? null : conlen;
-			encoding = conn.getContentEncoding();
-			contentTypeHeader = conn.getContentType();
+			this.length = conlen < 0 ? null : conlen;
+			this.encoding = conn.getContentEncoding();
+			this.contentTypeHeader = conn.getContentType();
 
 			int mimeEnd = contentTypeHeader.indexOf(';');
 			
-			contentType = contentTypeHeader.substring(0, mimeEnd >= 0 ? mimeEnd : contentTypeHeader.length()).trim();
+			this.charset = null;
+			this.contentType = contentTypeHeader.substring(0, mimeEnd >= 0 ? mimeEnd : contentTypeHeader.length()).trim();
 			
 			int charsetindex;
 			if ((charsetindex = contentTypeHeader.toLowerCase().indexOf("charset=")) >= 0)
@@ -1173,7 +1648,15 @@ public final class HTTPUtils
 			if (charset == null)
 				charset = defaultResponseCharset;
 			
-			headers = conn.getHeaderFields();
+			this.filename = null;
+			this.contentDisposition = null;
+			this.contentStream = null;
+			
+			this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+			for (Map.Entry<String, List<String>> entry : conn.getHeaderFields().entrySet())
+				if (entry.getKey() != null)
+					this.headers.put(entry.getKey(), entry.getValue());
+			this.headers = Collections.unmodifiableMap(this.headers);
 			
 			// content disposition?
 			if ((contentDisposition = conn.getHeaderField("content-disposition")) != null)
@@ -1198,6 +1681,14 @@ public final class HTTPUtils
 		}
 		
 		/**
+		 * @return the request used to get the response.
+		 */
+		public HTTPRequest getRequest() 
+		{
+			return request;
+		}
+		
+		/**
 		 * @return the headers on the response.
 		 */
 		public Map<String, List<String>> getHeaders()
@@ -1206,38 +1697,26 @@ public final class HTTPUtils
 		}
 		
 		/**
-		 * @return true if and only if the response status code is between 100 and 199, inclusive, false otherwise.
+		 * Gets the last specified header value of the response for a header name. 
+		 * @param name the header name.
+		 * @return the value, or null if no header by that name.
 		 */
-		public boolean isInformational()
+		public String getHeader(String name)
 		{
-			return statusCode / 100 == 1;
+			List<String> headerList = getHeaderValues(name);
+			return headerList != null ? headerList.get(headerList.size() - 1) : null;
 		}
-		
+
 		/**
-		 * @return true if and only if the response status code is between 200 and 299, inclusive, false otherwise.
+		 * Gets the list of header values for a header name.
+		 * @param name the header name.
+		 * @return the list of values, or null if no header by that name.
 		 */
-		public boolean isSuccess()
+		public List<String> getHeaderValues(String name)
 		{
-			return statusCode / 100 == 2;
+			return headers.get(name);
 		}
-		
-		/**
-		 * @return true if and only if the response status code is between 300 and 399, inclusive, false otherwise.
-		 */
-		public boolean isRedirect()
-		{
-			return statusCode / 100 == 3;
-		}
-		
-		/**
-		 * @return true if and only if the response status code is between 400 and 599, inclusive, false otherwise.
-		 */
-		public boolean isError()
-		{
-			int range = statusCode / 100;
-			return range == 4 || range == 5;
-		}
-		
+
 		/**
 		 * @return the response status code.
 		 */
@@ -1254,6 +1733,72 @@ public final class HTTPUtils
 			return statusMessage;
 		}
 	
+		/**
+		 * Fetches the list of previous redirect addresses (if any) plus the final address read, in the order contacted.
+		 * If no redirects occurred, this returns a list with a single address.
+		 * @return an immutable list of URLs.
+		 */
+		public List<String> getRedirectHistory()
+		{
+			List<String> out = new ArrayList<>((request.redirectedURLs != null ? request.redirectedURLs.size() : 0) + 1);
+			if (request.redirectedURLs != null)
+				out.addAll(request.redirectedURLs);
+			out.add(request.url);
+			return Collections.unmodifiableList(out);
+		}
+
+		/**
+		 * @return true if and only if the response status code is between 100 and 199, inclusive, false otherwise.
+		 */
+		public boolean isInformational()
+		{
+			return statusCode / 100 == 1;
+		}
+
+		/**
+		 * @return true if and only if the response status code is between 200 and 299, inclusive, false otherwise.
+		 */
+		public boolean isSuccess()
+		{
+			return statusCode / 100 == 2;
+		}
+
+		/**
+		 * @return true if and only if the response status code is between 300 and 399, inclusive, false otherwise.
+		 */
+		public boolean isRedirect()
+		{
+			return statusCode / 100 == 3;
+		}
+
+		/**
+		 * Checks if the this response can be automatically actioned upon in terms of resolving server-directed redirects.
+		 * This object can build a redirect request if the status code is NOT 300, 304, or 305, since that requires more of an intelligent decision.
+		 * <p> NOTE: This will not redirect a request that has a redirect in the content body (for instance, an HTML meta tag).
+		 * It must be a status code and <code>Location</code> header.
+		 * @return true if and only if the response status code has defined redirect guidelines, false otherwise.
+		 * @see #buildRedirect()
+		 */
+		public boolean isAutoRedirectable()
+		{
+			return (
+				statusCode == 301
+				|| statusCode == 302
+				|| statusCode == 303
+				|| statusCode == 307
+				|| statusCode == 308
+			) && getHeader("Location") != null;
+		}
+
+		/**
+		 * @return true if and only if the response status code is between 400 and 599, inclusive, false otherwise.
+		 */
+		public boolean isError()
+		{
+			int range = statusCode / 100;
+			return range == 4 || range == 5;
+		}
+
 		/**
 		 * @return the response's content length (if reported).
 		 */
@@ -1312,6 +1857,19 @@ public final class HTTPUtils
 		 * Reads this response with an HTTPReader and returns the read result.
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
+		 * @param monitor the transfer monitor to use to monitor the read.
+		 * @return the resultant object.
+		 * @throws IOException if a read error occurs.
+		 */
+		public <T> T read(HTTPReader<T> reader, TransferMonitor monitor) throws IOException
+		{
+			return reader.onHTTPResponse(this, monitor);
+		}
+		
+		/**
+		 * Reads this response with an HTTPReader and returns the read result.
+		 * @param <T> the reader return type - the desired object type.
+		 * @param reader the reader.
 		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
@@ -1319,6 +1877,20 @@ public final class HTTPUtils
 		public <T> T read(HTTPReader<T> reader, AtomicBoolean cancelSwitch) throws IOException
 		{
 			return reader.onHTTPResponse(this, cancelSwitch);
+		}
+		
+		/**
+		 * Reads this response with an HTTPReader and returns the read result.
+		 * @param <T> the reader return type - the desired object type.
+		 * @param reader the reader.
+		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
+		 * @param monitor the transfer monitor to use to monitor the read.
+		 * @return the resultant object.
+		 * @throws IOException if a read error occurs.
+		 */
+		public <T> T read(HTTPReader<T> reader, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+		{
+			return reader.onHTTPResponse(this, cancelSwitch, monitor);
 		}
 		
 		/**
@@ -1363,12 +1935,56 @@ public final class HTTPUtils
 
 		/**
 		 * @return the content filename. Set if content disposition is "attachment". Can be null.
+		 * @see #getContentDisposition()
 		 */
 		public String getFilename() 
 		{
 			return filename;
 		}
 
+		/**
+		 * Builds a request that fulfills a redirect, but only if this response is a redirect status.
+		 * @return a new request that would fulfill a redirect response.
+		 * @throws IllegalStateException if this response is not a redirect, or a 300, 304, or 305 
+		 * 		status code that would not warrant a remote redirect nor specific handling, or if a redirect loop has been detected.
+		 * @throws IllegalArgumentException if the URL string from the server is malformed.
+		 */
+		public HTTPRequest buildRedirect()
+		{
+			if (!isRedirect())
+				throw new IllegalStateException("Response is not a redirect type.");
+			
+			String location = getHeader("Location");
+			if (location == null)
+				throw new IllegalStateException("Response provided no redirect location.");
+			
+			HTTPRequest out;
+			
+			switch (statusCode)
+			{
+				case 300: // Multiple Choice
+					throw new IllegalStateException("Response status code 300 not automatically redirectable. Handle locally.");
+				case 304: // Not Modified
+					throw new IllegalStateException("Response redirects to local cache (code 304). Handle locally.");
+				case 305: // Use Proxy
+					throw new IllegalStateException("Response status code unsupported: 305 Use Proxy");
+				
+				default:
+				case 301: // Moved Permanently
+				case 302: // Found
+				case 307: // Temporary Redirect
+				case 308: // Permanent Redirect
+					out = getRequest().copyRedirect(location);
+					break;
+					
+				case 303: // See Other (Force GET)
+					out = getRequest().copyRedirect(HTTP_METHOD_GET, location);
+					break;
+			}
+			
+			return out;
+		}
+		
 		@Override
 		public void close()
 		{
@@ -1389,6 +2005,8 @@ public final class HTTPUtils
 		private HTTPHeaders headers;
 		/** HTTP Query Parameters. */
 		private HTTPParameters parameters;
+		/** List of cookies. */
+		private List<HTTPCookie> cookies;
 		/** Request timeout milliseconds. */
 		private int timeoutMillis;
 		/** Default charset encoding (on response). */
@@ -1397,6 +2015,10 @@ public final class HTTPUtils
 		private HTTPContent content;
 		/** Upload Transfer Monitor. */
 		private TransferMonitor monitor;
+		/** Auto-redirect if possible? */
+		private boolean autoRedirect;
+		/** Set of previous URLs from redirects. */
+		private List<String> redirectedURLs;
 		
 		private HTTPRequest()
 		{
@@ -1404,106 +2026,131 @@ public final class HTTPUtils
 			this.url = null;
 			this.headers = HTTPUtils.headers();
 			this.parameters = HTTPUtils.parameters();
-			this.timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
+			this.cookies = new LinkedList<>();
+			this.timeoutMillis = DEFAULT_TIMEOUT_MILLIS.get();
 			this.defaultCharsetEncoding = null;
 			this.content = null;
 			this.monitor = null;
+			this.autoRedirect = true;
+			this.redirectedURLs = null;
+		}
+		
+		// Checks if a URL pattern is valid.
+		// Returns the passed-in URL, unchanged.
+		private static String checkURL(String url)
+		{
+			return checkURL(url, false);
+		}
+		
+		// Checks if a URL pattern is valid.
+		// Returns the passed-in URL, unchanged.
+		private static String checkURL(String url, boolean fromServer)
+		{
+			try {
+				new URL(url);
+				return url;
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException(fromServer ? "Redirect URL from server is malformed." : "URL is malformed.", e);
+			}
+		}
+		
+		/**
+		 * Starts a new request builder.
+		 * @param method the HTTP method.
+		 * @param url the target URL.
+		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
+		 */
+		public static HTTPRequest create(String method, String url)
+		{
+			HTTPRequest out = new HTTPRequest();
+			out.method = method;
+			out.url = checkURL(url);
+			return out;
 		}
 		
 		/**
 		 * Starts a GET request builder.
+		 * This will also auto-redirect on an actionable redirect status
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest get(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_GET;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_GET, url);
 		}
 
 		/**
 		 * Starts a HEAD request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest head(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_HEAD;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_HEAD, url);
 		}
 
 		/**
 		 * Starts a DELETE request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest delete(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_DELETE;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_DELETE, url);
 		}
 
 		/**
 		 * Starts a OPTIONS request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest options(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_OPTIONS;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_OPTIONS, url);
 		}
 
 		/**
 		 * Starts a TRACE request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest trace(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_TRACE;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_TRACE, url);
 		}
 
 		/**
 		 * Starts a PUT request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest put(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_PUT;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_PUT, url);
 		}
 
 		/**
 		 * Starts a POST request builder.
 		 * @param url the URL to target.
 		 * @return an {@link HTTPRequest}.
+		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
 		public static HTTPRequest post(String url)
 		{
-			HTTPRequest out = new HTTPRequest();
-			out.method = HTTP_METHOD_POST;
-			out.url = url;
-			return out;
+			return create(HTTP_METHOD_POST, url);
 		}
 
 		/**
 		 * Makes a deep copy of this request, such that
-		 * changes to this one do not affect the original (the content and monitor, however, if any, is reference-copied). 
+		 * changes to this one do not affect the original 
+		 * (the content and monitor, however, if any, is reference-copied). 
 		 * @return a new HTTPRequest that is a copy of this one.
 		 */
 		public HTTPRequest copy()
@@ -1513,27 +2160,75 @@ public final class HTTPUtils
 			out.url = this.url;
 			out.headers = this.headers.copy();
 			out.parameters = this.parameters.copy();
+			out.cookies = new LinkedList<>(this.cookies);
 			out.timeoutMillis = this.timeoutMillis;
 			out.defaultCharsetEncoding = this.defaultCharsetEncoding;
 			out.content = this.content;
 			out.monitor = this.monitor;
+			if (redirectedURLs == null)
+				out.redirectedURLs = null;
+			else
+				out.redirectedURLs = new LinkedList<>(out.redirectedURLs);
+			return out;
+		}
+
+		/**
+		 * Copies this request object, but preps this as though it came from a redirect.
+		 * The new URL is set (method is preserved), but the previous URL on this request is preserved in a set of previous URLs in order to
+		 * detect redirect loops.
+		 * @param newURL the new URL (usually from a <code>"Location"</code> header value).
+		 * @return a new request that is a copy of this one, but with a new method and URL.
+		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
+		 * @throws IllegalArgumentException if the URL string is malformed.
+		 */
+		public HTTPRequest copyRedirect(String newURL)
+		{
+			return copyRedirect(null, newURL);
+		}
+		
+		/**
+		 * Copies this request object, but preps this as though it came from a redirect.
+		 * The new URL and method are set, but the previous URL on this request is preserved in a set of previous URLs in order to
+		 * detect redirect loops.
+		 * @param newMethod the new HTTP method. If not {@value #HTTP_METHOD_POST} nor {@value #HTTP_METHOD_PUT}, the body is automatically discarded.
+		 * @param newURL the new URL (usually from a <code>"Location"</code> header value).
+		 * @return a new request that is a copy of this one, but with a new method and URL.
+		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
+		 * @throws IllegalArgumentException if the URL string is malformed.
+		 */
+		public HTTPRequest copyRedirect(String newMethod, String newURL)
+		{
+			HTTPRequest out = copy();
+			if (out.redirectedURLs == null)
+				out.redirectedURLs = new LinkedList<>();
+			if (out.redirectedURLs.contains(out.url))
+				throw new IllegalStateException("Redirect loop detected - " + out.url + " wad already visited.");
+			out.redirectedURLs.add(out.url);
+			out.url = checkURL(newURL, true);
+			if (newMethod != null)
+				out.method = newMethod;
+			if (!(out.method.equalsIgnoreCase(HTTP_METHOD_POST) || out.method.equalsIgnoreCase(HTTP_METHOD_PUT)))
+				out.content(null);
 			return out;
 		}
 		
 		/**
 		 * Replaces the headers on this request.
+		 * The headers are copied, such that future alterations to the headers passed in
+		 * are not affected if that headers object is changed later.
 		 * @param headers the new headers.
 		 * @return this request, for chaining.
+		 * @see HTTPUtils#headers(java.util.Map.Entry...)
 		 */
 		public HTTPRequest headers(HTTPHeaders headers)
 		{
 			Objects.requireNonNull(headers);
-			this.headers = headers;
+			this.headers = headers.copy();
 			return this;
 		}
 		
 		/**
-		 * Adds headers to the headers on this request.
+		 * Adds/replaces headers to/on the headers on this request.
 		 * @param headers the source header map.
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
@@ -1560,18 +2255,21 @@ public final class HTTPUtils
 		
 		/**
 		 * Replaces the parameters on this request.
+		 * The parameters are copied, such that future alterations to the parameters passed in
+		 * are not affected if that parameters object is changed later.
 		 * @param parameters the new parameters.
+		 * @see HTTPUtils#parameters(java.util.Map.Entry...)
 		 * @return this request, for chaining.
 		 */
 		public HTTPRequest parameters(HTTPParameters parameters)
 		{
 			Objects.requireNonNull(parameters);
-			this.parameters = parameters;
+			this.parameters = parameters.copy();
 			return this;
 		}
 		
 		/**
-		 * Adds parameters to the headers on this request.
+		 * Adds/replaces parameters to/on the headers on this request.
 		 * @param parameters the source parameter map.
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
@@ -1610,9 +2308,28 @@ public final class HTTPUtils
 		}
 		
 		/**
-		 * Sets the content body for this request.
-		 * @param content the content.
+		 * Adds a cookie to this request.
+		 * @param cookie the cookie to add.
 		 * @return this request, for chaining.
+		 * @see HTTPUtils#cookie(String, String)
+		 */
+		public HTTPRequest addCookie(HTTPCookie cookie)
+		{
+			this.cookies.add(cookie);
+			return this;
+		}
+		
+		/**
+		 * Sets the content body for this request.
+		 * @param content the content. Can be null for no content body.
+		 * @return this request, for chaining.
+		 * @see #createByteContent(String, byte[])
+		 * @see #createByteContent(String, String, byte[])
+		 * @see #createTextContent(String, String)
+		 * @see #createFileContent(String, File)
+		 * @see #createFileContent(String, String, File)
+		 * @see #createFormContent(HTTPParameters)
+		 * @see #createMultipartContent()
 		 */
 		public HTTPRequest content(HTTPContent content) 
 		{
@@ -1649,9 +2366,22 @@ public final class HTTPUtils
 		 * @param monitor the monitor to call.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest monitor(TransferMonitor monitor) 
+		public HTTPRequest uploadMonitor(TransferMonitor monitor) 
 		{
 			this.monitor = monitor;
+			return this;
+		}
+		
+		/**
+		 * Sets if auto-redirecting happens.
+		 * All requests 
+		 * Note that not every redirect can be changed into an actionable redirect.
+		 * @param autoRedirect true 
+		 * @return this request, for chaining.
+		 */
+		public HTTPRequest setAutoRedirect(boolean autoRedirect) 
+		{
+			this.autoRedirect = autoRedirect;
 			return this;
 		}
 		
@@ -1696,7 +2426,20 @@ public final class HTTPUtils
 		 */
 		public HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
 		{
-			return httpFetch(method, new URL(urlParams(url, parameters)), headers, content, defaultCharsetEncoding, timeoutMillis, cancelSwitch, monitor);
+			HTTPResponse out;
+			HTTPRequest current = this;
+			while (true)
+			{
+				out = httpFetch(current, cancelSwitch);
+				if (!autoRedirect || !out.isAutoRedirectable())
+					break;
+				else
+				{
+					current = out.buildRedirect();
+					out.close(); // close open response.
+				}
+			}
+			return out;
 		}
 
 		/**
@@ -1729,7 +2472,10 @@ public final class HTTPUtils
 		 */
 		public <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
 		{
-			return httpFetch(method, new URL(urlParams(url, parameters)), headers, content, defaultCharsetEncoding, timeoutMillis, cancelSwitch, monitor, reader);
+			try (HTTPResponse response = send(cancelSwitch))
+			{
+				return response.read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false));
+			}
 		}
 
 		/**
@@ -1791,298 +2537,6 @@ public final class HTTPUtils
 
 	}
 	
-	/**
-	 * A single instance of a spawned, asynchronous executable task.
-	 * Note that this class is a type of {@link RunnableFuture} - this can be used in places
-	 * that {@link Future}s can also be used.
-	 * @param <T> the result type.
-	 */
-	public static abstract class HTTPRequestFuture<T> implements RunnableFuture<T>
-	{
-		// Source request.
-		protected HTTPRequest request;
-		protected HTTPResponse response;
-		protected AtomicBoolean cancelSwitch;
-
-		// Locks
-		private Object waitMutex;
-
-		// State
-		private Thread executor;
-		private boolean done;
-		private boolean running;
-		private Throwable exception;
-		private T finishedResult;
-
-		private HTTPRequestFuture(HTTPRequest request)
-		{
-			this.request = request;
-			this.response = null;
-			this.cancelSwitch = new AtomicBoolean(false);
-			this.waitMutex = new Object();
-
-			this.executor = null;
-			this.done = false;
-			this.running = false;
-			this.exception = null;
-			this.finishedResult = null;
-		}
-		
-		@Override
-		public final void run()
-		{
-			executor = Thread.currentThread();
-			running = true;
-
-			try {
-				finishedResult = execute();
-			} catch (Throwable e) {
-				exception = e;
-			}
-			
-			running = false;
-			done = true;
-			executor = null;
-			synchronized (waitMutex)
-			{
-				waitMutex.notifyAll();
-			}
-		}
-	
-		/**
-		 * Checks if this task instance is being worked on by a thread.
-		 * @return true if so, false if not.
-		 */
-		public final boolean isRunning()
-		{
-			return running;
-		}
-	
-		@Override
-		public final boolean isDone()
-		{
-			return done;
-		}
-	
-		/**
-		 * Gets the thread that is currently executing this future.
-		 * If this is done or waiting for execution, this returns null.
-		 * @return the executor thread, or null.
-		 */
-		public final Thread getExecutor()
-		{
-			return executor;
-		}
-		
-		/**
-		 * Makes the calling thread wait indefinitely for this task instance's completion.
-		 * @throws InterruptedException if the current thread was interrupted while waiting.
-		 */
-		public final void waitForDone() throws InterruptedException
-		{
-			while (!isDone())
-			{
-				synchronized (waitMutex)
-				{
-					waitMutex.wait();
-				}
-			}
-		}
-	
-		/**
-		 * Makes the calling thread wait for this task instance's completion for, at most, the given interval of time.
-		 * @param time the time to wait.
-		 * @param unit the time unit of the timeout argument.
-		 * @throws InterruptedException if the current thread was interrupted while waiting.
-		 */
-		public final void waitForDone(long time, TimeUnit unit) throws InterruptedException
-		{
-			if (!isDone())
-			{
-				synchronized (waitMutex)
-				{
-					unit.timedWait(waitMutex, time);
-				}
-			}
-		}
-	
-		/**
-		 * Gets the exception thrown as a result of this instance completing, making the calling thread wait for its completion.
-		 * @return the exception thrown by the encapsulated task, or null if no exception.
-		 */
-		public final Throwable getException()
-		{
-			if (!isDone())
-				join();
-			return exception;
-		}
-	
-		@Override
-		public final T get() throws InterruptedException, ExecutionException
-		{
-			liveLockCheck();
-			waitForDone();
-			if (isCancelled())
-				throw new CancellationException("task was cancelled");
-			if (getException() != null)
-				throw new ExecutionException(getException());
-			return finishedResult;
-		}
-	
-		@Override
-		public final T get(long time, TimeUnit unit) throws TimeoutException, InterruptedException, ExecutionException
-		{
-			liveLockCheck();
-			waitForDone(time, unit);
-			if (!isDone())
-				throw new TimeoutException("wait timed out");
-			if (isCancelled())
-				throw new CancellationException("task was cancelled");
-			if (getException() != null)
-				throw new ExecutionException(getException());
-			return finishedResult;
-		}
-	
-		/**
-		 * Attempts to return the result of this instance, making the calling thread wait for its completion.
-		 * <p>This is for convenience - this is like calling {@link #get()}, except it will only throw an
-		 * encapsulated {@link RuntimeException} with an exception that {@link #get()} would throw as a cause.
-		 * @return the result. Can be null if no result is returned, or this was cancelled before the return.
-		 * @throws RuntimeException if a call to {@link #get()} instead of this would throw an exception.
-		 */
-		public final T result()
-		{
-			liveLockCheck();
-			try {
-				waitForDone();
-			} catch (InterruptedException e) {
-				throw new RuntimeException("wait was interrupted", getException());
-			}
-			if (getException() != null)
-				throw new RuntimeException("exception on result", getException());
-			return finishedResult;
-		}
-	
-		/**
-		 * Attempts to return the result of this instance, without waiting for its completion.
-		 * <p>If {@link #isDone()} is false, this is guaranteed to return <code>null</code>.
-		 * @return the current result, or <code>null</code> if not finished.
-		 */
-		public final T resultNonBlocking()
-		{
-			return finishedResult;
-		}
-	
-		/**
-		 * Makes the calling thread wait until this task has finished, returning nothing.
-		 */
-		public final void join()
-		{
-			try {
-				result();
-			} catch (Exception e) {
-				// Eat exception.
-			}
-		}
-	
-		/**
-		 * Gets the response encapsulation from a call, waiting for the call to be in a "done" state.
-		 * <p> If the call errored out or was cancelled before the request was sent, this will be null.
-		 * <p> The response may be open, if this call is supposed to return an open response to be read by the application.
-		 * @return the response, or null if no response was captured due to an error.
-		 * @see #join()
-		 * @see #getException()
-		 * @see #result()
-		 */
-		public final HTTPResponse getResponse()
-		{
-			if (!isDone())
-				join();
-			return response;
-		}
-		
-	    /**
-	     * Convenience method for: <code>cancel(false)</code>.
-	     * @return {@code false} if the task could not be cancelled,
-	     * typically because it has already completed normally;
-	     * {@code true} otherwise
-	     */
-		public final boolean cancel()
-		{
-			return cancel(false);
-		}
-
-		@Override
-		public final boolean cancel(boolean mayInterruptIfRunning)
-		{
-			if (isDone())
-			{
-				return false;
-			}
-			else
-			{
-				if (mayInterruptIfRunning && executor != null)
-					executor.interrupt();
-				cancelSwitch.set(true);
-				return true;
-			}
-		}
-
-		@Override
-		public final boolean isCancelled() 
-		{
-			return cancelSwitch.get();
-		}
-		
-		// Checks for livelocks.
-		private void liveLockCheck()
-		{
-			if (executor == Thread.currentThread())
-				throw new IllegalStateException("Attempt to make executing thread wait for this result.");
-		}
-		
-		/**
-		 * Executes this instance's callable payload.
-		 * @return the result from the execution.
-		 * @throws Throwable for any exception that may occur.
-		 */
-		protected abstract T execute() throws Throwable;
-
-		/** Sends request and gets a response. */
-		private static class Response extends HTTPRequestFuture<HTTPResponse>
-		{
-			private Response(HTTPRequest request)
-			{
-				super(request);
-			}
-
-			@Override
-			protected HTTPResponse execute() throws Throwable
-			{
-				return response = request.send(cancelSwitch);
-			}
-		}
-		
-		/** Sends request and gets an object. */
-		private static class ObjectResponse<T> extends HTTPRequestFuture<T>
-		{
-			private HTTPReader<T> reader;
-			
-			private ObjectResponse(HTTPRequest request, HTTPReader<T> reader)
-			{
-				super(request);
-				this.reader = reader;
-			}
-
-			@Override
-			protected T execute() throws Throwable
-			{
-				response = request.send(cancelSwitch);
-				return response.read(reader, cancelSwitch);
-			}
-		}
-	}
-
 	/**
 	 * Makes an HTTP-acceptable ISO date string from a Date.
 	 * @param date the date to format.
@@ -2154,6 +2608,17 @@ public final class HTTPUtils
 	}
 	
 	/**
+	 * Creates a simple key-value pair.
+	 * @param key the pair key.
+	 * @param value the pair value (converted to a string via {@link String#valueOf(Object)}).
+	 * @return a new pair.
+	 */
+	public static Map.Entry<String, String> entry(String key, Object value)
+	{
+		return new AbstractMap.SimpleEntry<>(key, String.valueOf(value));
+	}
+	
+	/**
 	 * Starts a new {@link HTTPCookie} object.
 	 * @param key the cookie name.
 	 * @param value the cookie value. 
@@ -2166,20 +2631,41 @@ public final class HTTPUtils
 	
 	/**
 	 * Starts a new {@link HTTPHeaders} object.
+	 * @param entries the list of entries to add.
 	 * @return a new header object.
+	 * @see #entry(String, String)
+	 * @see HTTPHeaders#setHeader(String, String)
 	 */
-	public static HTTPHeaders headers()
+	@SafeVarargs
+	public static HTTPHeaders headers(Map.Entry<String, String> ... entries)
 	{
-		return new HTTPHeaders();
+		HTTPHeaders out = new HTTPHeaders();
+		for (int i = 0; i < entries.length; i++)
+		{
+			Map.Entry<String, String> entry = entries[i];
+			out.setHeader(entry.getKey(), entry.getValue());
+		}
+		return out;
 	}
 	
 	/**
 	 * Starts a new {@link HTTPParameters} object.
+	 * Duplicate parameters are added.
+	 * @param entries the list of entries to add.
 	 * @return a new parameters object.
+	 * @see #entry(String, String)
+	 * @see HTTPParameters#addParameter(String, Object)
 	 */
-	public static HTTPParameters parameters()
+	@SafeVarargs
+	public static HTTPParameters parameters(Map.Entry<String, String> ... entries)
 	{
-		return new HTTPParameters();
+		HTTPParameters out = new HTTPParameters();
+		for (int i = 0; i < entries.length; i++)
+		{
+			Map.Entry<String, String> entry = entries[i];
+			out.addParameter(entry.getKey(), entry.getValue());
+		}
+		return out;
 	}
 	
 	/**
@@ -2286,9 +2772,8 @@ public final class HTTPUtils
 
 	/**
 	 * Creates a WWW form, URL encoded content body for an HTTP request.
-	 * <p>Note: This is NOT mulitpart form-data content! 
-	 * See {@link MultipartFormContent} for mixed file attachments and fields.
 	 * @return a content object representing the content.
+	 * @see MultipartFormContent
 	 */
 	public static MultipartFormContent createMultipartContent()
 	{
@@ -2296,54 +2781,65 @@ public final class HTTPUtils
 	}
 
 	/**
+	 * Sets the default timeout to use for requests (if not overridden).
+	 * @param timeoutMillis the timeout in milliseconds. A timeout of 0 is indefinite.
+	 * @throws IllegalArgumentException if timeoutMillis is less than 0.
+	 */
+	public static void setDefaultTimeout(int timeoutMillis)
+	{
+		if (timeoutMillis < 0)
+			throw new IllegalArgumentException("timeout cannot be less than 0");
+		DEFAULT_TIMEOUT_MILLIS.set(timeoutMillis);
+	}
+	
+	/**
+	 * Sets the ThreadPoolExecutor to use for asynchronous requests.
+	 * The previous executor, if any, is forcibly shut down.
+	 * @param executor the thread pool executor to use for async request handling.
+	 * @see ThreadPoolExecutor#shutdownNow()
+	 */
+	public static void setAsyncExecutor(ThreadPoolExecutor executor)
+	{
+		ThreadPoolExecutor old;
+		if ((old = HTTP_THREAD_POOL.getAndSet(executor)) != null)
+			old.shutdownNow();
+	}
+	
+	/**
 	 * Gets the content from a opening an HTTP URL.
 	 * The response is encapsulated and returned, with an open input stream to read from the body of the return.
 	 * If the response/stream is closed afterward, it will not close the connection (which may be pooled).
 	 * <p>
 	 * Since the {@link HTTPResponse} auto-closes, the best way to use this method is with a try-with-resources call, a la:
 	 * <pre><code>
-	 * try (HTTPResponse response = getHTTPContent(requestMethod, url, headers, content, defaultResponseCharset, socketTimeoutMillis, uploadMonitor))
+	 * try (HTTPResponse response = httpFetch(request, cancelSwitch))
 	 * {
 	 *     // ... read response ...
 	 * }
 	 * </code></pre>
-	 * @param requestMethod the request method.
-	 * @param url the URL to open and read.
-	 * @param headers a map of header to header value to add to the request (can be null for no headers).
-	 * @param content if not null, add this content to the body.
-	 * @param defaultResponseCharset if the response charset is not specified, use this one.
-	 * @param socketTimeoutMillis the socket timeout time in milliseconds. 0 is forever.
+	 * @param request the request object.
 	 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel. Can be null.
-	 * @param uploadMonitor an optional callback during upload for upload progress. Can be null.
 	 * @return the response from an HTTP request.
 	 * @throws IOException if an error happens during the read/write.
 	 * @throws SocketTimeoutException if the socket read times out.
 	 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
-	 * @see HTTPHeaders
-	 * @see #createByteContent(String, byte[])
-	 * @see #createByteContent(String, String, byte[])
-	 * @see #createTextContent(String, String)
-	 * @see #createFileContent(String, File)
-	 * @see #createFileContent(String, String, File)
-	 * @see #createFormContent(HTTPParameters)
-	 * @see #createMultipartContent()
 	 */
-	public static HTTPResponse httpFetch(
-		String requestMethod,
-		URL url, 
-		HTTPHeaders headers, 
-		HTTPContent content, 
-		String defaultResponseCharset, 
-		int socketTimeoutMillis, 
-		AtomicBoolean cancelSwitch, 
-		TransferMonitor uploadMonitor
-	) throws IOException
+	private static HTTPResponse httpFetch(HTTPRequest request, AtomicBoolean cancelSwitch) throws IOException
 	{
+		String requestMethod = request.method;
+
 		Objects.requireNonNull(requestMethod, "request method is null");
+		URL url = new URL(urlParams(request.url, request.parameters));
 		
 		if (Arrays.binarySearch(VALID_HTTP, url.getProtocol()) < 0)
 			throw new ProtocolException("This is not an HTTP URL.");
 	
+		HTTPHeaders headers = request.headers; 
+		HTTPContent content = request.content; 
+		String defaultResponseCharset = request.defaultCharsetEncoding;
+		int socketTimeoutMillis = request.timeoutMillis; 
+		TransferMonitor uploadMonitor = request.monitor;
+
 		cancelSwitch = cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false);
 		
 		// Check cancellation.
@@ -2358,6 +2854,8 @@ public final class HTTPUtils
 		
 		if (headers != null) for (Map.Entry<String, String> entry : headers.map.entrySet())
 			conn.setRequestProperty(entry.getKey(), entry.getValue());
+		for (HTTPCookie cookie : request.cookies)
+			conn.addRequestProperty("Set-Cookie", cookie.toString());
 	
 		// set up body data.
 		if (content != null)
@@ -2383,65 +2881,9 @@ public final class HTTPUtils
 			return null;
 		}
 		
-		return new HTTPResponse(conn, defaultResponseCharset);
+		return new HTTPResponse(request, conn, defaultResponseCharset);
 	}
 	
-	/**
-	 * Gets the content from a opening an HTTP URL.
-	 * The stream is closed afterward (but not the connection, which may be pooled).
-	 * @param <R> the resultant value read from the response.
-	 * @param requestMethod the request method.
-	 * @param url the URL to open and read.
-	 * @param headers a map of header to header value to add to the request (can be null for no headers).
-	 * @param content if not null, add this content to the body.
-	 * @param defaultResponseCharset if the response charset is not specified, use this one.
-	 * @param socketTimeoutMillis the socket timeout time in milliseconds. 0 is forever.
-	 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel. Can be null.
-	 * @param uploadMonitor an optional callback during upload for upload progress. Can be null.
-	 * @param reader the reader to use to read the response and return the data in a useful shape.
-	 * @return the read content from an HTTP request, via the provided reader.
-	 * @throws IOException if an error happens during the read/write.
-	 * @throws SocketTimeoutException if the socket read times out.
-	 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
-	 * @see HTTPHeaders
-	 * @see #createByteContent(String, byte[])
-	 * @see #createByteContent(String, String, byte[])
-	 * @see #createTextContent(String, String)
-	 * @see #createFileContent(String, File)
-	 * @see #createFileContent(String, String, File)
-	 * @see #createFormContent(HTTPParameters)
-	 * @see #createMultipartContent()
-	 */
-	public static <R> R httpFetch(
-		String requestMethod, 
-		URL url, 
-		HTTPHeaders headers, 
-		HTTPContent content, 
-		String defaultResponseCharset, 
-		int socketTimeoutMillis, 
-		AtomicBoolean cancelSwitch, 
-		TransferMonitor uploadMonitor,
-		HTTPReader<R> reader
-	) throws IOException
-	{
-		try (HTTPResponse response = httpFetch(requestMethod, url, headers, content, defaultResponseCharset, socketTimeoutMillis, cancelSwitch, uploadMonitor))
-		{
-			return response.read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false));
-		}
-	}
-	
-	/**
-	 * Sets the ThreadPoolExecutor to use for asynchronous requests.
-	 * @param executor the thread pool executor to use for async request handling.
-	 */
-	public static void setAsyncExecutor(ThreadPoolExecutor executor)
-	{
-		synchronized (HTTP_THREAD_POOL)
-		{
-			HTTP_THREAD_POOL.set(executor);
-		}
-	}
-		
 	// Fetches or creates the thread executor.
 	private static ThreadPoolExecutor fetchExecutor()
 	{
