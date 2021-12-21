@@ -1430,30 +1430,35 @@ block.
 ===== Built-in Resources
 ==============================================================================
 
+#include <doom19>
 #include "classpath:decohack/doom19.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Doom 1.9 EXEs, plus the "using doom19" line. Also adds ZDoom thing and
     weapon aliases.
 
+#include <udoom19>
 #include "classpath:decohack/udoom19.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Ultimate Doom 1.9 EXEs, plus the "using udoom19" line. Also adds ZDoom 
     thing and weapon aliases.
 
+#include <boom>
 #include "classpath:decohack/boom.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     Boom-compatible ports, plus the "using boom" line. Also adds ZDoom 
     thing and weapon aliases.
 
+#include <mbf>
 #include "classpath:decohack/mbf.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
     MBF-compatible ports, plus the "using mbf" line. Also adds ZDoom thing 
     and weapon aliases.
 
+#include <extended>
 #include "classpath:decohack/extended.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
@@ -1462,6 +1467,7 @@ block.
     the things from 151 to 250 (the extended things) for auto-thing fill.
     Also adds ZDoom thing and weapon aliases.
 
+#include <mbf21>
 #include "classpath:decohack/mbf21.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
@@ -1471,6 +1477,7 @@ block.
     extended things) for auto-thing fill. Also adds ZDoom thing and
     weapon aliases.
 
+#include <dsdhacked>
 #include "classpath:decohack/dsdhacked.dh"
 
     Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
@@ -1482,6 +1489,7 @@ block.
 
 ..............................................................................
 
+#include <friendly>
 #include "classpath:decohack/constants/friendly_things.dh"
 
     "Friendly" names for Doom things, all the way up through extended.

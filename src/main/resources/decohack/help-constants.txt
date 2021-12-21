@@ -12,11 +12,11 @@ and strings for readability, but only if you "#include" the following files
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/strings.dh
-	decohack/constants/doom19/states.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/strings.dh
+    decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
     decohack/constants/doom19/things_aliases.dh
 
@@ -26,11 +26,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/udoom19/strings.dh
-	decohack/constants/doom19/states.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/udoom19/strings.dh
+    decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
     decohack/constants/doom19/things_aliases.dh
 
@@ -40,11 +40,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/boom/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/boom/states.dh
     decohack/constants/boom/things.dh
     decohack/constants/boom/things_aliases.dh
 
@@ -54,11 +54,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/mbf/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/mbf/states.dh
     decohack/constants/mbf/things.dh
     decohack/constants/mbf/things_aliases.dh
 
@@ -68,11 +68,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/extended/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
     decohack/constants/mbf/things_aliases.dh
 
@@ -82,11 +82,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/extended/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
     decohack/constants/mbf/things_aliases.dh
 
@@ -96,11 +96,11 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/weapons_aliases.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/extended/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/weapons_aliases.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
     decohack/constants/mbf/things_aliases.dh
 
@@ -371,10 +371,10 @@ MTF_EXTRA99               250
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/strings.dh
-	decohack/constants/doom19/states.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/strings.dh
+    decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
 
 
@@ -383,10 +383,10 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/udoom19/strings.dh
-	decohack/constants/doom19/states.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/udoom19/strings.dh
+    decohack/constants/doom19/states.dh
     decohack/constants/doom19/things.dh
 
 
@@ -395,10 +395,10 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/boom/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/boom/states.dh
     decohack/constants/boom/things.dh
 
 
@@ -407,10 +407,10 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/mbf/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/mbf/states.dh
     decohack/constants/mbf/things.dh
 
 
@@ -419,10 +419,10 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/extended/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
 
 
@@ -431,10 +431,10 @@ Everything in:
 ------------------------------------------------------------------------------
 
 Everything in:
-	decohack/constants/doom19/weapons.dh
-	decohack/constants/doom19/ammo.dh
-	decohack/constants/boom/strings.dh
-	decohack/constants/extended/states.dh
+    decohack/constants/doom19/weapons.dh
+    decohack/constants/doom19/ammo.dh
+    decohack/constants/boom/strings.dh
+    decohack/constants/extended/states.dh
     decohack/constants/extended/things.dh
 
 
