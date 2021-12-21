@@ -102,6 +102,15 @@
 #define STR_PD_BLUEK           PD_BLUEK
 #define STR_PD_REDK            PD_REDK
 #define STR_PD_YELLOWK         PD_YELLOWK
+#define STR_PD_BLUEC           PD_BLUEC
+#define STR_PD_REDC            PD_REDC
+#define STR_PD_YELLOWC         PD_YELLOWC
+#define STR_PD_BLUES           PD_BLUES
+#define STR_PD_REDS            PD_REDS
+#define STR_PD_YELLOWS         PD_YELLOWS
+#define STR_PD_ANY             PD_ANY
+#define STR_PD_ALL3            PD_ALL3
+#define STR_PD_ALL6            PD_ALL6
 
 #define STR_GOTARMOR           GOTARMOR
 #define STR_GOTMEGA            GOTMEGA
