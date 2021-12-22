@@ -402,7 +402,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		if (this.mbf21Flags != null)
 			this.mbf21Flags |= bits;
 		else
-			this.addMBF21Flags |= bits;
+			this.addMBF21Flags |= bits; // added later
 		return this;
 	}
 

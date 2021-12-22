@@ -130,7 +130,6 @@ public final class WadMergeMain
 		
 		/**
 		 * Calls this program.
-		 * @param options the program options.
 		 * @return the return code.
 		 */
 		public int call()

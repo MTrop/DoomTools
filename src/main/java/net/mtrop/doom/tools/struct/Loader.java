@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -81,6 +82,7 @@ public class Loader<T>
 	
 	/**
 	 * Creates a loader that always returns a single object. 
+	 * @param <T> The object type returned.
 	 * @param object the object to always return.
 	 * @return a new loader function that uses the working directory as a root.
 	 */
@@ -91,8 +93,8 @@ public class Loader<T>
 
 	/**
 	 * Creates an object loader that treats the object name as a path to a file from the working directory. 
-	 * @param fileLoader the function that loads the source file (after it is confirmed to be a non-directory file that exists).
 	 * @param <T> The object type returned.
+	 * @param fileLoader the function that loads the source file (after it is confirmed to be a non-directory file that exists).
 	 * @return a new loader function that uses the working directory as a root.
 	 */
 	public static <T> LoaderFunction<T> createFileLoader(Function<File, T> fileLoader)
@@ -102,6 +104,7 @@ public class Loader<T>
 
 	/**
 	 * Creates an object loader that treats the object name as a path to a file. 
+	 * @param <T> The object type returned.
 	 * @param directoryPath the root directory path for loading images.
 	 * @param fileLoader the function that loads the source file (after it is confirmed to be a non-directory file that exists).
 	 * @return a new loader function that uses the provided directory as a root.
@@ -114,6 +117,7 @@ public class Loader<T>
 
 	/**
 	 * Creates an object loader that treats the object name as a path to a file. 
+	 * @param <T> The object type returned.
 	 * @param directory the root directory for loading images.
 	 * @param fileLoader the function that loads the source file (after it is confirmed to be a non-directory file that exists).
 	 * @return a new loader function that uses the provided directory as a root.
@@ -135,6 +139,7 @@ public class Loader<T>
 	
 	/**
 	 * Creates an object loader that treats the object name as a path to a classpath resource (from the current classloader). 
+	 * @param <T> The object type returned.
 	 * @param fileLoader the function that loads the source stream (after it is confirmed to exist).
 	 * @return a new loader function that uses the provided string as a resource path prefix.
 	 * @throws IllegalArgumentException if the provided file is null or not a directory. 
@@ -146,6 +151,7 @@ public class Loader<T>
 	
 	/**
 	 * Creates an object loader that treats the object name as a path to a classpath resource (from the current classloader). 
+	 * @param <T> The object type returned.
 	 * @param prefix the root path for loading from classpath resources.
 	 * @param fileLoader the function that loads the source stream (after it is confirmed to exist).
 	 * @return a new loader function that uses the provided string as a resource path prefix.
@@ -158,6 +164,7 @@ public class Loader<T>
 	
 	/**
 	 * Creates an object loader that treats the object name as a path to a classpath resource. 
+	 * @param <T> The object type returned.
 	 * @param loader the classloader to use.
 	 * @param prefix the root path for loading from classpath resources.
 	 * @param fileLoader the function that loads the source stream (after it is confirmed to exist).

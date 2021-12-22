@@ -57,16 +57,6 @@ public class Lexer
 	private StringBuilder tokenBuffer;
 
 	/**
-	 * Creates a new lexer with no streams.
-	 * This will also assign this lexer a default name.
-	 * @param kernel the lexer kernel to use for defining how to parse the input text.
-	 */
-	public Lexer(Kernel kernel)
-	{
-		this(kernel, null, (Reader)null);
-	}
-	
-	/**
 	 * Creates a new lexer around a String, that will be wrapped into a StringReader.
 	 * This will also assign this lexer a default name.
 	 * @param kernel the lexer kernel to use for defining how to parse the input text.
@@ -103,15 +93,14 @@ public class Lexer
 	 * Creates a new lexer around a reader.
 	 * @param kernel the kernel to use for this lexer.
 	 * @param name the name of this lexer.
-	 * @param in the reader to read from. If null, does not push a stream.
+	 * @param in the reader to read from.
 	 */
 	public Lexer(Kernel kernel, String name, Reader in)
 	{
 		this.kernel = kernel;
 		readerStack = new ReaderStack();
 		tokenBuffer = new StringBuilder();
-		if (in != null)
-			pushStream(name, in);
+		pushStream(name, in);
 	}
 	
 	/**
@@ -2041,7 +2030,6 @@ public class Lexer
 		/**
 		 * Adds a line comment delimiter to this lexer.
 		 * @param delimiter		the delimiter lexeme.
-		 * @param type			the type id.
 		 * @throws IllegalArgumentException if type is &lt; 0 or delimiter is null or empty.
 		 */
 		public void addCommentLineDelimiter(String delimiter)

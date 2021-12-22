@@ -1082,7 +1082,6 @@ public final class WTExportMain
 		
 		/**
 		 * Starts texture extraction.
-		 * @param options
 		 * @return the return code.
 		 */
 		public int call() 

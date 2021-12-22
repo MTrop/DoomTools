@@ -3,8 +3,10 @@ package net.mtrop.doom.tools.doommake.gui;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 
+import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
@@ -102,6 +104,18 @@ public final class DoomMakeProjectHelper
 		throw new UnsupportedOperationException("NOT FINISHED");
 	}
 	
+	/**
+	 * Gets the list of project targets.
+	 * @param projectDirectory 
+	 * @return the list of project targets.
+	 */
+	public Instance<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetname)
+	{
+		throw new UnsupportedOperationException("NOT FINISHED");
+	}
+	
+	// TODO: Finish this.
+	
 	private void checkProjectDirectory(File projectDirectory)
 	{
 		if (!projectDirectory.exists())
@@ -122,8 +136,6 @@ public final class DoomMakeProjectHelper
 		return desktop;
 	}
 
-	// TODO: Finish this.
-	
 	/**
 	 * Thrown if a process call fails.
 	 */

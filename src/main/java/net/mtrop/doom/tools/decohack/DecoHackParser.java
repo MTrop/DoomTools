@@ -4150,7 +4150,6 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	/**
 	 * Starts parsing a script.
-	 * @param context 
 	 * @return the exporter for the script.
 	 */
 	public AbstractPatchContext<?> parse()

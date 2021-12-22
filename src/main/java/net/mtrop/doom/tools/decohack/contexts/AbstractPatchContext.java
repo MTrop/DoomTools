@@ -352,7 +352,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param state true to set as "free", false to unset.
 	 * @throws IllegalStateException if the target state is protected.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
-	 * @see #protectState(int)
+	 * @see #isProtectedState(int)
 	 */
 	public void setFreeState(int index, boolean state)
 	{
@@ -384,7 +384,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param state true to set as "free", false to unset.
 	 * @throws IllegalStateException if the target state is protected.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
-	 * @see #protectState(int)
+	 * @see #isProtectedState(int)
 	 */
 	public void setFreeState(int min, int max, boolean state)
 	{
@@ -723,7 +723,6 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * Writes the patch header.
 	 * @param writer the output writer.
 	 * @param comment a comment line (containing the version line).
-	 * @param formatNumber the patch format number.
 	 * @throws IOException if a write error occurs.
 	 */
 	protected void writePatchHeader(Writer writer, String comment) throws IOException
@@ -746,7 +745,6 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	/**
 	 * Writes the common patch body.
-	 * @param patch the patch.
 	 * @param writer the output writer.
 	 * @throws IOException if a write error occurs.
 	 */

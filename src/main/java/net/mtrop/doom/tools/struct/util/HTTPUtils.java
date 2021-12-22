@@ -2929,13 +2929,6 @@ public final class HTTPUtils
 		 * Sets the content body for this request.
 		 * @param content the content. Can be null for no content body.
 		 * @return this request, for chaining.
-		 * @see #createByteContent(String, byte[])
-		 * @see #createByteContent(String, String, byte[])
-		 * @see #createTextContent(String, String)
-		 * @see #createFileContent(String, File)
-		 * @see #createFileContent(String, String, File)
-		 * @see #createFormContent(HTTPParameters)
-		 * @see #createMultipartContent()
 		 */
 		public final HTTPRequest content(HTTPContent content) 
 		{
