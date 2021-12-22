@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.20.2
+
+* `Added` STR_ `#defines` for BOOM's extended locked door strings were missing (thanks, Xaser!). (PR #61)
+
+
 ### Changed for 0.20.1
 
 * `Fixed` Extended sounds were off by 1. (Issue #60)
