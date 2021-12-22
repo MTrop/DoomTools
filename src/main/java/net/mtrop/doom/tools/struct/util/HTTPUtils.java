@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.struct.util;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -15,11 +16,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
@@ -50,6 +57,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -75,15 +83,8 @@ public final class HTTPUtils
 	/** HTTP Method: PUT. */
 	public static final String HTTP_METHOD_PUT = "PUT";
 
-	/** Default timeout in milliseconds. */
-	public static final AtomicInteger DEFAULT_TIMEOUT_MILLIS = new AtomicInteger(5000); 
-	/** Thread pool for async requests. */
-	private static final AtomicReference<ThreadPoolExecutor> HTTP_THREAD_POOL = new AtomicReference<ThreadPoolExecutor>(null);
-	
-	// Not instantiable.
-	private HTTPUtils() {}
-	
 	private static final Charset UTF8 = Charset.forName("utf-8");
+	private static final Charset ISO_8859_1 = Charset.forName("iso-8859-1");
 	private static final String[] VALID_HTTP = new String[]{"http", "https"};
 	private static final byte[] URL_RESERVED = "!#$%&'()*+,/:;=?@[]".getBytes(UTF8);
 	private static final byte[] URL_UNRESERVED = "-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~".getBytes(UTF8);
@@ -93,6 +94,64 @@ public final class HTTPUtils
 		out.setTimeZone(TimeZone.getTimeZone("GMT"));
 		return out;
 	});
+
+	/** Default timeout in milliseconds. */
+	private static final AtomicInteger DEFAULT_TIMEOUT_MILLIS = new AtomicInteger(5000); 
+	/** Thread pool for async requests. */
+	private static final AtomicReference<ThreadPoolExecutor> HTTP_THREAD_POOL = new AtomicReference<ThreadPoolExecutor>(null);
+	
+	/** A transfer monitor that does nothing. */
+	private static final TransferMonitor TRANSFERMONITOR_NULL = (current, max) -> {};
+
+	/** An empty stream. */
+	private static final InputStream INPUTSTREAM_BLANK = new InputStream() 
+	{
+		@Override
+		public int read() throws IOException
+		{
+			return -1;
+		}
+	};
+	
+	/** String content reader. */
+	private static final HTTPReader<String> HTTPREADER_STRING_CONTENT = (response, cancelSwitch, monitor) ->
+	{
+		InputStreamReader reader = HTTPReader.openReader(response);
+		StringWriter writer = new StringWriter();
+		relay(reader, writer, 8192, null, cancelSwitch, monitor);
+		return cancelSwitch.get() ? null : writer.toString();
+	};
+
+	/** Byte content reader. */
+	private static final HTTPReader<byte[]> HTTPREADER_BYTE_CONTENT = (response, cancelSwitch, monitor) ->
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		relay(response.getContentStream(), bos, 8192, response.getLength(), cancelSwitch, monitor);
+		return cancelSwitch.get() ? null : bos.toByteArray();
+	};
+
+	/** Temporary file reader. */
+	private static final HTTPReader<File> HTTPREADER_TEMPORARY_FILE = (response, cancelSwitch, monitor) ->
+	{
+		File out = File.createTempFile("httpTempRead", null);
+		try (FileOutputStream fos = new FileOutputStream(out))
+		{
+			relay(response.getContentStream(), fos, 8192, response.getLength(), cancelSwitch, monitor);
+		}
+		if (cancelSwitch.get())
+		{
+			out.delete();
+			return null;
+		}
+		else
+		{
+			return out;
+		}
+	};
+
+	
+	// Not instantiable.
+	private HTTPUtils() {}
 	
 	/**
 	 * The default executor to use for sending async requests.
@@ -506,16 +565,12 @@ public final class HTTPUtils
 	public interface TransferMonitor
 	{
 		/**
-		 * Called when a series of bytes move from one place to another. 
-		 * @param current the current amount in bytes.
-		 * @param max the maximum amount/target in bytes, if any.
+		 * Called when a series of objects move from one place to another. 
+		 * @param current the current amount.
+		 * @param max the maximum amount/target, if any.
 		 */
 		void onProgressChange(long current, Long max);
 		
-		/**
-		 * A transfer monitor that does nothing.
-		 */
-		static TransferMonitor NULL_MONITOR = (current, max) -> {};
 	}
 	
 	/**
@@ -526,62 +581,6 @@ public final class HTTPUtils
 	public interface HTTPReader<R>
 	{
 		/**
-		 * An HTTP Reader that reads byte content and returns a decoded String.
-		 * Gets the string contents of the response, decoded using the response's charset.
-		 * <p> If the read is cancelled, this returns null.
-		 */
-		static HTTPReader<String> STRING_CONTENT_READER = (response, cancelSwitch, monitor) ->
-		{
-			String charset;
-			if ((charset = response.getCharset()) == null)
-				throw new UnsupportedEncodingException("No charset specified.");
-			
-			char[] c = new char[16384];
-			StringBuilder sb = new StringBuilder();
-			InputStreamReader reader = new InputStreamReader(response.getContentStream(), charset);
-	
-			int buf = 0;
-			while (!cancelSwitch.get() && (buf = reader.read(c)) >= 0) 
-				sb.append(c, 0, buf);
-			
-			return cancelSwitch.get() ? null : sb.toString();
-		};
-		
-		/**
-		 * An HTTP Reader that reads the response body as byte content and returns a byte array.
-		 * <p> If the read is cancelled, this returns null.
-		 */
-		static HTTPReader<byte[]> BYTE_CONTENT_READER = (response, cancelSwitch, monitor) ->
-		{
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			relay(response.getContentStream(), bos, 8192, response.getLength(), cancelSwitch, monitor);
-			return cancelSwitch.get() ? null : bos.toByteArray();
-		};
-		
-		/**
-		 * An HTTP Reader that reads byte content and puts it in a temporary file.
-		 * Gets the string contents of the response, decoded using the response's charset.
-		 * <p> If the read is cancelled, the file is closed and deleted, and this returns null.
-		 */
-		static HTTPReader<File> TEMPORARY_FILE_READER = (response, cancelSwitch, monitor) ->
-		{
-			File out = File.createTempFile("httpTempRead", null);
-			try (FileOutputStream fos = new FileOutputStream(out))
-			{
-				relay(response.getContentStream(), fos, 8192, response.getLength(), cancelSwitch, monitor);
-			}
-			if (cancelSwitch.get())
-			{
-				out.delete();
-				return null;
-			}
-			else
-			{
-				return out;
-			}
-		};
-		
-		/**
 		 * Called to read the HTTP response from an HTTP call.
 		 * <p> The policy of this reader is to keep reading from the open response stream until
 		 * the end is reached.
@@ -591,7 +590,7 @@ public final class HTTPUtils
 		 */
 		default R onHTTPResponse(HTTPResponse response) throws IOException
 		{
-			return onHTTPResponse(response, new AtomicBoolean(false), TransferMonitor.NULL_MONITOR);
+			return onHTTPResponse(response, new AtomicBoolean(false), TRANSFERMONITOR_NULL);
 		}
 		
 		/**
@@ -619,7 +618,7 @@ public final class HTTPUtils
 		 */
 		default R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch) throws IOException
 		{
-			return onHTTPResponse(response, cancelSwitch, TransferMonitor.NULL_MONITOR);
+			return onHTTPResponse(response, cancelSwitch, TRANSFERMONITOR_NULL);
 		}
 		
 		/**
@@ -636,15 +635,67 @@ public final class HTTPUtils
 		R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException;
 		
 		/**
-		 * Creates an HTTPReader that returns a File with the response body content written to it.
-		 * The target File will be created or overwritten.
-		 * @param targetFile the target file.
-		 * @return a reader for the file.
+		 * Convenience method for wrapping the content stream in a reader for 
+		 * the response's charset encoding.
+		 * @param response the open response object.
+		 * @return an InputStreamReader to read from.
+		 * @throws UnsupportedEncodingException if the response has a charset type that is unknown.
 		 */
-		static HTTPReader<File> createFileDownloader(final File targetFile)
+		static InputStreamReader openReader(HTTPResponse response) throws UnsupportedEncodingException
+		{
+			String charset;
+			if ((charset = response.getCharset()) == null)
+				charset = ISO_8859_1.displayName();
+			return new InputStreamReader(response.getContentStream(), charset);
+		}
+
+		/**
+		 * An HTTP Reader that reads byte content and returns a decoded String.
+		 * Gets the string contents of the response, decoded using the response's charset,
+		 * or if not provided, "ISO-8859-1".
+		 * <p> If the read is cancelled, this returns null.
+		 * @return the reader for reading the text content into a string.
+		 */
+		static HTTPReader<String> createStringReader()
+		{
+			return HTTPREADER_STRING_CONTENT;
+		}
+
+		/**
+		 * An HTTP Reader that reads the response body as byte content and returns a byte array.
+		 * <p> If the read is cancelled, this returns null.
+		 * @return the reader for reading the content into a byte array.
+		 */
+		static HTTPReader<byte[]> createByteArrayReader()
+		{
+			return HTTPREADER_BYTE_CONTENT;
+		}
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content written to it.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @return a reader for downloading the file.
+		 */
+		static HTTPReader<File> createFileDownloader(File targetFile)
+		{
+			return createFileDownloader(targetFile, false);
+		}
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content written to it.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @param createDirectories if true, this will attempt to create the directories for the file.
+		 * @return a reader for downloading the file.
+		 */
+		static HTTPReader<File> createFileDownloader(final File targetFile, final boolean createDirectories)
 		{
 			return (response, cancelSwitch, monitor) ->
 			{
+				if (createDirectories)
+					targetFile.getParentFile().mkdirs();
+				
 				try (FileOutputStream fos = new FileOutputStream(targetFile))
 				{
 					relay(response.getContentStream(), fos, 8192, response.getLength(), cancelSwitch, monitor);
@@ -661,6 +712,124 @@ public final class HTTPUtils
 			};
 		}
 		
+		/**
+		 * An HTTP Reader that reads byte content and puts it in a temporary file.
+		 * Gets the string contents of the response, decoded using the response's charset.
+		 * <p> If the read is cancelled, the file is closed and deleted, and this returns null.
+		 * @return the reader for reading the content into a file.
+		 */
+		static HTTPReader<File> createTemporaryFileReader()
+		{
+			return HTTPREADER_TEMPORARY_FILE;
+		}
+
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content (presumably text-based) written to it.
+		 * This differs from {@link #createFileDownloader(File)} as this will perform data conversion.
+		 * <p> This will use the system-native charset as the output charset for the new file.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @return a reader for downloading the text file.
+		 */
+		static HTTPReader<File> createTextFileDownloader(File targetFile)
+		{
+			return createTextFileDownloader(targetFile, Charset.defaultCharset(), false);
+		}
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content (presumably text-based) written to it.
+		 * This differs from {@link #createFileDownloader(File, boolean)} as this will perform data conversion.
+		 * <p> This will use the system-native charset as the output charset for the new file.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @param createDirectories if true, this will attempt to create the directories for the file.
+		 * @return a reader for downloading the text file.
+		 */
+		static HTTPReader<File> createTextFileDownloader(File targetFile, boolean createDirectories)
+		{
+			return createTextFileDownloader(targetFile, Charset.defaultCharset(), createDirectories);
+		}
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content (presumably text-based) written to it.
+		 * This differs from {@link #createFileDownloader(File)} as this will perform data conversion.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @param targetCharset the target charset encoding for the file.
+		 * @return a reader for downloading the text file.
+		 */
+		static HTTPReader<File> createTextFileDownloader(File targetFile, Charset targetCharset)
+		{
+			return createTextFileDownloader(targetFile, targetCharset, false);
+		}
+		
+		/**
+		 * Creates an HTTPReader that returns a File with the response body content (presumably text-based) written to it.
+		 * <p> This differs from {@link #createFileDownloader(File, boolean)} as this will perform data conversion.
+		 * <p> The target File will be created or overwritten.
+		 * @param targetFile the target file.
+		 * @param targetCharset the target charset encoding for the file.
+		 * @param createDirectories if true, this will attempt to create the directories for the file.
+		 * @return a reader for downloading the text file.
+		 */
+		static HTTPReader<File> createTextFileDownloader(final File targetFile, final Charset targetCharset, final boolean createDirectories)
+		{
+			return (response, cancelSwitch, monitor) ->
+			{
+				if (createDirectories)
+					targetFile.getParentFile().mkdirs();
+				
+				try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset))
+				{
+					relay(openReader(response), writer, 8192, null, cancelSwitch, monitor);
+				}
+				if (cancelSwitch.get())
+				{
+					targetFile.delete();
+					return null;
+				}
+				else
+				{
+					return targetFile;
+				}
+			};
+		}
+		
+		/**
+		 * Creates an HTTPReader that reads a text response line-by-line, 
+		 * emitting each line to a consumer function.
+		 * @param consumer the consumer for each line.
+		 * @return a reader for continually consuming the content one line at a time.
+		 */
+		static HTTPReader<Void> createLineConsumer(final Consumer<String> consumer)
+		{
+			return (response, cancelSwitch, monitor) ->
+			{
+				BufferedReader br = new BufferedReader(openReader(response));
+				String line;
+				while ((line = br.readLine()) != null)
+					consumer.accept(line);
+				return null;
+			};
+		}
+		
+		/**
+		 * Creates an HTTPReader that reads a byte stream text response byte-by-byte, 
+		 * emitting each byte to a consumer function.
+		 * @param consumer the consumer for each byte.
+		 * @return a reader for continually consuming the content one byte at a time.
+		 */
+		static HTTPReader<Void> createByteConsumer(final Consumer<Byte> consumer)
+		{
+			return (response, cancelSwitch, monitor) ->
+			{
+				int b;
+				while ((b = response.getContentStream().read()) >= 0)
+					consumer.accept((byte)b);
+				return null;
+			};
+		}
+		
 	}
 
 	/**
@@ -668,6 +837,9 @@ public final class HTTPUtils
 	 */
 	public interface HTTPContent
 	{
+		/** Default chunk size in bytes for uploads. */
+		public static final int DEFAULT_CHUNK_SIZE = 4096;
+
 		/**
 		 * @return the content MIME-type of this content.
 		 */
@@ -684,9 +856,10 @@ public final class HTTPUtils
 		String getEncoding();
 	
 		/**
-		 * @return the length of the content in bytes.
+		 * @return the length of the content in bytes, or null to use an unspecified length and a specific chunk size.
+		 * @see #getChunkLength()
 		 */
-		long getLength();
+		Long getLength();
 	
 		/**
 		 * @return an input stream for the data.
@@ -695,6 +868,229 @@ public final class HTTPUtils
 		 */
 		InputStream getInputStream() throws IOException;
 		
+		/**
+		 * @return the length of the upload chunks.
+		 */
+		default int getChunkLength()
+		{
+			return DEFAULT_CHUNK_SIZE;
+		}
+
+		/**
+		 * Creates a text blob content body for an HTTP request.
+		 * @param contentType the data's content type.
+		 * @param text the text data.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextContent(String contentType, String text)
+		{
+			try {
+				return new TextContent(contentType, "utf-8", text.getBytes("utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("JVM does not support the UTF-8 charset [INTERNAL ERROR].");
+			}
+		}
+
+		/**
+		 * Creates a byte blob content body for an HTTP request.
+		 * @param contentType the data's content type.
+		 * @param bytes the byte data.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createByteContent(String contentType, byte[] bytes)
+		{
+			return new BlobContent(contentType, null, bytes);
+		}
+
+		/**
+		 * Creates a byte blob content body for an HTTP request.
+		 * @param contentType the data's content type.
+		 * @param encodingType the data's encoding type (like gzip or what have you, can be null for none).
+		 * @param bytes the byte data.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createByteContent(String contentType, String encodingType, byte[] bytes)
+		{
+			return new BlobContent(contentType, encodingType, bytes);
+		}
+
+		/**
+		 * Creates an unknown-length stream for an HTTP request.
+		 * Uses the default chunk size for transfer: {@value HTTPContent#DEFAULT_CHUNK_SIZE}.
+		 * @param contentType the data's content type.
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createStreamContent(String contentType, InputStream inputStream)
+		{
+			return new StreamContent(contentType, null, null, HTTPContent.DEFAULT_CHUNK_SIZE, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length stream for an HTTP request.
+		 * @param contentType the data's content type.
+		 * @param chunkSize the maximum chunk size per upload segment in bytes.
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createStreamContent(String contentType, int chunkSize, InputStream inputStream)
+		{
+			return new StreamContent(contentType, null, null, chunkSize, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length stream for an HTTP request.
+		 * The stream is assumed to be the provided encoding - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param encodingType the data's encoding type (like gzip or what have you, can be null for none).
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createStreamContent(String contentType, String encodingType, InputStream inputStream)
+		{
+			return new StreamContent(contentType, encodingType, null, HTTPContent.DEFAULT_CHUNK_SIZE, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length stream for an HTTP request.
+		 * The stream is assumed to be the provided encoding - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param encodingType the data's encoding type (like gzip or what have you, can be null for none).
+		 * @param chunkSize the maximum chunk size per upload segment in bytes.
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createStreamContent(String contentType, String encodingType, int chunkSize, InputStream inputStream)
+		{
+			return new StreamContent(contentType, encodingType, null, chunkSize, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length text stream for an HTTP request.
+		 * The stream is assumed to be the provided type - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param charsetType the charset name for the text payload (e.g. "utf-8" or "ascii").
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextStreamContent(String contentType, String charsetType, InputStream inputStream)
+		{
+			return new StreamContent(contentType, null, charsetType, HTTPContent.DEFAULT_CHUNK_SIZE, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length text stream for an HTTP request.
+		 * The stream is assumed to be the provided type and encoding - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param encodingType the data's encoding type (like gzip or what have you, can be null for none).
+		 * @param charsetType the charset name for the text payload (e.g. "utf-8" or "ascii").
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextStreamContent(String contentType, String encodingType, String charsetType, InputStream inputStream)
+		{
+			return new StreamContent(contentType, encodingType, charsetType, HTTPContent.DEFAULT_CHUNK_SIZE, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length text stream for an HTTP request.
+		 * The stream is assumed to be the provided type and encoding - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param charsetType the charset name for the text payload (e.g. "utf-8" or "ascii").
+		 * @param chunkSize the maximum chunk size per upload segment in bytes.
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextStreamContent(String contentType, String charsetType, int chunkSize, InputStream inputStream)
+		{
+			return new StreamContent(contentType, null, charsetType, chunkSize, inputStream);
+		}
+
+		/**
+		 * Creates an unknown-length text stream for an HTTP request.
+		 * The stream is assumed to be the provided type and encoding - no conversion will occur.
+		 * @param contentType the data's content type.
+		 * @param encodingType the data's encoding type (like gzip or what have you, can be null for none).
+		 * @param charsetType the charset name for the text payload (e.g. "utf-8" or "ascii").
+		 * @param chunkSize the maximum chunk size per upload segment in bytes.
+		 * @param inputStream the stream to read from for the upload.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextStreamContent(String contentType, String encodingType, String charsetType, int chunkSize, InputStream inputStream)
+		{
+			return new StreamContent(contentType, encodingType, charsetType, chunkSize, inputStream);
+		}
+
+		/**
+		 * Creates a file-based content body for an HTTP request.
+		 * @param contentType the file's content type.
+		 * @param file the file to read from on send.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createFileContent(String contentType, File file)
+		{
+			return new FileContent(contentType, null, null, file);
+		}
+
+		/**
+		 * Creates a file-based content body for an HTTP request.
+		 * @param contentType the file's content type.
+		 * @param encodingType the data encoding type for the file's payload (e.g. "gzip" or "base64").
+		 * @param file the file to read from on send.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createFileContent(String contentType, String encodingType, File file)
+		{
+			return new FileContent(contentType, encodingType, null, file);
+		}
+
+		/**
+		 * Creates a file-based content body for an HTTP request, presumably a text file.
+		 * The default system text encoding is presumed.
+		 * @param contentType the file's content type.
+		 * @param file the file to read from on send.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextFileContent(String contentType, File file)
+		{
+			return new FileContent(contentType, null, Charset.defaultCharset().name(), file);
+		}
+
+		/**
+		 * Creates file based content body for an HTTP request, presumably a text file encoded
+		 * with a specific charset.
+		 * @param contentType the file's content type.
+		 * @param charset the charset for the file's payload (e.g. "utf-8" or "ascii").
+		 * @param file the file to read from on send.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createTextFileContent(String contentType, Charset charset, File file)
+		{
+			return new FileContent(contentType, null, charset.name(), file);
+		}
+
+		/**
+		 * Creates a WWW form, URL encoded content body for an HTTP request.
+		 * <p>Note: This is NOT mulitpart form-data content! 
+		 * See {@link MultipartFormContent} for mixed file attachments and fields.
+		 * @param keyValueMap the map of key to value.
+		 * @return a content object representing the content.
+		 */
+		public static HTTPContent createFormContent(HTTPParameters keyValueMap)
+		{
+			return new FormContent(keyValueMap);
+		}
+
+		/**
+		 * Creates a WWW form, URL encoded content body for an HTTP request.
+		 * @return a content object representing the content.
+		 * @see MultipartFormContent
+		 */
+		public static MultipartFormContent createMultipartContent()
+		{
+			return new MultipartFormContent();
+		}
+	
 	}
 
 	/**
@@ -722,14 +1118,14 @@ public final class HTTPUtils
 
 		static
 		{
-			CRLF = "\r\n".getBytes(UTF8);
-			DISPOSITION_HEADER = "Content-Disposition: form-data".getBytes(UTF8);
-			DISPOSITION_NAME = "; name=\"".getBytes(UTF8);
-			DISPOSITION_NAME_END = "\"".getBytes(UTF8);
-			DISPOSITION_FILENAME = "; filename=\"".getBytes(UTF8);
-			DISPOSITION_FILENAME_END = "\"".getBytes(UTF8);
-			TYPE_HEADER = "Content-Type: ".getBytes(UTF8);
-			ENCODING_HEADER = "Content-Transfer-Encoding: ".getBytes(UTF8);
+			CRLF = "\r\n".getBytes(ISO_8859_1);
+			DISPOSITION_HEADER = "Content-Disposition: form-data".getBytes(ISO_8859_1);
+			DISPOSITION_NAME = "; name=\"".getBytes(ISO_8859_1);
+			DISPOSITION_NAME_END = "\"".getBytes(ISO_8859_1);
+			DISPOSITION_FILENAME = "; filename=\"".getBytes(ISO_8859_1);
+			DISPOSITION_FILENAME_END = "\"".getBytes(ISO_8859_1);
+			TYPE_HEADER = "Content-Type: ".getBytes(ISO_8859_1);
+			ENCODING_HEADER = "Content-Transfer-Encoding: ".getBytes(ISO_8859_1);
 		}
 		
 		/** The form part first boundary. */
@@ -743,15 +1139,17 @@ public final class HTTPUtils
 		private List<Part> parts;
 		/** Total length. */
 		private long length;
+		/** Boundary Text. */
+		private String boundaryText;
 		
 		private MultipartFormContent() 
 		{
 			this.parts = new LinkedList<>();
-			String boundaryText = generateBoundary();
+			this.boundaryText = generateBoundary();
 			
 			this.boundaryFirst = ("--" + boundaryText + "\r\n").getBytes(UTF8);
 			this.boundaryMiddle = ("\r\n--" + boundaryText + "\r\n").getBytes(UTF8);
-			this.boundaryEnd = ("\r\n--" + boundaryText + "--").getBytes(UTF8);
+			this.boundaryEnd = ("\r\n--" + boundaryText + "--\r\n").getBytes(UTF8);
 			
 			// account for start and end boundary at least.
 			this.length = boundaryFirst.length + boundaryEnd.length;
@@ -761,8 +1159,9 @@ public final class HTTPUtils
 		{
 			Random r = new Random();
 			StringBuilder sb = new StringBuilder();
-			int dashes = r.nextInt(15) + 10;
-			int letters = r.nextInt(24) + 16;
+			int dashes = r.nextInt(8) + 10;
+			int letters = r.nextInt(20) + 14;
+			sb.append("HTTPUtilsBoundary");
 			while (dashes-- > 0)
 				sb.append('-');
 			while (letters-- > 0)
@@ -771,7 +1170,7 @@ public final class HTTPUtils
 		}
 		
 		// Adds a part and calculates change in length.
-		private void addPart(final Part p)
+		private void addPart(Part p)
 		{
 			boolean hadOtherParts = !parts.isEmpty();
 			parts.add(p);
@@ -785,11 +1184,10 @@ public final class HTTPUtils
 		 * @param name the field name.
 		 * @param value the value.
 		 * @return itself, for chaining.
-		 * @throws IOException if the data can't be encoded.
 		 */
-		public MultipartFormContent addField(String name, String value) throws IOException
+		public MultipartFormContent addField(String name, String value)
 		{
-			return addTextPart(name, null, value);
+			return addTextPart(name, "text/plain", value);
 		}
 		
 		/**
@@ -798,15 +1196,30 @@ public final class HTTPUtils
 		 * @param mimeType the mimeType of the text part.
 		 * @param text the text data.
 		 * @return itself, for chaining.
-		 * @throws IOException if the data can't be encoded.
 		 */
-		public MultipartFormContent addTextPart(String name, final String mimeType, final String text) throws IOException
+		public MultipartFormContent addTextPart(String name, String mimeType, String text)
 		{
-			return addDataPart(name, mimeType, null, null, text.getBytes(UTF8));
+			return addDataPart(name, mimeType, null, UTF8.displayName(), null, text.getBytes(UTF8));
 		}
 		
 		/**
 		 * Adds a file part to this multipart form.
+		 * The MIME-Type is "application/octet-stream".
+		 * The encoding type is "binary".
+		 * The name of the file is passed along.
+		 * @param name the field name.
+		 * @param data the file data.
+		 * @return itself, for chaining.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
+		 */
+		public MultipartFormContent addFilePart(String name, File data)
+		{
+			return addFilePart(name, null, "binary", null, data.getName(), data);
+		}
+		
+		/**
+		 * Adds a file part to this multipart form.
+		 * The encoding type is "binary".
 		 * The name of the file is passed along.
 		 * @param name the field name.
 		 * @param mimeType the mimeType of the file part.
@@ -814,21 +1227,24 @@ public final class HTTPUtils
 		 * @return itself, for chaining.
 		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
 		 */
-		public MultipartFormContent addFilePart(String name, String mimeType, final File data)
+		public MultipartFormContent addFilePart(String name, String mimeType, File data)
 		{
-			return addFilePart(name, mimeType, data.getName(), data);
+			return addFilePart(name, mimeType, "binary", null, data.getName(), data);
 		}
 		
 		/**
 		 * Adds a file part to this multipart form.
+		 * The encoding type is "binary".
 		 * @param name the field name.
 		 * @param mimeType the mimeType of the file part.
+		 * @param encoding the encoding type name for the data sent, like 'base64' or 'gzip' or somesuch (can be null to signal no encoding type).
+		 * @param charset the file data's charset encoding.
 		 * @param fileName the file name to send (overridden).
 		 * @param data the file data.
 		 * @return itself, for chaining.
 		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
 		 */
-		public MultipartFormContent addFilePart(String name, final String mimeType, final String fileName, final File data)
+		public MultipartFormContent addFilePart(String name, String mimeType, String encoding, String charset, String fileName, final File data)
 		{
 			if (data == null)
 				throw new IllegalArgumentException("data cannot be null.");
@@ -842,17 +1258,29 @@ public final class HTTPUtils
 				// Content Disposition Line
 				bos.write(DISPOSITION_HEADER);
 				bos.write(DISPOSITION_NAME);
-				bos.write(name.getBytes(UTF8));
+				bos.write(uriEncode(name).getBytes(ISO_8859_1));
 				bos.write(DISPOSITION_NAME_END);
 				bos.write(DISPOSITION_FILENAME);
-				bos.write(fileName.getBytes(UTF8));
+				bos.write(uriEncode(fileName).getBytes(ISO_8859_1));
 				bos.write(DISPOSITION_FILENAME_END);
 				bos.write(CRLF);
 
 				// Content Type Line
+				mimeType = mimeType == null ? "application/octet-stream" : mimeType;
+				
 				bos.write(TYPE_HEADER);
-				bos.write(mimeType.getBytes(UTF8));
+				bos.write(mimeType.getBytes(ISO_8859_1));
+				if (charset != null)
+					bos.write(("; charset=" + charset).getBytes(ISO_8859_1));
 				bos.write(CRLF);
+
+				// Content transfer encoding
+				if (encoding != null)
+				{
+					bos.write(ENCODING_HEADER);
+					bos.write(encoding.getBytes(ISO_8859_1));
+					bos.write(CRLF);
+				}
 
 				// Blank line for header end.
 				bos.write(CRLF);
@@ -863,9 +1291,7 @@ public final class HTTPUtils
 				throw new RuntimeException(e);
 			}
 
-			final byte[] headerBytes = bos.toByteArray();
-			
-			addPart(new Part(headerBytes, new PartData() 
+			addPart(new Part(bos.toByteArray(), new PartData() 
 			{
 				@Override
 				public long getDataLength() 
@@ -883,7 +1309,69 @@ public final class HTTPUtils
 		}
 		
 		/**
+		 * Adds a text file part to this multipart form.
+		 * The MIME-Type is "text/plain".
+		 * Uses the default charset.
+		 * The name of the file is passed along.
+		 * @param name the field name.
+		 * @param data the file data.
+		 * @return itself, for chaining.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
+		 */
+		public MultipartFormContent addTextFilePart(String name, File data)
+		{
+			return addFilePart(name, "text/plain", null, Charset.defaultCharset().displayName(), data.getName(), data);
+		}
+
+		/**
+		 * Adds a text file part to this multipart form.
+		 * Uses the default charset.
+		 * The name of the file is passed along.
+		 * @param name the field name.
+		 * @param mimeType the mimeType of the file part.
+		 * @param data the file data.
+		 * @return itself, for chaining.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
+		 */
+		public MultipartFormContent addTextFilePart(String name, String mimeType, File data)
+		{
+			return addFilePart(name, mimeType, null, Charset.defaultCharset().name(), data.getName(), data);
+		}
+
+		/**
+		 * Adds a text file part to this multipart form.
+		 * The name of the file is passed along.
+		 * @param name the field name.
+		 * @param mimeType the mimeType of the file part.
+		 * @param charset the file data's charset encoding.
+		 * @param data the file data.
+		 * @return itself, for chaining.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
+		 */
+		public MultipartFormContent addTextFilePart(String name, String mimeType, String charset, File data)
+		{
+			return addFilePart(name, mimeType, null, charset, data.getName(), data);
+		}
+
+		/**
+		 * Adds a text file part to this multipart form.
+		 * The name of the file is passed along.
+		 * @param name the field name.
+		 * @param mimeType the mimeType of the file part.
+		 * @param charset the file data's charset encoding.
+		 * @param fileName the file name to send (overridden).
+		 * @param data the file data.
+		 * @return itself, for chaining.
+		 * @throws IllegalArgumentException if data is null, the file cannot be found, or the file is a directory.
+		 */
+		public MultipartFormContent addTextFilePart(String name, String mimeType, String charset, String fileName, File data)
+		{
+			return addFilePart(name, mimeType, null, charset, fileName, data);
+		}
+
+		/**
 		 * Adds a byte data part to this multipart form.
+		 * The encoding type is "binary".
 		 * @param name the field name.
 		 * @param mimeType the mimeType of the file part.
 		 * @param dataIn the input data.
@@ -891,11 +1379,12 @@ public final class HTTPUtils
 		 */
 		public MultipartFormContent addDataPart(String name, String mimeType, byte[] dataIn)
 		{
-			return addDataPart(name, mimeType, null, null, dataIn);
+			return addDataPart(name, mimeType, "binary", null, null, dataIn);
 		}
 	
 		/**
-		 * Adds a byte data part to this multipart form as though it came from a file.
+		 * Adds a byte data part to this multipart form.
+		 * The encoding type is "binary".
 		 * @param name the field name.
 		 * @param mimeType the mimeType of the file part.
 		 * @param fileName the name of the file, as though this were originating from a file (can be null, for "no file").
@@ -904,7 +1393,7 @@ public final class HTTPUtils
 		 */
 		public MultipartFormContent addDataPart(String name, String mimeType, String fileName, byte[] dataIn)
 		{
-			return addDataPart(name, mimeType, null, fileName, dataIn);
+			return addDataPart(name, mimeType, "binary", null, fileName, dataIn);
 		}
 		
 		/**
@@ -912,40 +1401,41 @@ public final class HTTPUtils
 		 * @param name the field name.
 		 * @param mimeType the mimeType of the file part.
 		 * @param encoding the encoding type name for the data sent, like 'base64' or 'gzip' or somesuch (can be null to signal no encoding type).
+		 * @param charset the charset name that the text is encoded in.
 		 * @param fileName the name of the file, as though this were originating from a file (can be null, for "no file").
 		 * @param dataIn the input data.
 		 * @return itself, for chaining.
 		 */
-		public MultipartFormContent addDataPart(String name, final String mimeType, final String encoding, final String fileName, final byte[] dataIn)
+		public MultipartFormContent addDataPart(String name, String mimeType, String encoding, String charset, String fileName, final byte[] dataIn)
 		{
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(256);
 			try {
 				// Content Disposition Line
 				bos.write(DISPOSITION_HEADER);
 				bos.write(DISPOSITION_NAME);
-				bos.write(name.getBytes(UTF8));
+				bos.write(uriEncode(name).getBytes(ISO_8859_1));
 				bos.write(DISPOSITION_NAME_END);
 				if (fileName != null)
 				{
 					bos.write(DISPOSITION_FILENAME);
-					bos.write(fileName.getBytes(UTF8));
+					bos.write(uriEncode(fileName).getBytes(ISO_8859_1));
 					bos.write(DISPOSITION_FILENAME_END);
 				}
 				bos.write(CRLF);
 
 				// Content Type Line
-				if (mimeType != null)
-				{
-					bos.write(TYPE_HEADER);
-					bos.write(mimeType.getBytes(UTF8));
-					bos.write(CRLF);
-				}
+				mimeType = mimeType == null ? "application/octet-stream" : mimeType;
+				bos.write(TYPE_HEADER);
+				bos.write(mimeType.getBytes(ISO_8859_1));
+				if (charset != null)
+					bos.write(("; charset=" + charset).getBytes(ISO_8859_1));
+				bos.write(CRLF);
 
 				// Content transfer encoding
 				if (encoding != null)
 				{
 					bos.write(ENCODING_HEADER);
-					bos.write(encoding.getBytes(UTF8));
+					bos.write(encoding.getBytes(ISO_8859_1));
 					bos.write(CRLF);
 				}
 				
@@ -958,9 +1448,7 @@ public final class HTTPUtils
 				throw new RuntimeException(e);
 			}
 
-			final byte[] headerBytes = bos.toByteArray();
-			
-			addPart(new Part(headerBytes, new PartData() 
+			addPart(new Part(bos.toByteArray(), new PartData() 
 			{
 				@Override
 				public long getDataLength() 
@@ -980,13 +1468,13 @@ public final class HTTPUtils
 		@Override
 		public String getContentType()
 		{
-			return "multipart/form-data";
+			return "multipart/form-data; boundary=\"" + boundaryText + "\"";
 		}
 
 		@Override
 		public String getCharset()
 		{
-			return "utf-8";
+			return null;
 		}
 
 		@Override
@@ -996,7 +1484,7 @@ public final class HTTPUtils
 		}
 
 		@Override
-		public long getLength()
+		public Long getLength()
 		{
 			return length;
 		}
@@ -1132,7 +1620,7 @@ public final class HTTPUtils
 					for (int i = 1; i < blueprint.length; i += 2)
 					{
 						this.blueprint[i] = BLUEPRINT_PART;
-						this.blueprint[i + 1] = i + 1 < blueprint.length - 1 ? BLUEPRINT_BOUNDARY_MIDDLE : BLUEPRINT_BOUNDARY_END;
+						this.blueprint[i + 1] = (i + 1) < (blueprint.length - 1) ? BLUEPRINT_BOUNDARY_MIDDLE : BLUEPRINT_BOUNDARY_END;
 					}
 				}
 				nextStream();
@@ -1225,9 +1713,9 @@ public final class HTTPUtils
 		}
 		
 		@Override
-		public long getLength()
+		public Long getLength()
 		{
-			return data.length;
+			return (long)data.length;
 		}
 		
 		@Override
@@ -1242,9 +1730,9 @@ public final class HTTPUtils
 	{
 		private String contentCharset;
 	
-		private TextContent(String contentType, String contentCharset, String contentEncoding, byte[] data)
+		private TextContent(String contentType, String contentCharset, byte[] data)
 		{
-			super(contentType, contentEncoding, data);
+			super(contentType, null, data);
 			this.contentCharset = contentCharset;
 		}
 		
@@ -1295,7 +1783,7 @@ public final class HTTPUtils
 		}
 	
 		@Override
-		public long getLength()
+		public Long getLength()
 		{
 			return file.length();
 		}
@@ -1308,11 +1796,72 @@ public final class HTTPUtils
 		
 	}
 
+	private static class StreamContent implements HTTPContent
+	{
+		private String contentType;
+		private String encodingType;
+		private String charsetType;
+		private int chunkSize;
+		private InputStream inputStream;
+		
+		private StreamContent(String contentType, String encodingType, String charsetType, int chunkSize, InputStream inputStream)
+		{
+			if (inputStream == null)
+				throw new IllegalArgumentException("stream cannot be null.");
+			if (chunkSize <= 0)
+				throw new IllegalArgumentException("chunk size cannot be 0 or less.");
+	
+			this.contentType = contentType;
+			this.encodingType = encodingType;
+			this.charsetType = charsetType;
+			this.chunkSize = chunkSize;
+			this.inputStream = inputStream;
+		}
+		
+		@Override
+		public String getContentType()
+		{
+			return contentType;
+		}
+	
+		@Override
+		public String getCharset()
+		{
+			return charsetType;
+		}
+	
+		@Override
+		public String getEncoding()
+		{
+			return encodingType;
+		}
+	
+		@Override
+		public Long getLength()
+		{
+			// Unknown length.
+			return null;
+		}
+	
+		@Override
+		public int getChunkLength() 
+		{
+			return chunkSize;
+		}
+		
+		@Override
+		public InputStream getInputStream() throws IOException
+		{
+			return inputStream;
+		}
+		
+	}
+
 	private static class FormContent extends TextContent
 	{
 		private FormContent(HTTPParameters parameters)
 		{
-			super("x-www-form-urlencoded", UTF8.displayName(), null, parameters.toString().getBytes(UTF8));
+			super("x-www-form-urlencoded", UTF8.displayName(), parameters.toString().getBytes(UTF8));
 		}
 	}
 
@@ -1626,31 +2175,35 @@ public final class HTTPUtils
 			long conlen = conn.getContentLengthLong();
 			this.length = conlen < 0 ? null : conlen;
 			this.encoding = conn.getContentEncoding();
-			this.contentTypeHeader = conn.getContentType();
 
-			int mimeEnd = contentTypeHeader.indexOf(';');
-			
+			this.contentTypeHeader = conn.getContentType();
 			this.charset = null;
-			this.contentType = contentTypeHeader.substring(0, mimeEnd >= 0 ? mimeEnd : contentTypeHeader.length()).trim();
-			
-			int charsetindex;
-			if ((charsetindex = contentTypeHeader.toLowerCase().indexOf("charset=")) >= 0)
+
+			if (contentTypeHeader != null)
 			{
-				int endIndex = contentTypeHeader.indexOf(";", charsetindex);
-				if (endIndex >= 0)
-					charset = contentTypeHeader.substring(charsetindex + "charset=".length(), endIndex).trim();
-				else
-					charset = contentTypeHeader.substring(charsetindex + "charset=".length()).trim();
-				if (charset.startsWith("\"")) // remove surrounding quotes
-					charset = charset.substring(1, charset.length() - 1); 
+				int mimeEnd = contentTypeHeader.indexOf(';');
+				this.contentType = contentTypeHeader.substring(0, mimeEnd >= 0 ? mimeEnd : contentTypeHeader.length()).trim();
+				
+				int charsetindex;
+				if ((charsetindex = contentTypeHeader.toLowerCase().indexOf("charset=")) >= 0)
+				{
+					int endIndex = contentTypeHeader.indexOf(";", charsetindex);
+					if (endIndex >= 0)
+						charset = contentTypeHeader.substring(charsetindex + "charset=".length(), endIndex).trim();
+					else
+						charset = contentTypeHeader.substring(charsetindex + "charset=".length()).trim();
+					
+					if (charset.startsWith("\"")) // remove surrounding quotes
+						charset = charset.substring(1, charset.length() - 1); 
+				}
+				
+				if (charset == null)
+					charset = defaultResponseCharset;
 			}
-			
-			if (charset == null)
-				charset = defaultResponseCharset;
-			
+
 			this.filename = null;
 			this.contentDisposition = null;
-			this.contentStream = null;
+			this.contentStream = INPUTSTREAM_BLANK;
 			
 			this.headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			for (Map.Entry<String, List<String>> entry : conn.getHeaderFields().entrySet())
@@ -1675,9 +2228,9 @@ public final class HTTPUtils
 			}
 			
 			if (statusCode >= 400) 
-				contentStream = conn.getErrorStream();
+				contentStream = conn.getErrorStream() != null ? conn.getErrorStream() : INPUTSTREAM_BLANK;
 			else 
-				contentStream = conn.getInputStream();
+				contentStream = conn.getInputStream() != null ? conn.getInputStream() : INPUTSTREAM_BLANK;
 		}
 		
 		/**
@@ -1743,8 +2296,73 @@ public final class HTTPUtils
 			List<String> out = new ArrayList<>((request.redirectedURLs != null ? request.redirectedURLs.size() : 0) + 1);
 			if (request.redirectedURLs != null)
 				out.addAll(request.redirectedURLs);
-			out.add(request.url);
+			out.add(request.url.toString());
 			return Collections.unmodifiableList(out);
+		}
+
+		/**
+		 * @return the response's content length (if reported).
+		 */
+		public Long getLength() 
+		{
+			return length;
+		}
+
+		/**
+		 * @return an open input stream for reading the response's content.
+		 */
+		public InputStream getContentStream() 
+		{
+			return contentStream;
+		}
+
+		/**
+		 * @return the response's charset. can be null.
+		 */
+		public String getCharset()
+		{
+			return charset;
+		}
+
+		/**
+		 * @return the response's content type. can be null.
+		 */
+		public String getContentType()
+		{
+			return contentType;
+		}
+
+		/**
+		 * @return the response's content type (full unparsed header). can be null.
+		 */
+		public String getContentTypeHeader()
+		{
+			return contentTypeHeader;
+		}
+
+		/**
+		 * @return the response's encoding. can be null.
+		 */
+		public String getEncoding()
+		{
+			return encoding;
+		}
+
+		/**
+		 * @return the content disposition. if present, usually "attachment". Can be null.
+		 */
+		public String getContentDisposition() 
+		{
+			return contentDisposition;
+		}
+
+		/**
+		 * @return the content filename. Set if content disposition is "attachment". Can be null.
+		 * @see #getContentDisposition()
+		 */
+		public String getFilename() 
+		{
+			return filename;
 		}
 
 		/**
@@ -1799,22 +2417,6 @@ public final class HTTPUtils
 			return range == 4 || range == 5;
 		}
 
-		/**
-		 * @return the response's content length (if reported).
-		 */
-		public Long getLength() 
-		{
-			return length;
-		}
-	
-		/**
-		 * @return an open input stream for reading the response's content.
-		 */
-		public InputStream getContentStream() 
-		{
-			return contentStream;
-		}
-		
 		/**
 		 * Convenience function for transferring the entirety of the content 
 		 * stream to another.
@@ -1894,55 +2496,6 @@ public final class HTTPUtils
 		}
 		
 		/**
-		 * @return the response's charset. can be null.
-		 */
-		public String getCharset()
-		{
-			return charset;
-		}
-	
-		/**
-		 * @return the response's content type. can be null.
-		 */
-		public String getContentType()
-		{
-			return contentType;
-		}
-	
-		/**
-		 * @return the response's content type (full unparsed header). can be null.
-		 */
-		public String getContentTypeHeader()
-		{
-			return contentTypeHeader;
-		}
-	
-		/**
-		 * @return the response's encoding. can be null.
-		 */
-		public String getEncoding()
-		{
-			return encoding;
-		}
-	
-		/**
-		 * @return the content disposition. if present, usually "attachment". Can be null.
-		 */
-		public String getContentDisposition() 
-		{
-			return contentDisposition;
-		}
-
-		/**
-		 * @return the content filename. Set if content disposition is "attachment". Can be null.
-		 * @see #getContentDisposition()
-		 */
-		public String getFilename() 
-		{
-			return filename;
-		}
-
-		/**
 		 * Builds a request that fulfills a redirect, but only if this response is a redirect status.
 		 * @return a new request that would fulfill a redirect response.
 		 * @throws IllegalStateException if this response is not a redirect, or a 300, 304, or 305 
@@ -2000,7 +2553,7 @@ public final class HTTPUtils
 		/** HTTP Method. */
 		private String method;
 		/** Target URL string. */
-		private String url;
+		private URL url;
 		/** HTTP Headers. */
 		private HTTPHeaders headers;
 		/** HTTP Query Parameters. */
@@ -2035,22 +2588,25 @@ public final class HTTPUtils
 			this.redirectedURLs = null;
 		}
 		
-		// Checks if a URL pattern is valid.
-		// Returns the passed-in URL, unchanged.
-		private static String checkURL(String url)
-		{
-			return checkURL(url, false);
-		}
-		
-		// Checks if a URL pattern is valid.
-		// Returns the passed-in URL, unchanged.
-		private static String checkURL(String url, boolean fromServer)
+		// Checks if a URI pattern is valid.
+		// Returns the passed-in URI, unchanged.
+		private static URL checkURL(String url)
 		{
 			try {
-				new URL(url);
-				return url;
+				return new URL(url);
 			} catch (MalformedURLException e) {
-				throw new IllegalArgumentException(fromServer ? "Redirect URL from server is malformed." : "URL is malformed.", e);
+				throw new IllegalArgumentException("URL is malformed.", e);
+			}
+		}
+		
+		// Checks if a URI pattern is valid.
+		// Returns the passed-in URI, unchanged.
+		private static URI checkRedirectURI(String uri)
+		{
+			try {
+				return new URI(uri);
+			} catch (URISyntaxException e) {
+				throw new IllegalArgumentException("Redirect URI from server is malformed.", e);
 			}
 		}
 		
@@ -2153,7 +2709,7 @@ public final class HTTPUtils
 		 * (the content and monitor, however, if any, is reference-copied). 
 		 * @return a new HTTPRequest that is a copy of this one.
 		 */
-		public HTTPRequest copy()
+		public final HTTPRequest copy()
 		{
 			HTTPRequest out = new HTTPRequest();
 			out.method = this.method;
@@ -2165,10 +2721,7 @@ public final class HTTPUtils
 			out.defaultCharsetEncoding = this.defaultCharsetEncoding;
 			out.content = this.content;
 			out.monitor = this.monitor;
-			if (redirectedURLs == null)
-				out.redirectedURLs = null;
-			else
-				out.redirectedURLs = new LinkedList<>(out.redirectedURLs);
+			out.redirectedURLs = this.redirectedURLs != null ? new LinkedList<>(this.redirectedURLs) : null;
 			return out;
 		}
 
@@ -2181,7 +2734,7 @@ public final class HTTPUtils
 		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
 		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
-		public HTTPRequest copyRedirect(String newURL)
+		public final HTTPRequest copyRedirect(String newURL)
 		{
 			return copyRedirect(null, newURL);
 		}
@@ -2196,20 +2749,60 @@ public final class HTTPUtils
 		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
 		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
-		public HTTPRequest copyRedirect(String newMethod, String newURL)
+		public final HTTPRequest copyRedirect(String newMethod, String newURL)
 		{
 			HTTPRequest out = copy();
 			if (out.redirectedURLs == null)
 				out.redirectedURLs = new LinkedList<>();
-			if (out.redirectedURLs.contains(out.url))
+			String urlString = out.url.toString();
+			if (out.redirectedURLs.contains(urlString))
 				throw new IllegalStateException("Redirect loop detected - " + out.url + " wad already visited.");
-			out.redirectedURLs.add(out.url);
-			out.url = checkURL(newURL, true);
+			out.redirectedURLs.add(urlString);
+
+			try {
+				URI redirectURI = checkRedirectURI(newURL); 
+				if (redirectURI.getAuthority() == null)
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.append(out.url.getProtocol()).append("://");
+					if (out.url.getUserInfo() != null)
+						sb.append(out.url.getUserInfo()).append('@');
+					sb.append(out.url.getAuthority());
+					
+					sb.append(redirectURI.getPath());
+					
+					if (redirectURI.getQuery() != null)
+						sb.append(redirectURI.getQuery());
+					else if (out.url.getQuery() != null)
+						sb.append(out.url.getQuery());
+					out.url = new URL(sb.toString());
+				}
+				else
+				{
+					out.url = new URL(redirectURI.toString());
+				}
+			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException("Reconstructed URL is malformed. INTERNAL ERROR.", e);
+			} 
+			
 			if (newMethod != null)
 				out.method = newMethod;
 			if (!(out.method.equalsIgnoreCase(HTTP_METHOD_POST) || out.method.equalsIgnoreCase(HTTP_METHOD_PUT)))
 				out.content(null);
 			return out;
+		}
+		
+		/**
+		 * Replaces the headers on this request.
+		 * @param entries the header entries.
+		 * @return this request, for chaining.
+		 * @see HTTPUtils#headers(java.util.Map.Entry...)
+		 */
+		@SafeVarargs
+		public final HTTPRequest headers(Map.Entry<String, String> ... entries)
+		{
+			this.headers = HTTPUtils.headers(entries);
+			return this;
 		}
 		
 		/**
@@ -2220,7 +2813,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPUtils#headers(java.util.Map.Entry...)
 		 */
-		public HTTPRequest headers(HTTPHeaders headers)
+		public final HTTPRequest setHeaders(HTTPHeaders headers)
 		{
 			Objects.requireNonNull(headers);
 			this.headers = headers.copy();
@@ -2233,7 +2826,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public HTTPRequest addHeaders(HTTPHeaders headers)
+		public final HTTPRequest addHeaders(HTTPHeaders headers)
 		{
 			Objects.requireNonNull(headers);
 			this.headers.merge(headers);
@@ -2247,9 +2840,22 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public HTTPRequest setHeader(String header, String value)
+		public final HTTPRequest setHeader(String header, String value)
 		{
 			this.headers.setHeader(header, value);
+			return this;
+		}
+		
+		/**
+		 * Replaces the parameters on this request.
+		 * @param entries the parameter entries.
+		 * @return this request, for chaining.
+		 * @see HTTPUtils#parameters(java.util.Map.Entry...)
+		 */
+		@SafeVarargs
+		public final HTTPRequest parameters(Map.Entry<String, String> ... entries)
+		{
+			this.parameters = HTTPUtils.parameters(entries);
 			return this;
 		}
 		
@@ -2261,7 +2867,7 @@ public final class HTTPUtils
 		 * @see HTTPUtils#parameters(java.util.Map.Entry...)
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest parameters(HTTPParameters parameters)
+		public final HTTPRequest setParameters(HTTPParameters parameters)
 		{
 			Objects.requireNonNull(parameters);
 			this.parameters = parameters.copy();
@@ -2274,7 +2880,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public HTTPRequest addParameters(HTTPParameters parameters)
+		public final HTTPRequest addParameters(HTTPParameters parameters)
 		{
 			Objects.requireNonNull(parameters);
 			this.parameters.merge(parameters);
@@ -2288,7 +2894,7 @@ public final class HTTPUtils
 		 * @param value the parameter value.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest setParameter(String key, Object value)
+		public final HTTPRequest setParameter(String key, Object value)
 		{
 			this.parameters.setParameter(key, value);
 			return this;
@@ -2301,7 +2907,7 @@ public final class HTTPUtils
 		 * @param values the parameter values.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest setParameter(String key, Object... values)
+		public final HTTPRequest setParameter(String key, Object... values)
 		{
 			this.parameters.setParameter(key, values);
 			return this;
@@ -2313,7 +2919,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPUtils#cookie(String, String)
 		 */
-		public HTTPRequest addCookie(HTTPCookie cookie)
+		public final HTTPRequest addCookie(HTTPCookie cookie)
 		{
 			this.cookies.add(cookie);
 			return this;
@@ -2331,7 +2937,7 @@ public final class HTTPUtils
 		 * @see #createFormContent(HTTPParameters)
 		 * @see #createMultipartContent()
 		 */
-		public HTTPRequest content(HTTPContent content) 
+		public final HTTPRequest content(HTTPContent content) 
 		{
 			this.content = content;
 			return this;
@@ -2343,7 +2949,7 @@ public final class HTTPUtils
 		 * @param timeoutMillis the timeout in milliseconds.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest timeout(int timeoutMillis) 
+		public final HTTPRequest timeout(int timeoutMillis) 
 		{
 			this.timeoutMillis = timeoutMillis;
 			return this;
@@ -2355,7 +2961,7 @@ public final class HTTPUtils
 		 * @param defaultCharsetEncoding the new encoding name.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest defaultCharsetEncoding(String defaultCharsetEncoding) 
+		public final HTTPRequest defaultCharsetEncoding(String defaultCharsetEncoding) 
 		{
 			this.defaultCharsetEncoding = defaultCharsetEncoding;
 			return this;
@@ -2366,7 +2972,7 @@ public final class HTTPUtils
 		 * @param monitor the monitor to call.
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest uploadMonitor(TransferMonitor monitor) 
+		public final HTTPRequest uploadMonitor(TransferMonitor monitor) 
 		{
 			this.monitor = monitor;
 			return this;
@@ -2379,7 +2985,7 @@ public final class HTTPUtils
 		 * @param autoRedirect true 
 		 * @return this request, for chaining.
 		 */
-		public HTTPRequest setAutoRedirect(boolean autoRedirect) 
+		public final HTTPRequest setAutoRedirect(boolean autoRedirect) 
 		{
 			this.autoRedirect = autoRedirect;
 			return this;
@@ -2401,7 +3007,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
 		 */
-		public HTTPResponse send() throws IOException
+		public final HTTPResponse send() throws IOException
 		{
 			return send((AtomicBoolean)null);
 		}
@@ -2424,7 +3030,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
 		 */
-		public HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
+		public final HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
 		{
 			HTTPResponse out;
 			HTTPRequest current = this;
@@ -2453,7 +3059,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
 		 */
-		public <T> T send(HTTPReader<T> reader) throws IOException
+		public final <T> T send(HTTPReader<T> reader) throws IOException
 		{
 			return send(null, reader);
 		}
@@ -2470,7 +3076,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
 		 */
-		public <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
+		public final <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
 		{
 			try (HTTPResponse response = send(cancelSwitch))
 			{
@@ -2499,7 +3105,7 @@ public final class HTTPUtils
 		 * </code></pre>
 		 * @return a future for inspecting later, containing the open response object.
 		 */
-		public HTTPRequestFuture<HTTPResponse> sendAsync()
+		public final HTTPRequestFuture<HTTPResponse> sendAsync()
 		{
 			HTTPRequestFuture<HTTPResponse> out = new HTTPRequestFuture.Response(this);
 			fetchExecutor().execute(out);
@@ -2528,7 +3134,7 @@ public final class HTTPUtils
 		 * @param reader the reader to use to read the response.
 		 * @return a future for inspecting later, containing the decoded object.
 		 */
-		public <T> HTTPRequestFuture<T> sendAsync(HTTPReader<T> reader)
+		public final <T> HTTPRequestFuture<T> sendAsync(HTTPReader<T> reader)
 		{
 			HTTPRequestFuture<T> out = new HTTPRequestFuture.ObjectResponse<T>(this, reader);
 			fetchExecutor().execute(out);
@@ -2616,7 +3222,7 @@ public final class HTTPUtils
 	{
 		StringBuilder sb = new StringBuilder();
 		byte[] bytes = s.getBytes(UTF8);
-		for (int i = 0; i < s.length(); i++)
+		for (int i = 0; i < bytes.length; i++)
 		{
 			byte b = bytes[i];
 			if (Arrays.binarySearch(URL_UNRESERVED, b) >= 0)
@@ -2650,7 +3256,6 @@ public final class HTTPUtils
 	 * @param entries the list of replacers, mapping.
 	 * @return the resultant replaced and encoded URL.
 	 * @see #entry(String, Object)
-	 * @see #urlEncode(String)
 	 */
 	@SafeVarargs
 	public static String replaceURL(String url, Map.Entry<String, String> ... entries)
@@ -2678,7 +3283,7 @@ public final class HTTPUtils
 	 * Starts a new {@link HTTPHeaders} object.
 	 * @param entries the list of entries to add.
 	 * @return a new header object.
-	 * @see #entry(String, String)
+	 * @see #entry(String, Object)
 	 * @see HTTPHeaders#setHeader(String, String)
 	 */
 	@SafeVarargs
@@ -2698,7 +3303,7 @@ public final class HTTPUtils
 	 * Duplicate parameters are added.
 	 * @param entries the list of entries to add.
 	 * @return a new parameters object.
-	 * @see #entry(String, String)
+	 * @see #entry(String, Object)
 	 * @see HTTPParameters#addParameter(String, Object)
 	 */
 	@SafeVarargs
@@ -2713,118 +3318,6 @@ public final class HTTPUtils
 		return out;
 	}
 	
-	/**
-	 * Creates a text blob content body for an HTTP request.
-	 * @param contentType the data's content type.
-	 * @param text the text data.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createTextContent(String contentType, String text)
-	{
-		try {
-			return new TextContent(contentType, "utf-8", null, text.getBytes("utf-8"));
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("JVM does not support the UTF-8 charset [INTERNAL ERROR].");
-		}
-	}
-
-	/**
-	 * Creates a byte blob content body for an HTTP request.
-	 * @param contentType the data's content type.
-	 * @param bytes the byte data.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createByteContent(String contentType, byte[] bytes)
-	{
-		return new BlobContent(contentType, null, bytes);
-	}
-
-	/**
-	 * Creates a byte blob content body for an HTTP request.
-	 * @param contentType the data's content type.
-	 * @param contentEncoding the data's encoding type (like gzip or what have you, can be null for none).
-	 * @param bytes the byte data.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createByteContent(String contentType, String contentEncoding, byte[] bytes)
-	{
-		return new BlobContent(contentType, contentEncoding, bytes);
-	}
-
-	/**
-	 * Creates a file-based content body for an HTTP request.
-	 * <p>Note: This is NOT form-data content! See {@link MultipartFormContent} for that.
-	 * @param contentType the file's content type.
-	 * @param file the file to read from on send.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createFileContent(String contentType, File file)
-	{
-		return new FileContent(contentType, null, null, file);
-	}
-
-	/**
-	 * Creates a file-based content body for an HTTP request.
-	 * <p>Note: This is NOT form-data content! See {@link MultipartFormContent} for that.
-	 * @param contentType the file's content type.
-	 * @param encodingType the data encoding type for the file's payload (e.g. "gzip" or "base64").
-	 * @param file the file to read from on send.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createFileContent(String contentType, String encodingType, File file)
-	{
-		return new FileContent(contentType, encodingType, null, file);
-	}
-
-	/**
-	 * Creates a file-based content body for an HTTP request, presumably a text file.
-	 * The default system text encoding is presumed.
-	 * <p>Note: This is NOT form-data content! See {@link MultipartFormContent} for that.
-	 * @param contentType the file's content type.
-	 * @param file the file to read from on send.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createTextFileContent(String contentType, File file)
-	{
-		return new FileContent(contentType, null, Charset.defaultCharset().name(), file);
-	}
-
-	/**
-	 * Creates file based content body for an HTTP request, presumably a text file encoded
-	 * with a specific charset.
-	 * <p>Note: This is NOT form-data content! See {@link MultipartFormContent} for that.
-	 * @param contentType the file's content type.
-	 * @param charsetType the charset name for the file's payload (e.g. "utf-8" or "ascii").
-	 * @param file the file to read from on send.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createTextFileContent(String contentType, String charsetType, File file)
-	{
-		return new FileContent(contentType, null, charsetType, file);
-	}
-
-	/**
-	 * Creates a WWW form, URL encoded content body for an HTTP request.
-	 * <p>Note: This is NOT mulitpart form-data content! 
-	 * See {@link MultipartFormContent} for mixed file attachments and fields.
-	 * @param keyValueMap the map of key to value.
-	 * @return a content object representing the content.
-	 */
-	public static HTTPContent createFormContent(HTTPParameters keyValueMap)
-	{
-		return new FormContent(keyValueMap);
-	}
-
-	/**
-	 * Creates a WWW form, URL encoded content body for an HTTP request.
-	 * @return a content object representing the content.
-	 * @see MultipartFormContent
-	 */
-	public static MultipartFormContent createMultipartContent()
-	{
-		return new MultipartFormContent();
-	}
-
 	/**
 	 * Sets the default timeout to use for requests (if not overridden).
 	 * @param timeoutMillis the timeout in milliseconds. A timeout of 0 is indefinite.
@@ -2845,7 +3338,10 @@ public final class HTTPUtils
 	 */
 	public static ThreadPoolExecutor setAsyncExecutor(ThreadPoolExecutor executor)
 	{
-		return HTTP_THREAD_POOL.getAndSet(executor);
+		synchronized (HTTP_THREAD_POOL)
+		{
+			return HTTP_THREAD_POOL.getAndSet(executor);
+		}
 	}
 	
 	/**
@@ -2872,7 +3368,7 @@ public final class HTTPUtils
 		String requestMethod = request.method;
 
 		Objects.requireNonNull(requestMethod, "request method is null");
-		URL url = new URL(urlParams(request.url, request.parameters));
+		URL url = new URL(urlParams(request.url.toString(), request.parameters));
 		
 		if (Arrays.binarySearch(VALID_HTTP, url.getProtocol()) < 0)
 			throw new ProtocolException("This is not an HTTP URL.");
@@ -2894,6 +3390,10 @@ public final class HTTPUtils
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		conn.setReadTimeout(socketTimeoutMillis);
 		conn.setRequestMethod(requestMethod);
+		conn.setInstanceFollowRedirects(false);
+		
+		// Accept all by default.
+		conn.setRequestProperty("Accept", "*");
 		
 		if (headers != null) for (Map.Entry<String, String> entry : headers.map.entrySet())
 			conn.setRequestProperty(entry.getKey(), entry.getValue());
@@ -2903,15 +3403,26 @@ public final class HTTPUtils
 		// set up body data.
 		if (content != null)
 		{
-			long uploadLen = content.getLength();
-			conn.setFixedLengthStreamingMode(content.getLength());
-			conn.setRequestProperty("Content-Type", content.getContentType() == null ? "application/octet-stream" : content.getContentType());
+			String contentType = content.getContentType() == null ? "application/octet-stream" : content.getContentType();
+			if (content.getCharset() != null)
+				contentType += "; charset=" + content.getCharset();
+			
+			conn.setRequestProperty("Content-Type", contentType);
+			
+			Long uploadLen = content.getLength();
+			if (uploadLen != null)
+				conn.setFixedLengthStreamingMode(content.getLength());
+			else
+				conn.setChunkedStreamingMode(content.getChunkLength());
+			
 			if (content.getEncoding() != null)
 				conn.setRequestProperty("Content-Encoding", content.getEncoding());
+			
 			conn.setDoOutput(true);
 			try (DataOutputStream dos = new DataOutputStream(conn.getOutputStream()))
 			{
 				relay(content.getInputStream(), dos, 8192, uploadLen, cancelSwitch, uploadMonitor);
+				dos.flush();
 			}
 		}
 	
@@ -2978,7 +3489,7 @@ public final class HTTPUtils
 		long total = 0;
 		int buf = 0;
 			
-		byte[] RELAY_BUFFER = new byte[bufferSize];
+		final byte[] RELAY_BUFFER = new byte[bufferSize];
 		
 		while (!cancelSwitch.get() && (buf = in.read(RELAY_BUFFER, 0, Math.min(maxLength == null ? Integer.MAX_VALUE : (int)Math.min(maxLength, Integer.MAX_VALUE), bufferSize))) > 0)
 		{
@@ -2989,6 +3500,47 @@ public final class HTTPUtils
 			if (maxLength != null && maxLength >= 0)
 				maxLength -= buf;
 		}
+		out.flush();
+		return total;
+	}
+	
+	/**
+	 * Reads from a reader, reading in a consistent set of characters
+	 * and writing it to the writer. The read/write is buffered
+	 * so that it does not bog down the OS's other I/O requests.
+	 * This method finishes when the end of the source stream is reached.
+	 * Note that this may block if the reader is a type of reader
+	 * that will block if the reader blocks for additional input.
+	 * This method is thread-safe.
+	 * <p> One thing to note is that the monitor's progress reporting may not be exact, as
+	 * the incoming bytes may be more than the count of characters.
+	 * @param reader the reader to read decoded characters from.
+	 * @param writer the writer to write the characters to.
+	 * @param charBufferSize the buffer size for the characters. Must be &gt; 0.
+	 * @param maxCharacters the maximum amount of characters to read. Can be null for "no max".
+	 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
+	 * @param monitor the transfer monitor to call on changes.
+	 * @return the total amount of bytes relayed.
+	 * @throws IOException if a read or write error occurs.
+	 */
+	private static long relay(Reader reader, Writer writer, int charBufferSize, Long maxCharacters, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+	{
+		long total = 0;
+		int buf = 0;
+			
+		final char[] RELAY_BUFFER = new char[charBufferSize];
+
+		while (!cancelSwitch.get() && (buf = reader.read(RELAY_BUFFER)) >= 0)
+		{
+			writer.write(RELAY_BUFFER, 0, buf);
+			total += buf;
+			if (monitor != null)
+				monitor.onProgressChange(total, maxCharacters);
+			if (maxCharacters != null && maxCharacters >= 0)
+				maxCharacters -= buf;
+		}
+		
+		writer.flush();
 		return total;
 	}
 	

@@ -51,6 +51,8 @@ public final class DoomMakeSettings
 	/* ==================================================================== */
 	
     private static final String DOOMMAKE_PATH_LAST_PROJECT = "doommake.path.lastProject";
+    private static final String DOOMMAKE_PATH_SLADE = "doommake.path.slade";
+    private static final String DOOMMAKE_PATH_VSCODE = "doommake.path.vscode";
 
 	private Properties properties;
 	
@@ -111,6 +113,44 @@ public final class DoomMakeSettings
 	public File getLastProjectDirectory() 
 	{
 		String path = properties.getProperty(DOOMMAKE_PATH_LAST_PROJECT);
+		return path != null ? new File(path) : null;
+	}
+
+	/**
+	 * Sets the path to SLADE.
+	 * @param path the executable path.
+	 */
+	public void setPathToSlade(File path) 
+	{
+		properties.setProperty(DOOMMAKE_PATH_SLADE, path.getAbsolutePath());
+		saveSettings();
+	}
+
+	/**
+	 * @return the executable path to SLADE.
+	 */
+	public File getPathToSlade() 
+	{
+		String path = properties.getProperty(DOOMMAKE_PATH_SLADE);
+		return path != null ? new File(path) : null;
+	}
+
+	/**
+	 * Sets the path to VSCode.
+	 * @param path the executable path.
+	 */
+	public void setPathToVSCode(File path) 
+	{
+		properties.setProperty(DOOMMAKE_PATH_VSCODE, path.getAbsolutePath());
+		saveSettings();
+	}
+
+	/**
+	 * @return the executable path to VSCode.
+	 */
+	public File getPathToVSCode() 
+	{
+		String path = properties.getProperty(DOOMMAKE_PATH_VSCODE);
 		return path != null ? new File(path) : null;
 	}
 

@@ -88,7 +88,7 @@ public final class DoomToolsMain
 	};
 
 	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel, monitor) -> {
-		return JSONReader.readJSON(HTTPReader.STRING_CONTENT_READER.onHTTPResponse(response, cancel, monitor));
+		return JSONReader.readJSON(HTTPReader.openReader(response));
 	};
 
 	private static final int ERROR_NONE = 0;
