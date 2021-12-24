@@ -31,6 +31,7 @@ import com.blackrook.rookscript.tools.ScriptExecutor;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
@@ -228,8 +229,8 @@ public final class DoomToolsMain
 				return ERROR_NOWHERE;
 			}
 			
-			final String shellSourceFile = Common.IS_WINDOWS ? "app-name.cmd" : "app-name.sh";
-			final String shellExtension = Common.IS_WINDOWS ? ".cmd" : "";
+			final String shellSourceFile = OSUtils.isWindows() ? "app-name.cmd" : "app-name.sh";
+			final String shellExtension = OSUtils.isWindows() ? ".cmd" : "";
 			
 			// Export shell scripts.
 			for (Map.Entry<String, Class<?>> entry : SHELL_DATA.entrySet())
@@ -237,7 +238,7 @@ public final class DoomToolsMain
 				File outputFilePath = new File(path + "/" + entry.getKey() + shellExtension);
 				try {
 					Common.copyShellScript("shell/jar/" + shellSourceFile, entry.getValue(), SHELL_OPTIONS, "", outputFilePath);
-					if (!Common.IS_WINDOWS)
+					if (!OSUtils.isWindows())
 						outputFilePath.setExecutable(true, false);
 					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
 				} catch (IOException e) {

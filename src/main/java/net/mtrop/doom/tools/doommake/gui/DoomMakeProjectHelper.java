@@ -10,8 +10,13 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Properties;
 
+import com.blackrook.rookscript.ScriptInstanceBuilder;
+
 import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.WadScriptMain;
+import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
+import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
@@ -179,6 +184,24 @@ public final class DoomMakeProjectHelper
 	}
 	
 	// TODO: Finish this.
+	
+	private WadScriptMain.Options createDoomMakeOptionsBuilder(File projectDirectory)
+	{
+		/*
+		WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
+			.setDocsTitle("DoomMake Functions")
+			.setStackDepth(2048)
+			.setActivationDepth(1024)
+			.setRunawayLimit(0)
+			.setScriptFile(options.scriptFile)
+			.addResolver("DoomMake Functions", DoomMakeFunctions.createResolver())
+			.addResolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
+			//.setMode(options.mode)
+			//.setEntryPointName(options.targetName)
+		;
+		 */
+		return null;
+	}
 	
 	private Properties getProjectProperties(File projectDirectory)
 	{

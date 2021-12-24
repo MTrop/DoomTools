@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Common shared functions.
@@ -31,16 +32,12 @@ public final class Common
 	/** Version number map. */
 	private static Map<String, String> VERSION_MAP = new HashMap<>();
 	
-	/** Is this Windows? */
-	public static final boolean IS_WINDOWS;
-	
 	/** A null file. */
 	public static final File NULL_FILE;
 	
 	static
 	{
-		IS_WINDOWS = System.getProperty("os.name").contains("Windows");
-		NULL_FILE = new File(IS_WINDOWS ? "NUL" : "/dev/null");
+		NULL_FILE = new File(OSUtils.isWindows() ? "NUL" : "/dev/null");
 	}
 
 	/**

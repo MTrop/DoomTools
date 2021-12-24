@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.doommake.gui.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
@@ -20,7 +21,7 @@ public final class DoomMakeSettings
     /** Settings filename. */
     private static final String SETTINGS_FILENAME = "settings.properties";
     /** Configuration file. */
-    private static final File CONFIG_FILE = new File(DoomMakeConstants.APPDATA_PATH + SETTINGS_FILENAME);
+    private static final File CONFIG_FILE = new File(Paths.APPDATA_PATH + SETTINGS_FILENAME);
 
     /** Logger. */
     private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeSettings.class); 

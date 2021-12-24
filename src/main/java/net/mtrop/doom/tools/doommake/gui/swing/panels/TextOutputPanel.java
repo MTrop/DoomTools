@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui.swing;
+package net.mtrop.doom.tools.doommake.gui.swing.panels;
 
 import java.awt.Font;
 import java.io.IOException;
