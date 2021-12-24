@@ -278,7 +278,7 @@ public final class SwingUtils
 	 */
 	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return file(parent, null, null, approveText, choosableFilters);
+		return file(parent, null, initPath, approveText, choosableFilters);
 	}
 
 	/**

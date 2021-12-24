@@ -9,7 +9,6 @@ import java.util.Properties;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
@@ -18,12 +17,10 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  */
 public final class DoomMakeSettings 
 {
-	/** DoomMake Config folder base. */
-    public static final String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + "/DoomMake/";
-	/** Settings filename. */
+    /** Settings filename. */
     private static final String SETTINGS_FILENAME = "settings.properties";
     /** Configuration file. */
-    private static final File CONFIG_FILE = new File(APPDATA_PATH + SETTINGS_FILENAME);
+    private static final File CONFIG_FILE = new File(DoomMakeConstants.APPDATA_PATH + SETTINGS_FILENAME);
 
     /** Logger. */
     private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeSettings.class); 
@@ -86,6 +83,7 @@ public final class DoomMakeSettings
 		try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE))
 		{
 			properties.store(fos, "Created by DoomMake " + Common.getVersionString("doommake"));
+			LOG.infof("Saved DoomMake settings to %s.", CONFIG_FILE.getPath());
 		} 
 		catch (FileNotFoundException e) 
 		{
@@ -99,11 +97,11 @@ public final class DoomMakeSettings
 	
 	/**
 	 * Sets the last project directory opened.
-	 * @param lastProjectDirectory the last project directory.
+	 * @param path the last project directory.
 	 */
-	public void setLastProjectDirectory(File lastProjectDirectory) 
+	public void setLastProjectDirectory(File path) 
 	{
-		properties.setProperty(DOOMMAKE_PATH_LAST_PROJECT, lastProjectDirectory.getAbsolutePath());
+		properties.setProperty(DOOMMAKE_PATH_LAST_PROJECT, path != null ? path.getAbsolutePath() : "");
 		saveSettings();
 	}
 
@@ -113,7 +111,7 @@ public final class DoomMakeSettings
 	public File getLastProjectDirectory() 
 	{
 		String path = properties.getProperty(DOOMMAKE_PATH_LAST_PROJECT);
-		return path != null ? new File(path) : null;
+		return path != null && path.length() >= 0 ? new File(path) : null;
 	}
 
 	/**
@@ -122,7 +120,7 @@ public final class DoomMakeSettings
 	 */
 	public void setPathToSlade(File path) 
 	{
-		properties.setProperty(DOOMMAKE_PATH_SLADE, path.getAbsolutePath());
+		properties.setProperty(DOOMMAKE_PATH_SLADE, path != null ? path.getAbsolutePath() : "");
 		saveSettings();
 	}
 
@@ -132,7 +130,7 @@ public final class DoomMakeSettings
 	public File getPathToSlade() 
 	{
 		String path = properties.getProperty(DOOMMAKE_PATH_SLADE);
-		return path != null ? new File(path) : null;
+		return path != null && path.length() >= 0 ? new File(path) : null;
 	}
 
 	/**
@@ -141,7 +139,7 @@ public final class DoomMakeSettings
 	 */
 	public void setPathToVSCode(File path) 
 	{
-		properties.setProperty(DOOMMAKE_PATH_VSCODE, path.getAbsolutePath());
+		properties.setProperty(DOOMMAKE_PATH_VSCODE, path != null ? path.getAbsolutePath() : "");
 		saveSettings();
 	}
 
@@ -151,7 +149,7 @@ public final class DoomMakeSettings
 	public File getPathToVSCode() 
 	{
 		String path = properties.getProperty(DOOMMAKE_PATH_VSCODE);
-		return path != null ? new File(path) : null;
+		return path != null && path.length() >= 0 ? new File(path) : null;
 	}
 
 }

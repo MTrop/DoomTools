@@ -36,7 +36,23 @@ public final class ContainerFactory
 	/* ==================================================================== */
 
 	/**
-	 * Starts a layout tree, returns a container.
+	 * Starts a layout tree, returning the provided container.
+	 * The layout is replaced on it with the provided layout.
+	 * @param container the root container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param edges the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(Container container, LayoutManager layout, Node ... edges)
+	{
+		container.setLayout(layout);
+		for (Node n : edges)
+			n.addTo(container);
+		return container;
+	}
+
+	/**
+	 * Starts a layout tree, returning the provided container.
 	 * @param container the root container.
 	 * @param edges the component's children.
 	 * @return the component passed in, with the descendants added.
@@ -56,11 +72,7 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(LayoutManager layout, Node ... edges)
 	{
-		JPanel out = new JPanel();
-		out.setLayout(layout);
-		for (Node n : edges)
-			n.addTo(out);
-		return out;
+		return containerOf(new JPanel(), layout, edges);
 	}
 
 	/**

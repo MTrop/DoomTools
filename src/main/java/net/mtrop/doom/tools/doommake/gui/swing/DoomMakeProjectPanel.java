@@ -11,6 +11,8 @@ import javax.swing.ListModel;
  */
 public class DoomMakeProjectPanel extends JPanel
 {
+	private static final long serialVersionUID = 3576857310145843126L;
+
 	/** The project directory. */
 	private File projectDirectory;
 	

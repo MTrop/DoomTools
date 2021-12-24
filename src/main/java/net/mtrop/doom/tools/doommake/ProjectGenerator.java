@@ -175,7 +175,7 @@ public abstract class ProjectGenerator
 	 * @param outputMap the output map to add replacer token values to.
 	 * @throws IOException if a stream can't be read or written to.
 	 */
-	private static void insertReplacer(ProjectTokenReplacer replacer, PrintStream out, BufferedReader reader, Map<String, String> outputMap) throws IOException
+	public static void insertReplacer(ProjectTokenReplacer replacer, PrintStream out, BufferedReader reader, Map<String, String> outputMap) throws IOException
 	{
 		String value;
 		String key = replacer.getToken();

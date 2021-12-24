@@ -2,10 +2,10 @@ package net.mtrop.doom.tools.doommake.gui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.LoggingFactory;
+import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
@@ -14,30 +14,19 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
  */
 public final class DoomMakeLogger 
 {
-    /** The instance encapsulator. */
-	private static final AtomicReference<DoomMakeLogger> INSTANCE = new AtomicReference<>(null);
     /** Logging filename. */
     private static final String LOG_FILENAME = "doommake.log";
     /** Configuration file. */
-    private static final File LOG_FILE = new File(DoomMakeSettings.APPDATA_PATH + LOG_FILENAME);
-	
+    private static final File LOG_FILE = new File(DoomMakeConstants.APPDATA_PATH + LOG_FILENAME);
+    /** The instance encapsulator. */
+    private static final SingletonProvider<DoomMakeLogger> INSTANCE = new SingletonProvider<>(() -> new DoomMakeLogger()); 
+
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
 	public static DoomMakeLogger get()
 	{
-		DoomMakeLogger out;
-		if ((out = INSTANCE.get()) != null)
-			return out;
-		
-		synchronized (INSTANCE) 
-		{
-			// short-circuit.
-			if ((out = INSTANCE.get()) != null)
-				return out;
-			INSTANCE.set(out = new DoomMakeLogger());
-			return out;
-		}
+		return INSTANCE.get();
 	}
 
 	/**

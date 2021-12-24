@@ -2,9 +2,13 @@ package net.mtrop.doom.tools.doommake.gui;
 
 import java.awt.Desktop;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Properties;
 
 import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -20,10 +24,7 @@ public final class DoomMakeProjectHelper
     private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeProjectHelper.class); 
     
     /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeProjectHelper> INSTANCE = new SingletonProvider<>(() -> 
-    {
-		return new DoomMakeProjectHelper();
-    });
+    private static final SingletonProvider<DoomMakeProjectHelper> INSTANCE = new SingletonProvider<>(() -> new DoomMakeProjectHelper());
     
 	/**
 	 * @return the singleton instance of this object.
@@ -46,10 +47,10 @@ public final class DoomMakeProjectHelper
 	 * Opens the project folder shell.
 	 * @param projectDirectory the project directory.
 	 * @return true.
-	 * @throws IllegalArgumentException if the provided file does not exist or is not a directory.
+	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
 	 * @throws ProcessCallException if the process could not be started.
 	 */
-	public boolean openShell(File projectDirectory) throws ProcessCallException
+	public boolean openShell(File projectDirectory) throws ProcessCallException, FileNotFoundException
 	{
 		checkProjectDirectory(projectDirectory);
 		try {
@@ -63,14 +64,35 @@ public final class DoomMakeProjectHelper
 	}
 	
 	/**
+	 * Opens the local properties file.
+	 * @param projectDirectory the project directory.
+	 * @return true.
+	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
+	 * @throws ProcessCallException if the process could not be started.
+	 */
+	public boolean openLocalProperties(File projectDirectory) throws ProcessCallException, FileNotFoundException
+	{
+		checkProjectDirectory(projectDirectory);
+		File propsFile = new File(projectDirectory + File.separator + "doommake.properties");
+		try {
+			checkDesktopOpen().open(propsFile);
+			return true;
+		} catch (SecurityException e) {
+			throw new ProcessCallException("Properties file could not be opened. Operating system prevented the call.", e);
+		} catch (IOException e) {
+			throw new ProcessCallException("Properties file could not be opened.", e);
+		}
+	}
+	
+	/**
 	 * Opens VSCode for the project folder.
 	 * @param projectDirectory the project directory.
 	 * @return true.
-	 * @throws IllegalArgumentException if the provided file does not exist or is not a directory.
+	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
 	 * @throws ProcessCallException if the process could not be started.
 	 * @throws RequiredSettingException if a missing or bad setting is preventing the call from succeeding.
 	 */
-	public boolean openVSCode(File projectDirectory) throws ProcessCallException, RequiredSettingException
+	public boolean openVSCode(File projectDirectory) throws ProcessCallException, RequiredSettingException, FileNotFoundException
 	{
 		checkProjectDirectory(projectDirectory);
 		
@@ -90,13 +112,51 @@ public final class DoomMakeProjectHelper
 		} catch (SecurityException e) {
 			throw new ProcessCallException("VSCode could not be started. Operating system prevented the call.", e);
 		} catch (IOException e) {
-			throw new ProcessCallException("VSCode could not be started. Operating system prevented the call.", e);
+			throw new ProcessCallException("VSCode could not be started.", e);
+		}
+	}
+	
+	/**
+	 * Opens SLADE for the project source folder.
+	 * The source folder is lifted straight from the local properties.
+	 * @param projectDirectory the project directory.
+	 * @return true.
+	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
+	 * @throws ProcessCallException if the process could not be started.
+	 * @throws RequiredSettingException if a missing or bad setting is preventing the call from succeeding.
+	 */
+	public boolean openSourceFolderInSlade(File projectDirectory) throws ProcessCallException, RequiredSettingException, FileNotFoundException
+	{
+		checkProjectDirectory(projectDirectory);
+		
+		File sladePath = settings.getPathToSlade();
+		if (sladePath == null)
+			throw new RequiredSettingException("The path to SLADE is not configured. Cannot open SLADE.");
+		if (!sladePath.exists())
+			throw new RequiredSettingException("The path to SLADE could not be found. Cannot open SLADE.");
+		if (sladePath.isDirectory())
+			throw new RequiredSettingException("The path to SLADE is not a file. Cannot open SLADE.");
+		
+		Properties props = getProjectProperties(projectDirectory);
+		String folder = props.getProperty("doommake.dir.src", "src");
+		File sourceDir = new File(projectDirectory + File.separator + folder);
+		
+		try {
+			(new ProcessBuilder())
+				.command(sladePath.getAbsolutePath(), sourceDir.getAbsolutePath())
+				.start();
+			return true;
+		} catch (SecurityException e) {
+			throw new ProcessCallException("SLADE could not be started. Operating system prevented the call.", e);
+		} catch (IOException e) {
+			throw new ProcessCallException("SLADE could not be started.", e);
 		}
 	}
 	
 	/**
 	 * Gets the list of project targets.
-	 * @param projectDirectory 
+	 * Leverages a DoomMake call to fetch the project targets.
+	 * @param projectDirectory the project directory.
 	 * @return the list of project targets.
 	 */
 	public List<String> getProjectTargets(File projectDirectory)
@@ -106,22 +166,48 @@ public final class DoomMakeProjectHelper
 	
 	/**
 	 * Gets the list of project targets.
-	 * @param projectDirectory 
+	 * @param projectDirectory the project directory.
+	 * @param stdout the standard out stream. 
+	 * @param stderr the standard error stream. 
+	 * @param stdin the standard in stream.
+	 * @param targetname the target name.
 	 * @return the list of project targets.
 	 */
-	public Instance<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetname)
+	public Instance<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetname)
 	{
 		throw new UnsupportedOperationException("NOT FINISHED");
 	}
 	
 	// TODO: Finish this.
 	
-	private void checkProjectDirectory(File projectDirectory)
+	private Properties getProjectProperties(File projectDirectory)
+	{
+		Properties properties = new Properties();
+		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
+		File propertiesFile = new File(projectDirectory + File.separator + "doommake.properties");
+		mergeProperties(properties, projectPropertiesFile);
+		mergeProperties(properties, propertiesFile);
+		return properties;
+	}
+
+	private void mergeProperties(Properties properties, File projectPropertiesFile) 
+	{
+		if (projectPropertiesFile.exists()) try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
+		{
+			properties.load(fis);
+		} 
+		catch (Exception e) 
+		{
+			LOG.error(e, "Could not open properties file: " + projectPropertiesFile.getAbsolutePath());
+		}
+	}
+
+	private void checkProjectDirectory(File projectDirectory) throws FileNotFoundException
 	{
 		if (!projectDirectory.exists())
-			throw new IllegalArgumentException("Provided file does not exist.");
+			throw new FileNotFoundException("Project directory does not exist: " + projectDirectory.getAbsolutePath());
 		if (!projectDirectory.isDirectory())
-			throw new IllegalArgumentException("Provided file is not a directory.");		
+			throw new FileNotFoundException("Provided file is not a directory: " + projectDirectory.getAbsolutePath());		
 	}
 
 	private Desktop checkDesktopOpen() throws ProcessCallException
