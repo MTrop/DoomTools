@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
@@ -30,16 +31,53 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 public final class Common
 {
 	/** Version number map. */
-	private static Map<String, String> VERSION_MAP = new HashMap<>();
+	private static final Map<String, String> VERSION_MAP = new HashMap<>();
 	
+	/** A null outputstream. */
+	public static final OutputStream OUTPUTSTREAM_NULL = new OutputStream() 
+	{
+		@Override
+		public void write(int b) throws IOException
+		{
+			// Do nothing.
+		}
+		
+		@Override
+		public void write(byte[] b) throws IOException
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException 
+		{
+			// Do nothing.
+		}
+	};
+
+	/** A null inputstream. */
+	public static final InputStream INPUTSTREAM_NULL = new InputStream() 
+	{
+		@Override
+		public int read() throws IOException
+		{
+			return -1;
+		}
+	};
+
+	/** A null printstream. */
+	public static final PrintStream PRINTSTREAM_NULL = new PrintStream(OUTPUTSTREAM_NULL);
+
+
 	/** A null file. */
 	public static final File NULL_FILE;
 	
 	static
 	{
 		NULL_FILE = new File(OSUtils.isWindows() ? "NUL" : "/dev/null");
-	}
+	}	
 
+	
 	/**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
@@ -669,6 +707,100 @@ public final class Common
 			this.value = value;
 			return old;
 		}
+	}
+
+	/**
+	 * Reader to Writer stream thread.
+	 * Transfers until the source stream is closed.
+	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
+	 */
+	public static class ReaderToWriterThread extends Thread
+	{
+		protected InputStream sourceStream;
+		protected OutputStream targetStream;
+		
+		private IOException ioException;
+		private long totalCharacters;
+		// TODO: Finish.
+	}
+	
+	/**
+	 * Input to Output stream thread.
+	 * Transfers until the source stream is closed.
+	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
+	 */
+	public static class InputToOutputStreamThread extends Thread
+	{
+		protected InputStream sourceStream;
+		protected OutputStream targetStream;
+		
+		private IOException ioException;
+		private long totalBytes;
+		
+		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		{
+			super("InputToOutputStreamThread");
+			this.sourceStream = sourceStream;
+			this.targetStream = targetStream;
+			this.ioException = null;
+			this.totalBytes = 0L;
+		}
+		
+		@Override
+		public void run() 
+		{
+			int buf;
+			byte[] buffer = new byte[8192]; 
+			try {
+				while ((buf = sourceStream.read(buffer)) > 0)
+				{
+					targetStream.write(buffer, 0, buf);
+					targetStream.flush();
+					totalBytes += buf;
+				}
+			} catch (IOException e) {
+				ioException = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the IOException that occurred, if any.
+		 */
+		public IOException getIOException() 
+		{
+			return ioException;
+		}
+		
+		/**
+		 * @return the total amount of bytes moved.
+		 */
+		public long getTotalBytes() 
+		{
+			return totalBytes;
+		}
+		
+	}
+	
+	/**
+	 * Output to Input stream thread.
+	 * Transfers until the source stream is closed.
+	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
+	 */
+	public static class OutputToInputStreamThread extends Thread
+	{
+		
 	}
 	
 }

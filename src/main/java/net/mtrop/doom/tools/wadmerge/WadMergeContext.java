@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
 
 import net.mtrop.doom.Wad;
@@ -52,6 +53,8 @@ public class WadMergeContext
 	private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT = ThreadLocal.withInitial(
 		()->new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ")
 	);
+	/** Reusable StringBuilder. */
+	private static final ThreadLocal<StringBuilder> STRINGBUILDER = ThreadLocal.withInitial(()->new StringBuilder());
 	
 	/** Comparator for MERGEDIR file sorting. */
 	private static final Comparator<File> DIR_FILESORT = (a, b) -> 
@@ -78,6 +81,8 @@ public class WadMergeContext
 	private PrintStream logout;
 	/** If verbosity is enabled. */
 	private boolean verbose;
+	/** Map of character substitutions in filenames. */
+	private Map<Character, Character> charSubstitutions;
 
 	/**
 	 * Creates a new context. No output.
@@ -95,6 +100,7 @@ public class WadMergeContext
 	public WadMergeContext(PrintStream log, boolean verbose)
 	{
 		this.currentWads = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.charSubstitutions = new TreeMap<>();
 		this.logout = log;
 		this.verbose = verbose;
 	}
@@ -341,6 +347,38 @@ public class WadMergeContext
 		if ((out = save(symbol, outFile)) != Response.OK)
 			return out;
 		return discard(symbol);
+	}
+
+	/**
+	 * Adds a character substitution to this context.
+	 * Character substitutions happen on bulk import from files.
+	 * @param sourceChar the source character.
+	 * @param targetChar the target character.
+	 */
+	public void addCharSubstitution(char sourceChar, char targetChar)
+	{
+		charSubstitutions.put(sourceChar, targetChar);
+	}
+	
+	/**
+	 * Returns a string with the current character substitutions made.
+	 * @param input the input string.
+	 * @return the resultant string.
+	 */
+	public String subCharString(String input)
+	{
+		if (charSubstitutions.isEmpty())
+			return input;
+		
+		StringBuilder sb = STRINGBUILDER.get();
+		sb.delete(0, sb.length());
+		
+		for (int i = 0; i < input.length(); i++)
+		{
+			char c = input.charAt(i);
+			sb.append(charSubstitutions.getOrDefault(c, c));
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -731,12 +769,12 @@ public class WadMergeContext
 					{
 						if (adder == null)
 							adder = ((WadFile)buffer).createAdder();
-						if ((resp = mergeFileData(adder, symbol, f, Common.getFileNameWithoutExtension(f), buffer.getEntryCount())) != Response.OK)
+						if ((resp = mergeFileData(adder, symbol, f, subCharString(Common.getFileNameWithoutExtension(f)), buffer.getEntryCount())) != Response.OK)
 							return resp; 
 					}
 					else
 					{
-						if ((resp = mergeFile(symbol, f, Common.getFileNameWithoutExtension(f))) != Response.OK)
+						if ((resp = mergeFile(symbol, f, subCharString(Common.getFileNameWithoutExtension(f)))) != Response.OK)
 							return resp; 
 					}
 				}
@@ -920,7 +958,7 @@ public class WadMergeContext
 				else
 				{
 					Response resp;
-					String namenoext = Common.getFileNameWithoutExtension(f);
+					String namenoext = subCharString(Common.getFileNameWithoutExtension(f));
 					if (adder != null)
 					{
 						if ((resp = mergeFileData(adder, symbol, f, namenoext, insertIndex)) != Response.OK)

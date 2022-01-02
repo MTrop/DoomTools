@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.TreeMap;
 
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.tools.common.Common;
@@ -20,6 +19,7 @@ import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.struct.ArgumentScanner;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.TokenScanner.ParseException;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * The Wad Merge commands.
@@ -547,10 +547,12 @@ public enum WadMergeCommand
 		{
 			out.println("MERGEFILE [symbol] [path] [opt:entryname]"); 
 			out.println("    Reads file from [path] into [symbol].");
+			out.println("    NOTE: Specifying a target entry name will override any replacement");
+			out.println("    behavior set by FILECHARSUB.");
 			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [path]:      The file to add.");
-			out.println("    [entryname]: (Optional) If specified, this is the entry name to use");
-			out.println("                 to import as.");
+			out.println("    [entryname]: (Optional) If specified, this is the name to use as");
+			out.println("                 the imported entry.");
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
@@ -568,7 +570,7 @@ public enum WadMergeCommand
 			
 			try {
 				File f = new File(file);
-				return context.mergeFile(symbol, f, entryName == null ? Common.getFileNameWithoutExtension(f) : entryName);
+				return context.mergeFile(symbol, f, entryName == null ? context.subCharString(Common.getFileNameWithoutExtension(f)) : entryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
@@ -903,6 +905,35 @@ public enum WadMergeCommand
 		}
 	},
 	
+	FILECHARSUB
+	{
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println("CHARSUB [char] [replacement]");
+			out.println("    Sets a character replacement mapping (from this command onward) for");
+			out.println("    auto-merged lumps that come from file names. The intended use for this is");
+			out.println("    for renaming files to lump names that may have characters that can't be");
+			out.println("    used in file names in your filesystem.");
+			out.println("    For example: \"VILE^1.lmp\" will import as \"VILE\\1\" if the following");
+			out.println("    was set:");
+			out.println("        FILECHARSUB ^ \\");
+			out.println("    [char]:        The character to replace (first character is used).");
+			out.println("    [replacement]: The replacement character (first character is used).");
+			out.println("    ................................");
+			out.println("    Returns: OK.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			String src = scanner.nextString();
+			String dest = scanner.nextString();
+			context.addCharSubstitution(src.charAt(0), dest.charAt(0));
+			return Response.OK;
+		}
+	},
+	
 	;
 	
 	/**
@@ -1001,15 +1032,6 @@ public enum WadMergeCommand
 	}
 	
 	/** Value map for command name to command. */
-	public static final Map<String, WadMergeCommand> VALUES = new TreeMap<String, WadMergeCommand>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -9083149204025118660L;
-		{
-			for (WadMergeCommand command : WadMergeCommand.values())
-			{
-				put(command.name(), command);
-			}
-		}
-	};
+	public static final Map<String, WadMergeCommand> VALUES = EnumUtils.createCaseInsensitiveNameMap(WadMergeCommand.class);
 	
 }

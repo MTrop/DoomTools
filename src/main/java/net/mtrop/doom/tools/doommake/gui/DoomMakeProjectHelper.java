@@ -6,18 +6,29 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
 import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import com.blackrook.rookscript.ScriptEnvironment;
+import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptInstanceBuilder;
+import com.blackrook.rookscript.ScriptInstanceBuilder.BuilderException;
 
 import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.WadScriptMain;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
+import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Utility singleton for invoking DoomMake functions for a project.
@@ -164,9 +175,27 @@ public final class DoomMakeProjectHelper
 	 * @param projectDirectory the project directory.
 	 * @return the list of project targets.
 	 */
-	public List<String> getProjectTargets(File projectDirectory)
+	public SortedSet<String> getProjectTargets(File projectDirectory)
 	{
-		throw new UnsupportedOperationException("NOT FINISHED");
+		ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
+			.withSource(new File(projectDirectory.getAbsolutePath() + File.separator + "doommake.script"))
+			.withEnvironment(ScriptEnvironment.create(Common.PRINTSTREAM_NULL, Common.PRINTSTREAM_NULL, Common.INPUTSTREAM_NULL))
+			.withScriptStack(512, 1024)
+			.withRunawayLimit(0)
+			.withFunctionResolver(DoomMakeFunctions.createResolver())
+			.andFunctionResolver("TOOL", ToolInvocationFunctions.createResolver())
+		;
+		ScriptInstance instance;
+		try {
+			instance = builder.createInstance();
+		} catch (BuilderException e) {
+			return null;
+		}
+		
+		SortedSet<String> out = new TreeSet<>((a, b) -> a.equalsIgnoreCase("make") ? -1 : a.compareTo(b));
+		for (String entryName : instance.getScript().getScriptEntryNames())
+			out.add(entryName);
+		return out;
 	}
 	
 	/**
@@ -175,32 +204,37 @@ public final class DoomMakeProjectHelper
 	 * @param stdout the standard out stream. 
 	 * @param stderr the standard error stream. 
 	 * @param stdin the standard in stream.
-	 * @param targetname the target name.
+	 * @param targetName the target name.
 	 * @return the list of project targets.
+	 * @throws FileNotFoundException 
+	 * @throws ProcessCallException 
 	 */
-	public Instance<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetname)
+	public int callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetName) throws FileNotFoundException, ProcessCallException
 	{
-		throw new UnsupportedOperationException("NOT FINISHED");
-	}
-	
-	// TODO: Finish this.
-	
-	private WadScriptMain.Options createDoomMakeOptionsBuilder(File projectDirectory)
-	{
-		/*
-		WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
-			.setDocsTitle("DoomMake Functions")
-			.setStackDepth(2048)
-			.setActivationDepth(1024)
-			.setRunawayLimit(0)
-			.setScriptFile(options.scriptFile)
-			.addResolver("DoomMake Functions", DoomMakeFunctions.createResolver())
-			.addResolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
-			//.setMode(options.mode)
-			//.setEntryPointName(options.targetName)
-		;
-		 */
-		return null;
+		checkProjectDirectory(projectDirectory);
+		
+		if (!OSUtils.onPath("doommake"))
+		{
+			throw new ProcessCallException(
+				"DoomMake was not found on your PATH. " +
+				"DoomTools may not have been installed properly, or this is being called from an embedded instance."
+			);
+		}
+		
+		List<String> cmdLine = new LinkedList<>();
+		cmdLine.add("doommake");
+		cmdLine.add(targetName);
+		
+		try {
+			final Process process = Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory);
+			return process.waitFor();
+		} catch (InterruptedException e) {
+			throw new ProcessCallException("DoomMake target could not be completed. Process thread was interrupted.", e);
+		} catch (SecurityException e) {
+			throw new ProcessCallException("DoomMake target could not be completed. Operating system prevented the call.", e);
+		} catch (IOException e) {
+			throw new ProcessCallException("DoomMake target could not be completed.", e);
+		}
 	}
 	
 	private Properties getProjectProperties(File projectDirectory)

@@ -3679,8 +3679,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 	
-	// Matches an identifier that is a list of subframe indices.
-	// If match, advance token and return true plus modified out list.
+	// Matches an identifier that is interpreted to be a list of subframe indices.
+	// If match, advance token and returns the list of indices.
 	// Else, return null.
 	private Deque<Integer> matchFrameIndices()
 	{

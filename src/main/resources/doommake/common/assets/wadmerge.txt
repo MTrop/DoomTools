@@ -7,6 +7,9 @@
 # Argument 2: The output WAD.
 #
 
+# Turn all carats/circumflexes in filenames into backslashes in entries.
+filecharsub ^ \
+
 create out
 
 # Globals
