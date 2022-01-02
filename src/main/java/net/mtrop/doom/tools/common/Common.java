@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
@@ -716,50 +717,35 @@ public final class Common
 	 */
 	public static class ReaderToWriterThread extends Thread
 	{
-		protected InputStream sourceStream;
-		protected OutputStream targetStream;
+		protected Reader sourceReader;
+		protected Writer targetWriter;
 		
-		private IOException ioException;
+		private Throwable exception;
 		private long totalCharacters;
-		// TODO: Finish.
-	}
-	
-	/**
-	 * Input to Output stream thread.
-	 * Transfers until the source stream is closed.
-	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
-	 */
-	public static class InputToOutputStreamThread extends Thread
-	{
-		protected InputStream sourceStream;
-		protected OutputStream targetStream;
 		
-		private IOException ioException;
-		private long totalBytes;
-		
-		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		private ReaderToWriterThread(Reader reader, Writer writer)
 		{
-			super("InputToOutputStreamThread");
-			this.sourceStream = sourceStream;
-			this.targetStream = targetStream;
-			this.ioException = null;
-			this.totalBytes = 0L;
+			super("ReaderToWriterThread");
+			this.sourceReader = reader;
+			this.targetWriter = writer;
+			this.exception = null;
+			this.totalCharacters = 0L;
 		}
-		
+
 		@Override
 		public void run() 
 		{
 			int buf;
-			byte[] buffer = new byte[8192]; 
+			char[] buffer = new char[8192]; 
 			try {
-				while ((buf = sourceStream.read(buffer)) > 0)
+				while ((buf = sourceReader.read(buffer)) > 0)
 				{
-					targetStream.write(buffer, 0, buf);
-					targetStream.flush();
-					totalBytes += buf;
+					targetWriter.write(buffer, 0, buf);
+					targetWriter.flush();
+					totalCharacters += buf;
 				}
-			} catch (IOException e) {
-				ioException = e;
+			} catch (Throwable e) {
+				exception = e;
 			} finally {
 				afterClose();
 			}
@@ -776,11 +762,80 @@ public final class Common
 		}
 		
 		/**
-		 * @return the IOException that occurred, if any.
+		 * @return the exception that occurred, if any.
 		 */
-		public IOException getIOException() 
+		public Throwable getException() 
 		{
-			return ioException;
+			return exception;
+		}
+		
+		/**
+		 * @return the total amount of characters moved.
+		 */
+		public long getTotalCharacters() 
+		{
+			return totalCharacters;
+		}
+		
+	}
+	
+	/**
+	 * Input to Output stream thread.
+	 * Transfers until the source stream is closed.
+	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
+	 */
+	public static class InputToOutputStreamThread extends Thread
+	{
+		protected InputStream sourceStream;
+		protected OutputStream targetStream;
+		
+		private Throwable exception;
+		private long totalBytes;
+		
+		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		{
+			super("InputToOutputStreamThread");
+			this.sourceStream = sourceStream;
+			this.targetStream = targetStream;
+			this.exception = null;
+			this.totalBytes = 0L;
+		}
+		
+		@Override
+		public void run() 
+		{
+			int buf;
+			byte[] buffer = new byte[8192]; 
+			try {
+				while ((buf = sourceStream.read(buffer)) > 0)
+				{
+					targetStream.write(buffer, 0, buf);
+					targetStream.flush();
+					totalBytes += buf;
+				}
+			} catch (Throwable e) {
+				exception = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the exception that occurred, if any.
+		 */
+		public Throwable getException() 
+		{
+			return exception;
 		}
 		
 		/**
@@ -790,16 +845,6 @@ public final class Common
 		{
 			return totalBytes;
 		}
-		
-	}
-	
-	/**
-	 * Output to Input stream thread.
-	 * Transfers until the source stream is closed.
-	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
-	 */
-	public static class OutputToInputStreamThread extends Thread
-	{
 		
 	}
 	
