@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -88,9 +87,9 @@ public class DoomMakeProjectControlPanel extends JPanel
 		};
 		
 		containerOf(this, new FlowLayout(FlowLayout.RIGHT),
-			node(button(new ImageIcon(folderImage.result()), folderAction)),
-			node(button(new ImageIcon(vsCodeImage.result()), vsCodeAction)),
-			node(button(new ImageIcon(sladeImage.result()), sladeAction))
+			node(button(icon(folderImage.result()), folderAction)),
+			node(button(icon(vsCodeImage.result()), vsCodeAction)),
+			node(button(icon(sladeImage.result()), sladeAction))
 		);
 	}
 

@@ -7,8 +7,10 @@ package net.mtrop.doom.tools.struct;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -46,9 +48,12 @@ public class Loader<T>
 	/** The loader listener. */
 	private LoaderErrorListener<T> errorListener;
 	
+	/** Mutex map. */
+	private Map<String, WeakReference<String>> mutexMap;
+	
 	/** Thread pool for async loads. */
 	private AtomicReference<ThreadPoolExecutor> threadPool;
-
+	
 	/**
 	 * A loader function for loading an object via a name.
 	 * @param <T> the object type.
@@ -234,6 +239,7 @@ public class Loader<T>
 		this.errorNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		this.nameMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.loaderFunctions = Arrays.copyOf(functions, functions.length);
+		this.mutexMap = new HashMap<>();
 		this.errorListener = null;
 	}
 
@@ -268,7 +274,7 @@ public class Loader<T>
 	 */
 	public Loader<T> setObject(String name, T object)
 	{
-		synchronized (object) 
+		synchronized (nameMap) 
 		{
 			nameMap.put(name, object);
 		}
@@ -290,28 +296,35 @@ public class Loader<T>
 		
 		T object = null;
 		
-		synchronized (loaderFunctions)
+		try 
 		{
-			// Early outs for waiting threads.
-			if (errorNames.contains(name))
-				return null;
-			if (nameMap.containsKey(name))
-				return nameMap.get(name);
-			
-			for (int i = 0; i < loaderFunctions.length; i++)
+			synchronized (uniqueKey(name))
 			{
-				try
+				// Early outs for waiting threads.
+				if (errorNames.contains(name))
+					return null;
+				if (nameMap.containsKey(name))
+					return nameMap.get(name);
+				
+				for (int i = 0; i < loaderFunctions.length; i++)
 				{
-					if ((object = loaderFunctions[i].load(name)) != null)
-						break;
-				} 
-				catch (Exception e) 
-				{
-					if (errorListener != null)
-						errorListener.onLoaderError(loaderFunctions[i], e);
-					continue;
+					try
+					{
+						if ((object = loaderFunctions[i].load(name)) != null)
+							break;
+					} 
+					catch (Exception e) 
+					{
+						if (errorListener != null)
+							errorListener.onLoaderError(loaderFunctions[i], e);
+						continue;
+					}
 				}
 			}
+		} 
+		finally 
+		{
+			releaseKey(name);
 		}
 		
 		if (object == null)
@@ -323,10 +336,7 @@ public class Loader<T>
 		}
 		else
 		{
-			synchronized (nameMap)
-			{
-				nameMap.put(name, object);
-			}
+			setObject(name, object);
 		}
 		
 		return object;
@@ -429,6 +439,27 @@ public class Loader<T>
 		return out;
 	}
 
+	// Fetch a unique id suitable for mutex.
+	private String uniqueKey(String name)
+	{
+		WeakReference<String> out;
+		synchronized (mutexMap)
+		{
+			if ((out = mutexMap.get(name)) == null)
+				mutexMap.put(name, out = new WeakReference<String>(name));
+		}
+		return out.get();
+	}
+
+	// Releases a mutex.
+	private void releaseKey(String name)
+	{
+		synchronized (mutexMap)
+		{
+			mutexMap.remove(name);
+		}
+	}
+	
 	/**
 	 * The default executor to use for sending async requests.
 	 */

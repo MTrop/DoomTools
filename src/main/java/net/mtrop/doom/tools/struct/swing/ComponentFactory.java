@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.struct.swing;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Array;
@@ -20,6 +21,7 @@ import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
@@ -122,6 +124,20 @@ public final class ComponentFactory
 	public static JLabel label(String label)
 	{
 		return new JLabel(label);
+	}
+
+	/* ==================================================================== */
+	/* ==== Icons                                                      ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new icon from an image.
+	 * @param image the image to use.
+	 * @return a new Icon.
+	 */
+	public static Icon icon(Image image)
+	{
+		return new ImageIcon(image);
 	}
 
 	/* ==================================================================== */
