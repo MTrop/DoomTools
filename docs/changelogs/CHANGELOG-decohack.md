@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.21.0
 
 * `Added` STR_ `#defines` for BOOM's extended locked door strings were missing (thanks, Xaser!). (PR #61)
+* `Changed` A_RandomJump and A_WeaponJump should take a UINT, not BYTE for probability (thanks, Altazimuth!). (Issue #62)
 
 
 ### Changed for 0.20.1
