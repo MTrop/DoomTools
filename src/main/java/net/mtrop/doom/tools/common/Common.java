@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ReplacerReader;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Common shared functions.
@@ -34,50 +33,6 @@ public final class Common
 	/** Version number map. */
 	private static final Map<String, String> VERSION_MAP = new HashMap<>();
 	
-	/** A null outputstream. */
-	public static final OutputStream OUTPUTSTREAM_NULL = new OutputStream() 
-	{
-		@Override
-		public void write(int b) throws IOException
-		{
-			// Do nothing.
-		}
-		
-		@Override
-		public void write(byte[] b) throws IOException
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException 
-		{
-			// Do nothing.
-		}
-	};
-
-	/** A null inputstream. */
-	public static final InputStream INPUTSTREAM_NULL = new InputStream() 
-	{
-		@Override
-		public int read() throws IOException
-		{
-			return -1;
-		}
-	};
-
-	/** A null printstream. */
-	public static final PrintStream PRINTSTREAM_NULL = new PrintStream(OUTPUTSTREAM_NULL);
-
-
-	/** A null file. */
-	public static final File NULL_FILE;
-	
-	static
-	{
-		NULL_FILE = new File(OSUtils.isWindows() ? "NUL" : "/dev/null");
-	}	
-
 	
 	/**
 	 * Gets the embedded version string for a tool name.

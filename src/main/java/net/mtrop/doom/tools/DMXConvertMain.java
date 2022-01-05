@@ -23,6 +23,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import net.mtrop.doom.sound.DMXSound;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * Main class for Utility.
@@ -288,7 +289,7 @@ public final class DMXConvertMain
 		}
 		
 		// Opens an audio stream via FFmpeg
-		// Throws SecurityException or 
+		// Throws SecurityException or UnsupportedAudioFileException
 		private AudioInputStream openFFmpegAudioStreamForFile(File ffmpegPath, File input) throws IOException
 		{
 			String exe = ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg";
@@ -297,7 +298,7 @@ public final class DMXConvertMain
 				.command(
 					exe, "-i", input.getPath(), "-f", "wav", "-acodec", "pcm_s16le", "-ac", "2", "-"
 				)
-				.redirectError(Redirect.appendTo(Common.NULL_FILE))
+				.redirectError(Redirect.appendTo(IOUtils.NULL_FILE))
 				.redirectOutput(Redirect.PIPE)
 			.start();
 			try {
@@ -312,8 +313,8 @@ public final class DMXConvertMain
 			try {
 				(new ProcessBuilder())
 					.command(ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg")
-					.redirectError(Redirect.appendTo(Common.NULL_FILE))
-					.redirectOutput(Redirect.appendTo(Common.NULL_FILE))
+					.redirectError(Redirect.appendTo(IOUtils.NULL_FILE))
+					.redirectOutput(Redirect.appendTo(IOUtils.NULL_FILE))
 				.start().waitFor();
 				return true;
 			} catch (IOException e) {

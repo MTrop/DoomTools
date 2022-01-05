@@ -6,28 +6,18 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedInputStream;
 import java.io.PrintStream;
-import java.lang.ProcessBuilder.Redirect;
+import java.io.StringWriter;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.blackrook.rookscript.ScriptEnvironment;
-import com.blackrook.rookscript.ScriptInstance;
-import com.blackrook.rookscript.ScriptInstanceBuilder;
-import com.blackrook.rookscript.ScriptInstanceBuilder.BuilderException;
-
-import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.WadScriptMain;
-import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
-import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
-import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -60,13 +50,13 @@ public final class DoomMakeProjectHelper
 	}
 
 	/**
-	 * Opens the project folder shell.
+	 * Opens the project folder GUI shell (Explorer in Windows, Finder on macOS, etc.).
 	 * @param projectDirectory the project directory.
 	 * @return true.
 	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
 	 * @throws ProcessCallException if the process could not be started.
 	 */
-	public boolean openShell(File projectDirectory) throws ProcessCallException, FileNotFoundException
+	public boolean openExplorer(File projectDirectory) throws ProcessCallException, FileNotFoundException
 	{
 		checkProjectDirectory(projectDirectory);
 		try {
@@ -174,32 +164,46 @@ public final class DoomMakeProjectHelper
 	 * Leverages a DoomMake call to fetch the project targets.
 	 * @param projectDirectory the project directory.
 	 * @return the list of project targets.
+	 * @throws FileNotFoundException 
+	 * @throws ProcessCallException 
 	 */
-	public SortedSet<String> getProjectTargets(File projectDirectory)
+	public SortedSet<String> getProjectTargets(File projectDirectory) throws FileNotFoundException, ProcessCallException
 	{
-		ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
-			.withSource(new File(projectDirectory.getAbsolutePath() + File.separator + "doommake.script"))
-			.withEnvironment(ScriptEnvironment.create(Common.PRINTSTREAM_NULL, Common.PRINTSTREAM_NULL, Common.INPUTSTREAM_NULL))
-			.withScriptStack(512, 1024)
-			.withRunawayLimit(0)
-			.withFunctionResolver(DoomMakeFunctions.createResolver())
-			.andFunctionResolver("TOOL", ToolInvocationFunctions.createResolver())
-		;
-		ScriptInstance instance;
+		checkProjectDirectory(projectDirectory);
+		checkDoomMake();
+		
+		List<String> cmdLine = createDoomMakeCmdLine();
+		cmdLine.add("--targets");
+		
+		StringWriter sw = new StringWriter();
+		StringWriter errorsw = new StringWriter();
+		int result;
+		
 		try {
-			instance = builder.createInstance();
-		} catch (BuilderException e) {
-			return null;
+			result = IOUtils.ProcessWrapper.create(Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory))
+				.stdout(sw)
+				.stderr(errorsw)
+			.waitFor();
+			LOG.infof("Call to DoomMake returned %d", result);
+		} catch (InterruptedException e) {
+			throw new ProcessCallException("DoomMake target could not be completed. Process thread was interrupted.", e);
+		} catch (SecurityException e) {
+			throw new ProcessCallException("DoomMake target could not be completed. Operating system prevented the call.", e);
+		} catch (IOException e) {
+			throw new ProcessCallException("DoomMake target could not be completed.", e);
 		}
 		
+		if (result != 0)
+			return Collections.emptySortedSet();
+		
 		SortedSet<String> out = new TreeSet<>((a, b) -> a.equalsIgnoreCase("make") ? -1 : a.compareTo(b));
-		for (String entryName : instance.getScript().getScriptEntryNames())
-			out.add(entryName);
+		for (String entryName : sw.toString().split("\\n+"))
+			out.add(entryName.trim());
 		return out;
 	}
 	
 	/**
-	 * Gets the list of project targets.
+	 * Calls a DoomMake project target.
 	 * @param projectDirectory the project directory.
 	 * @param stdout the standard out stream. 
 	 * @param stderr the standard error stream. 
@@ -209,34 +213,27 @@ public final class DoomMakeProjectHelper
 	 * @throws FileNotFoundException 
 	 * @throws ProcessCallException 
 	 */
-	public int callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetName) throws FileNotFoundException, ProcessCallException
+	public IOUtils.ProcessWrapper callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetName) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
+		checkDoomMake();
 		
-		if (!OSUtils.onPath("doommake"))
-		{
-			throw new ProcessCallException(
-				"DoomMake was not found on your PATH. " +
-				"DoomTools may not have been installed properly, or this is being called from an embedded instance."
-			);
-		}
-		
-		List<String> cmdLine = new LinkedList<>();
-		cmdLine.add("doommake");
+		List<String> cmdLine = createDoomMakeCmdLine();
 		cmdLine.add(targetName);
 		
 		try {
-			final Process process = Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory);
-			return process.waitFor();
-		} catch (InterruptedException e) {
-			throw new ProcessCallException("DoomMake target could not be completed. Process thread was interrupted.", e);
+			LOG.infof("Calling DoomMake.");
+			return IOUtils.ProcessWrapper.create(Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory))
+				.stdout(stdout)
+				.stderr(stderr)
+				.stdin(stdin);
 		} catch (SecurityException e) {
 			throw new ProcessCallException("DoomMake target could not be completed. Operating system prevented the call.", e);
 		} catch (IOException e) {
 			throw new ProcessCallException("DoomMake target could not be completed.", e);
 		}
 	}
-	
+
 	private Properties getProjectProperties(File projectDirectory)
 	{
 		Properties properties = new Properties();
@@ -277,6 +274,30 @@ public final class DoomMakeProjectHelper
 			throw new ProcessCallException("The OS cannot open the project folder: \"open\" operation not supported.");
 		
 		return desktop;
+	}
+
+	private void checkDoomMake() throws ProcessCallException
+	{
+		if (!OSUtils.onPath("doommake"))
+		{
+			throw new ProcessCallException(
+				"DoomMake was not found on your PATH. " +
+				"DoomTools may not have been installed properly, or this is being called from an embedded instance."
+			);
+		}
+	}
+
+	private List<String> createDoomMakeCmdLine() 
+	{
+		List<String> cmdLine = new LinkedList<>();
+		// If Windows, call DoomMake from CMD.
+		if (OSUtils.isWindows())
+		{
+			cmdLine.add("cmd");
+			cmdLine.add("/c");
+		}
+		cmdLine.add("doommake");
+		return cmdLine;
 	}
 
 	/**

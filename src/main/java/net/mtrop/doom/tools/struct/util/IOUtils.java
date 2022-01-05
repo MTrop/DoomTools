@@ -7,13 +7,16 @@ package net.mtrop.doom.tools.struct.util;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 /**
  * Simple IO utility functions.
@@ -23,6 +26,85 @@ public final class IOUtils
 {
 	/** The relay buffer size, used by relay(). */
 	private static int RELAY_BUFFER_SIZE = 8192;
+	
+	/** A null outputstream. */
+	public static final OutputStream OUTPUTSTREAM_NULL = new OutputStream() 
+	{
+		@Override
+		public void write(int b) throws IOException
+		{
+			// Do nothing.
+		}
+		
+		@Override
+		public void write(byte[] b) throws IOException
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException 
+		{
+			// Do nothing.
+		}
+	};
+
+	/** A null inputstream. */
+	public static final InputStream INPUTSTREAM_NULL = new InputStream() 
+	{
+		@Override
+		public int read() throws IOException
+		{
+			return -1;
+		}
+	};
+
+	/** A null writer. */
+	public static final Reader READER_NULL = new Reader()
+	{
+		@Override
+		public int read(char[] cbuf, int off, int len) throws IOException 
+		{
+			return -1;
+		}
+
+		@Override
+		public void close() throws IOException 
+		{
+			// Do nothing.
+		}
+	};
+
+	/** A null writer. */
+	public static final Writer WRITER_NULL = new Writer()
+	{
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void flush() throws IOException 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void close() throws IOException 
+		{
+			// Do nothing.
+		}
+	};
+
+	/** A null printstream. */
+	public static final PrintStream PRINTSTREAM_NULL = new PrintStream(OUTPUTSTREAM_NULL);
+
+	/** A null print writer. */
+	public static final PrintWriter PRINTWRITER_NULL = new PrintWriter(OUTPUTSTREAM_NULL);
+
+	/** A null file. */
+	public static final File NULL_FILE = new File(System.getProperty("os.name").contains("Windows") ? "NUL" : "/dev/null");
 	
 	private IOUtils() {}
 	
@@ -398,4 +480,257 @@ public final class IOUtils
 		
 	}
 	
+	/**
+	 * Process wrapper. 
+	 */
+	public static class ProcessWrapper
+	{
+		private Process process;
+		private Thread stdOutThread;
+		private Thread stdErrThread;
+		private Thread stdInThread;
+		private boolean done;
+		
+		private ProcessWrapper(Process process)
+		{
+			this.process = process;
+			this.stdOutThread = null;
+			this.stdErrThread = null;
+			this.stdInThread = null;
+			this.done = false;
+		}
+		
+		/**
+		 * Creates a new process wrapper.
+		 * @param process the created process.
+		 * @return a new wrapper.
+		 */
+		public static ProcessWrapper create(Process process)
+		{
+			return new ProcessWrapper(process);
+		}
+		
+		private void checkNotDone()
+		{
+			if (done)
+				throw new IllegalStateException("Process already finished.");
+		}
+		
+		private void checkStandardOut()
+		{
+			if (stdOutThread != null)
+				throw new IllegalStateException("STDOUT redirect already added.");
+		}
+		
+		private void checkStandardError()
+		{
+			if (stdErrThread != null)
+				throw new IllegalStateException("STDERR redirect already added.");
+		}
+		
+		private void checkStandardIn()
+		{
+			if (stdInThread != null)
+				throw new IllegalStateException("STDIN redirect already added.");
+		}
+
+		/**
+		 * Redirects standard out.
+		 * @param newOut the new output stream to redirect STDOUT to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdout(OutputStream newOut)
+		{
+			checkNotDone();
+			checkStandardOut();
+			newOut = newOut == null ? IOUtils.OUTPUTSTREAM_NULL : newOut;
+			(stdOutThread = new InputToOutputStreamThread(process.getInputStream(), newOut)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard out.
+		 * @param newOut the new writer to redirect STDOUT to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdout(Writer newOut)
+		{
+			checkNotDone();
+			checkStandardOut();
+			newOut = newOut == null ? IOUtils.WRITER_NULL : newOut;
+			(stdOutThread = new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), newOut)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard out.
+		 * @param newOut the new print stream to redirect STDOUT to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdout(PrintStream newOut)
+		{
+			checkNotDone();
+			checkStandardOut();
+			newOut = newOut == null ? IOUtils.PRINTSTREAM_NULL : newOut;
+			(stdOutThread = new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream())), newOut)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard out.
+		 * @param encoding the output encoding.
+		 * @param newOut the new writer to redirect STDOUT to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdout(Charset encoding, Writer newOut)
+		{
+			checkNotDone();
+			checkStandardOut();
+			newOut = newOut == null ? IOUtils.WRITER_NULL : newOut;
+			(stdOutThread = new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), encoding), newOut)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard out.
+		 * @param encoding the output encoding.
+		 * @param newOut the new print stream to redirect STDOUT to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdout(Charset encoding, PrintStream newOut)
+		{
+			checkNotDone();
+			checkStandardOut();
+			newOut = newOut == null ? IOUtils.PRINTSTREAM_NULL : newOut;
+			(stdOutThread = new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream(), encoding)), newOut)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard error.
+		 * @param newErr the new output stream to redirect STDERR to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stderr(OutputStream newErr)
+		{
+			checkNotDone();
+			checkStandardError();
+			newErr = newErr == null ? IOUtils.OUTPUTSTREAM_NULL : newErr;
+			(stdErrThread = new InputToOutputStreamThread(process.getErrorStream(), newErr)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard error.
+		 * @param newErr the new writer to redirect STDERR to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stderr(Writer newErr)
+		{
+			checkNotDone();
+			checkStandardError();
+			newErr = newErr == null ? IOUtils.WRITER_NULL : newErr;
+			(stdErrThread = new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), newErr)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard error.
+		 * @param newErr the new print stream to redirect STDERR to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stderr(PrintStream newErr)
+		{
+			checkNotDone();
+			checkStandardError();
+			newErr = newErr == null ? IOUtils.PRINTSTREAM_NULL : newErr;
+			(stdErrThread = new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream())), newErr)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard error.
+		 * @param encoding the output encoding.
+		 * @param newErr the new writer to redirect STDERR to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stderr(Charset encoding, Writer newErr)
+		{
+			checkNotDone();
+			checkStandardError();
+			newErr = newErr == null ? IOUtils.WRITER_NULL : newErr;
+			(stdErrThread = new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), encoding), newErr)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard error.
+		 * @param encoding the output encoding.
+		 * @param newErr the new print stream to redirect STDERR to.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stderr(Charset encoding, PrintStream newErr)
+		{
+			checkNotDone();
+			checkStandardError();
+			newErr = newErr == null ? IOUtils.PRINTSTREAM_NULL : newErr;
+			(stdErrThread = new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding)), newErr)).start();
+			return this;
+		}
+		
+		/**
+		 * Redirects standard in.
+		 * @param newIn the new input stream to redirect STDIN from.
+		 * @return this, for chaining.
+		 */
+		public ProcessWrapper stdin(InputStream newIn)
+		{
+			checkNotDone();
+			checkStandardIn();
+			newIn = newIn == null ? IOUtils.INPUTSTREAM_NULL : newIn;
+			(stdInThread = new InputToOutputStreamThread(newIn, process.getOutputStream())).start();
+			return this;
+		}
+		
+		/**
+		 * Gets a killswitch Runnable.
+		 * If {@link Runnable#run()} is called on it, the process will terminate.
+		 * @return a runnable that can terminate the underlying process.
+		 */
+		public Runnable getKillSwitch()
+		{
+			return () -> {process.destroy();};
+		}
+		
+		/**
+		 * Waits for the wrapped process to exit as well as associated stream piping threads.
+		 * @return the process return code.
+		 * @throws InterruptedException if the current thread is interrupted by another 
+		 * 		thread while it is waiting, then the wait is ended and an InterruptedException is thrown.
+		 */
+		public int waitFor() throws InterruptedException
+		{
+			int out = process.waitFor();
+			if (stdOutThread != null)
+			{
+				stdOutThread.join();
+				stdOutThread = null;
+			}
+			if (stdErrThread != null)
+			{
+				stdErrThread.join();
+				stdErrThread = null;
+			}
+			if (stdInThread != null)
+			{
+				stdInThread.join();
+				stdInThread = null;
+			}
+			done = true;
+			return out;
+		}
+		
+	}
+	
+
 }

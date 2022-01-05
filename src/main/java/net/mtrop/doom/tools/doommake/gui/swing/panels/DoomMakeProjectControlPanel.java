@@ -50,7 +50,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 		ComponentActionHandler<JButton> folderAction = (component, event) -> 
 		{
 			try {
-				projectHelper.openShell(projectDirectory);
+				projectHelper.openExplorer(projectDirectory);
 			} catch (ProcessCallException e) {
 				SwingUtils.error(component, e.getMessage());
 			} catch (FileNotFoundException e) {
