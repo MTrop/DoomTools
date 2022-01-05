@@ -17,8 +17,6 @@ public enum DEHActionPointerType
 	MBF(false),
 	MBF21(true);
 
-	public static final DEHActionPointerType[] VALUES = values();
-
 	private boolean useArgs;
 
 	private DEHActionPointerType(boolean useArgs)
@@ -40,6 +38,5 @@ public enum DEHActionPointerType
 	{
 		return type.ordinal() <= ordinal(); 
 	}
-	
 
 }

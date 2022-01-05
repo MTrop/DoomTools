@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Enumeration of action pointers for frames.
@@ -153,14 +154,7 @@ public enum DEHActionPointer
 	
 	private DEHActionPointerParam[] params;
 
-	private static final Map<String, DEHActionPointer> MNEMONIC_MAP = new TreeMap<String, DEHActionPointer>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -7754048704695925418L;
-		{
-			for (DEHActionPointer val : DEHActionPointer.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHActionPointer> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointer.class);
 
 	public static DEHActionPointer getByMnemonic(String mnemonic)
 	{

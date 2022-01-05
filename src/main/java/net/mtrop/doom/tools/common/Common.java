@@ -711,8 +711,92 @@ public final class Common
 	}
 
 	/**
+	 * BufferedReader to Writer stream thread.
+	 * Transfers characters buffered at one line at a time until the source stream is closed.
+	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
+	 */
+	public static class LineReaderToWriterThread extends Thread
+	{
+		protected BufferedReader sourceReader;
+		protected Writer targetWriter;
+		
+		private Throwable exception;
+		private long totalCharacters;
+		
+		/**
+		 * Creates a new thread that, when started, transfers characters one line at a time until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the Reader to read from (wrapped as a BufferedReader).
+		 * @param writer the Writer to write to.
+		 */
+		public LineReaderToWriterThread(Reader reader, Writer writer)
+		{
+			this(new BufferedReader(reader), writer);
+		}
+
+		/**
+		 * Creates a new thread that, when started, transfers characters one line at a time until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the BufferedReader to read from.
+		 * @param writer the Writer to write to.
+		 */
+		public LineReaderToWriterThread(BufferedReader reader, Writer writer)
+		{
+			super("LineReaderToWriterThread");
+			this.sourceReader = reader;
+			this.targetWriter = writer;
+			this.exception = null;
+			this.totalCharacters = 0L;
+		}
+
+		@Override
+		public final void run() 
+		{
+			String line;
+			try {
+				while ((line = sourceReader.readLine()) != null)
+				{
+					targetWriter.append(line).append('\n').flush();
+					totalCharacters += line.length() + 1;
+				}
+			} catch (Throwable e) {
+				exception = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the exception that occurred, if any.
+		 */
+		public Throwable getException() 
+		{
+			return exception;
+		}
+		
+		/**
+		 * @return the total amount of characters moved.
+		 */
+		public long getTotalCharacters() 
+		{
+			return totalCharacters;
+		}
+		
+	}
+	
+	/**
 	 * Reader to Writer stream thread.
-	 * Transfers until the source stream is closed.
+	 * Transfers characters until the source stream is closed.
 	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
 	 */
 	public static class ReaderToWriterThread extends Thread
@@ -723,7 +807,13 @@ public final class Common
 		private Throwable exception;
 		private long totalCharacters;
 		
-		private ReaderToWriterThread(Reader reader, Writer writer)
+		/**
+		 * Creates a new thread that, when started, transfers characters until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the Reader to read from.
+		 * @param writer the Writer to write to.
+		 */
+		public ReaderToWriterThread(Reader reader, Writer writer)
 		{
 			super("ReaderToWriterThread");
 			this.sourceReader = reader;
@@ -733,7 +823,7 @@ public final class Common
 		}
 
 		@Override
-		public void run() 
+		public final void run() 
 		{
 			int buf;
 			char[] buffer = new char[8192]; 
@@ -792,7 +882,13 @@ public final class Common
 		private Throwable exception;
 		private long totalBytes;
 		
-		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		/**
+		 * Creates a new thread that, when started, transfers bytes until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param sourceStream the InputStream to read from. 
+		 * @param targetStream the OutputStream to write to.
+		 */
+		public InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
 		{
 			super("InputToOutputStreamThread");
 			this.sourceStream = sourceStream;
@@ -802,7 +898,7 @@ public final class Common
 		}
 		
 		@Override
-		public void run() 
+		public final void run() 
 		{
 			int buf;
 			byte[] buffer = new byte[8192]; 

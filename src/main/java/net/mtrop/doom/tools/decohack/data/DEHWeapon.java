@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
@@ -29,7 +30,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 		UNUSED,
 		INFINITE;
 		
-		public static final Ammo[] VALUES = values();
+		public static final Map<Integer, Ammo> VALUES = EnumUtils.createOrdinalMap(Ammo.class);
 	}
 	
 	/** Weapon name. */

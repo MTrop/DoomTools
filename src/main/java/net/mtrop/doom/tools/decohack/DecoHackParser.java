@@ -56,6 +56,7 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
 import net.mtrop.doom.tools.struct.PreprocessorLexer;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * The DecoHack parser.
@@ -2253,7 +2254,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					ammo = Ammo.VALUES[ammoIndex];
+					ammo = Ammo.VALUES.get(ammoIndex);
 				}
 
 				weapon.setAmmoType(ammo);
@@ -4228,11 +4229,11 @@ public final class DecoHackParser extends Lexer.Parser
 		ARG8,
 		ARG9;
 		
-		private static final FieldType[] VALUES = values();
+		private static final Map<Integer, FieldType> VALUES = EnumUtils.createOrdinalMap(FieldType.class);
 		
 		public static FieldType getArg(int i)
 		{
-			return VALUES[i + 3];
+			return VALUES.get(i + 3);
 		}
 	}
 	
