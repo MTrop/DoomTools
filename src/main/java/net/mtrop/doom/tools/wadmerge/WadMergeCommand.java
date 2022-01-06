@@ -910,7 +910,7 @@ public enum WadMergeCommand
 		@Override
 		public void help(PrintStream out)
 		{
-			out.println("CHARSUB [char] [replacement]");
+			out.println("FILECHARSUB [char] [replacement]");
 			out.println("    Sets a character replacement mapping (from this command onward) for");
 			out.println("    auto-merged lumps that come from file names. The intended use for this is");
 			out.println("    for renaming files to lump names that may have characters that can't be");
