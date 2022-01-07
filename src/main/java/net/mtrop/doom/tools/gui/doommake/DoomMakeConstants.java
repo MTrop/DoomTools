@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.gui.doommake;
 
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -8,7 +8,7 @@ public interface DoomMakeConstants
 	interface Paths
 	{
 		/** DoomMake Config folder base. */
-	    String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + "/DoomMake/";
+	    String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + "/DoomTools/DoomMake/";
 	}
 	
 	/** Common channel names. */

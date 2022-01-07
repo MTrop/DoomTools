@@ -1,17 +1,18 @@
-package net.mtrop.doom.tools.doommake.gui.swing.panels;
+package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
-import net.mtrop.doom.tools.doommake.gui.DoomMakeSettings;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeSettings;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+
+import java.io.File;
 
 /**
  * A DoomMake panel for common settings.
@@ -21,7 +22,20 @@ public class DoomMakeSettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = 3657842361863713721L;
 	
-	private static final FileFilter EXE_FILTER = new FileNameExtensionFilter("Executables (*.exe)", "exe");
+	private static final FileFilter EXE_FILTER = new FileFilter() 
+	{
+		@Override
+		public String getDescription() 
+		{
+			return "Executables";
+		}
+		
+		@Override
+		public boolean accept(File f) 
+		{
+			return f.canExecute();
+		}
+	};
 	
 	/** Settings singleton. */
 	private DoomMakeSettings settings;

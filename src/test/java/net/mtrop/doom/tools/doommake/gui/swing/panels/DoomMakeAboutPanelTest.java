@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.doommake.gui.swing.panels;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeAboutPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;

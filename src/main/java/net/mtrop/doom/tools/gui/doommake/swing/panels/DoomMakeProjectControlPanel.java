@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui.swing.panels;
+package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
@@ -8,10 +8,10 @@ import java.io.FileNotFoundException;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.doommake.gui.DoomMakeImageManager;
-import net.mtrop.doom.tools.doommake.gui.DoomMakeProjectHelper;
-import net.mtrop.doom.tools.doommake.gui.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.doommake.gui.DoomMakeProjectHelper.RequiredSettingException;
+import net.mtrop.doom.tools.gui.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.ProcessCallException;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.RequiredSettingException;
 import net.mtrop.doom.tools.struct.Loader.LoaderFuture;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -27,7 +27,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 	private static final long serialVersionUID = -726632043594260163L;
 	
 	/** Image manager. */
-	private DoomMakeImageManager imageManager;
+	private DoomToolsImageManager imageManager;
 	/** Project helper. */
 	private DoomMakeProjectHelper projectHelper;
 
@@ -40,12 +40,12 @@ public class DoomMakeProjectControlPanel extends JPanel
 		if (!projectDirectory.isDirectory())
 			throw new IllegalArgumentException("Provided directory is not a directory.");
 		
-		this.imageManager = DoomMakeImageManager.get();
+		this.imageManager = DoomToolsImageManager.get();
 		this.projectHelper = DoomMakeProjectHelper.get();
 		
-		LoaderFuture<BufferedImage> folderImage = imageManager.getImage("folder.png");
-		LoaderFuture<BufferedImage> vsCodeImage = imageManager.getImage("vscode.png");
-		LoaderFuture<BufferedImage> sladeImage = imageManager.getImage("slade.png");
+		LoaderFuture<BufferedImage> folderImage = imageManager.getImageAsync("folder.png");
+		LoaderFuture<BufferedImage> vsCodeImage = imageManager.getImageAsync("vscode.png");
+		LoaderFuture<BufferedImage> sladeImage = imageManager.getImageAsync("slade.png");
 		
 		ComponentActionHandler<JButton> folderAction = (component, event) -> 
 		{

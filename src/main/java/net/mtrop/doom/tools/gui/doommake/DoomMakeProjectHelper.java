@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.gui.doommake;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
@@ -27,7 +28,7 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 public final class DoomMakeProjectHelper 
 {
     /** Logger. */
-    private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeProjectHelper.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeProjectHelper.class); 
     
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomMakeProjectHelper> INSTANCE = new SingletonProvider<>(() -> new DoomMakeProjectHelper());

@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.gui;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,17 +14,17 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  * DoomMake GUI pub-sub layer.
  * @author Matthew Tropiano
  */
-public final class DoomMakeMessenger 
+public final class DoomToolsMessenger 
 {
     /** Logger. */
-    private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeMessenger.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMessenger.class); 
     /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeMessenger> INSTANCE = new SingletonProvider<>(() -> new DoomMakeMessenger());
+    private static final SingletonProvider<DoomToolsMessenger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsMessenger());
 
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static DoomMakeMessenger get()
+	public static DoomToolsMessenger get()
 	{
 		return INSTANCE.get();
 	}
@@ -38,7 +38,7 @@ public final class DoomMakeMessenger
 	/** Subscriber lock. */
 	private ReentrantReadWriteLock.WriteLock writeLock;
 	
-	private DoomMakeMessenger()
+	private DoomToolsMessenger()
 	{
 		this.subscriberListMap = new HashMap<>();
 		ReentrantReadWriteLock lock = new ReentrantReadWriteLock();

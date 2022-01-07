@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.gui.doommake;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.doommake.gui.DoomMakeConstants.Paths;
+import net.mtrop.doom.tools.gui.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
@@ -24,7 +25,7 @@ public final class DoomMakeSettings
     private static final File CONFIG_FILE = new File(Paths.APPDATA_PATH + SETTINGS_FILENAME);
 
     /** Logger. */
-    private static final Logger LOG = DoomMakeLogger.getLogger(DoomMakeSettings.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeSettings.class); 
     
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomMakeSettings> INSTANCE = new SingletonProvider<>(() -> 

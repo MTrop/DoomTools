@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.doommake.gui;
 
 import java.io.File;
 
+import net.mtrop.doom.tools.gui.doommake.DoomMakeSettings;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 public final class DoomMakeSettingsTest 
