@@ -199,7 +199,7 @@ public final class DoomToolsMain
 		private static String getProgressBar(long current, Long max)
 		{
 			final int MAXPIPS = 40;
-			if (max != null)
+			if (max != null && max != 0)
 			{
 				StringBuilder sb = new StringBuilder("[");
 				
@@ -358,17 +358,23 @@ public final class DoomToolsMain
 			}
 			
 			String releaseVersion = assetJSON.get("name").getString().substring(14, 34); // should grab date from asset name (CMD version). 
-			
+
 			if (currentVersion.compareTo(releaseVersion) >= 0)
 			{
 				options.stdout.println("DoomTools is up-to-date!");
 				return ERROR_NONE;
 			}
-
+			
 			options.stdout.println("New version found:  " + releaseVersion);
 			
-			try (HTTPResponse response = HTTPRequest.get(assetJSON.get("browser_download_url").getString()).send())
+			try (HTTPResponse response = HTTPRequest.get(assetJSON.get("browser_download_url").getString()).setHeader("Accept", "*/*").send())
 			{
+				if (!response.isSuccess())
+				{
+					options.stderr.println("ERROR: Server responded: HTTP " + response.getStatusCode() + " " + response.getStatusMessage());
+					return ERROR_SITE_ERROR;
+				}
+				
 				File tempFile = Files.createTempFile("doomtools-tmp-", ".zip").toFile(); 
 				try 
 				{

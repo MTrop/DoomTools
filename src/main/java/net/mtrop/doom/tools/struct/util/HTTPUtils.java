@@ -2440,7 +2440,7 @@ public final class HTTPUtils
 		 */
 		public final long relayContent(OutputStream out, TransferMonitor monitor) throws IOException
 		{
-			return relay(getContentStream(), out, 8192, getLength(), null, monitor);
+			return relay(getContentStream(), out, 8192, getLength(), new AtomicBoolean(false), monitor);
 		}
 		
 		/**
@@ -3002,7 +3002,7 @@ public final class HTTPUtils
 		 */
 		public final HTTPResponse send() throws IOException
 		{
-			return send((AtomicBoolean)null);
+			return send(new AtomicBoolean(false));
 		}
 
 		/**
@@ -3054,7 +3054,7 @@ public final class HTTPUtils
 		 */
 		public final <T> T send(HTTPReader<T> reader) throws IOException
 		{
-			return send(null, reader);
+			return send(new AtomicBoolean(false), reader);
 		}
 
 		/**
@@ -3359,7 +3359,7 @@ public final class HTTPUtils
 	private static HTTPResponse httpFetch(HTTPRequest request, AtomicBoolean cancelSwitch) throws IOException
 	{
 		String requestMethod = request.method;
-
+		Objects.requireNonNull(cancelSwitch, "cancelSwitch is null");
 		Objects.requireNonNull(requestMethod, "request method is null");
 		URL url = new URL(urlParams(request.url.toString(), request.parameters));
 		
@@ -3372,8 +3372,6 @@ public final class HTTPUtils
 		int socketTimeoutMillis = request.timeoutMillis; 
 		TransferMonitor uploadMonitor = request.monitor;
 
-		cancelSwitch = cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false);
-		
 		// Check cancellation.
 		if (cancelSwitch.get())
 		{
