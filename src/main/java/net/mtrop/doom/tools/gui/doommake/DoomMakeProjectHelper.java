@@ -9,13 +9,13 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -173,15 +173,12 @@ public final class DoomMakeProjectHelper
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
-		List<String> cmdLine = createDoomMakeCmdLine();
-		cmdLine.add("--targets");
-		
 		StringWriter sw = new StringWriter();
 		StringWriter errorsw = new StringWriter();
 		int result;
 		
 		try {
-			result = IOUtils.ProcessWrapper.create(Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory))
+			result = Common.spawnJavaProcess(projectDirectory, DoomMakeMain.class, "--targets")
 				.stdout(sw)
 				.stderr(errorsw)
 			.waitFor();
@@ -219,12 +216,9 @@ public final class DoomMakeProjectHelper
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
-		List<String> cmdLine = createDoomMakeCmdLine();
-		cmdLine.add(targetName);
-		
 		try {
 			LOG.infof("Calling DoomMake.");
-			return IOUtils.ProcessWrapper.create(Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, projectDirectory))
+			return Common.spawnJavaProcess(projectDirectory, DoomMakeMain.class, targetName)
 				.stdout(stdout)
 				.stderr(stderr)
 				.stdin(stdin);
@@ -286,19 +280,6 @@ public final class DoomMakeProjectHelper
 				"DoomTools may not have been installed properly, or this is being called from an embedded instance."
 			);
 		}
-	}
-
-	private List<String> createDoomMakeCmdLine() 
-	{
-		List<String> cmdLine = new LinkedList<>();
-		// If Windows, call DoomMake from CMD.
-		if (OSUtils.isWindows())
-		{
-			cmdLine.add("cmd");
-			cmdLine.add("/c");
-		}
-		cmdLine.add("doommake");
-		return cmdLine;
 	}
 
 	/**

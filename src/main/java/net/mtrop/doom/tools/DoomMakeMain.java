@@ -44,7 +44,7 @@ public final class DoomMakeMain
 	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
 	private static final String VERSION = Common.getVersionString("doommake");
 
-	private static final String SHELL_OPTIONS = "-Xms64M -Xmx784M";
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	

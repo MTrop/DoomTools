@@ -20,9 +20,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils.ProcessWrapper;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Common shared functions.
@@ -30,11 +35,13 @@ import net.mtrop.doom.tools.struct.ReplacerReader;
  */
 public final class Common
 {
+	/** DoomTools Config folder base. */
+    public static final String SETTINGS_PATH = OSUtils.getApplicationSettingsPath() + "/DoomTools/";
+
 	/** Version number map. */
 	private static final Map<String, String> VERSION_MAP = new HashMap<>();
 	
-	
-	/**
+    /**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
 	 * @param name the name of the tool. 
@@ -634,6 +641,33 @@ public final class Common
 				writer.flush();
 			}
 		}
+	}
+	
+	/**
+	 * Spawns a new Java process that executes a provided main class.
+	 * @param workingDirectory the working directory.
+	 * @param mainClass the main class to execute.
+	 * @param args the list of arguments.
+	 * @return the process created.
+	 * @throws IOException 
+	 * @see Runtime#exec(String[], String[], File)
+	 */
+	public static ProcessWrapper spawnJavaProcess(File workingDirectory, Class<?> mainClass, String... args) throws IOException
+	{
+		File javaExec = new File(System.getProperty("java.home") + File.separator + "bin" + File.separator + (OSUtils.isWindows() ? "java.exe" : "java"));
+		String classPath = System.getProperty("java.class.path");
+		
+		List<String> cmdLine = new LinkedList<>();
+		cmdLine.add(javaExec.getAbsolutePath());
+		cmdLine.add("-Xms64M");
+		cmdLine.add("-Xmx768M");
+		cmdLine.add("-cp");
+		cmdLine.add(classPath);
+		cmdLine.add(mainClass.getCanonicalName());
+		for (int i = 0; i < args.length; i++)
+			cmdLine.add(args[i]);
+		
+		return IOUtils.ProcessWrapper.create(Runtime.getRuntime().exec(cmdLine.toArray(new String[cmdLine.size()]), null, workingDirectory));
 	}
 	
 	/**

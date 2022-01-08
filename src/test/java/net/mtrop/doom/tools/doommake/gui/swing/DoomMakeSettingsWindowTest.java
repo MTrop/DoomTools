@@ -6,7 +6,7 @@ import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.swing.DoomMakeSettingsWindow;
 
-public final class DoomMakeWindowTest 
+public final class DoomMakeSettingsWindowTest 
 {
 	public static void main(String[] args) 
 	{

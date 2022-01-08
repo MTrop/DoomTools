@@ -17,13 +17,13 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.14.0" />
+	<property name="doom.lib.version" value="2.14.1" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 
-	<property name="json.lib.version" value="1.1.3" />
+	<property name="json.lib.version" value="1.2.0" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />
@@ -177,7 +177,7 @@
 	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
-	<property name="jvm.options.common" value="-Xms64M -Xmx784M" />
+	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />
 
 	<target name="scripts" description="Creates application shell scripts.">
 		<!-- DoomTools -->

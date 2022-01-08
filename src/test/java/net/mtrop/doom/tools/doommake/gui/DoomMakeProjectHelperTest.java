@@ -14,7 +14,7 @@ public final class DoomMakeProjectHelperTest
 		DoomMakeProjectHelper helper = DoomMakeProjectHelper.get();
 		
 		System.out.println(helper.getProjectTargets(projectDir));
-		helper.callDoomMakeTarget(projectDir, System.out, null, null, "patch").waitFor();
+		helper.callDoomMakeTarget(projectDir, System.out, System.err, null, "patch").waitFor();
 		helper.callDoomMakeTarget(projectDir, System.out, null, null, "make").getKillSwitch().run();
 	}
 }

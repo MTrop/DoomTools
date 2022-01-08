@@ -68,7 +68,8 @@ public final class DoomToolsMain
 	private static final String UPDATE_REPO_NAME = "DoomTools";
 	private static final String UPDATE_REPO_OWNER = "MTrop";
 
-	private static final String SHELL_OPTIONS = "-Xms64M -Xmx784M";
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
+	
 	private static final Map<String, Class<?>> SHELL_DATA = Common.map(
 		Common.keyValue("doomtools",  DoomToolsMain.class),
 		Common.keyValue("wadmerge",   WadMergeMain.class),
@@ -105,6 +106,7 @@ public final class DoomToolsMain
 	private static final String SWITCH_WEBSITE = "--website";
 	private static final String SWITCH_DOCS = "--docs";
 	private static final String SWITCH_WHERE = "--where";
+	private static final String SWITCH_SETTINGS = "--settings";
 	private static final String SWITCH_UPDATE = "--update";
 	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
 	private static final String SWITCH_UPDATE_SHELL = "--update-shell";
@@ -124,6 +126,7 @@ public final class DoomToolsMain
 		private boolean openWebsite;
 		private boolean openDocs;
 		private boolean where;
+		private boolean openSettings;
 		
 		private Options()
 		{
@@ -134,6 +137,7 @@ public final class DoomToolsMain
 			this.updateShell = false;
 			this.openWebsite = false;
 			this.where = false;
+			this.openSettings = false;
 		}
 		
 		public Options setStdout(OutputStream out) 
@@ -492,17 +496,9 @@ public final class DoomToolsMain
 					return ERROR_SECURITY;
 				}
 				
-				if (!Desktop.isDesktopSupported())
-				{
-					options.stderr.println("ERROR: No desktop support. Cannot open website.");
-					return ERROR_DESKTOP_ERROR;
-				}
-
-				if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
-				{
-					options.stderr.println("ERROR: No support for opening files/folders. Cannot open documentation folder.");
-					return ERROR_DESKTOP_ERROR;
-				}				
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "documentation folder")) != ERROR_NONE)
+					return desktopError;
 				
 				try {
 					options.stdout.println("Opening the DoomTools documentation folder...");
@@ -517,19 +513,37 @@ public final class DoomToolsMain
 
 				return ERROR_NONE;
 			}
-			else if (options.openWebsite)
+			else if (options.openSettings)
 			{
-				if (!Desktop.isDesktopSupported())
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "settings folder")) != ERROR_NONE)
+					return desktopError;
+
+				options.stdout.println("Opening the DoomTools settings folder...");
+				File settingsDir = new File(Common.SETTINGS_PATH);
+				if (!settingsDir.exists())
 				{
-					options.stderr.println("ERROR: No desktop support. Cannot open website.");
+					options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
+					return ERROR_DESKTOP_ERROR;
+				}
+				
+				try {
+					Desktop.getDesktop().open(settingsDir);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Cannot open settings folder. I/O Error.");
+					return ERROR_DESKTOP_ERROR;
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Cannot open settings folder. OS is preventing folder access.");
 					return ERROR_DESKTOP_ERROR;
 				}
 
-				if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-				{
-					options.stderr.println("ERROR: No default browser support. Cannot open website.");
-					return ERROR_DESKTOP_ERROR;
-				}				
+				return ERROR_NONE;
+			}
+			else if (options.openWebsite)
+			{
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.BROWSE, "website")) != ERROR_NONE)
+					return desktopError;
 				
 				try {
 					options.stdout.println("Opening the DoomTools website...");
@@ -570,6 +584,24 @@ public final class DoomToolsMain
 				return ERROR_NONE;
 			}
 		}
+
+		private int checkDesktopAction(Desktop.Action action, String name) 
+		{
+			if (!Desktop.isDesktopSupported())
+			{
+				options.stderr.println("ERROR: No desktop support. Cannot open " + name + ".");
+				return ERROR_DESKTOP_ERROR;
+			}
+
+			if (!Desktop.getDesktop().isSupported(action))
+			{
+				options.stderr.println("ERROR: No support for desktop " + action.name() + ". Cannot open " + name + ".");
+				return ERROR_DESKTOP_ERROR;
+			}
+			
+			return ERROR_NONE;
+		}
+		
 	}
 	
 	/**
@@ -601,6 +633,8 @@ public final class DoomToolsMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WEBSITE))
 						options.openWebsite = true;
+					else if (arg.equalsIgnoreCase(SWITCH_SETTINGS))
+						options.openSettings = true;
 					else if (arg.equalsIgnoreCase(SWITCH_DOCS))
 						options.openDocs = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
@@ -649,9 +683,12 @@ public final class DoomToolsMain
 		out.println("    --help               Prints help and exits.");
 		out.println("    -h");
 		out.println();
-		out.println("    --website            Opens DoomTools's main website.");
-		out.println();
 		out.println("    --docs               Opens DoomTools's documentation folder.");
+		out.println();
+		out.println("    --settings           Opens the folder where DoomTools stores global");
+		out.println("                             (user-level) settings.");
+		out.println();
+		out.println("    --website            Opens DoomTools's main website.");
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
 		out.println();
