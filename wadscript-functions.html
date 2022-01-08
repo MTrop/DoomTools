@@ -93,7 +93,7 @@
 					 | 
 					<a href="#category-wads" class="toc-link">WADs</a>
 					 | 
-					<a href="#category-pk-pkes" class="toc-link">PK3/PKEs</a>
+					<a href="#category-pk3-pkes" class="toc-link">PK3/PKEs</a>
 					 | 
 					<a href="#category-doom-hexen-zdoom-udmf-maps" class="toc-link">Doom / Hexen / ZDoom / UDMF Maps</a>
 					 | 
@@ -682,7 +682,7 @@
 								<div class="parameter-content">
 									<div class="parameter-usage">
 										<div class="parameter-type">
-											<span class="parameter-type-name">STRING</span>
+											<span class="parameter-type-name">ANY</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -736,7 +736,7 @@
 								<div class="parameter-content">
 									<div class="parameter-usage">
 										<div class="parameter-type">
-											<span class="parameter-type-name">STRING</span>
+											<span class="parameter-type-name">ANY</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -790,7 +790,7 @@
 								<div class="parameter-content">
 									<div class="parameter-usage">
 										<div class="parameter-type">
-											<span class="parameter-type-name">STRING</span>
+											<span class="parameter-type-name">ANY</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -844,7 +844,7 @@
 								<div class="parameter-content">
 									<div class="parameter-usage">
 										<div class="parameter-type">
-											<span class="parameter-type-name">STRING</span>
+											<span class="parameter-type-name">ANY</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -2533,7 +2533,7 @@
 						</div>
 						<div id="function-content-sublist" class="function-content">
 							<div class="function-description">
-								<p>Creates a new list from a larger list using a range of contiguous list indices.</p>
+								<p>Creates a new, smaller list from a larger list using a range of contiguous list indices, such that the new list contains the elements in the desired range, in order.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -2625,7 +2625,7 @@
 										</div>
 										<div class="parameter-description">
 											<p>
-												The substring returned.
+												The new list.
 											</p>
 										</div>
 									</div>
@@ -3001,7 +3001,7 @@
 						</div>
 						<div id="function-content-setunion" class="function-content">
 							<div class="function-description">
-								<p>Gets the union of two sets, returning a new set with values in both.</p>
+								<p>Creates the union of two sets, returning a new set with values in both.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -3094,7 +3094,7 @@
 						</div>
 						<div id="function-content-setintersect" class="function-content">
 							<div class="function-description">
-								<p>Gets the intersection of two sets, returning a new set with values in both.</p>
+								<p>Creates the intersection of two sets, returning a new set with values in both.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -3187,7 +3187,7 @@
 						</div>
 						<div id="function-content-setxor" class="function-content">
 							<div class="function-description">
-								<p>Gets the exclusive-or of two sets, returning the union of both sets minus the intersection.</p>
+								<p>Creates the exclusive-or of two sets, returning the union of both sets minus the intersection.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -3280,7 +3280,7 @@
 						</div>
 						<div id="function-content-setdiff" class="function-content">
 							<div class="function-description">
-								<p>Gets a new set that is the first set minus the values in the second set.</p>
+								<p>Creates a new set that is the first set minus the values in the second set.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -3818,7 +3818,7 @@
 						</div>
 						<div id="function-content-bufnew" class="function-content">
 							<div class="function-description">
-								<p>Creates a new, blank buffer.</p>
+								<p>Creates a new, blank buffer of a specific size.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -3833,7 +3833,7 @@
 										</div>
 										<div class="parameter-description">
 											<p>
-												The size of the buffer.
+												The size of the buffer in bytes.
 											</p>
 										</div>
 									</div>
@@ -3957,7 +3957,7 @@
 										</div>
 										<div class="parameter-description">
 											<p>
-												The new size of the buffer.
+												The new size of the buffer in bytes.
 											</p>
 										</div>
 									</div>
@@ -4652,7 +4652,7 @@
 						</div>
 						<div id="function-content-bufread" class="function-content">
 							<div class="function-description">
-								<p>Read bulk bytes from another buffer. Will stop if the end of this buffer is reached.</p>
+								<p>Reads a bulk set of bytes from another buffer into a destination buffer. Will stop if the end of the destination buffer is reached.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -8184,8 +8184,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-log-" class="function-section">
-						<div class="function-title" section-code="log-">
+					<div id="function-log10" class="function-section">
+						<div class="function-title" section-code="log10">
 							<h2 class="function-name">
 								LOG10
 								<span class="function-parameters">
@@ -8194,7 +8194,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-log-" class="function-content">
+						<div id="function-content-log10" class="function-content">
 							<div class="function-description">
 								<p>Returns the Base 10 Log of a value.</p>
 							</div>
@@ -8327,8 +8327,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-deg-rad" class="function-section">
-						<div class="function-title" section-code="deg-rad">
+					<div id="function-deg2rad" class="function-section">
+						<div class="function-title" section-code="deg2rad">
 							<h2 class="function-name">
 								DEG2RAD
 								<span class="function-parameters">
@@ -8337,7 +8337,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-deg-rad" class="function-content">
+						<div id="function-content-deg2rad" class="function-content">
 							<div class="function-description">
 								<p>Converts degrees to radians.</p>
 							</div>
@@ -8381,8 +8381,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-rad-deg" class="function-section">
-						<div class="function-title" section-code="rad-deg">
+					<div id="function-rad2deg" class="function-section">
+						<div class="function-title" section-code="rad2deg">
 							<h2 class="function-name">
 								RAD2DEG
 								<span class="function-parameters">
@@ -8391,7 +8391,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-rad-deg" class="function-content">
+						<div id="function-content-rad2deg" class="function-content">
 							<div class="function-description">
 								<p>Converts radians to degrees.</p>
 							</div>
@@ -9406,7 +9406,7 @@
 										</div>
 										<div class="parameter-description">
 											<p>
-												True if the pattern is malformed, false otherwise.
+												True if the pattern is valid, false otherwise.
 											</p>
 										</div>
 									</div>
@@ -11562,7 +11562,7 @@
 						</div>
 						<div id="function-content-createdirs" class="function-content">
 							<div class="function-description">
-								<p>Attempts to create a directory using an abstract pathname and all of directories in between, if they also don't exist. NOTE: A failure may still involve some directories being created!</p>
+								<p>Attempts to create a directory using an abstract pathname and all of the directories in between, if they also don't exist. NOTE: A failure may still involve some directories being created!</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -12856,7 +12856,7 @@
 						</div>
 						<div id="function-content-skip" class="function-content">
 							<div class="function-description">
-								<p>Skips reading [length] amount of bytes from a readable data input, from the file's current cursor position. The file's cursor will be advanced.</p>
+								<p>Skips reading [length] amount of bytes from a readable data input, from the file's current cursor position. The stream's position will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -13205,7 +13205,7 @@
 						</div>
 						<div id="function-content-read" class="function-content">
 							<div class="function-description">
-								<p>Reads [length] amount of bytes from a readable data input, from the file's current cursor position. The file's cursor will be advanced.</p>
+								<p>Reads [length] amount of bytes from a readable data input, from the file or stream's current position. The position will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -13359,7 +13359,7 @@
 						</div>
 						<div id="function-content-write" class="function-content">
 							<div class="function-description">
-								<p>Writes [length] amount of bytes to the file, from the file's current cursor position using the bytes in a buffer. The file's cursor will be advanced.</p>
+								<p>Writes [length] amount of bytes to a writable data output, to the file or stream position using the bytes in a buffer. The position will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -14813,7 +14813,7 @@
 						</div>
 						<div id="function-content-readbyte" class="function-content">
 							<div class="function-description">
-								<p>Reads a byte from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads a byte from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -14890,7 +14890,7 @@
 						</div>
 						<div id="function-content-readshort" class="function-content">
 							<div class="function-description">
-								<p>Reads a short (2 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads a short (2 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15007,7 +15007,7 @@
 						</div>
 						<div id="function-content-readushort" class="function-content">
 							<div class="function-description">
-								<p>Reads an unsigned short (2 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads an unsigned short (2 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15124,7 +15124,7 @@
 						</div>
 						<div id="function-content-readint" class="function-content">
 							<div class="function-description">
-								<p>Reads an integer (4 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads an integer (4 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15241,7 +15241,7 @@
 						</div>
 						<div id="function-content-readuint" class="function-content">
 							<div class="function-description">
-								<p>Reads an unsigned integer (4 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads an unsigned integer (4 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15358,7 +15358,7 @@
 						</div>
 						<div id="function-content-readfloat" class="function-content">
 							<div class="function-description">
-								<p>Reads a 32-bit float (4 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads a 32-bit float (4 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15475,7 +15475,7 @@
 						</div>
 						<div id="function-content-readlong" class="function-content">
 							<div class="function-description">
-								<p>Reads a long integer (8 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads a long integer (8 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15592,7 +15592,7 @@
 						</div>
 						<div id="function-content-readdouble" class="function-content">
 							<div class="function-description">
-								<p>Reads a 64-bit float (8 bytes) from a readable data input. The file's cursor will be advanced.</p>
+								<p>Reads a 64-bit float (8 bytes) from a readable data input. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15709,7 +15709,7 @@
 						</div>
 						<div id="function-content-readstr" class="function-content">
 							<div class="function-description">
-								<p>Reads a set of bytes from a readable data input, and converts it into a string.</p>
+								<p>Reads a set of bytes from a readable data input, and converts it into a string. The source's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15856,7 +15856,7 @@
 						</div>
 						<div id="function-content-writebyte" class="function-content">
 							<div class="function-description">
-								<p>Writes a byte to a writeable data output.</p>
+								<p>Writes a byte to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -15953,7 +15953,7 @@
 						</div>
 						<div id="function-content-writeshort" class="function-content">
 							<div class="function-description">
-								<p>Writes a short (2 bytes) to a writeable data output.</p>
+								<p>Writes a short (2 bytes) to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16079,7 +16079,7 @@
 						</div>
 						<div id="function-content-writeushort" class="function-content">
 							<div class="function-description">
-								<p>Writes an unsigned short (2 bytes) to a writeable data output.</p>
+								<p>Writes an unsigned short (2 bytes) to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16205,7 +16205,7 @@
 						</div>
 						<div id="function-content-writeint" class="function-content">
 							<div class="function-description">
-								<p>Writes an integer (4 bytes) to a writeable data output.</p>
+								<p>Writes an integer (4 bytes) to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16331,7 +16331,7 @@
 						</div>
 						<div id="function-content-writeuint" class="function-content">
 							<div class="function-description">
-								<p>Writes an unsigned integer (4 bytes) to a writeable data output.</p>
+								<p>Writes an unsigned integer (4 bytes) to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16457,7 +16457,7 @@
 						</div>
 						<div id="function-content-writefloat" class="function-content">
 							<div class="function-description">
-								<p>Writes a 32-bit floating-point number to a writeable data output.</p>
+								<p>Writes a 32-bit floating-point number to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16583,7 +16583,7 @@
 						</div>
 						<div id="function-content-writelong" class="function-content">
 							<div class="function-description">
-								<p>Writes a long integer (8 bytes) to a writeable data output.</p>
+								<p>Writes a long integer (8 bytes) to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16709,7 +16709,7 @@
 						</div>
 						<div id="function-content-writedouble" class="function-content">
 							<div class="function-description">
-								<p>Writes a 64-bit floating-point number to a writeable data output.</p>
+								<p>Writes a 64-bit floating-point number to a writeable data output. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -16835,7 +16835,7 @@
 						</div>
 						<div id="function-content-writestr" class="function-content">
 							<div class="function-description">
-								<p>Writes a string to a writeable data output, converting it into a set of bytes.</p>
+								<p>Writes a string to a writeable data output, converting it into a set of bytes. The destination's position, if any, will be advanced.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -17421,7 +17421,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-md-" class="function-section">
+					<div id="function-md5" class="function-section">
 						<div class="function-title" section-code="md5">
 							<h2 class="function-name">
 								MD5
@@ -17541,7 +17541,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-sha-" class="function-section">
+					<div id="function-sha1" class="function-section">
 						<div class="function-title" section-code="sha1">
 							<h2 class="function-name">
 								SHA1
@@ -17661,7 +17661,7 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-sha-" class="function-section">
+					<div id="function-sha256" class="function-section">
 						<div class="function-title" section-code="sha256">
 							<h2 class="function-name">
 								SHA256
@@ -18228,6 +18228,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">LIST</span>
+											<span class="parameter-subtype-name">[STRING, ...]</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -18333,6 +18334,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">LIST</span>
+											<span class="parameter-subtype-name">[STRING, ...]</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -18396,7 +18398,7 @@
 						</div>
 						<div id="function-content-exec" class="function-content">
 							<div class="function-description">
-								<p>Spawns a process instance. A set of daemon threads are created that assist the streams on the process. The process, if created successfully, is registered as an open resource, and is closeable like any other resource. The script may end before the process does, so you may want to wait for its end via EXECRESULT().</p>
+								<p>Spawns a process instance. A set of daemon threads are created that assist the streams on the process. The process, if created successfully, is registered as an open resource, and is closeable like any other resource (closing it will terminate it, if running). The script may end before the process does, so you may want to wait for its end via EXECRESULT(). All input/output streams are not closed, unless OBJECTREF:Files are used. If a file is used for output, it is overwritten. If you wish to keep a process running after the script terminates, call DONOTCLOSE with the process to avoid its cleanup.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -18690,7 +18692,7 @@
 							<h2 class="function-name">
 								EXECRESULT
 								<span class="function-parameters">
-									(command, waitmillis)
+									(process, waitmillis)
 								</span>
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
@@ -18702,7 +18704,7 @@
 							<div class="parameter-section">
 								<div class="parameter-title">
 									<h4 class="parameter-name">
-										command
+										process
 									</h4>
 								</div>
 								<div class="parameter-content">
@@ -23340,16 +23342,16 @@
 					</div>
 				</div>
 			</div>
-			<div id="category-pk-pkes" class="category-section">
-				<div class="category-title" section-code="pk-pkes">
+			<div id="category-pk3-pkes" class="category-section">
+				<div class="category-title" section-code="pk3-pkes">
 					<h1 class="category-name">
 						PK3/PKEs
 						<a href="#top" class="category-navigation">TOP</a>
 					</h1>
 				</div>
-				<div id="category-content-pk-pkes" class="category-content">
-					<div id="function-pk-open" class="function-section">
-						<div class="function-title" section-code="pk-open">
+				<div id="category-content-pk3-pkes" class="category-content">
+					<div id="function-pk3open" class="function-section">
+						<div class="function-title" section-code="pk3open">
 							<h2 class="function-name">
 								PK3OPEN
 								<span class="function-parameters">
@@ -23358,7 +23360,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-pk-open" class="function-content">
+						<div id="function-content-pk3open" class="function-content">
 							<div class="function-description">
 								<p>Opens a Doom PK3/PKE. The ZF* functions can work with this - a Doom PK3/PKE is a Zip file! The file, if opened, is registered as a resource, and will be closed when the script terminates.</p>
 							</div>
@@ -23436,8 +23438,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-pk-entry" class="function-section">
-						<div class="function-title" section-code="pk-entry">
+					<div id="function-pk3entry" class="function-section">
+						<div class="function-title" section-code="pk3entry">
 							<h2 class="function-name">
 								PK3ENTRY
 								<span class="function-parameters">
@@ -23446,7 +23448,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-pk-entry" class="function-content">
+						<div id="function-content-pk3entry" class="function-content">
 							<div class="function-description">
 								<p>Returns a list of all of the entries in an open PK3/PKE file. This is a rebrand of ZFENTRY - same function.</p>
 							</div>
@@ -23543,8 +23545,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-pk-entries" class="function-section">
-						<div class="function-title" section-code="pk-entries">
+					<div id="function-pk3entries" class="function-section">
+						<div class="function-title" section-code="pk3entries">
 							<h2 class="function-name">
 								PK3ENTRIES
 								<span class="function-parameters">
@@ -23553,7 +23555,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-pk-entries" class="function-content">
+						<div id="function-content-pk3entries" class="function-content">
 							<div class="function-description">
 								<p>Returns a list of all entries that start with a type of key. The name is treated case-insensitively.</p>
 							</div>
@@ -23640,8 +23642,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-pk-eopen" class="function-section">
-						<div class="function-title" section-code="pk-eopen">
+					<div id="function-pk3eopen" class="function-section">
+						<div class="function-title" section-code="pk3eopen">
 							<h2 class="function-name">
 								PK3EOPEN
 								<span class="function-parameters">
@@ -23650,9 +23652,9 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-pk-eopen" class="function-content">
+						<div id="function-content-pk3eopen" class="function-content">
 							<div class="function-description">
-								<p>Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource). This is a rebrand of ZFENTRY - same function.</p>
+								<p>Opens a data input stream for reading from a zip file entry (and registers this resource as an open resource). This is a rebrand of ZFEOPEN - same function.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -23759,8 +23761,8 @@
 							</div>
 						</div>
 					</div>
-					<div id="function-pk-wad" class="function-section">
-						<div class="function-title" section-code="pk-wad">
+					<div id="function-pk3wad" class="function-section">
+						<div class="function-title" section-code="pk3wad">
 							<h2 class="function-name">
 								PK3WAD
 								<span class="function-parameters">
@@ -23769,7 +23771,7 @@
 								<a href="#top" class="function-navigation">TOP</a>
 							</h2>
 						</div>
-						<div id="function-content-pk-wad" class="function-content">
+						<div id="function-content-pk3wad" class="function-content">
 							<div class="function-description">
 								<p>Reads a PK3/PKE entry as though it were a WAD file and returns an in-memory Wad buffer (not a resource - does not require closing).</p>
 							</div>
