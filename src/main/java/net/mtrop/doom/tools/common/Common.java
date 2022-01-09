@@ -659,8 +659,8 @@ public final class Common
 		
 		List<String> cmdLine = new LinkedList<>();
 		cmdLine.add(javaExec.getAbsolutePath());
-		cmdLine.add("-Xms64M");
-		cmdLine.add("-Xmx768M");
+		cmdLine.add("-Xms64M");  // min memory pool
+		cmdLine.add("-Xmx768M"); // max memory pool
 		cmdLine.add("-cp");
 		cmdLine.add(classPath);
 		cmdLine.add(mainClass.getCanonicalName());
