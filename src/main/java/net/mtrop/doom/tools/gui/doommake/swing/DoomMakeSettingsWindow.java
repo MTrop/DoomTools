@@ -3,7 +3,7 @@ package net.mtrop.doom.tools.gui.doommake.swing;
 import java.awt.BorderLayout;
 
 import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
-import net.mtrop.doom.tools.gui.swing.DoomToolsWindow;
+import net.mtrop.doom.tools.gui.swing.DoomToolsFrame;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
@@ -12,7 +12,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
  * Changing each setting automatically saves them.
  * @author Matthew Tropiano
  */
-public class DoomMakeSettingsWindow extends DoomToolsWindow 
+public class DoomMakeSettingsWindow extends DoomToolsFrame 
 {
 	private static final long serialVersionUID = 7920577573661915653L;
 

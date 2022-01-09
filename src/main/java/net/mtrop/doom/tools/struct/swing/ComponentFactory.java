@@ -834,12 +834,19 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, ListSelectionHandler<JList<E>> handler)
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, final ListSelectionHandler<E> handler)
 	{
-		JList<E> out = new JList<>(model);
+		final JList<E> out = new JList<>(model);
 		out.setCellRenderer(renderer);
 		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(handler);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
+			}
+		});
 		return out;
 	}
 
@@ -867,11 +874,18 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListModel<E> model, int selectionMode, ListSelectionHandler<JList<E>> handler)
+	public static <E> JList<E> list(ListModel<E> model, int selectionMode, final ListSelectionHandler<E> handler)
 	{
 		JList<E> out = new JList<>(model);
 		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(handler);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
+			}
+		});
 		return out;
 	}
 
@@ -914,11 +928,18 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the table created.
 	 */
-	public static JTable table(TableModel model, TableColumnModel columnModel, int selectionMode, ListSelectionHandler<JTable> handler)
+	public static JTable table(TableModel model, TableColumnModel columnModel, int selectionMode, final TableSelectionHandler handler)
 	{
 		JTable out = new JTable(model, columnModel);
 		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(handler);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
+			}
+		});
 		return out;
 	}
 
@@ -941,11 +962,18 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the table created.
 	 */
-	public static JTable table(TableModel model, int selectionMode, ListSelectionHandler<JTable> handler)
+	public static JTable table(TableModel model, int selectionMode, final TableSelectionHandler handler)
 	{
 		JTable out = new JTable(model, new DefaultTableColumnModel());
 		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(handler);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
+			}
+		});
 		return out;
 	}
 
@@ -977,26 +1005,32 @@ public final class ComponentFactory
 
 	/**
 	 * A handler interface for listening for list selection events.
-	 * @param <L> the listener type that this handles.
+	 * @param <V> the list's value type.
 	 */
 	@FunctionalInterface
-	public interface ListSelectionHandler<L> extends ListSelectionListener
+	public interface ListSelectionHandler<V>
 	{
-		@Override
-		@SuppressWarnings("unchecked")
-		default void valueChanged(ListSelectionEvent e) 
-		{
-			onSelectionChange((L)e.getSource(), e.getFirstIndex(), e.getLastIndex(), e.getValueIsAdjusting());
-		}
-		
 		/**
 		 * Called when a list's selection changes.
-		 * @param component the associated component.
-		 * @param firstIndex the first index of the selection.
-		 * @param lastIndex the last index of the selection.
+		 * @param selected the selected items.
 		 * @param adjusting if true, this is in the middle of adjusting, false if not.
 		 */
-		void onSelectionChange(L component, int firstIndex, int lastIndex, boolean adjusting);
+		void onSelectionChange(List<V> selected, boolean adjusting);
+	}
+	
+	/**
+	 * A handler interface for listening for table selection events.
+	 */
+	@FunctionalInterface
+	public interface TableSelectionHandler
+	{
+		/**
+		 * Called when a list's selection changes.
+		 * @param rowsSelected the selected rows. 
+		 * @param columnsSelected the selected columns. 
+		 * @param adjusting true if adjusting, false if not.
+		 */
+		void onSelectionChange(int[] rowsSelected, int[] columnsSelected, boolean adjusting);
 	}
 	
 	/**

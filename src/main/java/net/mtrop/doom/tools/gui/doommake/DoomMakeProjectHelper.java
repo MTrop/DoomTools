@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.util.Collections;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -184,15 +183,15 @@ public final class DoomMakeProjectHelper
 			.waitFor();
 			LOG.infof("Call to DoomMake returned %d", result);
 		} catch (InterruptedException e) {
-			throw new ProcessCallException("DoomMake target could not be completed. Process thread was interrupted.", e);
+			throw new ProcessCallException("DoomMake call could not be completed. Process thread was interrupted.", e);
 		} catch (SecurityException e) {
-			throw new ProcessCallException("DoomMake target could not be completed. Operating system prevented the call.", e);
+			throw new ProcessCallException("DoomMake call could not be completed. Operating system prevented the call.", e);
 		} catch (IOException e) {
-			throw new ProcessCallException("DoomMake target could not be completed.", e);
+			throw new ProcessCallException("DoomMake call could not be completed.", e);
 		}
 		
 		if (result != 0)
-			return Collections.emptySortedSet();
+			throw new ProcessCallException("DoomMake targets could not be retrieved.");
 		
 		SortedSet<String> out = new TreeSet<>((a, b) -> a.equalsIgnoreCase("make") ? -1 : a.compareTo(b));
 		for (String entryName : sw.toString().split("\\n+"))

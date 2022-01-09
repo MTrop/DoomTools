@@ -452,22 +452,22 @@ public final class ContainerFactory
 	/**
 	 * Creates a scrolling pane.
 	 * @param vsbPolicy the vertical scroll policy (from JScrollPane).
-	 * @param container the container 
+	 * @param component the component 
 	 * @return a scroll pane.
 	 */
-	public static JScrollPane scroll(int vsbPolicy, Container container)
+	public static JScrollPane scroll(int vsbPolicy, Component component)
 	{
-		return scroll(vsbPolicy, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, container);
+		return scroll(vsbPolicy, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, component);
 	}
 
 	/**
 	 * Creates a scrolling pane.
-	 * @param container the container 
+	 * @param component the component 
 	 * @return a scroll pane.
 	 */
-	public static JScrollPane scroll(Container container)
+	public static JScrollPane scroll(Component component)
 	{
-		return scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, container);
+		return scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, component);
 	}
 
 	/* ==================================================================== */

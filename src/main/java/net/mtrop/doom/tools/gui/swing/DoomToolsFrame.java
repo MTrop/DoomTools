@@ -9,11 +9,11 @@ import java.awt.Image;
 import java.util.Arrays;
 
 /**
- * A common DoomMake window.
+ * A common DoomTools window.
  * Sets up tedious window stuff.
  * @author Matthew Tropiano
  */
-public abstract class DoomToolsWindow extends JFrame 
+public abstract class DoomToolsFrame extends JFrame 
 {
 	private static final long serialVersionUID = -7160047525149992542L;
 
@@ -27,9 +27,9 @@ public abstract class DoomToolsWindow extends JFrame
 	/**
 	 * Creates the window and fills in some defaults.
 	 */
-	protected DoomToolsWindow()
+	protected DoomToolsFrame()
 	{
-		setTitle("DoomMake v" + Common.getVersionString("doommake"));
+		setTitle("DoomTools v" + Common.getVersionString("doomtools"));
 		setIconImages(Arrays.asList(ICON128, ICON96, ICON64, ICON48, ICON32, ICON16));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}

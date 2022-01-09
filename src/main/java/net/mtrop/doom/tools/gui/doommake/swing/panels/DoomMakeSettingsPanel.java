@@ -22,6 +22,9 @@ public class DoomMakeSettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = 3657842361863713721L;
 	
+	/** Settings singleton. */
+	private static final DoomMakeSettings settings = DoomMakeSettings.get();
+	
 	private static final FileFilter EXE_FILTER = new FileFilter() 
 	{
 		@Override
@@ -37,16 +40,11 @@ public class DoomMakeSettingsPanel extends JPanel
 		}
 	};
 	
-	/** Settings singleton. */
-	private DoomMakeSettings settings;
-	
 	/**
 	 * Creates the settings panel.
 	 */
 	public DoomMakeSettingsPanel()
 	{
-		this.settings = DoomMakeSettings.get();
-		
 		containerOf(this, new BoxLayout(this, BoxLayout.X_AXIS),
 			node(form(LabelSide.LEFT, LabelJustification.LEFT, 96)
 				.addField("Path to VSCode", fileField(
