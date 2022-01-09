@@ -1,11 +1,11 @@
 # Doom Tools
 
-Copyright (c) 2019-2021 Matt Tropiano  
+Copyright (c) 2019-2022 Matt Tropiano  
 
 ### Required Libraries
 
 [Doom Struct](https://github.com/MTrop/DoomStruct) 2.14.1+  
-[Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.1.3+  
+[Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.2.0+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.14.0+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
