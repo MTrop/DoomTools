@@ -15,7 +15,7 @@ public class TextOutputPanel extends JTextArea
 {
 	private static final long serialVersionUID = -1405465151452714437L;
 
-	private static final Font DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 14);
+	private static final Font DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
 	
 	/**
 	 * Creates a new output panel.

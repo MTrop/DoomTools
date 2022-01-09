@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
@@ -7,7 +7,6 @@ import java.io.PrintStream;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import net.mtrop.doom.tools.gui.swing.panels.TextOutputPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 public final class TextOutputPanelTest 
