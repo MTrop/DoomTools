@@ -1,9 +1,8 @@
-package net.mtrop.doom.tools.doommake.gui;
+package net.mtrop.doom.tools.gui.doommake;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.ProcessCallException;
 
 public final class DoomMakeProjectHelperTest 

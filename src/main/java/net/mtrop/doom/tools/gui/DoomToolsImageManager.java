@@ -35,7 +35,7 @@ public final class DoomToolsImageManager
 	
 	private DoomToolsImageManager()
 	{
-		this.imageLoader = new Loader<>(Loader.createResourceLoader("doommake/gui/images/", (path, in) -> {
+		this.imageLoader = new Loader<>(Loader.createResourceLoader("gui/images/", (path, in) -> {
 			try {
 				BufferedImage out = ImageIO.read(in);
 				LOG.debugf("Loaded image: %s", path);

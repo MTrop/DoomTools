@@ -52,7 +52,7 @@ public final class DoomToolsLanguageManager
 	{
 		String iso3language = Locale.getDefault().getISO3Language().toLowerCase();
 		
-		this.resourcePath = "doommake/gui/language/";
+		this.resourcePath = "gui/language/";
 		this.languageMap = new Properties();
 		
 		loadIntoMap(DEFAULT_LANGUAGE);

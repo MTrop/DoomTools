@@ -1,8 +1,7 @@
-package net.mtrop.doom.tools.doommake.gui.swing.panels;
+package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import javax.swing.JFrame;
 
-import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
