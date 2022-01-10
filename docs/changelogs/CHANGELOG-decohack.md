@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.22.0
+
+* `Fixed` **MAJOR FIX** DECOHack was completely broken and would NPE out on any parse. Whoops. Fixed!
+
+
 ### Changed for 0.21.0
 
 * `Added` STR_ `#defines` for BOOM's extended locked door strings were missing (thanks, Xaser!). (PR #61)

@@ -4213,7 +4213,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// State field type.
-	private enum FieldType
+	public enum FieldType
 	{
 		NEXTSTATE,
 		MISC1,
