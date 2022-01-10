@@ -29,7 +29,7 @@
 	<property name="json.jar" value="${json.project}.jar" />
 	<property name="json.jar.src" value="${json.project}-sources.jar" />
 
-	<property name="rookscript.lib.version" value="1.14.0" />
+	<property name="rookscript.lib.version" value="1.14.1" />
 	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
 	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
