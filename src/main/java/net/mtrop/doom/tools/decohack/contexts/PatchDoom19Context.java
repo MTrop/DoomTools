@@ -114,7 +114,12 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 		String original = getSourcePatch().getString(index);
 		int maxLength = calculateMaxStringLength(original);
 		if (value.length() > maxLength)
-			throw new IllegalArgumentException(String.format("Incoming string value for index %d is longer than the original string length: %d", index, maxLength));
+		{
+			throw new IllegalArgumentException(
+				String.format("Incoming string value for index %d is %d characters. Original string length is %d. Delete %d characters to fit!", 
+				index, value.length(), maxLength, value.length() - maxLength)
+			);
+		}
 		
 		// if sprite.
 		if (index >= getSoundStringIndex() && index < getSoundStringIndex() + getSoundCount())

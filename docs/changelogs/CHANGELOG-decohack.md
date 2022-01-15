@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.23.0
+
+* `Changed` Better string length error messages (Issue/Enhancement #64).
+
+
 ### Changed for 0.22.0
 
 * `Fixed` **MAJOR FIX** DECOHack was completely broken and would NPE out on any parse. Whoops. Fixed!
