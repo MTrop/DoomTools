@@ -29,6 +29,7 @@ import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
+import net.mtrop.doom.tools.decohack.contexts.PatchDoomUnityContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
@@ -175,6 +176,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_DOOM19 = "doom19";
 	private static final String KEYWORD_UDOOM19 = "udoom19";
+	private static final String KEYWORD_DOOMUNITY = "doomunity";
 	private static final String KEYWORD_BOOM = "boom";
 	private static final String KEYWORD_MBF = "mbf";
 	private static final String KEYWORD_EXTENDED = "extended";
@@ -324,6 +326,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return new PatchDoom19Context();
 		else if (matchIdentifierIgnoreCase(KEYWORD_UDOOM19))
 			return new PatchUltimateDoom19Context();
+		else if (matchIdentifierIgnoreCase(KEYWORD_DOOMUNITY))
+			return new PatchDoomUnityContext();
 		else if (matchIdentifierIgnoreCase(KEYWORD_BOOM))
 			return new PatchBoomContext();
 		else if (matchIdentifierIgnoreCase(KEYWORD_MBF))
@@ -4528,6 +4532,7 @@ public final class DecoHackParser extends Lexer.Parser
 					{
 						put("<doom19>", "classpath:decohack/doom19.dh");
 						put("<udoom19>", "classpath:decohack/udoom19.dh");
+						put("<doomunity>", "classpath:decohack/doomunity.dh");
 						put("<boom>", "classpath:decohack/boom.dh");
 						put("<mbf>", "classpath:decohack/mbf.dh");
 						put("<extended>", "classpath:decohack/extended.dh");

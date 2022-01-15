@@ -1201,6 +1201,12 @@ public class PatchUDoom19 implements DEHPatchDoom19
 	}
 
 	@Override
+	public Boolean enforceStringLength()
+	{
+		return true;
+	}
+
+	@Override
 	public String getString(int index)
 	{
 		return Common.arrayElement(DEHSTRINGS, index);

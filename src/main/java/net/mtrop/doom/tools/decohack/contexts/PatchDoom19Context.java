@@ -103,6 +103,12 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 		return Common.arrayElement(strings, index);
 	}
 
+	@Override
+	public Boolean enforceStringLength()
+	{
+		return true;
+	}
+
 	/**
 	 * Sets a new string.
 	 * @param index the string index to replace.
@@ -113,7 +119,7 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 	{
 		String original = getSourcePatch().getString(index);
 		int maxLength = calculateMaxStringLength(original);
-		if (value.length() > maxLength)
+		if (enforceStringLength() && value.length() > maxLength)
 			throw new IllegalArgumentException(String.format("Incoming string value for index %d is longer than the original string length: %d", index, maxLength));
 		
 		// if sprite.
