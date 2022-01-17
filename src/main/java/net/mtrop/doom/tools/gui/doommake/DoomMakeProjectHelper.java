@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Properties;
@@ -13,11 +12,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
-import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -177,16 +176,14 @@ public final class DoomMakeProjectHelper
 		int result;
 		
 		try {
-			result = Common.spawnJavaProcess(projectDirectory, DoomMakeMain.class, "--targets")
-				.stdout(sw)
-				.stderr(errorsw)
-			.waitFor();
+			result = Common.spawnJava(DoomMakeMain.class)
+				.setWorkingDirectory(projectDirectory)
+				.arg("--targets")
+				.setOut(sw)
+				.setErr(errorsw)
+			.call();
 			LOG.infof("Call to DoomMake returned %d", result);
-		} catch (InterruptedException e) {
-			throw new ProcessCallException("DoomMake call could not be completed. Process thread was interrupted.", e);
-		} catch (SecurityException e) {
-			throw new ProcessCallException("DoomMake call could not be completed. Operating system prevented the call.", e);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new ProcessCallException("DoomMake call could not be completed.", e);
 		}
 		
@@ -204,28 +201,23 @@ public final class DoomMakeProjectHelper
 	 * @param projectDirectory the project directory.
 	 * @param stdout the standard out stream. 
 	 * @param stderr the standard error stream. 
-	 * @param stdin the standard in stream.
 	 * @param targetName the target name.
 	 * @return the list of project targets.
 	 * @throws FileNotFoundException 
 	 * @throws ProcessCallException 
 	 */
-	public IOUtils.ProcessWrapper callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, InputStream stdin, String targetName) throws FileNotFoundException, ProcessCallException
+	public ProcessCallable.Instance callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
-		try {
-			LOG.infof("Calling DoomMake.");
-			return Common.spawnJavaProcess(projectDirectory, DoomMakeMain.class, targetName)
-				.stdout(stdout)
-				.stderr(stderr)
-				.stdin(stdin);
-		} catch (SecurityException e) {
-			throw new ProcessCallException("DoomMake target could not be completed. Operating system prevented the call.", e);
-		} catch (IOException e) {
-			throw new ProcessCallException("DoomMake target could not be completed.", e);
-		}
+		LOG.infof("Calling DoomMake.");
+		return Common.spawnJava(DoomMakeMain.class)
+			.setWorkingDirectory(projectDirectory)
+			.arg(targetName)
+			.setOut(stdout)
+			.setErr(stderr)
+		.spawn();
 	}
 
 	private Properties getProjectProperties(File projectDirectory)

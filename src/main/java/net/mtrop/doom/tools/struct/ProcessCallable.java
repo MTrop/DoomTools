@@ -824,9 +824,14 @@ public class ProcessCallable implements Callable<Integer>
 				else
 					process.destroy();
 				join();
-				return cancelled = true;
+				cancelled = true;
+				return true;
 			}
-			return false;
+			else
+			{
+				cancelled = true;
+				return false;
+			}
 		}
 
 		@Override
@@ -960,53 +965,58 @@ public class ProcessCallable implements Callable<Integer>
 		{
 			executor = Thread.currentThread();
 			try {
-				
-				process = exec();
-				
-				PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(process) : null;
-				PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(process) : null;
-				PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(process)  : null;
+				if (!cancelled)
+				{
+					process = exec();
+					
+					PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(process) : null;
+					PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(process) : null;
+					PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(process)  : null;
 
-				if (outThread != null)
-				{
-					outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
-					outThread.start();
-				}
-				if (errThread != null)
-				{
-					errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
-					errThread.start();
-				}
-				if (inThread != null)
-				{
-					inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
-					inThread.start();
-				}
+					if (outThread != null)
+					{
+						outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
+						outThread.start();
+					}
+					if (errThread != null)
+					{
+						errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
+						errThread.start();
+					}
+					if (inThread != null)
+					{
+						inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
+						inThread.start();
+					}
 
-				int out = process.waitFor();
-				
-				if (outThread != null)
-				{
-					outThread.join();
-					outException = outThread.getException();
+					int out = process.waitFor();
+					
+					if (outThread != null)
+					{
+						outThread.join();
+						outException = outThread.getException();
+					}
+					if (errThread != null)
+					{
+						errThread.join();
+						errException = errThread.getException();
+					}
+					if (inThread != null)
+					{
+						inThread.join();
+						inException = inThread.getException();
+					}
+					
+					result = out;
 				}
-				if (errThread != null)
-				{
-					errThread.join();
-					errException = errThread.getException();
-				}
-				if (inThread != null)
-				{
-					inThread.join();
-					inException = inThread.getException();
-				}
-				
-				result = out;
 			} catch (Exception e) {
 				exception = e;
 			} finally {
 				executor = null;
-				done = true;
+				synchronized (waitMutex) {
+					done = true;
+					waitMutex.notifyAll();
+				}
 			}
 		}
 

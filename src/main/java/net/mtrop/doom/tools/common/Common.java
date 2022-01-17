@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.ReplacerReader;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -637,6 +638,16 @@ public final class Common
 				writer.flush();
 			}
 		}
+	}
+	
+	/**
+	 * Creates a Java process callable using some common Java options.
+	 * @param mainClass the class.
+	 * @return the new process callable.
+	 */
+	public static ProcessCallable spawnJava(Class<?> mainClass)
+	{
+		return ProcessCallable.java(mainClass, "-Xms64M", "-Xmx768M");
 	}
 	
 	/**
