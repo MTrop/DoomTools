@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="The generated WadScript Help Page" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DoomTools - WadScript Help" />
+		<meta itemprop="description" content="The generated WadScript Help Page" />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/wadscript.html" />
+		<meta name="twitter:title" content="DoomTools - WadScript Help" />
+		<meta name="twitter:description" content="The generated WadScript Help Page" />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/wadscript.html" />
+		<meta property="og:title" content="DoomTools - WadScript Help" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta property="og:description" content="The generated WadScript Help Page" />
+
+		<title>DoomTools - WadScript Help</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">WadScript Help</h1>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">
+Usage: wadscript [filename] [switches | scriptargs]
+                 [--help | -h | --version]
+                 [--function-help]
+                 [--disassemble] [filename]
+[filename]:
+    The script filename.
+
+[switches]:
+    --help, -h                   Prints this help.
+    --version                    Prints the version of this utility.
+    --function-help              Prints all available function usages.
+    --function-help-markdown     Prints all available function usages in
+                                     Markdown format.
+    --function-help-html         Prints all available function usages in
+                                     HTML format.
+    --function-help-html-div     Prints all available function usages in
+                                     HTML format, but just the content.
+    --disassemble                Prints the disassembly for this script
+                                     and exits.
+    --entry-list                 Prints the list of entry point names for this
+                                     script and exits.
+    --entry [name]               Use a different entry point named [name].
+                                     Default: &quot;main&quot;
+    --runaway-limit [num]        Sets the runaway limit (in operations)
+                                     before the soft protection on infinite
+                                     loops triggers. 0 is no limit.
+                                     Default: 0
+    --activation-depth [num]     Sets the activation depth to [num].
+                                     Default: 256
+    --stack-depth [num]          Sets the stack value depth to [num].
+                                     Default: 2048
+    --                           All tokens after this one are interpreted
+                                     literally as args for the script.
+                                     Normally, all unrecognized switches
+                                     become arguments to the script. This
+                                     forces the alternate interpretation.
+    --X                          Bash script special: [DEPRECATED]
+                                     First argument after this is the script
+                                     file, and every argument after are args
+                                     to pass to the script.
+
+Scopes
+------
+All scripts can access a scope called &#x60;global&#x60; that serves as a common variable
+scope for sharing values outside of functions or for data that you would want
+to initialize once.
+		</pre>
+    <!-- VVV FOOTER VVV -->
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+	</body>
+</html>

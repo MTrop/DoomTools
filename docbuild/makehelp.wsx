@@ -1,0 +1,194 @@
+function headerData()
+{
+    if (global::headerData == null)
+    {
+        check (err)
+        {
+            writer = swopen();
+            reader = csropen(fisopen(file("docbuild/header.html")));
+            each (line : csiterate(reader))
+                writer->cswriteln(line);
+            global::headerData = tostring(writer);
+        }
+        close(reader);
+        if (err)
+            return err;
+    }
+    return global::headerData;
+}
+
+function footerData()
+{
+    if (global::footerData == null)
+    {
+        check (err)
+        {
+            writer = swopen();
+            reader = csropen(fisopen(file("docbuild/footer.html")));
+            each (line : csiterate(reader))
+                writer->cswriteln(line);
+            global::footerData = tostring(writer);
+        }
+        close(reader);
+        if (err)
+            return err;
+    }
+    return global::footerData;
+}
+
+function htmlsanitize(str)
+{
+    if (global::entities == null)
+    {
+        map = {
+            "<":  "&lt;",
+			"&":  "&amp;",
+			"<":  "&lt;",
+			">":  "&gt;",
+			"\"": "&quot;",
+			"'":  "&#39;",
+			"/":  "&#x2F;",
+			"`":  "&#x60;",
+			"=":  "&#x3D;"
+        };
+        global::entities = map;
+    }
+
+    reader = sropen(str);
+    writer = swopen();
+    c = reader->csread();
+    while (c !== null)
+    {
+        d = (global::entities)->mapget(c);
+        if (d !== null)
+            writer->cswrite(d);
+        else
+            writer->cswrite(c);
+        c = reader->csread();
+    }
+    return writer->tostring();
+}
+
+// returns text.
+function cmd(image, args)
+{
+    arglist = ["/c", image];
+    each (a : args)
+        arglist->listadd(a);
+    
+    println("Execute: " + image + "...");
+
+    buffer = bufnew(256*1024);
+    bos = bosopen(buffer);
+    result = execresult(exec("cmd", arglist, null, null, bos, bos, null));
+    if (result)
+        return error("CMDError", image + " returned nonzero.");
+
+    // clip buffer to end
+    buffer->bufsetsize(buffer->bufgetpos())->bufsetpos();
+
+    reader = csropen(bisopen(buffer));
+    writer = swopen();
+    each (line : csiterate(reader))
+        writer->cswriteln(line);
+
+    return tostring(writer);
+}
+
+check function dumpUtil(command, helparg, destination, replacers)
+{
+    headerHTML = headerData();
+    each (k, v : replacers)
+        headerHTML = headerHTML->strreplaceall("%%"+k+"%%", v);
+    precontent = cmd(command, [helparg])->htmlsanitize();
+    footerHTML = footerData();
+    
+    writer = cswopen(fosopen(destination));
+    writer->cswrite(headerHTML);
+    writer->cswrite(precontent);
+    writer->cswrite(footerHTML);
+    close(writer);
+
+    println("Wrote " + destination);
+}
+
+check entry main()
+{
+    dumpUtil("doomtools",  "--help", file("doomtools.html"), {
+        "title": "DoomTools - DoomTools Help",
+        "maintitle": "DoomTools Help",
+        "description": "The generated DECOHack Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/decohack.html"
+    });
+    dumpUtil("decohack",  "--help-full", file("decohack.html"), {
+        "title": "DoomTools - DECOHack Help",
+        "maintitle": "DECOHack Help",
+        "description": "The generated DECOHack Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/decohack.html"
+    });
+    dumpUtil("dimgconv",  "--help", file("dimgconv.html"), {
+        "title": "DoomTools - DImgConv Help",
+        "maintitle": "DImgConv Help",
+        "description": "The generated DImgConv Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/dimgconv.html"
+    });
+    dumpUtil("dmxconv",  "--help", file("dmxconv.html"), {
+        "title": "DoomTools - DMXConv Help",
+        "maintitle": "DMXConv Help",
+        "description": "The generated DMXConv Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/dmxconv.html"
+    });
+    dumpUtil("doommake",  "--help", file("doommake.html"), {
+        "title": "DoomTools - DoomMake Help",
+        "maintitle": "DoomMake Help",
+        "description": "The generated DoomMake Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/doommake.html"
+    });
+    dumpUtil("wadmerge",  "--help", file("wadmerge.html"), {
+        "title": "DoomTools - WadMerge Help",
+        "maintitle": "WadMerge Help",
+        "description": "The generated WadMerge Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wadmerge.html"
+    });
+    dumpUtil("wadscript",  "--help", file("wadscript.html"), {
+        "title": "DoomTools - WadScript Help",
+        "maintitle": "WadScript Help",
+        "description": "The generated WadScript Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wadscript.html"
+    });
+    dumpUtil("wadtex",  "--help", file("wadtex.html"), {
+        "title": "DoomTools - WadTex Help",
+        "maintitle": "WadTex Help",
+        "description": "The generated WadTex Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wadtex.html"
+    });
+    dumpUtil("wswantbl",  "--help", file("wswantbl.html"), {
+        "title": "DoomTools - WSwAnTbl Help",
+        "maintitle": "WSwAnTbl Help",
+        "description": "The generated WSwAnTbl Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wswantbl.html"
+    });
+    dumpUtil("wtexport",  "--help", file("wtexport.html"), {
+        "title": "DoomTools - WTExport Help",
+        "maintitle": "WTExport Help",
+        "description": "The generated WTExport Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wtexport.html"
+    });
+    dumpUtil("wtexscan",  "--help", file("wtexscan.html"), {
+        "title": "DoomTools - WTexScan Help",
+        "maintitle": "WTexScan Help",
+        "description": "The generated WTexScan Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wtexscan.html"
+    });
+}

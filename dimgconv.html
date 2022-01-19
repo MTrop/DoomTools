@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="The generated DImgConv Help Page" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DoomTools - DImgConv Help" />
+		<meta itemprop="description" content="The generated DImgConv Help Page" />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/dimgconv.html" />
+		<meta name="twitter:title" content="DoomTools - DImgConv Help" />
+		<meta name="twitter:description" content="The generated DImgConv Help Page" />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/dimgconv.html" />
+		<meta property="og:title" content="DoomTools - DImgConv Help" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta property="og:description" content="The generated DImgConv Help Page" />
+
+		<title>DoomTools - DImgConv Help</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">DImgConv Help</h1>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">
+DImgConv v1.1.0 by Matt Tropiano (using DoomStruct v2.14.1)
+Usage: dimgconv [--help | -h | --version]
+                [source] [switches]
+
+    --help              Prints help and exits.
+    -h
+
+    --version           Prints version, and exits.
+
+[source]:
+    The source file or directory to read from.
+
+[switches]:
+    --output [path]     Sets the output path for converted files. Can be
+    -o [path]           a single file, a directory, or a WAD file to add
+                        entries to.
+
+    --palette [path]    Sets the path to the source of target palette to use
+    -p [path]           for conversion (Doom format). Can be a file or a
+                        WAD. If WAD, it looks for the &quot;PLAYPAL&quot; lump.
+
+    --recursive         If the [source] is a directory, this scans directories
+    -r                  recursively.
+
+    --mode-palettes     Assumes that the incoming file or files are, by
+    -mp                 default, palettes, unless overridden by a metainfo
+                        file.
+
+    --mode-colormaps    Assumes that the incoming file or files are, by
+    -mc                 default, colormaps, unless overridden by a metainfo
+                        file.
+
+    --mode-flats        Assumes that the incoming file or files are, by
+    -mf                 default, flats, unless overridden by a metainfo
+                        file.
+
+    --infofile [name]   Sets the name of the metainfo file found in each
+    -i [name]           directory that specifies the mode for specific
+                        files. Default is &quot;dimgconv.txt&quot;
+
+    --verbose           Prints verbose output.
+    -v
+
+
+Palettes
+--------
+
+Palettes are expected to be images where the x-axis describes the colors in a
+palette and the y-axis is the palette index.
+
+
+Colormaps
+---------
+
+Colormaps are expected to be images where the x-axis describes the colors in a
+colomap to match against a palette to create the resulting map data and the
+y-axis is the colormap index.
+
+Stuff like TRANMAPs and TINTTABs are also COLORMAPs.
+
+
+Graphics
+--------
+
+Graphics, if they are PNGs, can contain the custom &#39;grAb&#39; chunks for default
+offsets.
+
+
+The MetaInfo Files
+------------------
+
+The meta info files consist of plain text lines of the following:
+
+    [name] [mode] [x-offset] [y-offset]
+
+[name]:
+    The name of the file in this directory (no extension). Can be &quot;*&quot; for the
+    default fallback.
+
+[mode]:
+    One of four modes: &quot;palette&quot;, &quot;colormap&quot;, &quot;graphic&quot; or &quot;flat&quot;.
+
+[x-offset]:
+    (Optional) If mode is &quot;graphic&quot;, specify an x-offset to set.
+
+[y-offset]:
+    (Optional) If mode is &quot;graphic&quot;, specify a y-offset to set.
+
+Lines that are blank and lines that begin with a &quot;#&quot; are ignored.
+
+Example line for &quot;everything in this directory is a flat&quot;:
+
+    * flat
+
+Example lines for &quot;GRAYTALL is a graphic but everything else is a flat&quot;:
+
+    graytall graphic
+    * flat
+
+Graphics with specific offsets:
+
+    m_skull graphic 0 12
+    m_doom graphic 30 -24
+		</pre>
+    <!-- VVV FOOTER VVV -->
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+	</body>
+</html>

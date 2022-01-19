@@ -94,7 +94,7 @@ A:hover {
 	white-space: pre-wrap;
 }
 
-.markdown-body {
+.markdown-section {
 	background-color: #05161B;
 	color: #dddddd;
 	padding: 16px;
@@ -111,6 +111,13 @@ PRE {
     font-size: 85%;
     line-height: 1.45;
 	border-radius: 3px;
+}
+
+.text-documentation {
+	font-size: 12pt;
+	font-weight: 500;
+	line-height: 1.25;
+	color: #cccccc;
 }
 
 .command-line {

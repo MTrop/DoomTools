@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="The generated WTExport Help Page" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DoomTools - WTExport Help" />
+		<meta itemprop="description" content="The generated WTExport Help Page" />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/wtexport.html" />
+		<meta name="twitter:title" content="DoomTools - WTExport Help" />
+		<meta name="twitter:description" content="The generated WTExport Help Page" />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/wtexport.html" />
+		<meta property="og:title" content="DoomTools - WTExport Help" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta property="og:description" content="The generated WTExport Help Page" />
+
+		<title>DoomTools - WTExport Help</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">WTExport Help</h1>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">
+WTEXport v1.4.0 by Matt Tropiano (using DoomStruct v2.14.1)
+Usage: wtexport [--help | -h | --version]
+                [files] --base-wad [base] --output [target] [--create | --add] [switches]
+
+    --help                Prints help and exits.
+    -h
+
+    --version             Prints version, and exits.
+
+[files]:
+    &lt;filenames&gt;           A valid WAD file (that contains the textures to
+                          extract). Accepts wildcards for multiple WAD files.
+
+    --base-wad [base]     The WAD file to use for reference for extraction.
+    -b [base]             Any texture resources found in this file are NOT
+                          extracted, except for the TEXTUREx and PNAMES lumps
+                          to use as a base. (Usually an IWAD)
+
+    --output [wad]        The output WAD file.
+    -o [wad]
+
+    --create              If specified, the specified output WAD file is
+    -c                    created, TEXTUREx and PNAMES lumps are overwritten, and the
+                          extracted contents are APPENDED to it. If the output
+                          file already exists, it is replaced COMPLETELY
+                          (be careful)!
+
+    --add                 If specified, if the output WAD exists, the target&#39;s
+    -a                    TEXTUREx and PNAMES lumps are overwritten, and the
+                          extracted contents are APPENDED to it. If the WAD
+                          does not exist, it is created.
+
+[switches]:
+    --null-texture [tex]  If specified, the next argument is the null
+                          texture that is always sorted first.
+
+    --no-animated         If specified, do not include other textures in
+                          a texture&#39;s animation sequence, and ignore ANIMATED
+                          lumps.
+
+    --no-switches         If specified, do not include other textures in
+                          a texture&#39;s switch sequence, and ignore SWITCHES
+                          lumps.
+
+Input List
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+The input list of textures and flats are a newline-separated list read from
+STDIN, with the texture and flat list separated by &quot;:textures&quot; and &quot;:flats&quot;
+entries, terminated by &quot;:end&quot;. Blank lines and lines prefixed with &quot;#&quot;
+are ignored.
+
+Example:
+
+:textures
+GRENWAL1
+GRENWAL2
+GRENWAL3
+GRENWAL4
+RAILING
+XXMETL02
+XXMETL03
+
+:flats
+# This is a comment.
+ICHOR01
+ICHOR02
+ICHOR03
+ICHOR04
+
+:end
+
+The utility WTEXSCAN already produces a list formatted this way.
+		</pre>
+    <!-- VVV FOOTER VVV -->
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+	</body>
+</html>
