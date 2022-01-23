@@ -45,6 +45,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -113,6 +114,18 @@ public final class HTTPUtils
 		}
 	};
 	
+	/** Status code reader. */
+	private static final HTTPReader<Integer> HTTPREADER_STATUS = (response, cancelSwitch, monitor) ->
+	{
+		return cancelSwitch.get() ? null : response.statusCode;
+	};
+
+	/** Headers reader. */
+	private static final HTTPReader<Map<String, List<String>>> HTTPREADER_HEADERS = (response, cancelSwitch, monitor) ->
+	{
+		return cancelSwitch.get() ? null : response.getHeaders();
+	};
+
 	/** String content reader. */
 	private static final HTTPReader<String> HTTPREADER_STRING_CONTENT = (response, cancelSwitch, monitor) ->
 	{
@@ -552,7 +565,7 @@ public final class HTTPUtils
 			{
 				try (HTTPResponse resp = (response = request.send(cancelSwitch)))
 				{
-					return resp.read(reader, cancelSwitch);
+					return resp != null ? resp.read(reader, cancelSwitch) : null;
 				}
 			}
 		}
@@ -604,7 +617,7 @@ public final class HTTPUtils
 		 */
 		default R onHTTPResponse(HTTPResponse response, TransferMonitor monitor) throws IOException
 		{
-			return onHTTPResponse(response, new AtomicBoolean(false), monitor);
+			return onHTTPResponse(response, new AtomicBoolean(false), monitor != null ? monitor : TRANSFERMONITOR_NULL);
 		}
 		
 		/**
@@ -650,9 +663,32 @@ public final class HTTPUtils
 		}
 
 		/**
+		 * An HTTP Reader that just returns the status code of the response.
+		 * This returns a singleton instance of the reader.
+		 * <p> If the read is cancelled, this returns null.
+		 * @return the reader for reading the status code.
+		 */
+		static HTTPReader<Integer> createStatusReader()
+		{
+			return HTTPREADER_STATUS;
+		}
+
+		/**
+		 * An HTTP Reader that just returns the header mapping of the response.
+		 * This returns a singleton instance of the reader.
+		 * <p> If the read is cancelled, this returns null.
+		 * @return the reader for reading the status code.
+		 */
+		static HTTPReader<Map<String, List<String>>> createHeaderReader()
+		{
+			return HTTPREADER_HEADERS;
+		}
+
+		/**
 		 * An HTTP Reader that reads byte content and returns a decoded String.
 		 * Gets the string contents of the response, decoded using the response's charset,
 		 * or if not provided, "ISO-8859-1".
+		 * This returns a singleton instance of the reader.
 		 * <p> If the read is cancelled, this returns null.
 		 * @return the reader for reading the text content into a string.
 		 */
@@ -663,6 +699,7 @@ public final class HTTPUtils
 
 		/**
 		 * An HTTP Reader that reads the response body as byte content and returns a byte array.
+		 * This returns a singleton instance of the reader.
 		 * <p> If the read is cancelled, this returns null.
 		 * @return the reader for reading the content into a byte array.
 		 */
@@ -1870,11 +1907,31 @@ public final class HTTPUtils
 	 */
 	public static class HTTPCookie
 	{
+		private static final String FLAG_EXPIRES = "Expires=";
+		private static final String FLAG_MAXAGE = "Max-Age=";
+		private static final String FLAG_DOMAIN = "Domain=";
+		private static final String FLAG_PATH = "Path=";
+		private static final String FLAG_SAMESITE = "SameSite=";
+		private static final String FLAG_SECURE = "Secure";
+		private static final String FLAG_HTTPONLY = "HttpOnly";
+		
 		public enum SameSiteMode
 		{
 			STRICT,
 			LAX,
 			NONE;
+			
+			private static final Map<String, SameSiteMode> MAP_VALUES = new TreeMap<String, SameSiteMode>(String.CASE_INSENSITIVE_ORDER) 
+			{
+				private static final long serialVersionUID = 8257488945177195081L;
+				{
+					for (SameSiteMode mode : SameSiteMode.values())
+					{
+						String name = mode.name();
+						put(name.charAt(0) + name.substring(1).toLowerCase(), mode);
+					}
+				}
+			};
 		}
 
 		private String key;
@@ -1889,13 +1946,51 @@ public final class HTTPUtils
 		}
 		
 		/**
+		 * Parses a new {@link HTTPCookie} object.
+		 * @param content the cookie header content.
+		 * @return a new cookie object.
+		 */
+		public static HTTPCookie parse(String content)
+		{
+			// Kinda lazy: relies on well-formed cookie.
+			try {
+				String[] splits = content.split("\\;\s*");
+				
+				String[] keyval = splits[0].split("=");
+				HTTPCookie out = new HTTPCookie(keyval[0], keyval[1]);
+				
+				for (int i = 1; i < splits.length; i++)
+				{
+					String flag = splits[i];
+					if (flag.startsWith(FLAG_EXPIRES))
+						out.expires(ISO_DATE.get().parse(flag.substring(FLAG_EXPIRES.length())));
+					else if (flag.startsWith(FLAG_MAXAGE))
+						out.maxAge(Long.parseLong(flag.substring(FLAG_MAXAGE.length())));
+					else if (flag.startsWith(FLAG_DOMAIN))
+						out.domain(flag.substring(FLAG_DOMAIN.length()));
+					else if (flag.startsWith(FLAG_PATH))
+						out.path(flag.substring(FLAG_PATH.length()));
+					else if (flag.startsWith(FLAG_SAMESITE))
+						out.sameSite(SameSiteMode.MAP_VALUES.get(flag.substring(FLAG_SAMESITE.length())));
+					else if (flag.equals(FLAG_SECURE))
+						out.secure();
+					else if (flag.equals(FLAG_HTTPONLY))
+						out.httpOnly();
+				}
+				return out; 
+			} catch (Exception e) {
+				throw new RuntimeException("Exception occurred on cookie parse.", e);
+			}
+		}
+
+		/**
 		 * Sets the cookie expiry date. 
 		 * @param date the expiry date.
 		 * @return this, for chaining.
 		 */
 		public HTTPCookie expires(Date date)
 		{
-			flags.add("Expires=" + date(date));
+			flags.add(FLAG_EXPIRES + date(date));
 			return this;
 		}
 		
@@ -1917,7 +2012,7 @@ public final class HTTPUtils
 		 */
 		public HTTPCookie maxAge(long seconds)
 		{
-			flags.add("Max-Age=" + seconds);
+			flags.add(FLAG_MAXAGE + seconds);
 			return this;
 		}
 		
@@ -1928,7 +2023,7 @@ public final class HTTPUtils
 		 */
 		public HTTPCookie domain(String value)
 		{
-			flags.add("Domain=" + value);
+			flags.add(FLAG_DOMAIN + value);
 			return this;
 		}
 		
@@ -1939,27 +2034,7 @@ public final class HTTPUtils
 		 */
 		public HTTPCookie path(String value)
 		{
-			flags.add("Path=" + value);
-			return this;
-		}
-
-		/**
-		 * Sets the cookie for only secure travel. 
-		 * @return this, for chaining.
-		 */
-		public HTTPCookie secure()
-		{
-			flags.add("Secure");
-			return this;
-		}
-
-		/**
-		 * Sets the cookie for only top-level HTTP requests (not JS/AJAX). 
-		 * @return this, for chaining.
-		 */
-		public HTTPCookie httpOnly()
-		{
-			flags.add("HttpOnly");
+			flags.add(FLAG_PATH + value);
 			return this;
 		}
 
@@ -1970,8 +2045,28 @@ public final class HTTPUtils
 		 */
 		public HTTPCookie sameSite(SameSiteMode mode)
 		{
-			String name = mode.name();
-			flags.add("SameSite=" + name.charAt(0) + name.substring(1).toLowerCase());
+			String name = Objects.requireNonNull(mode).name();
+			flags.add(FLAG_SAMESITE + name.charAt(0) + name.substring(1).toLowerCase());
+			return this;
+		}
+
+		/**
+		 * Sets the cookie for only secure travel. 
+		 * @return this, for chaining.
+		 */
+		public HTTPCookie secure()
+		{
+			flags.add(FLAG_SECURE);
+			return this;
+		}
+
+		/**
+		 * Sets the cookie for only top-level HTTP requests (not JS/AJAX). 
+		 * @return this, for chaining.
+		 */
+		public HTTPCookie httpOnly()
+		{
+			flags.add(FLAG_HTTPONLY);
 			return this;
 		}
 
@@ -2147,7 +2242,7 @@ public final class HTTPUtils
 	/**
 	 * Response from an HTTP call.
 	 */
-	public static class HTTPResponse implements AutoCloseable
+	public static final class HTTPResponse implements AutoCloseable
 	{
 		private HTTPRequest request;
 		
@@ -2391,7 +2486,7 @@ public final class HTTPUtils
 
 		/**
 		 * Checks if the this response can be automatically actioned upon in terms of resolving server-directed redirects.
-		 * This object can build a redirect request if the status code is NOT 300, 304, or 305, since that requires more of an intelligent decision.
+		 * This object can build a redirect request if the status code is NOT 300, 304, nor 305, since that requires more of an intelligent decision.
 		 * <p> NOTE: This will not redirect a request that has a redirect in the content body (for instance, an HTML meta tag).
 		 * It must be a status code and <code>Location</code> header.
 		 * @return true if and only if the response status code has defined redirect guidelines, false otherwise.
@@ -2424,7 +2519,7 @@ public final class HTTPUtils
 		 * @return the amount of bytes moved.
 		 * @throws IOException if an I/O error occurs during transfer.
 		 */
-		public final long relayContent(OutputStream out) throws IOException
+		public long relayContent(OutputStream out) throws IOException
 		{
 			return relayContent(out, null);
 		}
@@ -2438,7 +2533,7 @@ public final class HTTPUtils
 		 * @return the amount of bytes moved.
 		 * @throws IOException if an I/O error occurs during transfer.
 		 */
-		public final long relayContent(OutputStream out, TransferMonitor monitor) throws IOException
+		public long relayContent(OutputStream out, TransferMonitor monitor) throws IOException
 		{
 			return relay(getContentStream(), out, 8192, getLength(), new AtomicBoolean(false), monitor);
 		}
@@ -2486,17 +2581,18 @@ public final class HTTPUtils
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
 		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
-		 * @param monitor the transfer monitor to use to monitor the read.
+		 * @param monitor the transfer monitor to use to monitor the read. Can be null.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
 		 */
 		public <T> T read(HTTPReader<T> reader, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
 		{
-			return reader.onHTTPResponse(this, cancelSwitch, monitor);
+			return reader.onHTTPResponse(this, cancelSwitch, monitor != null ? monitor : TRANSFERMONITOR_NULL);
 		}
 		
 		/**
 		 * Builds a request that fulfills a redirect, but only if this response is a redirect status.
+		 * Any <code>Set-Cookie</code> headers from this response will be copied over into <code>Add-Cookie</code> headers in the request.
 		 * @return a new request that would fulfill a redirect response.
 		 * @throws IllegalStateException if this response is not a redirect, or a 300, 304, or 305 
 		 * 		status code that would not warrant a remote redirect nor specific handling, or if a redirect loop has been detected.
@@ -2535,6 +2631,9 @@ public final class HTTPUtils
 					break;
 			}
 			
+			for (String cookie : headers.getOrDefault("Set-Cookie", Collections.emptyList()))
+				out.addCookie(HTTPCookie.parse(cookie));
+			
 			return out;
 		}
 		
@@ -2548,7 +2647,7 @@ public final class HTTPUtils
 	/**
 	 * A request builder, as an alternative to calling the "http" methods directly.
 	 */
-	public static class HTTPRequest
+	public static final class HTTPRequest
 	{
 		/** HTTP Method. */
 		private String method;
@@ -2709,7 +2808,7 @@ public final class HTTPUtils
 		 * (the content and monitor, however, if any, is reference-copied). 
 		 * @return a new HTTPRequest that is a copy of this one.
 		 */
-		public final HTTPRequest copy()
+		public HTTPRequest copy()
 		{
 			HTTPRequest out = new HTTPRequest();
 			out.method = this.method;
@@ -2734,7 +2833,7 @@ public final class HTTPUtils
 		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
 		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
-		public final HTTPRequest copyRedirect(String newURL)
+		public HTTPRequest copyRedirect(String newURL)
 		{
 			return copyRedirect(null, newURL);
 		}
@@ -2749,7 +2848,7 @@ public final class HTTPUtils
 		 * @throws IllegalStateException if the new URL has already been seen previously in earlier redirects.
 		 * @throws IllegalArgumentException if the URL string is malformed.
 		 */
-		public final HTTPRequest copyRedirect(String newMethod, String newURL)
+		public HTTPRequest copyRedirect(String newMethod, String newURL)
 		{
 			HTTPRequest out = copy();
 			if (out.redirectedURLs == null)
@@ -2813,7 +2912,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPUtils#headers(java.util.Map.Entry...)
 		 */
-		public final HTTPRequest setHeaders(HTTPHeaders headers)
+		public HTTPRequest setHeaders(HTTPHeaders headers)
 		{
 			Objects.requireNonNull(headers);
 			this.headers = headers.copy();
@@ -2826,7 +2925,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public final HTTPRequest addHeaders(HTTPHeaders headers)
+		public HTTPRequest addHeaders(HTTPHeaders headers)
 		{
 			Objects.requireNonNull(headers);
 			this.headers.merge(headers);
@@ -2840,7 +2939,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public final HTTPRequest setHeader(String header, String value)
+		public HTTPRequest setHeader(String header, String value)
 		{
 			this.headers.setHeader(header, value);
 			return this;
@@ -2853,7 +2952,7 @@ public final class HTTPUtils
 		 * @see HTTPUtils#parameters(java.util.Map.Entry...)
 		 */
 		@SafeVarargs
-		public final HTTPRequest parameters(Map.Entry<String, String> ... entries)
+		public final HTTPRequest parameters(final Map.Entry<String, String> ... entries)
 		{
 			this.parameters = HTTPUtils.parameters(entries);
 			return this;
@@ -2867,7 +2966,7 @@ public final class HTTPUtils
 		 * @see HTTPUtils#parameters(java.util.Map.Entry...)
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest setParameters(HTTPParameters parameters)
+		public HTTPRequest setParameters(HTTPParameters parameters)
 		{
 			Objects.requireNonNull(parameters);
 			this.parameters = parameters.copy();
@@ -2880,7 +2979,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPHeaders#merge(HTTPHeaders)
 		 */
-		public final HTTPRequest addParameters(HTTPParameters parameters)
+		public HTTPRequest addParameters(HTTPParameters parameters)
 		{
 			Objects.requireNonNull(parameters);
 			this.parameters.merge(parameters);
@@ -2894,7 +2993,7 @@ public final class HTTPUtils
 		 * @param value the parameter value.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest setParameter(String key, Object value)
+		public HTTPRequest setParameter(String key, Object value)
 		{
 			this.parameters.setParameter(key, value);
 			return this;
@@ -2907,7 +3006,7 @@ public final class HTTPUtils
 		 * @param values the parameter values.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest setParameter(String key, Object... values)
+		public HTTPRequest setParameter(String key, Object... values)
 		{
 			this.parameters.setParameter(key, values);
 			return this;
@@ -2919,7 +3018,7 @@ public final class HTTPUtils
 		 * @return this request, for chaining.
 		 * @see HTTPUtils#cookie(String, String)
 		 */
-		public final HTTPRequest addCookie(HTTPCookie cookie)
+		public HTTPRequest addCookie(HTTPCookie cookie)
 		{
 			this.cookies.add(cookie);
 			return this;
@@ -2930,7 +3029,7 @@ public final class HTTPUtils
 		 * @param content the content. Can be null for no content body.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest content(HTTPContent content) 
+		public HTTPRequest content(HTTPContent content) 
 		{
 			this.content = content;
 			return this;
@@ -2942,7 +3041,7 @@ public final class HTTPUtils
 		 * @param timeoutMillis the timeout in milliseconds.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest timeout(int timeoutMillis) 
+		public HTTPRequest timeout(int timeoutMillis) 
 		{
 			this.timeoutMillis = timeoutMillis;
 			return this;
@@ -2954,7 +3053,7 @@ public final class HTTPUtils
 		 * @param defaultCharsetEncoding the new encoding name.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest defaultCharsetEncoding(String defaultCharsetEncoding) 
+		public HTTPRequest defaultCharsetEncoding(String defaultCharsetEncoding) 
 		{
 			this.defaultCharsetEncoding = defaultCharsetEncoding;
 			return this;
@@ -2965,7 +3064,7 @@ public final class HTTPUtils
 		 * @param monitor the monitor to call.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest uploadMonitor(TransferMonitor monitor) 
+		public HTTPRequest uploadMonitor(TransferMonitor monitor) 
 		{
 			this.monitor = monitor;
 			return this;
@@ -2978,7 +3077,7 @@ public final class HTTPUtils
 		 * @param autoRedirect true to handle auto-redirectable cases, false to not.
 		 * @return this request, for chaining.
 		 */
-		public final HTTPRequest setAutoRedirect(boolean autoRedirect) 
+		public HTTPRequest setAutoRedirect(boolean autoRedirect) 
 		{
 			this.autoRedirect = autoRedirect;
 			return this;
@@ -3000,7 +3099,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
 		 */
-		public final HTTPResponse send() throws IOException
+		public HTTPResponse send() throws IOException
 		{
 			return send(new AtomicBoolean(false));
 		}
@@ -3018,19 +3117,21 @@ public final class HTTPUtils
 		 * }
 		 * </code></pre>
 		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
-		 * @return an HTTPResponse object.
+		 * @return an HTTPResponse object, or null if the call was cancelled.
 		 * @throws IOException if an error happens during the read/write.
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
 		 */
-		public final HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
+		public HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
 		{
-			HTTPResponse out;
+			HTTPResponse out = null;
 			HTTPRequest current = this;
-			while (true)
+			while (!cancelSwitch.get())
 			{
 				out = httpFetch(current, cancelSwitch);
-				if (!autoRedirect || !out.isAutoRedirectable())
+				if (out == null) // cancelled before send or read.
+					break;
+				else if (!autoRedirect || !out.isAutoRedirectable())
 					break;
 				else
 				{
@@ -3038,7 +3139,7 @@ public final class HTTPUtils
 					out.close(); // close open response.
 				}
 			}
-			return out;
+			return cancelSwitch.get() ? null : out;
 		}
 
 		/**
@@ -3052,7 +3153,7 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
 		 */
-		public final <T> T send(HTTPReader<T> reader) throws IOException
+		public <T> T send(HTTPReader<T> reader) throws IOException
 		{
 			return send(new AtomicBoolean(false), reader);
 		}
@@ -3069,11 +3170,11 @@ public final class HTTPUtils
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
 		 */
-		public final <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
+		public <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
 		{
 			try (HTTPResponse response = send(cancelSwitch))
 			{
-				return response.read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false));
+				return response != null ? response.read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false)) : null;
 			}
 		}
 
@@ -3098,7 +3199,7 @@ public final class HTTPUtils
 		 * </code></pre>
 		 * @return a future for inspecting later, containing the open response object.
 		 */
-		public final HTTPRequestFuture<HTTPResponse> sendAsync()
+		public HTTPRequestFuture<HTTPResponse> sendAsync()
 		{
 			HTTPRequestFuture<HTTPResponse> out = new HTTPRequestFuture.Response(this);
 			fetchExecutor().execute(out);
@@ -3127,11 +3228,33 @@ public final class HTTPUtils
 		 * @param reader the reader to use to read the response.
 		 * @return a future for inspecting later, containing the decoded object.
 		 */
-		public final <T> HTTPRequestFuture<T> sendAsync(HTTPReader<T> reader)
+		public <T> HTTPRequestFuture<T> sendAsync(HTTPReader<T> reader)
 		{
 			HTTPRequestFuture<T> out = new HTTPRequestFuture.ObjectResponse<T>(this, reader);
 			fetchExecutor().execute(out);
 			return out;
+		}
+
+		/**
+		 * Wraps this request call as a {@link Callable} that returns an {@link HTTPResponse}.
+		 * This is for dispatching to a job processor.
+		 * @return a new Callable.
+		 */
+		public Callable<HTTPResponse> asCallable()
+		{
+			return (() -> send());
+		}
+
+		/**
+		 * Wraps this request call as a {@link Callable} that returns an interpreted object when {@link Callable#call()} is called.
+		 * This is for dispatching to a job processor.
+		 * @param <T> the Callable's return type, derived from the {@link HTTPReader} return type.
+		 * @param reader the reader to use for interpreting the response.
+		 * @return a new Callable.
+		 */
+		public <T> Callable<T> asCallable(final HTTPReader<T> reader)
+		{
+			return (() -> send(reader));
 		}
 
 	}
@@ -3273,6 +3396,16 @@ public final class HTTPUtils
 	}
 	
 	/**
+	 * Parses a new {@link HTTPCookie} object.
+	 * @param headerContent the cookie header content.
+	 * @return a new cookie object.
+	 */
+	public static HTTPCookie parseCookie(String headerContent)
+	{
+		return HTTPCookie.parse(headerContent);
+	}
+	
+	/**
 	 * Starts a new {@link HTTPHeaders} object.
 	 * @param entries the list of entries to add.
 	 * @return a new header object.
@@ -3351,7 +3484,7 @@ public final class HTTPUtils
 	 * </code></pre>
 	 * @param request the request object.
 	 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel. Can be null.
-	 * @return the response from an HTTP request.
+	 * @return the response from an HTTP request, or null if cancelled before the send or read of the response.
 	 * @throws IOException if an error happens during the read/write.
 	 * @throws SocketTimeoutException if the socket read times out.
 	 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
@@ -3389,7 +3522,7 @@ public final class HTTPUtils
 		if (headers != null) for (Map.Entry<String, String> entry : headers.map.entrySet())
 			conn.setRequestProperty(entry.getKey(), entry.getValue());
 		for (HTTPCookie cookie : request.cookies)
-			conn.addRequestProperty("Set-Cookie", cookie.toString());
+			conn.addRequestProperty("Cookie", cookie.toString());
 	
 		// set up body data.
 		if (content != null)

@@ -353,10 +353,7 @@ public final class ContainerFactory
 	 */
 	public static JTabbedPane tabs(int tabPlacement, int tabLayoutPolicy, Tab ... tabs)
 	{
-		JTabbedPane out = new JTabbedPane(tabPlacement, tabLayoutPolicy);
-		for (Tab t : tabs)
-			out.addTab(t.name, t.icon, t.component, t.tooltip);
-		return out;
+		return attachTabs(new JTabbedPane(tabPlacement, tabLayoutPolicy), tabs);
 	}
 	
 	/**
@@ -367,10 +364,7 @@ public final class ContainerFactory
 	 */
 	public static JTabbedPane tabs(int tabPlacement, Tab ... tabs)
 	{
-		JTabbedPane out = new JTabbedPane(tabPlacement);
-		for (Tab t : tabs)
-			out.addTab(t.name, t.icon, t.component, t.tooltip);
-		return out;
+		return attachTabs(new JTabbedPane(tabPlacement), tabs);
 	}
 
 	/**
@@ -380,10 +374,20 @@ public final class ContainerFactory
 	 */
 	public static JTabbedPane tabs(Tab ... tabs)
 	{
-		JTabbedPane out = new JTabbedPane();
+		return attachTabs(new JTabbedPane(), tabs);
+	}
+
+	/**
+	 * Attaches a series of tabs to a JTabbedPane, returning the TabbedPane.
+	 * @param tabbedPane the tabbed pane to add to.
+	 * @param tabs the tabs to add.
+	 * @return the tabbed pane component passed in.
+	 */
+	public static JTabbedPane attachTabs(JTabbedPane tabbedPane, Tab ... tabs)
+	{
 		for (Tab t : tabs)
-			out.addTab(t.name, t.icon, t.component, t.tooltip);
-		return out;
+			tabbedPane.addTab(t.name, t.icon, t.component, t.tooltip);
+		return tabbedPane;
 	}
 
 	/**
