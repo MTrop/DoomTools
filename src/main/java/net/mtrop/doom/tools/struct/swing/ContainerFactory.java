@@ -13,7 +13,9 @@ import java.awt.Image;
 import java.awt.LayoutManager;
 
 import javax.swing.Icon;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -478,6 +480,36 @@ public final class ContainerFactory
 	/* ==== Frames                                                     ==== */
 	/* ==================================================================== */
 
+	/**
+	 * Creates a new internal frame (for {@link JDesktopPane}s).
+	 * @param title the title of the frame.
+	 * @param menuBar the menu bar to add.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JInternalFrame internalFrame(String title, JMenuBar menuBar, Container content)
+	{
+		JInternalFrame out = new JInternalFrame(title);
+		out.add(menuBar);
+		out.setContentPane(content);
+		out.pack();
+		return out;
+	}
+	
+	/**
+	 * Creates a new internal frame (for {@link JDesktopPane}s).
+	 * @param title the title of the frame.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JInternalFrame internalFrame(String title, Container content)
+	{
+		JInternalFrame out = new JInternalFrame(title);
+		out.setContentPane(content);
+		out.pack();
+		return out;
+	}
+	
 	/**
 	 * Creates a new frame.
 	 * @param image the icon image.

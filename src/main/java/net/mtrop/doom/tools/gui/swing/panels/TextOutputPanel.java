@@ -28,6 +28,24 @@ public class TextOutputPanel extends JTextArea
 	}
 
 	/**
+	 * Writes a character to this panel.
+	 * @param c the character.
+	 */
+	public void writeChar(char c)
+	{
+		append(String.valueOf(c));
+		setCaretPosition(getDocument().getLength());
+	}
+	
+	/**
+	 * @return an output stream to use for printing to the text area.
+	 */
+	public OutputStream getOutputStream()
+	{
+		return new Printer();
+	}
+	
+	/**
 	 * @return a print stream to use for printing to the text area.
 	 */
 	public PrintStream getPrintStream()
@@ -52,8 +70,7 @@ public class TextOutputPanel extends JTextArea
 		@Override
 		public void write(int b) throws IOException 
 		{
-			append(String.valueOf((char)b));
-			setCaretPosition(getDocument().getLength());
+			writeChar((char)b);
 		}
 		
 	}

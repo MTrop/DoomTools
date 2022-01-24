@@ -135,7 +135,7 @@ public final class ComponentFactory
 	 * @param image the image to use.
 	 * @return a new Icon.
 	 */
-	public static Icon icon(Image image)
+	public static ImageIcon icon(Image image)
 	{
 		return new ImageIcon(image);
 	}

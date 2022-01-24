@@ -2,7 +2,7 @@ package net.mtrop.doom.tools.gui.swing;
 
 import javax.swing.JFrame;
 
-import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
 
 import java.awt.Image;
@@ -29,8 +29,9 @@ public abstract class DoomToolsFrame extends JFrame
 	 */
 	protected DoomToolsFrame()
 	{
-		setTitle("DoomTools v" + Common.getVersionString("doomtools"));
+		setTitle("DoomTools v" + DoomToolsMain.getVersion());
 		setIconImages(Arrays.asList(ICON128, ICON96, ICON64, ICON48, ICON32, ICON16));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
+	
 }

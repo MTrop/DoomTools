@@ -17,6 +17,11 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
  */
 public final class DoomToolsLanguageManager
 {
+	public interface Keys
+	{
+		String DOOMTOOLS_QUIT = "doomtools.quit";
+	}
+	
 	/** Default language. */
 	private static final String DEFAULT_LANGUAGE = "eng";
 	/** Missing text. */

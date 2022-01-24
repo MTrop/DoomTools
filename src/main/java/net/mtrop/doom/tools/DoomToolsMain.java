@@ -31,6 +31,7 @@ import com.blackrook.rookscript.tools.ScriptExecutor;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
@@ -100,6 +101,7 @@ public final class DoomToolsMain
 	private static final int ERROR_TIMEOUT = 4;
 	private static final int ERROR_SITE_ERROR = 5;
 	private static final int ERROR_IOERROR = 6;
+	private static final int ERROR_GUI_ALREADY_RUNNING = 7;
 	
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -110,6 +112,7 @@ public final class DoomToolsMain
 	private static final String SWITCH_UPDATE = "--update";
 	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
 	private static final String SWITCH_UPDATE_SHELL = "--update-shell";
+	private static final String SWITCH_GUI = "--gui";
 	
 	/**
 	 * Program options.
@@ -127,6 +130,7 @@ public final class DoomToolsMain
 		private boolean openDocs;
 		private boolean where;
 		private boolean openSettings;
+		private boolean gui;
 		
 		private Options()
 		{
@@ -138,6 +142,7 @@ public final class DoomToolsMain
 			this.openWebsite = false;
 			this.where = false;
 			this.openSettings = false;
+			this.gui = false;
 		}
 		
 		public Options setStdout(OutputStream out) 
@@ -459,6 +464,24 @@ public final class DoomToolsMain
 				help(options.stdout);
 				return ERROR_NONE;
 			}
+			else if (options.gui)
+			{
+				if (DoomToolsGUIMain.isAlreadyRunning())
+				{
+					options.stderr.println("DoomTools is already running.");
+		    		return ERROR_GUI_ALREADY_RUNNING;
+				}
+				else
+				{
+					try {
+						Common.spawnJava(DoomToolsGUIMain.class).exec();
+					} catch (Exception e) {
+						options.stderr.println("ERROR: Could not start DoomTools GUI process!");
+						return ERROR_IOERROR;
+					}
+					return ERROR_NONE;
+				}
+			}
 			else if (options.updateShell)
 			{
 				return doUpdateShell();
@@ -611,6 +634,14 @@ public final class DoomToolsMain
 	}
 	
 	/**
+	 * @return the current version string.
+	 */
+	public static String getVersion()
+	{
+		return VERSION;
+	}
+	
+	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
@@ -637,6 +668,8 @@ public final class DoomToolsMain
 				{
 					if (arg.equalsIgnoreCase(SWITCH_HELP) || arg.equalsIgnoreCase(SWITCH_HELP2))
 						options.help = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WEBSITE))
 						options.openWebsite = true;
 					else if (arg.equalsIgnoreCase(SWITCH_SETTINGS))

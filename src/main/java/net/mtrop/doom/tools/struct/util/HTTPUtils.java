@@ -1954,7 +1954,7 @@ public final class HTTPUtils
 		{
 			// Kinda lazy: relies on well-formed cookie.
 			try {
-				String[] splits = content.split("\\;\s*");
+				String[] splits = content.split("\\;\\s*");
 				
 				String[] keyval = splits[0].split("=");
 				HTTPCookie out = new HTTPCookie(keyval[0], keyval[1]);

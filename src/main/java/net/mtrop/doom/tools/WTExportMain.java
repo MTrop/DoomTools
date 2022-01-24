@@ -1335,6 +1335,14 @@ public final class WTExportMain
 	}
 	
 	/**
+	 * @return the current version string.
+	 */
+	public static String getVersion()
+	{
+		return VERSION;
+	}
+	
+	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
