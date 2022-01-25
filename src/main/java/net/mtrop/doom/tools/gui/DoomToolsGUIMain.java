@@ -8,7 +8,9 @@ import java.net.ServerSocket;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager.Keys;
+import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -62,6 +64,7 @@ public final class DoomToolsGUIMain
     	if (isAlreadyRunning())
     	{
     		System.out.println("DoomTools is already running.");
+    		System.exit(1);
     		return;
     	}
 		
@@ -70,6 +73,34 @@ public final class DoomToolsGUIMain
 	}
     
 	/* ==================================================================== */
+
+	/**
+	 * Adds a new application instance to the main desktop.
+	 * @param <I> the instance type.
+	 * @param applicationClass the application class.
+	 */
+	public static <I extends DoomToolsApplicationInstance> void createApplicationWindow(Class<I> applicationClass)
+	{
+		final I instance = Common.create(applicationClass); 
+		final DoomToolsApplicationFrame frame = new DoomToolsApplicationFrame(instance);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		frame.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e) 
+			{
+				if (instance.shouldClose())
+				{
+					frame.setVisible(false);
+					instance.onClose();
+					frame.dispose();
+				}
+			}
+		});
+		frame.setVisible(true);
+	}
+	
+    /* ==================================================================== */
 	
     /** The main window. */
     private DoomToolsMainWindow window;
@@ -92,23 +123,30 @@ public final class DoomToolsGUIMain
     		@Override
     		public void windowClosing(WindowEvent e) 
     		{
-    			if (SwingUtils.yesTo(window, DoomToolsLanguageManager.get().getText(Keys.DOOMTOOLS_QUIT)))
-    				shutDown();
+    			attemptShutDown();
     		}
 		});
     	window.setVisible(true);
     	LOG.info("Window created.");
     }
-    
-    /**
-     * Saves and quits.
-     */
+
+    // Attempts a shutdown, prompting the user first.
+    private void attemptShutDown()
+    {
+    	LOG.debug("Shutdown attempted.");
+		if (SwingUtils.yesTo(window, DoomToolsLanguageManager.get().getText(Keys.DOOMTOOLS_QUIT)))
+			shutDown();
+    }
+
+    // Saves and quits.
     private void shutDown()
     {
     	LOG.info("Shutting down DoomTools GUI...");
+    	LOG.debug("Disposing main window...");
     	window.setVisible(false);
     	window.dispose();
-    	LOG.info("Main window disposed.");
+    	LOG.debug("Main window disposed.");
+    	LOG.info("Exiting JVM...");
     	System.exit(0);
     }
     

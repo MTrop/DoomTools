@@ -3,9 +3,10 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -30,26 +31,60 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	private static final DoomToolsImageManager IMAGES = DoomToolsImageManager.get();
 
 	/** All application instances. */
-	private Set<DoomToolsApplicationInstance> instances;
+	private Map<DoomToolsApplicationInstance, JInternalFrame> instances;
 	/** The background image on the desktop pane. */
 	private ImageIcon backgroundImage;
 	
 	public DoomToolsDesktopPane()
 	{
-		this.instances = new HashSet<>();
+		this.instances = new HashMap<>();
 		this.backgroundImage = ComponentFactory.icon(IMAGES.getImage("background-logo.png"));
+		int imageWidth = backgroundImage.getIconWidth() + 100;
 		setBackground(Color.DARK_GRAY);
-		setPreferredSize(new Dimension(backgroundImage.getIconWidth(), backgroundImage.getIconHeight()));
+		setPreferredSize(new Dimension(imageWidth, (int)(imageWidth * 0.75)));
 	}
 	
 	@Override
 	protected void paintComponent(Graphics g) 
 	{
+		// Paint pane.
 		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D)g;
-		int x = (getWidth() - backgroundImage.getIconWidth()) / 2;
-        int y = (getHeight() - backgroundImage.getIconHeight()) / 2;
-		g2d.drawImage(backgroundImage.getImage(), x, y, null);
+
+		// Paint background image on top.
+		int x, y;
+		int width = getWidth();
+		int height = getHeight();
+		int imageWidth = backgroundImage.getIconWidth();
+		int imageHeight = backgroundImage.getIconHeight();
+        
+        // scale with aspect if needed
+        if (width < imageWidth || height < imageHeight)
+        {
+    		double panelWidthRatio = ((double)width) / height;
+    		double imageWidthRatio = ((double)imageWidth) / imageHeight;
+    		double imageHeightRatio = ((double)imageHeight) / imageWidth;
+            if (panelWidthRatio < imageWidthRatio)
+            {
+            	imageWidth = width;
+            	imageHeight = (int)(width * imageHeightRatio);
+            	x = 0;
+            	y = (height - imageHeight) / 2;
+            }
+            else
+            {
+            	imageWidth = (int)(height * imageWidthRatio);
+            	imageHeight = height;
+            	x = (width - imageWidth) / 2;
+            	y = 0;
+            }
+        }
+        else
+        {
+    		x = (width - imageWidth) / 2;
+            y = (height - imageHeight) / 2;
+        }
+        
+		g.drawImage(backgroundImage.getImage(), x, y, imageWidth, imageHeight, null);
 	}
 	
 	/**
@@ -57,19 +92,50 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	 * @param instance the application instance to use.
 	 * @return the new frame.
 	 */
-	public JInternalFrame addFrame(final DoomToolsApplicationInstance instance)
+	public JInternalFrame addApplicationFrame(final DoomToolsApplicationInstance instance)
 	{
 		DoomToolsApplicationInternalFrame frame = new DoomToolsApplicationInternalFrame(instance);
-		instances.add(instance);
+		instances.put(instance, frame);
 		frame.addInternalFrameListener(new InternalFrameAdapter()
 		{
 			@Override
-			public void internalFrameClosed(InternalFrameEvent e) 
+			public void internalFrameClosing(InternalFrameEvent e) 
 			{
-				instances.remove(instance);
+				attemptCloseApplication(instance);
 			}
 		});
+		add(frame);
 		return frame;
+	}
+	
+	private void attemptCloseApplication(DoomToolsApplicationInstance instance)
+	{
+		if (!instances.containsKey(instance))
+			return;
+		
+		if (instance.shouldClose())
+			closeApplication(instance);
+	}
+
+	private void closeApplication(DoomToolsApplicationInstance instance)
+	{
+		if (!instances.containsKey(instance))
+			return;
+		
+		JInternalFrame frame = instances.remove(instance); 
+		frame.setVisible(false);
+		frame.dispose();
+		instance.onClose();
+	}
+	
+	/**
+	 * Closes all workspace applications.
+	 */
+	public void clearWorkspace()
+	{
+		Set<DoomToolsApplicationInstance> instanceSet = new TreeSet<>(instances.keySet()); // copy set
+		for (DoomToolsApplicationInstance instance : instanceSet)
+			attemptCloseApplication(instance);
 	}
 	
 }
