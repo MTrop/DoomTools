@@ -1,10 +1,14 @@
 package net.mtrop.doom.tools.gui;
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Properties;
+
+import javax.swing.KeyStroke;
 
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -90,7 +94,7 @@ public final class DoomToolsLanguageManager
 	
 	/**
 	 * Gets text using a text key.
-	 * @param key the string key.
+	 * @param key the language key.
 	 * @param args string formatter arguments. 
 	 * @return the desired text, or a macro if it is not found. 
 	 */
@@ -101,8 +105,46 @@ public final class DoomToolsLanguageManager
 	}
 	
 	/**
+	 * Attempts to parse a mnemonic value from the results of a language lookup.
+	 * @param key the language key.
+	 * @return the corresponding {@link KeyEvent} VK value, or {@link KeyEvent#VK_UNDEFINED} if not found.
+	 */
+	public int getMnemonicValue(String key)
+	{
+		char keyname = Character.toUpperCase(getText(key).charAt(0));
+		try {
+			Field f;
+			if ((f = KeyEvent.class.getField("VK_" + keyname)) == null)
+				return KeyEvent.VK_UNDEFINED;
+			else
+				return f.getInt(null);
+		} catch (NoSuchFieldException | SecurityException e) {
+			return KeyEvent.VK_UNDEFINED;
+		} catch (IllegalArgumentException e) {
+			return KeyEvent.VK_UNDEFINED;
+		} catch (IllegalAccessException e) {
+			return KeyEvent.VK_UNDEFINED;
+		}
+	}
+	
+	/**
+	 * Attempts to parse a keystroke value from the results of a language lookup.
+	 * @param key the language key.
+	 * @param args string formatter arguments. 
+	 * @return the corresponding keystroke, or null if not found.
+	 */
+	public KeyStroke getKeyStroke(String key, Object ... args)
+	{
+		String value = getText(key, args);
+		KeyStroke out = KeyStroke.getKeyStroke(value);
+		if (out == null)
+			LOG.info("Language key " + key + " was not parseable: " + value);
+		return out;
+	}
+	
+	/**
 	 * Gets text wrapped in HTML tags using a text key.
-	 * @param key the string key.
+	 * @param key the language key.
 	 * @param args string formatter arguments. 
 	 * @return the desired text, or a macro if it is not found. 
 	 */

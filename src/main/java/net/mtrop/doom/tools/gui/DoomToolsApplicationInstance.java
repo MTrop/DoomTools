@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui;
 import java.awt.Container;
 import java.util.Map;
 
+import javax.swing.Icon;
 import javax.swing.JMenuBar;
 
 /**
@@ -22,6 +23,15 @@ public interface DoomToolsApplicationInstance
 	 * @return the application's content pane.
 	 */
 	Container getContentPane();
+
+	/**
+	 * Fetches this application instance's specific icon.
+	 * @return the application's icon, or <code>null</code> for default.
+	 */
+	default Icon getIcon()
+	{
+		return null;
+	}
 
 	/**
 	 * Fetches this application instance's menu bar, if used as a desktop frame.

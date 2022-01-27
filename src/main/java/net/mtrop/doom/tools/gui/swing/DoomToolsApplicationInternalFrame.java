@@ -1,15 +1,12 @@
 package net.mtrop.doom.tools.gui.swing;
 
-import java.awt.Image;
-
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 
 /**
  * A single internal application frame for a DoomTools application.
@@ -18,13 +15,9 @@ import net.mtrop.doom.tools.gui.DoomToolsImageManager;
 public class DoomToolsApplicationInternalFrame extends JInternalFrame 
 {
 	private static final long serialVersionUID = 7311434945898035762L;
-	
-	private static final DoomToolsImageManager IMAGES = DoomToolsImageManager.get();
-	
-	private static final Image ICON16 = IMAGES.getImage("doomtools-logo-16.png"); 
 
-	private static final Icon FRAMEICON = new ImageIcon(ICON16) ; 
-
+	/** Image manager. */
+	private DoomToolsGUIUtils utils;
 	/** The application instance. */
 	private DoomToolsApplicationInstance instance;
 	
@@ -34,9 +27,13 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 	 */
 	public DoomToolsApplicationInternalFrame(DoomToolsApplicationInstance instance)
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.instance = instance;
-		setFrameIcon(FRAMEICON);
+
+		Icon appIcon = instance.getIcon();
+		
 		setTitle(instance.getName());
+		setFrameIcon(appIcon != null ? appIcon : utils.getWindowIcon());
 		setJMenuBar(instance.getInternalMenuBar());
 		setContentPane(instance.getContentPane());
 		setResizable(true);

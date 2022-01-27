@@ -102,11 +102,14 @@ public final class DoomToolsGUIMain
 	
     /* ==================================================================== */
 	
+    /** Language manager. */
+    private DoomToolsLanguageManager language;
     /** The main window. */
     private DoomToolsMainWindow window;
     
     private DoomToolsGUIMain()
     {
+    	this.language = DoomToolsLanguageManager.get();
     	this.window = null;
     }
 
@@ -116,7 +119,7 @@ public final class DoomToolsGUIMain
     public void createAndDisplayMainWindow()
     {
     	LOG.info("Creating main window...");
-    	window = new DoomToolsMainWindow();
+    	window = new DoomToolsMainWindow(this::attemptShutDown);
     	window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     	window.addWindowListener(new WindowAdapter()
     	{
@@ -134,7 +137,7 @@ public final class DoomToolsGUIMain
     private void attemptShutDown()
     {
     	LOG.debug("Shutdown attempted.");
-		if (SwingUtils.yesTo(window, DoomToolsLanguageManager.get().getText(Keys.DOOMTOOLS_QUIT)))
+		if (SwingUtils.yesTo(window, language.getText(Keys.DOOMTOOLS_QUIT)))
 			shutDown();
     }
 

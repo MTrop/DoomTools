@@ -28,8 +28,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	private static final long serialVersionUID = -4832880176282917356L;
 
 	/** Image manager. */
-	private static final DoomToolsImageManager IMAGES = DoomToolsImageManager.get();
-
+	private DoomToolsImageManager images;
 	/** All application instances. */
 	private Map<DoomToolsApplicationInstance, JInternalFrame> instances;
 	/** The background image on the desktop pane. */
@@ -37,8 +36,11 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	
 	public DoomToolsDesktopPane()
 	{
+		this.images = DoomToolsImageManager.get();
 		this.instances = new HashMap<>();
-		this.backgroundImage = ComponentFactory.icon(IMAGES.getImage("background-logo.png"));
+		
+		this.backgroundImage = ComponentFactory.icon(images.getImage("background-logo.png"));
+		
 		int imageWidth = backgroundImage.getIconWidth() + 100;
 		setBackground(Color.DARK_GRAY);
 		setPreferredSize(new Dimension(imageWidth, (int)(imageWidth * 0.75)));

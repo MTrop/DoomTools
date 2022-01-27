@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.mtrop.doom.struct.io.IOUtils;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
@@ -29,9 +28,6 @@ import net.mtrop.doom.tools.wadmerge.WadMergeContext;
  */
 public final class WadMergeMain
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("wadmerge");
-
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_INPUT_FILE = 1;
 	private static final int ERROR_BAD_SCRIPT = 2;
@@ -196,14 +192,6 @@ public final class WadMergeMain
 	}
 	
 	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
-	}
-	
-	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
@@ -281,7 +269,7 @@ public final class WadMergeMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("WadMerge v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
+		out.println("WadMerge v" + Version.WADMERGE + " by Matt Tropiano (using DoomStruct v" + Version.DOOMSTRUCT + ")");
 	}
 
 	/**

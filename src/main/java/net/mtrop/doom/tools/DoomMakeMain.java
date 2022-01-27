@@ -38,12 +38,6 @@ import net.mtrop.doom.tools.exception.UtilityException;
  */
 public final class DoomMakeMain 
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
-	private static final String ROOKSCRIPT_DESKTOP_VERSION = Common.getVersionString("rookscript-desktop");
-	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
-	private static final String VERSION = Common.getVersionString("doommake");
-
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
@@ -488,14 +482,6 @@ public final class DoomMakeMain
 	}
 	
 	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
-	}
-	
-	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream.
@@ -694,8 +680,8 @@ public final class DoomMakeMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("DoomMake v" + VERSION + " by Matt Tropiano");
-		out.println("(using DoomStruct v" + DOOM_VERSION + " , WadScript v" + WADSCRIPT_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + ")");
+		out.println("DoomMake v" + Version.DOOMMAKE + " by Matt Tropiano");
+		out.println("(using DoomStruct v" + Version.DOOMSTRUCT + " , WadScript v" + Version.WADSCRIPT + ", RookScript v" + Version.ROOKSCRIPT + ", RookScript-Desktop v" + Version.ROOKSCRIPT_DESKTOP + ")");
 	}
 
 	/**

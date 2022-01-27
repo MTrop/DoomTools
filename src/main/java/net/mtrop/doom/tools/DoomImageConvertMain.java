@@ -36,9 +36,7 @@ import net.mtrop.doom.util.NameUtils;
  */
 public final class DoomImageConvertMain 
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("dimgconv");
-	private static final String SPLASH_VERSION = "DImgConv v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String SPLASH_VERSION = "DImgConv v" + Version.DIMGCONV + " by Matt Tropiano (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
@@ -843,14 +841,6 @@ public final class DoomImageConvertMain
 			return out;
 		}
 		
-	}
-	
-	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
 	}
 	
 	/**

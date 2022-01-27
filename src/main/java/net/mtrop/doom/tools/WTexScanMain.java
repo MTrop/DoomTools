@@ -34,7 +34,6 @@ import net.mtrop.doom.map.udmf.UDMFTable;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
 import net.mtrop.doom.struct.io.IOUtils;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
@@ -45,9 +44,7 @@ import net.mtrop.doom.util.NameUtils;
  */
 public final class WTexScanMain
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("wtexscan");
-	private static final String SPLASH_VERSION = "WTexScan v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String SPLASH_VERSION = "WTexScan v" + Version.WTEXSCAN + " by Matt Tropiano (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
@@ -560,14 +557,6 @@ public final class WTexScanMain
 		public int y;
 	}
 
-	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
-	}
-	
 	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.

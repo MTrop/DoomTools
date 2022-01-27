@@ -49,9 +49,6 @@ import net.mtrop.doom.util.TextureUtils;
  */
 public final class WTExportMain
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("wtexport");
-
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_NO_FILES = 2;
@@ -1335,14 +1332,6 @@ public final class WTExportMain
 	}
 	
 	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
-	}
-	
-	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
@@ -1456,7 +1445,7 @@ public final class WTExportMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("WTEXport v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")");
+		out.println("WTEXport v" + Version.WTEXPORT + " by Matt Tropiano (using DoomStruct v" + Version.DOOMSTRUCT + ")");
 	}
 
 	/**

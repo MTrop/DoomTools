@@ -40,10 +40,8 @@ import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
  */
 public final class DecoHackMain 
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("decohack");
-	private static final String VERSION_LINE = "DECOHack v" + VERSION + " by Matt Tropiano";
-	private static final String SPLASH_VERSION = VERSION_LINE + " (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String VERSION_LINE = "DECOHack v" + Version.DECOHACK + " by Matt Tropiano";
+	private static final String SPLASH_VERSION = VERSION_LINE + " (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
 	private static final Charset ASCII = Charset.forName("ASCII");
 	
@@ -346,14 +344,6 @@ public final class DecoHackMain
 			
 			return ERROR_NONE;
 		}
-	}
-	
-	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
 	}
 	
 	/**

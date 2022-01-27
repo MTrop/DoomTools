@@ -43,24 +43,6 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
  */
 public final class DoomToolsMain 
 {
-	private static final String VERSION = Common.getVersionString("doomtools");
-
-	private static final String JSON_VERSION = Common.getVersionString("json");
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
-	private static final String ROOKSCRIPT_DESKTOP_VERSION = Common.getVersionString("rookscript-desktop");
-
-	private static final String DECOHACK_VERSION = Common.getVersionString("decohack");
-	private static final String DIMGCONV_VERSION = Common.getVersionString("dimgconv");
-	private static final String DMXCONV_VERSION = Common.getVersionString("dmxconv");
-	private static final String DOOMMAKE_VERSION = Common.getVersionString("doommake");
-	private static final String WADMERGE_VERSION = Common.getVersionString("wadmerge");
-	private static final String WADSCRIPT_VERSION = Common.getVersionString("wadscript");
-	private static final String WADTEX_VERSION = Common.getVersionString("wadtex");
-	private static final String WSWANTBLS_VERSION = Common.getVersionString("wswantbls");
-	private static final String WTEXPORT_VERSION = Common.getVersionString("wtexport");
-	private static final String WTEXSCAN_VERSION = Common.getVersionString("wtexscan");
-
 	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
 
 	private static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
@@ -459,7 +441,7 @@ public final class DoomToolsMain
 		{
 			if (options.help)
 			{
-				options.stdout.println("DoomTools v" + VERSION);
+				options.stdout.println("DoomTools v" + Version.DOOMTOOLS);
 				options.stdout.println();
 				help(options.stdout);
 				return ERROR_NONE;
@@ -592,24 +574,24 @@ public final class DoomToolsMain
 			}
 			else
 			{
-				options.stdout.println("DoomTools v" + VERSION);
+				options.stdout.println("DoomTools v" + Version.DOOMTOOLS);
 				options.stdout.println("Run with `--help` for more options.");
 				options.stdout.println();
-				options.stdout.println("Using DoomStruct v" + DOOM_VERSION);
-				options.stdout.println("Using Black Rook JSON v" + JSON_VERSION);
-				options.stdout.println("Using Rookscript v" + ROOKSCRIPT_VERSION);
-				options.stdout.println("Using Rookscript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION);
+				options.stdout.println("Using DoomStruct v" + Version.DOOMSTRUCT);
+				options.stdout.println("Using Black Rook JSON v" + Version.JSON);
+				options.stdout.println("Using Rookscript v" + Version.ROOKSCRIPT);
+				options.stdout.println("Using Rookscript-Desktop v" + Version.ROOKSCRIPT_DESKTOP);
 				options.stdout.println();
-				options.stdout.println("Contains DECOHack v" + DECOHACK_VERSION);
-				options.stdout.println("Contains DImgConv v" + DIMGCONV_VERSION);
-				options.stdout.println("Contains DMXConv v" + DMXCONV_VERSION);
-				options.stdout.println("Contains DoomMake v" + DOOMMAKE_VERSION);
-				options.stdout.println("Contains WadMerge v" + WADMERGE_VERSION);
-				options.stdout.println("Contains WadScript v" + WADSCRIPT_VERSION);
-				options.stdout.println("Contains WADTex v" + WADTEX_VERSION);
-				options.stdout.println("Contains WSwAnTBLs v" + WSWANTBLS_VERSION);
-				options.stdout.println("Contains WTExport v" + WTEXPORT_VERSION);
-				options.stdout.println("Contains WTexScan v" + WTEXSCAN_VERSION);
+				options.stdout.println("Contains DECOHack v" + Version.DECOHACK);
+				options.stdout.println("Contains DImgConv v" + Version.DIMGCONV);
+				options.stdout.println("Contains DMXConv v" + Version.DMXCONV);
+				options.stdout.println("Contains DoomMake v" + Version.DOOMMAKE);
+				options.stdout.println("Contains WadMerge v" + Version.WADMERGE);
+				options.stdout.println("Contains WadScript v" + Version.WADSCRIPT);
+				options.stdout.println("Contains WADTex v" + Version.WADTEX);
+				options.stdout.println("Contains WSwAnTBLs v" + Version.WSWANTBLS);
+				options.stdout.println("Contains WTExport v" + Version.WTEXPORT);
+				options.stdout.println("Contains WTexScan v" + Version.WTEXSCAN);
 				return ERROR_NONE;
 			}
 		}
@@ -631,14 +613,6 @@ public final class DoomToolsMain
 			return ERROR_NONE;
 		}
 		
-	}
-	
-	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
 	}
 	
 	/**

@@ -31,9 +31,7 @@ import net.mtrop.doom.tools.struct.ProcessCallable;
  */
 public final class DMXConvertMain 
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String VERSION = Common.getVersionString("dmxconv");
-	private static final String SPLASH_VERSION = "DMXConv v" + VERSION + " by Matt Tropiano (using DoomStruct v" + DOOM_VERSION + ")";
+	private static final String SPLASH_VERSION = "DMXConv v" + Version.DMXCONV + " by Matt Tropiano (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
@@ -320,14 +318,6 @@ public final class DMXConvertMain
 			}
 		}
 		
-	}
-	
-	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
 	}
 	
 	/**

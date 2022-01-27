@@ -27,9 +27,9 @@ public class DoomMakeProjectControlPanel extends JPanel
 	private static final long serialVersionUID = -726632043594260163L;
 	
 	/** Image manager. */
-	private static final DoomToolsImageManager IMAGES = DoomToolsImageManager.get();
+	private DoomToolsImageManager images;
 	/** Project helper. */
-	private static final DoomMakeProjectHelper HELPER = DoomMakeProjectHelper.get();
+	private DoomMakeProjectHelper helper;
 
 	/**
 	 * Creates a new new project control panel.
@@ -37,17 +37,20 @@ public class DoomMakeProjectControlPanel extends JPanel
 	 */
 	public DoomMakeProjectControlPanel(final File projectDirectory)
 	{
+		this.images = DoomToolsImageManager.get();
+		this.helper = DoomMakeProjectHelper.get();
+		
 		if (!projectDirectory.isDirectory())
 			throw new IllegalArgumentException("Provided directory is not a directory.");
 		
-		LoaderFuture<BufferedImage> folderImage = IMAGES.getImageAsync("folder.png");
-		LoaderFuture<BufferedImage> vsCodeImage = IMAGES.getImageAsync("vscode.png");
-		LoaderFuture<BufferedImage> sladeImage = IMAGES.getImageAsync("slade.png");
+		LoaderFuture<BufferedImage> folderImage = images.getImageAsync("folder.png");
+		LoaderFuture<BufferedImage> vsCodeImage = images.getImageAsync("vscode.png");
+		LoaderFuture<BufferedImage> sladeImage = images.getImageAsync("slade.png");
 		
 		ComponentActionHandler<JButton> folderAction = (component, event) -> 
 		{
 			try {
-				HELPER.openExplorer(projectDirectory);
+				helper.openExplorer(projectDirectory);
 			} catch (ProcessCallException e) {
 				SwingUtils.error(component, e.getMessage());
 			} catch (FileNotFoundException e) {
@@ -58,7 +61,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 		ComponentActionHandler<JButton> vsCodeAction = (component, event) -> 
 		{
 			try {
-				HELPER.openVSCode(projectDirectory);
+				helper.openVSCode(projectDirectory);
 			} catch (ProcessCallException e) {
 				SwingUtils.error(component, e.getMessage());
 			} catch (RequiredSettingException e) {
@@ -72,7 +75,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 		ComponentActionHandler<JButton> sladeAction = (component, event) -> 
 		{
 			try {
-				HELPER.openSourceFolderInSlade(projectDirectory);
+				helper.openSourceFolderInSlade(projectDirectory);
 			} catch (ProcessCallException e) {
 				SwingUtils.error(component, e.getMessage());
 			} catch (RequiredSettingException e) {

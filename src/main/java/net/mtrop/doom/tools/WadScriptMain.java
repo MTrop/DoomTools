@@ -68,11 +68,6 @@ import com.blackrook.rookscript.functions.PrintFunctions;
  */
 public final class WadScriptMain
 {
-	private static final String DOOM_VERSION = Common.getVersionString("doom");
-	private static final String ROOKSCRIPT_VERSION = Common.getVersionString("rookscript");
-	private static final String ROOKSCRIPT_DESKTOP_VERSION = Common.getVersionString("rookscript-desktop");
-	private static final String VERSION = Common.getVersionString("wadscript");
-
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_IOERROR = 1;
 	private static final int ERROR_INTERNAL = 2;
@@ -1230,14 +1225,6 @@ public final class WadScriptMain
 	}
 	
 	/**
-	 * @return the current version string.
-	 */
-	public static String getVersion()
-	{
-		return VERSION;
-	}
-	
-	/**
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
@@ -1418,8 +1405,8 @@ public final class WadScriptMain
 	 */
 	private static void splash(PrintStream out)
 	{
-		out.println("WadScript v" + VERSION + " by Matt Tropiano");
-		out.println("(using DoomStruct v" + DOOM_VERSION + ", RookScript v" + ROOKSCRIPT_VERSION + ", RookScript-Desktop v" + ROOKSCRIPT_DESKTOP_VERSION + ")");
+		out.println("WadScript v" + Version.WADSCRIPT + " by Matt Tropiano");
+		out.println("(using DoomStruct v" + Version.DOOMSTRUCT + ", RookScript v" + Version.ROOKSCRIPT + ", RookScript-Desktop v" + Version.ROOKSCRIPT_DESKTOP + ")");
 	}
 
 	/**

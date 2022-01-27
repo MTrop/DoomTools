@@ -8,12 +8,23 @@ package net.mtrop.doom.tools.struct.swing;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.LayoutManager;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.function.Supplier;
 
+import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JDesktopPane;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
@@ -512,16 +523,16 @@ public final class ContainerFactory
 	
 	/**
 	 * Creates a new frame.
-	 * @param image the icon image.
+	 * @param icons the icon images in different dimensions.
 	 * @param title the title of the frame.
 	 * @param menuBar the menu bar to add.
 	 * @param content the content pane.
 	 * @return a new frame.
 	 */
-	public static JFrame frame(Image image, String title, JMenuBar menuBar, Container content)
+	public static JFrame frame(List<Image> icons, String title, JMenuBar menuBar, Container content)
 	{
 		JFrame out = new JFrame(title);
-		out.setIconImage(image);
+		out.setIconImages(icons);
 		out.add(menuBar);
 		out.setContentPane(content);
 		out.pack();
@@ -530,15 +541,49 @@ public final class ContainerFactory
 	
 	/**
 	 * Creates a new frame.
-	 * @param image the icon image.
+	 * @param icons the icon images in different dimensions.
 	 * @param title the title of the frame.
 	 * @param content the content pane.
 	 * @return a new frame.
 	 */
-	public static JFrame frame(Image image, String title, Container content)
+	public static JFrame frame(List<Image> icons, String title, Container content)
 	{
 		JFrame out = new JFrame(title);
-		out.setIconImage(image);
+		out.setIconImages(icons);
+		out.setContentPane(content);
+		out.pack();
+		return out;
+	}
+	
+	/**
+	 * Creates a new frame.
+	 * @param icon the icon image.
+	 * @param title the title of the frame.
+	 * @param menuBar the menu bar to add.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JFrame frame(Image icon, String title, JMenuBar menuBar, Container content)
+	{
+		JFrame out = new JFrame(title);
+		out.setIconImage(icon);
+		out.add(menuBar);
+		out.setContentPane(content);
+		out.pack();
+		return out;
+	}
+	
+	/**
+	 * Creates a new frame.
+	 * @param icon the icon image.
+	 * @param title the title of the frame.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JFrame frame(Image icon, String title, Container content)
+	{
+		JFrame out = new JFrame(title);
+		out.setIconImage(icon);
 		out.setContentPane(content);
 		out.pack();
 		return out;
@@ -572,6 +617,310 @@ public final class ContainerFactory
 		out.setContentPane(content);
 		out.pack();
 		return out;
+	}
+
+	/* ==================================================================== */
+	/* ==== Modals                                                     ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Modal<T> out = new Modal<>(owner);
+		out.setTitle(title);
+		out.setIconImages(icons);
+		return modal(out, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the icon image.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, Image icon, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Modal<T> out = new Modal<>(owner);
+		out.setTitle(title);
+		out.setIconImage(icon);
+		return modal(out, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Modal<T> out = new Modal<>(owner);
+		out.setTitle(title);
+		return modal(out, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icons, title, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icon the icon image.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Image icon, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icon, title, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal((Container)null, title, contentPane, choices);
+	}
+	
+	@SafeVarargs
+	private static <T> Modal<T> modal(final Modal<T> modal, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Node[] nodes = new Node[choices.length];
+		for (int i = 0; i < nodes.length; i++)
+		{
+			final ModalChoice<T> choice = choices[i];
+			JButton button = new JButton(new AbstractAction(choice.label, choice.icon)
+			{
+				private static final long serialVersionUID = 7418011293584407833L;
+
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					modal.setValue(choice.onClick.get());
+					modal.setVisible(false);
+				}
+			});
+			button.setMnemonic(choice.mnemonic);
+			nodes[i] = node(button);
+		}
+		modal.setContentPane(containerOf(new BorderLayout(),
+			node(BorderLayout.CENTER, contentPane),
+			node(BorderLayout.SOUTH, containerOf(new FlowLayout(FlowLayout.TRAILING, 8, 8), nodes))
+		));
+		modal.pack();
+		return modal;
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * Choosing one of these choices will close the modal.
+	 * @param <T> the object return type.
+	 * @param icon the modal button icon.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param result the result object to supply on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(Icon icon, String label, int mnemonic, T result)
+	{
+		return choice(icon, label, mnemonic, () -> result);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param result the result object to supply on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, int mnemonic, T result)
+	{
+		return choice(null, label, mnemonic, () -> result);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param result the result object to supply on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, T result)
+	{
+		return choice(null, label, 0, () -> result);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * Choosing one of these choices will close the modal.
+	 * @param <T> the object return type.
+	 * @param icon the modal button icon.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(Icon icon, String label, int mnemonic, Supplier<T> onClick)
+	{
+		return new ModalChoice<>(icon, label, mnemonic, onClick);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, int mnemonic, Supplier<T> onClick)
+	{
+		return new ModalChoice<>(null, label, mnemonic, onClick);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, Supplier<T> onClick)
+	{
+		return new ModalChoice<>(null, label, 0, onClick);
+	}
+	
+	/**
+	 * A single modal choice abstracted as a button. 
+	 * @param <T> the return type.
+	 */
+	public static class ModalChoice<T>
+	{
+		private Icon icon;
+		private String label;
+		private int mnemonic;
+		private Supplier<T> onClick;
+		private ModalChoice(Icon icon, String label, int mnemonic, Supplier<T> onClick)
+		{
+			this.icon = icon;
+			this.label = label;
+			this.mnemonic = mnemonic;
+			this.onClick = onClick;
+		}
+	}
+	
+	/**
+	 * The custom modal.
+	 * @param <T> the return type. 
+	 */
+	public static class Modal<T> extends JDialog
+	{
+		private static final long serialVersionUID = 3962942391178207377L;
+
+		private T value;
+		
+		private Modal(Container owner)
+		{
+			super(getWindowForComponent(owner));
+			setModalityType(ModalityType.APPLICATION_MODAL);
+		}
+
+		private static Window getWindowForComponent(Component parent) throws HeadlessException 
+		{
+	        if (parent == null)
+	            return null;
+	        if (parent instanceof Frame || parent instanceof Dialog)
+	            return (Window)parent;
+	        return getWindowForComponent(parent.getParent());
+	    }
+
+		
+		@Override
+		public void setVisible(boolean b) 
+		{
+			if (b)
+				value = null;
+			super.setVisible(b);
+		}
+		
+		private void setValue(T value) 
+		{
+			this.value = value;
+		}
+
+		/**
+		 * Gets the value result of this dialog.
+		 * If the dialog is made visible and closed without a button clicked,
+		 * the value is null.
+		 * @return the value result.
+		 */
+		public T getValue() 
+		{
+			return value;
+		}
+		
+		/**
+		 * Opens the dialog, waits for a choice, and then returns it.
+		 * @return the value result.
+		 */
+		public T open()
+		{
+			setVisible(true);
+			return getValue();
+		}
 	}
 	
 }
