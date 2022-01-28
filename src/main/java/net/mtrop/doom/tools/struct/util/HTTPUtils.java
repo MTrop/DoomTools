@@ -129,7 +129,7 @@ public final class HTTPUtils
 	/** String content reader. */
 	private static final HTTPReader<String> HTTPREADER_STRING_CONTENT = (response, cancelSwitch, monitor) ->
 	{
-		InputStreamReader reader = HTTPReader.openReader(response);
+		InputStreamReader reader = response.getContentReader();
 		StringWriter writer = new StringWriter();
 		relay(reader, writer, 8192, null, cancelSwitch, monitor);
 		return cancelSwitch.get() ? null : writer.toString();
@@ -648,21 +648,6 @@ public final class HTTPUtils
 		R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException;
 		
 		/**
-		 * Convenience method for wrapping the content stream in a reader for 
-		 * the response's charset encoding.
-		 * @param response the open response object.
-		 * @return an InputStreamReader to read from.
-		 * @throws UnsupportedEncodingException if the response has a charset type that is unknown.
-		 */
-		static InputStreamReader openReader(HTTPResponse response) throws UnsupportedEncodingException
-		{
-			String charset;
-			if ((charset = response.getCharset()) == null)
-				charset = ISO_8859_1.displayName();
-			return new InputStreamReader(response.getContentStream(), charset);
-		}
-
-		/**
 		 * An HTTP Reader that just returns the status code of the response.
 		 * This returns a singleton instance of the reader.
 		 * <p> If the read is cancelled, this returns null.
@@ -818,7 +803,7 @@ public final class HTTPUtils
 				
 				try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset))
 				{
-					relay(openReader(response), writer, 8192, null, cancelSwitch, monitor);
+					relay(response.getContentReader(), writer, 8192, null, cancelSwitch, monitor);
 				}
 				if (cancelSwitch.get())
 				{
@@ -842,7 +827,7 @@ public final class HTTPUtils
 		{
 			return (response, cancelSwitch, monitor) ->
 			{
-				BufferedReader br = new BufferedReader(openReader(response));
+				BufferedReader br = new BufferedReader(response.getContentReader());
 				String line;
 				while ((line = br.readLine()) != null)
 					consumer.accept(line);
@@ -2409,6 +2394,19 @@ public final class HTTPUtils
 		public InputStream getContentStream() 
 		{
 			return contentStream;
+		}
+
+		/**
+		 * Convenience method for wrapping the content stream in a reader for this response's charset encoding.
+		 * @return an InputStreamReader to read from.
+		 * @throws UnsupportedEncodingException if the response has a charset type that is unknown.
+		 */
+		public InputStreamReader getContentReader() throws UnsupportedEncodingException
+		{
+			String charset;
+			if ((charset = getCharset()) == null)
+				charset = ISO_8859_1.displayName();
+			return new InputStreamReader(getContentStream(), charset);
 		}
 
 		/**
