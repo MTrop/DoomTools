@@ -90,12 +90,12 @@ public final class ContainerFactory
 
 	/**
 	 * Starts a Container with a BorderLayout.
-	 * @param root the root node.
+	 * @param edges the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Node root)
+	public static Container containerOf(Node ... edges)
 	{
-		return containerOf(new BorderLayout(), root);
+		return containerOf(new BorderLayout(), edges);
 	}
 
 	/**
@@ -535,6 +535,7 @@ public final class ContainerFactory
 		out.setIconImages(icons);
 		out.add(menuBar);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -551,6 +552,7 @@ public final class ContainerFactory
 		JFrame out = new JFrame(title);
 		out.setIconImages(icons);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -569,6 +571,7 @@ public final class ContainerFactory
 		out.setIconImage(icon);
 		out.add(menuBar);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -585,6 +588,7 @@ public final class ContainerFactory
 		JFrame out = new JFrame(title);
 		out.setIconImage(icon);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -601,6 +605,7 @@ public final class ContainerFactory
 		JFrame out = new JFrame(title);
 		out.setJMenuBar(menuBar);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -615,6 +620,7 @@ public final class ContainerFactory
 	{
 		JFrame out = new JFrame(title);
 		out.setContentPane(content);
+		out.setLocationByPlatform(true);
 		out.pack();
 		return out;
 	}
@@ -755,11 +761,14 @@ public final class ContainerFactory
 			button.setMnemonic(choice.mnemonic);
 			nodes[i] = node(button);
 		}
-		modal.setContentPane(containerOf(new BorderLayout(),
+		modal.setContentPane(containerOf(
 			node(BorderLayout.CENTER, contentPane),
 			node(BorderLayout.SOUTH, containerOf(new FlowLayout(FlowLayout.TRAILING, 8, 8), nodes))
 		));
+		modal.setLocationByPlatform(true);
 		modal.pack();
+		modal.setMinimumSize(modal.getSize());
+		modal.setResizable(false);
 		return modal;
 	}
 	
@@ -795,12 +804,35 @@ public final class ContainerFactory
 	 * Creates a single modal choice that appears as a button in the modal.
 	 * @param <T> the object return type.
 	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, int mnemonic)
+	{
+		return choice(null, label, mnemonic, (T)null);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
 	 * @param result the result object to supply on click.
 	 * @return a modal choice to use on a new modal.
 	 */
 	public static <T> ModalChoice<T> choice(String label, T result)
 	{
 		return choice(null, label, 0, () -> result);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label)
+	{
+		return choice(null, label, 0, (T)null);
 	}
 	
 	/**
@@ -920,6 +952,17 @@ public final class ContainerFactory
 		{
 			setVisible(true);
 			return getValue();
+		}
+
+		/**
+		 * Opens the dialog, waits for a choice, and then returns it and disposes the modal.
+		 * @return the value result.
+		 */
+		public T openThenDispose()
+		{
+			T out = open();
+			dispose();
+			return out;
 		}
 	}
 	

@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import com.blackrook.rookscript.Script;
 import com.blackrook.rookscript.ScriptAssembler;
@@ -77,6 +78,7 @@ public final class WadScriptMain
 	private static final int ERROR_SCRIPT_RETURNED_ERROR = 7;
 	private static final int ERROR_SCRIPT_INSTANCE_EXECUTION = 8;
 	private static final int ERROR_SCRIPT_NOT_STARTED = 9;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_VERSION1 = "--version";
 	private static final String SWITCH_HELP1 = "--help";
@@ -851,7 +853,7 @@ public final class WadScriptMain
 		
 	}
 
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 		
@@ -860,7 +862,8 @@ public final class WadScriptMain
 			this.options = options;
 		}
 		
-		private int call()
+		@Override
+		public Integer call()
 		{
 			if (options.mode == null)
 			{
@@ -1378,7 +1381,22 @@ public final class WadScriptMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args)

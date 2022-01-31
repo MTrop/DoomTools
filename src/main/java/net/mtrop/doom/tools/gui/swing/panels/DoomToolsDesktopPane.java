@@ -16,7 +16,9 @@ import javax.swing.event.InternalFrameEvent;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationInternalFrame;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;
 
 /**
@@ -26,6 +28,9 @@ import net.mtrop.doom.tools.struct.swing.ComponentFactory;
 public class DoomToolsDesktopPane extends JDesktopPane 
 {
 	private static final long serialVersionUID = -4832880176282917356L;
+
+    /** Logger. */
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsDesktopPane.class); 
 
 	/** Image manager. */
 	private DoomToolsImageManager images;
@@ -107,6 +112,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 			}
 		});
 		add(frame);
+		LOG.infof("Started application: %s", instance.getClass().getSimpleName());
 		return frame;
 	}
 	
@@ -128,6 +134,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		frame.setVisible(false);
 		frame.dispose();
 		instance.onClose();
+		LOG.infof("Closed application: %s", instance.getClass().getSimpleName());
 	}
 	
 	/**

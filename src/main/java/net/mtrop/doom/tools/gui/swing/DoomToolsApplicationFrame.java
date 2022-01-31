@@ -1,10 +1,12 @@
 package net.mtrop.doom.tools.gui.swing;
 
+import java.awt.Container;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 
@@ -30,6 +32,7 @@ public class DoomToolsApplicationFrame extends JFrame
 		setTitle(instance.getName());
 		setJMenuBar(instance.getMenuBar());
 		setContentPane(instance.getContentPane());
+		setLocationByPlatform(true);
 		setResizable(true);
 		addWindowListener(new WindowAdapter()
 		{
@@ -63,7 +66,28 @@ public class DoomToolsApplicationFrame extends JFrame
 				instance.onRestore();
 			}
 		});
+		instance.setApplicationControlReceiver(new DoomToolsApplicationControlReceiver() 
+		{
+			@Override
+			public void attemptClose() 
+			{
+				closeMe();
+			}
+
+			@Override
+			public Container getApplicationContainer()
+			{
+				return getContentPane();
+			}
+		});
 		pack();
+		setMinimumSize(getSize());
+	}
+	
+	// Attempt to close.
+	private void closeMe()
+	{
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 	
 	/**

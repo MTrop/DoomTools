@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -32,6 +33,7 @@ public final class WadMergeMain
 	private static final int ERROR_BAD_INPUT_FILE = 1;
 	private static final int ERROR_BAD_SCRIPT = 2;
 	private static final int ERROR_BAD_OPTIONS = 3;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -115,7 +117,7 @@ public final class WadMergeMain
 	/**
 	 * Utility context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 		
@@ -124,11 +126,8 @@ public final class WadMergeMain
 			this.options = options;
 		}
 		
-		/**
-		 * Calls this program.
-		 * @return the return code.
-		 */
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -241,7 +240,22 @@ public final class WadMergeMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args)

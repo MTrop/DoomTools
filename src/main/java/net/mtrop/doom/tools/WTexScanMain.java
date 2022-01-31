@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -49,7 +50,8 @@ public final class WTexScanMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_BAD_OPTIONS = 2;
-	
+	private static final int ERROR_UNKNOWN = -1;
+
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_VERSION = "--version";
@@ -177,7 +179,7 @@ public final class WTexScanMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 		private SortedSet<String> textureList;
@@ -461,7 +463,8 @@ public final class WTexScanMain
 				flatList.add(flat);
 		}
 
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -628,7 +631,22 @@ public final class WTexScanMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args) throws IOException

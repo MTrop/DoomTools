@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -38,6 +39,7 @@ public final class DMXConvertMain
 	private static final int ERROR_NO_FILES = 2;
 	private static final int ERROR_CONVERSION_SKIPPED = 3;
 	private static final int ERROR_NO_FFMPEG = 4;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -128,7 +130,7 @@ public final class DMXConvertMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
 		
@@ -139,7 +141,8 @@ public final class DMXConvertMain
 			this.options = options;
 		}
 		
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -397,7 +400,22 @@ public final class DMXConvertMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args) throws IOException

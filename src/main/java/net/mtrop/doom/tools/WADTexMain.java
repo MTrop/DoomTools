@@ -17,6 +17,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
 
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.object.BinaryObject;
@@ -42,6 +43,7 @@ public final class WADTexMain
 	private static final int ERROR_BAD_INPUTOUTPUT_FILE = 1;
 	private static final int ERROR_BAD_PARSE = 2;
 	private static final int ERROR_MISSING_DATA = 3;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -144,7 +146,7 @@ public final class WADTexMain
 	/**
 	 * Utility context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 		
@@ -154,7 +156,8 @@ public final class WADTexMain
 		}
 
 		@SuppressWarnings("unchecked")
-		private int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -431,7 +434,22 @@ public final class WADTexMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args)

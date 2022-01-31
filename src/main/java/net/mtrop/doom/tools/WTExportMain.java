@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.Wad;
@@ -53,7 +54,8 @@ public final class WTExportMain
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_NO_FILES = 2;
 	private static final int ERROR_BAD_OPTIONS = 4;
-	
+	private static final int ERROR_UNKNOWN = -1;
+
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
 	private static final Pattern FLAT_MARKER = Pattern.compile("F[0-9]*_(START|END)");
 	
@@ -223,7 +225,7 @@ public final class WTExportMain
 		}
 	}
 
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		/** Options. */
 		private Options options;
@@ -1076,12 +1078,9 @@ public final class WTExportMain
 			
 			reader.close();
 		}
-		
-		/**
-		 * Starts texture extraction.
-		 * @return the return code.
-		 */
-		public int call() 
+
+		@Override
+		public Integer call() 
 		{
 			if (options.help)
 			{
@@ -1418,7 +1417,22 @@ public final class WTExportMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args)

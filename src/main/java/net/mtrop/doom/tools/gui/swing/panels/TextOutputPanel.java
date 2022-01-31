@@ -50,7 +50,7 @@ public class TextOutputPanel extends JTextArea
 	 */
 	public PrintStream getPrintStream()
 	{
-		return new PrintStream(new Printer());
+		return new PrintStream(new Printer(), true);
 	}
 	
 	public class Printer extends OutputStream

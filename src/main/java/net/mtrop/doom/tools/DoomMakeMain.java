@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
@@ -42,9 +44,6 @@ public final class DoomMakeMain
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	
-	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
-	private static final String ENVVAR_DOOMTOOLS_JAR = "DOOMTOOLS_JAR";
-
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;
@@ -53,7 +52,7 @@ public final class DoomMakeMain
 	private static final int ERROR_SECURITY = 5;
 	private static final int ERROR_BAD_TOOL_PATH = 6;
 	private static final int ERROR_IOERROR = 7;
-	private static final int ERROR_UNKNOWN = 100;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -208,6 +207,18 @@ public final class DoomMakeMain
 				this.args.add(s);
 			return this;
 		}
+		
+		public Options setProjectType(ProjectType projectType) 
+		{
+			this.projectType = projectType;
+			return this;
+		}
+		
+		public Options setNewProjectTemplateNames(String[] templateNames)
+		{
+			this.templateNames = Arrays.asList(templateNames);
+			return this;
+		}
 
 		public Options addArg(String arg)
 		{
@@ -220,7 +231,7 @@ public final class DoomMakeMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 	
@@ -229,7 +240,8 @@ public final class DoomMakeMain
 			this.options = options;
 		}
 		
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -391,10 +403,10 @@ public final class DoomMakeMain
 			String path;
 			String jarName;
 			try {
-				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
-				jarName = System.getenv(ENVVAR_DOOMTOOLS_JAR);
+				path = Environment.getDoomToolsPath();
+				jarName = Environment.getDoomToolsJarPath();
 			} catch (SecurityException e) {
-				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				options.stderr.println("ERROR: Could not fetch ENVVAR value.");
 				return ERROR_SECURITY;
 			}
 			
@@ -652,7 +664,22 @@ public final class DoomMakeMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args) throws IOException

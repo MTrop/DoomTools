@@ -1,10 +1,13 @@
 package net.mtrop.doom.tools.gui.swing;
 
+import java.awt.Container;
+
 import javax.swing.Icon;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 
@@ -16,7 +19,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 {
 	private static final long serialVersionUID = 7311434945898035762L;
 
-	/** Image manager. */
+    /** Image manager. */
 	private DoomToolsGUIUtils utils;
 	/** The application instance. */
 	private DoomToolsApplicationInstance instance;
@@ -72,7 +75,28 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 				instance.onRestore();
 			}
 		});
+		instance.setApplicationControlReceiver(new DoomToolsApplicationControlReceiver() 
+		{
+			@Override
+			public void attemptClose() 
+			{
+				closeMe();
+			}
+
+			@Override
+			public Container getApplicationContainer()
+			{
+				return getContentPane();
+			}
+		});
 		pack();
+		setMinimumSize(getSize());
+	}
+	
+	// Attempt to close.
+	private void closeMe()
+	{
+		dispatchEvent(new InternalFrameEvent(this, InternalFrameEvent.INTERNAL_FRAME_CLOSING));
 	}
 	
 	/**

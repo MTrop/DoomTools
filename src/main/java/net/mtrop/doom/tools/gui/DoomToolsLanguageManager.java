@@ -93,6 +93,16 @@ public final class DoomToolsLanguageManager
 	}
 	
 	/**
+	 * Checks if a key is present in the language map.
+	 * @param key the language key.
+	 * @return true if so, false if not.
+	 */
+	public boolean hasKey(String key)
+	{
+		return languageMap.getProperty(key) != null;
+	}
+	
+	/**
 	 * Gets text using a text key.
 	 * @param key the language key.
 	 * @param args string formatter arguments. 
@@ -111,6 +121,9 @@ public final class DoomToolsLanguageManager
 	 */
 	public int getMnemonicValue(String key)
 	{
+		if (!hasKey(key))
+			return KeyEvent.VK_UNDEFINED;
+		
 		char keyname = Character.toUpperCase(getText(key).charAt(0));
 		try {
 			Field f;
@@ -135,6 +148,9 @@ public final class DoomToolsLanguageManager
 	 */
 	public KeyStroke getKeyStroke(String key, Object ... args)
 	{
+		if (!hasKey(key))
+			return null;
+		
 		String value = getText(key, args);
 		KeyStroke out = KeyStroke.getKeyStroke(value);
 		if (out == null)

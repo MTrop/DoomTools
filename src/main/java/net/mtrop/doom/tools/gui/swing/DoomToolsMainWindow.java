@@ -3,15 +3,15 @@ package net.mtrop.doom.tools.gui.swing;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
-import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectApp;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
-import net.mtrop.doom.tools.struct.swing.ContainerFactory.Modal;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -35,8 +35,6 @@ public class DoomToolsMainWindow extends JFrame
 	/** Shutdown hook. */
 	private Runnable shutDownHook;
 	
-	private Modal<Void> aboutModal;
-	
 	/**
 	 * Creates the DoomTools main window.
 	 * @param shutDownHook the application shutdown hook.
@@ -48,16 +46,11 @@ public class DoomToolsMainWindow extends JFrame
 		this.language = DoomToolsLanguageManager.get();
 		this.shutDownHook = shutDownHook;
 		
-		this.aboutModal = modal(this, utils.getWindowIcons(), 
-			"About DoomTools", 
-			new DoomToolsAboutPanel(), 
-			choice("OK", KeyEvent.VK_O, (Void)null)
-		);
-		
 		setIconImages(utils.getWindowIcons());
 		setTitle("DoomTools v" + Version.DOOMTOOLS);
 		setJMenuBar(createMenuBar());
 		setContentPane(this.desktop = new DoomToolsDesktopPane());
+		setLocationByPlatform(true);
 		pack();
 	}
 
@@ -69,12 +62,31 @@ public class DoomToolsMainWindow extends JFrame
 					(c, e) -> shutDownHook.run()
 				)
 			),
+			utils.createMenuFromLanguageKey("doomtools.menu.tools",
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new",
+						(c, e) -> addApplication(DoomMakeNewProjectApp.class)
+					),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
+						(c, e) -> addApplication(DoomMakeProjectApp.class)
+					)
+				)
+			),
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.about",
-					(c, e) -> aboutModal.open()
+					(c, e) -> openAboutModal()
 				)
 			)
 		);
+	}
+	
+	private void openAboutModal()
+	{
+		modal(this, utils.getWindowIcons(), 
+			language.getText("doomtools.about.title"), 
+			new DoomToolsAboutPanel(), 
+			choice("OK", KeyEvent.VK_O)
+		).openThenDispose();
 	}
 	
 	/**

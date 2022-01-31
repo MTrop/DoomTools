@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
 import net.mtrop.doom.tools.doommake.ProjectModule;
@@ -34,23 +35,23 @@ import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.fileContentA
  */
 public class WADProjectGenerator extends ProjectGenerator
 {
-	private static final String CATEGORY_ASSETS = "Assets";
-	private static final String CATEGORY_MAPS = "Maps";
-	private static final String CATEGORY_TEXTURES = "Textures";
-	private static final String CATEGORY_REPOSITORY = "Repositories";
-	private static final String CATEGORY_PATCHES = "Patches";
-	private static final String CATEGORY_EXECUTION = "Execution";
+	public static final String CATEGORY_ASSETS = "Assets";
+	public static final String CATEGORY_MAPS = "Maps";
+	public static final String CATEGORY_TEXTURES = "Textures";
+	public static final String CATEGORY_REPOSITORY = "Repositories";
+	public static final String CATEGORY_PATCHES = "Patches";
+	public static final String CATEGORY_EXECUTION = "Execution";
 
-	private static final String TEMPLATE_GIT = "git";
-	private static final String TEMPLATE_MERCURIAL = "hg";
-	private static final String TEMPLATE_ASSETS = "assets";
-	private static final String TEMPLATE_MAPS = "maps";
-	private static final String TEMPLATE_TEXTURES = "textures";
-	private static final String TEMPLATE_TEXTURES_BOOM = "texturesboom";
-	private static final String TEMPLATE_TEXTUREWADS = "texturewads";
-	private static final String TEMPLATE_DECOHACK = "decohack";
-	private static final String TEMPLATE_PATCH = "patch";
-	private static final String TEMPLATE_RUN = "run";
+	public static final String TEMPLATE_GIT = "git";
+	public static final String TEMPLATE_MERCURIAL = "hg";
+	public static final String TEMPLATE_ASSETS = "assets";
+	public static final String TEMPLATE_MAPS = "maps";
+	public static final String TEMPLATE_TEXTURES = "textures";
+	public static final String TEMPLATE_TEXTURES_BOOM = "texturesboom";
+	public static final String TEMPLATE_TEXTUREWADS = "texturewads";
+	public static final String TEMPLATE_DECOHACK = "decohack";
+	public static final String TEMPLATE_PATCH = "patch";
+	public static final String TEMPLATE_RUN = "run";
 
 	private static final String MODULE_GIT = "git";
 	private static final String MODULE_MERCURIAL = "hg";
@@ -68,6 +69,8 @@ public class WADProjectGenerator extends ProjectGenerator
 	private static final String MODULE_TEXTUREWADS = "texturewads";
 	private static final String MODULE_RUN = "run";
 
+	/** The main categories. */
+	private static final SortedMap<String, Set<ProjectTemplate>> CATEGORIES;
 	/** The main templates. */
 	private static final SortedMap<String, ProjectTemplate> TEMPLATES;
 	/** The main modules. */
@@ -146,6 +149,7 @@ public class WADProjectGenerator extends ProjectGenerator
 
 	static
 	{
+		CATEGORIES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		TEMPLATES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		MODULES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -630,9 +634,29 @@ public class WADProjectGenerator extends ProjectGenerator
 			TEMPLATE_MAPS, CATEGORY_MAPS, "Adds the ability to merge maps together.",
 			MODULE_INIT, MODULE_MAPS
 		));
-		
+	
+		for (Map.Entry<String, ProjectTemplate> templateEntry : TEMPLATES.entrySet())
+		{
+			ProjectTemplate template = templateEntry.getValue();
+			Set<ProjectTemplate> templateSet;
+			if ((templateSet = CATEGORIES.get(template.getCategory())) == null)
+				CATEGORIES.put(template.getCategory(), templateSet = new TreeSet<>());
+			templateSet.add(template);
+		}
 	}
 	
+	@Override
+	public Set<String> getCategoryNames() 
+	{
+		return CATEGORIES.keySet();
+	}
+
+	@Override
+	public Set<ProjectTemplate> getTemplatesByCategory(String name) 
+	{
+		return CATEGORIES.get(name);
+	}
+
 	@Override
 	public Set<String> getTemplateNames() 
 	{

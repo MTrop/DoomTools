@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.struct.swing;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -752,13 +753,13 @@ public final class ComponentFactory
 	 * Creates a combo box (dropdown) with an attached listener.
 	 * @param <E> the item type.
 	 * @param model the spinner model.
-	 * @param listener the change listener.
+	 * @param handler the item change handler.
 	 * @return the resultant spinner.
 	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ItemListener listener)
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ComponentItemHandler<JComboBox<E>> handler)
 	{
 		JComboBox<E> out = new JComboBox<E>(model);
-		out.addItemListener(listener);
+		out.addItemListener(handler);
 		return out;
 	}
 
@@ -1215,6 +1216,29 @@ public final class ComponentFactory
 		 * @param component the associated component.
 		 */
 		void onChangeEvent(C component);
+	}
+	
+	/**
+	 * A handler interface for listening for change events.
+	 * @param <C> the component type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ComponentItemHandler<C> extends ItemListener
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void itemStateChanged(ItemEvent event)
+		{
+			C component = (C)event.getSource();
+			onItemChangeEvent(component, event.getItem());
+		}
+		
+		/**
+		 * Called when a component emits an item change event.
+		 * @param component the associated component.
+		 * @param item the item affected.
+		 */
+		void onItemChangeEvent(C component, Object item);
 	}
 	
 	/* ==================================================================== */

@@ -25,6 +25,16 @@ public interface DoomToolsApplicationInstance
 	Container getContentPane();
 
 	/**
+	 * Sets the application control receiver.
+	 * Called before application open, but after instantiation.
+	 * @param receiver the receiver instance.
+	 */
+	default void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver)
+	{
+		// Do nothing.
+	}
+	
+	/**
 	 * Fetches this application instance's specific icon.
 	 * @return the application's icon, or <code>null</code> for default.
 	 */

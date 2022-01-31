@@ -1,13 +1,12 @@
 package net.mtrop.doom.tools.gui;
 
-import static net.mtrop.doom.tools.struct.swing.ComponentFactory.item;
-
 import java.awt.Image;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -15,8 +14,10 @@ import javax.swing.JMenuItem;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
+import net.mtrop.doom.tools.struct.swing.ContainerFactory.ModalChoice;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
 /**
  * DoomTools GUI Utilities and component building.
@@ -120,6 +121,49 @@ public final class DoomToolsGUIUtils
 			language.getMnemonicValue(keyPrefix + ".mnemonic"),
 			language.getKeyStroke(keyPrefix + ".keystroke"),
 			handler
+		);
+	}
+
+	/**
+	 * Creates a button from a language key, getting the necessary pieces to assemble it.
+	 * @param icon the button icon.
+	 * @param keyPrefix the key prefix.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JButton createButtonFromLanguageKey(Icon icon, String keyPrefix, ComponentActionHandler<JButton> handler)
+	{
+		return button(
+			icon,
+			language.getText(keyPrefix),
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			handler
+		);
+	}
+
+	/**
+	 * Creates a button from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JButton createButtonFromLanguageKey(String keyPrefix, ComponentActionHandler<JButton> handler)
+	{
+		return createButtonFromLanguageKey(null, keyPrefix, handler);
+	}
+
+	/**
+	 * Creates a modal choice from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param result the choice result.
+	 * @return the new menu item node.
+	 */
+	public <T> ModalChoice<T> createChoiceFromLanguageKey(String keyPrefix, T result)
+	{
+		return choice(
+			language.getText(keyPrefix),
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			result
 		);
 	}
 

@@ -191,6 +191,74 @@ public final class SwingUtils
 	}
 
 	/**
+	 * Opens a directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the directory chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected directory, or null if no directory was selected for whatever reason.
+	 */
+	public static File directory(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		if (initPath != null)
+			jfc.setSelectedFile(initPath);
+		if (title != null)
+			jfc.setDialogTitle(title);
+		for (FileFilter filter : choosableFilters)
+			jfc.addChoosableFileFilter(filter);
+		switch (jfc.showDialog(parent, approveText))
+		{
+			default:
+			case JFileChooser.CANCEL_OPTION: 
+			case JFileChooser.ERROR_OPTION:
+				return null;
+			case JFileChooser.APPROVE_OPTION:
+				return jfc.getSelectedFile();
+		}
+	}
+
+	/**
+	 * Opens a directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected directory, or null if no directory was selected for whatever reason.
+	 */
+	public static File directory(Component parent, String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return directory(parent, title, null, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the directory chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected directory, or null if no directory was selected for whatever reason.
+	 */
+	public static File directory(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return directory(parent, null, initPath, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected directory, or null if no directory was selected for whatever reason.
+	 */
+	public static File directory(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return directory(parent, null, null, approveText, choosableFilters);
+	}
+
+	/**
 	 * Opens a file chooser dialog.
 	 * @param parent the parent component for the chooser modal.
 	 * @param title the dialog title.
@@ -202,6 +270,7 @@ public final class SwingUtils
 	public static File file(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
 		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (initPath != null)
 			jfc.setSelectedFile(initPath);
 		if (title != null)
@@ -232,6 +301,31 @@ public final class SwingUtils
 		return file(parent, title, null, approveText, choosableFilters);
 	}
 	
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, null, initPath, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, null, null, approveText, choosableFilters);
+	}
+
 	/**
 	 * Opens a file chooser dialog.
 	 * @param title the dialog title.
@@ -268,31 +362,6 @@ public final class SwingUtils
 		return file(null, title, null, null, choosableFilters);
 	}
 	
-	/**
-	 * Opens a file chooser dialog.
-	 * @param parent the parent component for the chooser modal.
-	 * @param initPath the initial path for the file chooser.
-	 * @param approveText the text to put on the approval button.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
-	{
-		return file(parent, null, initPath, approveText, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
-	 * @param parent the parent component for the chooser modal.
-	 * @param approveText the text to put on the approval button.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File file(Component parent, String approveText, FileFilter ... choosableFilters)
-	{
-		return file(parent, null, null, approveText, choosableFilters);
-	}
-
 	/**
 	 * Opens a file chooser dialog.
 	 * @param initPath the initial path for the file chooser.

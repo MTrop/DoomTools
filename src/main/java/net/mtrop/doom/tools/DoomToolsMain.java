@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -43,8 +44,6 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
  */
 public final class DoomToolsMain 
 {
-	private static final String ENVVAR_DOOMTOOLS_PATH = "DOOMTOOLS_PATH";
-
 	private static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
 
 	private static final String UPDATE_GITHUB_API = "https://api.github.com/";
@@ -84,7 +83,8 @@ public final class DoomToolsMain
 	private static final int ERROR_SITE_ERROR = 5;
 	private static final int ERROR_IOERROR = 6;
 	private static final int ERROR_GUI_ALREADY_RUNNING = 7;
-	
+	private static final int ERROR_UNKNOWN = -1;
+
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_WEBSITE = "--website";
@@ -156,7 +156,7 @@ public final class DoomToolsMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 	
@@ -209,9 +209,9 @@ public final class DoomToolsMain
 		{
 			final String path; 
 			try {
-				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				path = Environment.getDoomToolsPath();
 			} catch (SecurityException e) {
-				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
 			if (Common.isEmpty(path))
@@ -249,9 +249,9 @@ public final class DoomToolsMain
 		{
 			final String path; 
 			try {
-				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				path = Environment.getDoomToolsPath();
 			} catch (SecurityException e) {
-				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
 			if (Common.isEmpty(path))
@@ -280,9 +280,9 @@ public final class DoomToolsMain
 		{
 			final String path; 
 			try {
-				path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+				path = Environment.getDoomToolsPath();
 			} catch (SecurityException e) {
-				options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
 			if (Common.isEmpty(path))
@@ -437,7 +437,8 @@ public final class DoomToolsMain
 			return ERROR_NONE;
 		}
 		
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -480,9 +481,9 @@ public final class DoomToolsMain
 			{
 				String path; 
 				try {
-					path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+					path = Environment.getDoomToolsPath();
 				} catch (SecurityException e) {
-					options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+					options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 					return ERROR_SECURITY;
 				}
 				
@@ -501,9 +502,9 @@ public final class DoomToolsMain
 			{
 				String path; 
 				try {
-					path = System.getenv(ENVVAR_DOOMTOOLS_PATH);
+					path = Environment.getDoomToolsPath();
 				} catch (SecurityException e) {
-					options.stderr.println("ERROR: Could not fetch value of ENVVAR " + ENVVAR_DOOMTOOLS_PATH);
+					options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 					return ERROR_SECURITY;
 				}
 				
@@ -674,7 +675,22 @@ public final class DoomToolsMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args) throws IOException

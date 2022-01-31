@@ -27,6 +27,17 @@ public abstract class ProjectGenerator
 	public static final String TEMPLATE_BASE = "base";
 
 	/**
+	 * @return the set of valid category names.
+	 */
+	public abstract Set<String> getCategoryNames();
+	
+	/**
+	 * @param categoryName the category name.
+	 * @return the set of template names by template category.
+	 */
+	public abstract Set<ProjectTemplate> getTemplatesByCategory(String categoryName);
+	
+	/**
 	 * @return the set of valid template names.
 	 */
 	public abstract Set<String> getTemplateNames();

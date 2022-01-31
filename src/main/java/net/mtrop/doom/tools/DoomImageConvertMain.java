@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
 
@@ -46,6 +47,7 @@ public final class DoomImageConvertMain
 	private static final int ERROR_BAD_OUTPUT = 5;
 	private static final int ERROR_IO = 6;
 	private static final int ERROR_PARSE = 7;
+	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -210,7 +212,7 @@ public final class DoomImageConvertMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 	
@@ -219,7 +221,8 @@ public final class DoomImageConvertMain
 			this.options = options;
 		}
 		
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -939,7 +942,22 @@ public final class DoomImageConvertMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
+	}
+	
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
 	}
 	
 	public static void main(String[] args) throws IOException
