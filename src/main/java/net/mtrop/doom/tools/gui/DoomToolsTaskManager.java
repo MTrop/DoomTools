@@ -37,6 +37,16 @@ public final class DoomToolsTaskManager
 	{
 		this.asyncFactory = new AsyncFactory(0, 4, 5, TimeUnit.SECONDS);
 	}
+
+	/**
+	 * Spawns a new asynchronous task from a {@link Runnable}.
+	 * @param runnable the callable to use.
+	 * @return the new instance.
+	 */
+	public Instance<Void> spawn(Runnable runnable)
+	{
+		return asyncFactory.spawn(createListener(), runnable);
+	}
 	
 	/**
 	 * Spawns a new asynchronous task from a {@link Callable}.
@@ -46,7 +56,12 @@ public final class DoomToolsTaskManager
 	 */
 	public <T> Instance<T> spawn(Callable<T> callable)
 	{
-		InstanceListener<T> listener = new InstanceListener<T>()
+		return asyncFactory.spawn(createListener(), callable);
+	}
+
+	private <T> InstanceListener<T> createListener()
+	{
+		return new InstanceListener<T>()
 		{
 			@Override
 			public void onStart(Instance<T> instance) 
@@ -60,7 +75,6 @@ public final class DoomToolsTaskManager
 				LOG.infof("Finished task.");
 			}
 		};
-		return asyncFactory.spawn(listener, callable);
 	}
-
+	
 }

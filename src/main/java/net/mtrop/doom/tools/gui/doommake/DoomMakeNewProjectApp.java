@@ -2,13 +2,20 @@ package net.mtrop.doom.tools.gui.doommake;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
+import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -19,8 +26,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
+import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
+import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
+import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
+import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -109,7 +120,7 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 				), 
 				(selected) -> { 
 					targetDirectory = selected;
-					if (targetDirectory != null && targetDirectory.isDirectory() && targetDirectory.listFiles().length >= 0)
+					if (targetDirectory != null && targetDirectory.isDirectory() && targetDirectory.listFiles().length > 0)
 						SwingUtils.warning(out, language.getText("doommake.newproject.directory.browse.notempty"));
 				}
 			)))
@@ -250,6 +261,91 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 		templateNameSet.remove(templateToRemove);
 	}
 
+	private Modal<String> createOptionModal(String title, String prompt, String defaultValue, GUIHint guiHint)
+	{
+		final AtomicReference<String> stringValue = new AtomicReference<>();
+		
+		Component field;
+		switch (guiHint)
+		{
+			default:
+			case STRING:
+				field = stringTextField(
+					defaultValue, false, (value) -> stringValue.set(value)
+				);
+				break;
+			case FILE:
+				field = fileField(
+					(current) -> SwingUtils.file(
+						language.getText("doommake.newproject.directory.browse.title"), 
+						current, 
+						language.getText("doommake.newproject.directory.browse.accept"), 
+						DIRECTORY_FILTER
+					), 
+					(selected) -> { 
+						stringValue.set(selected == null ? "" : selected.getAbsolutePath());
+					}
+				);
+				break;
+		}
+		
+		final Container contentPane = containerOf(
+			apply(new JPanel(), (p) -> p.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8))), 
+			new BorderLayout(8, 8),
+			node(BorderLayout.CENTER, label(prompt)),
+			node(BorderLayout.SOUTH, field)
+		);
+		return modal(
+			utils.getWindowIcons(),
+			title,
+			contentPane,
+			choice(language.getText("doomtools.ok"), KeyEvent.VK_ENTER, () -> stringValue.get())
+		);
+	}
+	
+	private Map<String, String> getReplacerMap(SortedSet<ProjectModule> selectedModules)
+	{
+		Map<String, String> outputMap = new HashMap<>();
+		for (ProjectTokenReplacer replacer : ProjectGenerator.getReplacers(selectedModules))
+		{
+			String key = replacer.getToken();
+			String prompt = replacer.getPrompt();
+			
+			while (true)
+			{
+				String value = createOptionModal(
+					language.getText("doommake.newproject.modal.option.title"),
+					prompt,
+					replacer.getDefaultValue(),
+					replacer.getGUIHint()
+				).openThenDispose();
+				
+				if (value == null)
+					return null;
+				
+				value = replacer.getSanitizer().apply(value.trim());
+				
+				String error;
+				if ((error = replacer.getValidator().apply(value)) != null)
+				{
+					SwingUtils.error(receiver.getApplicationContainer(), error);
+				}
+				else if (value.length() == 0)
+				{
+					outputMap.put(key, replacer.getDefaultValue());
+					break; 
+				}
+				else
+				{
+					outputMap.put(key, value);
+					break; 
+				}
+				
+			}
+		}
+		return outputMap;
+	}
+	
 	// Creates a project.
 	private void createProject()
 	{
@@ -265,15 +361,32 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 		}
 		
 		File[] files = targetDirectory.listFiles(); 
-		if (files != null && files.length >= 0)
+		if (files != null && files.length > 0)
 		{
 			SwingUtils.error(language.getText("doommake.newproject.error.baddirectory"));
 			return;
 		}
 		
-		// TODO: Need to actually invoke the project creator for answering user questions!
+		SortedSet<ProjectModule> selectedModules;
+		try {
+			selectedModules = projectGenerator.getSelectedModules(templateNameSet);
+		} catch (UtilityException e) {
+			SwingUtils.error(e.getLocalizedMessage());
+			return;
+		}
 		
-		// Returns a trinary
+		Map<String, String> replacerMap;
+		if ((replacerMap = getReplacerMap(selectedModules)) == null)
+			return;
+		
+		try {
+			projectGenerator.createProject(selectedModules, replacerMap, targetDirectory);
+		} catch (IOException e) {
+			SwingUtils.error(e.getLocalizedMessage());
+			return;
+		}
+		
+		// Returns a trinary.
 		Boolean result = modal(
 			receiver.getApplicationContainer(), 
 			utils.getWindowIcons(), 
@@ -285,8 +398,28 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.tools", false),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.none", null)
 		).openThenDispose();
-		
-		// TODO: More junk!
+
+		if (result == null)
+		{
+			// Do nothing (also happens on close).
+		}
+		else if (result) // Open folder.
+		{
+			try {
+				if (!SwingUtils.open(targetDirectory))
+				{
+					SwingUtils.error(receiver.getApplicationContainer(), 
+						language.getText("doommake.newproject.modal.openproject.folder.error", targetDirectory.getAbsolutePath())
+					);
+				}
+			} catch (IOException e) {
+				SwingUtils.error(receiver.getApplicationContainer(), e.getLocalizedMessage());
+			}
+		}
+		else // Open in Doom Tools
+		{
+			// TODO: Finish this.
+		}
 		
 	}
 	

@@ -15,6 +15,7 @@ import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectModuleDescriptor;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
+import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.template;
 
@@ -83,7 +84,7 @@ public class WADProjectGenerator extends ProjectGenerator
 	
 	/** IWAD path replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_IWAD = ProjectTokenReplacer.create(
-		"PROJECT_IWAD", "Path to project IWAD (blank to skip)?", "", (path) -> {
+		"PROJECT_IWAD", "Path to project IWAD (blank to skip)?", "", GUIHint.FILE, (path) -> {
 			return path.replace("\\", "/");
 		}, (path) -> {
 			if (path.trim().length() == 0)
@@ -107,7 +108,7 @@ public class WADProjectGenerator extends ProjectGenerator
 
 	/** EXE path replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_PATH = ProjectTokenReplacer.create(
-		"PROJECT_EXE_PATH", "EXE path for testing (blank to skip)?", "", (path) -> {
+		"PROJECT_EXE_PATH", "EXE path for testing (blank to skip)?", "", GUIHint.FILE, (path) -> {
 			return path.replace("\\", "/");
 		}, (path) -> {
 			if (path.trim().length() == 0)
@@ -120,7 +121,7 @@ public class WADProjectGenerator extends ProjectGenerator
 
 	/** EXE working directory replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_RUN_EXE_WORKDIR = ProjectTokenReplacer.create(
-		"PROJECT_EXE_WORKDIR", "EXE working directory (blank to use EXE dir)?", "", (path) -> {
+		"PROJECT_EXE_WORKDIR", "EXE working directory (blank to use EXE dir)?", "", GUIHint.FILE, (path) -> {
 			return path.replace("\\", "/");
 		}, (path) -> {
 			if (path.trim().length() == 0)

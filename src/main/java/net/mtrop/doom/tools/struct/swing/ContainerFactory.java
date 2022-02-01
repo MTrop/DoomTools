@@ -769,6 +769,7 @@ public final class ContainerFactory
 		modal.pack();
 		modal.setMinimumSize(modal.getSize());
 		modal.setResizable(false);
+		modal.setLocationRelativeTo(modal.getOwner());
 		return modal;
 	}
 	
@@ -928,7 +929,11 @@ public final class ContainerFactory
 			super.setVisible(b);
 		}
 		
-		private void setValue(T value) 
+		/**
+		 * Sets the value for this modal.
+		 * @param value the value.
+		 */
+		public void setValue(T value) 
 		{
 			this.value = value;
 		}

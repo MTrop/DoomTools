@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -95,7 +96,7 @@ public abstract class ProjectGenerator
 	 * @return the set of selected modules from all of the templates.
 	 * @throws UtilityException if one of the template names would cause a problem (no such name, repeat category). 
 	 */
-	public SortedSet<ProjectModule> getSelectedModules(List<String> templateNameList) throws UtilityException
+	public SortedSet<ProjectModule> getSelectedModules(Collection<String> templateNameList) throws UtilityException
 	{
 		// Get Modules.
 		SortedSet<ProjectModule> selected = new TreeSet<>();
