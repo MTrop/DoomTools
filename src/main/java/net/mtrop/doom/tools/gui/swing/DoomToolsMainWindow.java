@@ -6,12 +6,14 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectApp;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -35,6 +37,9 @@ public class DoomToolsMainWindow extends JFrame
 	/** Shutdown hook. */
 	private Runnable shutDownHook;
 	
+    /** Application starter linker. */
+    private DoomToolsApplicationStarter applicationStarter;
+	
 	/**
 	 * Creates the DoomTools main window.
 	 * @param shutDownHook the application shutdown hook.
@@ -45,6 +50,21 @@ public class DoomToolsMainWindow extends JFrame
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.shutDownHook = shutDownHook;
+		
+		this.applicationStarter = new DoomToolsApplicationStarter()
+		{
+			@Override
+			public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass) 
+			{
+				addApplication(applicationClass);
+			}
+
+			@Override
+			public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
+			{
+				addApplication(applicationInstance);
+			}
+		};
 		
 		setIconImages(utils.getWindowIcons());
 		setTitle("DoomTools v" + Version.DOOMTOOLS);
@@ -68,9 +88,23 @@ public class DoomToolsMainWindow extends JFrame
 						(c, e) -> addApplication(DoomMakeNewProjectApp.class)
 					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
-						(c, e) -> addApplication(DoomMakeProjectApp.class)
+						(c, e) -> {
+							DoomMakeOpenProjectApp app;
+							if ((app = DoomMakeOpenProjectApp.openAndCreate(this, null)) != null)
+								addApplication(app);
+						}
 					)
 				)
+			),
+			utils.createMenuFromLanguageKey("doomtools.menu.view",
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.cascade", (c, e) -> desktop.cascadeWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.minimize", (c, e) -> desktop.minimizeWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.restore", (c, e) -> desktop.restoreWorkspace()),
+				separator(),
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.close", (c, e) -> {
+					if (SwingUtils.yesTo(this, language.getText("doomtools.closeall")))
+						desktop.clearWorkspace();
+				})
 			),
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.about",
@@ -91,13 +125,24 @@ public class DoomToolsMainWindow extends JFrame
 	
 	/**
 	 * Adds a new application instance to the desktop.
-	 * @param <I> the instance type.
+	 * @param <A> the instance type.
 	 * @param applicationClass the application class.
 	 * @throws RuntimeException if the class could not be instantiated.
 	 */
-	public <I extends DoomToolsApplicationInstance> void addApplication(Class<I> applicationClass)
+	public <A extends DoomToolsApplicationInstance> void addApplication(Class<A> applicationClass)
 	{
-		desktop.addApplicationFrame(Common.create(applicationClass)).setVisible(true);
+		addApplication(Common.create(applicationClass));
+	}
+	
+	/**
+	 * Adds a new application instance to the desktop.
+	 * @param <A> the instance type.
+	 * @param applicationInstance the application instance.
+	 * @throws RuntimeException if the class could not be instantiated.
+	 */
+	public <A extends DoomToolsApplicationInstance> void addApplication(A applicationInstance)
+	{
+		desktop.addApplicationFrame(applicationInstance, applicationStarter).setVisible(true);
 	}
 	
 }

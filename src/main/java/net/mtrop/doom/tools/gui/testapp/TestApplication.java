@@ -23,7 +23,7 @@ public class TestApplication implements DoomToolsApplicationInstance
 	}
 
 	@Override
-	public Container getContentPane() 
+	public Container createContentPane() 
 	{
 		return contentPane = containerOf(node(label("Hello")));
 	}

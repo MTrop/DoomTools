@@ -9,7 +9,7 @@ public final class TestApplicationTest
 	public static void main(String[] args) 
 	{
 		SwingUtils.setSystemLAF();
-		DoomToolsGUIMain.createApplicationWindow(TestApplication.class);
+		DoomToolsGUIMain.startApplication(TestApplication.class);
 	}
 
 }

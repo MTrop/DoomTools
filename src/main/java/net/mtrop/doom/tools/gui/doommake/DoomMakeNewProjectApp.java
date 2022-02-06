@@ -98,7 +98,7 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 	}
 
 	@Override
-	public Container getContentPane()
+	public Container createContentPane()
 	{
 		JPanel out = new JPanel();
 		
@@ -418,7 +418,8 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 		}
 		else // Open in Doom Tools
 		{
-			// TODO: Finish this.
+			receiver.startApplication(new DoomMakeOpenProjectApp(targetDirectory));
+			receiver.attemptClose();
 		}
 		
 	}

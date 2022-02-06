@@ -9,6 +9,7 @@ import javax.swing.event.InternalFrameEvent;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 
 /**
@@ -27,8 +28,9 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 	/**
 	 * Creates an application frame from an application instance.
 	 * @param instance the instance to use.
+	 * @param starter the application starter stub for other applications.
 	 */
-	public DoomToolsApplicationInternalFrame(DoomToolsApplicationInstance instance)
+	public DoomToolsApplicationInternalFrame(final DoomToolsApplicationInstance instance, final DoomToolsApplicationStarter starter)
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.instance = instance;
@@ -37,8 +39,8 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 		
 		setTitle(instance.getName());
 		setFrameIcon(appIcon != null ? appIcon : utils.getWindowIcon());
-		setJMenuBar(instance.getInternalMenuBar());
-		setContentPane(instance.getContentPane());
+		setJMenuBar(instance.createInternalMenuBar());
+		setContentPane(instance.createContentPane());
 		setResizable(true);
 		setIconifiable(true);
 		setClosable(true);
@@ -87,6 +89,18 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 			public Container getApplicationContainer()
 			{
 				return getContentPane();
+			}
+
+			@Override
+			public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass)
+			{
+				starter.startApplication(applicationClass);
+			}
+
+			@Override
+			public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
+			{
+				starter.startApplication(applicationInstance);
 			}
 		});
 		pack();

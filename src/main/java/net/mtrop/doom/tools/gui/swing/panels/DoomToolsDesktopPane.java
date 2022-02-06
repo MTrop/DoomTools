@@ -3,10 +3,11 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.beans.PropertyVetoException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -15,6 +16,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationInternalFrame;
@@ -97,11 +99,12 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	/**
 	 * Adds a frame to this pane for an application instance.
 	 * @param instance the application instance to use.
+	 * @param starter 
 	 * @return the new frame.
 	 */
-	public JInternalFrame addApplicationFrame(final DoomToolsApplicationInstance instance)
+	public JInternalFrame addApplicationFrame(final DoomToolsApplicationInstance instance, final DoomToolsApplicationStarter starter)
 	{
-		DoomToolsApplicationInternalFrame frame = new DoomToolsApplicationInternalFrame(instance);
+		DoomToolsApplicationInternalFrame frame = new DoomToolsApplicationInternalFrame(instance, starter);
 		instances.put(instance, frame);
 		frame.addInternalFrameListener(new InternalFrameAdapter()
 		{
@@ -116,6 +119,61 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		return frame;
 	}
 	
+	/**
+	 * Minimizes (iconifies) all windows in the workspace.
+	 */
+	public void minimizeWorkspace()
+	{
+		for (Map.Entry<DoomToolsApplicationInstance, JInternalFrame> entry : instances.entrySet())
+		{
+			try {
+				entry.getValue().setIcon(true);
+			} catch (PropertyVetoException e) {
+				LOG.warnf("Frame for %s refused iconify: %s", entry.getKey(), e.getLocalizedMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Restores (deiconifies) all windows in the workspace.
+	 */
+	public void restoreWorkspace()
+	{
+		for (Map.Entry<DoomToolsApplicationInstance, JInternalFrame> entry : instances.entrySet())
+		{
+			try {
+				entry.getValue().setIcon(false);
+			} catch (PropertyVetoException e) {
+				LOG.warnf("Frame for %s refused deiconify: %s", entry.getKey(), e.getLocalizedMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Cascades all windows in the workspace.
+	 */
+	public void cascadeWorkspace()
+	{
+		int i = 0;
+		final int CASCADE_STEP = 24;
+		for (Map.Entry<DoomToolsApplicationInstance, JInternalFrame> entry : instances.entrySet())
+		{
+			JInternalFrame frame = entry.getValue();
+			frame.setBounds(CASCADE_STEP * i, CASCADE_STEP * i, frame.getWidth(), frame.getHeight());
+			i++;
+		}
+	}
+	
+	/**
+	 * Closes all workspace applications.
+	 */
+	public void clearWorkspace()
+	{
+		Set<DoomToolsApplicationInstance> instanceSet = new HashSet<>(instances.keySet()); // copy set
+		for (DoomToolsApplicationInstance instance : instanceSet)
+			attemptCloseApplication(instance);
+	}
+
 	private void attemptCloseApplication(DoomToolsApplicationInstance instance)
 	{
 		if (!instances.containsKey(instance))
@@ -135,16 +193,6 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		frame.dispose();
 		instance.onClose();
 		LOG.infof("Closed application: %s", instance.getClass().getSimpleName());
-	}
-	
-	/**
-	 * Closes all workspace applications.
-	 */
-	public void clearWorkspace()
-	{
-		Set<DoomToolsApplicationInstance> instanceSet = new TreeSet<>(instances.keySet()); // copy set
-		for (DoomToolsApplicationInstance instance : instanceSet)
-			attemptCloseApplication(instance);
 	}
 	
 }

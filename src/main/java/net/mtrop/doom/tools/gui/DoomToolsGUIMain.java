@@ -29,6 +29,21 @@ public final class DoomToolsGUIMain
 	private static final int INSTANCE_SOCKET_PORT = 54666;
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomToolsGUIMain> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIMain());
+    /** Application starter linker. */
+    private static final DoomToolsApplicationStarter STARTER = new DoomToolsApplicationStarter()
+	{
+		@Override
+		public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass) 
+		{
+			DoomToolsGUIMain.startApplication(applicationClass);
+		}
+
+		@Override
+		public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
+		{
+			DoomToolsGUIMain.startApplication(applicationInstance);
+		}
+	};
     
     /** Instance socket. */
     @SuppressWarnings("unused")
@@ -75,24 +90,33 @@ public final class DoomToolsGUIMain
 	/* ==================================================================== */
 
 	/**
-	 * Adds a new application instance to the main desktop.
-	 * @param <I> the instance type.
+	 * Adds a new application instance to the main desktop by class.
+	 * @param <A> the instance type.
 	 * @param applicationClass the application class.
 	 */
-	public static <I extends DoomToolsApplicationInstance> void createApplicationWindow(Class<I> applicationClass)
+	public static <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass)
 	{
-		final I instance = Common.create(applicationClass); 
-		final DoomToolsApplicationFrame frame = new DoomToolsApplicationFrame(instance);
+		startApplication(Common.create(applicationClass));
+	}
+    
+	/**
+	 * Adds a new application instance to the main desktop.
+	 * @param <A> the instance type.
+	 * @param applicationInstance the application instance.
+	 */
+	public static <A extends DoomToolsApplicationInstance> void startApplication(final A applicationInstance)
+	{
+		final DoomToolsApplicationFrame frame = new DoomToolsApplicationFrame(applicationInstance, STARTER);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter()
 		{
 			@Override
 			public void windowClosing(WindowEvent e) 
 			{
-				if (instance.shouldClose())
+				if (applicationInstance.shouldClose())
 				{
 					frame.setVisible(false);
-					instance.onClose();
+					applicationInstance.onClose();
 					frame.dispose();
 				}
 			}

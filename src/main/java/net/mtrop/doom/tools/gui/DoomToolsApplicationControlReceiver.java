@@ -7,7 +7,7 @@ import java.awt.Container;
  * Can talk back to the application manager.
  * @author Matthew Tropiano
  */
-public interface DoomToolsApplicationControlReceiver
+public interface DoomToolsApplicationControlReceiver extends DoomToolsApplicationStarter
 {
 	/**
 	 * Attempts to close this application instance. 
