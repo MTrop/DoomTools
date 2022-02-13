@@ -122,6 +122,22 @@ public final class DoomMakeProjectHelper
 	}
 	
 	/**
+	 * Gets a file path for a project's path that is in 
+	 * @param projectDirectory
+	 * @param property
+	 * @param defaultValue
+	 * @return the project path.
+	 */
+	public File getProjectPropertyPath(File projectDirectory, String property, String defaultValue)
+	{
+		Properties props = getProjectProperties(projectDirectory);
+		String path = props.getProperty(property);
+		if (Common.isEmpty(path))
+			path = defaultValue;
+		return new File(projectDirectory + File.separator + path);
+	}
+	
+	/**
 	 * Opens SLADE for the project source folder.
 	 * The source folder is lifted straight from the local properties.
 	 * @param projectDirectory the project directory.
@@ -143,7 +159,10 @@ public final class DoomMakeProjectHelper
 			throw new RequiredSettingException("The path to SLADE is not a file. Cannot open SLADE.");
 		
 		Properties props = getProjectProperties(projectDirectory);
-		String folder = props.getProperty("doommake.dir.src", "src");
+		String folder = props.getProperty("doommake.dir.src");
+		if (Common.isEmpty(folder))
+			folder = "src";
+		
 		File sourceDir = new File(projectDirectory + File.separator + folder);
 		
 		try {

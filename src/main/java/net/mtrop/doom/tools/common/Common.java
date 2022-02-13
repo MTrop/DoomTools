@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.common;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +20,10 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ProcessCallable;
@@ -175,6 +179,42 @@ public final class Common
 		return getFileExtension(file.getName(), ".");
 	}
 
+	/**
+	 * Gets a list of subdirectories from a top directory.
+	 * @param startDirectory the starting directory.
+	 * @param includeTop if true, the output includes the starting directory.
+	 * @param dirFilter additional directory filter.
+	 * @return an array of subdirectory paths under the top directory.
+	 */
+	public static File[] getSubdirectories(File startDirectory, boolean includeTop, FileFilter dirFilter)
+	{
+		if (!startDirectory.isDirectory())
+			return null;
+		
+		List<File> dirs = new LinkedList<>();
+		Deque<File> dirQueue = new LinkedList<>();
+		dirQueue.add(startDirectory);
+		
+		if (includeTop)
+			dirs.add(startDirectory);
+		
+		while (!dirQueue.isEmpty())
+		{
+			File dir = dirQueue.pollFirst();
+			File[] files = dir.listFiles((f) -> f.isDirectory());
+			for (int i = 0; i < files.length; i++)
+			{
+				if (dirFilter.accept(files[i]))
+				{
+					dirQueue.add(files[i]);
+					dirs.add(files[i]);
+				}
+			}
+		}
+		
+		return dirs.toArray(new File[dirs.size()]);
+	}
+	
 	/**
 	 * Joins an array of strings into one string, with a separator between them.
 	 * @param separator the separator to insert between strings. Can be empty or null.

@@ -49,7 +49,7 @@ import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
  */
 public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 {
-	private static final FileFilter DIRECTORY_FILTER = new FileFilter()
+    private static final FileFilter DIRECTORY_FILTER = new FileFilter()
 	{
 		@Override
 		public boolean accept(File f) 

@@ -48,6 +48,7 @@ public final class IOUtils
 			// Do nothing.
 		}
 	};
+	
 	/** A null inputstream. */
 	private static final InputStream INPUTSTREAM_NULL = new InputStream() 
 	{
@@ -57,6 +58,7 @@ public final class IOUtils
 			return -1;
 		}
 	};
+	
 	/** A null file. */
 	private static final File NULL_FILE = new File(System.getProperty("os.name").contains("Windows") ? "NUL" : "/dev/null");
 
