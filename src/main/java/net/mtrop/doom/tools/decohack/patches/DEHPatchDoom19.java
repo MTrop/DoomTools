@@ -15,6 +15,11 @@ public interface DEHPatchDoom19 extends DEHPatch
 	 * @return the amount of strings.
 	 */
 	int getStringCount();
+
+	/**
+	 * @return if string length should be enforced.
+	 */
+	boolean enforceStringLength();
 	
 	/**
 	 * Gets a string.

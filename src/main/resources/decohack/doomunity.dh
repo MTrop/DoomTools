@@ -1,0 +1,12 @@
+#ifndef __DECOHACK_DOOMUNITY__
+#define __DECOHACK_DOOMUNITY__
+
+using doomunity
+
+// Doom Unity is just UDoom19 without string
+// length limits, so pull in the same stuff.
+#include "constants/udoom19.dh"
+#include "constants/doom19/things_aliases.dh"
+#include "constants/doom19/weapons_aliases.dh"
+
+#endif
