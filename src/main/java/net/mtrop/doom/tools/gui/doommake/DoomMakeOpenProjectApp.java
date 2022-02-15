@@ -5,23 +5,14 @@ import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.ClosedWatchServiceException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -35,7 +26,6 @@ import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.StatusPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
-import net.mtrop.doom.tools.struct.util.IOUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -80,16 +70,12 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
     
     /** Project directory. */
     private final File projectDirectory;
-    /** Watcher thread. */
-    private WatchThread watchThread;
 
     // State
     
     /** Current target. */
     private String currentTarget;
-    /** Auto build flag. */
-    private boolean autoBuild;
-
+    
     /**
 	 * Creates a new open project application from a project directory.
 	 * @param projectDirectory the project directory.
@@ -110,13 +96,21 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 				runCurrentTarget();
 			}
 		);
-		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (c, e) -> autoBuild = c.isSelected());
+		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (c, e) -> 
+		{
+			// TODO: Finish Agent start/stop.
+			/*
+			if (c.isSelected())
+				startWatchThread();
+			else
+				killWatchThread();
+			*/
+		});
 		this.targetRunAction = action(currentTarget, (e) -> runCurrentTarget());
 		this.statusPanel = new StatusPanel();
-		this.statusPanel.setSuccessMessage("Ready.");
+		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
 		this.projectDirectory = projectDirectory;
-		this.watchThread = null;
 		
 		this.currentTarget = null;
 	}
@@ -174,14 +168,14 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	public Container createContentPane()
 	{
 		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
-		
+		refreshTargets();
 		return containerOf(
 			node(BorderFactory.createEmptyBorder(4, 4, 4, 4), new BorderLayout(), node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.EAST, control)
 				)),
 				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
-					node(BorderLayout.CENTER, listPanel),
+					node(BorderLayout.CENTER, scroll(listPanel)),
 					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
 						node(BorderLayout.NORTH, autoBuildCheckbox),
 						node(BorderLayout.SOUTH, statusPanel)
@@ -214,14 +208,13 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	@Override
 	public void onOpen() 
 	{
-		this.watchThread = new WatchThread(projectDirectory);
-		this.watchThread.start();
+		
 	}
 	
 	@Override
 	public void onClose() 
 	{
-		this.watchThread.interrupt();
+		//killWatchThread();
 	}
 	
 	// Open settings.
@@ -269,77 +262,36 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 		if (!targetRunAction.isEnabled())
 			return;
 		
+		runTarget(currentTarget);
+	}
+
+	private void runTarget(final String targetName)
+	{
 		tasks.spawn(() -> {
-			
-		});
-	}
-	
-	// Project directory watcher thread.
-	private class WatchThread extends Thread
-	{
-		private File directory;
-		private WatchService service;
-		
-		private WatchThread(File directory)
-		{
-			this.directory = directory;
-			this.service = null;
-		}
-		
-		@Override
-		public void run() 
-		{
 			try {
-				service = FileSystems.getDefault().newWatchService();
-				File[] directories = Common.getSubdirectories(directory, true, (d) -> !d.isHidden());
-				for (File d : directories)
+				statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", targetName));
+				// TODO: Hook up to window, throw stuff into language file.
+				int result =  helper.callDoomMakeTarget(projectDirectory, null, null, targetName).get();
+				if (result == 0)
 				{
-					Path dirPath = Paths.get(d.getPath());
-					dirPath.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+					statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.success"));
 				}
-			} catch (UnsupportedOperationException e) {
-				LOG.warn("Could not start filesystem monitor for auto-build: unsupported by platform.");
-				return;
-			} catch (IOException e) {
-				LOG.warn("Could not start filesystem monitor for auto-build.");
-				service = null;
-				return;
-			}
-			
-			autoBuildCheckbox.setEnabled(true);
-			
-			try {
-				// Important files.
-				
-				try {
-					WatchKey key;
-					while ((key = service.take()) != null)
-					{
-						for (WatchEvent<?> event : key.pollEvents())
-						{
-							Path p = ((Path)key.watchable()).resolve(((Path)event.context()));
-							LOG.debugf("Received event: %s: %s", event.kind().name(), p.toFile());
-						}
-						key.reset();
-					}
-				} catch (ClosedWatchServiceException e) {
-					LOG.warnf("Watch Service for %s closed unexpectedly. Terminating.", directory.getAbsolutePath());
-				} catch (InterruptedException e) {
-					LOG.infof("Watcher thread for %s interrupted. Terminating.", directory.getAbsolutePath());
+				else
+				{
+					LOG.errorf("Error on DoomMake invoke (%s) result was %d: %s", targetName, result, projectDirectory.getAbsolutePath());
+					statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
 				}
-				
-			} finally {
-				autoBuildCheckbox.setEnabled(false);
-				IOUtils.close(service);
-				LOG.infof("Closed Watcher service for %s", directory.getAbsolutePath());
+			} catch (FileNotFoundException | ProcessCallException e) {
+				LOG.errorf(e, "Error on DoomMake invoke (%s): %s", targetName, projectDirectory.getAbsolutePath());
+				statusPanel.setErrorMessage("ERROR on build!");
+			} catch (InterruptedException e) {
+				LOG.warnf("Call to DoomMake invoke interrupted (%s): %s", targetName, projectDirectory.getAbsolutePath());
+				statusPanel.setErrorMessage("Build interrupted!");
+			} catch (ExecutionException e) {
+				LOG.errorf(e, "Error on DoomMake invoke (%s): %s", targetName, projectDirectory.getAbsolutePath());
+				statusPanel.setErrorMessage("ERROR on build!");
 			}
-		}
-	}
-	
-	// Auto-build kickoff thread.
-	private class AutoBuildKickoffThread extends Thread
-	{
-		
+		});
 	}
 	
 }

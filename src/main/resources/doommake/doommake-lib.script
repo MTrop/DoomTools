@@ -155,7 +155,6 @@ check function directoryHasChanged(dirpath) {
  * Sets if a directory changed since last build.
  * Returns error if an error happened.
  * Returns null if no change.
- * Returns a hash string if a change happened.
  */
 check function storeDirectoryChanged(dirpath, hash) {
 	lock = initBuildLock();

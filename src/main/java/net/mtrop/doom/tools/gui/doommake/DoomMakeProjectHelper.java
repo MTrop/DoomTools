@@ -123,9 +123,9 @@ public final class DoomMakeProjectHelper
 	
 	/**
 	 * Gets a file path for a project's path that is in 
-	 * @param projectDirectory
-	 * @param property
-	 * @param defaultValue
+	 * @param projectDirectory the project directory.
+	 * @param property the property name.
+	 * @param defaultValue the default value, if not found.
 	 * @return the project path.
 	 */
 	public File getProjectPropertyPath(File projectDirectory, String property, String defaultValue)
@@ -158,12 +158,7 @@ public final class DoomMakeProjectHelper
 		if (sladePath.isDirectory())
 			throw new RequiredSettingException("The path to SLADE is not a file. Cannot open SLADE.");
 		
-		Properties props = getProjectProperties(projectDirectory);
-		String folder = props.getProperty("doommake.dir.src");
-		if (Common.isEmpty(folder))
-			folder = "src";
-		
-		File sourceDir = new File(projectDirectory + File.separator + folder);
+		File sourceDir = getProjectPropertyPath(projectDirectory, "doommake.dir.src", "src");
 		
 		try {
 			(new ProcessBuilder())
@@ -230,7 +225,7 @@ public final class DoomMakeProjectHelper
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
-		LOG.infof("Calling DoomMake.");
+		LOG.infof("Calling DoomMake (%s).", targetName);
 		return Common.spawnJava(DoomMakeMain.class)
 			.setWorkingDirectory(projectDirectory)
 			.arg(targetName)
@@ -239,7 +234,7 @@ public final class DoomMakeProjectHelper
 		.spawn();
 	}
 
-	private Properties getProjectProperties(File projectDirectory)
+	private static Properties getProjectProperties(File projectDirectory)
 	{
 		Properties properties = new Properties();
 		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
@@ -249,7 +244,7 @@ public final class DoomMakeProjectHelper
 		return properties;
 	}
 
-	private void mergeProperties(Properties properties, File projectPropertiesFile) 
+	private static void mergeProperties(Properties properties, File projectPropertiesFile) 
 	{
 		if (projectPropertiesFile.exists()) try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
 		{

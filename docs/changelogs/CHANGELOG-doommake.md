@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.15.0
+
+* `Added` DoomMake Agent for listening for project changes. See help for more info!
+* `Added` DoomMake GUI for individual projects.
+
+
 ### Changed for 0.14.0
 
 * `Added` A switch for printing the targets for a project.

@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -10,6 +11,7 @@ import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager.Keys;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
@@ -22,6 +24,8 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
  */
 public final class DoomToolsGUIMain 
 {
+	public static final String APP_DOOMMAKE = "doommake";
+	
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIMain.class); 
 
@@ -76,15 +80,30 @@ public final class DoomToolsGUIMain
 	 */
     public static void main(String[] args) 
     {
-    	if (isAlreadyRunning())
+		SwingUtils.setSystemLAF();
+
+		if (args.length == 0)
     	{
-    		System.out.println("DoomTools is already running.");
-    		System.exit(1);
-    		return;
+        	if (isAlreadyRunning())
+        	{
+        		System.err.println("DoomTools is already running.");
+        		System.exit(1);
+        		return;
+        	}
+    		get().createAndDisplayMainWindow();
     	}
 		
-		SwingUtils.setSystemLAF();
-		get().createAndDisplayMainWindow();
+		switch (args[0])
+		{
+			default:
+        		System.err.println("Expected vaild application name.");
+        		System.exit(1);
+        		return;
+			case APP_DOOMMAKE:
+				startApplication(new DoomMakeOpenProjectApp(new File(System.getProperty("user.dir"))));
+				break;
+		}
+    	
 	}
     
 	/* ==================================================================== */

@@ -296,6 +296,25 @@ public final class Common
 	}
 	
 	/**
+	 * Compares two file paths for equality.
+	 * If the OS is Windows, the paths are compared case-insensitively.
+	 * @param a the first file.
+	 * @param b the second file.
+	 * @return true if the two files have the same absolute path, false otherwise.
+	 */
+	public static boolean filePathEquals(File a, File b)
+	{
+		if (a == null)
+			return b == null;
+		else if (b == null)
+			return false;
+		else if (OSUtils.isWindows())
+			return a.getAbsolutePath().equalsIgnoreCase(b.getAbsolutePath());
+		else
+			return a.getAbsolutePath().equals(b.getAbsolutePath());
+	}
+	
+	/**
 	 * Convenience method for
 	 * <code>new BufferedReader(new InputStreamReader(in))</code>
 	 * @param in the stream to read.

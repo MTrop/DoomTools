@@ -10,6 +10,8 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;
@@ -46,10 +48,7 @@ public class DoomMakeProjectTargetListPanel extends JPanel
 		
 		this.targetListModel = new DefaultListModel<>();
 
-		this.targetList = ComponentFactory.list(this.targetListModel, ListSelectionModel.SINGLE_SELECTION, (selected, adjusting) -> {
-			if (!adjusting)
-				selectListener.accept(selected.get(0));
-		});
+		this.targetList = ComponentFactory.list(this.targetListModel, ListSelectionModel.SINGLE_SELECTION, (selected, adjusting) -> {});
 		this.targetList.addMouseListener(new MouseInputAdapter() 
 		{
 			@Override
@@ -81,10 +80,12 @@ public class DoomMakeProjectTargetListPanel extends JPanel
 	 */
 	public void refreshTargets(Collection<String> targetNames)
 	{
-		targetListModel.clear();
-		for (String s : targetNames)
-			targetListModel.addElement(s);
-		targetList.setSelectedIndex(0);
+		SwingUtilities.invokeLater(() -> {
+			targetListModel.clear();
+			for (String s : targetNames)
+				targetListModel.addElement(s);
+			targetList.setSelectedIndex(0);
+		});
 	}
 	
 }

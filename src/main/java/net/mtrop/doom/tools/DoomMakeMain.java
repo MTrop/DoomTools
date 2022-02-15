@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
@@ -21,9 +24,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
+import com.blackrook.json.JSONConversionException;
+import com.blackrook.json.JSONObject;
+import com.blackrook.json.JSONReader;
+import com.blackrook.json.JSONWriter;
+
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
 import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
@@ -33,6 +42,7 @@ import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 
 /**
  * Main class for DoomMake.
@@ -40,6 +50,8 @@ import net.mtrop.doom.tools.exception.UtilityException;
  */
 public final class DoomMakeMain 
 {
+	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
+	
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
@@ -52,6 +64,7 @@ public final class DoomMakeMain
 	private static final int ERROR_SECURITY = 5;
 	private static final int ERROR_BAD_TOOL_PATH = 6;
 	private static final int ERROR_IOERROR = 7;
+	private static final int ERROR_AGENT_RUNNING = 8;
 	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
@@ -67,6 +80,10 @@ public final class DoomMakeMain
 	private static final String SWITCH_NEWPROJECT = "--new-project";
 	private static final String SWITCH_NEWPROJECT2 = "-n";
 	private static final String SWITCH_EMBED = "--embed";
+	private static final String SWITCH_GUI = "--gui";
+	private static final String SWITCH_AGENT = "--auto-build";
+	private static final String SWITCH_AGENT_VERBOSE = "--auto-build-verbose";
+	private static final String SWITCH_AGENT_BYPASS = "--agent-bypass";
 	
 	private static final String SWITCH_SCRIPTFILE = "--script";
 	private static final String SWITCH_SCRIPTFILE2 = "-s";
@@ -108,7 +125,11 @@ public final class DoomMakeMain
 		private boolean version;
 		private boolean listModules;
 		private boolean embed;
+		private boolean gui;
+		private boolean agent;
+		private boolean verboseAgent;
 
+		private boolean agentBypass;
 		private ProjectType projectType;
 		private List<String> templateNames;
 		
@@ -132,7 +153,11 @@ public final class DoomMakeMain
 			this.version = false;
 			this.listModules = false;
 			this.embed = false;
+			this.gui = false;
+			this.agent = false;
+			this.verboseAgent = false;
 			
+			this.agentBypass = false;
 			this.projectType = null;
 			this.templateNames = null;
 
@@ -300,7 +325,19 @@ public final class DoomMakeMain
 					return createProject(generator);
 				}
 			}
-			
+
+			// Embed DoomMake.
+			if (options.embed)
+			{
+				if (!options.scriptFile.exists())
+				{
+					options.stderr.printf("ERROR: Script file \"%s\" could not be found!\n", options.scriptFile.getPath());
+					return ERROR_BAD_SCRIPT;
+				}
+				
+				return embedDoomMake();
+			}
+
 			// Detect project.
 			if (options.mode == Mode.EXECUTE && !options.scriptFile.exists())
 			{
@@ -308,14 +345,186 @@ public final class DoomMakeMain
 				return ERROR_BAD_SCRIPT;
 			}
 			
-			if (options.embed)
-			{
-				return embedDoomMake();
-			}
-
 			loadProperties(new File("doommake.project.properties"));
 			loadProperties(options.propertiesFile);
+
+			if (options.gui)
+			{
+				try {
+					Common.spawnJava(DoomToolsGUIMain.class).arg(DoomToolsGUIMain.APP_DOOMMAKE).exec();
+				} catch (Exception e) {
+					options.stderr.println("ERROR: Could not start DoomMake GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
 			
+			boolean agentRunning;
+			try {
+				agentRunning = isAgentRunning();
+			} catch (Exception e) {
+				options.stderr.println("ERROR: Can't read lock file: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+				return ERROR_IOERROR;
+			}
+
+			// Is agent running?
+			if (agentRunning)
+			{
+				if (options.agent || !options.agentBypass)
+				{
+					agentMessage(options.stderr, getLockFile(new File("."), System.getProperties()));
+					return ERROR_AGENT_RUNNING;
+				}
+			}
+			
+			if (options.agent)
+				return startAgent();
+			else
+				return executeTarget();
+		}
+
+		private int startAgent()
+		{
+			File workDir = new File(".");
+			Properties properties = System.getProperties();
+			
+			try {
+				setAgentLock(workDir, properties);
+			} catch (JSONConversionException e) {
+				options.stderr.println("ERROR: Could not set agent lock on project! JSON Parse error: " + e.getLocalizedMessage());
+				return ERROR_IOERROR;
+			} catch (IOException e) {
+				options.stderr.println("ERROR: Could not set agent lock on project!");
+				return ERROR_IOERROR;
+			}
+			
+			final AutoBuildAgent agent = new AutoBuildAgent(workDir, new AutoBuildAgent.Listener() 
+			{
+				@Override
+				public int callBuild(String target) 
+				{
+					try {
+						return Common.spawnJava(DoomMakeMain.class)
+							.arg(SWITCH_AGENT_BYPASS)
+							.setOut(options.stdout)
+							.setErr(options.stderr)
+						.spawn().result();
+					} catch (Throwable t) {
+						options.stderr.println("ERROR: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
+						return ERROR_UNKNOWN;
+					}
+				}
+				
+				@Override
+				public void onBuildPrepared() 
+				{
+					options.stdout.println("Change detected...");
+				}
+
+				@Override
+				public void onBuildStart() 
+				{
+					options.stdout.println("***** Calling DoomMake");
+				}
+				
+				@Override
+				public void onBuildEnd(int result) 
+				{
+					options.stdout.println("***** Build Ended: " + (result == 0 ? "Success" : "FAILED"));
+				}
+				
+				@Override
+				public void onAgentStarted() 
+				{
+					options.stdout.println("Agent started.");
+				}
+
+				@Override
+				public void onAgentStopped() 
+				{
+					options.stdout.println("Agent stopped.");
+				}
+
+				@Override
+				public void onFileCreate(File file) 
+				{
+					if (options.verboseAgent)
+						options.stdout.println("File created: " + file.getPath());
+				}
+
+				@Override
+				public void onFileModify(File file) 
+				{
+					if (options.verboseAgent)
+						options.stdout.println("File modified: " + file.getPath());
+				}
+				
+				@Override
+				public void onFileDelete(File file) 
+				{
+					if (options.verboseAgent)
+						options.stdout.println("File deleted: " + file.getPath());
+				}
+
+				@Override
+				public void onErrorMessage(Throwable t, String message) 
+				{
+					options.stderr.println("ERROR: " + message);
+					if (t != null)
+						options.stderr.println(t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
+				}
+				
+				@Override
+				public void onInfoMessage(String message) 
+				{
+					options.stdout.println("INFO: " + message);
+				}
+				
+				@Override
+				public void onWarningMessage(String message) 
+				{
+					options.stdout.println("WARN: " + message);
+				}
+				
+				@Override
+				public void onVerboseMessage(String message) 
+				{
+					if (options.verboseAgent)
+						options.stdout.println(message);
+				}
+			});
+
+			// Handle SIGTERM/SIGINT.
+			Runtime.getRuntime().addShutdownHook(new Thread(() -> 
+			{
+				agent.shutDown();
+				try {
+					unsetAgentLock(workDir, properties);
+				} catch (JSONConversionException e) {
+					options.stderr.println("ERROR: Could not unset agent lock on project! JSON Parse error: " + e.getLocalizedMessage());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not unset agent lock on project! You will need to clear it manually.");
+				}
+			}));
+			
+			agent.start();
+			
+			// Wait for SIGTERM/SIGINT.
+			Object waitLock = new Object();
+			synchronized (waitLock) 
+			{
+				try {
+					waitLock.wait();
+				} catch (InterruptedException e) {
+					options.stderr.println("WAIT LOCK INTERRUPTED.");
+				}
+			}
+			
+			return ERROR_NONE;
+		}
+		
+		private int executeTarget() 
+		{
 			try {
 				WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
 					.setMode(options.mode)
@@ -337,6 +546,13 @@ public final class DoomMakeMain
 			}
 		}
 
+		private boolean isAgentRunning() throws IOException
+		{
+			File workingDirectory = new File(".");
+			JSONObject lock = readLockObject(workingDirectory, System.getProperties());
+			return lock.get(JSON_AGENT_LOCK_KEY).getBoolean();
+		}
+		
 		private int createProject(ProjectGenerator generator)
 		{
 			if (Common.isEmpty(options.targetName))
@@ -534,6 +750,17 @@ public final class DoomMakeMain
 						options.version = true;
 					else if (arg.equalsIgnoreCase(SWITCH_EMBED))
 						options.embed = true;
+					else if (arg.equalsIgnoreCase(SWITCH_AGENT))
+						options.agent = true;
+					else if (arg.equalsIgnoreCase(SWITCH_AGENT_VERBOSE))
+					{
+						options.agent = true;
+						options.verboseAgent = true;
+					}
+					else if (arg.equalsIgnoreCase(SWITCH_AGENT_BYPASS))
+						options.agentBypass = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
 					{
 						options.projectType = ProjectType.WAD;
@@ -795,11 +1022,148 @@ public final class DoomMakeMain
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();
+		out.println("    --gui                          Opens this project in a graphical interface");
+		out.println("                                       mode.");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("    --auto-build                   Starts DoomMake as an agent for detecting");
+		out.println("                                       changes in the current project and");
+		out.println("                                       kicking off full builds when changes");
+		out.println("                                       are detected.");
+		out.println();
+		out.println("    --auto-build-verbose           Same as above, except it produces more");
+		out.println("                                       verbose output.");
+		out.println();
+		out.println("While the agent is listening on a project, any attempt to run any DoomMake");
+		out.println("targets on that project will error out. In order to run targets, you can use:");
+		out.println();
+		out.println("    --agent-bypass                 Bypasses agent detection. USE WITH CAUTION.");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
 		out.println("Scopes");
 		out.println("------");
 		out.println("DoomMake has a variable scope called `global` that serves as a common variable");
 		out.println("scope for sharing values outside of functions or for data that you would want");
 		out.println("to initialize once.");
+	}
+
+	/**
+	 * Prints the "agent running" message.
+	 * @param out the print stream to print to.
+	 */
+	private static void agentMessage(PrintStream out, File lockFile)
+	{
+		out.println("ERROR: The DoomMake Auto-Build agent is running for this project.");
+		out.println("If this is incorrect, then delete the \"" + JSON_AGENT_LOCK_KEY + "\" key from the lock file:");
+		try {
+			out.println(lockFile.getCanonicalPath());
+		} catch (IOException e) {
+			out.println(lockFile.getAbsolutePath());
+		}
+	}
+
+	// Gets the lock file path.
+	private static File getLockFile(File projectDirectory, Properties properties) 
+	{
+		File buildDir = getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
+		File lockFile = getProjectPropertyPath(projectDirectory, properties, "doommake.file.lock", "lock.json");
+		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile.getPath());
+		return fullFilePath;
+	}
+
+	/**
+	 * Gets a file path for a project's path that is in a project directory. 
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to look into.
+	 * @param property the property name.
+	 * @param defaultValue the default value, if not found.
+	 * @return the project path.
+	 */
+	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
+	{
+		String path = properties.getProperty(property);
+		if (Common.isEmpty(path))
+			path = defaultValue;
+		return new File(projectDirectory.getPath() + File.separator + path);
+	}
+
+	/**
+	 * Reads in the lock JSON file and returns it as an object.
+	 * If the file does not exist, an empty object is returned.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @return the parsed object.
+	 * @throws IOException if the file could not be opened or read.
+	 * @throws JSONConversionException if the JSON is malformed.
+	 */
+	public static JSONObject readLockObject(File projectDirectory, Properties properties) throws IOException
+	{
+		File fullFilePath = getLockFile(projectDirectory, properties);
+
+		if (!Common.createPathForFile(fullFilePath))
+			throw new IOException("Could not create directories for lock file.");
+		
+		if (!fullFilePath.exists())
+			return JSONObject.createEmptyObject();
+		
+		JSONObject lockRoot;
+		try (Reader reader = new InputStreamReader(new FileInputStream(fullFilePath), "UTF-8"))
+		{
+			lockRoot = JSONReader.readJSON(reader);
+		}
+		
+		return lockRoot;
+	}
+
+	/**
+	 * Writes the lock JSON file.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @param lockRoot the lock object.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	public static void writeLockObject(File projectDirectory, Properties properties, JSONObject lockRoot) throws IOException
+	{
+		File fullFilePath = getLockFile(projectDirectory, properties);
+
+		if (!Common.createPathForFile(fullFilePath))
+			throw new IOException("Could not create directories for lock file.");
+		
+		JSONWriter.Options jsonOptions = new JSONWriter.Options();
+		jsonOptions.setIndentation("\t");
+
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(fullFilePath), "UTF-8"))
+		{
+			JSONWriter.writeJSON(lockRoot, jsonOptions, writer);
+		}
+	}
+
+	/**
+	 * Set agent lock.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	public static void setAgentLock(File projectDirectory, Properties properties) throws IOException
+	{
+		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, properties);
+		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, true);
+		DoomMakeMain.writeLockObject(projectDirectory, properties, lockRoot);
+	}
+	
+	/**
+	 * Unset agent lock.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	public static void unsetAgentLock(File projectDirectory, Properties properties) throws IOException
+	{
+		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, properties);
+		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, false);
+		DoomMakeMain.writeLockObject(projectDirectory, properties, lockRoot);
 	}
 
 }
