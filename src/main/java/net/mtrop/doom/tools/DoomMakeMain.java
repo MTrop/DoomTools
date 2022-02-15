@@ -43,6 +43,7 @@ import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 
 /**
  * Main class for DoomMake.
@@ -351,8 +352,8 @@ public final class DoomMakeMain
 			if (options.gui)
 			{
 				try {
-					Common.spawnJava(DoomToolsGUIMain.class).arg(DoomToolsGUIMain.APP_DOOMMAKE).exec();
-				} catch (Exception e) {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE);
+				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start DoomMake GUI!");
 					return ERROR_IOERROR;
 				}

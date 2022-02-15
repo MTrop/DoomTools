@@ -457,8 +457,8 @@ public final class DoomToolsMain
 				else
 				{
 					try {
-						Common.spawnJava(DoomToolsGUIMain.class).exec();
-					} catch (Exception e) {
+						DoomToolsGUIMain.startGUIAppProcess();
+					} catch (IOException e) {
 						options.stderr.println("ERROR: Could not start DoomTools GUI process!");
 						return ERROR_IOERROR;
 					}

@@ -24,7 +24,14 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
  */
 public final class DoomToolsGUIMain 
 {
-	public static final String APP_DOOMMAKE = "doommake";
+	/**
+	 * Valid application names. 
+	 */
+	public interface ApplicationNames
+	{
+		/** DoomMake. */
+		String DOOMMAKE = "doommake";
+	}
 	
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIMain.class); 
@@ -75,6 +82,31 @@ public final class DoomToolsGUIMain
 	}
 	
 	/**
+	 * Starts an orphaned main GUI Application.
+	 * Inherits the working directory and environment.
+	 * @return the process created.
+	 * @throws IOException if the application could not be created.
+	 * @see Common#spawnJava(Class) 
+	 */
+	public static Process startGUIAppProcess() throws IOException
+	{
+		return Common.spawnJava(DoomToolsGUIMain.class).exec();
+	}
+	
+	/**
+	 * Starts an orphaned GUI Application by name.
+	 * Inherits the working directory and environment.
+	 * @param appName the application name (see {@link ApplicationNames}).
+	 * @return the process created.
+	 * @throws IOException if the application could not be created.
+	 * @see Common#spawnJava(Class) 
+	 */
+	public static Process startGUIAppProcess(String appName) throws IOException
+	{
+		return Common.spawnJava(DoomToolsGUIMain.class).arg(appName).exec();
+	}
+	
+	/**
 	 * Main method - check for running local instance. If running, do nothing.
 	 * @param args command line arguments.
 	 */
@@ -96,10 +128,10 @@ public final class DoomToolsGUIMain
 		switch (args[0])
 		{
 			default:
-        		System.err.println("Expected vaild application name.");
-        		System.exit(1);
+        		SwingUtils.error("Expected valid application name.");
+        		System.exit(-1);
         		return;
-			case APP_DOOMMAKE:
+			case ApplicationNames.DOOMMAKE:
 				startApplication(new DoomMakeOpenProjectApp(new File(System.getProperty("user.dir"))));
 				break;
 		}
