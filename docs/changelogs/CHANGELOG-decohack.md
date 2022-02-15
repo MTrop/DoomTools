@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.24.0
+
+* `Added` A patch format for the Unity port, `doomunity`, which is `udoom19` but with no string limits (thanks, Xaser!). (PR #65).
+
+
 ### Changed for 0.23.0
 
 * `Changed` Better string length error messages (Issue/Enhancement #64).

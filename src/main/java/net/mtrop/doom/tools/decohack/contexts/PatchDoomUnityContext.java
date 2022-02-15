@@ -5,7 +5,6 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
-import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoomUnity;
 

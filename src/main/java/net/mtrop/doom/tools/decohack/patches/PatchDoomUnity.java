@@ -5,9 +5,6 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
-import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.decohack.patches.PatchUDoom19;
-
 /**
  * Patch implementation for Doom Unity Port.
  * Same as {@link PatchUDoom19} without string length enforcement.

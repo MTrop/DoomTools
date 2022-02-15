@@ -68,7 +68,8 @@ You'll see them in a bunch of places in this documentation.
 
 To set the output format (and available features):
 
-    using ( doom19 | udoom19 | boom | mbf | extended | mbf21 | dsdhacked )
+    using ( doom19 | udoom19 | doomunity | boom | 
+            mbf | extended | mbf21 | dsdhacked )
 
 
 Examples:
@@ -1320,6 +1321,7 @@ There are a few #include paths that are aliased in DECOHack for convenience:
  
     <doom19>    "classpath:decohack/doom19.dh"
     <udoom19>   "classpath:decohack/udoom19.dh"
+    <doomunity> "classpath:decohack/doomunity.dh"
     <boom>      "classpath:decohack/boom.dh"
     <mbf>       "classpath:decohack/mbf.dh"
     <extended>  "classpath:decohack/extended.dh"
@@ -1444,6 +1446,13 @@ block.
     Ultimate Doom 1.9 EXEs, plus the "using udoom19" line. Also adds ZDoom 
     thing and weapon aliases.
 
+#include <doomunity>
+#include "classpath:decohack/doomunity.dh"
+
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    Ultimate Doom 1.9 EXEs, plus the "using doomunity" line. Also adds ZDoom 
+    thing and weapon aliases, and does not limit string lengths.
+
 #include <boom>
 #include "classpath:decohack/boom.dh"
 
@@ -1513,9 +1522,17 @@ block.
 
     All thing slot mnemonics for Doom 1.9 EXEs.
 
+#include "classpath:decohack/constants/doom19/things_aliases.dh"
+
+    All thing aliases for Doom 1.9 EXEs.
+
 #include "classpath:decohack/constants/doom19/weapons.dh"
 
     All weapon slot mnemonics for Doom 1.9 EXEs.
+
+#include "classpath:decohack/constants/doom19/weapons_aliases.dh"
+
+    All weapon aliases for Doom 1.9 EXEs.
 
 #include "classpath:decohack/constants/doom19/strings.dh"
 
@@ -1549,6 +1566,10 @@ block.
 
     All thing mnemonics for Boom-compatible EXEs.
 
+#include "classpath:decohack/constants/boom/things_aliases.dh"
+
+    All thing aliases for Boom-compatible EXEs.
+
 #include "classpath:decohack/constants/mbf.dh"
 
     All ammo, state, weapon slot, thing slot, and string mnemonics for 
@@ -1561,6 +1582,10 @@ block.
 #include "classpath:decohack/constants/mbf/things.dh"
 
     All thing mnemonics for MBF-compatible EXEs.
+
+#include "classpath:decohack/constants/mbf/things_aliases.dh"
+
+    All thing aliases for MBF-compatible EXEs.
 
 #include "classpath:decohack/constants/extended.dh"
 
