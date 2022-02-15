@@ -93,6 +93,7 @@ public final class WadScriptMain
 	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 	private static final String SWITCH_ENTRY1 = "--entry";
 	private static final String SWITCH_ENTRY2 = "-e";
+	private static final String SWITCH_ENTRYLIST = "--entry-list";
 	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
 	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
 	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
@@ -724,6 +725,7 @@ public final class WadScriptMain
 		FUNCTIONHELP_HTML,
 		FUNCTIONHELP_HTML_DIV,
 		DISASSEMBLE,
+		ENTRYPOINTS,
 		EXECUTE;
 	}
 	
@@ -1042,7 +1044,14 @@ public final class WadScriptMain
 				doDisassemble(options.stdout, instance);
 				return ERROR_NONE;
 			}
-		
+
+			if (options.mode == Mode.ENTRYPOINTS)
+			{
+				for (String name : instance.getScript().getScriptEntryNames())
+					options.stdout.println(name);
+				return ERROR_NONE;
+			}
+			
 			if (options.mode == Mode.EXECUTE)
 			{
 				if (options.entryPointName == null)
@@ -1139,6 +1148,8 @@ public final class WadScriptMain
 			out.println("                                     HTML format, but just the content.");
 			out.println("    --disassemble                Prints the disassembly for this script");
 			out.println("                                     and exits.");
+			out.println("    --entry-list                 Prints the list of entry point names for this");
+			out.println("                                     script and exits.");
 			out.println("    --entry [name]               Use a different entry point named [name].");
 			out.println("                                     Default: \"main\"");
 			out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
@@ -1260,6 +1271,8 @@ public final class WadScriptMain
 						options.mode = Mode.VERSION;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
 						options.mode = Mode.DISASSEMBLE;
+					else if (SWITCH_ENTRYLIST.equalsIgnoreCase(arg))
+						options.mode = Mode.ENTRYPOINTS;
 					else if (SWITCH_FUNCHELP1.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP;
 					else if (SWITCH_FUNCHELP2.equalsIgnoreCase(arg))

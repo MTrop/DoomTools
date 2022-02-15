@@ -2041,7 +2041,6 @@ public class Lexer
 		/**
 		 * Adds a line comment delimiter to this lexer.
 		 * @param delimiter		the delimiter lexeme.
-		 * @param type			the type id.
 		 * @throws IllegalArgumentException if type is &lt; 0 or delimiter is null or empty.
 		 */
 		public void addCommentLineDelimiter(String delimiter)

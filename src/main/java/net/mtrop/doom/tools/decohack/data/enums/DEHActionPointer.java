@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Enumeration of action pointers for frames.
@@ -102,7 +103,7 @@ public enum DEHActionPointer
 	FACE                (-1,  false, DEHActionPointerType.MBF, "Face", DEHActionPointerParam.ANGLE_UINT),
 	SCRATCH             (-1,  false, DEHActionPointerType.MBF, "Scratch", DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT),
 	PLAYSOUND           (-1,  false, DEHActionPointerType.MBF, "PlaySound", DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL),
-	RANDOMJUMP          (-1,  false, DEHActionPointerType.MBF, "RandomJump", DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE),
+	RANDOMJUMP          (-1,  false, DEHActionPointerType.MBF, "RandomJump", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	LINEEFFECT          (-1,  false, DEHActionPointerType.MBF, "LineEffect", DEHActionPointerParam.SHORT, DEHActionPointerParam.SHORT),
 	DIE                 (-1,  false, DEHActionPointerType.MBF, "Die"),
 	FIREOLDBFG          (-1,  false, DEHActionPointerType.MBF, "FireOldBFG"),
@@ -135,7 +136,7 @@ public enum DEHActionPointer
 	WEAPONMELEEATTACK   (-1,  true,  DEHActionPointerType.MBF21, "WeaponMeleeAttack", DEHActionPointerParam.SHORT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.UINT, DEHActionPointerParam.INT),
 	WEAPONSOUND         (-1,  true,  DEHActionPointerType.MBF21, "WeaponSound", DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL),
 	WEAPONALERT         (-1,  true,  DEHActionPointerType.MBF21, "WeaponAlert"),
-	WEAPONJUMP          (-1,  true,  DEHActionPointerType.MBF21, "WeaponJump", DEHActionPointerParam.UINT, DEHActionPointerParam.BYTE),
+	WEAPONJUMP          (-1,  true,  DEHActionPointerType.MBF21, "WeaponJump", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
 	CONSUMEAMMO         (-1,  true,  DEHActionPointerType.MBF21, "ConsumeAmmo", DEHActionPointerParam.SHORT),
 	CHECKAMMO           (-1,  true,  DEHActionPointerType.MBF21, "CheckAmmo", DEHActionPointerParam.UINT, DEHActionPointerParam.SHORT),
 	REFIRETO            (-1,  true,  DEHActionPointerType.MBF21, "RefireTo", DEHActionPointerParam.UINT, DEHActionPointerParam.BOOL),
@@ -153,14 +154,7 @@ public enum DEHActionPointer
 	
 	private DEHActionPointerParam[] params;
 
-	private static final Map<String, DEHActionPointer> MNEMONIC_MAP = new TreeMap<String, DEHActionPointer>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -7754048704695925418L;
-		{
-			for (DEHActionPointer val : DEHActionPointer.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHActionPointer> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointer.class);
 
 	public static DEHActionPointer getByMnemonic(String mnemonic)
 	{

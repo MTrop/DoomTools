@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Doom Thing flags
@@ -48,16 +49,7 @@ public enum DEHThingFlag implements DEHFlag
 	TRANSLUCENT   (0x80000000),
 	;
 
-	public static final DEHThingFlag[] VALUES = values();
-
-	private static final Map<String, DEHThingFlag> MNEMONIC_MAP = new TreeMap<String, DEHThingFlag>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = 6270128398455692128L;
-		{
-			for (DEHThingFlag val : DEHThingFlag.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHThingFlag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHThingFlag.class);
 
 	public static DEHThingFlag getByMnemonic(String mnemonic)
 	{

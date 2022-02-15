@@ -280,14 +280,120 @@ function initBuild() {
 }
 
 /****************************************************************************
- * Fetches the source for the palette used for image conversion.
- * Edit this function if you create the palette yourself.
- *
+ * Writes a single palette from raw data to image data.
+ * 
+ * paletteDataBuf: the palette data buffer (should be 768 bytes, set to beginning).
+ * targetImage: the [256 x 1] image to write the colors to.
  ****************************************************************************/
+function writePaletteIntoImage(paletteDataBuf, targetImage) { 
+	for (i = 0; i < 256; i += 1) {
+		r = paletteDataBuf->bufgetbyte();
+		g = paletteDataBuf->bufgetbyte();
+		b = paletteDataBuf->bufgetbyte();
+		targetimage->imageset(i, 0, color(r, g, b, 255));
+	}
+}
+
+/****************************************************************************
+ * Writes a single colormap from raw data to image data.
+ * 
+ * colormapDataBuf: the colormap data buffer (should be 256 bytes, set to beginning).
+ * paletteImage: the palette image.
+ * targetImage: the [256 x 1] image to write the colors to.
+ ****************************************************************************/
+function writeColormapIntoImage(colormapDataBuf, paletteImage, targetImage) { 
+	for (i = 0; i < 256; i += 1) {
+		index = colormapDataBuf->bufgetbyte();
+		targetimage->imageset(i, 0, paletteImage->imageget(index, 0));
+	}
+}
+
+/****************************************************************************
+ * Exports a palette to an image. 
+ * 
+ * wad: the open WAD to read from.
+ * lumpname: the lump name of the palette data.
+ * RETURNS: the image. 
+ ****************************************************************************/
+check function exportPaletteToImage(wad, lumpname) {
+
+	playpalBuf = wad->waddata(lumpname);
+	
+	// make buffer for single palette.
+	paletteDataBuf = bufnew(768);
+	
+	paletteCount = playpalBuf->length() / 768;
+	paletteImage = image(256, paletteCount);
+	singlePaletteImage = image(256, 1);
+	
+	i = 0;
+	while (i < paletteCount) {
+		paletteDataBuf->bufsetpos(0);
+		bufread(paletteDataBuf, playpalBuf, 768, 0);
+		writePaletteIntoImage(paletteDataBuf, singlePaletteImage);
+		paletteImage->imagedraw(singlePaletteImage, 0, i, "replace");
+		i += 1;
+	}
+
+	return paletteImage;
+}
+
+/****************************************************************************
+ * Exports a colormap to an image. 
+ * 
+ * wad: the open WAD to read from.
+ * lumpname: the lump name of the colormap data.
+ * paletteImage: the image to use for palette lookups (uses only first row, Y = 0).
+ * RETURNS: the image. 
+ ****************************************************************************/
+check function exportColormapToImage(wad, lumpname, paletteImage) {
+	
+	colormapBuf = wad->waddata(lumpname);
+	
+	// make buffer for single colormap.
+	colormapDataBuf = bufnew(256);
+	
+	colormapCount = colormapBuf->length() / 256;
+	colormapImage = image(256, colormapCount);
+	singleColormapImage = image(256, 1);
+	
+	i = 0;
+	while (i < colormapCount) {
+		colormapDataBuf->bufsetpos(0);
+		bufread(colormapDataBuf, colormapBuf, 256, 0);
+		writeColormapIntoImage(colormapDataBuf, paletteImage, singleColormapImage);
+		colormapImage->imagedraw(singleColormapImage, 0, i, "replace");
+		i += 1;
+	}
+
+	return colormapImage;
+}
+
+/****************************************************************************
+ * Fetches the source for the palette used for image conversion.
+ * Attempts to find the default palette via the global asset folder.
+ ****************************************************************************/
+// Palette source file path.
+#define PALETTE_ASSET_SRC "/assets/_global/playpal"
+
 check function getConvertPaletteSource() {
+
+	paletteFile1Path = getSourceDirectory() + PALETTE_ASSET_SRC + ".pal";
+	paletteFile2Path = getSourceDirectory() + PALETTE_ASSET_SRC + ".lmp";
+
+	if (fileexists(paletteFile1Path)) {
+		println("Using palette found in `" + paletteFile1Path + "`...");
+		return paletteFile1Path; 
+	}
+	if (fileexists(paletteFile2Path)) {
+		println("Using palette found in `" + paletteFile2Path + "`...");
+		return paletteFile2Path;
+	}
+
 	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	println("Using palette found in IWAD `" + baseIwadPath + "`...");
 	return baseIwadPath;
 }
 
@@ -296,9 +402,10 @@ check function getConvertPaletteSource() {
  * 
  * sourceDir: The source directory path.
  * targetDir: The target directory path.
- * mode: One of 'palettes', 'colormaps', 'graphics', 'flats'.
+ * mode: One of 'palettes', 'colormaps', 'graphics', 'flats'. Default: 'graphics'
+ * recurse: true to recurse directory, false to not. Default = true.
  ****************************************************************************/
-check function convert(sourceDir, targetDir, mode) {
+check function convert(sourceDir, targetDir, mode, recurse) {
 	if (empty(sourceDir))
 		return error("ToolError", "Source directory path not specified.");
 	if (empty(targetDir))
@@ -306,10 +413,10 @@ check function convert(sourceDir, targetDir, mode) {
 		
 	if (tool::dimgconvert({
 		modeType: mode ?? "graphics",
-		paletteSourcePath: file(getConvertPaletteSource()),
+		paletteSourcePath: mode !== "palettes" ? file(getConvertPaletteSource()) : null,
 		sourcePath: file(sourceDir), 
 		outputPath: file(targetDir),
-		recursive: true,
+		recursive: recurse ?? true,
 		verbose: false
 	})) return error("ToolError", "DImgConvert threw an error.");
 }

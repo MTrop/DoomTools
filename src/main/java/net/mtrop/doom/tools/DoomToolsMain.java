@@ -31,9 +31,10 @@ import com.blackrook.rookscript.tools.ScriptExecutor;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
-import net.mtrop.doom.tools.struct.HTTPUtils;
-import net.mtrop.doom.tools.struct.HTTPUtils.HTTPReader;
-import net.mtrop.doom.tools.struct.HTTPUtils.HTTPResponse;
+import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 
 /**
  * Main class for DoomTools.
@@ -67,7 +68,8 @@ public final class DoomToolsMain
 	private static final String UPDATE_REPO_NAME = "DoomTools";
 	private static final String UPDATE_REPO_OWNER = "MTrop";
 
-	private static final String SHELL_OPTIONS = "-Xms64M -Xmx784M";
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
+	
 	private static final Map<String, Class<?>> SHELL_DATA = Common.map(
 		Common.keyValue("doomtools",  DoomToolsMain.class),
 		Common.keyValue("wadmerge",   WadMergeMain.class),
@@ -87,9 +89,8 @@ public final class DoomToolsMain
 		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
 
-	private static final HTTPReader<JSONObject> JSON_READER = (response) -> {
-		String json = HTTPReader.STRING_CONTENT_READER.onHTTPResponse(response);
-		return JSONReader.readJSON(json);
+	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel, monitor) -> {
+		return JSONReader.readJSON(HTTPReader.openReader(response));
 	};
 
 	private static final int ERROR_NONE = 0;
@@ -105,6 +106,7 @@ public final class DoomToolsMain
 	private static final String SWITCH_WEBSITE = "--website";
 	private static final String SWITCH_DOCS = "--docs";
 	private static final String SWITCH_WHERE = "--where";
+	private static final String SWITCH_SETTINGS = "--settings";
 	private static final String SWITCH_UPDATE = "--update";
 	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
 	private static final String SWITCH_UPDATE_SHELL = "--update-shell";
@@ -124,6 +126,7 @@ public final class DoomToolsMain
 		private boolean openWebsite;
 		private boolean openDocs;
 		private boolean where;
+		private boolean openSettings;
 		
 		private Options()
 		{
@@ -134,6 +137,7 @@ public final class DoomToolsMain
 			this.updateShell = false;
 			this.openWebsite = false;
 			this.where = false;
+			this.openSettings = false;
 		}
 		
 		public Options setStdout(OutputStream out) 
@@ -174,28 +178,28 @@ public final class DoomToolsMain
 			this.options = options;
 		}
 		
-		private File[] getSortedJarList(File dir)
+		private static File[] getSortedJarList(File dir)
 		{
 			File[] jars = dir.listFiles(JAR_FILES);
 			Arrays.sort(jars, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
 			return jars;
 		}
 		
-		private File getLatestJarFile(File dir)
+		private static File getLatestJarFile(File dir)
 		{
 			File[] jars = getSortedJarList(dir);
 			return jars.length == 0 ? null : jars[jars.length - 1];
 		}
 		
-		private JSONObject getJSONResponse(String url) throws IOException
+		private static JSONObject getJSONResponse(String url) throws IOException
 		{
-			return HTTPUtils.httpGet(url, JSON_READER);
+			return HTTPRequest.get(url).send(JSON_READER);
 		}
 		
-		private String getProgressBar(long current, Long max)
+		private static String getProgressBar(long current, Long max)
 		{
 			final int MAXPIPS = 40;
-			if (max != null)
+			if (max != null && max != 0)
 			{
 				StringBuilder sb = new StringBuilder("[");
 				
@@ -229,8 +233,8 @@ public final class DoomToolsMain
 				return ERROR_NOWHERE;
 			}
 			
-			final String shellSourceFile = Common.IS_WINDOWS ? "app-name.cmd" : "app-name.sh";
-			final String shellExtension = Common.IS_WINDOWS ? ".cmd" : "";
+			final String shellSourceFile = OSUtils.isWindows() ? "app-name.cmd" : "app-name.sh";
+			final String shellExtension = OSUtils.isWindows() ? ".cmd" : "";
 			
 			// Export shell scripts.
 			for (Map.Entry<String, Class<?>> entry : SHELL_DATA.entrySet())
@@ -238,7 +242,7 @@ public final class DoomToolsMain
 				File outputFilePath = new File(path + "/" + entry.getKey() + shellExtension);
 				try {
 					Common.copyShellScript("shell/jar/" + shellSourceFile, entry.getValue(), SHELL_OPTIONS, "", outputFilePath);
-					if (!Common.IS_WINDOWS)
+					if (!OSUtils.isWindows())
 						outputFilePath.setExecutable(true, false);
 					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
 				} catch (IOException e) {
@@ -354,17 +358,23 @@ public final class DoomToolsMain
 			}
 			
 			String releaseVersion = assetJSON.get("name").getString().substring(14, 34); // should grab date from asset name (CMD version). 
-			
+
 			if (currentVersion.compareTo(releaseVersion) >= 0)
 			{
 				options.stdout.println("DoomTools is up-to-date!");
 				return ERROR_NONE;
 			}
-
+			
 			options.stdout.println("New version found:  " + releaseVersion);
 			
-			try (HTTPResponse response = HTTPUtils.httpGet(assetJSON.get("browser_download_url").getString()))
+			try (HTTPResponse response = HTTPRequest.get(assetJSON.get("browser_download_url").getString()).setHeader("Accept", "*/*").send())
 			{
+				if (!response.isSuccess())
+				{
+					options.stderr.println("ERROR: Server responded: HTTP " + response.getStatusCode() + " " + response.getStatusMessage());
+					return ERROR_SITE_ERROR;
+				}
+				
 				File tempFile = Files.createTempFile("doomtools-tmp-", ".zip").toFile(); 
 				try 
 				{
@@ -492,17 +502,9 @@ public final class DoomToolsMain
 					return ERROR_SECURITY;
 				}
 				
-				if (!Desktop.isDesktopSupported())
-				{
-					options.stderr.println("ERROR: No desktop support. Cannot open website.");
-					return ERROR_DESKTOP_ERROR;
-				}
-
-				if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
-				{
-					options.stderr.println("ERROR: No support for opening files/folders. Cannot open documentation folder.");
-					return ERROR_DESKTOP_ERROR;
-				}				
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "documentation folder")) != ERROR_NONE)
+					return desktopError;
 				
 				try {
 					options.stdout.println("Opening the DoomTools documentation folder...");
@@ -517,19 +519,37 @@ public final class DoomToolsMain
 
 				return ERROR_NONE;
 			}
-			else if (options.openWebsite)
+			else if (options.openSettings)
 			{
-				if (!Desktop.isDesktopSupported())
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "settings folder")) != ERROR_NONE)
+					return desktopError;
+
+				options.stdout.println("Opening the DoomTools settings folder...");
+				File settingsDir = new File(Common.SETTINGS_PATH);
+				if (!settingsDir.exists())
 				{
-					options.stderr.println("ERROR: No desktop support. Cannot open website.");
+					options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
+					return ERROR_DESKTOP_ERROR;
+				}
+				
+				try {
+					Desktop.getDesktop().open(settingsDir);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Cannot open settings folder. I/O Error.");
+					return ERROR_DESKTOP_ERROR;
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Cannot open settings folder. OS is preventing folder access.");
 					return ERROR_DESKTOP_ERROR;
 				}
 
-				if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-				{
-					options.stderr.println("ERROR: No default browser support. Cannot open website.");
-					return ERROR_DESKTOP_ERROR;
-				}				
+				return ERROR_NONE;
+			}
+			else if (options.openWebsite)
+			{
+				int desktopError;
+				if ((desktopError = checkDesktopAction(Desktop.Action.BROWSE, "website")) != ERROR_NONE)
+					return desktopError;
 				
 				try {
 					options.stdout.println("Opening the DoomTools website...");
@@ -570,6 +590,24 @@ public final class DoomToolsMain
 				return ERROR_NONE;
 			}
 		}
+
+		private int checkDesktopAction(Desktop.Action action, String name) 
+		{
+			if (!Desktop.isDesktopSupported())
+			{
+				options.stderr.println("ERROR: No desktop support. Cannot open " + name + ".");
+				return ERROR_DESKTOP_ERROR;
+			}
+
+			if (!Desktop.getDesktop().isSupported(action))
+			{
+				options.stderr.println("ERROR: No support for desktop " + action.name() + ". Cannot open " + name + ".");
+				return ERROR_DESKTOP_ERROR;
+			}
+			
+			return ERROR_NONE;
+		}
+		
 	}
 	
 	/**
@@ -601,6 +639,8 @@ public final class DoomToolsMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WEBSITE))
 						options.openWebsite = true;
+					else if (arg.equalsIgnoreCase(SWITCH_SETTINGS))
+						options.openSettings = true;
 					else if (arg.equalsIgnoreCase(SWITCH_DOCS))
 						options.openDocs = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
@@ -649,9 +689,12 @@ public final class DoomToolsMain
 		out.println("    --help               Prints help and exits.");
 		out.println("    -h");
 		out.println();
-		out.println("    --website            Opens DoomTools's main website.");
-		out.println();
 		out.println("    --docs               Opens DoomTools's documentation folder.");
+		out.println();
+		out.println("    --settings           Opens the folder where DoomTools stores global");
+		out.println("                             (user-level) settings.");
+		out.println();
+		out.println("    --website            Opens DoomTools's main website.");
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
 		out.println();

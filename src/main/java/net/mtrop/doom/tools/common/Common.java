@@ -11,9 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Common shared functions.
@@ -28,22 +31,13 @@ import net.mtrop.doom.tools.struct.ReplacerReader;
  */
 public final class Common
 {
-	/** Version number map. */
-	private static Map<String, String> VERSION_MAP = new HashMap<>();
-	
-	/** Is this Windows? */
-	public static final boolean IS_WINDOWS;
-	
-	/** A null file. */
-	public static final File NULL_FILE;
-	
-	static
-	{
-		IS_WINDOWS = System.getProperty("os.name").contains("Windows");
-		NULL_FILE = new File(IS_WINDOWS ? "NUL" : "/dev/null");
-	}
+	/** DoomTools Config folder base. */
+    public static final String SETTINGS_PATH = OSUtils.getApplicationSettingsPath() + "/DoomTools/";
 
-	/**
+	/** Version number map. */
+	private static final Map<String, String> VERSION_MAP = new HashMap<>();
+	
+    /**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
 	 * @param name the name of the tool. 
@@ -672,6 +666,240 @@ public final class Common
 			this.value = value;
 			return old;
 		}
+	}
+
+	/**
+	 * BufferedReader to Writer stream thread.
+	 * Transfers characters buffered at one line at a time until the source stream is closed.
+	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
+	 */
+	public static class LineReaderToWriterThread extends Thread
+	{
+		protected BufferedReader sourceReader;
+		protected Writer targetWriter;
+		
+		private Throwable exception;
+		private long totalCharacters;
+		
+		/**
+		 * Creates a new thread that, when started, transfers characters one line at a time until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the Reader to read from (wrapped as a BufferedReader).
+		 * @param writer the Writer to write to.
+		 */
+		public LineReaderToWriterThread(Reader reader, Writer writer)
+		{
+			this(new BufferedReader(reader), writer);
+		}
+
+		/**
+		 * Creates a new thread that, when started, transfers characters one line at a time until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the BufferedReader to read from.
+		 * @param writer the Writer to write to.
+		 */
+		public LineReaderToWriterThread(BufferedReader reader, Writer writer)
+		{
+			super("LineReaderToWriterThread");
+			this.sourceReader = reader;
+			this.targetWriter = writer;
+			this.exception = null;
+			this.totalCharacters = 0L;
+		}
+
+		@Override
+		public final void run() 
+		{
+			String line;
+			try {
+				while ((line = sourceReader.readLine()) != null)
+				{
+					targetWriter.append(line).append('\n').flush();
+					totalCharacters += line.length() + 1;
+				}
+			} catch (Throwable e) {
+				exception = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the exception that occurred, if any.
+		 */
+		public Throwable getException() 
+		{
+			return exception;
+		}
+		
+		/**
+		 * @return the total amount of characters moved.
+		 */
+		public long getTotalCharacters() 
+		{
+			return totalCharacters;
+		}
+		
+	}
+	
+	/**
+	 * Reader to Writer stream thread.
+	 * Transfers characters until the source stream is closed.
+	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
+	 */
+	public static class ReaderToWriterThread extends Thread
+	{
+		protected Reader sourceReader;
+		protected Writer targetWriter;
+		
+		private Throwable exception;
+		private long totalCharacters;
+		
+		/**
+		 * Creates a new thread that, when started, transfers characters until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param reader the Reader to read from.
+		 * @param writer the Writer to write to.
+		 */
+		public ReaderToWriterThread(Reader reader, Writer writer)
+		{
+			super("ReaderToWriterThread");
+			this.sourceReader = reader;
+			this.targetWriter = writer;
+			this.exception = null;
+			this.totalCharacters = 0L;
+		}
+
+		@Override
+		public final void run() 
+		{
+			int buf;
+			char[] buffer = new char[8192]; 
+			try {
+				while ((buf = sourceReader.read(buffer)) > 0)
+				{
+					targetWriter.write(buffer, 0, buf);
+					targetWriter.flush();
+					totalCharacters += buf;
+				}
+			} catch (Throwable e) {
+				exception = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the exception that occurred, if any.
+		 */
+		public Throwable getException() 
+		{
+			return exception;
+		}
+		
+		/**
+		 * @return the total amount of characters moved.
+		 */
+		public long getTotalCharacters() 
+		{
+			return totalCharacters;
+		}
+		
+	}
+	
+	/**
+	 * Input to Output stream thread.
+	 * Transfers until the source stream is closed.
+	 * <p> The thread terminates if the input stream is closed. The target output stream is not closed.
+	 */
+	public static class InputToOutputStreamThread extends Thread
+	{
+		protected InputStream sourceStream;
+		protected OutputStream targetStream;
+		
+		private Throwable exception;
+		private long totalBytes;
+		
+		/**
+		 * Creates a new thread that, when started, transfers bytes until the source stream is closed.
+		 * The user must call {@link #start()} on this thread - it is not active after creation.
+		 * @param sourceStream the InputStream to read from. 
+		 * @param targetStream the OutputStream to write to.
+		 */
+		public InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		{
+			super("InputToOutputStreamThread");
+			this.sourceStream = sourceStream;
+			this.targetStream = targetStream;
+			this.exception = null;
+			this.totalBytes = 0L;
+		}
+		
+		@Override
+		public final void run() 
+		{
+			int buf;
+			byte[] buffer = new byte[8192]; 
+			try {
+				while ((buf = sourceStream.read(buffer)) > 0)
+				{
+					targetStream.write(buffer, 0, buf);
+					targetStream.flush();
+					totalBytes += buf;
+				}
+			} catch (Throwable e) {
+				exception = e;
+			} finally {
+				afterClose();
+			}
+		}
+		
+		/**
+		 * Called after the source stream hits EOF or closes,
+		 * but before the Thread terminates.
+		 * <p> Does nothing by default.
+		 */
+		public void afterClose()
+		{
+			// Do nothing by default.
+		}
+		
+		/**
+		 * @return the exception that occurred, if any.
+		 */
+		public Throwable getException() 
+		{
+			return exception;
+		}
+		
+		/**
+		 * @return the total amount of bytes moved.
+		 */
+		public long getTotalBytes() 
+		{
+			return totalBytes;
+		}
+		
 	}
 	
 }

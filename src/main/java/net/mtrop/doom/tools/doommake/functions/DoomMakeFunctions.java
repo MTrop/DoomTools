@@ -34,7 +34,7 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 import com.blackrook.rookscript.struct.PatternUtils;
 
-import net.mtrop.doom.struct.io.IOUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;

@@ -1,6 +1,18 @@
 DoomMake
 --------
 
+### Changed for 0.14.0
+
+* `Added` A switch for printing the targets for a project.
+* `Changed` The conversion function in graphics conversions now looks for (and prioritizes) loose palette assets for source palettes (in asset global folder) (new projects).
+* `Changed` Some WadMerge scripts for some templates to make use of the `FILECHARSUB` command for asset directory imports (new projects).
+
+
+### Changed for 0.13.1
+
+* `Fixed` The `texturewads` template added script lines that duped the extracted textures on export.
+
+
 ### Changed for 0.13.0
 
 * `Added` `infiles` as a valid option field for `TOOL::DECOHACK`.

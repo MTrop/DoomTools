@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * MBF21 Weapon flags.
@@ -23,16 +24,7 @@ public enum DEHWeaponMBF21Flag implements DEHFlag
 	NOAUTOSWITCHTO (0x00000020),
 	;
 
-	public static final DEHWeaponMBF21Flag[] VALUES = values();
-
-	private static final Map<String, DEHWeaponMBF21Flag> MNEMONIC_MAP = new TreeMap<String, DEHWeaponMBF21Flag>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -2813044917550646916L;
-		{
-			for (DEHWeaponMBF21Flag val : DEHWeaponMBF21Flag.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHWeaponMBF21Flag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHWeaponMBF21Flag.class);
 
 	public static DEHWeaponMBF21Flag getByMnemonic(String mnemonic)
 	{

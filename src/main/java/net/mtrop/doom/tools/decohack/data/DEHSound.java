@@ -26,8 +26,6 @@ public class DEHSound implements DEHObject<DEHSound>
 	
 	/**
 	 * Creates a new DEHSound.
-	 * @param priority the sound priority.
-	 * @param singular if the sound is singularly played and at full volume.
 	 * @throws IllegalArgumentException if a provided value is out of range.
 	 */
 	public DEHSound()

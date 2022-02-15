@@ -368,7 +368,6 @@ public final class WADTexMain
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
-	 * @param in the standard input buffered reader.
 	 * @param args the argument args.
 	 * @return the parsed options.
 	 */

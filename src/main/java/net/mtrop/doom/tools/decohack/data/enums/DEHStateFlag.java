@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Doom state flags.
@@ -18,16 +19,7 @@ public enum DEHStateFlag implements DEHFlag
 	SKILL5FAST (0x00000001),
 	;
 
-	public static final DEHStateFlag[] VALUES = values();
-
-	private static final Map<String, DEHStateFlag> MNEMONIC_MAP = new TreeMap<String, DEHStateFlag>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -935311506875376904L;
-		{
-			for (DEHStateFlag val : DEHStateFlag.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHStateFlag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHStateFlag.class);
 
 	public static DEHStateFlag getByMnemonic(String mnemonic)
 	{

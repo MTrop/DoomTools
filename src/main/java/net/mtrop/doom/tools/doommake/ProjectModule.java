@@ -43,8 +43,6 @@ public class ProjectModule implements Comparable<ProjectModule>
 	/**
 	 * Creates a new project module.
 	 * @param sort the sort value.
-	 * @param name the module name.
-	 * @param descriptor the main descriptor for files and directories.
 	 * @return a new module.
 	 */
 	public static ProjectModule module(int sort)

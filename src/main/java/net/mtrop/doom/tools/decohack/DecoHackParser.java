@@ -57,6 +57,7 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
 import net.mtrop.doom.tools.struct.PreprocessorLexer;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * The DecoHack parser.
@@ -2257,7 +2258,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					ammo = Ammo.VALUES[ammoIndex];
+					ammo = Ammo.VALUES.get(ammoIndex);
 				}
 
 				weapon.setAmmoType(ammo);
@@ -3683,8 +3684,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 	
-	// Matches an identifier that is a list of subframe indices.
-	// If match, advance token and return true plus modified out list.
+	// Matches an identifier that is interpreted to be a list of subframe indices.
+	// If match, advance token and returns the list of indices.
 	// Else, return null.
 	private Deque<Integer> matchFrameIndices()
 	{
@@ -4154,7 +4155,6 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	/**
 	 * Starts parsing a script.
-	 * @param context 
 	 * @return the exporter for the script.
 	 */
 	public AbstractPatchContext<?> parse()
@@ -4217,7 +4217,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// State field type.
-	private enum FieldType
+	public enum FieldType
 	{
 		NEXTSTATE,
 		MISC1,
@@ -4233,11 +4233,11 @@ public final class DecoHackParser extends Lexer.Parser
 		ARG8,
 		ARG9;
 		
-		private static final FieldType[] VALUES = values();
+		private static final Map<Integer, FieldType> VALUES = EnumUtils.createOrdinalMap(FieldType.class);
 		
 		public static FieldType getArg(int i)
 		{
-			return VALUES[i + 3];
+			return VALUES.get(i + 3);
 		}
 	}
 	

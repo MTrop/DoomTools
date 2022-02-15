@@ -6,7 +6,8 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
-import java.util.TreeMap;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * MBF21 Thing Flags.
@@ -35,16 +36,7 @@ public enum DEHThingMBF21Flag implements DEHFlag
 	FULLVOLSOUNDS  (0x00040000),
 	;
 
-	public static final DEHThingMBF21Flag[] VALUES = values();
-
-	private static final Map<String, DEHThingMBF21Flag> MNEMONIC_MAP = new TreeMap<String, DEHThingMBF21Flag>(String.CASE_INSENSITIVE_ORDER)
-	{
-		private static final long serialVersionUID = -3232636284673026047L;
-		{
-			for (DEHThingMBF21Flag val : DEHThingMBF21Flag.values())
-				put(val.name(), val);
-		}
-	};
+	private static final Map<String, DEHThingMBF21Flag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHThingMBF21Flag.class);
 
 	public static DEHThingMBF21Flag getByMnemonic(String mnemonic)
 	{

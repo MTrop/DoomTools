@@ -1,6 +1,12 @@
 WadMerge
 --------
 
+### Changed for 1.7.0
+
+* `Added` `FILECHARSUB` command for declaring filename character substitutions on import.
+* `Changed` Some behavior to accommodate the character substitution logic.
+
+
 ### Changed for 1.6.0.1
 
 * `Fixed` Some documentation inconsistencies.

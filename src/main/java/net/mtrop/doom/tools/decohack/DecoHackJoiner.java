@@ -9,8 +9,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.TokenScanner;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * The joiner that exports a full DECOHack tree.
@@ -109,7 +109,7 @@ public final class DecoHackJoiner
 
 	private static String getNextPath(String streamName, String path)
 	{
-		if (Common.IS_WINDOWS && streamName.contains("\\")) // check for Windows paths.
+		if (OSUtils.isWindows() && streamName.contains("\\")) // check for Windows paths.
 			streamName = streamName.replace('\\', '/');
 		return getParentPath(streamName) + path;
 	}

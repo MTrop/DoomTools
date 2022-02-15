@@ -315,6 +315,7 @@ public class WADProjectGenerator extends ProjectGenerator
 		// A module that converts assets.
 		MODULES.put(MODULE_ASSETS_CONVERT, module(4)
 			.base(descriptor(
+				dir("src/convert/colormaps"),
 				dir("src/convert/graphics"),
 				dir("src/convert/sounds"),
 				dir("src/convert/sprites"),
@@ -328,6 +329,7 @@ public class WADProjectGenerator extends ProjectGenerator
 					"\tdoConvertSounds();"
 					,"\tdoConvertGraphics();"
 					,"\tdoConvertSprites();"
+					,"\tdoConvertColormaps();"
 				)
 			))
 			.postRelease(descriptor(
@@ -338,13 +340,14 @@ public class WADProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add BMP, GIF, or PNG files to `src/convert/graphics`."
 				,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
-				,"Add sound files to `src/convert/sounds`."
+				,"Add BMP, GIF, or PNG files to `src/convert/colormaps`."
+				,"Add WAV or AIFF files to `src/convert/sounds`."
 			)
 		);
 
 		// ................................................................
 
-		// A module that builds maps and non-texture assets together.
+		// A module that builds non-texture assets together.
 		MODULES.put(MODULE_ASSETS, module(5)
 			.base(descriptor(
 				dir("src/assets/_global"),
@@ -495,14 +498,6 @@ public class WADProjectGenerator extends ProjectGenerator
 			.base(descriptor(
 				dir("src/wads/textures")
 			))
-			.releaseScriptMerge(descriptor(
-				fileContentAppend("doommake.script",
-					"\t\t,getMapTexWad()"
-				)
-			))
-			.releaseWadMergeLines(
-				"mergewad   out $0/$"
-			)
 			.todos(
 				"Add texture WADs to `src/wads/textures`."
 			)

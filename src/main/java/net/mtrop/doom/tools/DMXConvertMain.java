@@ -23,6 +23,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import net.mtrop.doom.sound.DMXSound;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 
 /**
  * Main class for Utility.
@@ -131,6 +132,8 @@ public final class DMXConvertMain
 	 */
 	private static class Context
 	{
+		private static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
+		
 		private Options options;
 	
 		private Context(Options options)
@@ -165,7 +168,7 @@ public final class DMXConvertMain
 				else
 				{
 					options.stdout.println("FFmpeg not found on the PATH.");
-					options.stdout.println("Either it is not named \"ffmpeg\", or the executible was not found on the");
+					options.stdout.println("Either it is not named \"ffmpeg\", or the executable was not found on the");
 					options.stdout.println("current PATH.");
 					return ERROR_NO_FFMPEG;
 				}
@@ -288,16 +291,16 @@ public final class DMXConvertMain
 		}
 		
 		// Opens an audio stream via FFmpeg
-		// Throws SecurityException or 
+		// Throws SecurityException or UnsupportedAudioFileException
 		private AudioInputStream openFFmpegAudioStreamForFile(File ffmpegPath, File input) throws IOException
 		{
 			String exe = ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg";
-			
+
 			Process proc = (new ProcessBuilder())
 				.command(
 					exe, "-i", input.getPath(), "-f", "wav", "-acodec", "pcm_s16le", "-ac", "2", "-"
 				)
-				.redirectError(Redirect.appendTo(Common.NULL_FILE))
+				.redirectError(Redirect.appendTo(NULL_FILE))
 				.redirectOutput(Redirect.PIPE)
 			.start();
 			try {
@@ -310,15 +313,9 @@ public final class DMXConvertMain
 		private boolean detectFFmpeg(File ffmpegPath)
 		{
 			try {
-				(new ProcessBuilder())
-					.command(ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg")
-					.redirectError(Redirect.appendTo(Common.NULL_FILE))
-					.redirectOutput(Redirect.appendTo(Common.NULL_FILE))
-				.start().waitFor();
+				ProcessCallable.create(ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg").call();
 				return true;
-			} catch (IOException e) {
-				return false;
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				return false;
 			}
 		}
