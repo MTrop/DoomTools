@@ -19,7 +19,7 @@ public interface DEHPatchDoom19 extends DEHPatch
 	/**
 	 * @return if string length should be enforced.
 	 */
-	Boolean enforceStringLength();
+	boolean enforceStringLength();
 	
 	/**
 	 * Gets a string.

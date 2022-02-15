@@ -104,7 +104,7 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 	}
 
 	@Override
-	public Boolean enforceStringLength()
+	public boolean enforceStringLength()
 	{
 		return true;
 	}

@@ -25,7 +25,7 @@ public class PatchDoomUnityContext extends PatchUltimateDoom19Context
 	}
 
 	@Override
-	public Boolean enforceStringLength()
+	public boolean enforceStringLength()
 	{
 		return false;
 	}

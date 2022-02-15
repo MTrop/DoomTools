@@ -16,7 +16,7 @@ import net.mtrop.doom.tools.decohack.patches.PatchUDoom19;
 public class PatchDoomUnity extends PatchUDoom19
 {
 	@Override
-	public Boolean enforceStringLength()
+	public boolean enforceStringLength()
 	{
 		return false;
 	}
