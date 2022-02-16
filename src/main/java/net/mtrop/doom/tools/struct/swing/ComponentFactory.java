@@ -225,7 +225,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(int mnemonic, Action action)
+	public static JButton button(int mnemonic, AbstractAction action)
 	{
 		JButton out = new JButton(action);
 		if (mnemonic > 0)
@@ -238,7 +238,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(Action action)
+	public static JButton button(AbstractAction action)
 	{
 		return button(0, action);
 	}
@@ -1872,7 +1872,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(Icon icon, String label, ActionEventHandler handler)
+	public static AbstractAction action(Icon icon, String label, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, label, handler);
 	}
@@ -1883,7 +1883,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(String label, ActionEventHandler handler)
+	public static AbstractAction action(String label, ActionEventHandler handler)
 	{
 		return new HandledAction(null, label, handler);
 	}
@@ -1894,7 +1894,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(Icon icon, ActionEventHandler handler)
+	public static AbstractAction action(Icon icon, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, null, handler);
 	}

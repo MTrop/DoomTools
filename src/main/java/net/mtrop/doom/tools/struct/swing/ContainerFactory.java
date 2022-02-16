@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -52,14 +53,16 @@ public final class ContainerFactory
 	 * Starts a layout tree, returning the provided container.
 	 * The layout is replaced on it with the provided layout.
 	 * @param container the root container.
+	 * @param border the border to set on the container.
 	 * @param layout the layout to use for this tree's children.
-	 * @param edges the component's children.
+	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(Container container, LayoutManager layout, Node ... edges)
+	public static Container containerOf(JComponent container, Border border, LayoutManager layout, Node ... children)
 	{
+		container.setBorder(border);
 		container.setLayout(layout);
-		for (Node n : edges)
+		for (Node n : children)
 			n.addTo(container);
 		return container;
 	}
@@ -67,35 +70,83 @@ public final class ContainerFactory
 	/**
 	 * Starts a layout tree, returning the provided container.
 	 * @param container the root container.
-	 * @param edges the component's children.
+	 * @param border the border to set on the container.
+	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(Container container, Node ... edges)
+	public static Container containerOf(JComponent container, Border border, Node ... children)
 	{
-		for (Node n : edges)
+		for (Node n : children)
 			n.addTo(container);
 		return container;
 	}
 
 	/**
-	 * Starts a layout tree, returns a component.
+	 * Starts a layout tree, returning the provided container.
+	 * The layout is replaced on it with the provided layout.
+	 * @param container the root container.
 	 * @param layout the layout to use for this tree's children.
-	 * @param edges the component's children.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, LayoutManager layout, Node ... children)
+	{
+		return containerOf(container, null, layout, children);
+	}
+
+	/**
+	 * Starts a layout tree, returning the provided container.
+	 * @param container the root container.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, Node ... children)
+	{
+		return containerOf(container, null, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a layout tree, returns a component.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(LayoutManager layout, Node ... edges)
+	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
 	{
-		return containerOf(new JPanel(), layout, edges);
+		return containerOf(new JPanel(), border, layout, children);
 	}
 
 	/**
 	 * Starts a Container with a BorderLayout.
-	 * @param edges the component's children.
+	 * @param border the border to set on the container.
+	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Node ... edges)
+	public static Container containerOf(Border border, Node ... children)
 	{
-		return containerOf(new BorderLayout(), edges);
+		return containerOf(new JPanel(), border, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a layout tree, returns a component.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), layout, children);
+	}
+
+	/**
+	 * Starts a Container with a BorderLayout.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Node ... children)
+	{
+		return containerOf(new JPanel(), null, new BorderLayout(), children);
 	}
 
 	/**
@@ -104,12 +155,12 @@ public final class ContainerFactory
 	 * @param border the border to add to the panel.
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Object constraints, Border border, Dimension preferredSize, LayoutManager layout, Node ... edges)
+	public static Node node(Object constraints, Border border, Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, border, preferredSize, constraints, edges);
+		return new NodeBranch(layout, border, preferredSize, constraints, children);
 	}
 
 	/**
@@ -117,12 +168,12 @@ public final class ContainerFactory
 	 * @param constraints the constraints to use for the added branch (using parent layout).
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Object constraints, Dimension preferredSize, LayoutManager layout, Node ... edges)
+	public static Node node(Object constraints, Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, null, preferredSize, constraints, edges);
+		return new NodeBranch(layout, null, preferredSize, constraints, children);
 	}
 
 	/**
@@ -130,12 +181,12 @@ public final class ContainerFactory
 	 * @param constraints the constraints to use for the added branch (using parent layout).
 	 * @param border the border to add to the panel.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Object constraints, Border border, LayoutManager layout, Node ... edges)
+	public static Node node(Object constraints, Border border, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, border, null, constraints, edges);
+		return new NodeBranch(layout, border, null, constraints, children);
 	}
 
 	/**
@@ -143,70 +194,70 @@ public final class ContainerFactory
 	 * @param border the border to add to the panel.
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Border border, Dimension preferredSize, LayoutManager layout, Node ... edges)
+	public static Node node(Border border, Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, border, preferredSize, null, edges);
+		return new NodeBranch(layout, border, preferredSize, null, children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch. 
 	 * @param border the border to add to the panel.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch.
 	 */
-	public static Node node(Border border, LayoutManager layout, Node ... edges)
+	public static Node node(Border border, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, border, null, null, edges);
+		return new NodeBranch(layout, border, null, null, children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch. 
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Dimension preferredSize, LayoutManager layout, Node ... edges)
+	public static Node node(Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, null, preferredSize, null, edges);
+		return new NodeBranch(layout, null, preferredSize, null, children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch. 
 	 * @param constraints the constraints to use for the added branch (using parent layout).
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Object constraints, LayoutManager layout, Node ... edges)
+	public static Node node(Object constraints, LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, null, null, constraints, edges);
+		return new NodeBranch(layout, null, null, constraints, children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch.
 	 * @param border the border to add to the panel.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(Border border, Node ... edges)
+	public static Node node(Border border, Node ... children)
 	{
-		return new NodeBranch(new BorderLayout(), border, null, null, edges);
+		return new NodeBranch(new BorderLayout(), border, null, null, children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch.
 	 * @param layout the layout to use for this branch's children.
-	 * @param edges the edges on the branch.
+	 * @param children the children on the branch.
 	 * @return a new branch node.
 	 */
-	public static Node node(LayoutManager layout, Node ... edges)
+	public static Node node(LayoutManager layout, Node ... children)
 	{
-		return new NodeBranch(layout, null, null, null, edges);
+		return new NodeBranch(layout, null, null, null, children);
 	}
 
 	/**

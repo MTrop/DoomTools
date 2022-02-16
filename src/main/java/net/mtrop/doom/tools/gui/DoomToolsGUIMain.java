@@ -124,8 +124,7 @@ public final class DoomToolsGUIMain
         	}
     		get().createAndDisplayMainWindow();
     	}
-		
-		switch (args[0])
+		else switch (args[0])
 		{
 			default:
         		SwingUtils.error("Expected valid application name.");

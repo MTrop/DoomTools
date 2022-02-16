@@ -387,17 +387,6 @@ public final class DoomMakeMain
 		private int startAgent()
 		{
 			File workDir = new File(".");
-			Properties properties = System.getProperties();
-			
-			try {
-				setAgentLock(workDir, properties);
-			} catch (JSONConversionException e) {
-				options.stderr.println("ERROR: Could not set agent lock on project! JSON Parse error: " + e.getLocalizedMessage());
-				return ERROR_IOERROR;
-			} catch (IOException e) {
-				options.stderr.println("ERROR: Could not set agent lock on project!");
-				return ERROR_IOERROR;
-			}
 			
 			final AutoBuildAgent agent = new AutoBuildAgent(workDir, new AutoBuildAgent.Listener() 
 			{
@@ -499,13 +488,6 @@ public final class DoomMakeMain
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> 
 			{
 				agent.shutDown();
-				try {
-					unsetAgentLock(workDir, properties);
-				} catch (JSONConversionException e) {
-					options.stderr.println("ERROR: Could not unset agent lock on project! JSON Parse error: " + e.getLocalizedMessage());
-				} catch (IOException e) {
-					options.stderr.println("ERROR: Could not unset agent lock on project! You will need to clear it manually.");
-				}
 			}));
 			
 			agent.start();
@@ -1065,15 +1047,6 @@ public final class DoomMakeMain
 		}
 	}
 
-	// Gets the lock file path.
-	private static File getLockFile(File projectDirectory, Properties properties) 
-	{
-		File buildDir = getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
-		File lockFile = getProjectPropertyPath(projectDirectory, properties, "doommake.file.lock", "lock.json");
-		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile.getPath());
-		return fullFilePath;
-	}
-
 	/**
 	 * Gets a file path for a project's path that is in a project directory. 
 	 * @param projectDirectory the project directory root.
@@ -1102,7 +1075,7 @@ public final class DoomMakeMain
 	public static JSONObject readLockObject(File projectDirectory, Properties properties) throws IOException
 	{
 		File fullFilePath = getLockFile(projectDirectory, properties);
-
+	
 		if (!Common.createPathForFile(fullFilePath))
 			throw new IOException("Could not create directories for lock file.");
 		
@@ -1128,43 +1101,28 @@ public final class DoomMakeMain
 	public static void writeLockObject(File projectDirectory, Properties properties, JSONObject lockRoot) throws IOException
 	{
 		File fullFilePath = getLockFile(projectDirectory, properties);
-
+	
 		if (!Common.createPathForFile(fullFilePath))
 			throw new IOException("Could not create directories for lock file.");
 		
 		JSONWriter.Options jsonOptions = new JSONWriter.Options();
 		jsonOptions.setIndentation("\t");
-
+	
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(fullFilePath), "UTF-8"))
 		{
 			JSONWriter.writeJSON(lockRoot, jsonOptions, writer);
 		}
 	}
 
-	/**
-	 * Set agent lock.
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to inspect for the lock file name.
-	 * @throws IOException if the file could not be opened or written.
-	 */
-	public static void setAgentLock(File projectDirectory, Properties properties) throws IOException
+	// Gets the lock file path.
+	private static File getLockFile(File projectDirectory, Properties properties) 
 	{
-		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, properties);
-		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, true);
-		DoomMakeMain.writeLockObject(projectDirectory, properties, lockRoot);
-	}
-	
-	/**
-	 * Unset agent lock.
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to inspect for the lock file name.
-	 * @throws IOException if the file could not be opened or written.
-	 */
-	public static void unsetAgentLock(File projectDirectory, Properties properties) throws IOException
-	{
-		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, properties);
-		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, false);
-		DoomMakeMain.writeLockObject(projectDirectory, properties, lockRoot);
+		File buildDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
+		String lockFile = properties.getProperty("doommake.file.lock", "lock.json");
+		if (Common.isEmpty(lockFile))
+			lockFile = "lock.json";
+		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile);
+		return fullFilePath;
 	}
 
 }

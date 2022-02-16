@@ -14,6 +14,9 @@ import java.nio.file.WatchService;
 import java.util.Objects;
 import java.util.Properties;
 
+import com.blackrook.json.JSONConversionException;
+import com.blackrook.json.JSONObject;
+
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -68,12 +71,14 @@ public class AutoBuildAgent
 	
 	/**
 	 * Starts the watcher.
-	 * @throws IllegalStateException if the thread is already running, or the agent lock could not be set.
+	 * @return true if started successfully, false if not.
+	 * @throws IllegalStateException if the watcher is already running.
 	 */
-	public void start()
+	public boolean start()
 	{
 		if (watchThread != null)
 			throw new IllegalStateException("Watcher thread is already running!");
+		
 		watchThread = new WatchThread(projectDirectory);
 		try {
 			watchThread.start();
@@ -83,14 +88,24 @@ public class AutoBuildAgent
 		}
 		buildThread = new BuildThread(projectDirectory, 1000L);
 		buildThread.start();
+
+		try {
+			setAgentLock();
+		} catch (JSONConversionException e) {
+			fireAgentStartupException("Could not set agent lock on project! JSON Parse error: " + e.getLocalizedMessage(), e);
+			stopThreads();
+			return false;
+		} catch (IOException e) {
+			fireAgentStartupException("Could not set agent lock on project!", e);
+			stopThreads();
+			return false;
+		}
+		
 		fireAgentStarted();
+		return true;
 	}
 	
-	/**
-	 * Ends the watcher.
-	 * Does nothing if it is not running.
-	 */
-	public void shutDown()
+	private void stopThreads()
 	{
 		if (watchThread != null)
 		{
@@ -102,6 +117,35 @@ public class AutoBuildAgent
 			buildThread.interrupt();
 			buildThread = null;
 		}
+	}
+	
+	/**
+	 * @return true if the agent is running, false if not. 
+	 */
+	public boolean isRunning()
+	{
+		return watchThread != null;
+	}
+	
+	/**
+	 * Ends the watcher.
+	 * Does nothing if the watcher is not running.
+	 */
+	public void shutDown()
+	{
+		if (!isRunning())
+			return;
+
+		stopThreads();
+
+		try {
+			unsetAgentLock();
+		} catch (JSONConversionException e) {
+			fireAgentStoppedException("Could not unset agent lock on project! JSON Parse error: " + e.getLocalizedMessage(), e);
+		} catch (IOException e) {
+			fireAgentStoppedException("Could not unset agent lock on project! You will need to clear it manually.", e);
+		}
+
 		fireAgentStopped();
 	}
 
@@ -161,12 +205,24 @@ public class AutoBuildAgent
 			listener.onAgentStarted();
 	}
 	
+	private void fireAgentStartupException(String message, Exception e)
+	{
+		if (listener != null)
+			listener.onAgentStartupException(message, e);
+	}
+
 	private void fireAgentStopped()
 	{
 		if (listener != null)
 			listener.onAgentStopped();
 	}
 	
+	private void fireAgentStoppedException(String message, Exception e)
+	{
+		if (listener != null)
+			listener.onAgentStoppedException(message, e);
+	}
+
 	private int fireCallBuild(String target)
 	{
 		if (listener != null)
@@ -259,6 +315,32 @@ public class AutoBuildAgent
 	}
 
 	/**
+	 * Set agent lock.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	private void setAgentLock() throws IOException
+	{
+		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, mergedProperties);
+		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, true);
+		DoomMakeMain.writeLockObject(projectDirectory, mergedProperties, lockRoot);
+	}
+	
+	/**
+	 * Unset agent lock.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	private void unsetAgentLock() throws IOException
+	{
+		JSONObject lockRoot = DoomMakeMain.readLockObject(projectDirectory, mergedProperties);
+		lockRoot.addMember(DoomMakeMain.JSON_AGENT_LOCK_KEY, false);
+		DoomMakeMain.writeLockObject(projectDirectory, mergedProperties, lockRoot);
+	}
+
+	/**
 	 * Listener interface for this agent.
 	 */
 	public interface Listener
@@ -274,7 +356,7 @@ public class AutoBuildAgent
 		}
 		
 		/**
-		 * Called when the agent is started.
+		 * Called when the agent is started and ready.
 		 */
 		default void onAgentStarted()
 		{
@@ -282,13 +364,34 @@ public class AutoBuildAgent
 		}
 		
 		/**
+		 * Called if an exception occurs on agent start.
+		 * If this gets called, the agent will not start.
+		 * @param message the error message.
+		 * @param exception the exception thrown.
+		 */
+		default void onAgentStartupException(String message, Exception exception)
+		{
+			// Do nothing.
+		}
+
+		/**
 		 * Called when the agent is stopped.
 		 */
 		default void onAgentStopped()
 		{
 			// Do nothing.
 		}
-		
+
+		/**
+		 * Called if an exception occurs on agent stop.
+		 * @param message the error message.
+		 * @param exception the exception thrown.
+		 */
+		default void onAgentStoppedException(String message, Exception exception)
+		{
+			// Do nothing.
+		}
+
 		/**
 		 * Called when a build is <em>going to</em> start (grace period is set to a nonzero duration from 0).
 		 */

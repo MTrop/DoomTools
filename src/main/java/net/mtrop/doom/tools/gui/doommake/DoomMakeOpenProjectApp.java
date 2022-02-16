@@ -3,16 +3,19 @@ package net.mtrop.doom.tools.gui.doommake;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.Action;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
 
+import net.mtrop.doom.tools.doommake.AutoBuildAgent;
+import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -62,7 +65,7 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
     /** Checkbox for flagging auto-build. */
     private JCheckBox autoBuildCheckbox;
     /** Target run action. */
-    private Action targetRunAction;
+    private AbstractAction targetRunAction;
     /** Status messages. */
     private StatusPanel statusPanel;
 
@@ -75,6 +78,8 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
     
     /** Current target. */
     private String currentTarget;
+    /** Auto build agent. */
+    private AutoBuildAgent autoBuildAgent;
     
     /**
 	 * Creates a new open project application from a project directory.
@@ -98,21 +103,51 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 		);
 		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (c, e) -> 
 		{
-			// TODO: Finish Agent start/stop.
-			/*
 			if (c.isSelected())
-				startWatchThread();
+				this.autoBuildAgent.start();
 			else
-				killWatchThread();
-			*/
+				this.autoBuildAgent.shutDown();
 		});
-		this.targetRunAction = action(currentTarget, (e) -> runCurrentTarget());
+		this.targetRunAction = action(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
+
 		this.statusPanel = new StatusPanel();
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
 		this.projectDirectory = projectDirectory;
 		
 		this.currentTarget = null;
+		
+		Listener listener = new Listener() 
+		{
+			@Override
+			public void onAgentStarted() 
+			{
+				LOG.info("Agent started: " + projectDirectory.getPath());
+			}
+			
+			@Override
+			public void onAgentStartupException(String message, Exception exception) 
+			{
+				LOG.error("Agent startup error: " + message);
+			}
+
+			@Override
+			public void onAgentStopped() 
+			{
+				LOG.info("Agent stopped: " + projectDirectory.getPath());
+			}
+
+			@Override
+			public void onAgentStoppedException(String message, Exception exception) 
+			{
+				LOG.error("Agent stop error: " + message);
+			}
+
+			// TODO: Finish this.
+			
+		};
+		
+		this.autoBuildAgent = new AutoBuildAgent(projectDirectory, listener);
 	}
 	
 	/**
@@ -169,7 +204,7 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	{
 		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
 		refreshTargets();
-		return containerOf(
+		Container out = containerOf(
 			node(BorderFactory.createEmptyBorder(4, 4, 4, 4), new BorderLayout(), node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.EAST, control)
@@ -177,12 +212,15 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
 					node(BorderLayout.CENTER, scroll(listPanel)),
 					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
-						node(BorderLayout.NORTH, autoBuildCheckbox),
+						node(BorderLayout.CENTER, autoBuildCheckbox),
+						node(BorderLayout.EAST, button(targetRunAction)),
 						node(BorderLayout.SOUTH, statusPanel)
 					))
 				))
 			)))
 		);
+		out.setPreferredSize(new Dimension(240, 200));
+		return out;
 	}
 
 	@Override
@@ -206,15 +244,9 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public void onOpen() 
-	{
-		
-	}
-	
-	@Override
 	public void onClose() 
 	{
-		//killWatchThread();
+		autoBuildAgent.shutDown();
 	}
 	
 	// Open settings.
@@ -230,15 +262,16 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	// Refresh targets.
 	private void refreshTargets()
 	{
+		Container parent = receiver != null ? receiver.getApplicationContainer() : null;
 		String absolutePath = projectDirectory.getAbsolutePath();
 		try {
 			listPanel.refreshTargets(helper.getProjectTargets(projectDirectory));
 			LOG.infof("Targets refreshed for %s", absolutePath);
 		} catch (FileNotFoundException e) {
-			SwingUtils.error(receiver.getApplicationContainer(), language.getText("doommake.project.targets.error.nodirectory", absolutePath));
+			SwingUtils.error(parent, language.getText("doommake.project.targets.error.nodirectory", absolutePath));
 			LOG.errorf("Project directory does not exist: %s", absolutePath);
 		} catch (ProcessCallException e) {
-			SwingUtils.error(receiver.getApplicationContainer(), language.getText("doommake.project.targets.error.gettargets", absolutePath));
+			SwingUtils.error(parent, language.getText("doommake.project.targets.error.gettargets", absolutePath));
 			LOG.errorf("Could not invoke `doommake --targets` in %s", absolutePath);
 		}
 	}
