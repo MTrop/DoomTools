@@ -68,6 +68,22 @@ definitions. You are better off using aliases or the pre-packaged defines via th
 type #includes.
 
 
+### [DECOHack] Why aren't DECOHack's base patches built from a source document a la DECORATE/ZScript?
+
+The main reason is - Doom's executables and other data are laid out in a very specific way,
+and if I attempt to rebuild that initial actor data using DECOHack's state-filling logic, 
+there's a good chance that the result will not line up with the original, which will make 
+patches with redundant "changes," or worse, ruin hardcodings that the author did not intend 
+to change, out-of-the-box. These problems compound if I (or anybody else) have to do other 
+internal changes.
+
+I could hardcode in specific states, but those would become less readable (or useful as examples) 
+if I have to keep defining specific states to have specific data.
+
+For the time being, you are better off using the [ZDoom Wiki](https://zdoom.org/wiki/Classes) pages
+as guidance.
+
+
 ### [WadScript] Why is there no WADREPLACE() built-in for replacing WAD entries?
 
 "Replacing" an entry is essentially removing and adding at the same index, but you can
