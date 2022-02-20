@@ -3,9 +3,9 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.icon;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.containerOf;
@@ -54,7 +54,7 @@ public class StatusPanel extends JPanel
 	 */
 	public void setMessage(String message)
 	{
-		SwingUtilities.invokeLater(() -> {
+		SwingUtils.invoke(() -> {
 			messageLabel.setIcon(null);
 			messageLabel.setText(message);
 		});
@@ -66,7 +66,7 @@ public class StatusPanel extends JPanel
 	 */
 	public void setSuccessMessage(String message)
 	{
-		SwingUtilities.invokeLater(() -> {
+		SwingUtils.invoke(() -> {
 			messageLabel.setIcon(successIcon);
 			messageLabel.setText(message);
 		});
@@ -78,7 +78,7 @@ public class StatusPanel extends JPanel
 	 */
 	public void setActivityMessage(String message)
 	{
-		SwingUtilities.invokeLater(() -> {
+		SwingUtils.invoke(() -> {
 			messageLabel.setIcon(activityIcon);
 			messageLabel.setText(message);
 		});
@@ -90,7 +90,7 @@ public class StatusPanel extends JPanel
 	 */
 	public void setErrorMessage(String message)
 	{
-		SwingUtilities.invokeLater(() -> {
+		SwingUtils.invoke(() -> {
 			messageLabel.setIcon(errorIcon);
 			messageLabel.setText(message);
 		});

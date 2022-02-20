@@ -206,6 +206,28 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 
 	/**
 	 * Creates a new instance builder.
+	 * @param runnable the runnable to execute.
+	 * @return a new instance builder.
+	 */
+	public static Builder<Void> instance(Runnable runnable)
+	{
+		return instance(asCallable(null, runnable));
+	}
+
+	/**
+	 * Creates a new instance builder.
+	 * @param <T> the return type.
+	 * @param result the result to return on a successful execution of the provided Runnable.
+	 * @param runnable the runnable to execute.
+	 * @return a new instance builder.
+	 */
+	public static <T> Builder<T> instance(T result, Runnable runnable)
+	{
+		return instance(asCallable(result, runnable));
+	}
+
+	/**
+	 * Creates a new instance builder.
 	 * @param <T> the Callable return type.
 	 * @param callable the Callable that gets called in the instance.
 	 * @return a new instance builder.

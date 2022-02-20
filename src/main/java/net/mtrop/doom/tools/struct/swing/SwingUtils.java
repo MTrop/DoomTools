@@ -10,11 +10,13 @@ import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.function.Consumer;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
@@ -69,6 +71,29 @@ public final class SwingUtils
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Convenience for {@link SwingUtilities#invokeLater(Runnable)}, so it is only one import.
+	 * @param runnable the runnable to call later in the Swing event cue.
+	 * @see SwingUtilities#invokeLater(Runnable)
+	 */
+	public static void invoke(Runnable runnable)
+	{
+		SwingUtilities.invokeLater(runnable);
+	}
+	
+	/**
+	 * Convenience for {@link SwingUtilities#invokeAndWait(Runnable)}, so it is only one import.
+	 * This will wait for the runnable to be called.
+	 * @param runnable the runnable to call later in the Swing event cue.
+	 * @throws InterruptedException 
+	 * @throws InvocationTargetException 
+	 * @see SwingUtilities#invokeAndWait(Runnable)
+	 */
+	public static void invokeAndWait(Runnable runnable) throws InvocationTargetException, InterruptedException
+	{
+		SwingUtilities.invokeAndWait(runnable);
 	}
 	
 	/**

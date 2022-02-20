@@ -10,10 +10,10 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
@@ -87,7 +87,7 @@ public class DoomMakeProjectTargetListPanel extends JPanel
 	 */
 	public void refreshTargets(Collection<String> targetNames)
 	{
-		SwingUtilities.invokeLater(() -> {
+		SwingUtils.invoke(() -> {
 			targetListModel.clear();
 			for (String s : targetNames)
 				targetListModel.addElement(s);

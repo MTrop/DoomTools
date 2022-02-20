@@ -14,8 +14,8 @@ public final class DoomMakeProjectHelperTest
 		DoomMakeProjectHelper helper = DoomMakeProjectHelper.get();
 		
 		System.out.println(helper.getProjectTargets(projectDir));
-		helper.callDoomMakeTarget(projectDir, System.out, System.err, "patch").result();
-		InstancedFuture<Integer> instance = helper.callDoomMakeTarget(projectDir, System.out, null, "make");
+		helper.callDoomMakeTarget(projectDir, System.out, System.err, "patch", false).result();
+		InstancedFuture<Integer> instance = helper.callDoomMakeTarget(projectDir, System.out, null, "make", false);
 		Thread.sleep(300);
 		instance.cancel();
 	}

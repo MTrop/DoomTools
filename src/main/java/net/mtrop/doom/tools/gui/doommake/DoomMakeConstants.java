@@ -7,8 +7,8 @@ public interface DoomMakeConstants
 	/** Common paths. */
 	interface Paths
 	{
-		/** DoomMake Config folder base. */
-	    String APPDATA_PATH = Common.SETTINGS_PATH + "DoomMake/";
+		/** DoomTools Config folder base. */
+	    String APPDATA_PATH = Common.SETTINGS_PATH;
 	}
 	
 	/** Common channel names. */

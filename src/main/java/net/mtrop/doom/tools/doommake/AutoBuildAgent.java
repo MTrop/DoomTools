@@ -43,11 +43,11 @@ public class AutoBuildAgent
     private File sourceDirectory;
     
     /** "Currently building" internal flag. */
-    private boolean currentlyBuilding;
+    private volatile boolean currentlyBuilding;
     /** Watcher thread. */
-    private WatchThread watchThread;
+    private volatile WatchThread watchThread;
     /** Watcher thread. */
-    private BuildThread buildThread;
+    private volatile BuildThread buildThread;
     
 	/**
 	 * Creates an auto-build agent class.

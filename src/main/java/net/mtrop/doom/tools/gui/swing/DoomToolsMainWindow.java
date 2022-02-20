@@ -3,22 +3,32 @@ package net.mtrop.doom.tools.gui.swing;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
+import net.mtrop.doom.tools.DoomToolsMain;
+import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
+import java.awt.Desktop;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * The main DoomTools application window.
@@ -26,7 +36,10 @@ import java.awt.event.KeyEvent;
  */
 public class DoomToolsMainWindow extends JFrame 
 {
-	private static final long serialVersionUID = -8837485206120777188L;
+    /** Logger. */
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
+
+    private static final long serialVersionUID = -8837485206120777188L;
 
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
@@ -77,11 +90,18 @@ public class DoomToolsMainWindow extends JFrame
 	private JMenuBar createMenuBar()
 	{
 		return menuBar(
+			// File
 			utils.createMenuFromLanguageKey("doomtools.menu.file",
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings",
+					(c, e) -> openSettingsModal()
+				),
+				separator(),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit",
 					(c, e) -> shutDownHook.run()
 				)
 			),
+
+			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new",
@@ -96,6 +116,8 @@ public class DoomToolsMainWindow extends JFrame
 					)
 				)
 			),
+
+			// View
 			utils.createMenuFromLanguageKey("doomtools.menu.view",
 				utils.createItemFromLanguageKey("doomtools.menu.view.item.cascade", (c, e) -> desktop.cascadeWorkspace()),
 				utils.createItemFromLanguageKey("doomtools.menu.view.item.minimize", (c, e) -> desktop.minimizeWorkspace()),
@@ -106,9 +128,21 @@ public class DoomToolsMainWindow extends JFrame
 						desktop.clearWorkspace();
 				})
 			),
+
+			// Help
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.about",
 					(c, e) -> openAboutModal()
+				),
+				separator(),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs",
+					(c, e) -> openDocs()
+				),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings",
+					(c, e) -> openSettingsFolder()
+				),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb",
+					(c, e) -> openWebsite()
 				)
 			)
 		);
@@ -121,6 +155,120 @@ public class DoomToolsMainWindow extends JFrame
 			new DoomToolsAboutPanel(), 
 			choice("OK", KeyEvent.VK_O)
 		).openThenDispose();
+	}
+	
+	private void openSettingsModal()
+	{
+		modal(this, utils.getWindowIcons(), 
+			language.getText("doomtools.settings.title"), 
+			new DoomToolsSettingsPanel() 
+		).openThenDispose();
+	}
+	
+	private void openDocs()
+	{
+		String path; 
+		try {
+			path = Environment.getDoomToolsPath();
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		if (Common.isEmpty(path))
+		{
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
+			return;
+		}
+		
+		LOG.info("Opening the DoomTools documentation folder...");
+
+		try {
+			Desktop.getDesktop().open(new File(path + File.separator + "docs"));
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.opendocs.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.opendocs.security"));
+		}
+	}
+	
+	private void openSettingsFolder()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
+			return;
+		}
+		
+		LOG.info("Opening the DoomTools settings folder...");
+		
+		File settingsDir = new File(Common.SETTINGS_PATH);
+		if (!settingsDir.exists())
+		{
+			SwingUtils.error(language.getText("doomtools.error.opensettings.notfound"));
+			return;
+		}
+		
+		try {
+			Desktop.getDesktop().open(settingsDir);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.opensettings.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.opensettings.security"));
+		}
+	}
+	
+	private void openWebsite()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
+			return;
+		}
+				
+		LOG.info("Opening the DoomTools website...");
+
+		try {
+			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_WEBSITE));
+		} catch (URISyntaxException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.url"));
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.security"));
+		}
+	}
+	
+	/**
+	 * Shuts down all the apps in the window.
+	 */
+	public void shutDownApps()
+	{
+		desktop.clearWorkspace();
 	}
 	
 	/**

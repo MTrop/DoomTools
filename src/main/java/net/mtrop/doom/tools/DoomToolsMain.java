@@ -44,11 +44,11 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
  */
 public final class DoomToolsMain 
 {
-	private static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
+	public static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
 
-	private static final String UPDATE_GITHUB_API = "https://api.github.com/";
-	private static final String UPDATE_REPO_NAME = "DoomTools";
-	private static final String UPDATE_REPO_OWNER = "MTrop";
+	public static final String UPDATE_GITHUB_API = "https://api.github.com/";
+	public static final String UPDATE_REPO_NAME = "DoomTools";
+	public static final String UPDATE_REPO_OWNER = "MTrop";
 
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	

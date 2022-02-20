@@ -11,12 +11,14 @@ import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager.Keys;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 
 /**
  * Manages the DoomTools GUI window. 
@@ -29,8 +31,12 @@ public final class DoomToolsGUIMain
 	 */
 	public interface ApplicationNames
 	{
-		/** DoomMake. */
+		/** DoomMake - Open Project (working dir). */
 		String DOOMMAKE = "doommake";
+		/** DoomMake - New Project. */
+		String DOOMMAKE_NEW = "doommake-new";
+		/** DoomMake - Open Project. */
+		String DOOMMAKE_OPEN = "doommake-open";
 	}
 	
     /** Logger. */
@@ -97,13 +103,17 @@ public final class DoomToolsGUIMain
 	 * Starts an orphaned GUI Application by name.
 	 * Inherits the working directory and environment.
 	 * @param appName the application name (see {@link ApplicationNames}).
+	 * @param args optional addition arguments (some apps require them).
 	 * @return the process created.
 	 * @throws IOException if the application could not be created.
 	 * @see Common#spawnJava(Class) 
 	 */
-	public static Process startGUIAppProcess(String appName) throws IOException
+	public static Process startGUIAppProcess(String appName, String ... args) throws IOException
 	{
-		return Common.spawnJava(DoomToolsGUIMain.class).arg(appName).exec();
+		ProcessCallable pc = Common.spawnJava(DoomToolsGUIMain.class).arg(appName);
+		for (int i = 0; i < args.length; i++)
+			pc.arg(args[i]);
+		return pc.exec();
 	}
 	
 	/**
@@ -124,15 +134,31 @@ public final class DoomToolsGUIMain
         	}
     		get().createAndDisplayMainWindow();
     	}
-		else switch (args[0])
+		else 
 		{
-			default:
-        		SwingUtils.error("Expected valid application name.");
-        		System.exit(-1);
-        		return;
-			case ApplicationNames.DOOMMAKE:
-				startApplication(new DoomMakeOpenProjectApp(new File(System.getProperty("user.dir"))));
-				break;
+			try 
+			{
+				switch (args[0])
+				{
+					default:
+		        		SwingUtils.error("Expected valid application name.");
+		        		System.exit(-1);
+		        		return;
+					case ApplicationNames.DOOMMAKE:
+						startApplication(new DoomMakeOpenProjectApp(new File(System.getProperty("user.dir"))));
+						break;
+					case ApplicationNames.DOOMMAKE_NEW:
+						startApplication(new DoomMakeNewProjectApp());
+						break;
+					case ApplicationNames.DOOMMAKE_OPEN:
+						startApplication(new DoomMakeOpenProjectApp(new File(args[1])));
+						break;
+				}
+			}
+			catch (ArrayIndexOutOfBoundsException e)
+			{
+        		SwingUtils.error("Missing argument for application: " + e.getLocalizedMessage());
+			}
 		}
     	
 	}
@@ -219,10 +245,15 @@ public final class DoomToolsGUIMain
     private void shutDown()
     {
     	LOG.info("Shutting down DoomTools GUI...");
+    	
+    	LOG.info("Sending close to all open apps...");
+    	window.shutDownApps();
+    	
     	LOG.debug("Disposing main window...");
     	window.setVisible(false);
     	window.dispose();
     	LOG.debug("Main window disposed.");
+    	
     	LOG.info("Exiting JVM...");
     	System.exit(0);
     }

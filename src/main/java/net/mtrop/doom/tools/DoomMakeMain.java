@@ -54,6 +54,33 @@ public final class DoomMakeMain
 {
 	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
 	
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_FUNCHELP1 = "--function-help";
+	public static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
+	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
+	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
+	public static final String SWITCH_TARGETS = "--targets";
+	public static final String SWITCH_LISTMODULES = "--list-templates";
+	public static final String SWITCH_LISTMODULES2 = "-t";
+	public static final String SWITCH_NEWPROJECT = "--new-project";
+	public static final String SWITCH_NEWPROJECT2 = "-n";
+	public static final String SWITCH_EMBED = "--embed";
+	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_AGENT = "--auto-build";
+	public static final String SWITCH_AGENT_VERBOSE = "--auto-build-verbose";
+	public static final String SWITCH_AGENT_BYPASS = "--agent-bypass";
+	
+	public static final String SWITCH_SCRIPTFILE = "--script";
+	public static final String SWITCH_SCRIPTFILE2 = "-s";
+	public static final String SWITCH_PROPERTYFILE = "--properties";
+	public static final String SWITCH_PROPERTYFILE2 = "-p";
+	public static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
+	public static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
+	public static final String SWITCH_STACKDEPTH1 = "--stack-depth";
+	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
+
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
@@ -68,33 +95,6 @@ public final class DoomMakeMain
 	private static final int ERROR_IOERROR = 7;
 	private static final int ERROR_AGENT_RUNNING = 8;
 	private static final int ERROR_UNKNOWN = -1;
-
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_FUNCHELP1 = "--function-help";
-	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
-	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
-	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
-	private static final String SWITCH_TARGETS = "--targets";
-	private static final String SWITCH_LISTMODULES = "--list-templates";
-	private static final String SWITCH_LISTMODULES2 = "-t";
-	private static final String SWITCH_NEWPROJECT = "--new-project";
-	private static final String SWITCH_NEWPROJECT2 = "-n";
-	private static final String SWITCH_EMBED = "--embed";
-	private static final String SWITCH_GUI = "--gui";
-	private static final String SWITCH_AGENT = "--auto-build";
-	private static final String SWITCH_AGENT_VERBOSE = "--auto-build-verbose";
-	private static final String SWITCH_AGENT_BYPASS = "--agent-bypass";
-	
-	private static final String SWITCH_SCRIPTFILE = "--script";
-	private static final String SWITCH_SCRIPTFILE2 = "-s";
-	private static final String SWITCH_PROPERTYFILE = "--properties";
-	private static final String SWITCH_PROPERTYFILE2 = "-p";
-	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
-	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
-	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
-	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
 	/**
 	 * Project types.

@@ -217,25 +217,28 @@ public final class DoomMakeProjectHelper
 	 * @param stdout the standard out stream. 
 	 * @param stderr the standard error stream. 
 	 * @param targetName the target name.
+	 * @param agentOverride if true, bypasses agent detection.
 	 * @return the list of project targets.
 	 * @throws FileNotFoundException 
 	 * @throws ProcessCallException 
 	 */
-	public InstancedFuture<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName) throws FileNotFoundException, ProcessCallException
+	public InstancedFuture<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName, boolean agentOverride) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
+		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
+		if (agentOverride)
+			callable.arg(DoomMakeMain.SWITCH_AGENT_BYPASS);
+		
+		callable.arg(targetName)
+			.setOut(stdout)
+			.setErr(stderr)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."));
+		
 		LOG.infof("Calling DoomMake (%s).", targetName);
-		return InstancedFuture.instance(
-			Common.spawnJava(DoomMakeMain.class)
-				.setWorkingDirectory(projectDirectory)
-				.arg(targetName)
-				.setOut(stdout)
-				.setErr(stderr)
-				.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
-				.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
-		).spawn();
+		return InstancedFuture.instance(callable).spawn();
 	}
 
 	private static Properties getProjectProperties(File projectDirectory)
