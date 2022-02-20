@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
@@ -220,18 +221,21 @@ public final class DoomMakeProjectHelper
 	 * @throws FileNotFoundException 
 	 * @throws ProcessCallException 
 	 */
-	public ProcessCallable.Instance callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName) throws FileNotFoundException, ProcessCallException
+	public InstancedFuture<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
 		checkDoomMake();
 		
 		LOG.infof("Calling DoomMake (%s).", targetName);
-		return Common.spawnJava(DoomMakeMain.class)
-			.setWorkingDirectory(projectDirectory)
-			.arg(targetName)
-			.setOut(stdout)
-			.setErr(stderr)
-		.spawn();
+		return InstancedFuture.instance(
+			Common.spawnJava(DoomMakeMain.class)
+				.setWorkingDirectory(projectDirectory)
+				.arg(targetName)
+				.setOut(stdout)
+				.setErr(stderr)
+				.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
+				.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+		).spawn();
 	}
 
 	private static Properties getProjectProperties(File projectDirectory)

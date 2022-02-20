@@ -1,13 +1,16 @@
 package net.mtrop.doom.tools.gui;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import net.mtrop.doom.tools.struct.AsyncFactory;
+import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.InstancedFuture.InstanceListener;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
-import net.mtrop.doom.tools.struct.AsyncFactory.Instance;
-import net.mtrop.doom.tools.struct.AsyncFactory.InstanceListener;
 
 /**
  * DoomMake GUI logger singleton.
@@ -30,12 +33,15 @@ public final class DoomToolsTaskManager
 
 	/* ==================================================================== */
 	
-	/** Async factory. */
-	private AsyncFactory asyncFactory;
+	/** Thread pool. */
+	private ThreadPoolExecutor executor;
 	
 	private DoomToolsTaskManager()
 	{
-		this.asyncFactory = new AsyncFactory(0, 4, 5, TimeUnit.SECONDS);
+		this.executor = new ThreadPoolExecutor(0, 4, 5, TimeUnit.SECONDS,
+			new LinkedBlockingQueue<Runnable>(),
+			new DefaultThreadFactory("DoomToolsThread")
+		);
 	}
 
 	/**
@@ -43,9 +49,9 @@ public final class DoomToolsTaskManager
 	 * @param runnable the callable to use.
 	 * @return the new instance.
 	 */
-	public Instance<Void> spawn(Runnable runnable)
+	public InstancedFuture<Void> spawn(Runnable runnable)
 	{
-		return asyncFactory.spawn(createListener(), runnable);
+		return spawn(() -> { runnable.run(); return null; });
 	}
 	
 	/**
@@ -54,9 +60,11 @@ public final class DoomToolsTaskManager
 	 * @param callable the callable to use.
 	 * @return the new instance.
 	 */
-	public <T> Instance<T> spawn(Callable<T> callable)
+	public <T> InstancedFuture<T> spawn(Callable<T> callable)
 	{
-		return asyncFactory.spawn(createListener(), callable);
+		return InstancedFuture.instance(callable)
+			.listener(createListener())
+			.spawn(executor);
 	}
 
 	private <T> InstanceListener<T> createListener()
@@ -64,17 +72,44 @@ public final class DoomToolsTaskManager
 		return new InstanceListener<T>()
 		{
 			@Override
-			public void onStart(Instance<T> instance) 
+			public void onStart(InstancedFuture<T> instance) 
 			{
 				LOG.infof("Started task.");
 			}
 
 			@Override
-			public void onEnd(Instance<T> instance)
+			public void onEnd(InstancedFuture<T> instance)
 			{
 				LOG.infof("Finished task.");
 			}
 		};
 	}
 	
+	/**
+	 * The thread factory used for the Thread Pool.
+	 * Makes non-daemon threads that start with the name <code>"AsyncUtilsThread-"</code>.
+	 */
+	private static class DefaultThreadFactory implements ThreadFactory
+	{
+		private AtomicLong threadId;
+		private String threadNamePrefix;
+
+		private DefaultThreadFactory(String threadNamePrefix)
+		{
+			this.threadId = new AtomicLong(0L);
+			this.threadNamePrefix = threadNamePrefix;
+		}
+
+		@Override
+		public Thread newThread(Runnable r)
+		{
+			Thread out = new Thread(r);
+			out.setName(threadNamePrefix + threadId.getAndIncrement());
+			out.setDaemon(false);
+			out.setPriority(Thread.NORM_PRIORITY);
+			return out;
+		}
+		
+	}
+
 }

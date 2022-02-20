@@ -44,6 +44,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 
 /**
  * Main class for DoomMake.
@@ -394,11 +395,11 @@ public final class DoomMakeMain
 				public int callBuild(String target) 
 				{
 					try {
-						return Common.spawnJava(DoomMakeMain.class)
+						return InstancedFuture.instance(Common.spawnJava(DoomMakeMain.class)
 							.arg(SWITCH_AGENT_BYPASS)
 							.setOut(options.stdout)
 							.setErr(options.stderr)
-						.spawn().result();
+						).spawn().result();
 					} catch (Throwable t) {
 						options.stderr.println("ERROR: " + t.getClass().getSimpleName() + ": " + t.getLocalizedMessage());
 						return ERROR_UNKNOWN;

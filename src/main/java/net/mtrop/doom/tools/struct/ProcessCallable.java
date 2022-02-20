@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -27,11 +27,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -132,6 +127,8 @@ public class ProcessCallable implements Callable<Integer>
 	private static final PipeThreadCreator NULLIN_REDIRECTOR =
 		(process) -> new InputToOutputStreamThread(INPUTSTREAM_NULL, process.getOutputStream());
 	
+	/* ==================================================================== */
+		
 	private String callName;
 	private Deque<String> command;
 	private Map<String, Object> envMap;
@@ -139,16 +136,23 @@ public class ProcessCallable implements Callable<Integer>
 	private PipeThreadCreator stdOutRedirector;
 	private PipeThreadCreator stdErrRedirector;
 	private PipeThreadCreator stdInRedirector;
-	
+	private StreamExceptionListener stdOutListener;
+	private StreamExceptionListener stdErrListener;
+	private StreamExceptionListener stdInListener;
+
 	private ProcessCallable(String callName)
 	{
 		setCallName(callName);
+		
 		this.command = new LinkedList<>();
 		this.envMap = new HashMap<>();
 		this.workingDirectory = null;
 		this.stdOutRedirector = NULLOUT_REDIRECTOR;
 		this.stdErrRedirector = NULLERR_REDIRECTOR;
 		this.stdInRedirector = NULLIN_REDIRECTOR;
+		this.stdOutListener = null;
+		this.stdErrListener = null;
+		this.stdInListener = null;
 	}
 	
 	/**
@@ -639,6 +643,39 @@ public class ProcessCallable implements Callable<Integer>
 	}
 	
 	/**
+	 * Sets the listener to use for exceptions that may occur on STDOUT streaming. 
+	 * @param listener the listener to use.
+	 * @return this, for chaining.
+	 */
+	public ProcessCallable setOutListener(StreamExceptionListener listener) 
+	{
+		this.stdOutListener = listener;
+		return this;
+	}
+
+	/**
+	 * Sets the listener to use for exceptions that may occur on STDERR streaming. 
+	 * @param listener the listener to use.
+	 * @return this, for chaining.
+	 */
+	public ProcessCallable setErrListener(StreamExceptionListener listener) 
+	{
+		this.stdOutListener = listener;
+		return this;
+	}
+
+	/**
+	 * Sets the listener to use for exceptions that may occur on STDIN streaming. 
+	 * @param listener the listener to use.
+	 * @return this, for chaining.
+	 */
+	public ProcessCallable setInListener(StreamExceptionListener listener) 
+	{
+		this.stdInListener = listener;
+		return this;
+	}
+
+	/**
 	 * Redirects the STDOUT of this ProcessCallable to the STDIN
 	 * of another ProcessCallable, piping the output to the input.
 	 * @param target the target ProcessCallable. 
@@ -673,7 +710,7 @@ public class ProcessCallable implements Callable<Integer>
 		return this;
 	}
 	
-    /**
+	/**
      * Computes a result, or throws an exception if unable to do so.
      * <p> This will create the process, bind the redirects, and wait for its completion and
      * thread termination, returning the Process result.
@@ -683,11 +720,52 @@ public class ProcessCallable implements Callable<Integer>
 	@Override
 	public final Integer call() throws Exception 
 	{
-		Instance instance = new Instance();
-		instance.run();
-		if (instance.getException() != null)
-			throw (Exception)instance.getException();
-		return instance.result();
+		Process process = exec();
+		
+		PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(process) : null;
+		PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(process) : null;
+		PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(process)  : null;
+
+		long instanceId = INSTANCE_ID.getAndIncrement();
+
+		if (outThread != null)
+		{
+			outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
+			outThread.start();
+		}
+		if (errThread != null)
+		{
+			errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
+			errThread.start();
+		}
+		if (inThread != null)
+		{
+			inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
+			inThread.start();
+		}
+
+		int out = process.waitFor();
+		
+		if (outThread != null)
+		{
+			outThread.join();
+			if (stdOutListener != null)
+				stdOutListener.onException(outThread.getException());
+		}
+		if (errThread != null)
+		{
+			errThread.join();
+			if (stdErrListener != null)
+				stdErrListener.onException(errThread.getException());
+		}
+		if (inThread != null)
+		{
+			inThread.join();
+			if (stdInListener != null)
+				stdInListener.onException(inThread.getException());
+		}
+		
+		return out;
 	}
 	
 	/**
@@ -716,347 +794,17 @@ public class ProcessCallable implements Callable<Integer>
 	}
 	
 	/**
-	 * Spawns this process in a newly-created thread, returning the instance.
-	 * @return a process instance.
+	 * A listener that this callable uses when an {@link IOException} occurs on
+	 * one of the Threads that this creates to pipe the standard streams to and from the opened Process. 
 	 */
-	public Instance spawn()
+	@FunctionalInterface
+	public interface StreamExceptionListener
 	{
-		return spawn("ProcessThread", false);
-	}
-	
-	/**
-	 * Spawns this process in a newly-created thread, returning the instance.
-	 * @param threadName the process thread name.
-	 * @return a process instance.
-	 */
-	public Instance spawn(String threadName)
-	{
-		return spawn(threadName, false);
-	}
-	
-	/**
-	 * Spawns this process in a newly-created thread, returning the instance.
-	 * @param daemon if the thread should be a daemon thread. 
-	 * @return a process instance.
-	 */
-	public Instance spawn(boolean daemon)
-	{
-		return spawn("ProcessThread", daemon);
-	}
-	
-	/**
-	 * Spawns this process in a newly-created thread, returning the instance.
-	 * @param threadName the thread name.
-	 * @param daemon if the thread should be a daemon thread. 
-	 * @return a process instance.
-	 */
-	public Instance spawn(String threadName, boolean daemon)
-	{
-		final Instance instance = new Instance();
-		Thread thread = new Thread(() -> instance.run());
-		thread.setName(threadName);
-		thread.setDaemon(daemon);
-		thread.start();
-		return instance;
-	}
-	
-	/**
-	 * Waits for a set of instances to complete via {@link Instance#join()}.
-	 * @param instances the list of instances.
-	 * @see Instance#join()
-	 */
-	public static void join(Instance ... instances)
-	{
-		for (int i = 0; i < instances.length; i++)
-			instances[i].join();
-	}
-	
-	/**
-	 * A Future that represents a running process.
-	 */
-	public final class Instance implements RunnableFuture<Integer>
-	{
-		private long instanceId;
-		private Object waitMutex;
-		private Thread executor;
-		private Process process;
-		private Integer result;
-		private Throwable exception;
-		private Throwable outException;
-		private Throwable errException;
-		private Throwable inException;
-		private boolean done;
-		private boolean cancelled;
-
-		private Instance()
-		{
-			this.instanceId = INSTANCE_ID.getAndIncrement();
-			this.waitMutex = new Object();
-			this.executor = null;
-			this.process = null;
-			this.result = null;
-			this.exception = null;
-			this.outException = null;
-			this.errException = null;
-			this.inException = null;
-			this.done = false;
-			this.cancelled = false;
-		}
-
-	    /**
-	     * Convenience method for: <code>cancel(false)</code>.
-	     * @return {@code false} if the task could not be cancelled,
-	     * typically because it has already completed normally;
-	     * {@code true} otherwise
-	     */
-		public final boolean cancel()
-		{
-			return cancel(false);
-		}
-
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning)
-		{
-			if (process != null)
-			{
-				if (mayInterruptIfRunning)
-					process.destroyForcibly();
-				else
-					process.destroy();
-				join();
-				cancelled = true;
-				return true;
-			}
-			else
-			{
-				cancelled = true;
-				return false;
-			}
-		}
-
-		@Override
-		public boolean isCancelled() 
-		{
-			return cancelled;
-		}
-
-		@Override
-		public boolean isDone() 
-		{
-			return done;
-		}
-
-		@Override
-		public final Integer get() throws InterruptedException, ExecutionException
-		{
-			liveLockCheck();
-			waitForDone();
-			if (isCancelled())
-				throw new CancellationException("task was cancelled");
-			if (getException() != null)
-				throw new ExecutionException(getException());
-			return result;
-		}
-
-		@Override
-		public final Integer get(long time, TimeUnit unit) throws TimeoutException, InterruptedException, ExecutionException
-		{
-			liveLockCheck();
-			waitForDone(time, unit);
-			if (!isDone())
-				throw new TimeoutException("wait timed out");
-			if (isCancelled())
-				throw new CancellationException("task was cancelled");
-			if (getException() != null)
-				throw new ExecutionException(getException());
-			return result;
-		}
-
 		/**
-		 * Attempts to return the result of this instance, making the calling thread wait for its completion.
-		 * <p>This is for convenience - this is like calling {@link #get()}, except it will only throw an
-		 * encapsulated {@link RuntimeException} with an exception that {@link #get()} would throw as a cause.
-		 * @return the result. Can be null if no result is returned, or this was cancelled before the return.
-		 * @throws RuntimeException if a call to {@link #get()} instead of this would throw an exception.
-		 * @throws IllegalStateException if the thread processing this future calls this method.
+		 * Called when an IOException occurs.
+		 * @param exception the exception that occurred.
 		 */
-		public final Integer result()
-		{
-			liveLockCheck();
-			try {
-				waitForDone();
-			} catch (InterruptedException e) {
-				throw new RuntimeException("wait was interrupted", getException());
-			}
-			if (getException() != null)
-				throw new RuntimeException("exception on result", getException());
-			return result;
-		}
-		
-		/**
-		 * Makes the calling thread wait indefinitely for this task instance's completion.
-		 * @throws InterruptedException if the current thread was interrupted while waiting.
-		 */
-		public final void waitForDone() throws InterruptedException
-		{
-			while (!isDone())
-			{
-				liveLockCheck();
-				synchronized (waitMutex)
-				{
-					waitMutex.wait();
-				}
-			}
-		}
-
-		/**
-		 * Makes the calling thread wait for this task instance's completion for, at most, the given interval of time.
-		 * @param time the time to wait.
-		 * @param unit the time unit of the timeout argument.
-		 * @throws InterruptedException if the current thread was interrupted while waiting.
-		 */
-		public final void waitForDone(long time, TimeUnit unit) throws InterruptedException
-		{
-			if (!isDone())
-			{
-				liveLockCheck();
-				synchronized (waitMutex)
-				{
-					unit.timedWait(waitMutex, time);
-				}
-			}
-		}
-
-		/**
-		 * Makes the calling thread wait until this task has finished, returning nothing.
-		 * This differs from {@link #waitForDone()} such that it eats a potential {@link InterruptedException}.
-		 * @throws IllegalStateException if the thread processing this future calls this method.
-		 */
-		public final void join()
-		{
-			try {
-				waitForDone();
-			} catch (Exception e) {
-				// Eat exception.
-			}
-		}
-
-		/**
-		 * Gets the process created and running in this instance.
-		 * @return the process created and running in this instance, or null if the process could not be created.
-		 */
-		public Process getProcess() 
-		{
-			return process;
-		}
-		
-		/**
-		 * Gets the exception thrown as a result of this instance completing, making the calling thread wait for its completion.
-		 * @return the exception thrown by the encapsulated task, or null if no exception.
-		 */
-		public final Throwable getException()
-		{
-			join();
-			return exception;
-		}
-
-		@Override
-		public final void run() 
-		{
-			executor = Thread.currentThread();
-			try {
-				if (!cancelled)
-				{
-					process = exec();
-					
-					PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(process) : null;
-					PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(process) : null;
-					PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(process)  : null;
-
-					if (outThread != null)
-					{
-						outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
-						outThread.start();
-					}
-					if (errThread != null)
-					{
-						errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
-						errThread.start();
-					}
-					if (inThread != null)
-					{
-						inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
-						inThread.start();
-					}
-
-					int out = process.waitFor();
-					
-					if (outThread != null)
-					{
-						outThread.join();
-						outException = outThread.getException();
-					}
-					if (errThread != null)
-					{
-						errThread.join();
-						errException = errThread.getException();
-					}
-					if (inThread != null)
-					{
-						inThread.join();
-						inException = inThread.getException();
-					}
-					
-					result = out;
-				}
-			} catch (Exception e) {
-				exception = e;
-			} finally {
-				executor = null;
-				synchronized (waitMutex) {
-					done = true;
-					waitMutex.notifyAll();
-				}
-			}
-		}
-
-		/**
-		 * Gets the exception thrown in the output thread, if any.
-		 * This will only produce a valid value if {@link #isDone()} returns true.
-		 * @return the exception thrown in the output thread. Can be null.
-		 */
-		public Throwable getOutException()
-		{
-			return outException;
-		}
-		
-		/**
-		 * Gets the exception thrown in the error thread, if any.
-		 * This will only produce a valid value if {@link #isDone()} returns true.
-		 * @return the exception thrown in the output thread. Can be null.
-		 */
-		public Throwable getErrException() 
-		{
-			return errException;
-		}
-		
-		/**
-		 * Gets the exception thrown in the input thread, if any.
-		 * This will only produce a valid value if {@link #isDone()} returns true.
-		 * @return the exception thrown in the output thread. Can be null.
-		 */
-		public Throwable getInException() 
-		{
-			return inException;
-		}
-		
-		// Checks for livelocks.
-		private void liveLockCheck()
-		{
-			if (executor == Thread.currentThread())
-				throw new IllegalStateException("Attempt to make executing thread wait for this result.");
-		}
-		
+		void onException(IOException exception);
 	}
 	
 	/**
@@ -1069,14 +817,12 @@ public class ProcessCallable implements Callable<Integer>
 		protected BufferedReader sourceReader;
 		protected PrintStream targetPrintStream;
 		private Object targetMutex;
-		private Throwable exception;
 		
 		private LineReaderToWriterThread(BufferedReader reader)
 		{
 			super("LineReaderToWriterThread");
 			this.sourceReader = reader;
 			this.targetMutex = new Object();
-			this.exception = null;
 		}
 		
 		/**
@@ -1115,12 +861,6 @@ public class ProcessCallable implements Callable<Integer>
 			// Do nothing by default.
 		}
 		
-		@Override
-		public Throwable getException() 
-		{
-			return exception;
-		}
-		
 	}
 
 	/**
@@ -1132,7 +872,6 @@ public class ProcessCallable implements Callable<Integer>
 	{
 		protected Reader sourceReader;
 		protected Writer targetWriter;
-		private Throwable exception;
 		
 		/**
 		 * Creates a new thread that, when started, transfers characters until the source stream is closed.
@@ -1145,7 +884,6 @@ public class ProcessCallable implements Callable<Integer>
 			super("ReaderToWriterThread");
 			this.sourceReader = reader;
 			this.targetWriter = writer;
-			this.exception = null;
 		}
 	
 		@Override
@@ -1172,12 +910,6 @@ public class ProcessCallable implements Callable<Integer>
 		public void afterClose() throws IOException
 		{
 			// Do nothing by default.
-		}
-		
-		@Override
-		public Throwable getException() 
-		{
-			return exception;
 		}
 		
 	}
@@ -1224,7 +956,7 @@ public class ProcessCallable implements Callable<Integer>
 
 	private static abstract class PipeThread extends Thread
 	{
-		private Throwable exception;
+		private IOException exception;
 
 		protected PipeThread(String name)
 		{
@@ -1237,7 +969,7 @@ public class ProcessCallable implements Callable<Integer>
 		{
 			try {
 				relay();
-			} catch (Throwable e) {
+			} catch (IOException e) {
 				exception = e;
 			} finally {
 				try {
@@ -1268,7 +1000,7 @@ public class ProcessCallable implements Callable<Integer>
 		/**
 		 * @return the exception thrown during streaming, if any.
 		 */
-		public Throwable getException()
+		public IOException getException()
 		{
 			return exception;
 		}
