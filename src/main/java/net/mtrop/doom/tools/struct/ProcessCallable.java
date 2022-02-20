@@ -660,7 +660,7 @@ public class ProcessCallable implements Callable<Integer>
 	 */
 	public ProcessCallable setErrListener(StreamExceptionListener listener) 
 	{
-		this.stdOutListener = listener;
+		this.stdErrListener = listener;
 		return this;
 	}
 
