@@ -749,19 +749,19 @@ public class ProcessCallable implements Callable<Integer>
 		if (outThread != null)
 		{
 			outThread.join();
-			if (stdOutListener != null)
+			if (stdOutListener != null && outThread.getException() != null)
 				stdOutListener.onException(outThread.getException());
 		}
 		if (errThread != null)
 		{
 			errThread.join();
-			if (stdErrListener != null)
+			if (stdErrListener != null && errThread.getException() != null)
 				stdErrListener.onException(errThread.getException());
 		}
 		if (inThread != null)
 		{
 			inThread.join();
-			if (stdInListener != null)
+			if (stdInListener != null && inThread.getException() != null)
 				stdInListener.onException(inThread.getException());
 		}
 		
