@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -32,7 +33,7 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 public final class Common
 {
 	/** DoomTools Config folder base. */
-    public static final String SETTINGS_PATH = OSUtils.getApplicationSettingsPath() + "/DoomTools/";
+    public static final String SETTINGS_PATH = OSUtils.getApplicationSettingsPath() + File.separator + "DoomTools" + File.separator;
 
 	/** Version number map. */
 	private static final Map<String, String> VERSION_MAP = new HashMap<>();
