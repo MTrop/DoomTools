@@ -33,7 +33,11 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}" $JAVAOPTS $MAINCLASS $*
+	if [[ "$OSTYPE" == "cygwin"* ]]; then
+		"$JAVACMD" -cp "$(cygpath -w -a "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}")" $JAVAOPTS $MAINCLASS $*
+	else
+		"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}" $JAVAOPTS $MAINCLASS $*
+	fi
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."
