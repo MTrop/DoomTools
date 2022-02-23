@@ -17,6 +17,11 @@ MAINCLASS={{MAIN_CLASSNAME}}
 
 export DOOMTOOLS_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 export DOOMTOOLS_JAR="jar/$((cd ${DOOMTOOLS_PATH}/jar && ls -1a *.jar) | sort | tail -1)"
+JAR_PATH="${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}"
+if [[ "$OSTYPE" == "cygwin"* ]]; then
+	JAR_PATH="$(cygpath -w -a "${JAR_PATH}")"
+	DOOMTOOLS_PATH="$(cygpath -w -a "${DOOMTOOLS_PATH}")"
+fi
 
 # ===========================================================================
 # Test for Java
@@ -33,11 +38,7 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	if [[ "$OSTYPE" == "cygwin"* ]]; then
-		"$JAVACMD" -cp "$(cygpath -w -a "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}")" $JAVAOPTS $MAINCLASS $*
-	else
-		"$JAVACMD" -cp "${DOOMTOOLS_PATH}/${DOOMTOOLS_JAR}" $JAVAOPTS $MAINCLASS $*
-	fi
+	"$JAVACMD" -cp "${JAR_PATH}" $JAVAOPTS $MAINCLASS $*
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."
