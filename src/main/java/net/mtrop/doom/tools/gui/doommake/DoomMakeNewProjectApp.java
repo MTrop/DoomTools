@@ -79,7 +79,7 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 	/** Set of used templates. */
 	private Set<String> templateNameSet;
 	
-	public DoomMakeNewProjectApp() 
+	public DoomMakeNewProjectApp(String initFilePath) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
@@ -110,7 +110,7 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 		);
 		
 		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
-			containerOf(node(fileField(
+			containerOf(node(fileField(targetDirectory,
 				(current) -> SwingUtils.directory(
 					out, 
 					language.getText("doommake.newproject.directory.browse.title"), 

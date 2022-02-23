@@ -4,6 +4,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import net.mtrop.doom.tools.gui.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -21,6 +22,8 @@ public class StatusPanel extends JPanel
 {
 	private static final long serialVersionUID = -3730984456173494660L;
 
+	/** Icon manager. */
+	private DoomToolsIconManager icons;
 	/** Image manager. */
 	private DoomToolsImageManager images;
 	
@@ -36,10 +39,11 @@ public class StatusPanel extends JPanel
 
 	public StatusPanel()
 	{
+		this.icons = DoomToolsIconManager.get();
 		this.images = DoomToolsImageManager.get();
 		this.messageLabel = new JLabel();
 		this.successIcon = icon(images.getImage("success.png"));
-		this.activityIcon = icon(images.getImage("activity.gif"));
+		this.activityIcon = icons.getImage("activity.gif");
 		this.errorIcon = icon(images.getImage("error.png"));
 		
 		this.setBorder(null);

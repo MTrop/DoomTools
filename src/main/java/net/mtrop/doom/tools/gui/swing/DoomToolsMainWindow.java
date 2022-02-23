@@ -7,6 +7,7 @@ import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -105,7 +106,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new",
-						(c, e) -> addApplication(DoomMakeNewProjectApp.class)
+						(c, e) -> addApplication(new DoomMakeNewProjectApp(null))
 					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
 						(c, e) -> {
@@ -143,6 +144,10 @@ public class DoomToolsMainWindow extends JFrame
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb",
 					(c, e) -> openWebsite()
+				),
+				separator(),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.update",
+					(c, e) -> openUpdate()
 				)
 			)
 		);
@@ -167,7 +172,7 @@ public class DoomToolsMainWindow extends JFrame
 	
 	private void openDocs()
 	{
-		String path; 
+		final String path; 
 		try {
 			path = Environment.getDoomToolsPath();
 		} catch (SecurityException e) {
@@ -260,6 +265,92 @@ public class DoomToolsMainWindow extends JFrame
 			SwingUtils.error(language.getText("doomtools.error.openweb.io"));
 		} catch (SecurityException e) {
 			SwingUtils.error(language.getText("doomtools.error.openweb.security"));
+		}
+	}
+	
+	private void openUpdate()
+	{
+		final String path; 
+		try {
+			path = Environment.getDoomToolsPath();
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		if (Common.isEmpty(path))
+		{
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		// TODO: Finish this. Create modal.
+		
+		// Listener 
+		DoomToolsUpdater.Listener listener = new DoomToolsUpdater.Listener() 
+		{
+			@Override
+			public void onMessage(String message) 
+			{
+				// TODO: Set active message.
+			}
+
+			@Override
+			public void onError(String message) 
+			{
+				// TODO: Spit out error.
+			}
+
+			@Override
+			public void onDownloadStart() 
+			{
+				// TODO: Init progress.
+			}
+
+			@Override
+			public void onDownloadTransfer(long current, Long max) 
+			{
+				// TODO: Change progress.
+			}
+
+			@Override
+			public void onDownloadFinish() 
+			{
+				// TODO: Finish progress.
+			}
+
+			@Override
+			public boolean shouldContinue(String versionString)
+			{
+				// TODO: Ask to continue, return true for yes, false for no.
+				return false;
+			}
+
+			@Override
+			public void onUpToDate() 
+			{
+				// TODO: End successfully.
+			}
+
+			@Override
+			public void onUpdateSuccessful() 
+			{
+				// TODO: End successfully.
+			}
+
+			@Override
+			public void onUpdateAbort() 
+			{
+				// TODO: Abort message.
+			}
+		};
+		
+		try {
+			// TODO: Spawn this.
+			(new DoomToolsUpdater(new File(path), listener)).call();
+		} catch (Exception e) {
+			LOG.error(e, "Uncaught error during update.");
+			SwingUtils.error(this, "Uncaught error during update: " + e.getClass().getSimpleName());
 		}
 	}
 	

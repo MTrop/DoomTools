@@ -11,7 +11,7 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
- * DoomMake GUI logger singleton.
+ * DoomMake GUI image loader singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsImageManager 
@@ -49,7 +49,7 @@ public final class DoomToolsImageManager
 	/**
 	 * Gets an image by name.
 	 * @param name the name of the image to load.
-	 * @return a future to get the image from.
+	 * @return the image.
 	 */
 	public BufferedImage getImage(String name)
 	{

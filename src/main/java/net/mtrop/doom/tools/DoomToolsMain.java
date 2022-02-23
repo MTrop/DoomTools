@@ -8,35 +8,22 @@ package net.mtrop.doom.tools;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
-import com.blackrook.json.JSONObject;
-import com.blackrook.json.JSONReader;
 import com.blackrook.rookscript.tools.ScriptExecutor;
 
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.util.OSUtils;
-import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
-import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
-import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 
 /**
  * Main class for DoomTools.
@@ -46,9 +33,15 @@ public final class DoomToolsMain
 {
 	public static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
 
-	public static final String UPDATE_GITHUB_API = "https://api.github.com/";
-	public static final String UPDATE_REPO_NAME = "DoomTools";
-	public static final String UPDATE_REPO_OWNER = "MTrop";
+	public static final int ERROR_NONE = 0;
+	public static final int ERROR_DESKTOP_ERROR = 1;
+	public static final int ERROR_SECURITY = 2;
+	public static final int ERROR_NOWHERE = 3;
+	public static final int ERROR_TIMEOUT = 4;
+	public static final int ERROR_SITE_ERROR = 5;
+	public static final int ERROR_IOERROR = 6;
+	public static final int ERROR_GUI_ALREADY_RUNNING = 7;
+	public static final int ERROR_UNKNOWN = -1;
 
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	
@@ -70,20 +63,6 @@ public final class DoomToolsMain
 	private static final FileFilter JAR_FILES = (f) -> {
 		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
-
-	private static final HTTPReader<JSONObject> JSON_READER = (response, cancel, monitor) -> {
-		return JSONReader.readJSON(response.getContentReader());
-	};
-
-	private static final int ERROR_NONE = 0;
-	private static final int ERROR_DESKTOP_ERROR = 1;
-	private static final int ERROR_SECURITY = 2;
-	private static final int ERROR_NOWHERE = 3;
-	private static final int ERROR_TIMEOUT = 4;
-	private static final int ERROR_SITE_ERROR = 5;
-	private static final int ERROR_IOERROR = 6;
-	private static final int ERROR_GUI_ALREADY_RUNNING = 7;
-	private static final int ERROR_UNKNOWN = -1;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -170,17 +149,6 @@ public final class DoomToolsMain
 			File[] jars = dir.listFiles(JAR_FILES);
 			Arrays.sort(jars, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName()));
 			return jars;
-		}
-		
-		private static File getLatestJarFile(File dir)
-		{
-			File[] jars = getSortedJarList(dir);
-			return jars.length == 0 ? null : jars[jars.length - 1];
-		}
-		
-		private static JSONObject getJSONResponse(String url) throws IOException
-		{
-			return HTTPRequest.get(url).send(JSON_READER);
 		}
 		
 		private static String getProgressBar(long current, Long max)
@@ -291,150 +259,72 @@ public final class DoomToolsMain
 				return ERROR_NOWHERE;
 			}
 
-			String currentVersion = getLatestJarFile(new File(path + "/jar")).getName().substring(10, 30); // grab date from current JAR.
-			options.stdout.println("Current version is: " + currentVersion);
-			options.stdout.println("Contacting update site...");
+			// Listener 
+			DoomToolsUpdater.Listener listener = new DoomToolsUpdater.Listener() 
+			{
+				@Override
+				public void onMessage(String message) 
+				{
+					options.stdout.println(message);
+				}
 
-			JSONObject assetJSON = null;
+				@Override
+				public void onError(String message) 
+				{
+					options.stderr.println("ERROR: " + message);
+				}
 
+				@Override
+				public void onDownloadStart() 
+				{
+					// Do nothing.
+				}
+
+				@Override
+				public void onDownloadTransfer(long current, Long max) 
+				{
+					options.stdout.print("\r" + getProgressBar(current, max));
+				}
+
+				@Override
+				public void onDownloadFinish() 
+				{
+					// Do nothing.
+				}
+
+				@Override
+				public void onUpToDate() 
+				{
+					options.stdout.println("DoomTools is up-to-date!");
+				}
+
+				@Override
+				public void onUpdateSuccessful() 
+				{
+					options.stdout.println("DoomTools is up-to-date!");
+				}
+
+				@Override
+				public boolean shouldContinue(String versionString)
+				{
+					options.stdout.println("New version found:  " + versionString);
+					return true; // just continue.
+				}
+
+				@Override
+				public void onUpdateAbort() 
+				{
+					options.stdout.println("Update aborted!");
+				}
+				
+			};
+			
 			try {
-				JSONObject json;
-				json = getJSONResponse(UPDATE_GITHUB_API);
-				
-				String repoURL;
-				if ((repoURL = json.get("repository_url").getString()) == null)
-				{
-					options.stderr.println("ERROR: Unexpected content from update site. Update failed.");
-					return ERROR_SITE_ERROR;
-				}
-				
-				// Get latest release assets list.
-				json = getJSONResponse(repoURL.replace("{owner}", UPDATE_REPO_OWNER).replace("{repo}", UPDATE_REPO_NAME) + "/releases")
-					.get(0).get("assets")
-				;
-
-				if (json == null || !json.isArray())
-				{
-					options.stderr.println("ERROR: Unexpected content from update site. Update failed.");
-					return ERROR_SITE_ERROR;
-				}
-				
-				// Get archive from latest release.
-				for (int i = 0; i < json.length(); i++)
-				{
-					JSONObject element = json.get(i);
-					if ("application/zip".equals(element.get("content_type").getString()))
-					{
-						assetJSON = element;
-						break;
-					}
-				}
-				
-			} catch (SocketTimeoutException e) {
-				options.stderr.println("ERROR: Timeout occurred contacting update site.");
-				return ERROR_TIMEOUT;
-			} catch (IOException e) {
-				options.stderr.println("ERROR: Read error contacting update site: " + e.getLocalizedMessage());
-				return ERROR_IOERROR;
+				return (new DoomToolsUpdater(new File(path), listener)).call();
+			} catch (Exception e) {
+				options.stderr.println("ERROR: Uncaught error during update: " + e.getClass().getSimpleName());
+				return ERROR_UNKNOWN;
 			}
-			
-			if (assetJSON == null)
-			{
-				options.stderr.println("ERROR: Release found, but no suitable archive.");
-				return ERROR_SITE_ERROR;
-			}
-			
-			String releaseVersion = assetJSON.get("name").getString().substring(14, 34); // should grab date from asset name (CMD version). 
-
-			if (currentVersion.compareTo(releaseVersion) >= 0)
-			{
-				options.stdout.println("DoomTools is up-to-date!");
-				return ERROR_NONE;
-			}
-			
-			options.stdout.println("New version found:  " + releaseVersion);
-			
-			try (HTTPResponse response = HTTPRequest.get(assetJSON.get("browser_download_url").getString()).setHeader("Accept", "*/*").send())
-			{
-				if (!response.isSuccess())
-				{
-					options.stderr.println("ERROR: Server responded: HTTP " + response.getStatusCode() + " " + response.getStatusMessage());
-					return ERROR_SITE_ERROR;
-				}
-				
-				File tempFile = Files.createTempFile("doomtools-tmp-", ".zip").toFile(); 
-				try 
-				{
-					final AtomicLong currentBytes = new AtomicLong(0L);
-
-					options.stdout.print("\r" + getProgressBar(currentBytes.get(), response.getLength()));
-					
-					final AtomicLong lastDate = new AtomicLong(System.currentTimeMillis());
-					try (FileOutputStream fos = new FileOutputStream(tempFile))
-					{
-						response.relayContent(fos, (cur, max) -> 
-						{
-							long next = System.currentTimeMillis();
-							currentBytes.set(cur);
-							if (next > lastDate.get() + 250L)
-							{
-								options.stdout.print("\r" + getProgressBar(currentBytes.get(), max));
-								lastDate.set(next);
-							}
-						});
-					}
-					
-					options.stdout.println("\r" + getProgressBar(currentBytes.get(), response.getLength()));
-					options.stdout.println("Extracting....");
-					
-					boolean extracted = false;
-					try (ZipFile zf = new ZipFile(tempFile))
-					{
-						@SuppressWarnings("unchecked")
-						Enumeration<ZipEntry> zipenum = (Enumeration<ZipEntry>)zf.entries();
-						while (zipenum.hasMoreElements())
-						{
-							ZipEntry entry = zipenum.nextElement();
-							if (entry.getName().endsWith(".jar"))
-							{
-								File targetJarFile = new File(path + "/" + entry.getName());
-								try (InputStream zin = zf.getInputStream(entry); FileOutputStream fos = new FileOutputStream(targetJarFile))
-								{
-									IOUtils.relay(zin, fos);
-								}
-								extracted = true;
-							}
-						}
-					}
-					
-					if (!extracted)
-					{
-						options.stderr.println("ERROR: No JAR entry in archive!");
-						return ERROR_IOERROR;
-					}
-					else
-					{
-						options.stdout.println("Finished updating!");
-					}
-				} 
-				finally 
-				{
-					tempFile.delete();
-				}
-			} 
-			catch (SocketTimeoutException e) 
-			{
-				options.stderr.println("ERROR: Timeout occurred downloading update!");
-				return ERROR_TIMEOUT;
-			} 
-			catch (IOException e) 
-			{
-				options.stderr.println("ERROR: Read error downloading update: " + e.getLocalizedMessage());
-				return ERROR_IOERROR;
-			}
-			
-			options.stdout.println("DoomTools is up-to-date!");
-			return ERROR_NONE;
 		}
 		
 		@Override

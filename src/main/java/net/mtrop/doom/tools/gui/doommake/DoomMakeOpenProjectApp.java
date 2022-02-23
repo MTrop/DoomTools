@@ -269,7 +269,7 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 				))
 			)))
 		);
-		out.setPreferredSize(new Dimension(240, 200));
+		out.setPreferredSize(new Dimension(300, 200));
 		return out;
 	}
 

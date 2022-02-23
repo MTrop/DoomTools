@@ -33,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -46,6 +47,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -620,6 +622,29 @@ public final class ComponentFactory
 		return new JTextField();
 	}
 
+	/* ==================================================================== */
+	/* ==== Progress Bars                                              ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new progress bar with a default model.
+	 * @param orientation the {@link JProgressBar} orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar(int orientation)
+	{
+		return new JProgressBar(orientation);
+	}
+	
+	/**
+	 * Creates a new progress bar with a default model and horizontal orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar()
+	{
+		return progressBar(SwingConstants.HORIZONTAL);
+	}
+	
 	/* ==================================================================== */
 	/* ==== Spinners                                                   ==== */
 	/* ==================================================================== */

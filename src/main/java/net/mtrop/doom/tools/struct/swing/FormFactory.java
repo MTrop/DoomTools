@@ -29,6 +29,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
@@ -576,6 +577,24 @@ public final class FormFactory
 		return byteTextField(initialValue, false, null); 
 	}
 
+	/* ==================================================================== */
+
+	/**
+	 * Creates a password field.
+	 * @param initialValue the initial value of the field.
+	 * @param changeListener the change listener.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> passwordField(String initialValue, JValueChangeListener<String> changeListener)
+	{
+		return new JValuePasswordField<String>(initialValue, converter(
+			(text) -> text,
+			(value) -> (
+				value != null ? String.valueOf(value) : ""
+			)
+		), changeListener);
+	}	
+	
 	/* ==================================================================== */
 
 	/**
@@ -1192,6 +1211,27 @@ public final class FormFactory
 	}
 	
 	/**
+	 * A password field that is the representation of a greater value.
+	 * @param <T> the type that this field stores.
+	 */
+	public static class JValuePasswordField<T> extends JValueTextField<T>
+	{
+		private static final long serialVersionUID = -1687010711460237854L;
+
+		protected JValuePasswordField(T initialValue, JValueConverter<T> converter, JValueChangeListener<T> changeListener) 
+		{
+			super(initialValue, converter, changeListener);
+		}
+
+		@Override
+		protected JTextField createTextField() 
+		{
+			return new JPasswordField();
+		}
+		
+	}
+	
+	/**
 	 * A text field that is the representation of a greater value.
 	 * @param <T> the type that this field stores.
 	 */
@@ -1219,7 +1259,7 @@ public final class FormFactory
 			this.converter = Objects.requireNonNull(converter);
 			this.changeListener = changeListener;
 	
-			this.textField = new JTextField();
+			this.textField = createTextField();
 			this.textField.addKeyListener(new KeyAdapter() 
 			{
 				@Override
@@ -1254,6 +1294,14 @@ public final class FormFactory
 			setLayout(new BorderLayout());
 			add(BorderLayout.CENTER, this.textField);
 			setValue(initialValue);
+		}
+		
+		/**
+		 * @return creates the text field.
+		 */
+		protected JTextField createTextField()
+		{
+			return new JTextField();
 		}
 		
 		/**

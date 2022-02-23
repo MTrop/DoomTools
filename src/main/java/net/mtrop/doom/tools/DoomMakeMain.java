@@ -54,6 +54,17 @@ public final class DoomMakeMain
 {
 	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
 	
+	public static final int ERROR_NONE = 0;
+	public static final int ERROR_BAD_OPTIONS = 1;
+	public static final int ERROR_BAD_PROPERTIES = 2;
+	public static final int ERROR_BAD_SCRIPT = 3;
+	public static final int ERROR_BAD_PROJECT = 4;
+	public static final int ERROR_SECURITY = 5;
+	public static final int ERROR_BAD_TOOL_PATH = 6;
+	public static final int ERROR_IOERROR = 7;
+	public static final int ERROR_AGENT_RUNNING = 8;
+	public static final int ERROR_UNKNOWN = -1;
+
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
@@ -85,17 +96,6 @@ public final class DoomMakeMain
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	
-	private static final int ERROR_NONE = 0;
-	private static final int ERROR_BAD_OPTIONS = 1;
-	private static final int ERROR_BAD_PROPERTIES = 2;
-	private static final int ERROR_BAD_SCRIPT = 3;
-	private static final int ERROR_BAD_PROJECT = 4;
-	private static final int ERROR_SECURITY = 5;
-	private static final int ERROR_BAD_TOOL_PATH = 6;
-	private static final int ERROR_IOERROR = 7;
-	private static final int ERROR_AGENT_RUNNING = 8;
-	private static final int ERROR_UNKNOWN = -1;
-
 	/**
 	 * Project types.
 	 */
@@ -353,7 +353,7 @@ public final class DoomMakeMain
 			if (options.gui)
 			{
 				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE);
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, System.getProperty("user.dir"));
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start DoomMake GUI!");
 					return ERROR_IOERROR;
@@ -913,6 +913,99 @@ public final class DoomMakeMain
 	}
 	
 	/**
+	 * Gets a file path for a project's path that is in a project directory. 
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to look into.
+	 * @param property the property name.
+	 * @param defaultValue the default value, if not found.
+	 * @return the project path.
+	 */
+	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
+	{
+		String path = properties.getProperty(property);
+		if (Common.isEmpty(path))
+			path = defaultValue;
+		return new File(projectDirectory.getPath() + File.separator + path);
+	}
+
+	/**
+	 * Reads in the lock JSON file and returns it as an object.
+	 * If the file does not exist, an empty object is returned.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @return the parsed object.
+	 * @throws IOException if the file could not be opened or read.
+	 * @throws JSONConversionException if the JSON is malformed.
+	 */
+	public static JSONObject readLockObject(File projectDirectory, Properties properties) throws IOException
+	{
+		File fullFilePath = getLockFile(projectDirectory, properties);
+	
+		if (!Common.createPathForFile(fullFilePath))
+			throw new IOException("Could not create directories for lock file.");
+		
+		if (!fullFilePath.exists())
+			return JSONObject.createEmptyObject();
+		
+		JSONObject lockRoot;
+		try (Reader reader = new InputStreamReader(new FileInputStream(fullFilePath), "UTF-8"))
+		{
+			lockRoot = JSONReader.readJSON(reader);
+		}
+		
+		return lockRoot;
+	}
+
+	/**
+	 * Writes the lock JSON file.
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to inspect for the lock file name.
+	 * @param lockRoot the lock object.
+	 * @throws IOException if the file could not be opened or written.
+	 */
+	public static void writeLockObject(File projectDirectory, Properties properties, JSONObject lockRoot) throws IOException
+	{
+		File fullFilePath = getLockFile(projectDirectory, properties);
+	
+		if (!Common.createPathForFile(fullFilePath))
+			throw new IOException("Could not create directories for lock file.");
+		
+		JSONWriter.Options jsonOptions = new JSONWriter.Options();
+		jsonOptions.setIndentation("\t");
+	
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(fullFilePath), "UTF-8"))
+		{
+			JSONWriter.writeJSON(lockRoot, jsonOptions, writer);
+		}
+	}
+
+	/**
+	 * Prints the "agent running" message.
+	 * @param out the print stream to print to.
+	 */
+	private static void agentMessage(PrintStream out, File lockFile)
+	{
+		out.println("ERROR: The DoomMake Auto-Build agent is running for this project.");
+		out.println("If this is incorrect, then delete the \"" + JSON_AGENT_LOCK_KEY + "\" key from the lock file:");
+		try {
+			out.println(lockFile.getCanonicalPath());
+		} catch (IOException e) {
+			out.println(lockFile.getAbsolutePath());
+		}
+	}
+
+	// Gets the lock file path.
+	private static File getLockFile(File projectDirectory, Properties properties) 
+	{
+		File buildDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
+		String lockFile = properties.getProperty("doommake.file.lock", "lock.json");
+		if (Common.isEmpty(lockFile))
+			lockFile = "lock.json";
+		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile);
+		return fullFilePath;
+	}
+
+	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
 	 */
@@ -1031,99 +1124,6 @@ public final class DoomMakeMain
 		out.println("DoomMake has a variable scope called `global` that serves as a common variable");
 		out.println("scope for sharing values outside of functions or for data that you would want");
 		out.println("to initialize once.");
-	}
-
-	/**
-	 * Prints the "agent running" message.
-	 * @param out the print stream to print to.
-	 */
-	private static void agentMessage(PrintStream out, File lockFile)
-	{
-		out.println("ERROR: The DoomMake Auto-Build agent is running for this project.");
-		out.println("If this is incorrect, then delete the \"" + JSON_AGENT_LOCK_KEY + "\" key from the lock file:");
-		try {
-			out.println(lockFile.getCanonicalPath());
-		} catch (IOException e) {
-			out.println(lockFile.getAbsolutePath());
-		}
-	}
-
-	/**
-	 * Gets a file path for a project's path that is in a project directory. 
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to look into.
-	 * @param property the property name.
-	 * @param defaultValue the default value, if not found.
-	 * @return the project path.
-	 */
-	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
-	{
-		String path = properties.getProperty(property);
-		if (Common.isEmpty(path))
-			path = defaultValue;
-		return new File(projectDirectory.getPath() + File.separator + path);
-	}
-
-	/**
-	 * Reads in the lock JSON file and returns it as an object.
-	 * If the file does not exist, an empty object is returned.
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to inspect for the lock file name.
-	 * @return the parsed object.
-	 * @throws IOException if the file could not be opened or read.
-	 * @throws JSONConversionException if the JSON is malformed.
-	 */
-	public static JSONObject readLockObject(File projectDirectory, Properties properties) throws IOException
-	{
-		File fullFilePath = getLockFile(projectDirectory, properties);
-	
-		if (!Common.createPathForFile(fullFilePath))
-			throw new IOException("Could not create directories for lock file.");
-		
-		if (!fullFilePath.exists())
-			return JSONObject.createEmptyObject();
-		
-		JSONObject lockRoot;
-		try (Reader reader = new InputStreamReader(new FileInputStream(fullFilePath), "UTF-8"))
-		{
-			lockRoot = JSONReader.readJSON(reader);
-		}
-		
-		return lockRoot;
-	}
-
-	/**
-	 * Writes the lock JSON file.
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to inspect for the lock file name.
-	 * @param lockRoot the lock object.
-	 * @throws IOException if the file could not be opened or written.
-	 */
-	public static void writeLockObject(File projectDirectory, Properties properties, JSONObject lockRoot) throws IOException
-	{
-		File fullFilePath = getLockFile(projectDirectory, properties);
-	
-		if (!Common.createPathForFile(fullFilePath))
-			throw new IOException("Could not create directories for lock file.");
-		
-		JSONWriter.Options jsonOptions = new JSONWriter.Options();
-		jsonOptions.setIndentation("\t");
-	
-		try (Writer writer = new OutputStreamWriter(new FileOutputStream(fullFilePath), "UTF-8"))
-		{
-			JSONWriter.writeJSON(lockRoot, jsonOptions, writer);
-		}
-	}
-
-	// Gets the lock file path.
-	private static File getLockFile(File projectDirectory, Properties properties) 
-	{
-		File buildDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
-		String lockFile = properties.getProperty("doommake.file.lock", "lock.json");
-		if (Common.isEmpty(lockFile))
-			lockFile = "lock.json";
-		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile);
-		return fullFilePath;
 	}
 
 }

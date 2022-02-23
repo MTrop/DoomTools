@@ -31,8 +31,6 @@ public final class DoomToolsGUIMain
 	 */
 	public interface ApplicationNames
 	{
-		/** DoomMake - Open Project (working dir). */
-		String DOOMMAKE = "doommake";
 		/** DoomMake - New Project. */
 		String DOOMMAKE_NEW = "doommake-new";
 		/** DoomMake - Open Project. */
@@ -144,11 +142,8 @@ public final class DoomToolsGUIMain
 		        		SwingUtils.error("Expected valid application name.");
 		        		System.exit(-1);
 		        		return;
-					case ApplicationNames.DOOMMAKE:
-						startApplication(new DoomMakeOpenProjectApp(new File(System.getProperty("user.dir"))));
-						break;
 					case ApplicationNames.DOOMMAKE_NEW:
-						startApplication(new DoomMakeNewProjectApp());
+						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
 						break;
 					case ApplicationNames.DOOMMAKE_OPEN:
 						startApplication(new DoomMakeOpenProjectApp(new File(args[1])));
