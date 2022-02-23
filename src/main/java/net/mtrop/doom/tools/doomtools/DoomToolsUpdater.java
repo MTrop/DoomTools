@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Objects;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -21,6 +20,7 @@ import com.blackrook.json.JSONReader;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
@@ -30,7 +30,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
  * The {@link #call()} method will return a {@link DoomToolsMain} result.
  * @author Matthew Tropiano
  */
-public class DoomToolsUpdater implements Callable<Integer>
+public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 {
 	public static final String UPDATE_GITHUB_API = "https://api.github.com/";
 	public static final String UPDATE_REPO_NAME = "DoomTools";
@@ -64,6 +64,8 @@ public class DoomToolsUpdater implements Callable<Integer>
 	@Override
 	public Integer call() throws Exception
 	{
+		// TODO: Implement cancellation.
+		
 		// grab date from current JAR.
 		String currentVersion = getLatestJarFile(new File(toolsRootDirectory.getAbsolutePath() + "/jar")).getName().substring(10, 30);
 		listener.onMessage("Current version is: " + currentVersion);
