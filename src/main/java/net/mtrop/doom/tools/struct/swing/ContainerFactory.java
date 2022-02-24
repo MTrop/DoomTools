@@ -191,6 +191,18 @@ public final class ContainerFactory
 
 	/**
 	 * Starts a new branch off of this branch. 
+	 * @param constraints the constraints to use for the added branch (using parent layout).
+	 * @param border the border to add to the panel.
+	 * @param children the children on the branch.
+	 * @return a new branch node.
+	 */
+	public static Node node(Object constraints, Border border, Node ... children)
+	{
+		return new NodeBranch(new BorderLayout(), border, null, constraints, children);
+	}
+
+	/**
+	 * Starts a new branch off of this branch. 
 	 * @param border the border to add to the panel.
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param layout the layout to use for this branch's children.

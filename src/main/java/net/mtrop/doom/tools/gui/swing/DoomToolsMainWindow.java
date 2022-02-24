@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.gui.swing;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
@@ -13,17 +14,21 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
+import net.mtrop.doom.tools.gui.swing.panels.ProgressPanel;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
+import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -44,6 +49,8 @@ public class DoomToolsMainWindow extends JFrame
 
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
+	/** Task manager. */
+	private DoomToolsTaskManager tasks;
     /** Language manager. */
     private DoomToolsLanguageManager language;
 	/** Desktop pane. */
@@ -62,6 +69,7 @@ public class DoomToolsMainWindow extends JFrame
 	{
 		super();
 		this.utils = DoomToolsGUIUtils.get();
+		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.shutDownHook = shutDownHook;
 		
@@ -284,70 +292,105 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
-		// TODO: Finish this. Create modal.
+		final ProgressPanel progressPanel = new ProgressPanel(48);
+		progressPanel.setActivityMessage("Please wait...");
+		progressPanel.setProgressLabel("");
+		progressPanel.setIndeterminate();
 		
+		Modal<Object> progressModal = modal(
+			utils.getWindowIcons(),
+			language.getText("doomtools.update.title"),
+			containerOf(node(BorderLayout.CENTER, BorderFactory.createEmptyBorder(8, 8, 8, 8), node(progressPanel))),
+			utils.createChoiceFromLanguageKey("doomtools.cancel")
+		);
+
 		// Listener 
 		DoomToolsUpdater.Listener listener = new DoomToolsUpdater.Listener() 
 		{
 			@Override
 			public void onMessage(String message) 
 			{
-				// TODO: Set active message.
+				progressPanel.setActivityMessage(message);
 			}
 
 			@Override
 			public void onError(String message) 
 			{
-				// TODO: Spit out error.
+				SwingUtils.error(progressModal, message);
+				progressPanel.setErrorMessage("Update failed.");
 			}
 
 			@Override
 			public void onDownloadStart() 
 			{
-				// TODO: Init progress.
+				progressPanel.setActivityMessage("Downloading");
+				progressPanel.setProgressLabel("0%");
 			}
 
 			@Override
 			public void onDownloadTransfer(long current, Long max) 
 			{
-				// TODO: Change progress.
+				int kbs = (int)(current / 1024L);
+				if (max != null)
+				{
+					int maxkbs = (int)(max / 1024L);
+					int pct = kbs * 100 / maxkbs;
+					progressPanel.setActivityMessage("Downloading (" + kbs + " KB / " + maxkbs + " KB)...");
+					progressPanel.setProgressLabel(pct + "%");
+					progressPanel.setProgress(0, kbs, maxkbs);
+				}
+				else // length was not in response
+				{
+					progressPanel.setActivityMessage("Downloading (" + kbs + " KB)...");
+					progressPanel.setProgressLabel("N/A");
+				}
 			}
 
 			@Override
 			public void onDownloadFinish() 
 			{
-				// TODO: Finish progress.
+				progressPanel.setActivityMessage("Finished!");
+				progressPanel.setProgressLabel("100%");
+				progressPanel.setProgress(0, 100, 100);
 			}
 
 			@Override
 			public boolean shouldContinue(String versionString)
 			{
-				// TODO: Ask to continue, return true for yes, false for no.
-				return false;
+				progressPanel.setActivityMessage("Update found...");
+				return SwingUtils.yesTo(progressModal, language.getText("doomtools.update.continue", versionString));
 			}
 
 			@Override
 			public void onUpToDate() 
 			{
-				// TODO: End successfully.
+				progressPanel.setSuccessMessage("DoomTools is up-to-date!");
+				progressPanel.setProgressLabel("100%");
+				progressPanel.setProgress(0, 100, 100);
 			}
 
 			@Override
 			public void onUpdateSuccessful() 
 			{
-				// TODO: End successfully.
+				progressPanel.setSuccessMessage("Update successful!");
 			}
 
 			@Override
 			public void onUpdateAbort() 
 			{
-				// TODO: Abort message.
+				progressPanel.setErrorMessage("Update aborted by user.");
+				progressPanel.setProgressLabel("");
+				progressPanel.setProgress(0, 0, 100);
 			}
 		};
 		
 		try {
-			// TODO: Spawn this.
-			(new DoomToolsUpdater(new File(path), listener)).call();
+			
+			InstancedFuture<Integer> instance = tasks.spawn(new DoomToolsUpdater(new File(path), listener));
+			progressModal.openThenDispose();
+			if (!instance.isDone())
+				instance.cancel();
+			
 		} catch (Exception e) {
 			LOG.error(e, "Uncaught error during update.");
 			SwingUtils.error(this, "Uncaught error during update: " + e.getClass().getSimpleName());

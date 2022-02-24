@@ -168,6 +168,16 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * Creates a modal choice from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @return the new menu item node.
+	 */
+	public <T> ModalChoice<T> createChoiceFromLanguageKey(String keyPrefix)
+	{
+		return createChoiceFromLanguageKey(keyPrefix, null);
+	}
+
+	/**
 	 * @return the common window icons to use.
 	 */
 	public List<Image> getWindowIcons() 
