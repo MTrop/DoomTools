@@ -529,10 +529,14 @@ public final class DoomToolsMain
 				File settingsDir = new File(Common.SETTINGS_PATH);
 				if (!settingsDir.exists())
 				{
+                                    options.stdout.println("Creating the missing DoomTools settings folder...");
+                                    if( !settingsDir.mkdirs())
+                                    {
 					options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
 					return ERROR_DESKTOP_ERROR;
+                                    }
 				}
-				
+
 				try {
 					Desktop.getDesktop().open(settingsDir);
 				} catch (IOException e) {
