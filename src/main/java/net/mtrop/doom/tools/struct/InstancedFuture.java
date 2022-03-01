@@ -47,7 +47,6 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	private Object waitMutex;
 
 	// Fields
-	private Callable<T> callable;
 	private InstanceListener<T> listener;
 	private Subscription<T> subscription;
 	
@@ -61,15 +60,13 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	
 	/**
 	 * Creates a new InstancedFuture.
-	 * @param callable the callable to call.
 	 * @param listener the listener for instance activity.
 	 * @param subscription the subscription to attach, if any.
 	 */
-	protected InstancedFuture(Callable<T> callable, InstanceListener<T> listener, Subscription<T> subscription)
+	protected InstancedFuture(InstanceListener<T> listener, Subscription<T> subscription)
 	{
 		this.waitMutex = new Object();
 		
-		this.callable = Objects.requireNonNull(callable, "Callable cannot be null.");
 		this.listener = listener;
 		this.subscription = subscription;
 		
@@ -517,47 +514,11 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 
 	/**
-	 * Cancels this task using the policy of the implemented method, {@link Future#cancel(boolean)},
-	 * HOWEVER, this will be cancelled if and ONLY if the encapsulated task is of type {@link Cancellable}.
-	 */
-	@Override
-	public final boolean cancel(boolean mayInterruptIfRunning)
-	{
-		if (isDone())
-		{
-			return false;
-		}
-		else if (callable instanceof Cancellable)
-		{
-			((Cancellable<T>)callable).cancel();
-			if (mayInterruptIfRunning && executor != null)
-				executor.interrupt();
-			join();
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	@Override
-	public final boolean isCancelled() 
-	{
-		return (callable instanceof Cancellable) && ((Cancellable<T>)callable).isCancelled();
-	}
-	
-	/**
-	 * Calls the encapsulated Callable, by default.
-	 * Called by {@link #run()}.
+	 * Called by {@link #run()} to get the value to return.
 	 * @return the result of the call. 
 	 * @throws Exception if an exception occurs.
-	 * @see Callable#call()
 	 */
-	protected final T call() throws Exception
-	{
-		return callable.call();
-	}
+	protected abstract T call() throws Exception;
 	
 	// Wrap Runnable to Callable.
 	private static <T> Callable<T> asCallable(T result, Runnable runnable)
@@ -774,10 +735,53 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	/** Under-the-covers instance. */
 	private static class Created<T> extends InstancedFuture<T>
 	{
+		private Callable<T> callable;
+
 		public Created(Callable<T> callable, InstanceListener<T> listener, Subscription<T> subscription) 
 		{
-			super(callable, listener, subscription);
+			super(listener, subscription);
+			this.callable = Objects.requireNonNull(callable, "Callable cannot be null.");
 		}
+
+		@Override
+		protected T call() throws Exception
+		{
+			return callable.call();
+		}
+		
+		/**
+		 * Cancels this task using the policy of the implemented method, {@link Future#cancel(boolean)},
+		 * HOWEVER, this will be cancelled if and ONLY if the encapsulated task is of type {@link Cancellable}.
+		 */
+		@Override
+		public final boolean cancel(boolean mayInterruptIfRunning)
+		{
+			if (isDone())
+			{
+				return false;
+			}
+			else if (callable instanceof Cancellable)
+			{
+				((Cancellable<T>)callable).cancel();
+				
+				Thread executor = getExecutor();
+				if (mayInterruptIfRunning && executor != null)
+					executor.interrupt();
+				join();
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		@Override
+		public final boolean isCancelled() 
+		{
+			return (callable instanceof Cancellable) && ((Cancellable<T>)callable).isCancelled();
+		}
+		
 	}
 	
 }

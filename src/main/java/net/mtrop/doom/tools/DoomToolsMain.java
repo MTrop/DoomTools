@@ -32,6 +32,7 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 public final class DoomToolsMain 
 {
 	public static final String DOOMTOOLS_WEBSITE = "https://mtrop.github.io/DoomTools/";
+	public static final String DOOMTOOLS_REPO_WEBSITE = "https://github.com/MTrop/DoomTools";
 
 	public static final int ERROR_NONE = 0;
 	public static final int ERROR_DESKTOP_ERROR = 1;

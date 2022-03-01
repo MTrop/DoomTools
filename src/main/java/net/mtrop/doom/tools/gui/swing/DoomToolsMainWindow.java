@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The main DoomTools application window.
@@ -101,13 +102,9 @@ public class DoomToolsMainWindow extends JFrame
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doomtools.menu.file",
-				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings",
-					(c, e) -> openSettingsModal()
-				),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings", (c, e) -> openSettingsModal()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit",
-					(c, e) -> shutDownHook.run()
-				)
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit", (c, e) -> shutDownHook.run())
 			),
 
 			// Tools
@@ -140,23 +137,14 @@ public class DoomToolsMainWindow extends JFrame
 
 			// Help
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.about",
-					(c, e) -> openAboutModal()
-				),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (c, e) -> openAboutModal()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs",
-					(c, e) -> openDocs()
-				),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings",
-					(c, e) -> openSettingsFolder()
-				),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb",
-					(c, e) -> openWebsite()
-				),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (c, e) -> openDocs()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (c, e) -> openSettingsFolder()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (c, e) -> openWebsite()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (c, e) -> openRepositorySite()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.update",
-					(c, e) -> openUpdate()
-				)
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (c, e) -> openUpdate())
 			)
 		);
 	}
@@ -276,6 +264,33 @@ public class DoomToolsMainWindow extends JFrame
 		}
 	}
 	
+	private void openRepositorySite()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
+			return;
+		}
+				
+		LOG.info("Opening the DoomTools code repository website...");
+
+		try {
+			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_REPO_WEBSITE));
+		} catch (URISyntaxException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.url"));
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.security"));
+		}
+	}
+	
 	private void openUpdate()
 	{
 		final String path; 
@@ -304,6 +319,8 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createChoiceFromLanguageKey("doomtools.cancel")
 		);
 
+		final AtomicBoolean successful = new AtomicBoolean(false);
+		
 		// Listener 
 		DoomToolsUpdater.Listener listener = new DoomToolsUpdater.Listener() 
 		{
@@ -373,6 +390,7 @@ public class DoomToolsMainWindow extends JFrame
 			public void onUpdateSuccessful() 
 			{
 				progressPanel.setSuccessMessage("Update successful!");
+				successful.set(true);
 			}
 
 			@Override
@@ -387,9 +405,12 @@ public class DoomToolsMainWindow extends JFrame
 		try {
 			
 			InstancedFuture<Integer> instance = tasks.spawn(new DoomToolsUpdater(new File(path), listener));
-			progressModal.openThenDispose();
+			progressModal.openThenDispose(); // will hold here until closed.
 			if (!instance.isDone())
 				instance.cancel();
+			
+			if (successful.get())
+				SwingUtils.info(this, language.getText("doomtools.update.success"));
 			
 		} catch (Exception e) {
 			LOG.error(e, "Uncaught error during update.");
