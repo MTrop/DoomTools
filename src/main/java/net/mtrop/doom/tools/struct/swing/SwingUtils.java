@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -52,25 +53,25 @@ public final class SwingUtils
 	}
 	
 	/**
-	 * Sets the system look and feel.
-	 * If this is not possible, this returns false. 
-	 * Otherwise, this sets the system look and feel and returns true.
+	 * Sets the system look and feel and returns it.
+	 * If this is not possible, this returns null. 
+	 * Otherwise, this sets the system look and feel and returns <code>UIManager.getLookAndFeel()</code>.
 	 * @return true if set, false if not.
 	 */
-	public static boolean setSystemLAF()
+	public static LookAndFeel setSystemLAF()
 	{
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {
-			return false;
+			return null;
 		} catch (InstantiationException e) {
-			return false;
+			return null;
 		} catch (IllegalAccessException e) {
-			return false;
+			return null;
 		} catch (UnsupportedLookAndFeelException e) {
-			return false;
+			return null;
 		}
-		return true;
+		return UIManager.getLookAndFeel();
 	}
 	
 	/**

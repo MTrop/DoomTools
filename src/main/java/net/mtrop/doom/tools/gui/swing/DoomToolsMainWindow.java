@@ -1,6 +1,5 @@
 package net.mtrop.doom.tools.gui.swing;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
@@ -24,6 +23,8 @@ import net.mtrop.doom.tools.gui.swing.panels.ProgressPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+
+import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -95,6 +96,36 @@ public class DoomToolsMainWindow extends JFrame
 		setContentPane(this.desktop = new DoomToolsDesktopPane());
 		setLocationByPlatform(true);
 		pack();
+	}
+
+	/**
+	 * Adds a new application instance to the desktop.
+	 * @param <A> the instance type.
+	 * @param applicationClass the application class.
+	 * @throws RuntimeException if the class could not be instantiated.
+	 */
+	public <A extends DoomToolsApplicationInstance> void addApplication(Class<A> applicationClass)
+	{
+		addApplication(Common.create(applicationClass));
+	}
+
+	/**
+	 * Adds a new application instance to the desktop.
+	 * @param <A> the instance type.
+	 * @param applicationInstance the application instance.
+	 * @throws RuntimeException if the class could not be instantiated.
+	 */
+	public <A extends DoomToolsApplicationInstance> void addApplication(A applicationInstance)
+	{
+		desktop.addApplicationFrame(applicationInstance, applicationStarter).setVisible(true);
+	}
+
+	/**
+	 * Shuts down all the apps in the window.
+	 */
+	public void shutDownApps()
+	{
+		desktop.clearWorkspace();
 	}
 
 	private JMenuBar createMenuBar()
@@ -315,7 +346,7 @@ public class DoomToolsMainWindow extends JFrame
 		Modal<Object> progressModal = modal(
 			utils.getWindowIcons(),
 			language.getText("doomtools.update.title"),
-			containerOf(node(BorderLayout.CENTER, BorderFactory.createEmptyBorder(8, 8, 8, 8), node(progressPanel))),
+			containerOf(createEmptyBorder(8, 8, 8, 8), node(BorderLayout.CENTER, progressPanel)),
 			utils.createChoiceFromLanguageKey("doomtools.cancel")
 		);
 
@@ -334,13 +365,13 @@ public class DoomToolsMainWindow extends JFrame
 			public void onError(String message) 
 			{
 				SwingUtils.error(progressModal, message);
-				progressPanel.setErrorMessage("Update failed.");
+				progressPanel.setErrorMessage(language.getText("doomtools.update.failed"));
 			}
 
 			@Override
 			public void onDownloadStart() 
 			{
-				progressPanel.setActivityMessage("Downloading");
+				progressPanel.setActivityMessage(language.getText("doomtools.update.downloading"));
 				progressPanel.setProgressLabel("0%");
 			}
 
@@ -352,13 +383,13 @@ public class DoomToolsMainWindow extends JFrame
 				{
 					int maxkbs = (int)(max / 1024L);
 					int pct = kbs * 100 / maxkbs;
-					progressPanel.setActivityMessage("Downloading (" + kbs + " KB / " + maxkbs + " KB)...");
+					progressPanel.setActivityMessage(language.getText("doomtools.update.downloading.amount2", kbs, maxkbs));
 					progressPanel.setProgressLabel(pct + "%");
 					progressPanel.setProgress(0, kbs, maxkbs);
 				}
 				else // length was not in response
 				{
-					progressPanel.setActivityMessage("Downloading (" + kbs + " KB)...");
+					progressPanel.setActivityMessage(language.getText("doomtools.update.downloading.amount1", kbs));
 					progressPanel.setProgressLabel("N/A");
 				}
 			}
@@ -366,7 +397,7 @@ public class DoomToolsMainWindow extends JFrame
 			@Override
 			public void onDownloadFinish() 
 			{
-				progressPanel.setActivityMessage("Finished!");
+				progressPanel.setActivityMessage(language.getText("doomtools.update.downloading.finished"));
 				progressPanel.setProgressLabel("100%");
 				progressPanel.setProgress(0, 100, 100);
 			}
@@ -374,14 +405,14 @@ public class DoomToolsMainWindow extends JFrame
 			@Override
 			public boolean shouldContinue(String versionString)
 			{
-				progressPanel.setActivityMessage("Update found...");
+				progressPanel.setActivityMessage(language.getText("doomtools.update.downloading.found"));
 				return SwingUtils.yesTo(progressModal, language.getText("doomtools.update.continue", versionString));
 			}
 
 			@Override
 			public void onUpToDate() 
 			{
-				progressPanel.setSuccessMessage("DoomTools is up-to-date!");
+				progressPanel.setSuccessMessage(language.getText("doomtools.update.downloading.uptodate"));
 				progressPanel.setProgressLabel("100%");
 				progressPanel.setProgress(0, 100, 100);
 			}
@@ -389,14 +420,14 @@ public class DoomToolsMainWindow extends JFrame
 			@Override
 			public void onUpdateSuccessful() 
 			{
-				progressPanel.setSuccessMessage("Update successful!");
+				progressPanel.setSuccessMessage(language.getText("doomtools.update.downloading.success"));
 				successful.set(true);
 			}
 
 			@Override
 			public void onUpdateAbort() 
 			{
-				progressPanel.setErrorMessage("Update aborted by user.");
+				progressPanel.setErrorMessage(language.getText("doomtools.update.downloading.aborted"));
 				progressPanel.setProgressLabel("");
 				progressPanel.setProgress(0, 0, 100);
 			}
@@ -416,36 +447,6 @@ public class DoomToolsMainWindow extends JFrame
 			LOG.error(e, "Uncaught error during update.");
 			SwingUtils.error(this, "Uncaught error during update: " + e.getClass().getSimpleName());
 		}
-	}
-	
-	/**
-	 * Shuts down all the apps in the window.
-	 */
-	public void shutDownApps()
-	{
-		desktop.clearWorkspace();
-	}
-	
-	/**
-	 * Adds a new application instance to the desktop.
-	 * @param <A> the instance type.
-	 * @param applicationClass the application class.
-	 * @throws RuntimeException if the class could not be instantiated.
-	 */
-	public <A extends DoomToolsApplicationInstance> void addApplication(Class<A> applicationClass)
-	{
-		addApplication(Common.create(applicationClass));
-	}
-	
-	/**
-	 * Adds a new application instance to the desktop.
-	 * @param <A> the instance type.
-	 * @param applicationInstance the application instance.
-	 * @throws RuntimeException if the class could not be instantiated.
-	 */
-	public <A extends DoomToolsApplicationInstance> void addApplication(A applicationInstance)
-	{
-		desktop.addApplicationFrame(applicationInstance, applicationStarter).setVisible(true);
 	}
 	
 }

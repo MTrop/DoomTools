@@ -1,8 +1,9 @@
 package net.mtrop.doom.tools.gui.swing.panels;
 
+import static javax.swing.BorderFactory.*;
+
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -13,7 +14,7 @@ public final class ProgressPanelTest
 	{
 		SwingUtils.setSystemLAF();
 		ProgressPanel panel = new ProgressPanel(48);
-		panel.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+		panel.setBorder(createEmptyBorder(8,8,8,8));
 
 		SwingUtils.apply(frame("Test", panel), 
 		(frame) -> {

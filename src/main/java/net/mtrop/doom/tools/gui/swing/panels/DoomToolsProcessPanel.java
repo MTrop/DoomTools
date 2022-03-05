@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.io.PrintStream;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
@@ -27,7 +26,7 @@ public class DoomToolsProcessPanel extends JPanel
 		this.statusPanel = new StatusPanel();
 		
 		containerOf(this, new BorderLayout(0, 4), 
-			node(BorderLayout.CENTER, scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, textOutputPanel)),
+			node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, textOutputPanel)),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}

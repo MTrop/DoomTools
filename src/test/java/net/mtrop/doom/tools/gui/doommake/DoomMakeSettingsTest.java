@@ -2,12 +2,13 @@ package net.mtrop.doom.tools.gui.doommake;
 
 import java.io.File;
 
+import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 public final class DoomMakeSettingsTest 
 {
 	public static void main(String[] args) 
 	{
-		DoomMakeSettings.get().setLastProjectDirectory(new File(OSUtils.getWorkingDirectoryPath()));
+		DoomToolsSettingsManager.get().setLastProjectDirectory(new File(OSUtils.getWorkingDirectoryPath()));
 	}
 }

@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.gui;
 
 import java.awt.Container;
-import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JMenuBar;
@@ -12,12 +11,20 @@ import javax.swing.JMenuBar;
  * Can be created as a JFrame or a JInternalFrame.
  * @author Matthew Tropiano
  */
-public interface DoomToolsApplicationInstance
+public abstract class DoomToolsApplicationInstance
 {
+	/** The control receiver set on all apps. */
+	protected DoomToolsApplicationControlReceiver receiver;
+	
+	protected DoomToolsApplicationInstance()
+	{
+		this.receiver = null; // set later
+	}
+	
 	/**
 	 * @return this application's name.
 	 */
-	String getName();
+	public abstract String getName();
 	
 	/**
 	 * Fetches this application instance's content pane.
@@ -26,7 +33,7 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's content pane.
 	 */
-	Container createContentPane();
+	public abstract Container createContentPane();
 
 	/**
 	 * Sets the application control receiver.
@@ -34,9 +41,9 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @param receiver the receiver instance.
 	 */
-	default void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver)
+	public final void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver)
 	{
-		// Do nothing.
+		this.receiver = receiver;
 	}
 	
 	/**
@@ -46,7 +53,7 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's icon, or <code>null</code> for default.
 	 */
-	default Icon getIcon()
+	public Icon getIcon()
 	{
 		return null;
 	}
@@ -58,7 +65,7 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's menu bar. May return <code>null</code> for no bar.
 	 */
-	default JMenuBar createMenuBar()
+	public JMenuBar createMenuBar()
 	{
 		return null;
 	}
@@ -70,29 +77,41 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's menu bar. May return <code>null</code> for no bar.
 	 */
-	default JMenuBar createInternalMenuBar()
+	public JMenuBar createInternalMenuBar()
 	{
 		return null;
 	}
 
 	/**
-	 * Fetches a map of settings for this application instance
-	 * so that it may be restored later in a workspace.
-	 * <p> This should NEVER be called by the application itself.
-	 * @param settingsMap the target settings map.
+	 * Creates a new settings object for saving into later, with NO defaults set.
+	 * @return a new settings object.
 	 */
-	default void saveSettings(Map<String, String> settingsMap)
+	public DoomToolsApplicationSettings createSettings()
+	{
+		return new DoomToolsApplicationSettings();
+	}
+
+	/**
+	 * Fetches a map of settings for this application instance
+	 * so that it may be restored later in a workspace. 
+	 * Applications that override this method should call this via <code>super</code> first!
+	 * <p> All values should be JSON serializable!
+	 * <p> This should NEVER be called by the application itself.
+	 * @param settings the settings object.
+	 */
+	public void saveSettingsTo(DoomToolsApplicationSettings settings)
 	{
 		// Do nothing.
 	}
 
 	/**
 	 * Applies a set of settings to this instance.
-	 * Presumably, these are the same settings as fetched from {{@link #saveSettings(Map)}.
+	 * Presumably, these are the same settings as set from {{@link #saveSettingsTo(DoomToolsApplicationSettings)}.
+	 * Applications that override this method should call this via <code>super</code> first!
 	 * <p> This should NEVER be called by the application itself.
-	 * @param settingsMap the settings map.
+	 * @param settings the settings object.
 	 */
-	default void applySettings(Map<String, String> settingsMap)
+	public void applySettingsFrom(DoomToolsApplicationSettings settings)
 	{
 		// Do nothing.
 	}
@@ -102,7 +121,7 @@ public interface DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @return true if the application should close, false if not.
 	 */
-	default boolean shouldClose()
+	public boolean shouldClose()
 	{
 		return true;
 	}
@@ -111,7 +130,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is opened.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onOpen()
+	public void onOpen()
 	{
 		// Do nothing.
 	}
@@ -120,7 +139,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is minimized.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onMinimize()
+	public void onMinimize()
 	{
 		// Do nothing.
 	}
@@ -129,7 +148,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is restored from iconification.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onRestore()
+	public void onRestore()
 	{
 		// Do nothing.
 	}
@@ -138,7 +157,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is focused.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onFocus()
+	public void onFocus()
 	{
 		// Do nothing.
 	}
@@ -147,7 +166,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is unfocused.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onBlur()
+	public void onBlur()
 	{
 		// Do nothing.
 	}
@@ -156,7 +175,7 @@ public interface DoomToolsApplicationInstance
 	 * Called when the application is closing.
 	 * <p> This should NEVER be called by the application itself.
 	 */
-	default void onClose()
+	public void onClose()
 	{
 		// Do nothing.
 	}

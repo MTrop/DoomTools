@@ -3,7 +3,6 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
 
@@ -23,7 +22,7 @@ public class DoomToolsSettingsPanel extends JPanel
 	public DoomToolsSettingsPanel()
 	{
 		containerOf(this, new BorderLayout(),
-			node(BorderLayout.CENTER, tabs(JTabbedPane.LEFT, JTabbedPane.WRAP_TAB_LAYOUT,
+			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
 				tab("DoomTools", containerOf()),
 				tab("DoomMake", new DoomMakeSettingsPanel())
 			))

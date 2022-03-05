@@ -5,7 +5,6 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import java.io.PrintStream;
 
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -17,9 +16,9 @@ public final class TextOutputPanelTest
 		TextOutputPanel panel = new TextOutputPanel();
 		PrintStream out = panel.getPrintStream();
 		
-		SwingUtils.apply(frame("Test", containerOf(
-			scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, panel)
-		)), 
+		SwingUtils.apply(frame("Test",
+			scroll(ScrollPolicy.AS_NEEDED, panel)
+		), 
 		(frame) -> {
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -17,6 +17,7 @@ import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -42,11 +43,11 @@ public final class DoomMakeProjectHelper
 	
 	/* ==================================================================== */
 	
-	private DoomMakeSettings settings;
+	private DoomToolsSettingsManager settings;
 	
 	private DoomMakeProjectHelper()
 	{
-		this.settings = DoomMakeSettings.get();
+		this.settings = DoomToolsSettingsManager.get();
 	}
 
 	/**

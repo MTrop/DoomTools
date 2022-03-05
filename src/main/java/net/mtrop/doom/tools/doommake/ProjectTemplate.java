@@ -18,6 +18,8 @@ public final class ProjectTemplate implements Comparable<ProjectTemplate>, Itera
 	private String description;
 	/** Module file entries. */
 	private Set<String> moduleNames;
+	/** Is hidden from listings? */
+	private boolean hidden;
 	
 	/**
 	 * Creates a new template.
@@ -28,6 +30,20 @@ public final class ProjectTemplate implements Comparable<ProjectTemplate>, Itera
 	 * @return the new template.
 	 */
 	public static ProjectTemplate template(String name, String category, String description, String... modules)
+	{
+		return template(name, category, description, false, modules);
+	}
+
+	/**
+	 * Creates a new template.
+	 * @param name the name of the template.
+	 * @param category the template category.
+	 * @param description the description.
+	 * @param hidden if this template is hidden.
+	 * @param modules the template module names.
+	 * @return the new template.
+	 */
+	public static ProjectTemplate template(String name, String category, String description, boolean hidden, String... modules)
 	{
 		return new ProjectTemplate(name, category, description, modules);
 	}
@@ -73,6 +89,14 @@ public final class ProjectTemplate implements Comparable<ProjectTemplate>, Itera
 		return description;
 	}
 
+	/**
+	 * @return true if this should be hidden from listings, false if not.
+	 */
+	public boolean isHidden() 
+	{
+		return hidden;
+	}
+	
 	@Override
 	public int compareTo(ProjectTemplate template) 
 	{

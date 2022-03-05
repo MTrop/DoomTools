@@ -2,6 +2,8 @@ package net.mtrop.doom.tools.doommake.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +18,7 @@ import net.mtrop.doom.tools.doommake.ProjectModuleDescriptor;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
+import net.mtrop.doom.tools.exception.UtilityException;
 
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.template;
 
@@ -43,6 +46,7 @@ public class WADProjectGenerator extends ProjectGenerator
 	public static final String CATEGORY_PATCHES = "Patches";
 	public static final String CATEGORY_EXECUTION = "Execution";
 
+	public static final String TEMPLATE_BASE = "base";
 	public static final String TEMPLATE_GIT = "git";
 	public static final String TEMPLATE_MERCURIAL = "hg";
 	public static final String TEMPLATE_ASSETS = "assets";
@@ -581,8 +585,9 @@ public class WADProjectGenerator extends ProjectGenerator
 
 		// ................................................................
 
+		// Hidden base template.
 		TEMPLATES.put(TEMPLATE_BASE, template(
-			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.",
+			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.", true,
 			MODULE_INIT, MODULE_BASE
 		));
 		
@@ -682,6 +687,16 @@ public class WADProjectGenerator extends ProjectGenerator
 		return MODULES.get(name);
 	}
 
+	@Override
+	public SortedSet<ProjectModule> getSelectedModules(Collection<String> templateNameList) throws UtilityException 
+	{
+		// Ensure that the base project is selected.
+		SortedSet<ProjectModule> out = super.getSelectedModules(templateNameList);
+		if (out.isEmpty())
+			out = getSelectedModules(Arrays.asList(TEMPLATE_BASE));
+		return out;
+	}
+	
 	@Override
 	public void createProject(SortedSet<ProjectModule> selected, Map<String, String> replacerMap, File targetDirectory) throws IOException 
 	{

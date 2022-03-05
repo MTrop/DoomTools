@@ -6,7 +6,7 @@ import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeSettings;
+import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -23,7 +23,7 @@ public class DoomMakeSettingsPanel extends JPanel
 	private static final long serialVersionUID = 3657842361863713721L;
 	
 	/** Settings singleton. */
-	private static final DoomMakeSettings settings = DoomMakeSettings.get();
+	private static final DoomToolsSettingsManager settings = DoomToolsSettingsManager.get();
 	
 	private static final FileFilter EXE_FILTER = new FileFilter() 
 	{

@@ -1,6 +1,5 @@
 package net.mtrop.doom.tools.gui.swing.panels;
 
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.Version;
@@ -52,7 +51,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Thank you for using DoomTools!");
 		sb.append("</html>");
 		
-		containerOf(this, BorderFactory.createEmptyBorder(4, 4, 4, 4), new BorderLayout(4, 4), node(BorderLayout.CENTER, label(sb.toString())));
+		containerOf(this, node(BorderLayout.CENTER, label(sb.toString())));
 	}
 	
 }

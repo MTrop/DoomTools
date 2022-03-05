@@ -25,8 +25,6 @@ import net.mtrop.doom.tools.exception.UtilityException;
  */
 public abstract class ProjectGenerator
 {
-	public static final String TEMPLATE_BASE = "base";
-
 	/**
 	 * @return the set of valid category names.
 	 */

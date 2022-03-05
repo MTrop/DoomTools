@@ -77,6 +77,7 @@ public final class DoomMakeMain
 	public static final String SWITCH_LISTMODULES2 = "-t";
 	public static final String SWITCH_NEWPROJECT = "--new-project";
 	public static final String SWITCH_NEWPROJECT2 = "-n";
+	public static final String SWITCH_NEWPROJECT_GUI = "--new-project-gui";
 	public static final String SWITCH_EMBED = "--embed";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_AGENT = "--auto-build";
@@ -128,6 +129,7 @@ public final class DoomMakeMain
 		private boolean listModules;
 		private boolean embed;
 		private boolean gui;
+		private boolean guiNewProject;
 		private boolean agent;
 		private boolean verboseAgent;
 
@@ -285,6 +287,17 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 
+			if (options.guiNewProject)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, System.getProperty("user.dir"));
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DoomMake New Project GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+			
 			if (options.projectType != null)
 			{
 				ProjectGenerator generator = options.projectType.createGenerator();
@@ -310,7 +323,7 @@ public final class DoomMakeMain
 						options.stdout.println(categoryEntry.getKey() + ":");
 						for (ProjectTemplate template : categoryEntry.getValue())
 						{
-							if (ProjectGenerator.TEMPLATE_BASE.equals(template.getName()))
+							if (template.isHidden())
 								continue;
 							
 							String description = template.getDescription();
@@ -552,11 +565,6 @@ public final class DoomMakeMain
 				return ERROR_BAD_PROJECT;
 			}
 
-			if (options.templateNames.isEmpty())
-			{
-				options.templateNames.add(ProjectGenerator.TEMPLATE_BASE);
-			}
-			
 			try {
 				SortedSet<ProjectModule> selectedModules = generator.getSelectedModules(options.templateNames);
 				List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
@@ -745,6 +753,8 @@ public final class DoomMakeMain
 						options.agentBypass = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT_GUI))
+						options.guiNewProject = true;
 					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
 					{
 						options.projectType = ProjectType.WAD;
@@ -1023,6 +1033,7 @@ public final class DoomMakeMain
 	{
 		out.println("Usage: doommake [target] [args] [switches]");
 		out.println("                [directory] --new-project [templates...]");
+		out.println("                [--gui | --new-project-gui]");
 		out.println("                [--list-templates | -t]");
 		out.println("                [--help | -h | --version]");
 		out.println("                [--function-help | --function-help-markdown]");
@@ -1073,6 +1084,13 @@ public final class DoomMakeMain
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();
+		out.println("    --gui                          Opens this project in a graphical interface");
+		out.println("                                       mode.");
+		out.println();
+		out.println("    --new-project-gui              Opens the \"New Project\" GUI.");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println();
 		out.println("    --script, -s [filename]        Use [filename] for the root build script.");
 		out.println("                                       Default is \"doommake.script\".");
 		out.println("    --properties, -p [filename]    Use [filename] for the project properties.");
@@ -1099,11 +1117,6 @@ public final class DoomMakeMain
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();
-		out.println("    --gui                          Opens this project in a graphical interface");
-		out.println("                                       mode.");
-		out.println();
-		out.println("-----------------------------------------------------------------------------");
-		out.println();
 		out.println("    --auto-build                   Starts DoomMake as an agent for detecting");
 		out.println("                                       changes in the current project and");
 		out.println("                                       kicking off full builds when changes");
@@ -1116,6 +1129,7 @@ public final class DoomMakeMain
 		out.println("targets on that project will error out. In order to run targets, you can use:");
 		out.println();
 		out.println("    --agent-bypass                 Bypasses agent detection. USE WITH CAUTION.");
+		out.println("                                       Used internally.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();

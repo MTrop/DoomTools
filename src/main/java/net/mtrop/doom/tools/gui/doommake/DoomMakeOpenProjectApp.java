@@ -1,6 +1,7 @@
 package net.mtrop.doom.tools.gui.doommake;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -12,14 +13,15 @@ import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
-import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationSettings;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -35,6 +37,8 @@ import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
+import static javax.swing.BorderFactory.*;
+
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 
@@ -42,7 +46,7 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
  * The DoomMake New Project application.
  * @author Matthew Tropiano
  */
-public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
+public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 {
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
@@ -57,11 +61,6 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
     private DoomToolsTaskManager tasks;
     /** Project helper. */
     private DoomMakeProjectHelper helper;
-
-	// Control
-
-    /** The app control receiver. */
-	private DoomToolsApplicationControlReceiver receiver;
 
 	// Components
 	
@@ -96,7 +95,6 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 		this.language = DoomToolsLanguageManager.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.helper = DoomMakeProjectHelper.get();
-		this.receiver = null;
 		
 		this.listPanel = new DoomMakeProjectTargetListPanel(
 			Collections.emptySortedSet(),
@@ -250,26 +248,42 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 	}
 
 	@Override
+	public DoomToolsApplicationSettings createSettings() 
+	{
+		return new DoomToolsApplicationSettings();
+	}
+
+	@Override
 	public Container createContentPane()
 	{
 		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
 		refreshTargets();
+		
+		Border targetsBorder = createTitledBorder(
+			createLineBorder(Color.GRAY, 1), "Available Targets", TitledBorder.LEADING, TitledBorder.TOP
+		);
+		
 		Container out = containerOf(
-			node(BorderFactory.createEmptyBorder(4, 4, 4, 4), new BorderLayout(), node(containerOf(
+			new Dimension(300, 200),
+			createEmptyBorder(4, 4, 4, 4),
+			node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.EAST, control)
 				)),
 				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
-					node(BorderLayout.CENTER, scroll(listPanel)),
+					node(BorderLayout.CENTER, containerOf(targetsBorder, 
+						node(containerOf(createEmptyBorder(4, 4, 4, 4), 
+							node(scroll(listPanel))
+						))
+					)),
 					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
 						node(BorderLayout.CENTER, autoBuildCheckbox),
 						node(BorderLayout.EAST, button(targetRunAction)),
 						node(BorderLayout.SOUTH, statusPanel)
 					))
 				))
-			)))
+			))
 		);
-		out.setPreferredSize(new Dimension(300, 200));
 		return out;
 	}
 
@@ -295,12 +309,6 @@ public class DoomMakeOpenProjectApp implements DoomToolsApplicationInstance
 				)
 			)
 		);
-	}
-	
-	@Override
-	public void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver) 
-	{
-		this.receiver = receiver;
 	}
 	
 	@Override

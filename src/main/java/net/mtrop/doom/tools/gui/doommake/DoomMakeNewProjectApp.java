@@ -17,7 +17,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -25,6 +24,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
 import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
@@ -32,11 +32,13 @@ import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
-import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationSettings;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+
+import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -47,7 +49,7 @@ import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
  * The DoomMake New Project application.
  * @author Matthew Tropiano
  */
-public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
+public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 {
     private static final FileFilter DIRECTORY_FILTER = new FileFilter()
 	{
@@ -68,8 +70,6 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 	private DoomToolsGUIUtils utils;
     /** Language manager. */
     private DoomToolsLanguageManager language;
-    /** The app control receiver. */
-	private DoomToolsApplicationControlReceiver receiver;
 	
 	/** Project generator. */
 	private ProjectGenerator projectGenerator;
@@ -83,11 +83,10 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.receiver = null;
 		
 		this.projectGenerator = new WADProjectGenerator();
 		
-		this.targetDirectory = null;
+		this.targetDirectory = Common.isEmpty(initFilePath) ? null : new File(initFilePath);
 		this.templateNameSet = new TreeSet<>();
 	}
 	
@@ -95,6 +94,12 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 	public String getName()
 	{
 		return language.getText("doommake.newproject.title");
+	}
+
+	@Override
+	public DoomToolsApplicationSettings createSettings() 
+	{
+		return new DoomToolsApplicationSettings();
 	}
 
 	@Override
@@ -132,36 +137,38 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 
 		JPanel projectPanel = new JPanel();
 		JScrollPane scrollPane = apply(
-			scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, projectPanel), 
+			scroll(projectPanel), 
 			(p) -> p.setBorder(null)
 		);
 		containerOf(projectPanel, new BoxLayout(projectPanel, BoxLayout.Y_AXIS), getWADGeneratorOptionNodes());
 		
 		return containerOf(
-			node(BorderLayout.CENTER, BorderFactory.createEmptyBorder(4, 4, 4, 4), new BorderLayout(), node(containerOf(out, new BorderLayout(),
+			createEmptyBorder(4, 4, 4, 4),
+			node(BorderLayout.CENTER, containerOf(out, createEmptyBorder(4, 4, 4, 4), new BorderLayout(),
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.NORTH, projectTypePanel),
 					node(BorderLayout.SOUTH, projectDirectoryPanel)
 				)),
-				node(BorderLayout.CENTER, scrollPane),
+				node(BorderLayout.CENTER, containerOf(
+					node(BorderLayout.NORTH, scrollPane),
+					node(BorderLayout.CENTER, containerOf())
+				)),
 				node(BorderLayout.SOUTH, controlPane)
-			)))
+			))
 		);
-	}
-	
-	@Override
-	public void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver) 
-	{
-		this.receiver = receiver;
 	}
 	
 	// The title panel.
-	private Container titlePanel(String title, Container container)
+	private static Container titlePanel(String title, Container container)
 	{
-		Border border = BorderFactory.createTitledBorder(
-			BorderFactory.createLineBorder(Color.GRAY, 1), title, TitledBorder.LEADING, TitledBorder.TOP
+		Border border = createTitledBorder(
+			createLineBorder(Color.GRAY, 1), title, TitledBorder.LEADING, TitledBorder.TOP
 		);
-		return containerOf(node(BorderLayout.CENTER, border, new BorderLayout(), node(BorderLayout.CENTER, container)));
+		return containerOf(border, 
+			node(containerOf(createEmptyBorder(4, 4, 4, 4),
+				node(BorderLayout.CENTER, container)
+			))
+		);
 	}
 
 	// The options for WAD Generators.
@@ -290,7 +297,7 @@ public class DoomMakeNewProjectApp implements DoomToolsApplicationInstance
 		}
 		
 		final Container contentPane = containerOf(
-			apply(new JPanel(), (p) -> p.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8))), 
+			apply(new JPanel(), (p) -> p.setBorder(createEmptyBorder(8, 8, 8, 8))), 
 			new BorderLayout(8, 8),
 			node(BorderLayout.CENTER, label(prompt)),
 			node(BorderLayout.SOUTH, field)

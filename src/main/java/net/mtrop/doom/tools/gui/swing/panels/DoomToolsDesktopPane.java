@@ -3,11 +3,18 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.beans.PropertyVetoException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
@@ -36,21 +43,50 @@ public class DoomToolsDesktopPane extends JDesktopPane
 
 	/** Image manager. */
 	private DoomToolsImageManager images;
+	
 	/** All application instances. */
 	private Map<DoomToolsApplicationInstance, JInternalFrame> instances;
+	/** List of frames. */
+	private List<JInternalFrame> frames;
+	
 	/** The background image on the desktop pane. */
 	private ImageIcon backgroundImage;
+	/** A movement listener that keeps windows in the desktop area. */
+	private ComponentListener frameMovementListener;
 	
 	public DoomToolsDesktopPane()
 	{
 		this.images = DoomToolsImageManager.get();
 		this.instances = new HashMap<>();
-		
+		this.frames = new ArrayList<>();
 		this.backgroundImage = ComponentFactory.icon(images.getImage("background-logo.png"));
+		this.frameMovementListener = new ComponentAdapter() 
+		{
+			@Override
+			public void componentMoved(ComponentEvent e) 
+			{
+				correctFramePosition((JInternalFrame)e.getComponent());
+			}
+			
+			@Override
+			public void componentResized(ComponentEvent e) 
+			{
+				correctFramePosition((JInternalFrame)e.getComponent());
+			}
+		};
+		
 		
 		int imageWidth = backgroundImage.getIconWidth() + 100;
 		setBackground(Color.DARK_GRAY);
 		setPreferredSize(new Dimension(imageWidth, (int)(imageWidth * 0.75)));
+		addComponentListener(new ComponentAdapter() 
+		{
+			@Override
+			public void componentResized(ComponentEvent e) 
+			{
+				correctAllFramePositions();
+			}
+		});
 	}
 	
 	@Override
@@ -106,6 +142,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	{
 		DoomToolsApplicationInternalFrame frame = new DoomToolsApplicationInternalFrame(instance, starter);
 		instances.put(instance, frame);
+		frames.add(frame);
 		frame.addInternalFrameListener(new InternalFrameAdapter()
 		{
 			@Override
@@ -114,6 +151,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 				attemptCloseApplication(instance);
 			}
 		});
+		frame.addComponentListener(frameMovementListener);
 		add(frame);
 		LOG.infof("Started application: %s", instance.getClass().getSimpleName());
 		return frame;
@@ -156,6 +194,13 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	{
 		int i = 0;
 		final int CASCADE_STEP = 24;
+		
+		final TreeSet<JInternalFrame> reorderedSet = new TreeSet<>((a, b) -> a.hasFocus() ? 1 : 0);
+		reorderedSet.addAll(instances.entrySet().stream()
+			.map((e)->e.getValue())
+			.collect(Collectors.toList())
+		);
+		
 		for (Map.Entry<DoomToolsApplicationInstance, JInternalFrame> entry : instances.entrySet())
 		{
 			JInternalFrame frame = entry.getValue();
@@ -189,10 +234,40 @@ public class DoomToolsDesktopPane extends JDesktopPane
 			return;
 		
 		JInternalFrame frame = instances.remove(instance); 
+		frames.remove(frame);
 		frame.setVisible(false);
 		frame.dispose();
 		instance.onClose();
 		LOG.infof("Closed application: %s", instance.getClass().getSimpleName());
+	}
+	
+	private void correctAllFramePositions()
+	{
+		for (int i = 0; i < frames.size(); i++)
+			correctFramePosition(frames.get(i));
+	}
+	
+	private void correctFramePosition(JInternalFrame frame)
+	{
+		int currentX = frame.getX();
+		int currentY = frame.getY();
+		int currentWidth = frame.getWidth();
+		int currentHeight = frame.getHeight();
+
+		if (frame.getWidth() > getWidth())
+			return;
+		if (frame.getHeight() > getHeight())
+			return;
+		
+		if (frame.getX() < 0)
+			frame.setBounds(0, currentY, currentWidth, currentHeight);
+		else if (frame.getX() + frame.getWidth() > getWidth())
+			frame.setBounds(getWidth() - frame.getWidth(), currentY, currentWidth, currentHeight);
+
+		if (frame.getY() < 0)
+			frame.setBounds(currentX, 0, currentWidth, currentHeight);
+		else if (frame.getY() + frame.getHeight() > getHeight())
+			frame.setBounds(currentX, getHeight() - frame.getHeight(), currentWidth, currentHeight);
 	}
 	
 }

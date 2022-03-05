@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,8 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
@@ -17,7 +17,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  * DoomMake GUI settings singleton.
  * @author Matthew Tropiano
  */
-public final class DoomMakeSettings 
+public final class DoomToolsSettingsManager 
 {
     /** Settings filename. */
     private static final String SETTINGS_FILENAME = "settings.properties";
@@ -25,12 +25,12 @@ public final class DoomMakeSettings
     private static final File CONFIG_FILE = new File(Paths.APPDATA_PATH + SETTINGS_FILENAME);
 
     /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeSettings.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsSettingsManager.class); 
     
     /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeSettings> INSTANCE = new SingletonProvider<>(() -> 
+    private static final SingletonProvider<DoomToolsSettingsManager> INSTANCE = new SingletonProvider<>(() -> 
     {
-    	DoomMakeSettings out = new DoomMakeSettings();
+    	DoomToolsSettingsManager out = new DoomToolsSettingsManager();
 		if (!CONFIG_FILE.exists())
 			LOG.infof("No settings file %s - using defaults.", CONFIG_FILE.getPath());
 		else
@@ -42,7 +42,7 @@ public final class DoomMakeSettings
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static DoomMakeSettings get()
+	public static DoomToolsSettingsManager get()
 	{
 		return INSTANCE.get();
 	}
@@ -55,7 +55,7 @@ public final class DoomMakeSettings
 
 	private Properties properties;
 	
-	private DoomMakeSettings()
+	private DoomToolsSettingsManager()
 	{
 		this.properties = new Properties();
 	}
@@ -84,7 +84,7 @@ public final class DoomMakeSettings
 		
 		try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE))
 		{
-			properties.store(fos, "Created by DoomMake " + Common.getVersionString("doommake"));
+			properties.store(fos, "Created by DoomTools " + Version.DOOMTOOLS);
 			LOG.infof("Saved DoomMake settings to %s.", CONFIG_FILE.getPath());
 		} 
 		catch (FileNotFoundException e) 

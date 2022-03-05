@@ -4,7 +4,7 @@ DoomMake
 ### Changed for 0.15.0
 
 * `Added` DoomMake Agent for listening for project changes. See help for more info!
-* `Added` DoomMake GUI for individual projects.
+* `Added` DoomMake GUI for individual projects and creating new ones.
 
 
 ### Changed for 0.14.0

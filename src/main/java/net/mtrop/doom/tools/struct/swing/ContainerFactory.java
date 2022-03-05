@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -35,6 +35,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 
+import static javax.swing.BorderFactory.*;
+
+
 /**
  * The main ContainerFactory class.
  * ContainerFactory is used for creating complex layouts quickly, without the tedium of creating
@@ -46,11 +49,105 @@ public final class ContainerFactory
 	private ContainerFactory() {}
 	
 	/* ==================================================================== */
+	/* ==== Enums                                                      ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Tab placement enumeration.
+	 */
+	public enum TabPlacement
+	{
+		TOP(JTabbedPane.TOP),
+		BOTTOM(JTabbedPane.BOTTOM),
+		LEFT(JTabbedPane.LEFT),
+		RIGHT(JTabbedPane.RIGHT);
+		
+		private final int swingId;
+		
+		private TabPlacement(int swingId)
+		{
+			this.swingId = swingId;
+		}
+	}
+	
+	/**
+	 * Tab layout enumeration for too many tabs.
+	 */
+	public enum TabLayoutPolicy
+	{
+		WRAP(JTabbedPane.WRAP_TAB_LAYOUT),
+		SCROLL(JTabbedPane.SCROLL_TAB_LAYOUT);
+		
+		private final int swingId;
+		
+		private TabLayoutPolicy(int swingId)
+		{
+			this.swingId = swingId;
+		}
+	}
+	
+	/**
+	 * Scrolling policy for scroll panes.
+	 */
+	public enum ScrollPolicy
+	{
+		NEVER(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS),
+		AS_NEEDED(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED),
+		ALWAYS(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER, JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		
+		private final int swingIdHorizontal;
+		private final int swingIdVertical;
+		
+		private ScrollPolicy(int swingIdHorizontal, int swingIdVertical)
+		{
+			this.swingIdHorizontal = swingIdHorizontal;
+			this.swingIdVertical = swingIdVertical;
+		}
+	}
+	
+	/**
+	 * Split orientation for split panes.
+	 */
+	public enum SplitOrientation
+	{
+		HORIZONTAL(JSplitPane.HORIZONTAL_SPLIT),
+		VERTICAL(JSplitPane.VERTICAL_SPLIT);
+		
+		private final int swingId;
+		
+		private SplitOrientation(int swingId)
+		{
+			this.swingId = swingId;
+		}
+	}
+	
+	/* ==================================================================== */
 	/* ==== Containers                                                 ==== */
 	/* ==================================================================== */
 
 	/**
 	 * Starts a layout tree, returning the provided container.
+	 * The layout is replaced on it with the provided layout.
+	 * @param container the root container.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
+	{
+		container.setBorder(border);
+		container.setLayout(layout);
+		if (preferredSize != null)
+			container.setPreferredSize(preferredSize);
+		for (Node n : children)
+			n.addTo(container);
+		return container;
+	}
+
+	/**
+	 * Starts a container layout tree, returning the provided container.
 	 * The layout is replaced on it with the provided layout.
 	 * @param container the root container.
 	 * @param border the border to set on the container.
@@ -60,15 +157,24 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(JComponent container, Border border, LayoutManager layout, Node ... children)
 	{
-		container.setBorder(border);
-		container.setLayout(layout);
-		for (Node n : children)
-			n.addTo(container);
-		return container;
+		return containerOf(container, null, border, layout, children);
 	}
 
 	/**
 	 * Starts a layout tree, returning the provided container.
+	 * @param container the root container.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param border the border to set on the container.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, Dimension preferredSize, Border border, Node ... children)
+	{
+		return containerOf(container, preferredSize, border, null, children);
+	}
+
+	/**
+	 * Starts a container layout tree, returning the provided container.
 	 * @param container the root container.
 	 * @param border the border to set on the container.
 	 * @param children the component's children.
@@ -76,13 +182,25 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(JComponent container, Border border, Node ... children)
 	{
-		for (Node n : children)
-			n.addTo(container);
-		return container;
+		return containerOf(container, null, border, new BorderLayout(), children);
 	}
 
 	/**
 	 * Starts a layout tree, returning the provided container.
+	 * The layout is replaced on it with the provided layout.
+	 * @param container the root container.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, Dimension preferredSize, LayoutManager layout, Node ... children)
+	{
+		return containerOf(container, preferredSize, null, layout, children);
+	}
+
+	/**
+	 * Starts a container layout tree, returning the provided container.
 	 * The layout is replaced on it with the provided layout.
 	 * @param container the root container.
 	 * @param layout the layout to use for this tree's children.
@@ -91,22 +209,82 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(JComponent container, LayoutManager layout, Node ... children)
 	{
-		return containerOf(container, null, layout, children);
+		return containerOf(container, null, null, layout, children);
 	}
 
 	/**
 	 * Starts a layout tree, returning the provided container.
+	 * @param container the root container.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param children the component's children.
+	 * @return the component passed in, with the descendants added.
+	 */
+	public static Container containerOf(JComponent container, Dimension preferredSize, Node ... children)
+	{
+		return containerOf(container, preferredSize, null, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a container layout tree, returning the provided container.
 	 * @param container the root container.
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
 	public static Container containerOf(JComponent container, Node ... children)
 	{
-		return containerOf(container, null, new BorderLayout(), children);
+		return containerOf(container, null, null, new BorderLayout(), children);
 	}
 
 	/**
 	 * Starts a layout tree, returns a component.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), preferredSize, border, layout, children);
+	}
+
+	/**
+	 * Starts a Container with a BorderLayout.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param border the border to set on the container.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Dimension preferredSize, Border border, Node ... children)
+	{
+		return containerOf(new JPanel(), preferredSize, border, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a layout tree, returns a component.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Dimension preferredSize, LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), preferredSize, null, layout, children);
+	}
+
+	/**
+	 * Starts a Container with a BorderLayout.
+	 * @param preferredSize the dimensions for the preferred size of this container.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Dimension preferredSize, Node ... children)
+	{
+		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a container layout tree, returns a component.
 	 * @param border the border to set on the container.
 	 * @param layout the layout to use for this tree's children.
 	 * @param children the component's children.
@@ -114,18 +292,18 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
 	{
-		return containerOf(new JPanel(), border, layout, children);
+		return containerOf(new JPanel(), null, border, layout, children);
 	}
 
 	/**
-	 * Starts a Container with a BorderLayout.
+	 * Starts a container with a BorderLayout.
 	 * @param border the border to set on the container.
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
 	public static Container containerOf(Border border, Node ... children)
 	{
-		return containerOf(new JPanel(), border, new BorderLayout(), children);
+		return containerOf(new JPanel(), null, border, new BorderLayout(), children);
 	}
 
 	/**
@@ -136,7 +314,7 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(LayoutManager layout, Node ... children)
 	{
-		return containerOf(new JPanel(), layout, children);
+		return containerOf(new JPanel(), null, null, layout, children);
 	}
 
 	/**
@@ -146,130 +324,30 @@ public final class ContainerFactory
 	 */
 	public static Container containerOf(Node ... children)
 	{
-		return containerOf(new JPanel(), null, new BorderLayout(), children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param constraints the constraints to use for the added branch (using parent layout).
-	 * @param border the border to add to the panel.
-	 * @param preferredSize the dimensions for the preferred size.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Object constraints, Border border, Dimension preferredSize, LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, border, preferredSize, constraints, children);
+		return containerOf(new JPanel(), null, null, new BorderLayout(), children);
 	}
 
 	/**
 	 * Starts a new branch off of this branch. 
 	 * @param constraints the constraints to use for the added branch (using parent layout).
 	 * @param preferredSize the dimensions for the preferred size.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
+	 * @param component the component to add.
 	 * @return a new branch node.
 	 */
-	public static Node node(Object constraints, Dimension preferredSize, LayoutManager layout, Node ... children)
+	public static Node node(Object constraints, Dimension preferredSize, Component component)
 	{
-		return new NodeBranch(layout, null, preferredSize, constraints, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param constraints the constraints to use for the added branch (using parent layout).
-	 * @param border the border to add to the panel.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Object constraints, Border border, LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, border, null, constraints, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param constraints the constraints to use for the added branch (using parent layout).
-	 * @param border the border to add to the panel.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Object constraints, Border border, Node ... children)
-	{
-		return new NodeBranch(new BorderLayout(), border, null, constraints, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param border the border to add to the panel.
-	 * @param preferredSize the dimensions for the preferred size.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Border border, Dimension preferredSize, LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, border, preferredSize, null, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param border the border to add to the panel.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch.
-	 */
-	public static Node node(Border border, LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, border, null, null, children);
+		return new Node(constraints, preferredSize, component);
 	}
 
 	/**
 	 * Starts a new branch off of this branch. 
 	 * @param preferredSize the dimensions for the preferred size.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
+	 * @param component the component to add.
 	 * @return a new branch node.
 	 */
-	public static Node node(Dimension preferredSize, LayoutManager layout, Node ... children)
+	public static Node node(Dimension preferredSize, Component component)
 	{
-		return new NodeBranch(layout, null, preferredSize, null, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch. 
-	 * @param constraints the constraints to use for the added branch (using parent layout).
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Object constraints, LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, null, null, constraints, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch.
-	 * @param border the border to add to the panel.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(Border border, Node ... children)
-	{
-		return new NodeBranch(new BorderLayout(), border, null, null, children);
-	}
-
-	/**
-	 * Starts a new branch off of this branch.
-	 * @param layout the layout to use for this branch's children.
-	 * @param children the children on the branch.
-	 * @return a new branch node.
-	 */
-	public static Node node(LayoutManager layout, Node ... children)
-	{
-		return new NodeBranch(layout, null, null, null, children);
+		return node(null, preferredSize, component);
 	}
 
 	/**
@@ -280,7 +358,7 @@ public final class ContainerFactory
 	 */
 	public static Node node(Object constraints, Component component)
 	{
-		return new NodeLeaf(constraints, component);
+		return node(constraints, null, component);
 	}
 
 	/**
@@ -290,82 +368,32 @@ public final class ContainerFactory
 	 */
 	public static Node node(Component component)
 	{
-		return new NodeLeaf(null, component);
+		return node(null, null, component);
 	}
 
 	/**
-	 * Common Swing node.
+	 * A component node.
 	 */
-	public static abstract class Node
+	public static class Node
 	{
-		/** Constraints on the layout. */
-		protected Object constraints;
-		protected Node(Object constraints)
+		private Object constraints;
+		private Dimension preferredSize;
+		private Component component;
+		
+		private Node(Object constraints, Dimension preferredSize, Component component)
 		{
 			this.constraints = constraints;
-		}
-		
-		protected abstract void addTo(Container container); 
-	}
-
-	/**
-	 * Leaf node in Swing.
-	 */
-	private static class NodeLeaf extends Node
-	{
-		private Component component;
-		private NodeLeaf(Object constraints, Component component)
-		{
-			super(constraints);
 			this.component = component;
+			this.preferredSize = preferredSize;
 		}
 		
-		@Override
 		protected void addTo(Container parent)
 		{
+			if (preferredSize != null)
+				component.setPreferredSize(preferredSize);
+			
 			parent.add(component, constraints);
 		}
-	}
-
-	/**
-	 * Branch node in Swing.
-	 */
-	private static class NodeBranch extends Node
-	{
-		private Border border;
-		private Dimension preferredSize;
-		private LayoutManager layout; 
-		private Node[] edges;
-		
-		private NodeBranch(LayoutManager layout, Border border, Dimension preferredSize, Object constraints, Node[] edges)
-		{
-			super(constraints);
-			this.border = border;
-			this.preferredSize = preferredSize;
-			this.layout = layout;
-			this.edges = edges;
-		}
-		
-		@Override
-		protected void addTo(Container container)
-		{
-			JPanel branchPanel = new JPanel();
-			
-			if (layout != null)
-				branchPanel.setLayout(layout);
-	
-			if (preferredSize != null)
-				branchPanel.setPreferredSize(preferredSize);
-			
-			if (border != null)
-				branchPanel.setBorder(border);
-			
-			for (Node edge : edges)
-				edge.addTo(branchPanel);
-			
-			container.add(branchPanel, constraints);
-		}
-		
 	}
 
 	/* ==================================================================== */
@@ -422,25 +450,36 @@ public final class ContainerFactory
 	
 	/**
 	 * Creates a tabbed pane component.
-	 * @param tabPlacement the tab placement policy (from JTabbedPane).
+	 * @param tabPlacement the tab placement policy.
+	 * @param tabLayoutPolicy the tab layout policy.
+	 * @param tabs the tabs to add.
+	 * @return a new tabbed pane component.
+	 */
+	public static JTabbedPane tabs(TabPlacement tabPlacement, TabLayoutPolicy tabLayoutPolicy, Tab ... tabs)
+	{
+		return attachTabs(new JTabbedPane(tabPlacement.swingId, tabLayoutPolicy.swingId), tabs);
+	}
+	
+	/**
+	 * Creates a tabbed pane component (scroll as needed).
 	 * @param tabLayoutPolicy the tab layout policy (from JTabbedPane).
 	 * @param tabs the tabs to add.
 	 * @return a new tabbed pane component.
 	 */
-	public static JTabbedPane tabs(int tabPlacement, int tabLayoutPolicy, Tab ... tabs)
+	public static JTabbedPane tabs(TabLayoutPolicy tabLayoutPolicy, Tab ... tabs)
 	{
-		return attachTabs(new JTabbedPane(tabPlacement, tabLayoutPolicy), tabs);
+		return tabs(TabPlacement.TOP, tabLayoutPolicy, tabs);
 	}
-	
+
 	/**
 	 * Creates a tabbed pane component (wrapped tabs).
 	 * @param tabPlacement the tab placement policy (from JTabbedPane).
 	 * @param tabs the tabs to add.
 	 * @return a new tabbed pane component.
 	 */
-	public static JTabbedPane tabs(int tabPlacement, Tab ... tabs)
+	public static JTabbedPane tabs(TabPlacement tabPlacement, Tab ... tabs)
 	{
-		return attachTabs(new JTabbedPane(tabPlacement), tabs);
+		return tabs(tabPlacement, TabLayoutPolicy.WRAP, tabs);
 	}
 
 	/**
@@ -454,7 +493,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Attaches a series of tabs to a JTabbedPane, returning the TabbedPane.
+	 * Attaches a series of tabs to a JTabbedPane, returning the JTabbedPane.
 	 * @param tabbedPane the tabbed pane to add to.
 	 * @param tabs the tabs to add.
 	 * @return the tabbed pane component passed in.
@@ -490,27 +529,50 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a split pane.
-	 * @param orientation the split orientation (from JSplitPane).
+	 * @param orientation the split orientation.
 	 * @param continuousLayout if true, this renders as the size is adjusted.
 	 * @param first the first component.
 	 * @param second the second component.
 	 * @return a new split pane.
 	 */
-	public static JSplitPane split(int orientation, boolean continuousLayout, Component first, Component second)
+	public static JSplitPane split(SplitOrientation orientation, boolean continuousLayout, Component first, Component second)
 	{
-		return new JSplitPane(orientation, continuousLayout, first, second);
+		return new JSplitPane(orientation.swingId, continuousLayout, first, second);
 	}
 
 	/**
-	 * Creates a split pane.
-	 * @param orientation the split orientation (from JSplitPane).
+	 * Creates a split pane (horizontal orientation).
+	 * @param continuousLayout if true, this renders as the size is adjusted.
 	 * @param first the first component.
 	 * @param second the second component.
 	 * @return a new split pane.
 	 */
-	public static JSplitPane split(int orientation, Component first, Component second)
+	public static JSplitPane split(boolean continuousLayout, Component first, Component second)
 	{
-		return new JSplitPane(orientation, true, first, second);
+		return split(SplitOrientation.HORIZONTAL, true, first, second);
+	}
+
+	/**
+	 * Creates a split pane.
+	 * @param orientation the split orientation.
+	 * @param first the first component.
+	 * @param second the second component.
+	 * @return a new split pane.
+	 */
+	public static JSplitPane split(SplitOrientation orientation, Component first, Component second)
+	{
+		return split(orientation, true, first, second);
+	}
+
+	/**
+	 * Creates a split pane (horizontal orientation, continuous render).
+	 * @param first the first component.
+	 * @param second the second component.
+	 * @return a new split pane.
+	 */
+	public static JSplitPane split(Component first, Component second)
+	{
+		return split(SplitOrientation.HORIZONTAL, true, first, second);
 	}
 
 	/* ==================================================================== */
@@ -519,25 +581,25 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a scrolling pane.
-	 * @param vsbPolicy the vertical scroll policy (from JScrollPane).
-	 * @param hsbPolicy the horizontal scroll policy (from JScrollPane).
+	 * @param verticalPolicy the vertical scroll policy.
+	 * @param horizontalPolicy the horizontal scroll policy.
 	 * @param component the component to add to the scroller. 
 	 * @return a scroll pane.
 	 */
-	public static JScrollPane scroll(int vsbPolicy, int hsbPolicy, Component component)
+	public static JScrollPane scroll(ScrollPolicy verticalPolicy, ScrollPolicy horizontalPolicy, Component component)
 	{
-		return new JScrollPane(component, vsbPolicy, hsbPolicy);
+		return new JScrollPane(component, verticalPolicy.swingIdVertical, horizontalPolicy.swingIdHorizontal);
 	}
 
 	/**
 	 * Creates a scrolling pane.
-	 * @param vsbPolicy the vertical scroll policy (from JScrollPane).
+	 * @param verticalPolicy the vertical scroll policy (from JScrollPane).
 	 * @param component the component 
 	 * @return a scroll pane.
 	 */
-	public static JScrollPane scroll(int vsbPolicy, Component component)
+	public static JScrollPane scroll(ScrollPolicy verticalPolicy, Component component)
 	{
-		return scroll(vsbPolicy, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, component);
+		return scroll(verticalPolicy, ScrollPolicy.AS_NEEDED, component);
 	}
 
 	/**
@@ -547,13 +609,44 @@ public final class ContainerFactory
 	 */
 	public static JScrollPane scroll(Component component)
 	{
-		return scroll(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED, component);
+		return scroll(ScrollPolicy.AS_NEEDED, ScrollPolicy.AS_NEEDED, component);
 	}
 
 	/* ==================================================================== */
 	/* ==== Frames                                                     ==== */
 	/* ==================================================================== */
 
+	/**
+	 * Creates a new internal frame (for {@link JDesktopPane}s).
+	 * @param icon the icon for the frame.
+	 * @param title the title of the frame.
+	 * @param menuBar the menu bar to add.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JInternalFrame internalFrame(Icon icon, String title, JMenuBar menuBar, Container content)
+	{
+		JInternalFrame out = new JInternalFrame(title);
+		out.setFrameIcon(icon);
+		if (menuBar != null)
+			out.add(menuBar);
+		out.setContentPane(content);
+		out.pack();
+		return out;
+	}
+	
+	/**
+	 * Creates a new internal frame (for {@link JDesktopPane}s).
+	 * @param icon the icon for the frame.
+	 * @param title the title of the frame.
+	 * @param content the content pane.
+	 * @return a new frame.
+	 */
+	public static JInternalFrame internalFrame(Icon icon, String title, Container content)
+	{
+		return internalFrame(icon, title, null, content);
+	}
+	
 	/**
 	 * Creates a new internal frame (for {@link JDesktopPane}s).
 	 * @param title the title of the frame.
@@ -563,11 +656,7 @@ public final class ContainerFactory
 	 */
 	public static JInternalFrame internalFrame(String title, JMenuBar menuBar, Container content)
 	{
-		JInternalFrame out = new JInternalFrame(title);
-		out.add(menuBar);
-		out.setContentPane(content);
-		out.pack();
-		return out;
+		return internalFrame(null, title, menuBar, content);
 	}
 	
 	/**
@@ -578,10 +667,7 @@ public final class ContainerFactory
 	 */
 	public static JInternalFrame internalFrame(String title, Container content)
 	{
-		JInternalFrame out = new JInternalFrame(title);
-		out.setContentPane(content);
-		out.pack();
-		return out;
+		return internalFrame(null, title, null, content);
 	}
 	
 	/**
@@ -824,9 +910,13 @@ public final class ContainerFactory
 			button.setMnemonic(choice.mnemonic);
 			nodes[i] = node(button);
 		}
-		modal.setContentPane(containerOf(
-			node(BorderLayout.CENTER, contentPane),
-			node(BorderLayout.SOUTH, containerOf(new FlowLayout(FlowLayout.TRAILING, 8, 8), nodes))
+		modal.setContentPane(containerOf(createEmptyBorder(4, 4, 4, 4),
+			node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
+				node(contentPane)
+			)),
+			node(BorderLayout.SOUTH, containerOf(createEmptyBorder(4, 4, 4, 4), new FlowLayout(FlowLayout.TRAILING, 4, 0), 
+				nodes
+			))
 		));
 		modal.setLocationByPlatform(true);
 		modal.pack();
@@ -836,6 +926,59 @@ public final class ContainerFactory
 		return modal;
 	}
 	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * Choosing one of these choices will close the modal.
+	 * @param <T> the object return type.
+	 * @param icon the modal button icon.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(Icon icon, String label, int mnemonic, Supplier<T> onClick)
+	{
+		return new ModalChoice<>(icon, label, mnemonic, onClick);
+	}
+
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param mnemonic the key mnemonic for the button (VK key).
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, int mnemonic, Supplier<T> onClick)
+	{
+		return choice(null, label, mnemonic, onClick);
+	}
+
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * Choosing one of these choices will close the modal.
+	 * @param <T> the object return type.
+	 * @param icon the modal button icon.
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(Icon icon, Supplier<T> onClick)
+	{
+		return choice(icon, null, 0, onClick);
+	}
+
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * @param <T> the object return type.
+	 * @param label the modal button label.
+	 * @param onClick the object supplier function to call on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(String label, Supplier<T> onClick)
+	{
+		return choice(null, label, 0, onClick);
+	}
+
 	/**
 	 * Creates a single modal choice that appears as a button in the modal.
 	 * Choosing one of these choices will close the modal.
@@ -862,6 +1005,19 @@ public final class ContainerFactory
 	public static <T> ModalChoice<T> choice(String label, int mnemonic, T result)
 	{
 		return choice(null, label, mnemonic, () -> result);
+	}
+	
+	/**
+	 * Creates a single modal choice that appears as a button in the modal.
+	 * Choosing one of these choices will close the modal.
+	 * @param <T> the object return type.
+	 * @param icon the modal button icon.
+	 * @param result the result object to supply on click.
+	 * @return a modal choice to use on a new modal.
+	 */
+	public static <T> ModalChoice<T> choice(Icon icon, T result)
+	{
+		return choice(icon, null, 0, () -> result);
 	}
 	
 	/**
@@ -901,42 +1057,13 @@ public final class ContainerFactory
 	
 	/**
 	 * Creates a single modal choice that appears as a button in the modal.
-	 * Choosing one of these choices will close the modal.
 	 * @param <T> the object return type.
 	 * @param icon the modal button icon.
-	 * @param label the modal button label.
-	 * @param mnemonic the key mnemonic for the button (VK key).
-	 * @param onClick the object supplier function to call on click.
 	 * @return a modal choice to use on a new modal.
 	 */
-	public static <T> ModalChoice<T> choice(Icon icon, String label, int mnemonic, Supplier<T> onClick)
+	public static <T> ModalChoice<T> choice(Icon icon)
 	{
-		return new ModalChoice<>(icon, label, mnemonic, onClick);
-	}
-	
-	/**
-	 * Creates a single modal choice that appears as a button in the modal.
-	 * @param <T> the object return type.
-	 * @param label the modal button label.
-	 * @param mnemonic the key mnemonic for the button (VK key).
-	 * @param onClick the object supplier function to call on click.
-	 * @return a modal choice to use on a new modal.
-	 */
-	public static <T> ModalChoice<T> choice(String label, int mnemonic, Supplier<T> onClick)
-	{
-		return new ModalChoice<>(null, label, mnemonic, onClick);
-	}
-	
-	/**
-	 * Creates a single modal choice that appears as a button in the modal.
-	 * @param <T> the object return type.
-	 * @param label the modal button label.
-	 * @param onClick the object supplier function to call on click.
-	 * @return a modal choice to use on a new modal.
-	 */
-	public static <T> ModalChoice<T> choice(String label, Supplier<T> onClick)
-	{
-		return new ModalChoice<>(null, label, 0, onClick);
+		return choice(icon, null, 0, (T)null);
 	}
 	
 	/**

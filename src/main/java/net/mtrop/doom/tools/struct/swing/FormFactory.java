@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -35,6 +34,9 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import static javax.swing.BorderFactory.*;
+
 
 /**
  * A field factory that creates form fields.
@@ -1128,7 +1130,7 @@ public final class FormFactory
 		private JFormFieldPanel(JLabel label, JFormField<T> field)
 		{
 			super();
-			setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+			setBorder(createEmptyBorder(4, 4, 4, 4));
 			setLayout(new BorderLayout(4, 0));
 			add(this.label = label, BorderLayout.WEST);
 			add(this.formField = field, BorderLayout.CENTER);
@@ -1137,7 +1139,7 @@ public final class FormFactory
 		private JFormFieldPanel(JFormField<T> field, JLabel label)
 		{
 			super();
-			setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+			setBorder(createEmptyBorder(2, 2, 2, 2));
 			setLayout(new BorderLayout());
 			add(this.formField = field, BorderLayout.CENTER);
 			add(this.label = label, BorderLayout.EAST);

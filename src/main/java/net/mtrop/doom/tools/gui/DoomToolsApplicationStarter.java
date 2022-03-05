@@ -7,14 +7,14 @@ package net.mtrop.doom.tools.gui;
 public interface DoomToolsApplicationStarter
 {
 	/**
-	 * Adds a new application instance to the main desktop by class.
+	 * Starts a new application instance by class.
 	 * @param <A> the instance type.
 	 * @param applicationClass the application class.
 	 */
 	<A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass);
     
 	/**
-	 * Adds a new application instance to the main desktop.
+	 * Starts a new application instance.
 	 * @param <A> the instance type.
 	 * @param applicationInstance the application instance.
 	 */
