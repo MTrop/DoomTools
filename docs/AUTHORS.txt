@@ -3,3 +3,5 @@ Matt Tropiano <mtropiano@gmail.com>
 Xaser Acheron 
 	- DECOHack fixes/additions.
 	- WTexScan fixes/additions.
+dmcmahill
+	- Cygwin fixes.
