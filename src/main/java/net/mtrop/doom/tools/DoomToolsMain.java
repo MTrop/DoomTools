@@ -23,6 +23,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -343,7 +344,7 @@ public final class DoomToolsMain
 				if (DoomToolsGUIMain.isAlreadyRunning())
 				{
 					options.stderr.println("DoomTools is already running.");
-		    		return ERROR_GUI_ALREADY_RUNNING;
+					return ERROR_GUI_ALREADY_RUNNING;
 				}
 				else
 				{
@@ -423,13 +424,17 @@ public final class DoomToolsMain
 					return desktopError;
 
 				options.stdout.println("Opening the DoomTools settings folder...");
-				File settingsDir = new File(Common.SETTINGS_PATH);
+				File settingsDir = new File(Paths.APPDATA_PATH);
 				if (!settingsDir.exists())
 				{
-					options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
-					return ERROR_DESKTOP_ERROR;
+					options.stdout.println("Creating the missing DoomTools settings folder...");
+					if( !settingsDir.mkdirs())
+					{
+						options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
+						return ERROR_DESKTOP_ERROR;
+					}
 				}
-				
+
 				try {
 					Desktop.getDesktop().open(settingsDir);
 				} catch (IOException e) {

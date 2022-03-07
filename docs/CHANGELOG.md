@@ -8,6 +8,7 @@ Changes
 -------
 
 - **2022-03-06** DoomTools has a GUI now!
+- **2022-03-06** Cygwin pathing fixes (thanks, @dmcmahill).
 
 - **2022-01-09** Rookscript updated to `1.14.1` (Fixes to LIST function).
 

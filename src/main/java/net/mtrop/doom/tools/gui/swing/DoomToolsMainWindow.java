@@ -1,5 +1,14 @@
 package net.mtrop.doom.tools.gui.swing;
 
+import java.awt.BorderLayout;
+import java.awt.Desktop;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
@@ -16,6 +25,7 @@ import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
@@ -28,15 +38,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-
-import java.awt.BorderLayout;
-import java.awt.Desktop;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The main DoomTools application window.
@@ -252,7 +253,7 @@ public class DoomToolsMainWindow extends JFrame
 		
 		LOG.info("Opening the DoomTools settings folder...");
 		
-		File settingsDir = new File(Common.SETTINGS_PATH);
+		File settingsDir = new File(Paths.APPDATA_PATH);
 		if (!settingsDir.exists())
 		{
 			SwingUtils.error(language.getText("doomtools.error.opensettings.notfound"));
