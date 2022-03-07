@@ -5,6 +5,7 @@ DoomMake
 
 * `Added` DoomMake Agent for listening for project changes. See help for more info!
 * `Added` DoomMake GUI for individual projects and creating new ones.
+* `Added` A `justrun` target for new projects using the `run` template to execute the project without building it.
 
 
 ### Changed for 0.14.0

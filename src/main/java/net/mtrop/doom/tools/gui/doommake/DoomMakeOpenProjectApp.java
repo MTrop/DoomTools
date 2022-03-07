@@ -260,11 +260,11 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		refreshTargets();
 		
 		Border targetsBorder = createTitledBorder(
-			createLineBorder(Color.GRAY, 1), "Available Targets", TitledBorder.LEADING, TitledBorder.TOP
+			createLineBorder(Color.GRAY, 1), language.getText("doommake.project.targets"), TitledBorder.LEADING, TitledBorder.TOP
 		);
 		
-		Container out = containerOf(
-			new Dimension(300, 200),
+		return containerOf(
+			new Dimension(300, 300),
 			createEmptyBorder(4, 4, 4, 4),
 			node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
@@ -284,7 +284,6 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 				))
 			))
 		);
-		return out;
 	}
 
 	@Override
@@ -432,7 +431,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	private void updateTargetsEnabled(boolean enabled)
 	{
 		final boolean state = enabled && !autoBuildAgent.isRunning();
-		SwingUtils.invoke(()->{
+		SwingUtils.invoke(() -> {
 			listPanel.setEnabled(state);
 			targetRunAction.setEnabled(state);
 		});

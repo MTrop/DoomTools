@@ -441,6 +441,7 @@ public final class DoomMakeMain
 				public void onAgentStarted() 
 				{
 					options.stdout.println("Agent started.");
+					options.stdout.println("Send SIGTERM/SIGINT to this process to stop it safely (CTRL-C).");
 				}
 
 				@Override
@@ -498,13 +499,14 @@ public final class DoomMakeMain
 				}
 			});
 
+			agent.start();
+
 			// Handle SIGTERM/SIGINT.
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> 
 			{
+				options.stdout.println("Signal received. Shutting down...");
 				agent.shutDown();
 			}));
-			
-			agent.start();
 			
 			// Wait for SIGTERM/SIGINT.
 			Object waitLock = new Object();

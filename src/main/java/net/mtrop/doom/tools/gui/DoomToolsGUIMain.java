@@ -10,7 +10,6 @@ import java.net.ServerSocket;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.DoomToolsLanguageManager.Keys;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
@@ -229,11 +228,15 @@ public final class DoomToolsGUIMain
     }
 
     // Attempts a shutdown, prompting the user first.
-    private void attemptShutDown()
+    private boolean attemptShutDown()
     {
     	LOG.debug("Shutdown attempted.");
-		if (SwingUtils.yesTo(window, language.getText(Keys.DOOMTOOLS_QUIT)))
+		if (SwingUtils.yesTo(window, language.getText("doomtools.quit")))
+		{
 			shutDown();
+			return true;
+		}
+		return false;
     }
 
     // Saves and quits.

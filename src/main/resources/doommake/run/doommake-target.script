@@ -2,41 +2,22 @@
  * TARGET: run
  *****************************************************************************
  * Runs this project.
- * doommake run
+ * doommake run [optional:portname]
  ****************************************************************************/
 check entry run(args) {
-
-	doInit();
+	doInit(args);
 	doAll();
-	
-	// Must use native separator for args passed to program.
-	fs = prop("file.separator", "/");
-	
-	patchPath     = getBuildDirectory() + fs + getPatchFile();
-	assetsWadPath = getBuildDirectory() + fs + getAssetsWAD();
-	mapsWadPath   = getBuildDirectory() + fs + getMapsWAD();
-	texWadPath    = getBuildDirectory() + fs + getTextureWAD();
-	mapTexWadPath = getBuildDirectory() + fs + getMapTextureWAD();
+	return runCommon(args);	
+}
 
-	wadList = [];
-
-	if (fileexists(assetsWadPath))
-		wadlist->listAdd(assetsWadPath);
-	if (fileexists(mapsWadPath))
-		wadlist->listAdd(mapsWadPath);
-
-	// Run will add either add the reduced texture set from compiled maps 
-	// or the compiled textures WAD. If you want to explicitly use one or the
-	// other, edit the following lines:
-
-	if (fileexists(mapTexWadPath))
-		wadlist->listAdd(mapTexWadPath);
-	else if (fileexists(texWadPath))
-		wadlist->listAdd(texWadPath);
-	
-	// Set DEH file here, if any.
-	dehFile = fileexists(patchPath) ? file(patchPath) : null;
-
-	return doRun(args[0], wadList, dehFile);
+/*****************************************************************************
+ * TARGET: justrun
+ *****************************************************************************
+ * Runs this project with no pre-build.
+ * doommake justrun [optional:portname]
+ ****************************************************************************/
+check entry justrun(args) {
+	doInit(args);
+	return runCommon(args);	
 }
 
