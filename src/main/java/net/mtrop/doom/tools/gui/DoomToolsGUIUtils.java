@@ -30,7 +30,7 @@ public final class DoomToolsGUIUtils
     private static final SingletonProvider<DoomToolsGUIUtils> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIUtils());
 	
 	/**
-	 * @return the singleton instance of this settings object.
+	 * @return the singleton instance of this object.
 	 */
 	public static DoomToolsGUIUtils get()
 	{

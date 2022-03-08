@@ -1,9 +1,10 @@
 package net.mtrop.doom.tools.gui;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,14 +35,11 @@ public final class DoomToolsTaskManager
 	/* ==================================================================== */
 	
 	/** Thread pool. */
-	private ThreadPoolExecutor executor;
+	private Executor executor;
 	
 	private DoomToolsTaskManager()
 	{
-		this.executor = new ThreadPoolExecutor(0, 4, 5, TimeUnit.SECONDS,
-			new LinkedBlockingQueue<Runnable>(),
-			new DefaultThreadFactory("DoomToolsThread")
-		);
+		this.executor = Executors.newFixedThreadPool(8, new DefaultThreadFactory("DoomToolsThread"));
 	}
 
 	/**

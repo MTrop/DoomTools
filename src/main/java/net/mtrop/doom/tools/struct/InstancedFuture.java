@@ -9,10 +9,10 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -102,12 +102,12 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 	
 	/**
-	 * Runs a runnable via a {@link ThreadPoolExecutor}.
+	 * Runs a runnable via an {@link Executor}.
 	 * @param executor the executor to add the Callable to.
 	 * @param runnable the runnable to execute.
 	 * @return an instanced future.
 	 */
-	public static InstancedFuture<Void> spawn(ThreadPoolExecutor executor, Runnable runnable)
+	public static InstancedFuture<Void> spawn(Executor executor, Runnable runnable)
 	{
 		return spawn(executor, asCallable(null, runnable));
 	}
@@ -140,14 +140,14 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 	
 	/**
-	 * Runs a runnable via a {@link ThreadPoolExecutor}.
+	 * Runs a runnable via an {@link Executor}.
 	 * @param <T> the return type.
 	 * @param executor the executor to add the Callable to.
 	 * @param result the result to return on a successful execution of the provided Runnable.
 	 * @param runnable the runnable to execute.
 	 * @return an instanced future.
 	 */
-	public static <T> InstancedFuture<T> spawn(ThreadPoolExecutor executor, T result, Runnable runnable)
+	public static <T> InstancedFuture<T> spawn(Executor executor, T result, Runnable runnable)
 	{
 		return spawn(executor, asCallable(result, runnable));
 	}
@@ -178,13 +178,13 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 	
 	/**
-	 * Runs a callable via a {@link ThreadPoolExecutor}.
+	 * Runs a callable via an {@link Executor}.
 	 * @param <T> the Callable return type.
 	 * @param executor the executor to add the Callable to.
 	 * @param callable the Callable to execute.
 	 * @return an instanced future.
 	 */
-	public static <T> InstancedFuture<T> spawn(ThreadPoolExecutor executor, Callable<T> callable)
+	public static <T> InstancedFuture<T> spawn(Executor executor, Callable<T> callable)
 	{
 		return instance(callable).spawn(executor);
 	}
@@ -314,7 +314,8 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 			liveLockCheck();
 			synchronized (waitMutex)
 			{
-				waitMutex.wait();
+				if (!isDone())
+					waitMutex.wait();
 			}
 		}
 	}
@@ -625,7 +626,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		 * @param executor the factory for creating the new thread.
 		 * @return an instanced future.
 		 */
-		public InstancedFuture<T> spawn(ThreadPoolExecutor executor)
+		public InstancedFuture<T> spawn(Executor executor)
 		{
 			InstancedFuture<T> out;
 			executor.execute(out = new Created<>(callable, listener, new Subscription<>(onResult, onError, onComplete)));

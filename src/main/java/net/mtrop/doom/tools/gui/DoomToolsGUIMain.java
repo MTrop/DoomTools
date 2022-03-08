@@ -113,49 +113,7 @@ public final class DoomToolsGUIMain
 		return pc.exec();
 	}
 	
-	/**
-	 * Main method - check for running local instance. If running, do nothing.
-	 * @param args command line arguments.
-	 */
-    public static void main(String[] args) 
-    {
-		SwingUtils.setSystemLAF();
-
-		if (args.length == 0)
-    	{
-        	if (isAlreadyRunning())
-        	{
-        		System.err.println("DoomTools is already running.");
-        		System.exit(1);
-        		return;
-        	}
-    		get().createAndDisplayMainWindow();
-    	}
-		else 
-		{
-			try 
-			{
-				switch (args[0])
-				{
-					default:
-		        		SwingUtils.error("Expected valid application name.");
-		        		System.exit(-1);
-		        		return;
-					case ApplicationNames.DOOMMAKE_NEW:
-						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
-						break;
-					case ApplicationNames.DOOMMAKE_OPEN:
-						startApplication(new DoomMakeOpenProjectApp(new File(args[1])));
-						break;
-				}
-			}
-			catch (ArrayIndexOutOfBoundsException e)
-			{
-        		SwingUtils.error("Missing argument for application: " + e.getLocalizedMessage());
-			}
-		}
-    	
-	}
+	
     
 	/* ==================================================================== */
 
@@ -196,7 +154,51 @@ public final class DoomToolsGUIMain
 	
     /* ==================================================================== */
 	
-    /** Language manager. */
+    /**
+	 * Main method - check for running local instance. If running, do nothing.
+	 * @param args command line arguments.
+	 */
+	public static void main(String[] args) 
+	{
+		SwingUtils.setSystemLAF();
+	
+		if (args.length == 0)
+		{
+	    	if (isAlreadyRunning())
+	    	{
+	    		System.err.println("DoomTools is already running.");
+	    		System.exit(1);
+	    		return;
+	    	}
+			get().createAndDisplayMainWindow();
+		}
+		else 
+		{
+			try 
+			{
+				switch (args[0])
+				{
+					default:
+		        		SwingUtils.error("Expected valid application name.");
+		        		System.exit(-1);
+		        		return;
+					case ApplicationNames.DOOMMAKE_NEW:
+						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
+						break;
+					case ApplicationNames.DOOMMAKE_OPEN:
+						startApplication(new DoomMakeOpenProjectApp(new File(args[1])));
+						break;
+				}
+			}
+			catch (ArrayIndexOutOfBoundsException e)
+			{
+	    		SwingUtils.error("Missing argument for application: " + e.getLocalizedMessage());
+			}
+		}
+		
+	}
+
+	/** Language manager. */
     private DoomToolsLanguageManager language;
     /** The main window. */
     private DoomToolsMainWindow window;

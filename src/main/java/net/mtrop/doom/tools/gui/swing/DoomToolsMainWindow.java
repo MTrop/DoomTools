@@ -22,6 +22,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
@@ -58,6 +59,9 @@ public class DoomToolsMainWindow extends JFrame
     private DoomToolsLanguageManager language;
 	/** Desktop pane. */
 	private DoomToolsDesktopPane desktop;
+    /** Settings manager. */
+	private DoomToolsSettingsManager settings;
+
 	/** Shutdown hook. */
 	private Runnable shutDownHook;
 	
@@ -74,6 +78,8 @@ public class DoomToolsMainWindow extends JFrame
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
+		this.settings = DoomToolsSettingsManager.get();
+		
 		this.shutDownHook = shutDownHook;
 		
 		this.applicationStarter = new DoomToolsApplicationStarter()
@@ -148,7 +154,7 @@ public class DoomToolsMainWindow extends JFrame
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
 						(c, e) -> {
 							DoomMakeOpenProjectApp app;
-							if ((app = DoomMakeOpenProjectApp.openAndCreate(this, null)) != null)
+							if ((app = DoomMakeOpenProjectApp.openAndCreate(this, settings.getLastProjectDirectory())) != null)
 								addApplication(app);
 						}
 					)

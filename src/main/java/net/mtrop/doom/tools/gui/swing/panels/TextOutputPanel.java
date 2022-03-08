@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.swing.JTextArea;
+import javax.swing.plaf.metal.MetalBorders.Flush3DBorder;
 
 /**
  * Text output panel.
@@ -57,12 +58,6 @@ public class TextOutputPanel extends JTextArea
 	{
 		@Override
 		public void close() throws IOException
-		{
-			// Do nothing.
-		}
-		
-		@Override
-		public void flush() throws IOException 
 		{
 			// Do nothing.
 		}
