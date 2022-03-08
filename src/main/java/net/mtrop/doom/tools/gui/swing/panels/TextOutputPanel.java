@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.swing.JTextArea;
-import javax.swing.plaf.metal.MetalBorders.Flush3DBorder;
 
 /**
  * Text output panel.
