@@ -15,7 +15,7 @@
  * wadList: List of WAD files to add.
  * dehFile: DEH file to add.
  */
-check function doRun(portType, wadList, dehFile) {
+check function doRun(portType, wadList, dehFile, args) {
 
 	iwadPath = getIwad();
 	if (empty(iwadPath))
@@ -58,6 +58,10 @@ check function doRun(portType, wadList, dehFile) {
 	if (!empty(dehFile)) {
 		arguments->listadd(dehSwitch);
 		arguments->listadd(dehFile->filecanonpath());
+	}
+	
+	if (args) each (a : args) {
+		arguments->listadd(a);
 	}
 	
 	return execresult(exec(

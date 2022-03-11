@@ -1,6 +1,7 @@
 package net.mtrop.doom.tools.gui;
 
 import java.awt.Container;
+import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JMenuBar;
@@ -9,6 +10,7 @@ import javax.swing.JMenuBar;
  * Interface for assembling the GUI part of a DoomTools application instance and 
  * listening to environment events.
  * Can be created as a JFrame or a JInternalFrame.
+ * <p> Because of how workspace saving works, all applications must have a default constructor.
  * @author Matthew Tropiano
  */
 public abstract class DoomToolsApplicationInstance
@@ -60,19 +62,19 @@ public abstract class DoomToolsApplicationInstance
 
 	/**
 	 * Fetches this application instance's menu bar, if used as a desktop frame.
-	 * This is only called once, and is intended to be the function that constructs
+	 * This is only called once per application creation, and is intended to be the function that constructs
 	 * the menu bar for the application's GUI.
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's menu bar. May return <code>null</code> for no bar.
 	 */
-	public JMenuBar createMenuBar()
+	public JMenuBar createDesktopMenuBar()
 	{
 		return null;
 	}
 
 	/**
 	 * Fetches this application instance's menu bar, if used as an internal frame.
-	 * This is only called once, and is intended to be the function that constructs
+	 * This is only called once per application creation, and is intended to be the function that constructs
 	 * the menu bar for the application's GUI.
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's menu bar. May return <code>null</code> for no bar.
@@ -83,41 +85,34 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
-	 * Creates a new settings object for saving into later, with NO defaults set.
-	 * @return a new settings object.
-	 */
-	public DoomToolsApplicationSettings createSettings()
-	{
-		return new DoomToolsApplicationSettings();
-	}
-
-	/**
-	 * Fetches a map of settings for this application instance
-	 * so that it may be restored later in a workspace. 
+	 * Sets the current state of this application into a state object for persisting workspaces. 
+	 * It is up to the application to figure out what to store.
 	 * Applications that override this method should call this via <code>super</code> first!
 	 * <p> All values should be JSON serializable!
 	 * <p> This should NEVER be called by the application itself.
-	 * @param settings the settings object.
+	 * @return this application's state properties (if any - can be null).
 	 */
-	public void saveSettingsTo(DoomToolsApplicationSettings settings)
+	public Map<String, String> getState()
 	{
-		// Do nothing.
+		return null;
 	}
 
 	/**
-	 * Applies a set of settings to this instance.
-	 * Presumably, these are the same settings as set from {{@link #saveSettingsTo(DoomToolsApplicationSettings)}.
+	 * Sets this applcation's state. 
+	 * Called before it is started, if restoring from a workspace.
 	 * Applications that override this method should call this via <code>super</code> first!
+	 * <p> All values should be JSON serializable!
 	 * <p> This should NEVER be called by the application itself.
-	 * @param settings the settings object.
+	 * @param state the state object.
 	 */
-	public void applySettingsFrom(DoomToolsApplicationSettings settings)
+	public void setState(Map<String, String> state)
 	{
 		// Do nothing.
 	}
 
 	/**
-	 * Called when the application is about to close.
+	 * Called when the application is about to close. 
+	 * By default, this returns true. You may ask the user if they wish to close it, here.
 	 * <p> This should NEVER be called by the application itself.
 	 * @return true if the application should close, false if not.
 	 */
@@ -172,7 +167,7 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
-	 * Called when the application is closing.
+	 * Called when the application is closed (after {@link #shouldClose()} is called and returns true).
 	 * <p> This should NEVER be called by the application itself.
 	 */
 	public void onClose()

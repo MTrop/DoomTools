@@ -32,7 +32,7 @@ public class DoomToolsApplicationFrame extends JFrame
 		this.instance = instance;
 		setIconImages(DoomToolsGUIUtils.get().getWindowIcons());
 		setTitle(instance.getName());
-		setJMenuBar(instance.createMenuBar());
+		setJMenuBar(instance.createDesktopMenuBar());
 		setContentPane(instance.createContentPane());
 		setLocationByPlatform(true);
 		setResizable(true);
@@ -83,15 +83,9 @@ public class DoomToolsApplicationFrame extends JFrame
 			}
 
 			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass)
+			public void startApplication(DoomToolsApplicationInstance instance)
 			{
-				starter.startApplication(applicationClass);
-			}
-
-			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
-			{
-				starter.startApplication(applicationInstance);
+				starter.startApplication(instance);
 			}
 		});
 		pack();

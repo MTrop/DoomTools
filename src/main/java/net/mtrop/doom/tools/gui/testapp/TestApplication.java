@@ -3,7 +3,6 @@ package net.mtrop.doom.tools.gui.testapp;
 import java.awt.Container;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsApplicationSettings;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -35,10 +34,4 @@ public class TestApplication extends DoomToolsApplicationInstance
 		return SwingUtils.yesTo(contentPane, "Quit?");
 	}
 
-	@Override
-	public DoomToolsApplicationSettings createSettings() 
-	{
-		return new DoomToolsApplicationSettings();
-	}
-	
 }

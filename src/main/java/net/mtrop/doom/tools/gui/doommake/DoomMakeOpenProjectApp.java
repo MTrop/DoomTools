@@ -10,7 +10,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
@@ -22,7 +21,6 @@ import javax.swing.border.TitledBorder;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsApplicationSettings;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
@@ -90,15 +88,21 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     private String currentTarget;
     /** Auto build agent. */
     private AutoBuildAgent autoBuildAgent;
-    
+
+    /**
+	 * Creates a new open project application.
+	 */
+	public DoomMakeOpenProjectApp()
+	{
+		this(null);
+	}
+	
     /**
 	 * Creates a new open project application from a project directory.
-	 * @param projectDirectory the project directory.
+     * @param targetDirectory 
 	 */
-	public DoomMakeOpenProjectApp(File projectDirectory)
+	public DoomMakeOpenProjectApp(File targetDirectory)
 	{
-		Objects.requireNonNull(projectDirectory);
-		
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.tasks = DoomToolsTaskManager.get();
@@ -115,9 +119,9 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		);
 		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (c, e) -> {
 			if (c.isSelected())
-				this.autoBuildAgent.start();
+				startAgent();
 			else
-				this.autoBuildAgent.shutDown();
+				shutDownAgent();
 		});
 		
 		this.targetRunAction = action(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
@@ -125,11 +129,157 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		this.statusPanel = new StatusPanel();
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
-		this.projectDirectory = projectDirectory;
+		this.projectDirectory = targetDirectory;
 		
 		this.currentTarget = null;
+		this.autoBuildAgent = null;
+	}
+	
+	/**
+	 * Opens a dialog for opening a directory, then checks
+	 * if the directory is a project directory, and is a project directory. 
+	 * @param parent the parent window for the dialog.
+	 * @param initPath the init path for the dialog.
+	 * @return a new app instance.
+	 */
+	public static File openAndGetDirectory(Component parent, File initPath)
+	{
+		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
+		File directory = SwingUtils.directory(
+			parent,
+			language.getText("doommake.project.open.browse.title"),
+			initPath,
+			language.getText("doommake.project.open.browse.accept")
+		);
 		
-		Listener listener = new Listener() 
+		if (directory == null)
+			return null;
+		
+		if (!isProjectDirectory(directory))
+		{
+			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", directory.getAbsolutePath()));
+			return null;
+		}
+		
+		return directory;
+	}
+	
+	/**
+	 * Opens a dialog for opening a directory, then checks
+	 * if the directory is a project directory, and is a project directory. 
+	 * @param parent the parent window for the dialog.
+	 * @param initPath the init path for the dialog.
+	 * @return a new app instance.
+	 */
+	public static DoomMakeOpenProjectApp openAndCreate(Component parent, File initPath)
+	{
+		File directory;
+		if ((directory = openAndGetDirectory(parent, initPath)) == null)
+			return null;
+		return new DoomMakeOpenProjectApp(directory);
+	}
+	
+	/**
+	 * Checks if a directory is a project directory.
+	 * @param directory the directory to check.
+	 * @return true if it is, false if not.
+	 */
+	public static boolean isProjectDirectory(File directory)
+	{
+		if (!directory.isDirectory())
+			return false;
+		if (!(new File(directory.getAbsolutePath() + File.separator + "doommake.script")).exists())
+			return false;
+		return true;
+	}
+	
+	@Override
+	public String getName()
+	{
+		return language.getText("doommake.project.title", projectDirectory.getName());
+	}
+
+	@Override
+	public Container createContentPane()
+	{
+		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
+		refreshTargets();
+		
+		Border targetsBorder = createTitledBorder(
+			createLineBorder(Color.GRAY, 1), language.getText("doommake.project.targets"), TitledBorder.LEADING, TitledBorder.TOP
+		);
+		
+		return containerOf(
+			new Dimension(300, 300),
+			createEmptyBorder(4, 4, 4, 4),
+			node(containerOf(
+				node(BorderLayout.NORTH, containerOf(
+					node(BorderLayout.EAST, control)
+				)),
+				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
+					node(BorderLayout.CENTER, containerOf(targetsBorder, 
+						node(containerOf(createEmptyBorder(4, 4, 4, 4), 
+							node(scroll(listPanel))
+						))
+					)),
+					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
+						node(BorderLayout.CENTER, autoBuildCheckbox),
+						node(BorderLayout.EAST, button(targetRunAction)),
+						node(BorderLayout.SOUTH, statusPanel)
+					))
+				))
+			))
+		);
+	}
+
+	@Override
+	public JMenuBar createDesktopMenuBar() 
+	{
+		return menuBar(
+			// File
+			utils.createMenuFromLanguageKey("doommake.menu.file",
+				utils.createItemFromLanguageKey("doommake.menu.file.item.new",
+					(c, e) -> openNewProject()
+				),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.open",
+					(c, e) -> openOpenProject()
+				),
+				separator(),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.settings",
+					(c, e) -> openSettings()
+				),
+				separator(),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.exit",
+					(c, e) -> receiver.attemptClose()
+				)
+			)
+		);
+	}
+	
+	@Override
+	public void onOpen() 
+	{
+		if (projectDirectory == null)
+			throw new IllegalStateException("Project directory not set!");
+		
+		// Set the last directory successfully opened.
+		settings.setLastProjectDirectory(projectDirectory);
+	}
+	
+	@Override
+	public void onClose() 
+	{
+		if (autoBuildAgent != null)
+			autoBuildAgent.shutDown();
+	}
+	
+	// Starts the agent.
+	private void startAgent()
+	{
+		if (autoBuildAgent != null)
+			throw new IllegalStateException("INTERNAL ERROR: Start agent while agent running!");
+		
+		autoBuildAgent = new AutoBuildAgent(projectDirectory, new Listener() 
 		{
 			@Override
 			public void onAgentStarted() 
@@ -180,156 +330,27 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			{
 				try {
 					return runTarget(target, null, null, true).get();
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (InterruptedException e) {
+					LOG.warn("DoomMake call interrupted!");
+					return -1;
+				} catch (ExecutionException e) {
 					LOG.error(e, "Exception occurred on DoomMake call!");
 					return -1;
 				}
 			}
 			
-		};
+		});
 		
-		this.autoBuildAgent = new AutoBuildAgent(projectDirectory, listener);
+		autoBuildAgent.start();
 	}
 	
-	/**
-	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory, and is a project directory. 
-	 * @param parent the parent window for the dialog.
-	 * @param initPath the init path for the dialog.
-	 * @return a new app instance.
-	 */
-	public static File openAndGetDirectory(Component parent, File initPath)
+	private void shutDownAgent()
 	{
-		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
-		File directory = SwingUtils.directory(
-			parent,
-			language.getText("doommake.project.open.browse.title"),
-			initPath,
-			language.getText("doommake.project.open.browse.accept")
-		);
-		
-		if (directory == null)
-			return null;
-		
-		if (!isProjectDirectory(directory))
-		{
-			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", directory.getAbsolutePath()));
-			return null;
-		}
-		
-		return directory;
-	}
-	
-	/**
-	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory, and is a project directory. 
-	 * @param parent the parent window for the dialog.
-	 * @param initPath the init path for the dialog.
-	 * @return a new app instance.
-	 */
-	public static DoomMakeOpenProjectApp openAndCreate(Component parent, File initPath)
-	{
-		File directory;
-		if ((directory = openAndGetDirectory(parent, initPath)) == null)
-			return null;
-		
-		return new DoomMakeOpenProjectApp(directory);
-	}
-	
-	/**
-	 * Checks if a directory is a project directory.
-	 * @param directory the directory to check.
-	 * @return true if it is, false if not.
-	 */
-	public static boolean isProjectDirectory(File directory)
-	{
-		if (!directory.isDirectory())
-			return false;
-		if (!(new File(directory.getAbsolutePath() + File.separator + "doommake.script")).exists())
-			return false;
-		return true;
-	}
-	
-	@Override
-	public String getName()
-	{
-		return language.getText("doommake.project.title", projectDirectory.getName());
-	}
+		if (autoBuildAgent == null)
+			throw new IllegalStateException("INTERNAL ERROR: Shutdown agent while agent not running!");
 
-	@Override
-	public DoomToolsApplicationSettings createSettings() 
-	{
-		return new DoomToolsApplicationSettings();
-	}
-
-	@Override
-	public Container createContentPane()
-	{
-		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
-		refreshTargets();
-		
-		Border targetsBorder = createTitledBorder(
-			createLineBorder(Color.GRAY, 1), language.getText("doommake.project.targets"), TitledBorder.LEADING, TitledBorder.TOP
-		);
-		
-		return containerOf(
-			new Dimension(300, 300),
-			createEmptyBorder(4, 4, 4, 4),
-			node(containerOf(
-				node(BorderLayout.NORTH, containerOf(
-					node(BorderLayout.EAST, control)
-				)),
-				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
-					node(BorderLayout.CENTER, containerOf(targetsBorder, 
-						node(containerOf(createEmptyBorder(4, 4, 4, 4), 
-							node(scroll(listPanel))
-						))
-					)),
-					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
-						node(BorderLayout.CENTER, autoBuildCheckbox),
-						node(BorderLayout.EAST, button(targetRunAction)),
-						node(BorderLayout.SOUTH, statusPanel)
-					))
-				))
-			))
-		);
-	}
-
-	@Override
-	public JMenuBar createMenuBar() 
-	{
-		return menuBar(
-			// File
-			utils.createMenuFromLanguageKey("doommake.menu.file",
-				utils.createItemFromLanguageKey("doommake.menu.file.item.new",
-					(c, e) -> openNewProject()
-				),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.open",
-					(c, e) -> openOpenProject()
-				),
-				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.settings",
-					(c, e) -> openSettings()
-				),
-				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.exit",
-					(c, e) -> receiver.attemptClose()
-				)
-			)
-		);
-	}
-	
-	@Override
-	public void onOpen() 
-	{
-		// Set the last directory successfully opened.
-		settings.setLastProjectDirectory(projectDirectory);
-	}
-	
-	@Override
-	public void onClose() 
-	{
 		autoBuildAgent.shutDown();
+		autoBuildAgent = null;
 	}
 	
 	// Open new project app (new instance).
@@ -403,7 +424,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		// execution failsafe
 		if (!targetRunAction.isEnabled())
 			return;
-		if (autoBuildAgent.isRunning())
+		if (autoBuildAgent != null && autoBuildAgent.isRunning())
 			return;
 		if (currentTarget == null)
 			return;
@@ -469,7 +490,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	
 	private void updateTargetsEnabled(boolean enabled)
 	{
-		final boolean state = enabled && !autoBuildAgent.isRunning();
+		final boolean state = enabled && (autoBuildAgent == null || !autoBuildAgent.isRunning());
 		SwingUtils.invoke(() -> {
 			listPanel.setEnabled(state);
 			targetRunAction.setEnabled(state);

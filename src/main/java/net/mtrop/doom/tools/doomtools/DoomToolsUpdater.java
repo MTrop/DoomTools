@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -48,6 +49,8 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	private File toolsRootDirectory;
 	/** Root directory of DoomTools. */
 	private Listener listener;
+	/** Cancel switch. */
+	private AtomicBoolean cancelSwitch;
 	
 	/**
 	 * Creates an updater instance.
@@ -59,12 +62,26 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	{
 		this.toolsRootDirectory = Objects.requireNonNull(toolsRootDirectory);
 		this.listener = Objects.requireNonNull(listener);
+		this.cancelSwitch = new AtomicBoolean(false);
+	}
+	
+	@Override
+	public void cancel() 
+	{
+		cancelSwitch.set(true);
+		super.cancel();
 	}
 	
 	@Override
 	public Integer call() throws Exception
 	{
-		// TODO: Implement cancellation.
+		if (isCancelled())
+		{
+			listener.onUpdateAbort();
+			return DoomToolsMain.ERROR_TASK_CANCELLED;
+		}
+		
+		cancelSwitch.set(false);
 		
 		// grab date from current JAR.
 		String currentVersion = getLatestJarFile(new File(toolsRootDirectory.getAbsolutePath() + "/jar")).getName().substring(10, 30);
@@ -76,6 +93,12 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 		try {
 			JSONObject json;
 			json = getJSONResponse(UPDATE_GITHUB_API);
+			
+			if (isCancelled())
+			{
+				listener.onUpdateAbort();
+				return DoomToolsMain.ERROR_TASK_CANCELLED;
+			}
 			
 			String repoURL;
 			if ((repoURL = json.get("repository_url").getString()) == null)
@@ -91,6 +114,12 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 				+ "/releases"
 			).get(0).get("assets");
 
+			if (isCancelled())
+			{
+				listener.onUpdateAbort();
+				return DoomToolsMain.ERROR_TASK_CANCELLED;
+			}
+			
 			if (json == null || !json.isArray())
 			{
 				listener.onError("Unexpected content from update site. Update failed.");
@@ -129,6 +158,12 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 		{
 			listener.onUpToDate();
 			return DoomToolsMain.ERROR_NONE;
+		}
+		
+		if (isCancelled())
+		{
+			listener.onUpdateAbort();
+			return DoomToolsMain.ERROR_TASK_CANCELLED;
 		}
 		
 		if (!listener.shouldContinue(releaseVersion))

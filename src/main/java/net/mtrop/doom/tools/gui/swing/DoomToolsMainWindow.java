@@ -24,9 +24,9 @@ import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
@@ -85,15 +85,9 @@ public class DoomToolsMainWindow extends JFrame
 		this.applicationStarter = new DoomToolsApplicationStarter()
 		{
 			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass) 
+			public void startApplication(DoomToolsApplicationInstance instance) 
 			{
-				addApplication(applicationClass);
-			}
-
-			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
-			{
-				addApplication(applicationInstance);
+				addApplication(instance);
 			}
 		};
 		
@@ -118,11 +112,10 @@ public class DoomToolsMainWindow extends JFrame
 
 	/**
 	 * Adds a new application instance to the desktop.
-	 * @param <A> the instance type.
 	 * @param applicationInstance the application instance.
 	 * @throws RuntimeException if the class could not be instantiated.
 	 */
-	public <A extends DoomToolsApplicationInstance> void addApplication(A applicationInstance)
+	public void addApplication(DoomToolsApplicationInstance applicationInstance)
 	{
 		desktop.addApplicationFrame(applicationInstance, applicationStarter).setVisible(true);
 	}
@@ -149,7 +142,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new",
-						(c, e) -> addApplication(new DoomMakeNewProjectApp(null))
+						(c, e) -> addApplication(new DoomMakeNewProjectApp())
 					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
 						(c, e) -> {

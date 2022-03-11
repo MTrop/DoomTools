@@ -33,7 +33,6 @@ import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsApplicationSettings;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -51,7 +50,9 @@ import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
  */
 public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 {
-    private static final FileFilter DIRECTORY_FILTER = new FileFilter()
+    public static final String STATE_TARGET_DIRECTORY = "targetDirectory";
+
+	private static final FileFilter DIRECTORY_FILTER = new FileFilter()
 	{
 		@Override
 		public boolean accept(File f) 
@@ -79,14 +80,26 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	/** Set of used templates. */
 	private Set<String> templateNameSet;
 	
-	public DoomMakeNewProjectApp(String initFilePath) 
+	/**
+	 * Creates a new New Project app instance.
+	 */
+	public DoomMakeNewProjectApp() 
+	{
+		this(null);
+	}
+	
+	/**
+	 * Creates a new New Project app instance.
+	 * @param targetDirectoryPath the starting directory path, if any.
+	 */
+	public DoomMakeNewProjectApp(String targetDirectoryPath) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
 		this.projectGenerator = new WADProjectGenerator();
 		
-		this.targetDirectory = Common.isEmpty(initFilePath) ? null : new File(initFilePath);
+		this.targetDirectory = Common.isEmpty(targetDirectoryPath) ? null : new File(targetDirectoryPath);
 		this.templateNameSet = new TreeSet<>();
 	}
 	
@@ -95,11 +108,19 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	{
 		return language.getText("doommake.newproject.title");
 	}
+	
+	@Override
+	public Map<String, String> getState()
+	{
+		return apply(new HashMap<>(), (state) -> {
+			state.put(STATE_TARGET_DIRECTORY, targetDirectory.getAbsolutePath());
+		});
+	}
 
 	@Override
-	public DoomToolsApplicationSettings createSettings() 
+	public void setState(Map<String, String> state)
 	{
-		return new DoomToolsApplicationSettings();
+		this.targetDirectory = state.containsKey(STATE_TARGET_DIRECTORY) ? new File(state.get(STATE_TARGET_DIRECTORY)) : null;
 	}
 
 	@Override
@@ -134,7 +155,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		Container controlPane = containerOf(new FlowLayout(FlowLayout.TRAILING, 4, 4), node(
 			utils.createButtonFromLanguageKey("doommake.newproject.create", (c, e) -> createProject())
 		));
-
+	
 		JPanel projectPanel = new JPanel();
 		JScrollPane scrollPane = apply(
 			scroll(projectPanel), 
@@ -157,7 +178,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			))
 		);
 	}
-	
+
 	// The title panel.
 	private static Container titlePanel(String title, Container container)
 	{
@@ -425,10 +446,16 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		else // Open in Doom Tools
 		{
+			
 			receiver.startApplication(new DoomMakeOpenProjectApp(targetDirectory));
 			receiver.attemptClose();
 		}
 		
+	}
+	
+	public final class State
+	{
+		public File targetDirectory;
 	}
 	
 }

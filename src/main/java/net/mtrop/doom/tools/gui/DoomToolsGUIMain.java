@@ -47,13 +47,7 @@ public final class DoomToolsGUIMain
     private static final DoomToolsApplicationStarter STARTER = new DoomToolsApplicationStarter()
 	{
 		@Override
-		public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass) 
-		{
-			DoomToolsGUIMain.startApplication(applicationClass);
-		}
-
-		@Override
-		public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
+		public void startApplication(DoomToolsApplicationInstance applicationInstance) 
 		{
 			DoomToolsGUIMain.startApplication(applicationInstance);
 		}
@@ -129,10 +123,9 @@ public final class DoomToolsGUIMain
     
 	/**
 	 * Adds a new application instance to the main desktop.
-	 * @param <A> the instance type.
 	 * @param applicationInstance the application instance.
 	 */
-	public static <A extends DoomToolsApplicationInstance> void startApplication(final A applicationInstance)
+	public static void startApplication(final DoomToolsApplicationInstance applicationInstance)
 	{
 		final DoomToolsApplicationFrame frame = new DoomToolsApplicationFrame(applicationInstance, STARTER);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -162,6 +155,7 @@ public final class DoomToolsGUIMain
 	{
 		SwingUtils.setSystemLAF();
 	
+		// no args - run main application.
 		if (args.length == 0)
 		{
 	    	if (isAlreadyRunning())
@@ -172,6 +166,7 @@ public final class DoomToolsGUIMain
 	    	}
 			get().createAndDisplayMainWindow();
 		}
+		// run standalone application.
 		else 
 		{
 			try 

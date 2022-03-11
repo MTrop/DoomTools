@@ -23,7 +23,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -43,6 +43,7 @@ public final class DoomToolsMain
 	public static final int ERROR_SITE_ERROR = 5;
 	public static final int ERROR_IOERROR = 6;
 	public static final int ERROR_GUI_ALREADY_RUNNING = 7;
+	public static final int ERROR_TASK_CANCELLED = 8;
 	public static final int ERROR_UNKNOWN = -1;
 
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";

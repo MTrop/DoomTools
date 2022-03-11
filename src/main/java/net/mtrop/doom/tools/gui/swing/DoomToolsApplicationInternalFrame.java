@@ -92,15 +92,9 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 			}
 
 			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass)
+			public void startApplication(DoomToolsApplicationInstance instance) 
 			{
-				starter.startApplication(applicationClass);
-			}
-
-			@Override
-			public <A extends DoomToolsApplicationInstance> void startApplication(A applicationInstance) 
-			{
-				starter.startApplication(applicationInstance);
+				starter.startApplication(instance);
 			}
 		});
 		pack();

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeConstants.Paths;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;

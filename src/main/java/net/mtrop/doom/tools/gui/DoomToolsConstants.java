@@ -1,10 +1,10 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui;
 
 import java.io.File;
 
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
-public interface DoomMakeConstants 
+public interface DoomToolsConstants 
 {
 	/** Common paths. */
 	interface Paths

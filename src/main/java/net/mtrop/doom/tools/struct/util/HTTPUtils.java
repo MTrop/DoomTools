@@ -2494,13 +2494,12 @@ public final class HTTPUtils
 		 */
 		public long relayContent(OutputStream out) throws IOException
 		{
-			return relayContent(out, null);
+			return relayContent(out, 8192, new AtomicBoolean(false), null);
 		}
 		
 		/**
 		 * Convenience function for transferring the entirety of the content 
 		 * stream to another, monitoring the progress as it goes.
-		 * <p>Equivalent to: <code>return relay(getContentStream(), out, 8192, getLength(), monitor);</code>
 		 * @param out the output stream.
 		 * @param monitor the optional monitor. Can be null.
 		 * @return the amount of bytes moved.
@@ -2508,7 +2507,76 @@ public final class HTTPUtils
 		 */
 		public long relayContent(OutputStream out, TransferMonitor monitor) throws IOException
 		{
-			return relay(getContentStream(), out, 8192, getLength(), new AtomicBoolean(false), monitor);
+			return relayContent(out, 8192, new AtomicBoolean(false), monitor);
+		}
+		
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, AtomicBoolean cancelSwitch) throws IOException
+		{
+			return relayContent(out, 8192, cancelSwitch, null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @param monitor the optional monitor. Can be null.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+		{
+			return relayContent(out, 8192, cancelSwitch, monitor);
+		}
+		
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize) throws IOException
+		{
+			return relayContent(out, bufferSize, new AtomicBoolean(false), null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize, AtomicBoolean cancelSwitch) throws IOException
+		{
+			return relayContent(out, bufferSize, cancelSwitch, null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @param monitor the optional monitor. Can be null.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+		{
+			return relay(getContentStream(), out, bufferSize, getLength(), cancelSwitch, monitor);
 		}
 		
 		/**

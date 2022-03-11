@@ -23,7 +23,7 @@ public class DoomMakeSettingsWindow extends JFrame
 		setIconImages(DoomToolsGUIUtils.get().getWindowIcons());
 		setTitle("DoomMake Settings");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setContentPane(containerOf(new BorderLayout(), 
+		setContentPane(containerOf(
 			node(BorderLayout.CENTER, new DoomMakeSettingsPanel())
 		));
 		pack();
