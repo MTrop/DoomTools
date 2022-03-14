@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui;
 
 import java.awt.Container;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.swing.Icon;
 import javax.swing.JMenuBar;
@@ -87,14 +88,15 @@ public abstract class DoomToolsApplicationInstance
 	/**
 	 * Sets the current state of this application into a state object for persisting workspaces. 
 	 * It is up to the application to figure out what to store.
-	 * Applications that override this method should call this via <code>super</code> first!
+	 * <p> DO NOT store the content pane bounds - this is stored on the workspace.
+	 * <p> Applications that override this method should call this via <code>super</code> first!
 	 * <p> All values should be JSON serializable!
 	 * <p> This should NEVER be called by the application itself.
 	 * @return this application's state properties (if any - can be null).
 	 */
-	public Map<String, String> getState()
+	public Map<String, String> getApplicationState()
 	{
-		return null;
+		return new TreeMap<>();
 	}
 
 	/**
@@ -105,7 +107,7 @@ public abstract class DoomToolsApplicationInstance
 	 * <p> This should NEVER be called by the application itself.
 	 * @param state the state object.
 	 */
-	public void setState(Map<String, String> state)
+	public void setApplicationState(Map<String, String> state)
 	{
 		// Do nothing.
 	}

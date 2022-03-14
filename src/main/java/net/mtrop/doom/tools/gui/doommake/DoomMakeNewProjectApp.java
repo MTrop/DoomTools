@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
@@ -33,6 +32,7 @@ import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -41,8 +41,9 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
-import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
+import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 
 /**
  * The DoomMake New Project application.
@@ -50,23 +51,8 @@ import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
  */
 public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 {
-    public static final String STATE_TARGET_DIRECTORY = "targetDirectory";
+	private static final String STATE_TARGET_DIRECTORY = "targetDirectory";
 
-	private static final FileFilter DIRECTORY_FILTER = new FileFilter()
-	{
-		@Override
-		public boolean accept(File f) 
-		{
-			return f.isDirectory();
-		}
-
-		@Override
-		public String getDescription() 
-		{
-			return "Directories";
-		}
-	};
-	
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
     /** Language manager. */
@@ -110,15 +96,16 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public Map<String, String> getState()
+	public Map<String, String> getApplicationState()
 	{
-		return apply(new HashMap<>(), (state) -> {
-			state.put(STATE_TARGET_DIRECTORY, targetDirectory.getAbsolutePath());
+		return apply(super.getApplicationState(), (state) -> {
+			if (targetDirectory != null)
+				state.put(STATE_TARGET_DIRECTORY, targetDirectory.getAbsolutePath());
 		});
 	}
 
 	@Override
-	public void setState(Map<String, String> state)
+	public void setApplicationState(Map<String, String> state)
 	{
 		this.targetDirectory = state.containsKey(STATE_TARGET_DIRECTORY) ? new File(state.get(STATE_TARGET_DIRECTORY)) : null;
 	}
@@ -137,12 +124,12 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		
 		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
 			containerOf(node(fileField(targetDirectory,
-				(current) -> SwingUtils.directory(
+				(current) -> chooseDirectory(
 					out, 
 					language.getText("doommake.newproject.directory.browse.title"), 
 					current, 
 					language.getText("doommake.newproject.directory.browse.accept"), 
-					DIRECTORY_FILTER
+					FileFilters.DIRECTORIES
 				), 
 				(selected) -> { 
 					targetDirectory = selected;
@@ -304,11 +291,11 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				break;
 			case FILE:
 				field = fileField(
-					(current) -> SwingUtils.file(
+					(current) -> chooseFile(
 						language.getText("doommake.newproject.directory.browse.title"), 
 						current, 
 						language.getText("doommake.newproject.directory.browse.accept"), 
-						DIRECTORY_FILTER
+						FileFilters.DIRECTORIES
 					), 
 					(selected) -> { 
 						stringValue.set(selected == null ? "" : selected.getAbsolutePath());
@@ -446,16 +433,10 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		else // Open in Doom Tools
 		{
-			
 			receiver.startApplication(new DoomMakeOpenProjectApp(targetDirectory));
 			receiver.attemptClose();
 		}
 		
-	}
-	
-	public final class State
-	{
-		public File targetDirectory;
 	}
 	
 }

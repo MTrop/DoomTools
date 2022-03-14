@@ -32,7 +32,7 @@ public interface DoomToolsApplicationStarter
 	{
 		A instance = Common.create(applicationClass);
 		if (state != null)
-			instance.setState(state);
+			instance.setApplicationState(state);
 		return instance;
 	}
     

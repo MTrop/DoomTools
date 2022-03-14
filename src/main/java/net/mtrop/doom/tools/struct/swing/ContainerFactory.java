@@ -372,6 +372,18 @@ public final class ContainerFactory
 	}
 
 	/**
+	 * Creates a new {@link Dimension}.
+	 * The intent behind this shallow function is to unify the grammar used to build containers via this factory. 
+	 * @param width the dimension width.
+	 * @param height the dimension height.
+	 * @return a new dimension.
+	 */
+	public static Dimension dimension(int width, int height)
+	{
+		return new Dimension(width, height);
+	}
+	
+	/**
 	 * A component node.
 	 */
 	public static class Node

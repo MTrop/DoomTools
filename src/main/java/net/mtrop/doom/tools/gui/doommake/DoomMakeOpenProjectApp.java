@@ -4,15 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
 import javax.swing.border.Border;
@@ -43,6 +43,8 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
+import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
 
 /**
  * The DoomMake New Project application.
@@ -50,6 +52,8 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
  */
 public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 {
+    private static final String STATE_PROJECT_DIRECTORY = "projectDirectory";
+
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
 
@@ -73,14 +77,14 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     /** Checkbox for flagging auto-build. */
     private JCheckBox autoBuildCheckbox;
     /** Target run action. */
-    private AbstractAction targetRunAction;
+    private Action targetRunAction;
     /** Status messages. */
     private StatusPanel statusPanel;
 
 	// Fields
     
     /** Project directory. */
-    private final File projectDirectory;
+    private File projectDirectory;
 
     // State
     
@@ -124,7 +128,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 				shutDownAgent();
 		});
 		
-		this.targetRunAction = action(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
+		this.targetRunAction = actionItem(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
 
 		this.statusPanel = new StatusPanel();
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
@@ -145,23 +149,23 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	public static File openAndGetDirectory(Component parent, File initPath)
 	{
 		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
-		File directory = SwingUtils.directory(
+		File workspaceFile = chooseDirectory(
 			parent,
 			language.getText("doommake.project.open.browse.title"),
 			initPath,
 			language.getText("doommake.project.open.browse.accept")
 		);
 		
-		if (directory == null)
+		if (workspaceFile == null)
 			return null;
 		
-		if (!isProjectDirectory(directory))
+		if (!isProjectDirectory(workspaceFile))
 		{
-			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", directory.getAbsolutePath()));
+			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", workspaceFile.getAbsolutePath()));
 			return null;
 		}
 		
-		return directory;
+		return workspaceFile;
 	}
 	
 	/**
@@ -210,7 +214,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		);
 		
 		return containerOf(
-			new Dimension(300, 300),
+			dimension(300, 300),
 			createEmptyBorder(4, 4, 4, 4),
 			node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
@@ -273,6 +277,20 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			autoBuildAgent.shutDown();
 	}
 	
+	@Override
+	public Map<String, String> getApplicationState()
+	{
+		return apply(super.getApplicationState(), (state) -> {
+			state.put(STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
+		});
+	}
+
+	@Override
+	public void setApplicationState(Map<String, String> state)
+	{
+		this.projectDirectory = state.containsKey(STATE_PROJECT_DIRECTORY) ? new File(state.get(STATE_PROJECT_DIRECTORY)) : null;
+	}
+
 	// Starts the agent.
 	private void startAgent()
 	{

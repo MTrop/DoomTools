@@ -1,18 +1,17 @@
 package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import javax.swing.filechooser.FileFilter;
+import java.awt.BorderLayout;
 
+import javax.swing.JPanel;
+
+import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
+import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
-
-import java.io.File;
 
 /**
  * A DoomMake panel for common settings.
@@ -25,39 +24,25 @@ public class DoomMakeSettingsPanel extends JPanel
 	/** Settings singleton. */
 	private static final DoomToolsSettingsManager settings = DoomToolsSettingsManager.get();
 	
-	private static final FileFilter EXE_FILTER = new FileFilter() 
-	{
-		@Override
-		public String getDescription() 
-		{
-			return "Executables";
-		}
-		
-		@Override
-		public boolean accept(File f) 
-		{
-			return f.canExecute();
-		}
-	};
-	
 	/**
 	 * Creates the settings panel.
 	 */
 	public DoomMakeSettingsPanel()
 	{
-		containerOf(this, new BoxLayout(this, BoxLayout.X_AXIS),
-			node(form(LabelSide.LEFT, LabelJustification.LEFT, 96)
+		containerOf(this, dimension(450, 100),
+			node(BorderLayout.NORTH, form(LabelSide.LEFT, LabelJustification.LEFT, 96)
 				.addField("Path to VSCode", fileField(
 					settings.getPathToVSCode(), 
-					(currentFile) -> SwingUtils.file(this, "Path to VSCode Executable", currentFile, "Open", EXE_FILTER), 
+					(currentFile) -> chooseFile(this, "Path to VSCode Executable", currentFile, "Open", FileFilters.EXECUTABLES), 
 					(value) -> settings.setPathToVSCode(value)
 				))
 				.addField("Path to SLADE3", fileField(
 					settings.getPathToSlade(), 
-					(currentFile) -> SwingUtils.file(this, "Path to SLADE Executable", currentFile, "Open", EXE_FILTER), 
+					(currentFile) -> chooseFile(this, "Path to SLADE Executable", currentFile, "Open", FileFilters.EXECUTABLES), 
 					(value) -> settings.setPathToSlade(value)
 				))
-			)
+			),
+			node(BorderLayout.CENTER, containerOf())
 		);
 	}
 	

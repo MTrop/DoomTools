@@ -6,6 +6,8 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
 
+import static javax.swing.BorderFactory.*;
+
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
 /**
@@ -24,7 +26,9 @@ public class DoomToolsSettingsPanel extends JPanel
 		containerOf(this, new BorderLayout(),
 			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
 				tab("DoomTools", containerOf()),
-				tab("DoomMake", new DoomMakeSettingsPanel())
+				tab("DoomMake", containerOf(createEmptyBorder(4, 4, 4, 4),
+					node(new DoomMakeSettingsPanel())
+				))
 			))
 		);
 	}

@@ -22,7 +22,7 @@ public class TextOutputPanel extends JTextArea
 	 */
 	public TextOutputPanel()
 	{
-		super(25, 80);
+		super(25, 84);
 		setFont(DEFAULT_FONT);
 		setEditable(false);
 	}

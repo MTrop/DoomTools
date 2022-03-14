@@ -1,5 +1,8 @@
 package net.mtrop.doom.tools.gui;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.blackrook.json.annotation.JSONMapType;
@@ -22,8 +25,63 @@ public final class DoomToolsWorkspace
 	public static DoomToolsApplicationInstance createApplication(Entry entry)
 	{
 		DoomToolsApplicationInstance instance = (DoomToolsApplicationInstance)Common.create(entry.appClass);
-		instance.setState(entry.state);
+		instance.setApplicationState(entry.state);
 		return instance;
+	}
+	
+	/** Entries. */
+	private List<Entry> entries;
+	/** Main Window width. */
+	private int windowWidth;
+	/** Main Window height. */
+	private int windowHeight;
+	
+	public DoomToolsWorkspace()
+	{
+		this.entries = new LinkedList<>();
+		this.windowWidth = 0;
+		this.windowHeight = 0;
+	}
+	
+	/**
+	 * Creates a new entry.
+	 * @return the new entry.
+	 */
+	public Entry createEntry()
+	{
+		Entry out;
+		entries.add(out = new Entry());
+		return out;
+	}
+	
+	public void setEntries(Entry[] entries)
+	{
+		this.entries = Arrays.asList(entries); 
+	}
+	
+	public List<Entry> getEntries()
+	{
+		return entries;
+	}
+	
+	public void setWindowWidth(int windowWidth) 
+	{
+		this.windowWidth = windowWidth;
+	}
+	
+	public int getWindowWidth() 
+	{
+		return windowWidth;
+	}
+	
+	public void setWindowHeight(int windowHeight) 
+	{
+		this.windowHeight = windowHeight;
+	}
+	
+	public int getWindowHeight() 
+	{
+		return windowHeight;
 	}
 	
 	/**
@@ -33,8 +91,6 @@ public final class DoomToolsWorkspace
 	{
 		/** Application type. */
 		private Class<?> appClass;
-		/** Application state type. */
-		private Class<?> appStateClass;
 		
 		/** Application window bounds: Top-left X-coordinate. */
 		private Integer windowBoundsX;
@@ -49,6 +105,17 @@ public final class DoomToolsWorkspace
 		/** State data. */
 		private Map<String, String> state;
 
+		public Entry()
+		{
+			this.appClass = null;
+			this.windowBoundsX = null;
+			this.windowBoundsY = null;
+			this.windowBoundsWidth = null;
+			this.windowBoundsHeight = null;
+			this.windowMinimized = null;
+			this.state = null;
+		}
+		
 		/**
 		 * @return the class name of the application.
 		 */
@@ -70,27 +137,6 @@ public final class DoomToolsWorkspace
 			}
 		}
 		
-		/**
-		 * @return the class name of the application.
-		 */
-		public String getAppStateClassName() 
-		{
-			return appStateClass.getName();
-		}
-		
-		/**
-		 * @param appStateClassName the application state class name, fully qualified.
-		 * @throws ClassCastException if bad class.
-		 */
-		public void setAppStateClassName(String appStateClassName)
-		{
-			try {
-				this.appStateClass = (Class<?>)Class.forName(appStateClassName);
-			} catch (ClassNotFoundException e) {
-				throw new ClassCastException("Invalid application class: " + appStateClassName);
-			}
-		}
-
 		public Integer getWindowBoundsX() 
 		{
 			return windowBoundsX;

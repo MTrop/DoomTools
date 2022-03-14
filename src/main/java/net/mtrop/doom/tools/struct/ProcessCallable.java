@@ -290,6 +290,19 @@ public class ProcessCallable implements Callable<Integer>
 	}
 	
 	/**
+	 * Adds a series of command line arguments.
+	 * Command line arguments are sent in the order added.
+	 * @param args the command arguments to add.
+	 * @return this, for chaining.
+	 */
+	public ProcessCallable args(String ... args)
+	{
+		for (int i = 0; i < args.length; i++)
+			arg(args[i]);
+		return this;
+	}
+	
+	/**
 	 * Sets all environment variables from the current {@link System#getenv()}.
 	 * This is entirely unnecessary for most cases, as setting zero environment variables
 	 * will automatically inherit this program's environment.

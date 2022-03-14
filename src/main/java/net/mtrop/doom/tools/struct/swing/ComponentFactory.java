@@ -157,7 +157,7 @@ public final class ComponentFactory
 	 */
 	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
 	{
-		JButton out = new JButton(action(icon, label, handler));
+		JButton out = new JButton(actionItem(icon, label, handler));
 		if (mnemonic > 0)
 			out.setMnemonic(mnemonic);
 		return out;
@@ -227,7 +227,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(int mnemonic, AbstractAction action)
+	public static JButton button(int mnemonic, Action action)
 	{
 		JButton out = new JButton(action);
 		if (mnemonic > 0)
@@ -240,7 +240,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(AbstractAction action)
+	public static JButton button(Action action)
 	{
 		return button(0, action);
 	}
@@ -259,7 +259,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(action(icon, label, handler));
+		JCheckBox out = new JCheckBox(actionItem(icon, label, handler));
 		out.setSelected(selected);
 		return out;
 	}
@@ -273,7 +273,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(action(label, handler));
+		JCheckBox out = new JCheckBox(actionItem(label, handler));
 		out.setSelected(selected);
 		return out;
 	}
@@ -287,7 +287,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(action(icon, handler));
+		JCheckBox out = new JCheckBox(actionItem(icon, handler));
 		out.setSelected(selected);
 		return out;
 	}
@@ -1363,7 +1363,7 @@ public final class ComponentFactory
 	 */
 	public static JMenu menu(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenu> handler)
 	{
-		JMenu out = new JMenu(action(icon, label, handler));
+		JMenu out = new JMenu(actionItem(icon, label, handler));
 		out.setMnemonic(mnemonic);
 		return out;
 	}
@@ -1375,7 +1375,7 @@ public final class ComponentFactory
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(int mnemonic, KeyStroke accelerator, Action action)
+	public static MenuNode menuItem(int mnemonic, KeyStroke accelerator, Action action)
 	{
 		return new MenuItemNode(action, mnemonic, accelerator);
 	}
@@ -1386,7 +1386,7 @@ public final class ComponentFactory
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(KeyStroke accelerator, Action action)
+	public static MenuNode menuItem(KeyStroke accelerator, Action action)
 	{
 		return new MenuItemNode(action, 0, accelerator);
 	}
@@ -1397,7 +1397,7 @@ public final class ComponentFactory
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(int mnemonic, Action action)
+	public static MenuNode menuItem(int mnemonic, Action action)
 	{
 		return new MenuItemNode(action, mnemonic, null);
 	}
@@ -1407,7 +1407,7 @@ public final class ComponentFactory
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Action action)
+	public static MenuNode menuItem(Action action)
 	{
 		return new MenuItemNode(action, 0, null);
 	}
@@ -1421,9 +1421,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(icon, label, handler), mnemonic, accelerator);
+		return new MenuItemNode(actionItem(icon, label, handler), mnemonic, accelerator);
 	}
 	
 	/**
@@ -1434,9 +1434,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(label, handler), mnemonic, accelerator);
+		return new MenuItemNode(actionItem(label, handler), mnemonic, accelerator);
 	}
 	
 	/**
@@ -1447,9 +1447,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(icon, label, handler), mnemonic, null);
+		return new MenuItemNode(actionItem(icon, label, handler), mnemonic, null);
 	}
 	
 	/**
@@ -1459,9 +1459,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(label, handler), mnemonic, null);
+		return new MenuItemNode(actionItem(label, handler), mnemonic, null);
 	}
 	
 	/**
@@ -1472,9 +1472,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(icon, label, handler), 0, accelerator);
+		return new MenuItemNode(actionItem(icon, label, handler), 0, accelerator);
 	}
 	
 	/**
@@ -1484,9 +1484,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(label, handler), 0, accelerator);
+		return new MenuItemNode(actionItem(label, handler), 0, accelerator);
 	}
 	
 	/**
@@ -1496,9 +1496,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(icon, label, handler), 0, null);
+		return new MenuItemNode(actionItem(icon, label, handler), 0, null);
 	}
 	
 	/**
@@ -1507,9 +1507,9 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(action(label, handler), 0, null);
+		return new MenuItemNode(actionItem(label, handler), 0, null);
 	}
 	
 	/**
@@ -1520,7 +1520,7 @@ public final class ComponentFactory
 	 * @param nodes the menu nodes to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, int mnemonic, MenuNode ... nodes)
+	public static MenuNode menuItem(Icon icon, String label, int mnemonic, MenuNode ... nodes)
 	{
 		return new MenuBranchNode(icon, label, mnemonic, nodes);
 	}
@@ -1532,7 +1532,7 @@ public final class ComponentFactory
 	 * @param nodes the menu nodes to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, int mnemonic, MenuNode ... nodes)
+	public static MenuNode menuItem(String label, int mnemonic, MenuNode ... nodes)
 	{
 		return new MenuBranchNode(null, label, mnemonic, nodes);
 	}
@@ -1544,7 +1544,7 @@ public final class ComponentFactory
 	 * @param nodes the menu nodes to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, MenuNode ... nodes)
+	public static MenuNode menuItem(Icon icon, String label, MenuNode ... nodes)
 	{
 		return new MenuBranchNode(icon, label, 0, nodes);
 	}
@@ -1555,7 +1555,7 @@ public final class ComponentFactory
 	 * @param nodes the menu nodes to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, MenuNode ... nodes)
+	public static MenuNode menuItem(String label, MenuNode ... nodes)
 	{
 		return new MenuBranchNode(null, label, 0, nodes);
 	}
@@ -1620,7 +1620,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(icon, label, handler), selected, mnemonic, accelerator);
+		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, mnemonic, accelerator);
 	}
 
 	/**
@@ -1634,7 +1634,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(label, handler), selected, mnemonic, accelerator);
+		return new MenuCheckBoxNode(actionItem(label, handler), selected, mnemonic, accelerator);
 	}
 
 	/**
@@ -1648,7 +1648,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(icon, label, handler), selected, mnemonic, null);
+		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, mnemonic, null);
 	}
 
 	/**
@@ -1661,7 +1661,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(label, handler), selected, mnemonic, null);
+		return new MenuCheckBoxNode(actionItem(label, handler), selected, mnemonic, null);
 	}
 
 	/**
@@ -1675,7 +1675,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(icon, label, handler), selected, 0, accelerator);
+		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, 0, accelerator);
 	}
 
 	/**
@@ -1688,7 +1688,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(label, handler), selected, 0, accelerator);
+		return new MenuCheckBoxNode(actionItem(label, handler), selected, 0, accelerator);
 	}
 
 	/**
@@ -1701,7 +1701,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(icon, label, handler), selected, 0, null);
+		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, 0, null);
 	}
 
 	/**
@@ -1713,7 +1713,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(action(label, handler), selected, 0, null);
+		return new MenuCheckBoxNode(actionItem(label, handler), selected, 0, null);
 	}
 
 	/**
@@ -1897,7 +1897,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static AbstractAction action(Icon icon, String label, ActionEventHandler handler)
+	public static Action actionItem(Icon icon, String label, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, label, handler);
 	}
@@ -1908,7 +1908,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static AbstractAction action(String label, ActionEventHandler handler)
+	public static Action actionItem(String label, ActionEventHandler handler)
 	{
 		return new HandledAction(null, label, handler);
 	}
@@ -1919,7 +1919,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static AbstractAction action(Icon icon, ActionEventHandler handler)
+	public static Action actionItem(Icon icon, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, null, handler);
 	}

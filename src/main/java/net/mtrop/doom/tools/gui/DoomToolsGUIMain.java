@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.gui;
 
+import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -17,7 +18,6 @@ import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.struct.ProcessCallable;
 
 /**
  * Manages the DoomTools GUI window. 
@@ -101,10 +101,7 @@ public final class DoomToolsGUIMain
 	 */
 	public static Process startGUIAppProcess(String appName, String ... args) throws IOException
 	{
-		ProcessCallable pc = Common.spawnJava(DoomToolsGUIMain.class).arg(appName);
-		for (int i = 0; i < args.length; i++)
-			pc.arg(args[i]);
-		return pc.exec();
+		return Common.spawnJava(DoomToolsGUIMain.class).arg(appName).args(args).exec();
 	}
 	
 	
@@ -175,6 +172,7 @@ public final class DoomToolsGUIMain
 				{
 					default:
 		        		SwingUtils.error("Expected valid application name.");
+			    		System.err.println("ERROR: Expected valid application name.");
 		        		System.exit(-1);
 		        		return;
 					case ApplicationNames.DOOMMAKE_NEW:
@@ -188,11 +186,15 @@ public final class DoomToolsGUIMain
 			catch (ArrayIndexOutOfBoundsException e)
 			{
 	    		SwingUtils.error("Missing argument for application: " + e.getLocalizedMessage());
+	    		System.err.println("ERROR: Missing argument for application.");
+        		System.exit(-1);
 			}
 		}
 		
 	}
 
+	/** Settings singleton. */
+	private DoomToolsSettingsManager settings;
 	/** Language manager. */
     private DoomToolsLanguageManager language;
     /** The main window. */
@@ -200,6 +202,7 @@ public final class DoomToolsGUIMain
     
     private DoomToolsGUIMain()
     {
+    	this.settings = DoomToolsSettingsManager.get();
     	this.language = DoomToolsLanguageManager.get();
     	this.window = null;
     }
@@ -220,7 +223,15 @@ public final class DoomToolsGUIMain
     			attemptShutDown();
     		}
 		});
+    	
+    	Rectangle windowBounds;
+    	if ((windowBounds = settings.getWindowBounds()) != null)
+    		window.setBounds(windowBounds);
+    	
     	window.setVisible(true);
+		if (settings.getWindowMaximized())
+			window.setExtendedState(window.getExtendedState() | DoomToolsMainWindow.MAXIMIZED_BOTH);
+		
     	LOG.info("Window created.");
     }
 
@@ -245,6 +256,9 @@ public final class DoomToolsGUIMain
     	window.shutDownApps();
     	
     	LOG.debug("Disposing main window...");
+    	settings.setWindowBounds(window.getX(), window.getY(), window.getWidth(), window.getHeight(), 
+    		(window.getExtendedState() & DoomToolsMainWindow.MAXIMIZED_BOTH) != 0
+    	);
     	window.setVisible(false);
     	window.dispose();
     	LOG.debug("Main window disposed.");

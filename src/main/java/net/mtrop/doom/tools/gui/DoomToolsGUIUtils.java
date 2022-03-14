@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -83,7 +84,7 @@ public final class DoomToolsGUIUtils
 	 */
 	public MenuNode createItemFromLanguageKey(String keyPrefix, MenuNode... nodes)
 	{
-		return item(
+		return menuItem(
 			language.getText(keyPrefix),
 			language.getMnemonicValue(keyPrefix + ".mnemonic"),
 			nodes
@@ -98,7 +99,7 @@ public final class DoomToolsGUIUtils
 	 */
 	public MenuNode createItemFromLanguageKey(String keyPrefix, ComponentActionHandler<JMenuItem> handler)
 	{
-		return item(
+		return menuItem(
 			language.getText(keyPrefix),
 			language.getMnemonicValue(keyPrefix + ".mnemonic"),
 			language.getKeyStroke(keyPrefix + ".keystroke"),
@@ -106,6 +107,22 @@ public final class DoomToolsGUIUtils
 		);
 	}
 	
+	/**
+	 * Creates a menu item from a language key, getting the necessary pieces to assemble it.
+	 * Name is taken form the action.
+	 * @param keyPrefix the key prefix.
+	 * @param action the attached action.
+	 * @return the new menu item node.
+	 */
+	public MenuNode createItemFromLanguageKey(String keyPrefix, Action action)
+	{
+		return menuItem(
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			language.getKeyStroke(keyPrefix + ".keystroke"),
+			action
+		);
+	}
+
 	/**
 	 * Creates a menu checkbox item from a language key, getting the necessary pieces to assemble it.
 	 * @param keyPrefix the key prefix.

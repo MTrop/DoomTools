@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.gui;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,6 +13,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 /**
  * DoomMake GUI settings singleton.
@@ -49,6 +51,12 @@ public final class DoomToolsSettingsManager
 	
 	/* ==================================================================== */
 	
+    private static final String DOOMTOOLS_WINDOW_X = "doomtools.window.x";
+    private static final String DOOMTOOLS_WINDOW_Y = "doomtools.window.y";
+    private static final String DOOMTOOLS_WINDOW_WIDTH = "doomtools.window.width";
+    private static final String DOOMTOOLS_WINDOW_HEIGHT = "doomtools.window.height";
+    private static final String DOOMTOOLS_WINDOW_MAXIMIZED = "doomtools.window.max";
+    private static final String DOOMTOOLS_LAST_PATH = "doomtools.lastPath";
     private static final String DOOMMAKE_PATH_LAST_PROJECT = "doommake.path.lastProject";
     private static final String DOOMMAKE_PATH_SLADE = "doommake.path.slade";
     private static final String DOOMMAKE_PATH_VSCODE = "doommake.path.vscode";
@@ -85,7 +93,7 @@ public final class DoomToolsSettingsManager
 		try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE))
 		{
 			properties.store(fos, "Created by DoomTools " + Version.DOOMTOOLS);
-			LOG.infof("Saved DoomMake settings to %s.", CONFIG_FILE.getPath());
+			LOG.infof("Saved DoomTools settings to %s.", CONFIG_FILE.getPath());
 		} 
 		catch (FileNotFoundException e) 
 		{
@@ -96,7 +104,66 @@ public final class DoomToolsSettingsManager
 			LOG.errorf(e, "Could not write settings to %s", CONFIG_FILE.getPath());
 		}
 	}
+
+	/**
+	 * Sets the main DoomTools window bounds.
+	 * @param x 
+	 * @param y 
+	 * @param width 
+	 * @param height 
+	 * @param maximized if window was maximized
+	 */
+	public void setWindowBounds(int x, int y, int width, int height, boolean maximized) 
+	{
+		properties.setProperty(DOOMTOOLS_WINDOW_X, String.valueOf(x));
+		properties.setProperty(DOOMTOOLS_WINDOW_Y, String.valueOf(y));
+		properties.setProperty(DOOMTOOLS_WINDOW_WIDTH, String.valueOf(width));
+		properties.setProperty(DOOMTOOLS_WINDOW_HEIGHT, String.valueOf(height));
+		properties.setProperty(DOOMTOOLS_WINDOW_MAXIMIZED, String.valueOf(maximized));
+		saveSettings();
+	}
+
+	/**
+	 * Gets the main DoomTools window bounds.
+	 * @return the bounds.
+	 */
+	public Rectangle getWindowBounds()
+	{
+		return new Rectangle(
+			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_X), 0),
+			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_Y), 0),
+			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_WIDTH), 720),
+			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_HEIGHT), 480)
+		);
+	}
 	
+	/**
+	 * @return if the main DoomTools window should be maximized.
+	 */
+	public boolean getWindowMaximized()
+	{
+		return ValueUtils.parseBoolean(properties.getProperty(DOOMTOOLS_WINDOW_MAXIMIZED), false);
+	}
+	
+	/**
+	 * Sets the last path touched.
+	 * @param path the last path.
+	 */
+	public void setLastPath(File path) 
+	{
+		properties.setProperty(DOOMTOOLS_LAST_PATH, path != null ? path.getAbsolutePath() : "");
+		saveSettings();
+	}
+
+	/**
+	 * @return the last path touched.
+	 */
+	public File getLastPath() 
+	{
+		String path = properties.getProperty(DOOMTOOLS_LAST_PATH);
+		return path != null && path.length() >= 0 ? new File(path) : null;
+	}
+
 	/**
 	 * Sets the last project directory opened.
 	 * @param path the last project directory.

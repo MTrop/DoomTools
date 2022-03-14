@@ -4,13 +4,26 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.filechooser.FileFilter;
+
+import com.blackrook.json.JSONReader;
+import com.blackrook.json.JSONWriter;
+import com.blackrook.json.JSONWriter.Options;
 
 import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.Environment;
@@ -24,6 +37,7 @@ import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
@@ -39,6 +53,7 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 
 /**
  * The main DoomTools application window.
@@ -46,11 +61,17 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
  */
 public class DoomToolsMainWindow extends JFrame 
 {
-    /** Logger. */
+	private static final long serialVersionUID = -8837485206120777188L;
+
+	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
 
-    private static final long serialVersionUID = -8837485206120777188L;
+    private static final FileFilter WORKSPACE_FILTER = fileExtensionFilter("DoomTools Workspace", "dtw");
 
+    private static final Options JSON_OPTIONS = SwingUtils.apply(new Options(), (options) -> {
+    	options.setIndentation("\t");
+    });
+    
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
 	/** Task manager. */
@@ -67,7 +88,20 @@ public class DoomToolsMainWindow extends JFrame
 	
     /** Application starter linker. */
     private DoomToolsApplicationStarter applicationStarter;
-	
+
+	/* ==================================================================== */
+
+    // State
+    
+    /** Current workspace. */
+    private File currentWorkspace;
+    /** Save Workspace action. */
+    private Action actionSaveWorkspace;
+    /** Save Workspace As action. */
+    private Action actionSaveWorkspaceAs;
+    /** Clear workspace action. */
+    private Action actionClearWorkspace;
+    
 	/**
 	 * Creates the DoomTools main window.
 	 * @param shutDownHook the application shutdown hook.
@@ -91,12 +125,18 @@ public class DoomToolsMainWindow extends JFrame
 			}
 		};
 		
+		this.currentWorkspace = null;
+		this.actionSaveWorkspace = actionItem(language.getText("doomtools.menu.file.item.workspace.save"), (e) -> saveWorkspace());
+		this.actionSaveWorkspaceAs = actionItem(language.getText("doomtools.menu.file.item.workspace.saveas"), (e) -> saveWorkspaceAs());
+		this.actionClearWorkspace = actionItem(language.getText("doomtools.menu.file.item.workspace.close"), (e) -> clearWorkspace());
+
 		setIconImages(utils.getWindowIcons());
 		setTitle("DoomTools v" + Version.DOOMTOOLS);
 		setJMenuBar(createMenuBar());
 		setContentPane(this.desktop = new DoomToolsDesktopPane());
 		setLocationByPlatform(true);
 		pack();
+		updateWorkspaceActions();
 	}
 
 	/**
@@ -118,6 +158,7 @@ public class DoomToolsMainWindow extends JFrame
 	public void addApplication(DoomToolsApplicationInstance applicationInstance)
 	{
 		desktop.addApplicationFrame(applicationInstance, applicationStarter).setVisible(true);
+		updateWorkspaceActions();
 	}
 
 	/**
@@ -128,11 +169,99 @@ public class DoomToolsMainWindow extends JFrame
 		desktop.clearWorkspace();
 	}
 
+	// Saves a workspace to a target file.
+	private boolean saveWorkspaceTo(File workspaceFile)
+	{
+		DoomToolsWorkspace out = desktop.getWorkspace();
+		out.setWindowWidth(getWidth());
+		out.setWindowHeight(getHeight());
+		
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(workspaceFile), "UTF-8"))
+		{
+			JSONWriter.writeJSON(out, JSON_OPTIONS, writer);
+		} 
+		catch (IOException e) 
+		{
+			LOG.errorf(e, "I/O Error saving workspace: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.saveas.notwritten", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		catch (SecurityException e)
+		{
+			LOG.errorf(e, "Security Error saving workspace: Access Denied: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.saveas.notwritten.security", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		catch (Exception e)
+		{
+			LOG.errorf(e, "Unexpected Error saving workspace: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.saveas.notwritten.unexpected", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		
+		currentWorkspace = workspaceFile;
+		LOG.infof("Saved workspace: %s", workspaceFile.getAbsolutePath());
+		SwingUtils.info(this, language.getText("doomtools.workspace.saveas.success"));
+		return true;
+	}
+	
+	private boolean loadWorkspaceFrom(File workspaceFile)
+	{
+		DoomToolsWorkspace workspace;
+		try (Reader reader = new InputStreamReader(new FileInputStream(workspaceFile), "UTF-8"))
+		{
+			workspace = JSONReader.readJSON(DoomToolsWorkspace.class, reader);
+		} 
+		catch (FileNotFoundException e) 
+		{
+			LOG.errorf(e, "Workspace not found: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.open.notfound", workspaceFile.getAbsolutePath()));
+			return false;
+		} 
+		catch (IOException e) 
+		{
+			LOG.errorf(e, "I/O Error loading workspace: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.open.notopened", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		catch (SecurityException e)
+		{
+			LOG.errorf(e, "Security Error saving workspace: Access Denied: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.saveas.notwritten.security", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		catch (Exception e)
+		{
+			LOG.errorf(e, "Unexpected Error saving workspace: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.saveas.notwritten.unexpected", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+		
+		LOG.infof("Opened workspace: %s", workspaceFile.getAbsolutePath());
+		setBounds(getX(), getY(), workspace.getWindowWidth(), workspace.getWindowHeight());
+		try {
+			desktop.setWorkspace(workspace, applicationStarter);
+			currentWorkspace = workspaceFile;
+			updateWorkspaceActions();
+			return true;
+		} catch (Exception e) {
+			LOG.errorf(e, "Unexpected Error loading workspace: %s", workspaceFile.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doomtools.workspace.open.unexpected", workspaceFile.getAbsolutePath()));
+			return false;
+		}
+	}
+
 	private JMenuBar createMenuBar()
 	{
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doomtools.menu.file",
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.open", (c, e) -> openWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.save", actionSaveWorkspace),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.saveas", actionSaveWorkspaceAs),
+				separator(),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.close", actionClearWorkspace),
+				separator(),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings", (c, e) -> openSettingsModal()),
 				separator(),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit", (c, e) -> shutDownHook.run())
@@ -141,16 +270,8 @@ public class DoomToolsMainWindow extends JFrame
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new",
-						(c, e) -> addApplication(new DoomMakeNewProjectApp())
-					),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open",
-						(c, e) -> {
-							DoomMakeOpenProjectApp app;
-							if ((app = DoomMakeOpenProjectApp.openAndCreate(this, settings.getLastProjectDirectory())) != null)
-								addApplication(app);
-						}
-					)
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new", (c, e) -> newDoomMakeProject()),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open", (c, e) -> openDoomMakeProject())
 				)
 			),
 
@@ -158,12 +279,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.view",
 				utils.createItemFromLanguageKey("doomtools.menu.view.item.cascade", (c, e) -> desktop.cascadeWorkspace()),
 				utils.createItemFromLanguageKey("doomtools.menu.view.item.minimize", (c, e) -> desktop.minimizeWorkspace()),
-				utils.createItemFromLanguageKey("doomtools.menu.view.item.restore", (c, e) -> desktop.restoreWorkspace()),
-				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.view.item.close", (c, e) -> {
-					if (SwingUtils.yesTo(this, language.getText("doomtools.closeall")))
-						desktop.clearWorkspace();
-				})
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.restore", (c, e) -> desktop.restoreWorkspace())
 			),
 
 			// Help
@@ -447,6 +563,101 @@ public class DoomToolsMainWindow extends JFrame
 			LOG.error(e, "Uncaught error during update.");
 			SwingUtils.error(this, "Uncaught error during update: " + e.getClass().getSimpleName());
 		}
+	}
+	
+
+	/* ==================================================================== */
+
+	// Sets availability of workspace actions by state.
+	private void updateWorkspaceActions()
+	{
+		boolean workspacePresent = desktop.hasWorkspace();
+		actionSaveWorkspace.setEnabled(workspacePresent);
+		actionSaveWorkspaceAs.setEnabled(workspacePresent);
+		actionClearWorkspace.setEnabled(workspacePresent);
+	}
+	
+	// Open workspace.
+	private void openWorkspace()
+	{
+		if (desktop.hasWorkspace())
+		{
+			if (SwingUtils.noTo(language.getText("doomtools.workspace.warning")))
+				return;
+		}
+		
+		File workspaceFile = chooseFile(
+			this,
+			language.getText("doomtools.workspace.open.browse.title"),
+			currentWorkspace,
+			language.getText("doomtools.workspace.open.browse.accept"),
+			WORKSPACE_FILTER
+		);
+		
+		if (workspaceFile == null)
+			return;
+		
+		loadWorkspaceFrom(workspaceFile);
+	}
+
+	// Save workspace.
+	private void saveWorkspace()
+	{
+		if (!desktop.hasWorkspace())
+		{
+			SwingUtils.info(this, language.getText("doomtools.workspace.save.noworkpace"));
+			return;
+		}
+		
+		if (currentWorkspace != null)
+			saveWorkspaceTo(currentWorkspace);
+		else
+			saveWorkspaceAs();
+	}
+	
+	// Save workspace as.
+	private void saveWorkspaceAs()
+	{
+		if (!desktop.hasWorkspace())
+		{
+			SwingUtils.info(this, language.getText("doomtools.workspace.save.noworkpace"));
+			return;
+		}
+		
+		File workspaceFile = chooseFile(
+			this,
+			language.getText("doomtools.workspace.saveas.browse.title"),
+			currentWorkspace,
+			language.getText("doomtools.workspace.saveas.browse.accept"),
+			WORKSPACE_FILTER
+		);
+		
+		if (workspaceFile == null)
+			return;
+
+		saveWorkspaceTo(workspaceFile);
+	}
+	
+	private void clearWorkspace()
+	{
+		if (SwingUtils.yesTo(this, language.getText("doomtools.closeall")))
+		{
+			desktop.clearWorkspace();
+			currentWorkspace = null;
+			updateWorkspaceActions();
+		}
+	}
+	
+	private void newDoomMakeProject()
+	{
+		addApplication(new DoomMakeNewProjectApp());
+	}
+	
+	private void openDoomMakeProject()
+	{
+		DoomMakeOpenProjectApp app;
+		if ((app = DoomMakeOpenProjectApp.openAndCreate(this, settings.getLastProjectDirectory())) != null)
+			addApplication(app);
 	}
 	
 }

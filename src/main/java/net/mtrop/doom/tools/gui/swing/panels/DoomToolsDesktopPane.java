@@ -26,6 +26,8 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsImageManager;
 import net.mtrop.doom.tools.gui.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
+import net.mtrop.doom.tools.gui.DoomToolsWorkspace.Entry;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationInternalFrame;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;
@@ -74,7 +76,6 @@ public class DoomToolsDesktopPane extends JDesktopPane
 				correctFramePosition((JInternalFrame)e.getComponent());
 			}
 		};
-		
 		
 		int imageWidth = backgroundImage.getIconWidth() + 100;
 		setBackground(Color.DARK_GRAY);
@@ -218,7 +219,74 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		for (DoomToolsApplicationInstance instance : instanceSet)
 			attemptCloseApplication(instance);
 	}
+	
+	/**
+	 * Checks if a workspace is present (at least one open app).
+	 * @return true if so, false if not.
+	 */
+	public boolean hasWorkspace()
+	{
+		return !instances.isEmpty();
+	}
+	
+	/**
+	 * Creates a workspace for the current set of windows. 
+	 * @return a new workspace for serialization.
+	 */
+	public DoomToolsWorkspace getWorkspace()
+	{
+		DoomToolsWorkspace out = new DoomToolsWorkspace();
+		for (Map.Entry<DoomToolsApplicationInstance, JInternalFrame> instance : instances.entrySet())
+		{
+			DoomToolsApplicationInstance app = instance.getKey();
+			JInternalFrame frame = instance.getValue();
+			Entry entry = out.createEntry();
+			entry.setAppClassName(app.getClass().getCanonicalName());
+			entry.setWindowBoundsX(frame.getX());
+			entry.setWindowBoundsY(frame.getY());
+			entry.setWindowBoundsWidth(frame.getWidth());
+			entry.setWindowBoundsHeight(frame.getHeight());
+			entry.setWindowMinimized(frame.isIcon());
+			entry.setState(app.getApplicationState());
+		}
+		return out;
+	}
 
+	/**
+	 * Sets the workspace to a new one.
+	 * @param workspace the new workspace.
+	 * @param starter the application starter to attach to the instances.
+	 */
+	public void setWorkspace(DoomToolsWorkspace workspace, DoomToolsApplicationStarter starter)
+	{
+		// Close all open forcefully.
+		Set<DoomToolsApplicationInstance> instanceSet = new HashSet<>(instances.keySet()); // copy set
+		for (DoomToolsApplicationInstance instance : instanceSet)
+			closeApplication(instance);
+		
+		for (Entry entry : workspace.getEntries())
+		{
+			DoomToolsApplicationInstance instance = DoomToolsWorkspace.createApplication(entry);
+			JInternalFrame frame = addApplicationFrame(instance, starter);
+			frame.setBounds(
+				entry.getWindowBoundsX(),
+				entry.getWindowBoundsY(),
+				entry.getWindowBoundsWidth(),
+				entry.getWindowBoundsHeight()
+			);
+			
+			if (entry.getWindowMinimized())
+			{
+				try {
+					frame.setIcon(true);
+				} catch (PropertyVetoException e) {
+					LOG.warnf("Workspace frame refused iconify: %s", e.getLocalizedMessage());
+				}
+			}
+			frame.setVisible(true);
+		}
+	}
+	
 	private void attemptCloseApplication(DoomToolsApplicationInstance instance)
 	{
 		if (!instances.containsKey(instance))
