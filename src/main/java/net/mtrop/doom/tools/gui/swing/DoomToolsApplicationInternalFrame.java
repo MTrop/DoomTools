@@ -37,7 +37,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 
 		Icon appIcon = instance.getIcon();
 		
-		setTitle(instance.getName());
+		setTitle(instance.getTitle());
 		setFrameIcon(appIcon != null ? appIcon : utils.getWindowIcon());
 		setJMenuBar(instance.createInternalMenuBar());
 		setContentPane(instance.createContentPane());

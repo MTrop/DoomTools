@@ -9,10 +9,10 @@ import java.util.function.Consumer;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.ListSelectionMode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -47,7 +47,7 @@ public class DoomMakeProjectTargetListPanel extends JPanel
 		
 		this.targetListModel = new DefaultListModel<>();
 
-		this.targetList = ComponentFactory.list(this.targetListModel, ListSelectionModel.SINGLE_SELECTION, (selected, adjusting) -> 
+		this.targetList = ComponentFactory.list(this.targetListModel, ListSelectionMode.SINGLE, (selected, adjusting) -> 
 		{
 			if (!adjusting)
 			{

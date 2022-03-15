@@ -47,7 +47,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -72,957 +72,56 @@ public final class ComponentFactory
 	private ComponentFactory() {}
 	
 	/* ==================================================================== */
-	/* ==== Labels                                                     ==== */
+	/* ==== Enums                                                      ==== */
 	/* ==================================================================== */
 
 	/**
-	 * Creates a new label.
-	 * @param icon the label icon.
-	 * @param horizontalAlignment the horizontal alignment for the label.
-	 * @param label the label.
-	 * @return a created label.
+	 * List selection mode.
 	 */
-	public static JLabel label(int horizontalAlignment, Icon icon, String label)
+	public enum ListSelectionMode
 	{
-		return new JLabel(label, icon, horizontalAlignment);
-	}
-
-	/**
-	 * Creates a new label.
-	 * @param icon the label icon.
-	 * @param horizontalAlignment the horizontal alignment for the label.
-	 * @return a created label.
-	 */
-	public static JLabel label(int horizontalAlignment, Icon icon)
-	{
-		return new JLabel(icon, horizontalAlignment);
-	}
-
-	/**
-	 * Creates a new label.
-	 * @param horizontalAlignment the horizontal alignment for the label.
-	 * @param label the label.
-	 * @return a created label.
-	 */
-	public static JLabel label(int horizontalAlignment, String label)
-	{
-		return new JLabel(label, horizontalAlignment);
-	}
-
-	/**
-	 * Creates a new label.
-	 * @param icon the label icon.
-	 * @return a created label.
-	 */
-	public static JLabel label(Icon icon)
-	{
-		return new JLabel(icon);
-	}
-
-	/**
-	 * Creates a new label.
-	 * @param label the label.
-	 * @return a created label.
-	 */
-	public static JLabel label(String label)
-	{
-		return new JLabel(label);
-	}
-
-	/* ==================================================================== */
-	/* ==== Icons                                                      ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a new icon from an image.
-	 * @param image the image to use.
-	 * @return a new Icon.
-	 */
-	public static ImageIcon icon(Image image)
-	{
-		return new ImageIcon(image);
-	}
-
-	/* ==================================================================== */
-	/* ==== Buttons                                                    ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a button.
-	 * @param icon the check box icon.
-	 * @param label the check box label.
-	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
-	{
-		JButton out = new JButton(actionItem(icon, label, handler));
-		if (mnemonic > 0)
-			out.setMnemonic(mnemonic);
-		return out;
-	}
-
-	/**
-	 * Creates a button.
-	 * @param icon the check box icon.
-	 * @param label the check box label.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(Icon icon, String label, ComponentActionHandler<JButton> handler)
-	{
-		return button(icon, label, 0, handler);
-	}
-	
-	/**
-	 * Creates a button.
-	 * @param icon the check box icon.
-	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(Icon icon, int mnemonic, ComponentActionHandler<JButton> handler)
-	{
-		return button(icon, null, 0, handler);
-	}
-
-	/**
-	 * Creates a button.
-	 * @param icon the check box icon.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(Icon icon, ComponentActionHandler<JButton> handler)
-	{
-		return button(icon, 0, handler);
-	}
-	
-	/**
-	 * Creates a button.
-	 * @param label the check box label.
-	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(String label, int mnemonic, ComponentActionHandler<JButton> handler)
-	{
-		return button(null, label, 0, handler);
-	}
-
-	/**
-	 * Creates a button.
-	 * @param label the check box label.
-	 * @param handler the check box label.
-	 * @return a new button.
-	 */
-	public static JButton button(String label, ComponentActionHandler<JButton> handler)
-	{
-		return button(label, 0, handler);
-	}
-	
-	/**
-	 * Creates a button.
-	 * @param mnemonic the button mnemonic.
-	 * @param action the action on the button.
-	 * @return a new button.
-	 */
-	public static JButton button(int mnemonic, Action action)
-	{
-		JButton out = new JButton(action);
-		if (mnemonic > 0)
-			out.setMnemonic(mnemonic);
-		return out;
-	}
-
-	/**
-	 * Creates a button.
-	 * @param action the action on the button.
-	 * @return a new button.
-	 */
-	public static JButton button(Action action)
-	{
-		return button(0, action);
-	}
-
-	/* ==================================================================== */
-	/* ==== Checkboxes                                                 ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a check box.
-	 * @param icon the check box icon.
-	 * @param label the check box label.
-	 * @param selected the selected state.
-	 * @param handler the check box label.
-	 * @return a new check box.
-	 */
-	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
-	{
-		JCheckBox out = new JCheckBox(actionItem(icon, label, handler));
-		out.setSelected(selected);
-		return out;
-	}
-
-	/**
-	 * Creates a check box.
-	 * @param label the check box label.
-	 * @param selected the selected state.
-	 * @param handler the check box label.
-	 * @return a new check box.
-	 */
-	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
-	{
-		JCheckBox out = new JCheckBox(actionItem(label, handler));
-		out.setSelected(selected);
-		return out;
-	}
-
-	/**
-	 * Creates a check box.
-	 * @param icon the check box icon.
-	 * @param selected the selected state.
-	 * @param handler the check box label.
-	 * @return a new check box.
-	 */
-	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)
-	{
-		JCheckBox out = new JCheckBox(actionItem(icon, handler));
-		out.setSelected(selected);
-		return out;
-	}
-
-	/**
-	 * Creates a checkbox.
-	 * @param selected the selected state.
-	 * @param action the action for the checkbox.
-	 * @return a new checkbox.
-	 */
-	public static JCheckBox checkBox(boolean selected, Action action)
-	{
-		JCheckBox out = new JCheckBox(action);
-		out.setSelected(selected);
-		return out;
-	}
-
-	/**
-	 * Creates a check box.
-	 * @param selected the selected state.
-	 * @return a new check box.
-	 */
-	public static JCheckBox checkBox(boolean selected)
-	{
-		JCheckBox out = new JCheckBox();
-		out.setSelected(selected);
-		return out;
-	}
-
-	/* ==================================================================== */
-	/* ==== Sliders                                                    ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a new range model for a slider.
-	 * @param value the current value.
-	 * @param extent the length of the inner range that begins at the model's value.
-	 * @param min the minimum value.
-	 * @param max the maximum value.
-	 * @return a new range model.
-	 */
-	public static BoundedRangeModel sliderModel(int value, int extent, int min, int max)
-	{
-		return new DefaultBoundedRangeModel(value, extent, min, max);
-	}
-
-	/**
-	 * Creates a value slider.
-	 * @param orientation the orientation type.
-	 * @param rangeModel the range model for the slider.
-	 * @param handler the change handler.
-	 * @return a new slider.
-	 */
-	public static JSlider slider(int orientation, BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
-	{
-		JSlider out = new JSlider(rangeModel);
-		out.setOrientation(orientation);
-		if (handler != null)
-			out.addChangeListener(handler);
-		return out;
-	}
-	
-	/**
-	 * Creates a horizontal value slider.
-	 * @param rangeModel the range model for the slider.
-	 * @param handler the change handler.
-	 * @return a new slider.
-	 */
-	public static JSlider slider(BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
-	{
-		return slider(JSlider.HORIZONTAL, rangeModel, handler);
-	}
-	
-	/**
-	 * Creates a value slider.
-	 * @param orientation the orientation type.
-	 * @param rangeModel the range model for the slider.
-	 * @return a new slider.
-	 */
-	public static JSlider slider(int orientation, BoundedRangeModel rangeModel)
-	{
-		return slider(orientation, rangeModel, null);
-	}
-	
-	/**
-	 * Creates a horizontal value slider.
-	 * @param rangeModel the range model for the slider.
-	 * @return a new slider.
-	 */
-	public static JSlider slider(BoundedRangeModel rangeModel)
-	{
-		return slider(rangeModel, null);
-	}
-	
-	/* ==================================================================== */
-	/* ==== Documents                                                  ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a single document handler that uses different functions for each change type.
-	 * @param <T> the text component type.
-	 * @param insertHandler the handler function for text insertion.
-	 * @param removeHandler the handler function for text removal.
-	 * @param changeHandler the handler function for changes.
-	 * @return a new document handler.
-	 */
-	public static <T extends JTextComponent> DocumentHandler<T> documentHandler(
-			DocumentHandlerFunction<T> insertHandler,
-			DocumentHandlerFunction<T> removeHandler,
-			DocumentHandlerFunction<T> changeHandler
-	){
-		return new DocumentHandler<T>(insertHandler, removeHandler, changeHandler);
-	}
-	
-	/**
-	 * Creates a single document handler that uses one function for all changes.
-	 * @param <T> the text component type.
-	 * @param changeHandler the handler function.
-	 * @return a new document handler.
-	 */
-	public static <T extends JTextComponent> DocumentHandler<T> textHandler(TextHandlerFunction<T> changeHandler)
-	{
-		return new DocumentHandler<T>(changeHandler);
-	}
-
-	/* ==================================================================== */
-	/* ==== Text Area                                                  ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a new TextArea.
-	 * @param document the backing document model.
-	 * @param text the default starting text contained.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(Document document, String text, int rows, int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextArea out = new JTextArea(document, text, rows, columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextArea.
-	 * @param document the backing document model.
-	 * @param text the default starting text contained.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(Document document, String text, int rows, int columns)
-	{
-		JTextArea out = new JTextArea(document, text, rows, columns);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextArea.
-	 * @param text the default starting text contained.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(String text, int rows, int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextArea out = new JTextArea(text, rows, columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextArea.
-	 * @param text the default starting text contained.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(String text, int rows, int columns)
-	{
-		JTextArea out = new JTextArea(text, rows, columns);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextArea.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(int rows, int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextArea out = new JTextArea(rows, columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextArea.
-	 * @param rows the amount of rows.
-	 * @param columns the amount of columns.
-	 * @return a new text area.
-	 */
-	public static JTextArea textArea(int rows, int columns)
-	{
-		return new JTextArea(rows, columns);
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param document the backing document model.
-	 * @param text the default starting text contained.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(Document document, String text, int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField(document, text, columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param document the backing document model.
-	 * @param text the default starting text contained.
-	 * @param columns the amount of columns.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(Document document, String text, int columns)
-	{
-		JTextField out = new JTextField(document, text, columns);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param text the default starting text contained.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(String text, int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField(text, columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param text the default starting text contained.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(String text, DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField(text);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param columns the amount of columns.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(int columns, DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField(columns);
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField();
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param text the default starting text contained.
-	 * @param columns the amount of columns.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(String text, int columns)
-	{
-		return new JTextField(text, columns);
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param text the default starting text contained.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(String text)
-	{
-		JTextField out = new JTextField(text);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param columns the amount of columns.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(int columns)
-	{
-		JTextField out = new JTextField(columns);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @return a new text field.
-	 */
-	public static JTextField textField()
-	{
-		return new JTextField();
-	}
-
-	/* ==================================================================== */
-	/* ==== Progress Bars                                              ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a new progress bar with a default model.
-	 * @param orientation the {@link JProgressBar} orientation.
-	 * @return the new progress bar.
-	 */
-	public static JProgressBar progressBar(int orientation)
-	{
-		return new JProgressBar(orientation);
-	}
-	
-	/**
-	 * Creates a new progress bar with a default model and horizontal orientation.
-	 * @return the new progress bar.
-	 */
-	public static JProgressBar progressBar()
-	{
-		return progressBar(SwingConstants.HORIZONTAL);
-	}
-	
-	/* ==================================================================== */
-	/* ==== Spinners                                                   ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a spinner model for numbers.
-	 * @param value the current value.
-	 * @param minimum the minimum value.
-	 * @param maximum the maximum value.
-	 * @param stepSize the step between values.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerNumberModel spinnerModel(int value, int minimum, int maximum, int stepSize)
-	{
-		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
-	}
-
-	/**
-	 * Creates a spinner model for numbers.
-	 * @param value the current value.
-	 * @param minimum the minimum value.
-	 * @param maximum the maximum value.
-	 * @param stepSize the step between values.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerNumberModel spinnerModel(double value, double minimum, double maximum, double stepSize)
-	{
-		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
-	}
-
-	/**
-	 * Creates a spinner model for numbers.
-	 * @param value the current value.
-	 * @param minimum the minimum value.
-	 * @param maximum the maximum value.
-	 * @param stepSize the step between values.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerNumberModel spinnerModel(Number value, Comparable<?> minimum, Comparable<?> maximum, Number stepSize)
-	{
-		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
-	}
-
-	/**
-	 * Creates a spinner model for objects.
-	 * @param selectedIndex the selected index.
-	 * @param list the list of values.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerListModel spinnerModel(int selectedIndex, List<?> list)
-	{
-		SpinnerListModel out = new SpinnerListModel(list);
-		out.setValue(list.get(selectedIndex));
-		return out;
-	}
-
-	/**
-	 * Creates a spinner model for objects.
-	 * @param selectedIndex the selected index.
-	 * @param objects the list of values.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerListModel spinnerModel(int selectedIndex, Object ... objects)
-	{
-		SpinnerListModel out = new SpinnerListModel(objects);
-		out.setValue(objects[selectedIndex]);
-		return out;
-	}
-
-	/**
-	 * Creates a spinner model for dates.
-	 * @param value the current value.
-	 * @param start the starting date value.
-	 * @param end the ending date value.
-	 * @param calendarField the stepping between values for each date.
-	 * @return a new spinner model.
-	 */
-	public static SpinnerDateModel spinnerModel(Date value, Comparable<Date> start, Comparable<Date> end, int calendarField)
-	{
-		return new SpinnerDateModel(value, start, end, calendarField);
-	}
-
-	/**
-	 * Creates a value spinner with an attached change listener.
-	 * @param model the spinner model.
-	 * @param handler the change handler.
-	 * @return the resultant spinner.
-	 */
-	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
-	{
-		JSpinner out = new JSpinner(model);
-		out.addChangeListener(handler);
-		return out;
-	}
-
-	/* ==================================================================== */
-	/* ==== Comboboxes                                                 ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a combo box model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @param listener the listener to attach to the model (after items are added).
-	 * @return the list component.
-	 */
-	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects, ListDataListener listener)
-	{
-		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		out.addListDataListener(listener);
-		return out;
-	}
-
-	/**
-	 * Creates a combo box model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @return the list component.
-	 */
-	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects)
-	{
-		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		return out;
-	}
-
-	/**
-	 * Creates a combo box (dropdown) with an attached listener.
-	 * @param <E> the item type.
-	 * @param model the spinner model.
-	 * @param handler the item change handler.
-	 * @return the resultant spinner.
-	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ComponentItemHandler<JComboBox<E>> handler)
-	{
-		JComboBox<E> out = new JComboBox<E>(model);
-		out.addItemListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a combo box (dropdown).
-	 * @param <E> the item type.
-	 * @param model the spinner model.
-	 * @return the resultant spinner.
-	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model)
-	{
-		return new JComboBox<E>(model);
-	}
-
-	/* ==================================================================== */
-	/* ==== Lists                                                      ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a list model.
-	 * @param <M> the list model type.
-	 * @param <D> the data type contained in the model. 
-	 * @param addedHandler the handler function called for when data is added to the model.
-	 * @param removedHandler  the handler function called for when data is removed from the model.
-	 * @param changedHandler  the handler function called for when data is changed in the model.
-	 * @return the list data handler.
-	 */
-	public static <M extends ListModel<D>, D> ListDataHandler<M, D> listDataHandler(
-			final ListDataHandlerFunction<M, D> addedHandler,
-			final ListDataHandlerFunction<M, D> removedHandler,
-			final ListDataHandlerFunction<M, D> changedHandler
-	){
-		return new ListDataHandler<M, D>(addedHandler, removedHandler, changedHandler);
-	}
-
-	/**
-	 * Creates a list model.
-	 * @param <M> the list model type.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
-	 * @return the list component.
-	 */
-	public static <M extends ListModel<E>, E> ListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
-	{
-		DefaultListModel<E> out = new DefaultListModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		out.addListDataListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a list model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @return the list component.
-	 */
-	public static <E> ListModel<E> listModel(Collection<E> objects)
-	{
-		DefaultListModel<E> out = new DefaultListModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		return out;
-	}
-
-	/**
-	 * Creates a list with a specific list model.
-	 * @param <E> the object type that the model contains.
-	 * @param model the list model.
-	 * @param renderer the cell renderer.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param handler the listener to use for selection changes.
-	 * @return the list component.
-	 */
-	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, final ListSelectionHandler<E> handler)
-	{
-		final JList<E> out = new JList<>(model);
-		out.setCellRenderer(renderer);
-		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		SINGLE(ListSelectionModel.SINGLE_SELECTION),
+		SINGLE_INTERVAL(ListSelectionModel.SINGLE_INTERVAL_SELECTION),
+		MULTIPLE_INTERVAL(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		
+		private final int swingId;
+		
+		private ListSelectionMode(int swingId)
 		{
-			@Override
-			public void valueChanged(ListSelectionEvent e) 
-			{
-				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
-			}
-		});
-		return out;
-	}
-
-	/**
-	 * Creates a list with a specific list model.
-	 * @param <E> the object type that the model contains.
-	 * @param model the list model.
-	 * @param renderer the cell renderer.
-	 * @param selectionModel the list selection model.
-	 * @return the list component.
-	 */
-	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionModel selectionModel)
-	{
-		JList<E> out = new JList<>(model);
-		out.setCellRenderer(renderer);
-		out.setSelectionModel(selectionModel);
-		return out;
+			this.swingId = swingId;
+		}
 	}
 	
 	/**
-	 * Creates a list with a specific list model.
-	 * @param <E> the object type that the model contains.
-	 * @param model the list model.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param handler the listener to use for selection changes.
-	 * @return the list component.
+	 * Progress bar orientation.
 	 */
-	public static <E> JList<E> list(ListModel<E> model, int selectionMode, final ListSelectionHandler<E> handler)
+	public enum ProgressBarOrientation
 	{
-		JList<E> out = new JList<>(model);
-		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		HORIZONTAL(JProgressBar.HORIZONTAL),
+		VERTICAL(JProgressBar.VERTICAL);
+		
+		private final int swingId;
+		
+		private ProgressBarOrientation(int swingId)
 		{
-			@Override
-			public void valueChanged(ListSelectionEvent e) 
-			{
-				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
-			}
-		});
-		return out;
-	}
-
-	/**
-	 * Creates a list with a specific list model.
-	 * @param <E> the object type that the model contains.
-	 * @param model the list model.
-	 * @param selectionModel the list selection model.
-	 * @return the list component.
-	 */
-	public static <E> JList<E> list(ListModel<E> model, ListSelectionModel selectionModel)
-	{
-		JList<E> out = new JList<>(model);
-		out.setSelectionModel(selectionModel);
-		return out;
+			this.swingId = swingId;
+		}
 	}
 	
 	/**
-	 * Creates a list with a specific list model and single selection mode.
-	 * @param <E> the object type that the model contains.
-	 * @param model the list model.
-	 * @return the list component.
+	 * Slider orientation.
 	 */
-	public static <E> JList<E> list(ListModel<E> model)
+	public enum SliderOrientation
 	{
-		JList<E> out = new JList<>(model);
-		out.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		return out;
-	}
-
-	/* ==================================================================== */
-	/* ==== Tables                                                     ==== */
-	/* ==================================================================== */
-
-	/**
-	 * Creates a new table.
-	 * @param model the table model.
-	 * @param columnModel the column model.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param handler the listener to use for selection changes.
-	 * @return the table created.
-	 */
-	public static JTable table(TableModel model, TableColumnModel columnModel, int selectionMode, final TableSelectionHandler handler)
-	{
-		JTable out = new JTable(model, columnModel);
-		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		HORIZONTAL(JSlider.HORIZONTAL),
+		VERTICAL(JSlider.VERTICAL);
+		
+		private final int swingId;
+		
+		private SliderOrientation(int swingId)
 		{
-			@Override
-			public void valueChanged(ListSelectionEvent e) 
-			{
-				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
-			}
-		});
-		return out;
-	}
-
-	/**
-	 * Creates a new table.
-	 * @param model the table model.
-	 * @param columnModel the column model.
-	 * @param selectionModel the selection model.
-	 * @return the table created.
-	 */
-	public static JTable table(TableModel model, TableColumnModel columnModel, ListSelectionModel selectionModel)
-	{
-		return new JTable(model, columnModel, selectionModel);
-	}
-	
-	/**
-	 * Creates a new table.
-	 * @param model the table model.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param handler the listener to use for selection changes.
-	 * @return the table created.
-	 */
-	public static JTable table(TableModel model, int selectionMode, final TableSelectionHandler handler)
-	{
-		JTable out = new JTable(model, new DefaultTableColumnModel());
-		out.setSelectionMode(selectionMode);
-		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
-		{
-			@Override
-			public void valueChanged(ListSelectionEvent e) 
-			{
-				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
-			}
-		});
-		return out;
-	}
-
-	/**
-	 * Creates a new table.
-	 * @param model the table model.
-	 * @param selectionModel the selection model.
-	 * @return the table created.
-	 */
-	public static JTable table(TableModel model, ListSelectionModel selectionModel)
-	{
-		return new JTable(model, new DefaultTableColumnModel(), selectionModel);
-	}
-
-	/**
-	 * Creates a new table.
-	 * @param model the table model.
-	 * @param columnModel the column model.
-	 * @return the table created.
-	 */
-	public static JTable table(TableModel model, TableColumnModel columnModel)
-	{
-		return new JTable(model, columnModel);
+			this.swingId = swingId;
+		}
 	}
 	
 	/* ==================================================================== */
@@ -1246,16 +345,17 @@ public final class ComponentFactory
 	/**
 	 * A handler interface for listening for change events.
 	 * @param <C> the component type that this handles.
+	 * @param <T> the item type.
 	 */
 	@FunctionalInterface
-	public interface ComponentItemHandler<C> extends ItemListener
+	public interface ComponentItemHandler<C, T> extends ItemListener
 	{
 		@Override
 		@SuppressWarnings("unchecked")
 		default void itemStateChanged(ItemEvent event)
 		{
 			C component = (C)event.getSource();
-			onItemChangeEvent(component, event.getItem());
+			onItemChangeEvent(component, (T)event.getItem());
 		}
 		
 		/**
@@ -1263,7 +363,1076 @@ public final class ComponentFactory
 		 * @param component the associated component.
 		 * @param item the item affected.
 		 */
-		void onItemChangeEvent(C component, Object item);
+		void onItemChangeEvent(C component, T item);
+	}
+	
+	/* ==================================================================== */
+	/* ==== Labels                                                     ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new label.
+	 * @param icon the label icon.
+	 * @param horizontalAlignment the horizontal alignment for the label.
+	 * @param label the label.
+	 * @return a created label.
+	 */
+	public static JLabel label(int horizontalAlignment, Icon icon, String label)
+	{
+		return new JLabel(label, icon, horizontalAlignment);
+	}
+
+	/**
+	 * Creates a new label.
+	 * @param icon the label icon.
+	 * @param horizontalAlignment the horizontal alignment for the label.
+	 * @return a created label.
+	 */
+	public static JLabel label(int horizontalAlignment, Icon icon)
+	{
+		return new JLabel(icon, horizontalAlignment);
+	}
+
+	/**
+	 * Creates a new label.
+	 * @param horizontalAlignment the horizontal alignment for the label.
+	 * @param label the label.
+	 * @return a created label.
+	 */
+	public static JLabel label(int horizontalAlignment, String label)
+	{
+		return new JLabel(label, horizontalAlignment);
+	}
+
+	/**
+	 * Creates a new label.
+	 * @param icon the label icon.
+	 * @return a created label.
+	 */
+	public static JLabel label(Icon icon)
+	{
+		return new JLabel(icon);
+	}
+
+	/**
+	 * Creates a new label.
+	 * @param label the label.
+	 * @return a created label.
+	 */
+	public static JLabel label(String label)
+	{
+		return new JLabel(label);
+	}
+	
+	/**
+	 * Creates an uneditable text area styled like a label, such that it can display multi-line, wrapped text.
+	 * @param label the label.
+	 * @return a created text area.
+	 */
+	public static JTextArea wrappedLabel(String label)
+	{
+		JTextArea out = textArea();
+	    out.setBackground(UIManager.getColor("Label.background"));
+	    out.setFont(UIManager.getFont("Label.font"));
+	    out.setBorder(UIManager.getBorder("Label.border"));
+	    out.setOpaque(false);
+	    out.setEditable(false);
+	    out.setFocusable(false);
+	    out.setWrapStyleWord(true);
+	    out.setLineWrap(true);
+	    out.setText(label);
+	    return out;
+	}
+
+	/* ==================================================================== */
+	/* ==== Icons                                                      ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new icon from an image.
+	 * @param image the image to use.
+	 * @return a new Icon.
+	 */
+	public static ImageIcon icon(Image image)
+	{
+		return new ImageIcon(image);
+	}
+
+	/* ==================================================================== */
+	/* ==== Buttons                                                    ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a button.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param mnemonic the button mnemonic.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
+	{
+		JButton out = new JButton(actionItem(icon, label, handler));
+		if (mnemonic > 0)
+			out.setMnemonic(mnemonic);
+		return out;
+	}
+
+	/**
+	 * Creates a button.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, String label, ComponentActionHandler<JButton> handler)
+	{
+		return button(icon, label, 0, handler);
+	}
+	
+	/**
+	 * Creates a button.
+	 * @param icon the check box icon.
+	 * @param mnemonic the button mnemonic.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, int mnemonic, ComponentActionHandler<JButton> handler)
+	{
+		return button(icon, null, 0, handler);
+	}
+
+	/**
+	 * Creates a button.
+	 * @param icon the check box icon.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, ComponentActionHandler<JButton> handler)
+	{
+		return button(icon, 0, handler);
+	}
+	
+	/**
+	 * Creates a button.
+	 * @param label the check box label.
+	 * @param mnemonic the button mnemonic.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(String label, int mnemonic, ComponentActionHandler<JButton> handler)
+	{
+		return button(null, label, 0, handler);
+	}
+
+	/**
+	 * Creates a button.
+	 * @param label the check box label.
+	 * @param handler the check box label.
+	 * @return a new button.
+	 */
+	public static JButton button(String label, ComponentActionHandler<JButton> handler)
+	{
+		return button(label, 0, handler);
+	}
+	
+	/**
+	 * Creates a button.
+	 * @param mnemonic the button mnemonic.
+	 * @param action the action on the button.
+	 * @return a new button.
+	 */
+	public static JButton button(int mnemonic, Action action)
+	{
+		JButton out = new JButton(action);
+		if (mnemonic > 0)
+			out.setMnemonic(mnemonic);
+		return out;
+	}
+
+	/**
+	 * Creates a button.
+	 * @param action the action on the button.
+	 * @return a new button.
+	 */
+	public static JButton button(Action action)
+	{
+		return button(0, action);
+	}
+
+	/* ==================================================================== */
+	/* ==== Checkboxes                                                 ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a check box.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param selected the selected state.
+	 * @param handler the check box label.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	{
+		JCheckBox out = new JCheckBox(actionItem(icon, label, handler));
+		out.setSelected(selected);
+		return out;
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param label the check box label.
+	 * @param selected the selected state.
+	 * @param handler the check box label.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	{
+		JCheckBox out = new JCheckBox(actionItem(label, handler));
+		out.setSelected(selected);
+		return out;
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param icon the check box icon.
+	 * @param selected the selected state.
+	 * @param handler the check box label.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	{
+		JCheckBox out = new JCheckBox(actionItem(icon, handler));
+		out.setSelected(selected);
+		return out;
+	}
+
+	/**
+	 * Creates a checkbox.
+	 * @param selected the selected state.
+	 * @param action the action for the checkbox.
+	 * @return a new checkbox.
+	 */
+	public static JCheckBox checkBox(boolean selected, Action action)
+	{
+		JCheckBox out = new JCheckBox(action);
+		out.setSelected(selected);
+		return out;
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param selected the selected state.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(boolean selected)
+	{
+		JCheckBox out = new JCheckBox();
+		out.setSelected(selected);
+		return out;
+	}
+
+	/* ==================================================================== */
+	/* ==== Sliders                                                    ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new range model for a slider.
+	 * @param value the current value.
+	 * @param extent the length of the inner range that begins at the model's value.
+	 * @param min the minimum value.
+	 * @param max the maximum value.
+	 * @return a new range model.
+	 */
+	public static BoundedRangeModel sliderModel(int value, int extent, int min, int max)
+	{
+		return new DefaultBoundedRangeModel(value, extent, min, max);
+	}
+
+	/**
+	 * Creates a value slider.
+	 * @param orientation the orientation type.
+	 * @param rangeModel the range model for the slider.
+	 * @param handler the change handler.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(SliderOrientation orientation, BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
+	{
+		JSlider out = new JSlider(rangeModel);
+		out.setOrientation(orientation.swingId);
+		if (handler != null)
+			out.addChangeListener(handler);
+		return out;
+	}
+	
+	/**
+	 * Creates a horizontal value slider.
+	 * @param rangeModel the range model for the slider.
+	 * @param handler the change handler.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
+	{
+		return slider(SliderOrientation.HORIZONTAL, rangeModel, handler);
+	}
+	
+	/**
+	 * Creates a value slider.
+	 * @param orientation the orientation type.
+	 * @param rangeModel the range model for the slider.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(SliderOrientation orientation, BoundedRangeModel rangeModel)
+	{
+		return slider(orientation, rangeModel, null);
+	}
+	
+	/**
+	 * Creates a horizontal value slider.
+	 * @param rangeModel the range model for the slider.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(BoundedRangeModel rangeModel)
+	{
+		return slider(rangeModel, null);
+	}
+	
+	/* ==================================================================== */
+	/* ==== Documents                                                  ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a single document handler that uses different functions for each change type.
+	 * @param <T> the text component type.
+	 * @param insertHandler the handler function for text insertion.
+	 * @param removeHandler the handler function for text removal.
+	 * @param changeHandler the handler function for changes.
+	 * @return a new document handler.
+	 */
+	public static <T extends JTextComponent> DocumentHandler<T> documentHandler(
+			DocumentHandlerFunction<T> insertHandler,
+			DocumentHandlerFunction<T> removeHandler,
+			DocumentHandlerFunction<T> changeHandler
+	){
+		return new DocumentHandler<T>(insertHandler, removeHandler, changeHandler);
+	}
+	
+	/**
+	 * Creates a single document handler that uses one function for all changes.
+	 * @param <T> the text component type.
+	 * @param changeHandler the handler function.
+	 * @return a new document handler.
+	 */
+	public static <T extends JTextComponent> DocumentHandler<T> textHandler(TextHandlerFunction<T> changeHandler)
+	{
+		return new DocumentHandler<T>(changeHandler);
+	}
+
+	/* ==================================================================== */
+	/* ==== Text Area                                                  ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new TextArea.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(Document document, String text, int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(document, text, rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(Document document, String text, int rows, int columns)
+	{
+		JTextArea out = new JTextArea(document, text, rows, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(String text, int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(text, rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(String text, int rows, int columns)
+	{
+		JTextArea out = new JTextArea(text, rows, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(int rows, int columns)
+	{
+		return new JTextArea(rows, columns);
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea()
+	{
+		return new JTextArea();
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(Document document, String text, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(document, text, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(Document document, String text, int columns)
+	{
+		JTextField out = new JTextField(document, text, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(text, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(text);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField();
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, int columns)
+	{
+		return new JTextField(text, columns);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text)
+	{
+		JTextField out = new JTextField(text);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(int columns)
+	{
+		JTextField out = new JTextField(columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @return a new text field.
+	 */
+	public static JTextField textField()
+	{
+		return new JTextField();
+	}
+
+	/* ==================================================================== */
+	/* ==== Progress Bars                                              ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new progress bar with a default model.
+	 * @param orientation the orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar(ProgressBarOrientation orientation)
+	{
+		return new JProgressBar(orientation.swingId);
+	}
+	
+	/**
+	 * Creates a new progress bar with a default model and horizontal orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar()
+	{
+		return progressBar(ProgressBarOrientation.HORIZONTAL);
+	}
+	
+	
+	/* ==================================================================== */
+	/* ==== Spinners                                                   ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a spinner model for numbers.
+	 * @param value the current value.
+	 * @param minimum the minimum value.
+	 * @param maximum the maximum value.
+	 * @param stepSize the step between values.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerNumberModel spinnerModel(int value, int minimum, int maximum, int stepSize)
+	{
+		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
+	}
+
+	/**
+	 * Creates a spinner model for numbers.
+	 * @param value the current value.
+	 * @param minimum the minimum value.
+	 * @param maximum the maximum value.
+	 * @param stepSize the step between values.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerNumberModel spinnerModel(double value, double minimum, double maximum, double stepSize)
+	{
+		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
+	}
+
+	/**
+	 * Creates a spinner model for numbers.
+	 * @param value the current value.
+	 * @param minimum the minimum value.
+	 * @param maximum the maximum value.
+	 * @param stepSize the step between values.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerNumberModel spinnerModel(Number value, Comparable<?> minimum, Comparable<?> maximum, Number stepSize)
+	{
+		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
+	}
+
+	/**
+	 * Creates a spinner model for objects.
+	 * @param selectedIndex the selected index.
+	 * @param list the list of values.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerListModel spinnerModel(int selectedIndex, List<?> list)
+	{
+		SpinnerListModel out = new SpinnerListModel(list);
+		out.setValue(list.get(selectedIndex));
+		return out;
+	}
+
+	/**
+	 * Creates a spinner model for objects.
+	 * @param selectedIndex the selected index.
+	 * @param objects the list of values.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerListModel spinnerModel(int selectedIndex, Object ... objects)
+	{
+		SpinnerListModel out = new SpinnerListModel(objects);
+		out.setValue(objects[selectedIndex]);
+		return out;
+	}
+
+	/**
+	 * Creates a spinner model for dates.
+	 * @param value the current value.
+	 * @param start the starting date value.
+	 * @param end the ending date value.
+	 * @param calendarField the stepping between values for each date.
+	 * @return a new spinner model.
+	 */
+	public static SpinnerDateModel spinnerModel(Date value, Comparable<Date> start, Comparable<Date> end, int calendarField)
+	{
+		return new SpinnerDateModel(value, start, end, calendarField);
+	}
+
+	/**
+	 * Creates a value spinner with an attached change listener.
+	 * @param model the spinner model.
+	 * @param handler the change handler.
+	 * @return the resultant spinner.
+	 */
+	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
+	{
+		JSpinner out = new JSpinner(model);
+		out.addChangeListener(handler);
+		return out;
+	}
+
+	/* ==================================================================== */
+	/* ==== Comboboxes                                                 ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a combo box model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param listener the listener to attach to the model (after items are added).
+	 * @return the list component.
+	 */
+	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects, ListDataListener listener)
+	{
+		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		out.addListDataListener(listener);
+		return out;
+	}
+
+	/**
+	 * Creates a combo box model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @return the list component.
+	 */
+	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects)
+	{
+		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		return out;
+	}
+
+	/**
+	 * Creates a combo box (dropdown) with an attached listener.
+	 * @param <E> the item type.
+	 * @param model the spinner model.
+	 * @param handler the item change handler.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ComponentItemHandler<JComboBox<E>, E> handler)
+	{
+		JComboBox<E> out = new JComboBox<E>(model);
+		out.addItemListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a combo box (dropdown).
+	 * @param <E> the item type.
+	 * @param model the spinner model.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model)
+	{
+		return new JComboBox<E>(model);
+	}
+
+	/**
+	 * Creates a combo box (dropdown).
+	 * @param <E> the item type.
+	 * @param objects the objects to put in the list model.
+	 * @param handler the item change handler.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(Collection<E> objects, ComponentItemHandler<JComboBox<E>, E> handler)
+	{
+		return comboBox(comboBoxModel(objects), handler);
+	}
+
+	/**
+	 * Creates a combo box (dropdown).
+	 * @param <E> the item type.
+	 * @param objects the objects to put in the list model.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(Collection<E> objects)
+	{
+		return comboBox(comboBoxModel(objects));
+	}
+
+	/* ==================================================================== */
+	/* ==== Lists                                                      ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a list model.
+	 * @param <M> the list model type.
+	 * @param <D> the data type contained in the model. 
+	 * @param addedHandler the handler function called for when data is added to the model.
+	 * @param removedHandler  the handler function called for when data is removed from the model.
+	 * @param changedHandler  the handler function called for when data is changed in the model.
+	 * @return the list data handler.
+	 */
+	public static <M extends ListModel<D>, D> ListDataHandler<M, D> listDataHandler(
+			final ListDataHandlerFunction<M, D> addedHandler,
+			final ListDataHandlerFunction<M, D> removedHandler,
+			final ListDataHandlerFunction<M, D> changedHandler
+	){
+		return new ListDataHandler<M, D>(addedHandler, removedHandler, changedHandler);
+	}
+
+	/**
+	 * Creates a list model.
+	 * @param <M> the list model type.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
+	 * @return the list component.
+	 */
+	public static <M extends ListModel<E>, E> ListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
+	{
+		DefaultListModel<E> out = new DefaultListModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		out.addListDataListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a list model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @return the list component.
+	 */
+	public static <E> ListModel<E> listModel(Collection<E> objects)
+	{
+		DefaultListModel<E> out = new DefaultListModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		return out;
+	}
+
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param renderer the cell renderer.
+	 * @param selectionMode the list selection mode.
+	 * @param handler the listener to use for selection changes.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, final ListSelectionHandler<E> handler)
+	{
+		final JList<E> out = new JList<>(model);
+		out.setCellRenderer(renderer);
+		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
+			}
+		});
+		return out;
+	}
+
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param renderer the cell renderer.
+	 * @param selectionModel the list selection model.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionModel selectionModel)
+	{
+		JList<E> out = new JList<>(model);
+		out.setCellRenderer(renderer);
+		out.setSelectionModel(selectionModel);
+		return out;
+	}
+	
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param selectionMode the list selection mode.
+	 * @param handler the listener to use for selection changes.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model, ListSelectionMode selectionMode, final ListSelectionHandler<E> handler)
+	{
+		JList<E> out = new JList<>(model);
+		out.setSelectionMode(selectionMode.swingId);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedValuesList(), e.getValueIsAdjusting());
+			}
+		});
+		return out;
+	}
+
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param selectionModel the list selection model.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model, ListSelectionModel selectionModel)
+	{
+		JList<E> out = new JList<>(model);
+		out.setSelectionModel(selectionModel);
+		return out;
+	}
+	
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param selectionMode the list selection mode.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model, ListSelectionMode selectionMode)
+	{
+		JList<E> out = new JList<>(model);
+		out.setSelectionMode(selectionMode.swingId);
+		return out;
+	}
+	
+	/**
+	 * Creates a list with a specific list model and single selection mode.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(ListModel<E> model)
+	{
+		JList<E> out = new JList<>(model);
+		out.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		return out;
+	}
+
+	/**
+	 * Creates a list with a list model made from a collection.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param selectionMode the list selection mode.
+	 * @param handler the listener to use for selection changes.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(Collection<E> objects, ListSelectionMode selectionMode, ListSelectionHandler<E> handler)
+	{
+		return list(listModel(objects), selectionMode, handler);
+	}
+
+	/**
+	 * Creates a list with a list model made from a collection and single selection mode.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param handler the listener to use for selection changes.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(Collection<E> objects, ListSelectionHandler<E> handler)
+	{
+		return list(listModel(objects), ListSelectionMode.SINGLE, handler);
+	}
+
+	/**
+	 * Creates a list with a list model made from a collection.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param selectionMode the list selection mode.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(Collection<E> objects, ListSelectionMode selectionMode)
+	{
+		return list(listModel(objects), selectionMode);
+	}
+
+	/**
+	 * Creates a list with a specific list model and single selection mode.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @return the list component.
+	 */
+	public static <E> JList<E> list(Collection<E> objects)
+	{
+		return list(listModel(objects), ListSelectionMode.SINGLE);
+	}
+
+	/* ==================================================================== */
+	/* ==== Tables                                                     ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @param selectionMode the list selection mode.
+	 * @param handler the listener to use for selection changes.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, TableColumnModel columnModel, int selectionMode, final TableSelectionHandler handler)
+	{
+		JTable out = new JTable(model, columnModel);
+		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
+			}
+		});
+		return out;
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @param selectionModel the selection model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, TableColumnModel columnModel, ListSelectionModel selectionModel)
+	{
+		return new JTable(model, columnModel, selectionModel);
+	}
+	
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param selectionMode the list selection mode.
+	 * @param handler the listener to use for selection changes.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, ListSelectionMode selectionMode, final TableSelectionHandler handler)
+	{
+		JTable out = new JTable(model, new DefaultTableColumnModel());
+		out.setSelectionMode(selectionMode.swingId);
+		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
+		{
+			@Override
+			public void valueChanged(ListSelectionEvent e) 
+			{
+				handler.onSelectionChange(out.getSelectedRows(), out.getSelectedColumns(), e.getValueIsAdjusting());
+			}
+		});
+		return out;
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param selectionModel the selection model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, ListSelectionModel selectionModel)
+	{
+		return new JTable(model, new DefaultTableColumnModel(), selectionModel);
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, TableColumnModel columnModel)
+	{
+		return new JTable(model, columnModel);
 	}
 	
 	/* ==================================================================== */

@@ -31,7 +31,7 @@ public class DoomToolsApplicationFrame extends JFrame
 	{
 		this.instance = instance;
 		setIconImages(DoomToolsGUIUtils.get().getWindowIcons());
-		setTitle(instance.getName());
+		setTitle(instance.getTitle());
 		setJMenuBar(instance.createDesktopMenuBar());
 		setContentPane(instance.createContentPane());
 		setLocationByPlatform(true);

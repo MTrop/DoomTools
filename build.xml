@@ -41,6 +41,10 @@
 	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
 	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
 
+	<property name="flatlaf.lib.version" value="2.0.2" />
+	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
+
+
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
@@ -117,6 +121,7 @@
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.desktop.lib.version}" />
+		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -156,6 +161,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${doom.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.desktop.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
@@ -183,7 +189,12 @@
 		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar.src}" dest="${dependencies.dir}" />
 	</target>
 
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.flatlaf">
+		<maven-jar-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+	</target>
+
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />
@@ -232,6 +243,7 @@
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset file="images/doomtools-logo.ico" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
 		</zip>
 	</target>
@@ -241,6 +253,7 @@
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
 			<tarfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset file="images/doomtools-logo.ico" prefix="docs" />
 			<tarfileset dir="docs" prefix="docs" />
 		</tar>
 	</target>

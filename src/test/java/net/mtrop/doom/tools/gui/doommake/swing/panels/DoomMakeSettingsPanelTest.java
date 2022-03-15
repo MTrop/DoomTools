@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -10,7 +11,7 @@ public final class DoomMakeSettingsPanelTest
 {
 	public static void main(String[] args) 
 	{
-		SwingUtils.setSystemLAF();
+		DoomToolsGUIMain.setLAF();
 		SwingUtils.apply(frame("Test", new DoomMakeSettingsPanel()), 
 		(frame) -> {
 			frame.setVisible(true);

@@ -54,18 +54,58 @@ public final class SwingUtils
 	 * Sets the system look and feel and returns it.
 	 * If this is not possible, this returns null. 
 	 * Otherwise, this sets the system look and feel and returns <code>UIManager.getLookAndFeel()</code>.
-	 * @return true if set, false if not.
+	 * @return the Look and Feel if set, null if not.
 	 */
 	public static LookAndFeel setSystemLAF()
 	{
+		return setLAF(UIManager.getSystemLookAndFeelClassName());
+	}
+	
+	/**
+	 * Sets the cross-platform default look and feel and returns it.
+	 * If this is not possible, this returns null. 
+	 * Otherwise, this sets the cross-platform default look and feel and returns <code>UIManager.getLookAndFeel()</code>.
+	 * @return the Look and Feel if set, null if not.
+	 */
+	public static LookAndFeel setCrossPlatformLAF()
+	{
+		return setLAF(UIManager.getCrossPlatformLookAndFeelClassName());
+	}
+	
+	/**
+	 * Sets a look and feel and returns it.
+	 * If this is not possible, this returns null. 
+	 * Otherwise, this sets the provided look and feel and returns <code>UIManager.getLookAndFeel()</code>.
+	 * @param className the Look and Feel classname.
+	 * @return the Look and Feel if set, null if not.
+	 */
+	public static LookAndFeel setLAF(String className)
+	{
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			UIManager.setLookAndFeel(className);
 		} catch (ClassNotFoundException e) {
 			return null;
 		} catch (InstantiationException e) {
 			return null;
 		} catch (IllegalAccessException e) {
 			return null;
+		} catch (UnsupportedLookAndFeelException e) {
+			return null;
+		}
+		return UIManager.getLookAndFeel();
+	}
+	
+	/**
+	 * Sets a look and feel and returns it.
+	 * If this is not possible, this returns null. 
+	 * Otherwise, this sets the provided look and feel and returns <code>UIManager.getLookAndFeel()</code>.
+	 * @param laf the Look and Feel.
+	 * @return the Look and Feel if set, null if not.
+	 */
+	public static LookAndFeel setLAF(LookAndFeel laf)
+	{
+		try {
+			UIManager.setLookAndFeel(laf);
 		} catch (UnsupportedLookAndFeelException e) {
 			return null;
 		}

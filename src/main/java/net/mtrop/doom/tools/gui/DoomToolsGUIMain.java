@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.util.Map;
 
 import javax.swing.JFrame;
 
@@ -17,6 +18,7 @@ import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
@@ -34,6 +36,26 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_NEW = "doommake-new";
 		/** DoomMake - Open Project. */
 		String DOOMMAKE_OPEN = "doommake-open";
+	}
+	
+	/**
+	 * Supported GUI Themes
+	 */
+	public enum Theme
+	{
+		LIGHT("com.formdev.flatlaf.FlatLightLaf"),
+		DARK("com.formdev.flatlaf.FlatDarkLaf"),
+		INTELLIJ("com.formdev.flatlaf.FlatIntelliJLaf"),
+		DARCULA("com.formdev.flatlaf.FlatDarculaLaf");
+		
+		public static final Map<String, Theme> MAP = EnumUtils.createCaseInsensitiveNameMap(Theme.class);
+		
+		private final String className;
+		
+		private Theme(String className)
+		{
+			this.className = className;
+		}
 	}
 	
     /** Logger. */
@@ -142,6 +164,15 @@ public final class DoomToolsGUIMain
 		frame.setVisible(true);
 	}
 	
+	/**
+	 * Sets the preferred Look And Feel.
+	 */
+	public static void setLAF() 
+	{
+		Theme theme = Theme.MAP.get(DoomToolsSettingsManager.get().getThemeName());
+		SwingUtils.setLAF(theme != null ? theme.className : Theme.LIGHT.className);
+	}
+
     /* ==================================================================== */
 	
     /**
@@ -150,8 +181,8 @@ public final class DoomToolsGUIMain
 	 */
 	public static void main(String[] args) 
 	{
-		SwingUtils.setSystemLAF();
-	
+		setLAF();
+		
 		// no args - run main application.
 		if (args.length == 0)
 		{

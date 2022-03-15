@@ -51,6 +51,7 @@ public final class DoomToolsSettingsManager
 	
 	/* ==================================================================== */
 	
+    private static final String DOOMTOOLS_THEME = "doomtools.theme";
     private static final String DOOMTOOLS_WINDOW_X = "doomtools.window.x";
     private static final String DOOMTOOLS_WINDOW_Y = "doomtools.window.y";
     private static final String DOOMTOOLS_WINDOW_WIDTH = "doomtools.window.width";
@@ -105,6 +106,24 @@ public final class DoomToolsSettingsManager
 		}
 	}
 
+	/**
+	 * Sets the theme to use for the GUI.
+	 * @param name the name of the theme.
+	 */
+	public void setThemeName(String name)
+	{
+		properties.setProperty(DOOMTOOLS_THEME, name);
+		saveSettings();
+	}
+	
+	/**
+	 * @return the theme to use for the GUI.
+	 */
+	public String getThemeName()
+	{
+		return properties.getProperty(DOOMTOOLS_THEME, "LIGHT");
+	}
+	
 	/**
 	 * Sets the main DoomTools window bounds.
 	 * @param x 

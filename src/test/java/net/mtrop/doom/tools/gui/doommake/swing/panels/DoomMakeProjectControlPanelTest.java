@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -12,7 +13,7 @@ public final class DoomMakeProjectControlPanelTest
 {
 	public static void main(String[] args) 
 	{
-		SwingUtils.setSystemLAF();
+		DoomToolsGUIMain.setLAF();
 		DoomMakeProjectControlPanel panel = new DoomMakeProjectControlPanel(new File(args[0]));
 		SwingUtils.apply(frame("Test", containerOf(panel)), 
 		(frame) -> {

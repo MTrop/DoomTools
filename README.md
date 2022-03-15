@@ -9,6 +9,8 @@ Copyright (c) 2019-2022 Matt Tropiano
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.14.1+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
+[FlatLaF](https://www.formdev.com/flatlaf/) 2.0.2+
+
 ### Required Modules
 
 [java.desktop](https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html)  

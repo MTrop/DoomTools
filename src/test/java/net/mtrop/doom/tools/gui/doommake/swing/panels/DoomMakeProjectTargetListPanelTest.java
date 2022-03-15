@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.doommake.swing.panels;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -15,7 +16,7 @@ public final class DoomMakeProjectTargetListPanelTest
 {
 	public static void main(String[] args) throws FileNotFoundException, ProcessCallException 
 	{
-		SwingUtils.setSystemLAF();
+		DoomToolsGUIMain.setLAF();
 		SwingUtils.apply(frame("Test", new DoomMakeProjectTargetListPanel(
 			DoomMakeProjectHelper.get().getProjectTargets(new File(args[0])),
 			(target) -> { System.out.println("SELECT: " + target); }, 

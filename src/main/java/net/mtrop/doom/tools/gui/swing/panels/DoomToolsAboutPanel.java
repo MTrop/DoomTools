@@ -25,13 +25,14 @@ public class DoomToolsAboutPanel extends JPanel
 		String versionString = Version.DOOMTOOLS;
 		
 		StringBuilder sb = new StringBuilder("<html>");
-		sb.append("<b>DoomTools v").append(versionString).append("</b>").append("<br/>");
+		sb.append("<h2>DoomTools v").append(versionString).append("</h2>");
 		sb.append("by Matt Tropiano").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Using <b>DoomStruct v").append(Version.DOOMSTRUCT).append("</b>").append("<br/>");
 		sb.append("Using <b>Black Rook JSON v").append(Version.JSON).append("</b>").append("<br/>");
 		sb.append("Using <b>Rookscript v").append(Version.ROOKSCRIPT).append("</b>").append("<br/>");
 		sb.append("Using <b>Rookscript-Desktop v").append(Version.ROOKSCRIPT_DESKTOP).append("</b>").append("<br/>");
+		sb.append("Using <b>FlatLaf v").append(Version.FLATLAF).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Contains <b>DECOHack v").append(Version.DECOHACK).append("</b>").append("<br/>");
 		sb.append("Contains <b>DImgConv v").append(Version.DIMGCONV).append("</b>").append("<br/>");
@@ -44,9 +45,10 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WTExport v").append(Version.WTEXPORT).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");
+		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
 		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
 		sb.append("<b>SLADE3</b> Icon by Sir Juddington").append("<br/>");
-		sb.append("Folder and VSCode Icons (C) Microsoft 2021").append("<br/>");
+		sb.append("<b>Folder and VSCode Icons</b> (C) Microsoft Corp. 2021").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Thank you for using DoomTools!");
 		sb.append("</html>");

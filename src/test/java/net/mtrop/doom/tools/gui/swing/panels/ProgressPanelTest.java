@@ -6,13 +6,14 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 public final class ProgressPanelTest 
 {
 	public static void main(String[] args) 
 	{
-		SwingUtils.setSystemLAF();
+		DoomToolsGUIMain.setLAF();
 		ProgressPanel panel = new ProgressPanel(48);
 		panel.setBorder(createEmptyBorder(8,8,8,8));
 

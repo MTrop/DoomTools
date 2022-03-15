@@ -6,13 +6,14 @@ import java.io.PrintStream;
 
 import javax.swing.JFrame;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 public final class TextOutputPanelTest 
 {
 	public static void main(String[] args) 
 	{
-		SwingUtils.setSystemLAF();
+		DoomToolsGUIMain.setLAF();
 		TextOutputPanel panel = new TextOutputPanel();
 		PrintStream out = panel.getPrintStream();
 		

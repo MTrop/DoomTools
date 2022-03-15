@@ -13,7 +13,6 @@ import javax.swing.filechooser.FileFilter;
  */
 public final class FileChooserFactory
 {
-
 	/**
 	 * Opens a directory chooser dialog.
 	 * @param parent the parent component for the chooser modal.
@@ -100,6 +99,7 @@ public final class FileChooserFactory
 			jfc.setSelectedFile(initPath);
 		if (title != null)
 			jfc.setDialogTitle(title);
+		jfc.resetChoosableFileFilters();
 		for (FileFilter filter : choosableFilters)
 			jfc.addChoosableFileFilter(filter);
 		switch (jfc.showDialog(parent, approveText))

@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-03-14** GUI uses the FlatLaf Look and Feel.
+
 - **2022-03-06** DoomTools has a GUI now!
 - **2022-03-06** Cygwin pathing fixes (thanks, @dmcmahill).
 

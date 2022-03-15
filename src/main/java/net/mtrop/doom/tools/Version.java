@@ -15,6 +15,8 @@ public interface Version
 	String ROOKSCRIPT = Common.getVersionString("rookscript");
 	String ROOKSCRIPT_DESKTOP = Common.getVersionString("rookscript-desktop");
 
+	String FLATLAF = Common.getVersionString("flatlaf");
+
 	String DECOHACK = Common.getVersionString("decohack");
 	String DIMGCONV = Common.getVersionString("dimgconv");
 	String DMXCONV = Common.getVersionString("dmxconv");

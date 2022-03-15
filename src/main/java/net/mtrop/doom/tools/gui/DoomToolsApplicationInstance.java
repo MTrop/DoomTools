@@ -27,7 +27,7 @@ public abstract class DoomToolsApplicationInstance
 	/**
 	 * @return this application's name.
 	 */
-	public abstract String getName();
+	public abstract String getTitle();
 	
 	/**
 	 * Fetches this application instance's content pane.
@@ -50,9 +50,8 @@ public abstract class DoomToolsApplicationInstance
 	}
 	
 	/**
-	 * Fetches this application instance's specific icon.
-	 * This is only called once, and is intended to be the function that gets
-	 * the application's icon (by default, it's DoomTools's icon).
+	 * Fetches this application instance's window frame icons.
+	 * This is only called once, and is intended to be the function that gets the application's icon.
 	 * <p> This should NEVER be called by the application itself.
 	 * @return the application's icon, or <code>null</code> for default.
 	 */
