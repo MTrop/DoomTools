@@ -550,10 +550,10 @@ associated Thing for pickups.
         state <WeaponStateName> <INTEGER>
         
         // specific state assignment using another thing's states.
-        state <WeaponStateName> thing <INTEGER> <ThingStateLabel>
+        state <WeaponStateName> thing <INTEGER or ThingAlias> <ThingStateLabel>
         
         // specific state assignment using another weapon's states.
-        state <WeaponStateName> weapon <INTEGER> <WeaponStateLabel>
+        state <WeaponStateName> weapon <INTEGER or WeaponAlias> <WeaponStateLabel>
         
         // if present, clear all state indices (not freed!).
         clear states 
@@ -670,7 +670,7 @@ individually via an "each" clause like so:
         // ... weapon properties ...
     }
 
-    each weapon in ( <INTEGER> , ... )
+    each weapon in ( <INTEGER or WeaponAlias> , ... )
     {
         // ... weapon properties ...
     }
@@ -791,10 +791,10 @@ the thing state indices. Other labels are used for arbitrary jump points.
         state <ThingStateName> <INTEGER>
         
         // specific state assignment using another thing's states.
-        state <ThingStateName> thing <INTEGER> <ThingStateLabel>
+        state <ThingStateName> thing <INTEGER or ThingAlias> <ThingStateLabel>
         
         // specific state assignment using another weapon's states.
-        state <ThingStateName> weapon <INTEGER> <WeaponStateLabel>
+        state <ThingStateName> weapon <INTEGER or WeaponAlias> <WeaponStateLabel>
         
         // if present, clear all state indices (not freed!).
         clear states
@@ -955,7 +955,7 @@ via an "each" clause like so:
         // ... thing properties ...
     }
 
-    each thing in ( <INTEGER> , ... )
+    each thing in ( <INTEGER or ThingAlias> , ... )
     {
         // ... thing properties ...
     }
