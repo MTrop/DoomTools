@@ -656,8 +656,8 @@ public final class DoomMakeMain
 			try (FileInputStream fis = new FileInputStream(new File(path + jarName)); FileOutputStream fos = new FileOutputStream(targetJARFile))
 			{
 				IOUtils.relay(fis, fos);
-				Common.copyShellScript(SHELL_RESOURCE_CMD, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("/", "\\"), targetShellCmdFile);
-				Common.copyShellScript(SHELL_RESOURCE_SH, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("\\", "/"), targetShellBashFile);
+				Common.copyShellScript(SHELL_RESOURCE_CMD, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("/", "\\"), "java", targetShellCmdFile);
+				Common.copyShellScript(SHELL_RESOURCE_SH, DoomMakeMain.class, SHELL_OPTIONS, targetJARFile.getPath().replace("\\", "/"), "java", targetShellBashFile);
 			} 
 			catch (SecurityException e)
 			{

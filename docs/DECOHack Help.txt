@@ -776,10 +776,10 @@ the thing state indices. Other labels are used for arbitrary jump points.
         deathsound <STRING>
         activesound <STRING>
 
-        // Extended Properties (Extended/DEHEXTRA feature set only)
-        dropitem <INTEGER>
+        // Extended Properties (Extended/DEHEXTRA feature set and later)
+        dropitem <INTEGER or ThingAlias>
         
-        // MBF21 Properties (MBF21 feature set only)
+        // MBF21 Properties (MBF21 feature set and later)
         fastspeed <INTEGER>
         meleerange <INTEGER>
         infightinggroup <INTEGER>

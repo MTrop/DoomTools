@@ -199,7 +199,7 @@ public final class DoomToolsMain
 			{
 				File outputFilePath = new File(path + "/" + entry.getKey() + shellExtension);
 				try {
-					Common.copyShellScript("shell/jar/" + shellSourceFile, entry.getValue(), SHELL_OPTIONS, "", outputFilePath);
+					Common.copyShellScript("shell/jar/" + shellSourceFile, entry.getValue(), SHELL_OPTIONS, "", "java", outputFilePath);
 					if (!OSUtils.isWindows())
 						outputFilePath.setExecutable(true, false);
 					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
@@ -628,6 +628,8 @@ public final class DoomToolsMain
 		out.println("    --update-shell       Updates the shell commands that invoke the tools.");
 		out.println("                             If you are missing one, run DoomTools with this");
 		out.println("                             switch.");
+		out.println();
+		out.println("    --gui                Starts the DoomTools GUI.");
 	}
 	
 }

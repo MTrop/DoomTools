@@ -11,11 +11,13 @@
 		<attribute name="todir" default="." />
 		<attribute name="mainclass" />
 		<attribute name="options" default="" />
+		<attribute name="exename" default="java" />
 		<sequential>
 			<delete file="@{todir}/@{name}.cmd" failonerror="false" />
 			<copy file="${shell.dir}/jar/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_OPTIONS}}" value="@{options}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
+			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_EXENAME}}" value="@{exename}" />
 		</sequential>
 	</macrodef>
 	

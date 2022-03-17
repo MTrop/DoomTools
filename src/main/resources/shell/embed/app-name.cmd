@@ -3,6 +3,7 @@
 REM ============================[ VARIABLES ]================================
 SETLOCAL
 SET JAVAEXE=
+SET JAVAEXENAME={{JAVA_EXENAME}}
 SET JAVAOPTS={{JAVA_OPTIONS}}
 SET MAINCLASS={{MAIN_CLASSNAME}}
 SET DOOMTOOLS_PATH=%~dp0
@@ -17,20 +18,20 @@ goto _end
 :_findjava
 REM ===== Java Scan
 
-if exist "%DOOMTOOLS_PATH%\jre\bin\java.exe" SET JAVAEXE=%DOOMTOOLS_PATH%\jre\bin\java.exe
+if exist "%DOOMTOOLS_PATH%\jre\bin\%JAVAEXENAME%.exe" SET JAVAEXE=%DOOMTOOLS_PATH%\jre\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-where java > nul
-if %ERRORLEVEL% == 0 SET JAVAEXE=java
+where %JAVAEXENAME% > nul
+if %ERRORLEVEL% == 0 SET JAVAEXE=%JAVAEXENAME%
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JAVA_HOME%=="" SET JAVAEXE=%JAVA_HOME%\bin\java.exe
+if not %JAVA_HOME%=="" SET JAVAEXE=%JAVA_HOME%\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JDK_HOME%=="" SET JAVAEXE=%JDK_HOME%\bin\java.exe
+if not %JDK_HOME%=="" SET JAVAEXE=%JDK_HOME%\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JRE_HOME%=="" SET JAVAEXE=%JRE_HOME%\java.exe
+if not %JRE_HOME%=="" SET JAVAEXE=%JRE_HOME%\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
 REM ===== No Java.

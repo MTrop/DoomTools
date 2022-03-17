@@ -671,11 +671,12 @@ public final class Common
 	 * @param mainClass the main class to invoke.
 	 * @param options the JVM options.
 	 * @param jarName the JAR file name to invoke, if embedded JAR script.
+	 * @param javaexe the executable name.
 	 * @param target the target file to write to.
 	 * @throws IOException if the file could not be written.
 	 * @throws SecurityException if file could not be created due to permissioning.
 	 */
-	public static void copyShellScript(String resourceName, Class<?> mainClass, String options, String jarName, File target) throws IOException
+	public static void copyShellScript(String resourceName, Class<?> mainClass, String options, String jarName, String javaexe, File target) throws IOException
 	{
 		try (
 			ReplacerReader reader = new ReplacerReader(Common.openResourceReader(resourceName), "{{", "}}");
@@ -683,6 +684,7 @@ public final class Common
 		){
 			reader
 				.replace("JAVA_OPTIONS", options)
+				.replace("JAVA_EXENAME", javaexe)
 				.replace("MAIN_CLASSNAME", mainClass.getCanonicalName())
 				.replace("JAR_NAME", jarName)
 			;
