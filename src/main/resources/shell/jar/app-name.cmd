@@ -24,7 +24,7 @@ REM ===== Java Scan
 if exist "%DOOMTOOLS_PATH%\jre\bin\%JAVAEXENAME%.exe" SET JAVAEXE=%DOOMTOOLS_PATH%\jre\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-where %JAVAEXENAME% > nul
+where %JAVAEXENAME% > nul 2>&1
 if %ERRORLEVEL% == 0 SET JAVAEXE=%JAVAEXENAME%
 if not "%JAVAEXE%"=="" goto _calljava
 
