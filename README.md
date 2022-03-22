@@ -34,7 +34,7 @@ have a demo copy buildable at all times?
 
 ### Compiling with Ant
 
-To download dependencies for this project, type (`build.properties` will also be altered/created):
+**First**, to download dependencies for this project, type (`build.properties` will also be altered/created):
 
 	ant dependencies
 
@@ -64,16 +64,26 @@ To compile, JAR, test, and Zip up everything:
 
 To create a distribution (Bash and CMD):
 
-	ant dist
+	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native]
 
-To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY):
+To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):
 
-	ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
+	ant deploy.cmd -Ddeploy.dir=[TARGETPATH] -Dnatives.windows.dir=[PathToDoomTools-GUI-Native]
 	ant deploy.bash -Ddeploy.dir=[TARGETPATH]
 
 To clean up everything:
 
 	ant clean
+
+
+Note that the `deploy.dir` and `natives.windows.dir` properties are supplied above - it may be better to
+add local paths to your `build.properties` file for those. That "GUI Native" project is here: [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
+
+
+### Other Projects
+
+Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
+It is not necessary for building or local deploying, but a package distributable will not be complete without it.
 
 
 ### Utilities

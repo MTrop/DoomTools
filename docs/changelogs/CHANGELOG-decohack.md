@@ -4,6 +4,8 @@ DECOHack
 ### Changed for 0.24.0
 
 * `Added` A patch format for the Unity port, `doomunity`, which is `udoom19` but with no string limits (thanks, Xaser!). (PR #65).
+* `Fixed` MBF21's `A_SeekTracer` parameters needed to check for FIXED angles, not UINT.
+* `Changed` Stricter (but safer) checking for types in parameters, such as Fixed values, and auto-detecting sounds, things, and states.
 
 
 ### Changed for 0.23.0

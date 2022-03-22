@@ -238,7 +238,21 @@
 		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
 	</target>
 
-	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
+	<target name="dist.cmd.gui.build" if="natives.windows.dir">
+	</target>
+
+	<target name="dist.cmd.gui" if="natives.windows.dir" depends="init.dist, dist.cmd.gui.build">
+		<exec executable="make" dir="${natives.windows.dir}" failonerror="true">
+			<arg line="clean" />
+		</exec>
+		<exec executable="make" dir="${natives.windows.dir}" failonerror="true">
+		</exec>
+		<copy todir="${build.dir}/shell/cmd">
+			<fileset dir="${natives.windows.dir}/dist" />
+		</copy>
+	</target>
+
+	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist, dist.cmd.gui">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />

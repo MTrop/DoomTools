@@ -50,6 +50,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.TypeGuess;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
@@ -3157,7 +3158,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 					// get first argument
 					Object p;
-					if ((p = parseActionPointerParameterValue(context, actor)) == null)
+					if ((p = parseActionPointerParameterValue(pointer.getParam(0), context, actor)) == null)
 						return false;
 					else if (p instanceof Integer)
 					{
@@ -3174,7 +3175,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+						if ((p = parseActionPointerParameterValue(pointer.getParam(1), context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3214,7 +3215,7 @@ public final class DecoHackParser extends Lexer.Parser
 						// get argument
 						int argIndex = action.args.size();
 						Object p;
-						if ((p = parseActionPointerParameterValue(context, actor)) == null)
+						if ((p = parseActionPointerParameterValue(pointer.getParam(argIndex), context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3246,9 +3247,11 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Object parseActionPointerParameterValue(AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Object parseActionPointerParameterValue(DEHActionPointerParam paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		Object value;
+
+		// Force value
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingOrThingStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
@@ -3257,8 +3260,11 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseSoundIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 			return matchNumericExpression(context, true);
-		else if ((value = matchNumericExpression(context, false)) != null)
+		// Guess it.
+		else if ((value = matchNumericExpression(context, paramType.getTypeGuess() == TypeGuess.FLAGS)) != null)
 		{
+			// TODO: Actually guess it. Use DEHActionPointerParam.TypeGuess to interpret a String value.
+			
 			if (value instanceof String)
 			{
 				String labelName = (String)value;
@@ -3913,7 +3919,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		Integer out = null;
 		
-		// force label.
+		// force label/mnemonic.
 		if (!forceFlags && currentType(DecoHackKernel.TYPE_STRING))
 		{
 			String labelName = currentToken().getLexeme();
@@ -4107,18 +4113,20 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		DEHActionPointerParam[] params = action.getParams();
-		if (index >= params.length)
+		DEHActionPointerParam param = action.getParam(index);
+		if (param == null)
 		{
 			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
 			return false;
 		}
 
-		if (!params[index].isValueValid(value))
+		if (!param.isValueValid(value))
 		{
-			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, params[index].getValueMin(), params[index].getValueMax());
+			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, param.getValueMin(), param.getValueMax());
 			return false;
 		}
+		
+		// TODO: Further check range for THING, SOUND, STATE TypeGuess (FLAGS is just an integer).
 
 		return true;
 	}
