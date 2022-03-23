@@ -344,12 +344,20 @@ public class DoomToolsMainWindow extends JFrame
 		
 		LOG.info("Opening the DoomTools documentation folder...");
 
-		try {
-			Desktop.getDesktop().open(new File(path + File.separator + "docs"));
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("doomtools.error.opendocs.io"));
-		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("doomtools.error.opendocs.security"));
+		File docsDir = new File(path + File.separator + "docs");
+		if (!docsDir.exists())
+		{
+			SwingUtils.error(language.getText("doomtools.error.opendocs.notfound"));
+		}
+		else
+		{
+			try {
+				Desktop.getDesktop().open(docsDir);
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("doomtools.error.opendocs.io"));
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("doomtools.error.opendocs.security"));
+			}
 		}
 	}
 	
