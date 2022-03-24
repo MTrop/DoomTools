@@ -202,16 +202,27 @@ public final class DoomToolsGUIMain
 				switch (args[0])
 				{
 					default:
+					{
 		        		SwingUtils.error("Expected valid application name.");
 			    		System.err.println("ERROR: Expected valid application name.");
 		        		System.exit(-1);
-		        		return;
+			        	return;
+					}
+		        	
 					case ApplicationNames.DOOMMAKE_NEW:
+					{
 						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
 						break;
+					}
 					case ApplicationNames.DOOMMAKE_OPEN:
-						startApplication(new DoomMakeOpenProjectApp(new File(args[1])));
+					{
+						File projectDirectory = new File(args[1]);
+						if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
+							startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+						else
+							SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 						break;
+					}
 				}
 			}
 			catch (ArrayIndexOutOfBoundsException e)

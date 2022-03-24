@@ -953,6 +953,9 @@ public final class DoomMakeMain
 	{
 		File fullFilePath = getLockFile(projectDirectory, properties);
 	
+		if (!projectDirectory.exists())
+			return JSONObject.createEmptyObject();
+		
 		if (!Common.createPathForFile(fullFilePath))
 			throw new IOException("Could not create directories for lock file.");
 		

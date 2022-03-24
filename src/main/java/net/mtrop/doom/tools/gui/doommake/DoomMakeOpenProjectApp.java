@@ -142,7 +142,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	
 	/**
 	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory, and is a project directory. 
+	 * if the directory is a project directory. 
 	 * @param parent the parent window for the dialog.
 	 * @param initPath the init path for the dialog.
 	 * @return a new app instance.
@@ -171,7 +171,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	
 	/**
 	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory, and is a project directory. 
+	 * if the directory is a project directory. 
 	 * @param parent the parent window for the dialog.
 	 * @param initPath the init path for the dialog.
 	 * @return a new app instance.
