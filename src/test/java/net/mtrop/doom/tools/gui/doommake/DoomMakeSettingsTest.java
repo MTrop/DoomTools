@@ -2,7 +2,7 @@ package net.mtrop.doom.tools.gui.doommake;
 
 import java.io.File;
 
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 public final class DoomMakeSettingsTest 

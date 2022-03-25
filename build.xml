@@ -44,7 +44,10 @@
 	<property name="flatlaf.lib.version" value="2.0.2" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
+	<property name="rsyntaxtextarea.lib.version" value="3.2.0" />
+	<property name="rsyntaxtextarea.jar" value="rsyntaxtextarea-${rsyntaxtextarea.lib.version}.jar" />
 
+	
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
@@ -64,11 +67,13 @@
 		net.mtrop.doom.tools.doommake,
 		net.mtrop.doom.tools.doommake.functions,
 		net.mtrop.doom.tools.doommake.generators,
+		net.mtrop.doom.tools.doomtools,
 		net.mtrop.doom.tools.exception,
 		net.mtrop.doom.tools.gui,
-		net.mtrop.doom.tools.gui.doommake,
-		net.mtrop.doom.tools.gui.doommake.swing,
-		net.mtrop.doom.tools.gui.doommake.swing.panels,
+		net.mtrop.doom.tools.gui.apps,
+		net.mtrop.doom.tools.gui.apps.swing,
+		net.mtrop.doom.tools.gui.apps.swing.panels,
+		net.mtrop.doom.tools.gui.managers,
 		net.mtrop.doom.tools.gui.swing,
 		net.mtrop.doom.tools.gui.swing.panels,
 		net.mtrop.doom.tools.struct,
@@ -122,6 +127,7 @@
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.desktop.lib.version}" />
 		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
+		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -162,6 +168,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.desktop.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${rsyntaxtextarea.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
@@ -194,7 +201,12 @@
 		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
 	</target>
 
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.rsyntaxtextarea">
+		<maven-jar-dl group-path="com/fifesoft" artifact="rsyntaxtextarea" version="${rsyntaxtextarea.lib.version}" />
+		<maven-jar-sources-dl group-path="com/fifesoft" artifact="rsyntaxtextarea" version="${rsyntaxtextarea.lib.version}" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />

@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -24,15 +24,16 @@ import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
-import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
-import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeProjectControlPanel;
-import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeProjectTargetListPanel;
-import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
+import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeProjectControlPanel;
+import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeProjectTargetListPanel;
+import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeSettingsPanel;
+import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.gui.swing.panels.StatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.TextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
@@ -141,11 +142,11 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	}
 	
 	/**
-	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory. 
+	 * Opens a dialog for opening a directory, checks
+	 * if the directory is a project directory, and then returns the directory. 
 	 * @param parent the parent window for the dialog.
 	 * @param initPath the init path for the dialog.
-	 * @return a new app instance.
+	 * @return the valid directory selected, or null if not valid.
 	 */
 	public static File openAndGetDirectory(Component parent, File initPath)
 	{
@@ -170,11 +171,11 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	}
 	
 	/**
-	 * Opens a dialog for opening a directory, then checks
-	 * if the directory is a project directory. 
+	 * Opens a dialog for opening a directory, checks
+	 * if the directory is a project directory, and returns an application instance. 
 	 * @param parent the parent window for the dialog.
 	 * @param initPath the init path for the dialog.
-	 * @return a new app instance.
+	 * @return a new app instance, or null if bad directory selected.
 	 */
 	public static DoomMakeOpenProjectApp openAndCreate(Component parent, File initPath)
 	{
@@ -215,7 +216,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		);
 		
 		return containerOf(
-			dimension(300, 300),
+			dimension(400, 300),
 			createEmptyBorder(4, 4, 4, 4),
 			node(containerOf(
 				node(BorderLayout.NORTH, containerOf(

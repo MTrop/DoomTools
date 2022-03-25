@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.filechooser.FileFilter;
 
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
@@ -27,20 +26,20 @@ import com.blackrook.json.JSONWriter.Options;
 
 import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.Environment;
-import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
-import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
-import net.mtrop.doom.tools.gui.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
@@ -65,8 +64,6 @@ public class DoomToolsMainWindow extends JFrame
 
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
-
-    private static final FileFilter WORKSPACE_FILTER = fileExtensionFilter("DoomTools Workspace", "dtw");
 
     private static final Options JSON_OPTIONS = SwingUtils.apply(new Options(), (options) -> {
     	options.setIndentation("\t");
@@ -131,7 +128,7 @@ public class DoomToolsMainWindow extends JFrame
 		this.actionClearWorkspace = actionItem(language.getText("doomtools.menu.file.item.workspace.close"), (e) -> clearWorkspace());
 
 		setIconImages(utils.getWindowIcons());
-		setTitle("DoomTools v" + Version.DOOMTOOLS);
+		setTitle("DoomTools");
 		setJMenuBar(createMenuBar());
 		setContentPane(this.desktop = new DoomToolsDesktopPane());
 		setLocationByPlatform(true);
@@ -600,7 +597,7 @@ public class DoomToolsMainWindow extends JFrame
 			language.getText("doomtools.workspace.open.browse.title"),
 			currentWorkspace,
 			language.getText("doomtools.workspace.open.browse.accept"),
-			WORKSPACE_FILTER
+			FileFilters.WORKSPACES
 		);
 		
 		if (workspaceFile == null)
@@ -638,7 +635,7 @@ public class DoomToolsMainWindow extends JFrame
 			language.getText("doomtools.workspace.saveas.browse.title"),
 			currentWorkspace,
 			language.getText("doomtools.workspace.saveas.browse.accept"),
-			WORKSPACE_FILTER
+			FileFilters.WORKSPACES
 		);
 		
 		if (workspaceFile == null)

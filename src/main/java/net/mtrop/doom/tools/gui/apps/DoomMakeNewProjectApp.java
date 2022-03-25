@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,8 +33,8 @@ import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
-import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static javax.swing.BorderFactory.*;

@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake.swing.panels;
+package net.mtrop.doom.tools.gui.apps.swing.panels;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseEvent;

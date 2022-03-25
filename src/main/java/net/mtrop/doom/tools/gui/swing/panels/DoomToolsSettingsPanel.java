@@ -7,10 +7,10 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.Theme;
-import net.mtrop.doom.tools.gui.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.doommake.swing.panels.DoomMakeSettingsPanel;
+import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeSettingsPanel;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 

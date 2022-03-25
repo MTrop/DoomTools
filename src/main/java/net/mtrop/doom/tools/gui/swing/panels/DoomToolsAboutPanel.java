@@ -46,6 +46,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
+		sb.append("<b>RSyntaxTextArea</b> (C) 2021 Robert Futrell").append("<br/>");
 		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
 		sb.append("<b>SLADE3</b> Icon by Sir Juddington").append("<br/>");
 		sb.append("<b>Folder and VSCode Icons</b> (C) Microsoft Corp. 2021").append("<br/>");

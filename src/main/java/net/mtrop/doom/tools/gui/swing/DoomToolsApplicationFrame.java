@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
-import net.mtrop.doom.tools.gui.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 
 /**
  * A single application frame for a DoomTools application.

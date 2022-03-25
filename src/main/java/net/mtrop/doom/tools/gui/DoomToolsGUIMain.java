@@ -12,8 +12,11 @@ import java.util.Map;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
@@ -214,13 +217,26 @@ public final class DoomToolsGUIMain
 						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
 						break;
 					}
+					
 					case ApplicationNames.DOOMMAKE_OPEN:
 					{
-						File projectDirectory = new File(args[1]);
-						if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
-							startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+						String path = Common.arrayElement(args, 1);
+						
+						// No path. Open file.
+						if (Common.isEmpty(path))
+						{
+							DoomMakeOpenProjectApp app;
+							if ((app = DoomMakeOpenProjectApp.openAndCreate(null, DoomToolsSettingsManager.get().getLastProjectDirectory())) != null)
+								startApplication(app);
+						}
 						else
-							SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+						{
+							File projectDirectory = new File(args[1]);
+							if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
+								startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+							else
+								SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+						}
 						break;
 					}
 				}

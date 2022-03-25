@@ -24,10 +24,10 @@ import javax.swing.event.InternalFrameEvent;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
-import net.mtrop.doom.tools.gui.DoomToolsImageManager;
-import net.mtrop.doom.tools.gui.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace.Entry;
+import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationInternalFrame;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory;

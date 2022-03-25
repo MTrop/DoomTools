@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui;
+package net.mtrop.doom.tools.gui.managers;
 
 import java.awt.Image;
 import java.util.Arrays;

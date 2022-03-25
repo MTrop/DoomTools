@@ -32,7 +32,10 @@ public final class FileChooserFactory
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
 		for (FileFilter filter : choosableFilters)
+		{
 			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
 		switch (jfc.showDialog(parent, approveText))
 		{
 			default:
@@ -101,7 +104,10 @@ public final class FileChooserFactory
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
 		for (FileFilter filter : choosableFilters)
+		{
 			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
 		switch (jfc.showDialog(parent, approveText))
 		{
 			default:

@@ -1,6 +1,6 @@
 package net.mtrop.doom.tools.gui;
 
-import net.mtrop.doom.tools.gui.doommake.DoomMakeNewProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 
 public final class TestApplicationTest
 {

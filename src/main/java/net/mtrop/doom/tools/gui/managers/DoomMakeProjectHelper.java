@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui.managers;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -16,8 +16,6 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 

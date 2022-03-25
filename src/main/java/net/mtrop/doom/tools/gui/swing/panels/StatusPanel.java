@@ -4,8 +4,8 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsIconManager;
-import net.mtrop.doom.tools.gui.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.icon;

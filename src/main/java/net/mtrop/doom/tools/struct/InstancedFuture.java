@@ -190,18 +190,6 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 	
 	/**
-	 * Waits for all of the provided instances to complete, then continues execution.
-	 * @param <T> the return type of each of the instances.
-	 * @param instances the list of instances.
-	 */
-	@SafeVarargs
-	public static <T> void join(InstancedFuture<T> ... instances)
-	{
-		for (int i = 0; i < instances.length; i++)
-			instances[i].join();
-	}
-
-	/**
 	 * Creates a new instance builder.
 	 * @param runnable the runnable to execute.
 	 * @return a new instance builder.
@@ -232,6 +220,18 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	public static <T> Builder<T> instance(Callable<T> callable)
 	{
 		return new Builder<>(callable);
+	}
+
+	/**
+	 * Waits for all of the provided instances to complete, then continues execution.
+	 * @param <T> the return type of each of the instances.
+	 * @param instances the list of instances.
+	 */
+	@SafeVarargs
+	public static <T> void join(InstancedFuture<T> ... instances)
+	{
+		for (int i = 0; i < instances.length; i++)
+			instances[i].join();
 	}
 
 	@Override
@@ -496,7 +496,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	{
 		try {
 			waitForDone();
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
 			// Eat exception.
 		}
 	}
@@ -561,9 +561,50 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 			this.listener = listener;
 			return this;
 		}
+
+		/**
+		 * Subscribes a set of functions to execute on the completion of this instance.
+		 * @param onResult the function to call with the result value.
+		 * @param onComplete the function to call after the result or exception is processed.
+		 * @return this builder.
+		 * @see #onResult(Consumer)
+		 * @see #onComplete(Runnable)
+		 */
+		public Builder<T> subscribe(Consumer<T> onResult, Runnable onComplete)
+		{
+			return onResult(onResult).onComplete(onComplete);
+		}
 		
 		/**
-		 * Adds the function to call when the instance completes successfully. 
+		 * Subscribes a set of functions to execute on the completion of this instance.
+		 * @param onResult the function to call with the result value.
+		 * @param onError the function to call with the exception/throwable.
+		 * @return this builder.
+		 * @see #onResult(Consumer)
+		 * @see #onError(Consumer)
+		 */
+		public Builder<T> subscribe(Consumer<T> onResult, Consumer<Throwable> onError)
+		{
+			return onResult(onResult).onError(onError);
+		}
+		
+		/**
+		 * Subscribes a set of functions to execute on the completion of this instance.
+		 * @param onResult the function to call with the result value.
+		 * @param onError the function to call with the exception/throwable.
+		 * @param onComplete the function to call after the result or exception is processed.
+		 * @return this builder.
+		 * @see #onResult(Consumer)
+		 * @see #onError(Consumer)
+		 * @see #onComplete(Runnable)
+		 */
+		public Builder<T> subscribe(Consumer<T> onResult, Consumer<Throwable> onError, Runnable onComplete)
+		{
+			return onResult(onResult).onError(onError).onComplete(onComplete);
+		}
+		
+		/**
+		 * Sets the function to call when the instance completes successfully. 
 		 * @param onResult the function to call with the result value.
 		 * @return this builder.
 		 */
@@ -574,7 +615,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		}
 		
 		/**
-		 * Adds the function to call when the instance throws an exception. 
+		 * Sets the function to call when the instance throws an exception. 
 		 * @param onError the function to call with the exception/throwable.
 		 * @return this builder.
 		 */
@@ -585,7 +626,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		}
 		
 		/**
-		 * Adds the function to always call when the instance finishes (after result or exception). 
+		 * Sets the function to always call when the instance finishes (after result or exception). 
 		 * @param onComplete the function to call after the result or exception is processed.
 		 * @return this builder.
 		 * @see #onResult(Consumer)
@@ -676,10 +717,33 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 	
 	/**
+	 * A listener interface for all instances.
+	 * The purpose of this listener is to report on instances starting or ending,
+	 * mostly for monitoring behavior in a work queue or executor.
+	 * @param <T> instance return type.
+	 */
+	public static interface InstanceListener<T>
+	{
+		/**
+		 * Called on Instance start. 
+		 * NOTE: The Instance, is this state, is NOT safe to inspect via blocking methods, and {@link InstancedFuture#isDone()} is guaranteed to return false.
+		 * @param instance the instance that this is attached to.
+		 */
+		void onStart(InstancedFuture<T> instance);
+	
+		/**
+		 * Called on Instance end.
+		 * The Instance is safe to inspect, and {@link InstancedFuture#isDone()} is guaranteed to return true.
+		 * @param instance the instance that this is attached to.
+		 */
+		void onEnd(InstancedFuture<T> instance);
+	}
+
+	/**
 	 * Subscription class type.
 	 * @param <T> the Future return type.
 	 */
-	public static class Subscription<T>
+	private static class Subscription<T>
 	{
 		private Consumer<T> onResult;
 		private Consumer<Throwable> onError;
@@ -708,29 +772,6 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 			if (onComplete != null)
 				onComplete.run();
 		}
-	}
-
-	/**
-	 * A listener interface for all instances.
-	 * The purpose of this listener is to report on instances starting or ending,
-	 * mostly for monitoring behavior in a work queue or executor.
-	 * @param <T> instance return type.
-	 */
-	public static interface InstanceListener<T>
-	{
-		/**
-		 * Called on Instance start. 
-		 * NOTE: The Instance, is this state, is NOT safe to inspect via blocking methods, and {@link InstancedFuture#isDone()} is guaranteed to return false.
-		 * @param instance the instance that this is attached to.
-		 */
-		void onStart(InstancedFuture<T> instance);
-	
-		/**
-		 * Called on Instance end.
-		 * The Instance is safe to inspect, and {@link InstancedFuture#isDone()} is guaranteed to return true.
-		 * @param instance the instance that this is attached to.
-		 */
-		void onEnd(InstancedFuture<T> instance);
 	}
 
 	/** Under-the-covers instance. */

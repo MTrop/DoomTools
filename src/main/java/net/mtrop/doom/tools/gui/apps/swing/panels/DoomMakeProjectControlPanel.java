@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake.swing.panels;
+package net.mtrop.doom.tools.gui.apps.swing.panels;
 
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
@@ -8,10 +8,10 @@ import java.io.FileNotFoundException;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsImageManager;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.gui.doommake.DoomMakeProjectHelper.RequiredSettingException;
+import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
+import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
+import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
+import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.RequiredSettingException;
 import net.mtrop.doom.tools.struct.Loader.LoaderFuture;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
