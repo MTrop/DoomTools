@@ -8,7 +8,9 @@ package net.mtrop.doom.tools;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
@@ -24,6 +26,7 @@ import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -209,6 +212,21 @@ public final class DoomToolsMain
 				} catch (SecurityException e) {
 					options.stderr.println("ERROR: Could not create `" + outputFilePath.getPath() + "`. Access denied by OS.");
 					return ERROR_SECURITY;
+				}
+			}
+			
+			if (OSUtils.isWindows())
+			{
+				File outputFilePath = new File(path + "/doomtools-gui.exe");
+				try (InputStream in = Common.openResource("shell/exe/doomtools-gui.exe"); FileOutputStream fos = new FileOutputStream(outputFilePath))
+				{
+					IOUtils.relay(in, fos);
+					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.println("ERROR: Could not create `" + outputFilePath.getPath() + "`.");
+					return ERROR_IOERROR;
 				}
 			}
 			
