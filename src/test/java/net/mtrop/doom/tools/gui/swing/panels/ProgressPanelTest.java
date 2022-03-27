@@ -14,7 +14,7 @@ public final class ProgressPanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		ProgressPanel panel = new ProgressPanel(48);
+		DoomToolsProgressPanel panel = new DoomToolsProgressPanel(48);
 		panel.setBorder(createEmptyBorder(8,8,8,8));
 
 		SwingUtils.apply(frame("Test", panel), 

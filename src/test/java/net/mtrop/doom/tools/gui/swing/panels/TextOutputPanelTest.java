@@ -14,7 +14,7 @@ public final class TextOutputPanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		TextOutputPanel panel = new TextOutputPanel();
+		DoomToolsTextOutputPanel panel = new DoomToolsTextOutputPanel();
 		PrintStream out = panel.getPrintStream();
 		
 		SwingUtils.apply(frame("Test",

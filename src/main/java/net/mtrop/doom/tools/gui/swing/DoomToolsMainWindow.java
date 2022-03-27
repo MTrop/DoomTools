@@ -43,7 +43,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
-import net.mtrop.doom.tools.gui.swing.panels.ProgressPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -460,7 +460,7 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
-		final ProgressPanel progressPanel = new ProgressPanel(48);
+		final DoomToolsProgressPanel progressPanel = new DoomToolsProgressPanel(48);
 		progressPanel.setActivityMessage("Please wait...");
 		progressPanel.setProgressLabel("");
 		progressPanel.setIndeterminate();

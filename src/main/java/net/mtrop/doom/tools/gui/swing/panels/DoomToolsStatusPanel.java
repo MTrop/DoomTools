@@ -18,7 +18,7 @@ import java.awt.BorderLayout;
  * A message panel that shows a status icon and a message.
  * @author Matthew Tropiano
  */
-public class StatusPanel extends JPanel
+public class DoomToolsStatusPanel extends JPanel
 {
 	private static final long serialVersionUID = -3730984456173494660L;
 
@@ -37,7 +37,7 @@ public class StatusPanel extends JPanel
 	/** Error icon. */
 	private Icon errorIcon;
 
-	public StatusPanel()
+	public DoomToolsStatusPanel()
 	{
 		this.icons = DoomToolsIconManager.get();
 		this.images = DoomToolsImageManager.get();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Black Rook Software
+ * Copyright (c) 2021-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -9,9 +9,12 @@ package net.mtrop.doom.tools.struct.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.BiFunction;
 
 /**
@@ -46,7 +49,7 @@ public final class EnumUtils
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class. 
 	 * @param keyProviderFunc the function that fetches the corresponding id to use for the provided enum value. First parameter is the ordinal from {@link Enum#ordinal()}.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <C extends Comparable<C>, E extends Enum<E>> SortedMap<C, E> createMap(Class<E> enumClass, BiFunction<Integer, E, C> keyProviderFunc)
 	{
@@ -58,7 +61,7 @@ public final class EnumUtils
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class. 
 	 * @param idProviderFunc the function that fetches the corresponding id to use for the provided enum value. First parameter is the ordinal from {@link Enum#ordinal()}.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<Integer, E> createIntegerMap(Class<E> enumClass, BiFunction<Integer, E, Integer> idProviderFunc)
 	{
@@ -69,7 +72,7 @@ public final class EnumUtils
 	 * Turns a set of enums into a map of ordinal to enum value.
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class. 
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<Integer, E> createOrdinalMap(Class<E> enumClass)
 	{
@@ -82,7 +85,7 @@ public final class EnumUtils
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class. 
 	 * @param offset the offset to add to each ordinal.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<Integer, E> createOrdinalMap(Class<E> enumClass, final int offset)
 	{
@@ -94,7 +97,7 @@ public final class EnumUtils
 	 * The Strings used are the enum's {@link Enum#name()}.
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<String, E> createNameMap(Class<E> enumClass)
 	{
@@ -106,7 +109,7 @@ public final class EnumUtils
 	 * The Strings used are the enum's {@link Enum#name()}.
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<String, E> createCaseInsensitiveNameMap(Class<E> enumClass)
 	{
@@ -118,13 +121,60 @@ public final class EnumUtils
 	 * @param <E> an Enum type.
 	 * @param enumClass the Enum class.
 	 * @param nameProviderFunc the function that fetches the corresponding string to use for the provided enum value. First parameter is the ordinal from {@link Enum#ordinal()}.
-	 * @return a new map.
+	 * @return the resultant, unmodifiable map.
 	 */
 	public static <E extends Enum<E>> SortedMap<String, E> createCaseInsensitiveEnumMap(Class<E> enumClass, BiFunction<Integer, E, String> nameProviderFunc)
 	{
 		return Collections.unmodifiableSortedMap(fillEnumMap(invokeValues(enumClass), new TreeMap<>(String.CASE_INSENSITIVE_ORDER), nameProviderFunc));
 	}
 
+	/**
+	 * Turns a set of enums into a sorted set that contains them, sorted by their declared name.
+	 * @param <E> an Enum type.
+	 * @param enumClass the Enum class.
+	 * @return the resultant, unmodifiable set.
+	 */
+	public static <E extends Enum<E>> SortedSet<E> createNameSortedSet(Class<E> enumClass)
+	{
+		return createSortedSet(enumClass, (a, b) -> a.name().compareTo(b.name()));
+	}
+	
+	/**
+	 * Turns a set of enums into a sorted set that contains them, sorted by their declared name, case-insensitively.
+	 * @param <E> an Enum type.
+	 * @param enumClass the Enum class.
+	 * @return the resultant, unmodifiable set.
+	 */
+	public static <E extends Enum<E>> SortedSet<E> createCaseInsensitiveNameSortedSet(Class<E> enumClass)
+	{
+		return createSortedSet(enumClass, (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
+	}
+	
+	/**
+	 * Turns a set of enums into a sorted set that contains them, sorted by their ordinal value.
+	 * @param <E> an Enum type.
+	 * @param enumClass the Enum class.
+	 * @return the resultant, unmodifiable set.
+	 */
+	public static <E extends Enum<E>> SortedSet<E> createOrdinalSortedSet(Class<E> enumClass)
+	{
+		return createSortedSet(enumClass, (a, b) -> a.ordinal() - b.ordinal());
+	}
+	
+	/**
+	 * Turns a set of enums into a sorted set that contains them, sorted by their ordinal value.
+	 * WARNING: The comparator is used by a sorted set to determine equality, too, so be careful that you don't
+	 * exclude enums that you don't mean to!
+	 * @param <E> an Enum type.
+	 * @param enumClass the Enum class.
+	 * @param comparator the comparator to use for sorting.
+	 * @return the resultant, unmodifiable set.
+	 */
+	public static <E extends Enum<E>> SortedSet<E> createSortedSet(Class<E> enumClass, final Comparator<E> comparator)
+	{
+		return Collections.unmodifiableSortedSet(fillEnumSortedSet(invokeValues(enumClass), new TreeSet<>(comparator)));
+	}
+	
 	@SuppressWarnings("unchecked")
 	private static <E extends Enum<E>> E[] invokeValues(Class<E> enumClass)
 	{
@@ -152,6 +202,14 @@ public final class EnumUtils
 		for (int i = 0; i < values.length; i++)
 			targetMap.put(keyProvider.apply(i, values[i]), values[i]);
 		return targetMap;
+	}
+	
+	// Fills a map and returns the map reference.
+	private static <E extends Enum<E>, K, S extends SortedSet<E>> S fillEnumSortedSet(E[] values, S targetSet)
+	{
+		for (int i = 0; i < values.length; i++)
+			targetSet.add(values[i]);
+		return targetSet;
 	}
 	
 }

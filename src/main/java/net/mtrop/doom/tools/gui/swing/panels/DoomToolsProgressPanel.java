@@ -15,11 +15,11 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
  * A progress panel that displays a message and a progress bar.
  * @author Matthew Tropiano
  */
-public class ProgressPanel extends JPanel 
+public class DoomToolsProgressPanel extends JPanel 
 {
 	private static final long serialVersionUID = 4039975713920529279L;
 	
-	private StatusPanel statusPanel;
+	private DoomToolsStatusPanel statusPanel;
 	private JProgressBar progressBar;
 	private JLabel progressLabel;
 	
@@ -27,9 +27,9 @@ public class ProgressPanel extends JPanel
 	 * Creates a progress panel.
 	 * @param progressLabelWidth width of the progress label.
 	 */
-	public ProgressPanel(int progressLabelWidth)
+	public DoomToolsProgressPanel(int progressLabelWidth)
 	{
-		this.statusPanel = new StatusPanel();
+		this.statusPanel = new DoomToolsStatusPanel();
 		this.progressBar = progressBar();
 		this.progressLabel = SwingUtils.apply(label(JLabel.TRAILING, ""), 
 			(label) -> label.setPreferredSize(dimension(progressLabelWidth, 32))

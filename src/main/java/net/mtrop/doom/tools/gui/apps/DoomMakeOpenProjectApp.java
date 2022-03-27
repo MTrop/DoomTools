@@ -34,8 +34,8 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.gui.swing.panels.StatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.TextOutputPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -81,7 +81,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     /** Target run action. */
     private Action targetRunAction;
     /** Status messages. */
-    private StatusPanel statusPanel;
+    private DoomToolsStatusPanel statusPanel;
 
 	// Fields
     
@@ -132,7 +132,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		
 		this.targetRunAction = actionItem(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
 
-		this.statusPanel = new StatusPanel();
+		this.statusPanel = new DoomToolsStatusPanel();
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
 		this.projectDirectory = targetDirectory;
@@ -459,8 +459,8 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		// TODO: Break out into generic modal (for other utilities).
 		
 		// Show output.
-		final TextOutputPanel outputPanel = new TextOutputPanel();
-		final StatusPanel status = new StatusPanel();
+		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
+		final DoomToolsStatusPanel status = new DoomToolsStatusPanel();
 		status.setActivityMessage(modalActivityStatusMessage);
 		
 		Modal<Void> outputModal = modal(

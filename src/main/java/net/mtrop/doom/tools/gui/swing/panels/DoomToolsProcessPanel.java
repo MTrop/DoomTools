@@ -16,14 +16,14 @@ public class DoomToolsProcessPanel extends JPanel
 	private static final long serialVersionUID = 3116234535666493956L;
 	
 	/** Text output panel. */
-	private TextOutputPanel textOutputPanel;
+	private DoomToolsTextOutputPanel textOutputPanel;
 	/** Message label. */
-	private StatusPanel statusPanel;
+	private DoomToolsStatusPanel statusPanel;
 
 	public DoomToolsProcessPanel()
 	{
-		this.textOutputPanel = new TextOutputPanel();
-		this.statusPanel = new StatusPanel();
+		this.textOutputPanel = new DoomToolsTextOutputPanel();
+		this.statusPanel = new DoomToolsStatusPanel();
 		
 		containerOf(this, new BorderLayout(0, 4), 
 			node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, textOutputPanel)),

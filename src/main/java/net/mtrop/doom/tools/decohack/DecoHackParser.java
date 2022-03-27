@@ -24,15 +24,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
-import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
-import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
-import net.mtrop.doom.tools.decohack.contexts.PatchDoomUnityContext;
-import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
-import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
-import net.mtrop.doom.tools.decohack.contexts.PatchUltimateDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -50,7 +45,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.TypeGuess;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.Type;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
@@ -176,14 +171,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_SWAP = "swap";
 
 	private static final String KEYWORD_USING = "using";
-	private static final String KEYWORD_DOOM19 = "doom19";
-	private static final String KEYWORD_UDOOM19 = "udoom19";
-	private static final String KEYWORD_DOOMUNITY = "doomunity";
-	private static final String KEYWORD_BOOM = "boom";
-	private static final String KEYWORD_MBF = "mbf";
-	private static final String KEYWORD_EXTENDED = "extended";
 	private static final String KEYWORD_MBF21 = "mbf21";
-	private static final String KEYWORD_DSDHACKED = "dsdhacked";
 	
 	private static final String KEYWORD_NULL = "null";
 
@@ -324,29 +312,27 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		}
 		
-		if (matchIdentifierIgnoreCase(KEYWORD_DOOM19))
-			return new PatchDoom19Context();
-		else if (matchIdentifierIgnoreCase(KEYWORD_UDOOM19))
-			return new PatchUltimateDoom19Context();
-		else if (matchIdentifierIgnoreCase(KEYWORD_DOOMUNITY))
-			return new PatchDoomUnityContext();
-		else if (matchIdentifierIgnoreCase(KEYWORD_BOOM))
-			return new PatchBoomContext();
-		else if (matchIdentifierIgnoreCase(KEYWORD_MBF))
-			return new PatchMBFContext();
-		else if (matchIdentifierIgnoreCase(KEYWORD_EXTENDED))
-			return new PatchExtendedContext();
-		else if (matchIdentifierIgnoreCase(KEYWORD_MBF21))
-			return new PatchMBF21Context();
-		else if (matchIdentifierIgnoreCase(KEYWORD_DSDHACKED))
-			return new PatchDSDHackedContext();
-		else
+		DecoHackPatchType patchType = null;
+		String patchName;
+		if ((patchName = matchIdentifier()) != null)
+			patchType = DecoHackPatchType.getByKeyword(patchName);
+		
+		if (patchType == null)
 		{
-			addErrorMessage("Expected valid patch format type (%s, %s, %s, %s, %s, %s, %s).", 
-				KEYWORD_DOOM19, KEYWORD_UDOOM19, KEYWORD_BOOM, KEYWORD_MBF, KEYWORD_EXTENDED, KEYWORD_MBF21, KEYWORD_DSDHACKED
-			);
+			StringBuilder sb = new StringBuilder();
+			DecoHackPatchType[] values = DecoHackPatchType.values();
+			for (int i = 0; i < values.length; i++) 
+			{
+				sb.append(values[i].getKeyword());
+				if (i < values.length - 1)
+					sb.append(", ");
+			}
+			
+			addErrorMessage("Expected valid patch format type (%s).", sb.toString());
 			return null;
 		}
+		
+		return Common.create(patchType.getPatchClass());
 	}
 
 	/**
@@ -1607,7 +1593,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 			{
-				if ((value = (Integer)matchNumericExpression(context, true)) == null)
+				if ((value = (Integer)matchNumericExpression(context, thing, Type.FLAGS)) == null)
 				{
 					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_FLAGS);
 					return false;
@@ -2903,9 +2889,13 @@ public final class DecoHackParser extends Lexer.Parser
 	private Object parseStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
+		{
 			return parseThingStateIndex(context);
+		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+		{
 			return parseWeaponStateIndex(context);
+		}
 		else if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			if (actor == null)
@@ -2925,7 +2915,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return matchString();
 		}
 		else
+		{
 			return matchStateIndex(context);
+		}
 	}
 
 	// Parses a thing or thing state index.
@@ -2992,7 +2984,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a weapon state index.
-	private Integer parseWeaponStateIndex(AbstractPatchContext<?> context)
+	private Integer parseWeaponOrWeaponStateIndex(AbstractPatchContext<?> context)
 	{
 		String labelName;
 		Integer index;
@@ -3000,12 +2992,10 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		
 		DEHWeapon weapon = context.getWeapon(index);
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			addErrorMessage("Expected weapon label name.");
-			return null;
-		}
 		
+		if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return parseWeaponLabel(context, index);
+
 		labelName = currentToken().getLexeme();
 	
 		Integer stateIndex;
@@ -3035,6 +3025,56 @@ public final class DecoHackParser extends Lexer.Parser
 		return stateIndex;
 	}
 
+	// Parses a weapon state index.
+	private Integer parseWeaponStateIndex(AbstractPatchContext<?> context) 
+	{
+		Integer index;
+		if ((index = matchWeaponIndex(context)) == null)
+			return null;
+		
+		return parseWeaponLabel(context, index);
+	}
+
+	// Parses a weapon's label.
+	private Integer parseWeaponLabel(AbstractPatchContext<?> context, Integer index) 
+	{
+		String labelName;
+		DEHWeapon weapon = context.getWeapon(index);
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected weapon label name.");
+			return null;
+		}
+		
+		labelName = currentToken().getLexeme();
+
+		Integer stateIndex;
+		if ((stateIndex = weapon.getLabel(labelName)) == 0)
+		{
+			String[] labels = weapon.getLabels();
+			StringBuilder sb;
+			if (labels.length == 0)
+			{
+				sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+				sb.append(index);
+				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
+			}
+			else
+			{
+				sb = new StringBuilder("Expected a valid weapon state label for weapon ");
+				sb.append(index).append(": ");
+				sb.append(Arrays.toString(labels));
+				sb.append(".");
+			}
+			addErrorMessage(sb.toString());
+			return null;
+		}
+		
+		nextToken();
+		
+		return stateIndex;
+	}
+	
 	// Parses a sound index.
 	private Integer parseSoundIndex(AbstractPatchContext<?> context)
 	{
@@ -3249,48 +3289,18 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a pointer argument value.
 	private Object parseActionPointerParameterValue(DEHActionPointerParam paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
-		Object value;
-
-		// Force value
+		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 			return parseThingOrThingStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
-			return parseWeaponStateIndex(context);
+			return parseWeaponOrWeaponStateIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 			return parseSoundIndex(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
-			return matchNumericExpression(context, true);
+			return matchNumericExpression(context, actor, Type.FLAGS);
 		// Guess it.
-		else if ((value = matchNumericExpression(context, paramType.getTypeGuess() == TypeGuess.FLAGS)) != null)
-		{
-			// TODO: Actually guess it. Use DEHActionPointerParam.TypeGuess to interpret a String value.
-			
-			if (value instanceof String)
-			{
-				String labelName = (String)value;
-				if (actor != null)
-				{
-					if (actor.hasLabel(labelName))
-						return actor.getLabel(labelName);
-					else
-						return labelName;
-				}
-				else
-				{
-					addErrorMessage("Expected valid parameter value.");
-					return null;
-				}				
-			}
-			else
-			{
-				return (Integer)value;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected parameter.");
-			return null;
-		}
+		else 
+			return matchNumericExpression(context, actor, paramType.getTypeCheck());
 	}
 
 	// Parses a next state line.
@@ -3781,17 +3791,18 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 
-		if (!context.supports(DEHFeatureLevel.MBF21))
-		{
-			addErrorMessage("MBF21 thing flags are not available. Not an MBF21 patch.");
-			return null;
-		}
-
 		Integer out = null;
 		DEHThingMBF21Flag flag;
 		if ((flag = DEHThingMBF21Flag.getByMnemonic(currentToken().getLexeme())) != null)
 		{
 			out = flag.getValue();
+
+			if (!context.supports(DEHFeatureLevel.MBF21))
+			{
+				addErrorMessage("MBF21 thing flags are not available. Not an MBF21 patch.");
+				return null;
+			}
+
 			nextToken();
 		}
 		
@@ -3806,17 +3817,18 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 		
-		if (!context.supports(DEHFeatureLevel.MBF21))
-		{
-			addErrorMessage("MBF21 weapon flags are not available. Not an MBF21 patch.");
-			return null;
-		}
-
 		Integer out = null;
 		DEHWeaponMBF21Flag flag;
 		if ((flag = DEHWeaponMBF21Flag.getByMnemonic(currentToken().getLexeme())) != null)
 		{
 			out = flag.getValue();
+
+			if (!context.supports(DEHFeatureLevel.MBF21))
+			{
+				addErrorMessage("MBF21 weapon flags are not available. Not an MBF21 patch.");
+				return null;
+			}
+
 			nextToken();
 		}
 		
@@ -3913,102 +3925,182 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches and parses a numeric expression.
-	// Figure out a better way to force flag interpretation.
-	private Object matchNumericExpression(AbstractPatchContext<?> context, boolean forceFlags)
+	// STATE type can return a String. Everything else is an Integer, or null.
+	private Object matchNumericExpression(AbstractPatchContext<?> context, DEHActor<?> actor, Type typeCheck)
 	{
-		Integer value;
 		Integer out = null;
 		
-		// force label/mnemonic.
-		if (!forceFlags && currentType(DecoHackKernel.TYPE_STRING))
+		switch (typeCheck)
 		{
-			String labelName = currentToken().getLexeme();
-			nextToken();
-			return labelName;
-		}
-		
-		if (forceFlags && currentType(DecoHackKernel.TYPE_STRING))
-		{
-			addErrorMessage("Unexpected label. Not in a thing/weapon block.");
-			return null;
-		}
-		
-		while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			if (out == null)
-				out = 0;
-			
-			if (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER))
+			default:
 			{
-				if ((value = matchNumeric()) == null)
+				addErrorMessage("INTERNAL ERROR: Unrecognized parameter type.");
+				return null;
+			}
+			
+			case INTEGER:
+			{
+				if ((out = matchInteger()) == null)
 				{
-					addErrorMessage("Expected numeric value.");
+					addErrorMessage("Expected integer value.");
 					return null;
 				}
-				out |= value;
-			}
-			else if ((value = matchThingFlagMnemonic()) != null)
-			{
-				out |= value;
-			}
-			else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
-			{
-				out |= value;
-			}
-			else if ((value = matchWeaponMBF21FlagMnemonic(context)) != null)
-			{
-				out |= value;
-			}
-			else if (forceFlags)
-			{
-				addErrorMessage("Expected valid flag mnemonic.");
-				return null;
-			}
-			else // expression not started. Maybe label.
-			{
-				return matchIdentifier(); 
+				return out;
 			}
 			
-			if (!matchType(DecoHackKernel.TYPE_PIPE))
-				break;
+			case FIXED:
+			{
+				if ((out = matchFixed()) == null)
+				{
+					addErrorMessage("Expected fixed-point value.");
+					return null;
+				}
+				return out;
+			}
 			
-			forceFlags = true;
+			case FLAGS:
+			{
+				Integer value;
+				while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
+				{
+					if (out == null)
+						out = 0;
+					
+					if (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER))
+					{
+						if ((value = matchInteger()) == null)
+						{
+							addErrorMessage("Expected integer value.");
+							return null;
+						}
+						out |= value;
+					}
+					else if ((value = matchThingFlagMnemonic()) != null)
+					{
+						out |= value;
+					}
+					else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
+					{
+						out |= value;
+					}
+					else if ((value = matchWeaponMBF21FlagMnemonic(context)) != null)
+					{
+						out |= value;
+					}
+					else // expression not started. Maybe label.
+					{
+						addErrorMessage("Expected valid flag mnemonic or integer.");
+						return null;
+					}
+					
+					if (!currentType(DecoHackKernel.TYPE_PIPE, DecoHackKernel.TYPE_PLUS))
+						break;
+					else
+						nextToken();
+				}
+				
+				return out;
+			}
+			
+			case STATE:
+			{
+				Object value;
+				if ((value = parseStateIndex(context, actor)) == null)
+				{
+					addErrorMessage("Expected valid state: positive integer, or thing/weapon/local state label.");
+					return null;
+				}
+				
+				return value;
+			}
+			
+			case THING:
+			{
+				Object value;
+				if ((value = matchThingIndex(context)) == null)
+				{
+					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
+					return null;
+				}
+				
+				return value;
+			}
+			
+			case WEAPON:
+			{
+				Object value;
+				if ((value = matchWeaponIndex(context)) == null)
+				{
+					addErrorMessage("Expected valid weapon index: positive integer, or weapon alias.");
+					return null;
+				}
+				
+				return value;
+			}
+			
+			case SOUND:
+			{
+				Object value;
+				if ((value = parseSoundIndex(context)) == null)
+					return null;
+				
+				return value;
+			}
 		}
-		
-		return out;
 	}
 
-	// Matches a numeric value, and returns an integer or a fixed-point value. 
-	private Integer matchNumeric()
-	{
-		if (matchType(DecoHackKernel.TYPE_DASH))
-		{
-			Integer out;
-			if ((out = matchPositiveNumeric()) == null)
-				return null;
-			return -out;
-		}
-		return matchPositiveNumeric();
-	}
-	
-	// Matches a positive numeric value, and returns an integer or a fixed-point value. 
-	private Integer matchPositiveNumeric()
+	// Matches a positive integer.
+	private Integer matchPositiveInteger()
 	{
 		if (!currentType(DecoHackKernel.TYPE_NUMBER))
 			return null;
-	
+		
 		String lexeme = currentToken().getLexeme();
+		// Always take hex numbers as raw.
 		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
 		{
+			long v = parseUnsignedHexLong(lexeme.substring(2));
+			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
+				return null;
+			nextToken();
+			return (int)v;
+		}
+		// Fixed - coerce to whole number.
+		else if (lexeme.contains("."))
+		{
 			try {
-				long v = parseUnsignedHexLong(lexeme.substring(2));
-				if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
-					return null;
+				int out = (int)(Double.parseDouble(lexeme));
 				nextToken();
-				return (int)v;
+				return out;
 			} catch (NumberFormatException e) {
 				return null;
 			}
+		}
+		else
+		{
+			long v = Long.parseLong(lexeme);
+			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
+				return null;
+			nextToken();
+			return (int)v;
+		}
+	}
+
+	// Matches a positive fixed-point number.
+	private Integer matchPositiveFixed()
+	{
+		if (!currentType(DecoHackKernel.TYPE_NUMBER))
+			return null;
+		
+		String lexeme = currentToken().getLexeme();
+		// Always take hex numbers as raw.
+		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
+		{
+			long v = parseUnsignedHexLong(lexeme.substring(2));
+			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
+				return null;
+			nextToken();
+			return ((int)v);
 		}
 		else if (lexeme.contains("."))
 		{
@@ -4020,46 +4112,14 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			}
 		}
-		else
-		{
-			try {
-				long v = Long.parseLong(lexeme);
-				if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
-					return null;
-				nextToken();
-				return (int)v;
-			} catch (NumberFormatException e) {
-				return null;
-			}
-		}
-	}
-	
-	// Matches a positive integer.
-	private Integer matchPositiveInteger()
-	{
-		if (!currentType(DecoHackKernel.TYPE_NUMBER))
-			return null;
-		
-		String lexeme = currentToken().getLexeme();
-		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
-		{
-			long v = parseUnsignedHexLong(lexeme.substring(2));
-			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
-				return null;
-			nextToken();
-			return (int)v;
-		}
-		else if (lexeme.contains("."))
-		{
-			return null;
-		}
+		// Whole number - coerce to fixed.
 		else
 		{
 			long v = Long.parseLong(lexeme);
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
 			nextToken();
-			return (int)v;
+			return ((int)v) << 16;
 		}
 	}
 
@@ -4074,6 +4134,19 @@ public final class DecoHackParser extends Lexer.Parser
 			return -out;
 		}
 		return matchPositiveInteger();
+	}
+
+	// Matches a fixed-point value.
+	private Integer matchFixed()
+	{
+		if (matchType(DecoHackKernel.TYPE_DASH))
+		{
+			Integer out;
+			if ((out = matchPositiveFixed()) == null)
+				return null;
+			return -out;
+		}
+		return matchPositiveFixed();
 	}
 
 	// Matches a boolean.
@@ -4126,8 +4199,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		// TODO: Further check range for THING, SOUND, STATE TypeGuess (FLAGS is just an integer).
-
 		return true;
 	}
 	

@@ -24,11 +24,13 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.BiPredicate;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
@@ -64,6 +66,7 @@ public final class DecoHackMain
 	private static final String SWITCH_HELPFULL = "--help-full";
 	private static final String SWITCH_VERSION = "--version";
 
+	private static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
 	private static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
 	private static final String SWITCH_DUMPRESOURCE = "--dump-resource";
 	
@@ -87,6 +90,7 @@ public final class DecoHackMain
 		private boolean help;
 		private boolean full;
 		private boolean version;
+		private boolean dumpActionPointers;
 		private String dumpResource;
 
 		private List<File> inFiles;
@@ -103,6 +107,8 @@ public final class DecoHackMain
 			this.stderr = null;
 			this.help = false;
 			this.version = false;
+			this.dumpActionPointers = false;
+			this.dumpResource = null;
 
 			this.inFiles = new LinkedList<>();
 			
@@ -194,6 +200,47 @@ public final class DecoHackMain
 			if (options.version)
 			{
 				splash(options.stdout);
+				return ERROR_NONE;
+			}
+			
+			if (options.dumpActionPointers)
+			{
+				final BiPredicate<DEHActionPointer, DEHActionPointer> BREAK = (p1, p2) -> 
+					p1.isWeapon() != p2.isWeapon() || p1.getType() != p2.getType(); 
+				
+				boolean firstCategory = true;
+				DEHActionPointer prev = null;
+				for (DEHActionPointer pointer : DEHActionPointer.values())
+				{
+					// Will skip A_NULL
+					if (prev != null)
+					{
+						if (BREAK.test(prev, pointer))
+						{
+							if (!firstCategory)
+								options.stdout.print("\n");
+							
+							options.stdout.print("# ");
+							options.stdout.print(pointer.getType().name());
+							options.stdout.println(pointer.isWeapon() ? " Weapon Pointer" : " Thing Pointer");
+							firstCategory = false;
+						}
+						
+						options.stdout.print("A_");
+						options.stdout.print(pointer.getMnemonic());
+						options.stdout.print("(");
+						for (int i = 0; i < pointer.getParams().length; i++)
+						{
+							options.stdout.print(pointer.getParam(i).name());
+							if (i < pointer.getParams().length - 1)
+								options.stdout.print(", ");
+						}
+						options.stdout.println(")");
+					}
+
+					prev = pointer;
+				}
+				
 				return ERROR_NONE;
 			}
 			
@@ -387,6 +434,8 @@ public final class DecoHackMain
 					}
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equals(SWITCH_DUMPPOINTERS))
+						options.dumpActionPointers = true;
 					else if (arg.equals(SWITCH_DUMPCONSTANTS))
 						options.dumpResource = RESOURCE_HELP_CONSTANTS;
 					else if (arg.equals(SWITCH_DUMPRESOURCE))
@@ -533,6 +582,9 @@ public final class DecoHackMain
 		out.println();
 		out.println("    --dump-resource [path]   Dumps an internal resource (starting with");
 		out.println("                             \"decohack/\" ) to STDOUT.");
+		out.println();
+		out.println("    --dump-pointers          Dumps the list of Action Pointers and their");
+		out.println("                             parameter types to STDOUT.");
 		out.println();
 		out.println("[filenames]:");
 		out.println("    <filename> ...           The input filenames. One or more can be added,");

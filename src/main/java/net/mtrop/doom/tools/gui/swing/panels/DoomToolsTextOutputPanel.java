@@ -11,7 +11,7 @@ import javax.swing.JTextArea;
  * Text output panel.
  * @author Matthew Tropiano
  */
-public class TextOutputPanel extends JTextArea
+public class DoomToolsTextOutputPanel extends JTextArea
 {
 	private static final long serialVersionUID = -1405465151452714437L;
 
@@ -20,7 +20,7 @@ public class TextOutputPanel extends JTextArea
 	/**
 	 * Creates a new output panel.
 	 */
-	public TextOutputPanel()
+	public DoomToolsTextOutputPanel()
 	{
 		super(25, 84);
 		setFont(DEFAULT_FONT);

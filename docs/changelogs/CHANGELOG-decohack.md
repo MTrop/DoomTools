@@ -4,7 +4,9 @@ DECOHack
 ### Changed for 0.24.0
 
 * `Added` A patch format for the Unity port, `doomunity`, which is `udoom19` but with no string limits (thanks, Xaser!). (PR #65).
+* `Added` A way to dump all known action pointers to DECOHack to STDOUT via the `--dump-pointers` runtime switch.
 * `Fixed` MBF21's `A_SeekTracer` parameters needed to check for FIXED angles, not UINT.
+* `Fixed` Some Action Pointer parameter interpretation - if a field needs a fixed expression, integer values are coerced to fixed, and vice-versa.
 * `Changed` Stricter (but safer) checking for types in parameters, such as Fixed values, and auto-detecting sounds, things, and states.
 
 

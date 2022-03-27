@@ -11,58 +11,56 @@ package net.mtrop.doom.tools.decohack.data.enums;
  */
 public enum DEHActionPointerParam
 {
-	NONE        (null,            false, 0, 0),
-	BOOL        (null,            false, 0, 1),
-	BYTE        (null,            false, 0, 255),
-	SHORT       (null,            false, -32767, 32767),
-	INT         (null,            false, Integer.MIN_VALUE, Integer.MAX_VALUE),
-	UINT        (null,            false, 0, Integer.MAX_VALUE),
-	ANGLE_INT   (null,            false, -359, 359),
-	ANGLE_UINT  (null,            false, 0, 359),
-	ANGLE_FIXED (null,            true,  (-360 << 16) + 1, (360 << 16) - 1),
-	FIXED       (null,            true,  Integer.MIN_VALUE, Integer.MAX_VALUE),
-	STATE       (TypeGuess.STATE, false, 0, Integer.MAX_VALUE),
-	THING       (TypeGuess.THING, false, 0, Integer.MAX_VALUE),
-	SOUND       (TypeGuess.SOUND, false, 0, Integer.MAX_VALUE),
-	FLAGS       (TypeGuess.FLAGS, false, Integer.MIN_VALUE, Integer.MAX_VALUE),
+	NONE        (Type.INTEGER, 0, 0),
+	BOOL        (Type.INTEGER, 0, 1),
+	BYTE        (Type.INTEGER, 0, 255),
+	SHORT       (Type.INTEGER, -32767, 32767),
+	USHORT      (Type.INTEGER, 0, 65535),
+	INT         (Type.INTEGER, Integer.MIN_VALUE, Integer.MAX_VALUE),
+	UINT        (Type.INTEGER, 0, Integer.MAX_VALUE),
+	ANGLE_INT   (Type.INTEGER, -359, 359),
+	ANGLE_UINT  (Type.INTEGER, 0, 359),
+	ANGLE_FIXED (Type.FIXED,   (-360 << 16) + 1, (360 << 16) - 1),
+	FIXED       (Type.FIXED,   Integer.MIN_VALUE, Integer.MAX_VALUE),
+	STATE       (Type.STATE,   0, Integer.MAX_VALUE),
+	THING       (Type.THING,   0, Integer.MAX_VALUE),
+	WEAPON      (Type.WEAPON,  0, Integer.MAX_VALUE),
+	SOUND       (Type.SOUND,   0, Integer.MAX_VALUE),
+	FLAGS       (Type.FLAGS,   Integer.MIN_VALUE, Integer.MAX_VALUE),
 	;
 
-	public enum TypeGuess
+	public enum Type
 	{
+		INTEGER,
+		FIXED,
+		FLAGS,
 		STATE,
 		THING,
-		SOUND,
-		FLAGS
+		WEAPON,
+		SOUND
 	}
 	
-	private TypeGuess typeGuess;
-	private boolean fixed;
+	private Type typeCheck;
 	private int valueMin;
 	private int valueMax;
 
 	private DEHActionPointerParam(int valueMin, int valueMax)
 	{
-		this(null, false, valueMin, valueMax);
+		this(Type.INTEGER, valueMin, valueMax);
 	}
 
-	private DEHActionPointerParam(TypeGuess typeGuess, boolean fixed, int valueMin, int valueMax)
+	private DEHActionPointerParam(Type typeGuess, int valueMin, int valueMax)
 	{
-		this.typeGuess = typeGuess;
-		this.fixed = fixed;
+		this.typeCheck = typeGuess;
 		this.valueMin = valueMin;
 		this.valueMax = valueMax;
 	}
 
-	public TypeGuess getTypeGuess() 
+	public Type getTypeCheck() 
 	{
-		return typeGuess;
+		return typeCheck;
 	}
 	
-	public boolean isFixed() 
-	{
-		return fixed;
-	}
-
 	public int getValueMin()
 	{
 		return valueMin;
