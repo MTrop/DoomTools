@@ -295,7 +295,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 						language.getText("doommake.newproject.directory.browse.title"), 
 						current, 
 						language.getText("doommake.newproject.directory.browse.accept"), 
-						FileFilters.DIRECTORIES
+						FileFilters.ALL
 					), 
 					(selected) -> { 
 						stringValue.set(selected == null ? "" : selected.getAbsolutePath());
