@@ -9,7 +9,7 @@ Copyright (c) 2019-2022 Matt Tropiano
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.14.1+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
-[FlatLaF](https://www.formdev.com/flatlaf/) 2.0.2+
+[FlatLaF](https://www.formdev.com/flatlaf/) 2.0.2+  
 [RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.0.2+
 
 ### Required Modules
