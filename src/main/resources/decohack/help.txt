@@ -275,8 +275,8 @@ Action pointers understand what is expected in each parameter - you can just
 refer to thing aliases, labels, and sounds or what-have-you as is and it
 will attempt to figure it out:
 
-	A_Spawn(Demon, 0.0)                           // Thing alias
-	A_Scratch(10, punch)                          // Sound name
+    A_Spawn(Demon, 0.0)                           // Thing alias
+    A_Scratch(10, punch)                          // Sound name
     A_RandomJump(pain2, 128)                      // State label
     A_HealChase(heal, slop)                       // State label, sound name
     A_WeaponSound(shotg3, 1)                      // Sound name
