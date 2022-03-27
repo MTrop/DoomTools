@@ -1,37 +1,36 @@
-const djProjectForm = $DJ.id('project-form');
-const djProjectName = $DJ.id('project-name');
-const djCMDName = $DJ.id('cmd-name');
-const djCMDTemplates = $DJ.id('cmd-templates');
-const djMoreStuffToggle = $DJ.id('more-stuff-toggle');
-const djMoreStuffContent = $DJ.id('more-stuff-content');
-
-const djTemplateSections = $DJ.class('template-section');
+const group = $DJ.createGroups({
+	projectForm: '#project-form',
+	projectName: '#project-name',
+	cmdName: '#cmd-name',
+	cmdTemplates: '#cmd-templates',
+	templateSections: '.template-section',
+});
 
 function call(funcRef) {
 	return () => { funcRef(); };
 }
 
 function refreshView() {
-	const projectForm = djProjectForm.form();
+	const form = group.projectForm.form();
 
 	const args = [];
-	projectForm.assets && args.push(projectForm.assets);
-	projectForm.patch && args.push(projectForm.patch);
-	projectForm.textures && args.push(projectForm.textures);
-	projectForm.maps && args.push(projectForm.maps);
-	projectForm.scm && args.push(projectForm.scm);
-	projectForm.run && args.push(projectForm.run);
+	form.assets && args.push(form.assets);
+	form.patch && args.push(form.patch);
+	form.textures && args.push(form.textures);
+	form.maps && args.push(form.maps);
+	form.scm && args.push(form.scm);
+	form.run && args.push(form.run);
 
-	djCMDName.each(function(){
-		const n = projectForm.project;
+	group.cmdName.each(function(){
+		const n = form.project;
 		this.innerHTML = n.indexOf(' ') > 0 || n.length === 0 ? '"' + n + '"' : n;
 	});
 
-	djCMDTemplates.each(function(){
+	group.cmdTemplates.each(function(){
 		this.innerHTML = args.join(' ');
 	});
 
-	djTemplateSections.classRemove('visible-section');
+	group.templateSections.classRemove('visible-section');
 	if (args.length) {
 		$DJ.class('section-all').classAdd('visible-section');
 	}
@@ -41,9 +40,9 @@ function refreshView() {
 }
 
 $DJMain(() => {
-	djProjectName.focus(function() {
+	group.projectName.focus(function() {
 		this.setSelectionRange(0, this.value.length);
 	});
-	djProjectForm.change(call(refreshView));
+	group.projectForm.change(call(refreshView));
 	refreshView();
 });

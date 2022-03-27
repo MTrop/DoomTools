@@ -119,7 +119,7 @@ check entry main()
         "maintitle": "DoomTools Help",
         "description": "The generated DECOHack Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
-        "pageurl": "https://mtrop.github.io/DoomTools/decohack.html"
+        "pageurl": "https://mtrop.github.io/DoomTools/doomtools.html"
     });
     dumpUtil("decohack",  "--help-full", file("decohack.html"), {
         "title": "DoomTools - DECOHack Help",

@@ -46,10 +46,11 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-DoomMake v0.14.0 by Matt Tropiano
+DoomMake v0.15.0 by Matt Tropiano
 (using DoomStruct v2.14.1 , WadScript v1.4.0, RookScript v1.14.1, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
+                [--gui | --new-project-gui]
                 [--list-templates | -t]
                 [--help | -h | --version]
                 [--function-help | --function-help-markdown]
@@ -93,6 +94,13 @@ Usage: doommake [target] [args] [switches]
 
 -----------------------------------------------------------------------------
 
+    --gui                          Opens this project in a graphical interface
+                                       mode.
+
+    --new-project-gui              Opens the &quot;New Project&quot; GUI.
+
+-----------------------------------------------------------------------------
+
     --script, -s [filename]        Use [filename] for the root build script.
                                        Default is &quot;doommake.script&quot;.
     --properties, -p [filename]    Use [filename] for the project properties.
@@ -116,6 +124,22 @@ Usage: doommake [target] [args] [switches]
 
     --embed                        Embeds DoomTools&#x2F;DoomMake into the current
                                        project.
+
+-----------------------------------------------------------------------------
+
+    --auto-build                   Starts DoomMake as an agent for detecting
+                                       changes in the current project and
+                                       kicking off full builds when changes
+                                       are detected.
+
+    --auto-build-verbose           Same as above, except it produces more
+                                       verbose output.
+
+While the agent is listening on a project, any attempt to run any DoomMake
+targets on that project will error out. In order to run targets, you can use:
+
+    --agent-bypass                 Bypasses agent detection. USE WITH CAUTION.
+                                       Used internally.
 
 -----------------------------------------------------------------------------
 
