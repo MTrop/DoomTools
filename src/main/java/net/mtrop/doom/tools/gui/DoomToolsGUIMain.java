@@ -133,20 +133,10 @@ public final class DoomToolsGUIMain
 	/* ==================================================================== */
 
 	/**
-	 * Adds a new application instance to the main desktop by class.
-	 * @param <A> the instance type.
-	 * @param applicationClass the application class.
-	 */
-	public static <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass)
-	{
-		startApplication(Common.create(applicationClass));
-	}
-    
-	/**
 	 * Adds a new application instance to the main desktop.
 	 * @param applicationInstance the application instance.
 	 */
-	public static void startApplication(final DoomToolsApplicationInstance applicationInstance)
+	private static void startApplication(final DoomToolsApplicationInstance applicationInstance)
 	{
 		final DoomToolsApplicationFrame frame = new DoomToolsApplicationFrame(applicationInstance, STARTER);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

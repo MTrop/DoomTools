@@ -101,7 +101,7 @@ public final class DoomToolsTaskManager
 		{
 			Thread out = new Thread(r);
 			out.setName(threadNamePrefix + threadId.getAndIncrement());
-			out.setDaemon(false);
+			out.setDaemon(true);
 			out.setPriority(Thread.NORM_PRIORITY);
 			return out;
 		}
