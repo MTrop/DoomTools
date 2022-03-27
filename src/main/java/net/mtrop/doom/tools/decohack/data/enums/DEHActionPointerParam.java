@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.data.enums;
 /**
  * Enumeration of action pointer parameter types.
  * @author Xaser Acheron
+ * @author Matthew Tropiano
  */
 public enum DEHActionPointerParam
 {
@@ -43,11 +44,6 @@ public enum DEHActionPointerParam
 	private Type typeCheck;
 	private int valueMin;
 	private int valueMax;
-
-	private DEHActionPointerParam(int valueMin, int valueMax)
-	{
-		this(Type.INTEGER, valueMin, valueMax);
-	}
 
 	private DEHActionPointerParam(Type typeGuess, int valueMin, int valueMax)
 	{

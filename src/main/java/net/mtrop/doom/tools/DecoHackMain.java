@@ -32,7 +32,6 @@ import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
-import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
 
@@ -65,6 +64,7 @@ public final class DecoHackMain
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_HELPFULL = "--help-full";
 	private static final String SWITCH_VERSION = "--version";
+	private static final String SWITCH_DRYRUN = "--dry-run";
 
 	private static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
 	private static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
@@ -92,6 +92,7 @@ public final class DecoHackMain
 		private boolean version;
 		private boolean dumpActionPointers;
 		private String dumpResource;
+		private boolean dryRun;
 
 		private List<File> inFiles;
 		
@@ -109,6 +110,7 @@ public final class DecoHackMain
 			this.version = false;
 			this.dumpActionPointers = false;
 			this.dumpResource = null;
+			this.dryRun = false;
 
 			this.inFiles = new LinkedList<>();
 			
@@ -287,22 +289,28 @@ public final class DecoHackMain
 
 			if (options.outFile == null)
 			{
-				options.stdout.printf("NOTE: Output file not specified, defaulting to %s.\n", DEFAULT_OUTFILENAME);
+				if (!options.dryRun)
+					options.stdout.printf("NOTE: Output file not specified, defaulting to %s.\n", DEFAULT_OUTFILENAME);
 				options.outFile = new File(DEFAULT_OUTFILENAME);
 			}
 
 			// Read script.
+			DecoHackParser.Result result;
 			AbstractPatchContext<?> context;
 			try 
 			{
-				context = DecoHackParser.read(options.inFiles);
+				result = DecoHackParser.read(options.inFiles);
+				context = result.getContext();
+				for (String message : result.getWarnings())
+					options.stderr.println("WARNING: " + message);
+				if (context == null)
+				{
+					for (String message : result.getErrors())
+						options.stderr.println("ERROR: " + message);
+					return ERROR_PARSEERROR;
+				}
 			} 
 			catch (PreprocessorException e) 
-			{
-				options.stderr.println("ERROR: " + e.getLocalizedMessage());
-				return ERROR_PARSEERROR;
-			} 
-			catch (DecoHackParseException e) 
 			{
 				options.stderr.println("ERROR: " + e.getLocalizedMessage());
 				return ERROR_PARSEERROR;
@@ -352,44 +360,47 @@ public final class DecoHackMain
 				options.stdout.printf("--------------------------\n");
 			}
 			
-			// Combine source.
-			if (options.outSourceFile != null)
+			if (!options.dryRun)
 			{
-				try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile)), true))
+				// Combine source.
+				if (options.outSourceFile != null)
 				{
-					for (File file : options.inFiles)
+					try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile)), true))
 					{
-						DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+						for (File file : options.inFiles)
+						{
+							DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+						}
+						options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
+					} 
+					catch (FileNotFoundException e) 
+					{
+						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+						return ERROR_IOERROR;
 					}
-					options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
+					catch (IOException e)
+					{
+						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+						return ERROR_IOERROR;
+					}
+				}
+				
+				// Write Patch.
+				try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
+				{
+					context.writePatch(writer, "Created with " + VERSION_LINE);
+					options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
 				} 
-				catch (FileNotFoundException e) 
+				catch (IOException e) 
 				{
 					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
 					return ERROR_IOERROR;
 				}
-				catch (IOException e)
+				catch (SecurityException e) 
 				{
-					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
-					return ERROR_IOERROR;
+					options.stderr.println("ERROR: Could not open input file (access denied).");
+					return ERROR_SECURITY;
 				}
-			}
-			
-			// Write Patch.
-			try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
-			{
-				context.writePatch(writer, "Created with " + VERSION_LINE);
-				options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
-			} 
-			catch (IOException e) 
-			{
-				options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
-				return ERROR_IOERROR;
-			}
-			catch (SecurityException e) 
-			{
-				options.stderr.println("ERROR: Could not open input file (access denied).");
-				return ERROR_SECURITY;
 			}
 			
 			return ERROR_NONE;
@@ -434,6 +445,8 @@ public final class DecoHackMain
 					}
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equals(SWITCH_DRYRUN))
+						options.dryRun = true;
 					else if (arg.equals(SWITCH_DUMPPOINTERS))
 						options.dumpActionPointers = true;
 					else if (arg.equals(SWITCH_DUMPCONSTANTS))
@@ -594,6 +607,9 @@ public final class DecoHackMain
 		out.println("    --output [file]          Outputs the resultant patch to [file].");
 		out.println("    -o [file]");
 		out.println();
+		out.println("    --source-output [file]   Outputs the combined source to a single file.");
+		out.println("    -s [file]");
+		out.println();
 		out.println("    --output-charset [name]  Sets the output charset to [name]. The default");
 		out.println("    -oc [name]               charset is ASCII, and there are not many reasons");
 		out.println("                             to change.");
@@ -601,8 +617,9 @@ public final class DecoHackMain
 		out.println("    --budget                 Prints the state budget after compilation.");
 		out.println("    -b");
 		out.println();
-		out.println("    --source-output [file]   Outputs the combined source to a single file.");
-		out.println("    -s [file]");
+		out.println("    --dry-run                Does no output - only attempts to compile and");
+		out.println("                             return errors and/or warnings. Overrides all");
+		out.println("                             output switches.");
 		out.println();
 		if (full)
 		{

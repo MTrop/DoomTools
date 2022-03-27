@@ -48,7 +48,6 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.Type;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
-import net.mtrop.doom.tools.decohack.exception.DecoHackParseException;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
@@ -182,14 +181,38 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final int PLACEHOLDER_LABEL = -1234567890;
 
 	/**
+	 * The parser result from compiling a DECOHack.
+	 */
+	public static final class Result
+	{
+		private AbstractPatchContext<?> context;
+		private String[] warnings;
+		private String[] errors;
+		
+		public AbstractPatchContext<?> getContext() 
+		{
+			return context;
+		}
+		
+		public String[] getWarnings() 
+		{
+			return warnings;
+		}
+		
+		public String[] getErrors() 
+		{
+			return errors;
+		}
+	}
+	
+	/**
 	 * Reads a DECOHack script from a String of text.
 	 * @param text the String to read from.
-	 * @return an exportable patch.
-	 * @throws DecoHackParseException if one or more parse errors happen.
+	 * @return the result of the parse.
 	 * @throws IOException if the stream can't be read.
 	 * @throws NullPointerException if text is null. 
 	 */
-	public static AbstractPatchContext<?> read(String text) throws IOException
+	public static Result read(String text) throws IOException
 	{
 		return read(STREAMNAME_TEXT, new StringReader(text));
 	}
@@ -198,26 +221,57 @@ public final class DecoHackParser extends Lexer.Parser
 	 * Reads a DECOHack script from a String of text.
 	 * @param streamName a name to assign to the stream.
 	 * @param text the String to read from.
-	 * @return an exportable patch.
-	 * @throws DecoHackParseException if one or more parse errors happen.
+	 * @return the result of the parse.
 	 * @throws IOException if the stream can't be read.
 	 * @throws NullPointerException if text is null. 
 	 */
-	public static AbstractPatchContext<?> read(String streamName, String text) throws IOException
+	public static Result read(String streamName, String text) throws IOException
 	{
 		return read(streamName, new StringReader(text));
 	}
 
 	/**
+	 * Reads a DECOHack script.
+	 * @param streamName the name of the stream.
+	 * @param in the stream to read from.
+	 * @return the result of the parse.
+	 * @throws IOException if the stream can't be read.
+	 * @throws SecurityException if a read error happens due to OS permissioning.
+	 * @throws NullPointerException if in is null. 
+	 */
+	public static Result read(String streamName, InputStream in) throws IOException
+	{
+		return read(streamName, new InputStreamReader(in));
+	}
+
+	/**
+	 * Reads a DECOHack script from a reader stream.
+	 * @param streamName the name of the stream.
+	 * @param reader the reader to read from.
+	 * @return the result of the parse.
+	 * @throws IOException if the stream can't be read.
+	 * @throws SecurityException if a read error happens due to OS permissioning.
+	 * @throws NullPointerException if reader is null. 
+	 */
+	public static Result read(String streamName, Reader reader) throws IOException
+	{
+		DecoHackParser parser = new DecoHackParser(streamName, reader);
+		Result out = new Result();
+		out.context = parser.parse();
+		out.warnings = parser.getWarningMessages();
+		out.errors = parser.getErrorMessages();
+		return out;
+	}
+
+	/**
 	 * Reads a DECOHack script from a starting text file.
 	 * @param files the files to read from (as though each file is included, in order).
-	 * @return an exportable patch.
-	 * @throws DecoHackParseException if one or more parse errors happen.
+	 * @return the result of the parse.
 	 * @throws IOException if the stream can't be read.
 	 * @throws SecurityException if a read error happens due to OS permissioning.
 	 * @throws NullPointerException if file is null. 
 	 */
-	public static AbstractPatchContext<?> read(Iterable<File> files) throws IOException
+	public static Result read(Iterable<File> files) throws IOException
 	{
 		DecoHackParser parser = new DecoHackParser(null, null);
 		Lexer lexer = parser.getLexer();
@@ -232,37 +286,11 @@ public final class DecoHackParser extends Lexer.Parser
 			lexer.pushStream(file.getPath(), new InputStreamReader(new FileInputStream(file)));
 		}
 
-		return parser.parse();
-	}
-
-	/**
-	 * Reads a DECOHack script.
-	 * @param streamName the name of the stream.
-	 * @param in the stream to read from.
-	 * @return an exportable patch.
-	 * @throws DecoHackParseException if one or more parse errors happen.
-	 * @throws IOException if the stream can't be read.
-	 * @throws SecurityException if a read error happens due to OS permissioning.
-	 * @throws NullPointerException if in is null. 
-	 */
-	public static AbstractPatchContext<?> read(String streamName, InputStream in) throws IOException
-	{
-		return read(streamName, new InputStreamReader(in));
-	}
-
-	/**
-	 * Reads a DECOHack script from a reader stream.
-	 * @param streamName the name of the stream.
-	 * @param reader the reader to read from.
-	 * @return an exportable patch.
-	 * @throws DecoHackParseException if one or more parse errors happen.
-	 * @throws IOException if the stream can't be read.
-	 * @throws SecurityException if a read error happens due to OS permissioning.
-	 * @throws NullPointerException if reader is null. 
-	 */
-	public static AbstractPatchContext<?> read(String streamName, Reader reader) throws IOException
-	{
-		return (new DecoHackParser(streamName, reader)).parse();
+		Result out = new Result();
+		out.context = parser.parse();
+		out.warnings = parser.getWarningMessages();
+		out.errors = parser.getErrorMessages();
+		return out;
 	}
 
 	// =======================================================================
@@ -3081,7 +3109,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		if ((value = matchSoundIndexName(context)) == null)
 		{
-			addErrorMessage("Expected a valid sound name after '%s'.", KEYWORD_SOUND);
+			addErrorMessage("Expected a valid sound name.");
 			return null;
 		}
 		return value;
@@ -3291,13 +3319,29 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
+		{
+			if (paramType == DEHActionPointerParam.THING)
+				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
 			return parseThingOrThingStateIndex(context);
+		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+		{
+			if (paramType == DEHActionPointerParam.WEAPON)
+				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
 			return parseWeaponOrWeaponStateIndex(context);
+		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
+		{
+			if (paramType == DEHActionPointerParam.SOUND)
+				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
 			return parseSoundIndex(context);
+		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
+		{
+			if (paramType == DEHActionPointerParam.FLAGS)
+				addWarningMessage("The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
 			return matchNumericExpression(context, actor, Type.FLAGS);
+		}
 		// Guess it.
 		else 
 			return matchNumericExpression(context, actor, paramType.getTypeCheck());
@@ -3587,7 +3631,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected positive integer or alias after \"%s\" for the thing slot.", KEYWORD_THING);
+			addErrorMessage("Expected positive integer or alias for the thing slot.");
 			return null;
 		}		
 	}
@@ -3638,7 +3682,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if ((slot = matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected positive integer or alias after \"%s\" for the weapon slot.", KEYWORD_WEAPON);
+			addErrorMessage("Expected positive integer or alias for the weapon slot.");
 			return null;
 		}
 
@@ -4206,6 +4250,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 	/** List of errors. */
 	private LinkedList<String> errors;
+	/** List of warnings. */
+	private LinkedList<String> warnings;
 	/** Editor directives. */
 	private Map<String, String> editorKeys;
 	/** Last auto thing index (for slightly better search continuation). */
@@ -4215,9 +4261,22 @@ public final class DecoHackParser extends Lexer.Parser
 	private DecoHackParser(String streamName, Reader in)
 	{
 		super(new DecoHackLexer(streamName, in));
+		this.warnings = new LinkedList<>();
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.lastAutoThingIndex = 0;
+	}
+	
+	private void addWarningMessage(String message, Object... args)
+	{
+		warnings.add(getTokenInfoLine(String.format(message, args)));
+	}
+	
+	private String[] getWarningMessages()
+	{
+		String[] out = new String[warnings.size()];
+		warnings.toArray(out);
+		return out;
 	}
 	
 	private void addErrorMessage(String message, Object... args)
@@ -4250,9 +4309,6 @@ public final class DecoHackParser extends Lexer.Parser
 			noError = context != null;
 			while (currentToken() != null && noError)
 				noError = parseEntry(context);
-		} catch (DecoHackParseException e) {
-			addErrorMessage(e.getMessage());
-			noError = false;
 		} catch (NumberFormatException e) {
 			addErrorMessage(e.getMessage());
 			noError = false;
@@ -4264,23 +4320,7 @@ public final class DecoHackParser extends Lexer.Parser
 			noError = false;
 		}
 		
-		if (!noError) // awkward, I know.
-		{
-			String[] errors = getErrorMessages();
-			if (errors.length > 0)
-			{
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < errors.length; i++)
-				{
-					sb.append(errors[i]);
-					if (i < errors.length-1)
-						sb.append('\n');
-				}
-				throw new DecoHackParseException(sb.toString());
-			}
-		}
-		
-		return context;
+		return noError ? context : null;
 	}
 	
 	@FunctionalInterface
