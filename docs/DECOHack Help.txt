@@ -222,27 +222,33 @@ is used).
     A_RandomJump(missile2, 255)         // Available state label on same actor
     A_RandomJump(thing 23 pain, 128)    // Thing state label
     A_RandomJump(weapon 5 fire2, 128)   // Weapon state label
-    A_PlaySound(sound "FRE001", 0)      // Sound name
-    A_PlaySound(sound pistol, 0)        // Sound name
+    A_PlaySound("FRE001", 0)            // Sound name
+    A_PlaySound(pistol, 0)              // Sound name
 
 
 Some parameter values can be set with fixed-point numbers, but not every 
-function requires them or understands them (be careful - it is up to the 
-function to interpret them as such):
+function requires them or understands them:
 
     A_Mushroom(-45.0, 16.0)
 
 
+Depending on the expected parameter type, DECOHack will automatically convert
+those parameters to fixed-point. The following is equivalent to the above:
+
+    A_Mushroom(-45, 16)
+
+
 Parameter values can also be a series of flags that get or'ed together. This
 is useful for some functions that manipulate flags. A set of supported flags 
-can be combined via the PIPE operator:
+can be combined via the PIPE operator (or pluses):
 
     A_AddFlags(SOLID | DROPPED, 0)
+    A_AddFlags(SOLID + DROPPED, 0)
 
 
-Note that this works ANYTWHERE that action parameters are accepted - DECOHack
-calculates a single value from these expressions. The only checking done is
-if those flags are valid for the patch level (i.e. MBF, EXTENDED, or MBF21).  
+DECOHack calculates a single value from these expressions. The only checking 
+done is if those flags are valid for the patch level (i.e. MBF, EXTENDED, or 
+MBF21).
 
 NOTE: Some flags may share names with valid labels. To force DECOHack to 
 interpret a parameter as a label, wrap it in quotes (it may be a good idea to
@@ -251,7 +257,7 @@ do this anyway, for readability).
     A_RandomJump("missile", 64)
 
 
-Also, similarly, to force DECOHack to interpret a parameter as a flag 
+Also, similarly, to force DECOHack to interpret an expression as a flag 
 expression, prefix it with the "flags" keyword:
 
     A_AddFlags(flags SOLID | DROPPED, 0)
@@ -263,6 +269,18 @@ weapon graphic on the frame (but note that it will only apply it if the first
 argument is nonzero).
 
     Offset(1, 32)
+
+
+Action pointers understand what is expected in each parameter - you can just
+refer to thing aliases, labels, and sounds or what-have-you as is and it
+will attempt to figure it out:
+
+	A_Spawn(Demon, 0.0)                           // Thing alias
+	A_Scratch(10, punch)                          // Sound name
+    A_RandomJump(pain2, 128)                      // State label
+    A_HealChase(heal, slop)                       // State label, sound name
+    A_WeaponSound(shotg3, 1)                      // Sound name
+    A_WeaponProjectile(CacodemonBall, 0, 0, 0, 0) // Thing alias
 
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
@@ -299,19 +317,19 @@ The duration on every state is 0 except for the last one, which simulates
 several actions on "one" state. This works for action pointers that also
 have parameters. The following: 
 
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
-    TNT1 A 0 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
-    TNT1 A 4 A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
+    TNT1 A 0 A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
+    TNT1 A 0 A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
+    TNT1 A 0 A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
+    TNT1 A 4 A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
 
 
 ...could be collapsed to:
 
     TNT1 A 4 { 
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
-        A_SpawnObject(165, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
+        A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 4.0, 0.0, 0.0)
+        A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, -4.0, 0.0, 0.0)
+        A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 0.0, 4.0, 0.0)
+        A_SpawnObject(DoomImpBall, 0.0, 0.0, 0.0, 16.0, 0.0, -4.0, 0.0)
     }
 
 
@@ -1065,8 +1083,8 @@ Examples:
 ...then in action pointer functions (and other places that use thing 
 references), you can refer to them later since they are now aliased:
 
-    A_SpawnThing(thing NewImp)
-    A_RandomJump(thing NewImp death, 128)    // Thing state label
+    A_SpawnThing(NewImp)
+    A_RandomJump(thing NewImp death, 128)  // Label in a specific thing
 
 
 Any place that would ordinarily use a Thing index can use an auto-thing 
