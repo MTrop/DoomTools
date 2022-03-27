@@ -5,9 +5,9 @@ var $INC = $INC || function(srcurl)
 	fetch(srcurl)
 	    .then(resp => resp.text())
 	    .then(content => {
-	    	BodyElement.appendChild($DJU.E('script', {
+	    	BodyElement.appendChild($DJ.e('script', {
 			    "type": 'text/javascript'
-		    }, [$DJU.T(content)]));
+		    }, [$DJ.t(content)]));
 		});
 };
 
@@ -106,20 +106,20 @@ function display_release_data(release, release_section_element, release_version_
 
 	release.assets = release.assets.sort((a,b) => {return SORTASSET(a) - SORTASSET(b)});
 
-	$DJU.each(release.assets, (asset)=>{
+	$DJ.each(release.assets, (asset)=>{
 		let linkhtml = [
 			GENTITLE(asset.name),
 			'<span class="w3-small">'+asset.name+'</span>',
 			parseInt(asset.size / 1024) + ' KB',
 		].join('<br/>');
 
-		let link = $DJU.E('a', {
+		let link = $DJ.e('a', {
 			"href": asset.browser_download_url, 
 			"class": 'w3-button w3-round-large w3-margin download-link'
 		});
 		link.innerHTML = linkhtml;
 
-		release_links_element.append($DJU.E('div', {"class":'w3-col l6 w3-center'}, [link]));
+		release_links_element.append($DJ.e('div', {"class":'w3-col l6 w3-center'}, [link]));
 	});
 
 	release_version_element[0].innerHTML = version;
