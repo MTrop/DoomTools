@@ -1,9 +1,8 @@
-package net.mtrop.doom.tools.gui.doommake;
+package net.mtrop.doom.tools.gui.managers;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 

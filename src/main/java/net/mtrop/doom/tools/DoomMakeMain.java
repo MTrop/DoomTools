@@ -45,6 +45,7 @@ import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Main class for DoomMake.
@@ -366,7 +367,7 @@ public final class DoomMakeMain
 			if (options.gui)
 			{
 				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, System.getProperty("user.dir"));
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, OSUtils.getWorkingDirectoryPath());
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start DoomMake GUI!");
 					return ERROR_IOERROR;

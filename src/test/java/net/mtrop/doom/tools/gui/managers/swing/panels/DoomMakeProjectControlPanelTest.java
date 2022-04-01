@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake.swing.panels;
+package net.mtrop.doom.tools.gui.managers.swing.panels;
 
 import javax.swing.JFrame;
 

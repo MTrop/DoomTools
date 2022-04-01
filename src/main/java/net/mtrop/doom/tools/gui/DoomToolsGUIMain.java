@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.WadScriptApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
@@ -39,6 +40,8 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_NEW = "doommake-new";
 		/** DoomMake - Open Project. */
 		String DOOMMAKE_OPEN = "doommake-open";
+		/** WadScript. */
+		String WADSCRIPT = "wadscript";
 	}
 	
 	/**
@@ -215,7 +218,7 @@ public final class DoomToolsGUIMain
 						if (Common.isEmpty(path))
 						{
 							DoomMakeOpenProjectApp app;
-							if ((app = DoomMakeOpenProjectApp.openAndCreate(null, DoomToolsSettingsManager.get().getLastProjectDirectory())) != null)
+							if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
 								startApplication(app);
 						}
 						else
@@ -228,6 +231,13 @@ public final class DoomToolsGUIMain
 						}
 						break;
 					}
+
+					case ApplicationNames.WADSCRIPT:
+					{
+						startApplication(new WadScriptApp());
+						break;
+					}
+					
 				}
 			}
 			catch (ArrayIndexOutOfBoundsException e)

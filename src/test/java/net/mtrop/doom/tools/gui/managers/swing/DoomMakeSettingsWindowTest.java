@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.doommake.swing;
+package net.mtrop.doom.tools.gui.managers.swing;
 
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 

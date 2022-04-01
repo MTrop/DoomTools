@@ -38,7 +38,6 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
@@ -77,8 +76,6 @@ public class DoomToolsMainWindow extends JFrame
     private DoomToolsLanguageManager language;
 	/** Desktop pane. */
 	private DoomToolsDesktopPane desktop;
-    /** Settings manager. */
-	private DoomToolsSettingsManager settings;
 
 	/** Shutdown hook. */
 	private Runnable shutDownHook;
@@ -109,7 +106,6 @@ public class DoomToolsMainWindow extends JFrame
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = DoomToolsSettingsManager.get();
 		
 		this.shutDownHook = shutDownHook;
 		
@@ -630,10 +626,10 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
-		File workspaceFile = chooseFile(
+		File workspaceFile = utils.chooseFile(
 			this,
+			"workspace",
 			language.getText("doomtools.workspace.saveas.browse.title"),
-			currentWorkspace,
 			language.getText("doomtools.workspace.saveas.browse.accept"),
 			FileFilters.WORKSPACES
 		);
@@ -662,7 +658,7 @@ public class DoomToolsMainWindow extends JFrame
 	private void openDoomMakeProject()
 	{
 		DoomMakeOpenProjectApp app;
-		if ((app = DoomMakeOpenProjectApp.openAndCreate(this, settings.getLastProjectDirectory())) != null)
+		if ((app = DoomMakeOpenProjectApp.openAndCreate(this)) != null)
 			addApplication(app);
 	}
 	

@@ -51,7 +51,10 @@ import com.blackrook.rookscript.resolvers.variable.DefaultVariableResolver;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
 import net.mtrop.doom.tools.wadscript.UtilityFunctions;
@@ -88,6 +91,7 @@ public final class WadScriptMain
 	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
+	private static final String SWITCH_GUI = "--gui";
 	private static final String SWITCH_ENTRY1 = "--entry";
 	private static final String SWITCH_ENTRY2 = "-e";
 	private static final String SWITCH_ENTRYLIST = "--entry-list";
@@ -728,6 +732,7 @@ public final class WadScriptMain
 	
 	public static class Options
 	{
+		private boolean gui;
 		private PrintStream stdout;
 		private PrintStream stderr;
 		private InputStream stdin;
@@ -745,6 +750,7 @@ public final class WadScriptMain
 		
 		private Options()
 		{
+			this.gui = false;
 			this.stdout = null;
 			this.stderr = null;
 			this.stdin = null;
@@ -865,6 +871,17 @@ public final class WadScriptMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADSCRIPT, OSUtils.getWorkingDirectoryPath());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WadScript GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.mode == null)
 			{
 				splash(options.stdout);
@@ -1265,6 +1282,8 @@ public final class WadScriptMain
 						options.mode = Mode.HELP;
 						return options;
 					}
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (SWITCH_VERSION1.equalsIgnoreCase(arg))
 						options.mode = Mode.VERSION;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))

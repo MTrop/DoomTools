@@ -45,7 +45,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
 
 /**
@@ -145,42 +144,41 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	 * Opens a dialog for opening a directory, checks
 	 * if the directory is a project directory, and then returns the directory. 
 	 * @param parent the parent window for the dialog.
-	 * @param initPath the init path for the dialog.
 	 * @return the valid directory selected, or null if not valid.
 	 */
-	public static File openAndGetDirectory(Component parent, File initPath)
+	public static File openAndGetDirectory(Component parent)
 	{
 		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
-		File workspaceFile = chooseDirectory(
+		
+		File projectDir = DoomToolsGUIUtils.get().chooseDirectory(
 			parent,
+			"projectDirectory",
 			language.getText("doommake.project.open.browse.title"),
-			initPath,
 			language.getText("doommake.project.open.browse.accept")
 		);
 		
-		if (workspaceFile == null)
+		if (projectDir == null)
 			return null;
 		
-		if (!isProjectDirectory(workspaceFile))
+		if (!isProjectDirectory(projectDir))
 		{
-			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", workspaceFile.getAbsolutePath()));
+			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", projectDir.getAbsolutePath()));
 			return null;
 		}
 		
-		return workspaceFile;
+		return projectDir;
 	}
 	
 	/**
 	 * Opens a dialog for opening a directory, checks
 	 * if the directory is a project directory, and returns an application instance. 
 	 * @param parent the parent window for the dialog.
-	 * @param initPath the init path for the dialog.
 	 * @return a new app instance, or null if bad directory selected.
 	 */
-	public static DoomMakeOpenProjectApp openAndCreate(Component parent, File initPath)
+	public static DoomMakeOpenProjectApp openAndCreate(Component parent)
 	{
 		File directory;
-		if ((directory = openAndGetDirectory(parent, initPath)) == null)
+		if ((directory = openAndGetDirectory(parent)) == null)
 			return null;
 		return new DoomMakeOpenProjectApp(directory);
 	}
@@ -387,8 +385,8 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	// Open Open project app (new instance).
 	private void openOpenProject()
 	{
-		File dir = openAndGetDirectory(receiver.getApplicationContainer(), null);
-		if (dir == null)
+		File dir;
+		if ((dir = openAndGetDirectory(receiver.getApplicationContainer())) == null)
 			return;
 		
 		try {

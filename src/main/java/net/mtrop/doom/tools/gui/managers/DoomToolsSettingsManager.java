@@ -166,20 +166,22 @@ public final class DoomToolsSettingsManager
 	
 	/**
 	 * Sets the last path touched.
+	 * @param keyName an associated key.
 	 * @param path the last path.
 	 */
-	public void setLastPath(File path) 
+	public void setLastPath(String keyName, File path) 
 	{
-		properties.setProperty(DOOMTOOLS_LAST_PATH, path != null ? path.getAbsolutePath() : "");
+		properties.setProperty(DOOMTOOLS_LAST_PATH + "." + keyName, path != null ? path.getAbsolutePath() : "");
 		saveSettings();
 	}
 
 	/**
+	 * @param keyName an associated key.
 	 * @return the last path touched.
 	 */
-	public File getLastPath() 
+	public File getLastPath(String keyName) 
 	{
-		String path = properties.getProperty(DOOMTOOLS_LAST_PATH);
+		String path = properties.getProperty(DOOMTOOLS_LAST_PATH + "." + keyName);
 		return path != null && path.length() >= 0 ? new File(path) : null;
 	}
 
