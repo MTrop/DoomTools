@@ -17,7 +17,6 @@ import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.SingletonProvider;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Utility singleton for invoking DoomMake functions for a project.
@@ -183,7 +182,6 @@ public final class DoomMakeProjectHelper
 	public SortedSet<String> getProjectTargets(File projectDirectory) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
-		checkDoomMake();
 		
 		StringWriter sw = new StringWriter();
 		StringWriter errorsw = new StringWriter();
@@ -224,7 +222,6 @@ public final class DoomMakeProjectHelper
 	public InstancedFuture<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName, boolean agentOverride) throws FileNotFoundException, ProcessCallException
 	{
 		checkProjectDirectory(projectDirectory);
-		checkDoomMake();
 		
 		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
 		if (agentOverride)
@@ -280,17 +277,6 @@ public final class DoomMakeProjectHelper
 			throw new ProcessCallException("The OS cannot open the project folder: \"open\" operation not supported.");
 		
 		return desktop;
-	}
-
-	private void checkDoomMake() throws ProcessCallException
-	{
-		if (!OSUtils.onPath("doommake"))
-		{
-			throw new ProcessCallException(
-				"DoomMake was not found on your PATH. " +
-				"DoomTools may not have been installed properly, or this is being called from an embedded instance."
-			);
-		}
 	}
 
 	/**
