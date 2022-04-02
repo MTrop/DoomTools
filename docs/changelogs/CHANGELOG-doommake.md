@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.16.0
+
+* `Fixed` (GUI) GUI still checked for DoomMake on PATH in order to run. This was unnecessary. (Issue #69)
+
+
 ### Changed for 0.15.0
 
 * `Added` DoomMake Agent for listening for project changes. See help for more info!

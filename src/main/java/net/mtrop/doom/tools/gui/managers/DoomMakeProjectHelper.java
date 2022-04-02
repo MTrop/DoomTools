@@ -18,7 +18,6 @@ import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
-
 /**
  * Utility singleton for invoking DoomMake functions for a project.
  * @author Matthew Tropiano
