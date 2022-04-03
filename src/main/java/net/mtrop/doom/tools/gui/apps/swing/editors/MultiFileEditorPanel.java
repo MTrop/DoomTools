@@ -555,6 +555,9 @@ public class MultiFileEditorPanel extends JPanel
 				language.getText("texteditor.action.save.approve"), 
 				getSaveFileTypes()
 			);
+			
+			if (editorFile == null)
+				return false;
 		}
 		
 		return saveEditorToFile(handle, editorFile);
