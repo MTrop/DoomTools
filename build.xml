@@ -220,7 +220,7 @@
 		</exec>
 		<exec executable="make" dir="${natives.windows.dir}" failonerror="true">
 		</exec>
-		<copy todir="${resource.dir}/shell/exe">
+		<copy overwrite="false" todir="${resource.dir}/shell/exe">
 			<fileset dir="${natives.windows.dir}/dist" />
 		</copy>
 	</target>
@@ -288,7 +288,37 @@
 		</tar>
 	</target>
 
-	<target name="dist" depends="dist.bash, dist.cmd" description="Zips together the application and shell scripts.">
+	<target name="dist.installer.copy" depends="init.jar, jar.one, scripts">
+		<delete dir="${build.dir}/installer" failonerror="false" />
+		<mkdir dir="${build.dir}/installer"/>
+		<mkdir dir="${build.dir}/installer/docs"/>
+		<mkdir dir="${build.dir}/installer/jar"/>
+		<copy todir="${build.dir}/installer">
+			<fileset dir="${resource.dir}/shell/exe" />
+			<fileset dir="${build.dir}/shell/cmd" />
+		</copy>
+		<copy todir="${build.dir}/installer/docs">
+			<fileset dir="docs" />
+			<fileset file="README.md" />
+			<fileset file="LICENSE.txt" />
+		</copy>
+		<copy todir="${build.dir}/installer/jar">
+			<fileset file="${jar.dir}/${jar.filename}" />
+		</copy>
+	</target>
+	
+	<target name="dist.installer" if="inno.setup.dir" depends="init.dist, dist.installer.copy">
+		<exec executable="${inno.setup.dir}/ISCC.exe" failonerror="true">
+			<arg line="/DSrcDirectory=${user.dir}\${build.dir}\installer" />
+			<arg line="/DSrcLicensePath=${user.dir}\${build.dir}\installer\docs\LICENSE.txt" />
+			<arg line="/DBaseOutputFilename=doomtools-setup-${build.version.number}" />
+			<arg line="/DDTAppVersion=${build.date}" />
+			<arg line="/O${dist.dir}" />
+			<arg line="inno\doomtools.iss" />
+		</exec>
+	</target>	
+	
+	<target name="dist" depends="dist.bash, dist.cmd, dist.installer" description="Zips together the application and shell scripts, and creates the installer.">
 	</target>
 
 	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
