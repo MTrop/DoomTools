@@ -14,6 +14,7 @@
 ; #define BaseOutputFilename "doomtools-setup-versionnum"
 
 #include "environment.iss"
+#include "shell.iss"
 
 [Setup]
 ; App GUID
@@ -21,6 +22,7 @@ AppId={{1932D1F3-180D-4CAD-AD72-8F51B51196C2}
 
 AppName={#DTAppName}
 AppVersion={#DTAppVersion}
+AppVerName={#DTAppName} v{#DTAppVersion}
 AppPublisher={#DTAppPublisher}
 AppPublisherURL={#DTAppURL}
 AppSupportURL={#DTAppSupportURL}
@@ -33,16 +35,21 @@ UninstallDisplayIcon={app}\{#DTAppExeName}
 
 ChangesEnvironment=true
 Compression=lzma
-DisableProgramGroupPage=yes
+DisableWelcomePage=no
+DisableProgramGroupPage=no
 SolidCompression=yes
 WizardStyle=modern
+
+AppCopyright=(C) 2019-2022 Matt Tropiano
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "envPath"; Description: "Add DoomTools to PATH variable (for Command Line tools)"
+Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"
+Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; Flags: unchecked
 
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -60,13 +67,34 @@ Filename: "{app}\{#DTAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 ; The following is responsible for listening for the install steps to inject PATH changing, if selected.
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+    appPath: String;
+    exePath: String;
 begin
-    if (CurStep = ssPostInstall) and WizardIsTaskSelected('envPath')
-    then EnvAddPath(ExpandConstant('{app}'));
+    if (CurStep = ssPostInstall) then
+    begin
+        appPath := ExpandConstant('{app}');
+
+        if WizardIsTaskSelected('envPath') then
+        begin
+            EnvAddPath(appPath);
+        end;
+
+        if WizardIsTaskSelected('addToExplorerShell') then 
+        begin
+            exePath := appPath + '\{#DTAppExeName}';
+            ExplorerAddCommandItem('doommake-new', 'New Doom&Make Project', exePath, exePath + ' doommake-new "%V"');
+            ExplorerAddCommandItem('doommake-open', 'Open Doom&Make Project', exePath, exePath + ' doommake-open "%V"');
+        end;
+    end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
-    if (CurUninstallStep = usPostUninstall)
-    then EnvRemovePath(ExpandConstant('{app}'));
+    if (CurUninstallStep = usPostUninstall) then
+    begin
+        EnvRemovePath(ExpandConstant('{app}'));
+        ExplorerRemoveCommandItem('doommake-new');
+        ExplorerRemoveCommandItem('doommake-open');
+    end;
 end;

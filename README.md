@@ -59,10 +59,6 @@ To make Zip archives of everything (main src/resources, bin, javadocs, placed in
 
 	ant zip
 
-To compile, JAR, test, and Zip up everything:
-
-	ant release
-
 To create a Windows Installer in the `dist` folder:
 
 	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup]
