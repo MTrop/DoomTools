@@ -21,8 +21,8 @@
 AppId={{1932D1F3-180D-4CAD-AD72-8F51B51196C2}
 
 AppName={#DTAppName}
+AppVerName={#DTAppName}
 AppVersion={#DTAppVersion}
-AppVerName={#DTAppName} v{#DTAppVersion}
 AppPublisher={#DTAppPublisher}
 AppPublisherURL={#DTAppURL}
 AppSupportURL={#DTAppSupportURL}
@@ -32,13 +32,17 @@ DefaultGroupName={#DTAppName}
 LicenseFile={#SrcLicensePath}
 OutputBaseFilename={#BaseOutputFilename}
 UninstallDisplayIcon={app}\{#DTAppExeName}
+UninstallFilesDir={app}\uninst
 
 ChangesEnvironment=true
 Compression=lzma
 DisableWelcomePage=no
 DisableProgramGroupPage=no
+SetupIconFile=doomtools-setup.ico
 SolidCompression=yes
 WizardStyle=modern
+WizardImageFile=installer-image.bmp
+WizardImageStretch=yes
 
 AppCopyright=(C) 2019-2022 Matt Tropiano
 
