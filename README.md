@@ -61,11 +61,11 @@ To make Zip archives of everything (main src/resources, bin, javadocs, placed in
 
 To create a Windows Installer in the `dist` folder:
 
-	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup]
+	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
 To create a distribution (Bash and CMD):
 
-	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native-Project] -Dinno.setup.dir=[Path-To-Inno-Setup]
+	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native-Project] -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
 To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):
 
@@ -77,8 +77,8 @@ To clean up everything:
 	ant clean
 
 
-Note that the `deploy.dir`, `natives.windows.dir`, and `inno.setup.dir` properties are supplied above - it may be better to
-add local paths to your `build.properties` file for those.
+Note that the `deploy.dir`, `natives.windows.dir`, `inno.setup.dir`, and `embedded.jre.source.dir` 
+properties are supplied above - it may be better to add local paths to your `build.properties` file for those.
 
 
 ### Other Stuff
@@ -92,6 +92,9 @@ Building a Windows Installer requires [Inno Setup 6.2.0+](https://jrsoftware.org
 is set to Inno Setup's directory to make use of `iscc`.
 
 The installer target will be skipped if the `inno.setup.dir` property is not set.
+
+The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
+JRE version will not be built if `embedded.jre.source.dir` is not set.
 
 
 ### Utilities

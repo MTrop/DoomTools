@@ -1,4 +1,4 @@
-﻿; DoomTools Inno Setup Installer Script
+; DoomTools Inno Setup Installer Script
 
 #define DTAppName "DoomTools"
 #define DTAppPublisher "MTrop"
@@ -10,6 +10,7 @@
 ; For notes - defined on compile via /D
 ; #define DTAppVersion "0000.00.00"
 ; #define SrcDirectory "C:\SOURCEDIR"
+; #define SrcJREDirectory "C:\JREDIR" (optional)
 ; #define SrcLicensePath "C:\SOURCEDIR\docs\LICENSE.txt"
 ; #define BaseOutputFilename "doomtools-setup-versionnum"
 
@@ -53,12 +54,17 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"
+#ifdef SrcJREDirectory
+Name: "embedJRE"; Description: "Embed a local Java Runtime (required if not installed, 46.3 MB)";
+#endif
 Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; Flags: unchecked
 
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#SrcDirectory}\{#DTAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SrcDirectory}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+#ifdef SrcJREDirectory
+Source: "{#SrcJREDirectory}\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs; Tasks: embedJRE
+#endif
 
 [Icons]
 Name: "{group}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"

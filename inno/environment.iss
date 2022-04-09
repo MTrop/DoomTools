@@ -1,4 +1,4 @@
-; Note from MTrop - this code was shamelessly taken from a pertinent answer from Stack Overflow
+; Note from MTrop - the "path environment" code was shamelessly taken from a pertinent answer from Stack Overflow
 ; https://stackoverflow.com/questions/3304463/how-do-i-modify-the-path-environment-variable-when-running-an-inno-setup-install
 ; Thanks, Wojciech Mleczek!
 
