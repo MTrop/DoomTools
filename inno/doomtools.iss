@@ -35,6 +35,7 @@ OutputBaseFilename={#BaseOutputFilename}
 UninstallDisplayIcon={app}\{#DTAppExeName}
 UninstallFilesDir={app}\uninst
 
+ArchitecturesInstallIn64BitMode=x64
 ChangesEnvironment=true
 Compression=lzma
 DisableWelcomePage=no
@@ -53,11 +54,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"
 #ifdef SrcJREDirectory
-Name: "embedJRE"; Description: "Embed a local Java Runtime (required if not installed, 46.3 MB)";
+Name: "embedJRE"; Description: "Embed a minified Java Runtime (REQUIRED if not already installed, 46.5 MB)"; GroupDescription: "May Be Required:"
 #endif
-Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; Flags: unchecked
+Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"; GroupDescription: "More Actions:"
+Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; GroupDescription: "More Actions:"; Flags: unchecked
 
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -73,6 +74,10 @@ Name: "{autodesktop}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#DTAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DTAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: files; Name: "{app}\jar\*.jar"
+
 
 ; The following is responsible for listening for the install steps to inject PATH changing, if selected.
 [Code]

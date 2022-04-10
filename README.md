@@ -4,7 +4,7 @@ Copyright (c) 2019-2022 Matt Tropiano
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.14.1+  
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.14.2+  
 [Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.2.0+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.14.1+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
@@ -86,15 +86,24 @@ properties are supplied above - it may be better to add local paths to your `bui
 Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
 It is not necessary for building or local deploying, but a package distributable will not be complete without it.
 
-The EXE build and copy to `src/maim/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set.
+The EXE build and copy to `src/maim/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set. You
+are better off not setting is for every build as the EXE will more than likely be built differently every time.
 
 Building a Windows Installer requires [Inno Setup 6.2.0+](https://jrsoftware.org/isdl.php), and requires that the property `inno.setup.dir`
 is set to Inno Setup's directory to make use of `iscc`.
 
-The installer target will be skipped if the `inno.setup.dir` property is not set.
-
 The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
-JRE version will not be built if `embedded.jre.source.dir` is not set.
+JRE version of the installer will not be built if `embedded.jre.source.dir` is not set.
+
+
+### Recommended Minified JRE Setup
+
+The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
+
+	jlink --add-modules java.desktop,jdk.crypto.ec --compress=2 --output [jredir]
+
+That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
+and perhaps future tools that pull resources from Internet addresses.
 
 
 ### Utilities
