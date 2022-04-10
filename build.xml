@@ -17,7 +17,7 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.14.1" />
+	<property name="doom.lib.version" value="2.14.2" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
@@ -104,10 +104,13 @@
 	
 	<!-- Filenames -->
 	<property name="build.versions.dir" value="${build.dir}/versions" />
+	<property name="build.installer.dir" value="${build.dir}/installer" />
 	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version.number}.zip" />
 	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version.number}.tar.gz" />
+	<property name="installer.dist.name" value="${project.archive}-setup-${build.version.number}" />
+	<property name="installer.jre.dist.name" value="${project.archive}-setup-jre-${build.version.number}" />
 
-	<target name="clean.dist">
+	<target name="clean.dist" description="Cleans up the distributables folder.">
 		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
 	</target>
 
@@ -115,7 +118,7 @@
 		<mkdir dir="${dist.dir}" />
 	</target>
 
-	<target name="clean.versions">
+	<target name="clean.versions" description="Cleans up the distributables folder.">
 		<delete dir="${build.versions.dir}" includeemptydirs="true" casesensitive="false" /> 
 	</target>
 
@@ -140,7 +143,7 @@
 		<echo file="${build.versions.dir}/doommake.version" message="${doommake.version}" />
 	</target>
 
-	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
+	<target name="javadoc" depends="init.docs" description="Builds the Java documentation.">
         <javadoc access="protected" 
         	additionalparam="-J-Xmx512m  " author="true" 
         	classpath="${project.classpath}${path.separator}${bin.dir}" 
@@ -220,7 +223,7 @@
 		</exec>
 		<exec executable="make" dir="${natives.windows.dir}" failonerror="true">
 		</exec>
-		<copy todir="${resource.dir}/shell/exe">
+		<copy overwrite="false" todir="${resource.dir}/shell/exe">
 			<fileset dir="${natives.windows.dir}/dist" />
 		</copy>
 	</target>
@@ -268,7 +271,7 @@
 		</copy>
 	</target>
 
-	<target name="dist.cmd" depends="init.jar, jar.one, init.dist, scripts">
+	<target name="dist.cmd" depends="init.jar, jar.one, init.dist, scripts" description="Build CMD distribution.">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
@@ -278,7 +281,7 @@
 		</zip>
 	</target>
 
-	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist">
+	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist" description="Build Bash distribution.">
 		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
@@ -288,16 +291,76 @@
 		</tar>
 	</target>
 
-	<target name="dist" depends="dist.bash, dist.cmd" description="Zips together the application and shell scripts.">
+	<target name="dist.installer.copy" depends="init.jar, jar.one, scripts">
+		<delete dir="${build.installer.dir}" failonerror="false" />
+		<mkdir dir="${build.installer.dir}"/>
+		<mkdir dir="${build.installer.dir}/docs"/>
+		<mkdir dir="${build.installer.dir}/jar"/>
+		<copy todir="${build.installer.dir}">
+			<fileset dir="${resource.dir}/shell/exe" />
+			<fileset dir="${build.dir}/shell/cmd" />
+		</copy>
+		<copy todir="${build.installer.dir}/docs">
+			<fileset dir="docs" />
+			<fileset file="README.md" />
+			<fileset file="LICENSE.txt" />
+		</copy>
+		<copy todir="${build.installer.dir}/jar">
+			<fileset file="${jar.dir}/${jar.filename}" />
+		</copy>
+	</target>
+	
+	<target name="dist.installer.dirs.exist">
+		<condition property="dist.installer.is.available">
+			<and>
+				<available file="${inno.setup.dir}" />
+			</and>
+		</condition>
+		<condition property="dist.installer.jre.is.available">
+			<and>
+				<available file="${inno.setup.dir}" />
+				<available file="${embedded.jre.source.dir}" />
+			</and>
+		</condition>
+		<echoproperties />
+	</target>
+	
+	<target name="dist.installer.compile" if="dist.installer.is.available">
+		<exec executable="${inno.setup.dir}/ISCC.exe" failonerror="true">
+			<arg line="/DSrcDirectory=${user.dir}\${build.dir}\installer" />
+			<arg line="/DSrcLicensePath=${user.dir}\${build.dir}\installer\docs\LICENSE.txt" />
+			<arg line="/DBaseOutputFilename=${installer.dist.name}" />
+			<arg line="/DDTAppVersion=${build.date}" />
+			<arg line="/O${dist.dir}" />
+			<arg line="inno\doomtools.iss" />
+		</exec>
 	</target>
 
-	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+	<target name="dist.installer.jre.compile" if="dist.installer.jre.is.available">
+		<exec executable="${inno.setup.dir}/ISCC.exe" failonerror="true">
+			<arg line="/DSrcDirectory=${user.dir}\${build.dir}\installer" />
+			<arg line="/DSrcJREDirectory=${embedded.jre.source.dir}" />
+			<arg line="/DSrcLicensePath=${user.dir}\${build.dir}\installer\docs\LICENSE.txt" />
+			<arg line="/DBaseOutputFilename=${installer.jre.dist.name}" />
+			<arg line="/DDTAppVersion=${build.date}" />
+			<arg line="/O${dist.dir}" />
+			<arg line="inno\doomtools.iss" />
+		</exec>
+	</target>
+
+	<target name="dist.installer" depends="init.dist, dist.installer.copy, dist.installer.dirs.exist, dist.installer.compile, dist.installer.jre.compile" description="Build Windows installer distribution (requires Inno Setup Path).">
+	</target>	
+	
+	<target name="dist" depends="dist.bash, dist.cmd, dist.installer" description="Zips together the application and shell scripts, and creates the installer.">
+	</target>
+
+	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION (requires deploy directory path).">
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
 		<unzip src="${dist.dir}/${zip.dist.filename}" dest="${deploy.dir}" />
 	</target>
 
-	<target name="deploy.bash" if="deploy.dir" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+	<target name="deploy.bash" if="deploy.dir" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION (requires deploy directory path).">
 		<delete dir="${deploy.dir}" failonerror="false" />
 		<mkdir dir="${deploy.dir}" />
 		<!-- Untar does not preserve file permissions for some dumb reason, so call TAR itself. -->

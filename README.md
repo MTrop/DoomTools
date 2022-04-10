@@ -59,13 +59,13 @@ To make Zip archives of everything (main src/resources, bin, javadocs, placed in
 
 	ant zip
 
-To compile, JAR, test, and Zip up everything:
+To create a Windows Installer in the `dist` folder:
 
-	ant release
+	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
 To create a distribution (Bash and CMD):
 
-	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native]
+	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native-Project] -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
 To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):
 
@@ -77,14 +77,24 @@ To clean up everything:
 	ant clean
 
 
-Note that the `deploy.dir` and `natives.windows.dir` properties are supplied above - it may be better to
-add local paths to your `build.properties` file for those. That "GUI Native" project is here: [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
+Note that the `deploy.dir`, `natives.windows.dir`, `inno.setup.dir`, and `embedded.jre.source.dir` 
+properties are supplied above - it may be better to add local paths to your `build.properties` file for those.
 
 
-### Other Projects
+### Other Stuff
 
 Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
 It is not necessary for building or local deploying, but a package distributable will not be complete without it.
+
+The EXE build and copy to `src/maim/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set.
+
+Building a Windows Installer requires [Inno Setup 6.2.0+](https://jrsoftware.org/isdl.php), and requires that the property `inno.setup.dir`
+is set to Inno Setup's directory to make use of `iscc`.
+
+The installer target will be skipped if the `inno.setup.dir` property is not set.
+
+The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
+JRE version will not be built if `embedded.jre.source.dir` is not set.
 
 
 ### Utilities
