@@ -230,41 +230,43 @@
 
 	<target name="scripts" depends="scripts.gui.exe" description="Creates application shell scripts.">
 		<!-- DoomTools -->
-		<shell-cmd  name="doomtools"  todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
-		<shell-bash name="doomtools"  todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
+		<shell-cmd  name="doomtools"       todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
+		<shell-bash name="doomtools"       todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomToolsMain" />
 		<!-- WadMerge -->
-		<shell-cmd  name="wadmerge"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
-		<shell-bash name="wadmerge"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-cmd  name="wadmerge"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
+		<shell-bash name="wadmerge"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadMergeMain" />
 		<!-- WSWANTBL -->
-		<shell-cmd  name="wswantbl"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
-		<shell-bash name="wswantbl"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
+		<shell-cmd  name="wswantbl"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
+		<shell-bash name="wswantbl"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WSwAnTablesMain" />
 		<!-- WADTex -->
-		<shell-cmd  name="wadtex"     todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WADTexMain" />
-		<shell-bash name="wadtex"     todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<shell-cmd  name="wadtex"          todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WADTexMain" />
+		<shell-bash name="wadtex"          todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WADTexMain" />
 		<!-- WTexScan -->
-		<shell-cmd  name="wtexscan"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
-		<shell-bash name="wtexscan"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<shell-cmd  name="wtexscan"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<shell-bash name="wtexscan"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
 		<!-- WTexport -->
-		<shell-cmd  name="wtexport"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />
-		<shell-bash name="wtexport"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-cmd  name="wtexport"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />
+		<shell-bash name="wtexport"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 		<!-- WadScript -->
-		<shell-cmd  name="wadscript"  todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
-		<shell-bash name="wadscript"  todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<shell-cmd  name="wadscript"       todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
+		<shell-bash name="wadscript"       todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WadScriptMain" />
 		<!-- DecoHack -->
-		<shell-cmd  name="decohack"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
-		<shell-bash name="decohack"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-cmd  name="decohack"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
+		<shell-bash name="decohack"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DecoHackMain" />
 		<!-- DMXConv -->
-		<shell-cmd  name="dmxconv"    todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
-		<shell-bash name="dmxconv"    todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-cmd  name="dmxconv"         todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
+		<shell-bash name="dmxconv"         todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DMXConvertMain" />
 		<!-- DImgConv -->
-		<shell-cmd  name="dimgconv"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
-		<shell-bash name="dimgconv"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
+		<shell-cmd  name="dimgconv"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
+		<shell-bash name="dimgconv"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
 		<!-- DoomMake -->
-		<shell-cmd  name="doommake"   todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
-		<shell-bash name="doommake"   todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
+		<shell-cmd  name="doommake"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
+		<shell-bash name="doommake"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
 		<!-- RookScript -->
-		<shell-cmd  name="rookscript" todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
-		<shell-bash name="rookscript" todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<shell-cmd  name="rookscript"      todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<shell-bash name="rookscript"      todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="com.blackrook.rookscript.tools.ScriptExecutor" />
+		<!-- Other -->
+		<shell-cmd  name="doomtools-shell" todir="${build.dir}/shell/cmd"  src="${shell.dir}/cmd/doomtools-shell.cmd" />
 		<!-- WIN32 Natives -->
 		<copy todir="${build.dir}/shell/cmd">
 			<fileset dir="${resource.dir}/shell/exe" />

@@ -1,4 +1,4 @@
-; Note from MTrop - the "path environment" code was shamelessly taken from a pertinent answer from Stack Overflow
+; Note from MTrop - the "path environment" code was shamelessly taken (and also modified) from a pertinent answer from Stack Overflow
 ; https://stackoverflow.com/questions/3304463/how-do-i-modify-the-path-environment-variable-when-running-an-inno-setup-install
 ; Thanks, Wojciech Mleczek!
 
@@ -8,16 +8,22 @@ const EnvironmentKey = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environ
 procedure EnvAddPath(Path: string);
 var
     Paths: string;
+    PathEntry: string;
+    P: Integer;
 begin
     { Retrieve current path (use empty string if entry not exists) }
     if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvironmentKey, 'Path', Paths)
     then Paths := '';
 
     { Skip if string already found in path }
-    if Pos(';' + Uppercase(Path) + ';', ';' + Uppercase(Paths) + ';') > 0 then exit;
+	PathEntry := Uppercase(Path) + ';';
+	P := Pos(PathEntry, Uppercase(Paths));
+    if P > 0 then exit;
 
-    { App string to the end of the path variable }
-    Paths := Paths + ';'+ Path +';'
+	{ If Paths ends in a path separator, do not add another separator, and append to Paths }
+	if Copy(Paths, Length(Paths), 1) = ';'
+	then Paths := Paths + Path + ';'
+	else Paths := Paths + ';' + Path + ';';
 
     { Overwrite (or create if missing) path environment variable }
     if RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvironmentKey, 'Path', Paths)
@@ -28,6 +34,7 @@ end;
 procedure EnvRemovePath(Path: string);
 var
     Paths: string;
+    PathEntry: string;
     P: Integer;
 begin
     { Skip if registry entry not exists }
@@ -35,11 +42,12 @@ begin
         exit;
 
     { Skip if string not found in path }
-    P := Pos(';' + Uppercase(Path) + ';', ';' + Uppercase(Paths) + ';');
+	PathEntry := Uppercase(Path) + ';';
+    P := Pos(PathEntry, Uppercase(Paths));
     if P = 0 then exit;
 
     { Update path variable }
-    Delete(Paths, P - 1, Length(Path) + 1);
+    Delete(Paths, P, Length(PathEntry));
 
     { Overwrite path environment variable }
     if RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvironmentKey, 'Path', Paths)
