@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -27,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
@@ -116,22 +118,42 @@ public class MultiFileEditorPanel extends JPanel
 	private Map<Component, EditorHandle> allEditors;
 	/** The currently selected editor. */
 	private EditorHandle currentEditor;
+	/** The text area factory function. */
+	private Function<String, RSyntaxTextArea> textAreaProvider;
 	/** The panel listener. */
 	private Listener listener;
 
+	/**
+	 * Creates a new multi-file editor panel.
+	 */
+	public MultiFileEditorPanel()
+	{
+		this((unused) -> new RSyntaxTextArea(), null);
+	}
+	
 	/**
 	 * Creates a new multi-file editor panel.
 	 * @param listener the listener.
 	 */
 	public MultiFileEditorPanel(Listener listener)
 	{
+		this((unused) -> new RSyntaxTextArea(), listener);
+	}
+	
+	/**
+	 * Creates a new multi-file editor panel.
+	 * @param textAreaProvider the text area provider factory function. Must make new {@link RSyntaxTextArea}s. Input is file name (can be null).
+	 * @param listener the listener.
+	 */
+	public MultiFileEditorPanel(Function<String, RSyntaxTextArea> textAreaProvider, Listener listener)
+	{
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.utils = DoomToolsGUIUtils.get();
 		
-		
 		this.allEditors = new HashMap<>();
 		this.currentEditor = null;
+		this.textAreaProvider = textAreaProvider;
 		this.listener = listener;
 		
 		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
@@ -398,7 +420,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String content)
 	{
-		RSyntaxTextArea textArea = createTextArea();
+		RSyntaxTextArea textArea = textAreaProvider.apply(attachedFile != null ? attachedFile.getAbsolutePath() : null);
 		textArea.setText(content);
 		textArea.setCaretPosition(0);
 		
@@ -419,17 +441,6 @@ public class MultiFileEditorPanel extends JPanel
 			setCurrentEditor(handle);
 		textArea.requestFocus();
 		return handle;
-	}
-
-	/**
-	 * Called to generate a new syntax text area.
-	 * By default, this creates a default text area.
-	 * Does not have to attach required listeners.
-	 * @return a new area.
-	 */
-	protected RSyntaxTextArea createTextArea()
-	{
-		return new RSyntaxTextArea();
 	}
 
 	/**
@@ -609,7 +620,6 @@ public class MultiFileEditorPanel extends JPanel
 		 * @param handle the handle saved.
 		 */
 		void onSave(EditorHandle handle);
-		
 	}
 	
 	/**
@@ -735,7 +745,7 @@ public class MultiFileEditorPanel extends JPanel
 				b.setOpaque(false);
 			});
 			setOpaque(false);
-			containerOf(this, new FlowLayout(FlowLayout.LEADING, 16, 0),
+			containerOf(this, (Border)null, new FlowLayout(FlowLayout.LEADING, 8, 0),
 				node(titleLabel),
 				node(closeButton)
 			);

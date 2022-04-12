@@ -18,7 +18,7 @@ public final class MultiFileEditorPanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		SwingUtils.apply(frame("Test", SwingUtils.apply(new MultiFileEditorPanel(null), (ep) -> {
+		SwingUtils.apply(frame("Test", SwingUtils.apply(new MultiFileEditorPanel(), (ep) -> {
 			ep.newEditor("Stuff", "Hello, content!");
 			ep.newEditor("Stuff 2", "Hello, more content!");
 			try {

@@ -8,10 +8,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.swing.JButton;
 import javax.swing.JMenuBar;
 import javax.swing.filechooser.FileFilter;
-
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
@@ -67,6 +66,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private MultiFileEditorPanel editorPanel;
 	private JFormField<File> workingDirFileField;
 	private JFormField<String> entryPointField;
+	private JButton runScriptButton;
 	private DoomToolsStatusPanel statusPanel;
 	
 	// Fields
@@ -113,7 +113,11 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		
 		this.entryPoint = "main";
 		this.entryPointField = stringTextField(entryPoint, (value) -> entryPoint = value);
-		
+		this.runScriptButton = utils.createButtonFromLanguageKey(
+			icons.getImage("script-run.png"), 
+			"wadscript.entrypoint.action", 
+			(b, e) -> executeScript()
+		);
 		this.editorPanel = new WadScriptEditorPanel(new WadScriptEditorPanel.Listener()
 		{
 			@Override
@@ -125,11 +129,13 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 					setWorkingDirectoryField(sourceFile == null ? defaultWorkingDirectory : sourceFile.getParentFile());
 					workingDirFileField.setEnabled(true);
 					entryPointField.setEnabled(true);
+					runScriptButton.setEnabled(true);
 				}
 				else
 				{
 					workingDirFileField.setEnabled(false);
 					entryPointField.setEnabled(false);
+					runScriptButton.setEnabled(false);
 				}
 			}
 
@@ -160,11 +166,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 					node(BorderLayout.NORTH, utils.createTitlePanel(language.getText("wadscript.workdir.title"), workingDirFileField)),
 					node(BorderLayout.SOUTH, utils.createTitlePanel(language.getText("wadscript.entrypoint.title"), containerOf(new BorderLayout(4, 0),
 						node(BorderLayout.CENTER, entryPointField),
-						node(BorderLayout.LINE_END, utils.createButtonFromLanguageKey(
-							icons.getImage("script-run.png"), 
-							"wadscript.entrypoint.action", 
-							(b, e) -> executeScript()
-						))
+						node(BorderLayout.LINE_END, runScriptButton)
 					)))
 				)),
 				node(BorderLayout.SOUTH, statusPanel)
@@ -283,12 +285,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			super(listener);
 		}
 
-		@Override
-		protected RSyntaxTextArea createTextArea() 
-		{
-			return super.createTextArea();
-		}
-		
 		@Override
 		protected String getLastPathKey() 
 		{
