@@ -41,7 +41,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WadMerge v").append(Version.WADMERGE).append("</b>").append("<br/>");
 		sb.append("Contains <b>WadScript v").append(Version.WADSCRIPT).append("</b>").append("<br/>");
 		sb.append("Contains <b>WADTex v").append(Version.WADTEX).append("</b>").append("<br/>");
-		sb.append("Contains <b>WSwAnTBLs v").append(Version.WSWANTBLS).append("</b>").append("<br/>");
+		sb.append("Contains <b>WSwAnTBL v").append(Version.WSWANTBL).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTExport v").append(Version.WTEXPORT).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");

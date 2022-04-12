@@ -505,7 +505,7 @@ public final class DoomToolsMain
 				options.stdout.println("Contains WadMerge v" + Version.WADMERGE);
 				options.stdout.println("Contains WadScript v" + Version.WADSCRIPT);
 				options.stdout.println("Contains WADTex v" + Version.WADTEX);
-				options.stdout.println("Contains WSwAnTBLs v" + Version.WSWANTBLS);
+				options.stdout.println("Contains WSwAnTBL v" + Version.WSWANTBL);
 				options.stdout.println("Contains WTExport v" + Version.WTEXPORT);
 				options.stdout.println("Contains WTexScan v" + Version.WTEXSCAN);
 				return ERROR_NONE;
