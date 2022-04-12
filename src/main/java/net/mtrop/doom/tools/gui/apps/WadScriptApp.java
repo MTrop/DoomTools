@@ -77,21 +77,25 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	// State
 	
 	// ...
+
+	/**
+	 * Create a new WadScript application.
+	 * The default working directory for new files is the application working directory.
+	 */
+	public WadScriptApp() 
+	{
+		this(new File(OSUtils.getWorkingDirectoryPath()).getAbsoluteFile());
+	}
 	
 	/**
 	 * Create a new WadScript application.
+	 * @param defaultWorkingDirectory the working directory for new files.
 	 */
-	public WadScriptApp() 
+	public WadScriptApp(final File defaultWorkingDirectory) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
-		
-		try {
-			this.currentWorkingDirectory = new File(OSUtils.getWorkingDirectoryPath()).getCanonicalFile();
-		} catch (IOException e) {
-			this.currentWorkingDirectory = new File(OSUtils.getWorkingDirectoryPath());
-		}
 		
 		this.workingDirFileField = fileField(
 			currentWorkingDirectory, 
@@ -118,7 +122,14 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				if (handle != null)
 				{
 					File sourceFile = handle.getContentSourceFile();
-					setWorkingDirectoryField(sourceFile == null ? new File(OSUtils.getWorkingDirectoryPath()) : sourceFile.getParentFile());
+					setWorkingDirectoryField(sourceFile == null ? defaultWorkingDirectory : sourceFile.getParentFile());
+					workingDirFileField.setEnabled(true);
+					entryPointField.setEnabled(true);
+				}
+				else
+				{
+					workingDirFileField.setEnabled(false);
+					entryPointField.setEnabled(false);
 				}
 			}
 
@@ -127,6 +138,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			{
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.saved", sourceFile.getName()));
+				setWorkingDirectoryField(sourceFile.getParentFile());
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
@@ -259,7 +271,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	
 	private void executeScript()
 	{
-		
+		// TODO: Do this. 
 	}
 
 	private static class WadScriptEditorPanel extends MultiFileEditorPanel

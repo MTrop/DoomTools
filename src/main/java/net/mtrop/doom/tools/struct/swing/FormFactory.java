@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.struct.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -721,6 +722,12 @@ public final class FormFactory
 			{
 				field.setText(value);
 			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
+			}
 		};
 	}
 
@@ -752,6 +759,12 @@ public final class FormFactory
 			public void setValue(Boolean value)
 			{
 				field.setSelected(value);
+			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
 			}
 		};
 	}
@@ -790,6 +803,12 @@ public final class FormFactory
 			public void setValue(Integer value)
 			{
 				field.setValue(value);
+			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
 			}
 		};
 	}
@@ -839,6 +858,12 @@ public final class FormFactory
 			{
 				field.setValue(value);
 			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
+			}
 		};
 	}
 	
@@ -873,6 +898,12 @@ public final class FormFactory
 			{
 				field.setSelectedItem(value);
 			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
+			}
 		};
 	}
 	
@@ -905,6 +936,12 @@ public final class FormFactory
 			public void setValue(Object value)
 			{
 				field.setSelectedValue(value, true);
+			}
+			
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
 			}
 		};
 	}
@@ -1093,6 +1130,14 @@ public final class FormFactory
 			return type.cast(getValue(key));
 		}
 		
+		@Override
+		public void setEnabled(boolean enabled) 
+		{
+			super.setEnabled(enabled);
+			for (JFormField<?> field : fieldValueMap.values())
+				field.setEnabled(enabled);
+		}
+		
 	}
 	
 	/**
@@ -1102,6 +1147,13 @@ public final class FormFactory
 	public static abstract class JFormField<V> extends JPanel
 	{
 		private static final long serialVersionUID = 1207550884473493069L;
+		
+		@Override
+		public void setEnabled(boolean enabled)
+		{
+			super.setEnabled(enabled);
+			getFormComponent().setEnabled(enabled);
+		}
 		
 		/**
 		 * @return the field's value. 
@@ -1113,7 +1165,13 @@ public final class FormFactory
 		 * @param value the new value. 
 		 */
 		public abstract void setValue(V value);
-		
+
+		/**
+		 * Gets the reference to this field's form component (for state stuff).
+		 * @return the component. Cannot be null.
+		 */
+		protected abstract Component getFormComponent();
+
 	}
 
 	/**
@@ -1174,6 +1232,11 @@ public final class FormFactory
 			formField.setValue(value);
 		}
 		
+		@Override
+		protected Component getFormComponent() 
+		{
+			return formField;
+		}
 	}
 
 	/**
@@ -1183,6 +1246,8 @@ public final class FormFactory
 	public static class JValueBrowseField<T> extends JValueTextField<T>
 	{
 		private static final long serialVersionUID = 7171922756771225976L;
+		
+		private JButton browseButton;
 		
 		/**
 		 * Creates a new browse field.
@@ -1195,7 +1260,7 @@ public final class FormFactory
 		protected JValueBrowseField(T initialValue, String browseText, final Function<T, T> browseFunction, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
 		{
 			super(initialValue, converter, changeListener);
-			add(new JButton(new AbstractAction(browseText)
+			add(browseButton = new JButton(new AbstractAction(browseText)
 			{
 				private static final long serialVersionUID = -7785265067430010139L;
 
@@ -1208,6 +1273,13 @@ public final class FormFactory
 				}
 				
 			}), BorderLayout.EAST);
+		}
+		
+		@Override
+		public void setEnabled(boolean enabled)
+		{
+			super.setEnabled(enabled);
+			browseButton.setEnabled(enabled);
 		}
 		
 	}
@@ -1340,6 +1412,12 @@ public final class FormFactory
 		private void restoreValue()
 		{
 			setValue(getValue());
+		}
+		
+		@Override
+		protected Component getFormComponent() 
+		{
+			return textField;
 		}
 		
 	}
