@@ -9,12 +9,13 @@
 	<macrodef name="shell-cmd">
 		<attribute name="name" />
 		<attribute name="todir" default="." />
-		<attribute name="mainclass" />
+		<attribute name="mainclass" default="net.mtrop.doom.tools.DoomToolsMain" />
 		<attribute name="options" default="" />
 		<attribute name="exename" default="java" />
+		<attribute name="src" default="${shell.dir}/jar/app-name.cmd" />
 		<sequential>
 			<delete file="@{todir}/@{name}.cmd" failonerror="false" />
-			<copy file="${shell.dir}/jar/app-name.cmd" tofile="@{todir}/@{name}.cmd" />
+			<copy file="@{src}" tofile="@{todir}/@{name}.cmd" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_OPTIONS}}" value="@{options}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{MAIN_CLASSNAME}}" value="@{mainclass}" />
 			<replace file="@{todir}/@{name}.cmd" token="{{JAVA_EXENAME}}" value="@{exename}" />

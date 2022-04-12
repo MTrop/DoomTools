@@ -69,6 +69,7 @@ Source: "{#SrcJREDirectory}\*"; DestDir: "{app}\jre"; Flags: ignoreversion recur
 
 [Icons]
 Name: "{group}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"
+Name: "{group}\{#DTAppName} CMD"; Filename: "{cmd}"; Parameters: "/k ""{app}\doomtools-shell.cmd"""; WorkingDir: "%USERPROFILE%"
 Name: "{group}\{cm:UninstallProgram,{#DTAppName}}"; Filename: {uninstallexe}
 Name: "{autodesktop}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon
 
