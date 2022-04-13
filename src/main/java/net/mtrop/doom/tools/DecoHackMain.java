@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -79,6 +80,8 @@ public final class DecoHackMain
 	private static final String SWITCH_SOURCE_OUTPUT = "--source-output";
 	private static final String SWITCH_SOURCE_OUTPUT2 = "-s";
 
+	private static final String SWITCH_SYSTEMIN = "--";
+
 	/**
 	 * Program options.
 	 */
@@ -86,6 +89,7 @@ public final class DecoHackMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		private InputStream stdin;
 		
 		private boolean help;
 		private boolean full;
@@ -94,6 +98,7 @@ public final class DecoHackMain
 		private String dumpResource;
 		private boolean dryRun;
 
+		private boolean useStdin;
 		private List<File> inFiles;
 		
 		private Charset outCharset;
@@ -106,12 +111,14 @@ public final class DecoHackMain
 		{
 			this.stdout = null;
 			this.stderr = null;
+			this.stdin = null;
 			this.help = false;
 			this.version = false;
 			this.dumpActionPointers = false;
 			this.dumpResource = null;
 			this.dryRun = false;
 
+			this.useStdin = false;
 			this.inFiles = new LinkedList<>();
 			
 			this.outCharset = ASCII;
@@ -130,6 +137,12 @@ public final class DecoHackMain
 		public Options setStderr(OutputStream err) 
 		{
 			this.stderr = new PrintStream(err, true);
+			return this;
+		}
+
+		public Options setUseStdin(boolean useStdin) 
+		{
+			this.useStdin = useStdin;
 			return this;
 		}
 
@@ -271,66 +284,108 @@ public final class DecoHackMain
 				}
 				return ERROR_NONE;
 			}
-
-			if (options.inFiles.isEmpty())
-			{
-				options.stderr.println("ERROR: Missing input file.");
-				return ERROR_MISSING_INPUT;
-			}
-
-			for (File f : options.inFiles)
-			{
-				if (!f.exists())
-				{
-					options.stderr.println("ERROR: Input file `" + f.getPath() + "` does not exist.");
-					return ERROR_MISSING_INPUT_FILE;
-				}
-			}
-
-			if (options.outFile == null)
-			{
-				if (!options.dryRun)
-					options.stdout.printf("NOTE: Output file not specified, defaulting to %s.\n", DEFAULT_OUTFILENAME);
-				options.outFile = new File(DEFAULT_OUTFILENAME);
-			}
-
-			// Read script.
-			DecoHackParser.Result result;
-			AbstractPatchContext<?> context;
-			try 
-			{
-				result = DecoHackParser.read(options.inFiles);
-				context = result.getContext();
-				for (String message : result.getWarnings())
-					options.stderr.println("WARNING: " + message);
-				if (context == null)
-				{
-					for (String message : result.getErrors())
-						options.stderr.println("ERROR: " + message);
-					return ERROR_PARSEERROR;
-				}
-			} 
-			catch (PreprocessorException e) 
-			{
-				options.stderr.println("ERROR: " + e.getLocalizedMessage());
-				return ERROR_PARSEERROR;
-			} 
-			catch (FileNotFoundException e) 
-			{
-				options.stderr.println("ERROR: Input file does not exist.");
-				return ERROR_MISSING_INPUT_FILE;
-			} 
-			catch (IOException e) 
-			{
-				options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
-				return ERROR_IOERROR;
-			} 
-			catch (SecurityException e) 
-			{
-				options.stderr.println("ERROR: Could not open input file (access denied).");
-				return ERROR_SECURITY;
-			}
 			
+			// Read script.
+			AbstractPatchContext<?> context;
+			if (options.useStdin)
+			{
+				if (options.outFile == null)
+				{
+					if (!options.dryRun)
+						options.stdout.printf("NOTE: Output file not specified, defaulting to %s.\n", DEFAULT_OUTFILENAME);
+					options.outFile = new File(DEFAULT_OUTFILENAME);
+				}
+
+				try (Reader reader = new BufferedReader(new InputStreamReader(options.stdin))) 
+				{
+					DecoHackParser.Result result;
+					result = DecoHackParser.read("STDIN", reader);
+					context = result.getContext();
+					for (String message : result.getWarnings())
+						options.stderr.println("WARNING: " + message);
+					if (context == null)
+					{
+						for (String message : result.getErrors())
+							options.stderr.println("ERROR: " + message);
+						return ERROR_PARSEERROR;
+					}
+				} 
+				catch (PreprocessorException e) 
+				{
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_PARSEERROR;
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} 
+				catch (SecurityException e) 
+				{
+					options.stderr.println("ERROR: Could not open standard in for reading (access denied).");
+					return ERROR_SECURITY;
+				}
+			}
+			else
+			{
+				if (options.inFiles.isEmpty())
+				{
+					options.stderr.println("ERROR: Missing input file.");
+					return ERROR_MISSING_INPUT;
+				}
+
+				for (File f : options.inFiles)
+				{
+					if (!f.exists())
+					{
+						options.stderr.println("ERROR: Input file `" + f.getPath() + "` does not exist.");
+						return ERROR_MISSING_INPUT_FILE;
+					}
+				}
+
+				if (options.outFile == null)
+				{
+					if (!options.dryRun)
+						options.stdout.printf("NOTE: Output file not specified, defaulting to %s.\n", DEFAULT_OUTFILENAME);
+					options.outFile = new File(DEFAULT_OUTFILENAME);
+				}
+
+				try 
+				{
+					DecoHackParser.Result result;
+					result = DecoHackParser.read(options.inFiles);
+					context = result.getContext();
+					for (String message : result.getWarnings())
+						options.stderr.println("WARNING: " + message);
+					if (context == null)
+					{
+						for (String message : result.getErrors())
+							options.stderr.println("ERROR: " + message);
+						return ERROR_PARSEERROR;
+					}
+				} 
+				catch (PreprocessorException e) 
+				{
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_PARSEERROR;
+				} 
+				catch (FileNotFoundException e) 
+				{
+					options.stderr.println("ERROR: Input file does not exist.");
+					return ERROR_MISSING_INPUT_FILE;
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} 
+				catch (SecurityException e) 
+				{
+					options.stderr.println("ERROR: Could not open input file (access denied).");
+					return ERROR_SECURITY;
+				}
+			}			
+
 			// warn export if [Ultimate] Doom 1.9 and last state is replaced.
 			if (context.getSupportedFeatureLevel() == DEHFeatureLevel.DOOM19
 				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
@@ -411,15 +466,17 @@ public final class DecoHackMain
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
+	 * @param in the standard in input stream.
 	 * @param args the argument args.
 	 * @return the parsed options.
 	 * @throws OptionParseException if a parse exception occurs.
 	 */
-	public static Options options(PrintStream out, PrintStream err, String ... args) throws OptionParseException
+	public static Options options(PrintStream out, PrintStream err, InputStream in, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
 		options.stderr = err;
+		options.stdin = in;
 	
 		final int STATE_START = 0;
 		final int STATE_OUTFILE = 1;
@@ -461,6 +518,8 @@ public final class DecoHackMain
 						state = STATE_SOURCEOUTFILE;
 					else if (arg.equals(SWITCH_OUTPUTCHARSET) || arg.equals(SWITCH_OUTPUTCHARSET2))
 						state = STATE_OUTCHARSET;
+					else if (arg.equals(SWITCH_SYSTEMIN))
+						options.setUseStdin(true);
 					else
 						options.inFiles.add(new File(arg));
 				}
@@ -546,7 +605,7 @@ public final class DecoHackMain
 		}
 	
 		try {
-			System.exit(call(options(System.out, System.err, args)));
+			System.exit(call(options(System.out, System.err, System.in, args)));
 		} catch (OptionParseException e) {
 			System.err.println(e.getMessage());
 			System.exit(ERROR_BAD_OPTIONS);
@@ -602,6 +661,8 @@ public final class DecoHackMain
 		out.println("[filenames]:");
 		out.println("    <filename> ...           The input filenames. One or more can be added,");
 		out.println("                             parsed in the order specified.");
+		out.println();
+		out.println("    --                       Script input is from Standard In, not a file.");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output [file]          Outputs the resultant patch to [file].");

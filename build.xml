@@ -164,7 +164,7 @@
         </javadoc>
     </target>	
 
-	<target name="jar.one" depends="compile, init.versions">
+	<target name="jar.one" depends="init.jar, compile, init.versions">
 		<jar destfile="${jar.dir}/${jar.filename}">
 			<zipgroupfileset file="${dependencies.dir}/${json.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${doom.jar}"/>
@@ -273,7 +273,7 @@
 		</copy>
 	</target>
 
-	<target name="dist.cmd" depends="init.jar, jar.one, init.dist, scripts" description="Build CMD distribution.">
+	<target name="dist.cmd" depends="jar.one, scripts, init.dist" description="Build CMD distribution.">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
@@ -283,7 +283,7 @@
 		</zip>
 	</target>
 
-	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist" description="Build Bash distribution.">
+	<target name="dist.bash" depends="jar.one, scripts, init.dist" description="Build Bash distribution.">
 		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
@@ -293,7 +293,7 @@
 		</tar>
 	</target>
 
-	<target name="dist.installer.copy" depends="init.jar, jar.one, scripts">
+	<target name="dist.installer.copy" depends="jar.one, scripts">
 		<delete dir="${build.installer.dir}" failonerror="false" />
 		<mkdir dir="${build.installer.dir}"/>
 		<mkdir dir="${build.installer.dir}/docs"/>
@@ -353,6 +353,9 @@
 	<target name="dist.installer" depends="init.dist, dist.installer.copy, dist.installer.dirs.exist, dist.installer.compile, dist.installer.jre.compile" description="Build Windows installer distribution (requires Inno Setup Path).">
 	</target>	
 	
+	<target name="dist.jar" depends="init.dist, jar.one" description="Build Windows installer distribution (requires Inno Setup Path).">
+	</target>	
+
 	<target name="dist" depends="dist.bash, dist.cmd, dist.installer" description="Zips together the application and shell scripts, and creates the installer.">
 	</target>
 
