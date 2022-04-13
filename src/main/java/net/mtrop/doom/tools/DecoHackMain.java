@@ -32,6 +32,7 @@ import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
@@ -225,7 +226,7 @@ public final class DecoHackMain
 				
 				boolean firstCategory = true;
 				DEHActionPointer prev = null;
-				for (DEHActionPointer pointer : DEHActionPointer.values())
+				for (DEHActionPointer pointer : DEHActionPointerDefinition.values())
 				{
 					// Will skip A_NULL
 					if (prev != null)

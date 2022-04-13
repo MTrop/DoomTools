@@ -17,7 +17,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
 
 /**
  * Patch implementation for Extended DeHackEd.
@@ -408,6 +408,7 @@ public class PatchExtended extends PatchMBF
 		return 4000;
 	}
 
+	@Override
 	protected PatchBoom.State getBoomState(int index)
 	{
 		int mbflen = DEHSTATE.length + DEHSTATEMBF.length;
@@ -416,7 +417,7 @@ public class PatchExtended extends PatchMBF
 		if (index >= getStateCount())
 			return null;
 		else if (index >= extlen)
-			return PatchBoom.State.create(DEHState.create(SPRITE_INDEX_TNT1, 0, false, index, -1), DEHActionPointer.NULL);
+			return PatchBoom.State.create(DEHState.create(SPRITE_INDEX_TNT1, 0, false, index, -1), DEHActionPointerDefinition.NULL);
 		else if (index >= mbflen)
 			return Common.arrayElement(DEHSTATEEXTENDED, index - mbflen);
 		else

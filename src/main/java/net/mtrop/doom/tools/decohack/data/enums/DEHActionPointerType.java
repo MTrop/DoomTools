@@ -24,6 +24,9 @@ public enum DEHActionPointerType
 		this.useArgs = useArgs;
 	}
 
+	/**
+	 * @return true if this uses the "args" fields for values, false for the "misc" fields.
+	 */
 	public boolean getUseArgs()
 	{
 		return useArgs;

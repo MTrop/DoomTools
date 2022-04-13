@@ -39,6 +39,7 @@ import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
@@ -2628,7 +2629,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (isBoom)
 			{
 				if (pointerIndex != null && parsedAction.pointer == null)
-					parsedAction.pointer = DEHActionPointer.NULL;
+					parsedAction.pointer = DEHActionPointerDefinition.NULL;
 			}
 			else if ((pointerIndex == null && parsedAction.pointer != null) || (pointerIndex != null && parsedAction.pointer == null))
 			{
@@ -2735,7 +2736,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else
 					{
-						action.pointer = DEHActionPointer.NULL;
+						action.pointer = DEHActionPointerDefinition.NULL;
 					}
 				}
 				else if (!parseActionClause(context, null, action, requireAction))
@@ -2744,7 +2745,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 	
 				if (isBoom && pointerIndex != null && action.pointer == null)
-					action.pointer = DEHActionPointer.NULL;
+					action.pointer = DEHActionPointerDefinition.NULL;
 				
 				if (pointerIndex != null)
 					context.setActionPointer(pointerIndex, action.pointer);
@@ -3210,7 +3211,7 @@ public final class DecoHackParser extends Lexer.Parser
 			// else, state body.
 
 			// MBF args (misc1/misc2)
-			if (!pointer.useArgs())
+			if (!pointer.getType().getUseArgs())
 			{
 				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
@@ -3439,7 +3440,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer pointerIndex = context.getStateActionPointerIndex(currentIndex);
 				
 				if (isBoom && pointerIndex != null && parsedAction.pointer == null)
-					parsedAction.pointer = DEHActionPointer.NULL;
+					parsedAction.pointer = DEHActionPointerDefinition.NULL;
 				
 				if (pointerIndex != null)
 					context.setActionPointer(pointerIndex, parsedAction.pointer);
@@ -3891,9 +3892,9 @@ public final class DecoHackParser extends Lexer.Parser
 		DEHActionPointer out;
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
-		if ((out = DEHActionPointer.getByMnemonic(lexeme.substring(2))) == null)
+		if ((out = DEHActionPointerDefinition.getByMnemonic(lexeme.substring(2))) == null)
 			return null;
-		if (out == DEHActionPointer.NULL)
+		if (out == DEHActionPointerDefinition.NULL)
 			return null;
 
 		nextToken();
