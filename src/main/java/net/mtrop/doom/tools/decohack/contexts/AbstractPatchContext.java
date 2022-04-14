@@ -268,7 +268,19 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	/**
+	 * Adds an available, custom action pointer.
+	 * Associates using its mnemonic. If another pointer uses the same mnemonic, it is overwritten. 
+	 * @param pointer the pointer to add.
+	 * @see DEHActionPointer#getMnemonic()
+	 */
+	public void addActionPointer(DEHActionPointer pointer)
+	{
+		pointerMnemonicMap.put(pointer.getMnemonic(), pointer);
+	}
+	
+	/**
 	 * Gets an action pointer by its mnemonic.
+	 * Custom action pointers get precedence.
 	 * @param mnemonic the action pointer mnemonic.
 	 * @return the corresponding pointer, or null if no pointer.
 	 */

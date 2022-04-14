@@ -32,7 +32,9 @@ import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
@@ -223,10 +225,15 @@ public final class DecoHackMain
 			{
 				final BiPredicate<DEHActionPointer, DEHActionPointer> BREAK = (p1, p2) -> 
 					p1.isWeapon() != p2.isWeapon() || p1.getType() != p2.getType(); 
-				
+
+				List<DEHActionPointer> pointerList = new LinkedList<>();
+				pointerList.addAll(Arrays.asList(DEHActionPointerDoom19.values()));
+				pointerList.addAll(Arrays.asList(DEHActionPointerMBF.values()));
+				pointerList.addAll(Arrays.asList(DEHActionPointerMBF21.values()));
+					
 				boolean firstCategory = true;
 				DEHActionPointer prev = null;
-				for (DEHActionPointer pointer : DEHActionPointerDefinition.values())
+				for (DEHActionPointer pointer : pointerList)
 				{
 					// Will skip A_NULL
 					if (prev != null)

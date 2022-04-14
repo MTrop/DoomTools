@@ -13,15 +13,18 @@ package net.mtrop.doom.tools.decohack.data.enums;
  */
 public enum DEHActionPointerType
 {
-	DOOM19(false),
-	MBF(false),
-	MBF21(true);
+	DOOM19 (false, 0),
+	BOOM   (false, 0), // redundant for DOOM19, necessary for custom pointers
+	MBF    (false, 2),
+	MBF21  (true,  9);
 
+	private int maxCustomParams;
 	private boolean useArgs;
 
-	private DEHActionPointerType(boolean useArgs)
+	private DEHActionPointerType(boolean useArgs, int maxCustomParams)
 	{
 		this.useArgs = useArgs;
+		this.maxCustomParams = maxCustomParams;
 	}
 
 	/**
@@ -30,6 +33,16 @@ public enum DEHActionPointerType
 	public boolean getUseArgs()
 	{
 		return useArgs;
+	}
+	
+	/**
+	 * Gets the maximum amount of definable parameter types.
+	 * If used in a custom type, this is the max amount of params that a user is allowed to define.
+	 * @return the max amount of params. 
+	 */
+	public int getMaxCustomParams() 
+	{
+		return maxCustomParams;
 	}
 	
 	/**

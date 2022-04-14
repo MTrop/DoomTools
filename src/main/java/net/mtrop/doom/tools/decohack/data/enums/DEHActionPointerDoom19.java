@@ -5,7 +5,10 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.Map;
+
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Enumeration of action pointers for frames.
@@ -116,6 +119,13 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		this.mnemonic = mnemonic;
 	}
 
+	private static final Map<String, DEHActionPointerDoom19> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerDoom19.class);
+	
+	public static DEHActionPointer getActionPointerByMnemonic(String mnemonic)
+	{
+		return MNEMONIC_MAP.get(mnemonic);
+	}
+	
 	@Override
 	public int getFrame() 
 	{

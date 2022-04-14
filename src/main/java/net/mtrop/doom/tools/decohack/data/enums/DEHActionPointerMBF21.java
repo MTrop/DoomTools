@@ -6,8 +6,11 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.*;
+
+import java.util.Map;
 
 /**
  * Enumeration of action pointers for frames.
@@ -18,36 +21,36 @@ import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType
 public enum DEHActionPointerMBF21 implements DEHActionPointer
 {
 	// MBF21 Thing Action Pointers
-	SPAWNOBJECT         (false, "SpawnObject", THING, ANGLE_FIXED, FIXED, FIXED, FIXED, FIXED, FIXED, FIXED),
-	MONSTERPROJECTILE   (false, "MonsterProjectile", THING, ANGLE_FIXED, ANGLE_FIXED, FIXED, FIXED),
+	SPAWNOBJECT         (false, "SpawnObject",         THING, ANGLE_FIXED, FIXED, FIXED, FIXED, FIXED, FIXED, FIXED),
+	MONSTERPROJECTILE   (false, "MonsterProjectile",   THING, ANGLE_FIXED, ANGLE_FIXED, FIXED, FIXED),
 	MONSTERBULLETATTACK (false, "MonsterBulletAttack", ANGLE_FIXED, ANGLE_FIXED, UINT, USHORT, UINT),
-	MONSTERMELEEATTACK  (false, "MonsterMeleeAttack", USHORT, UINT, SOUND, INT),
-	RADIUSDAMAGE        (false, "RadiusDamage", UINT, UINT),
+	MONSTERMELEEATTACK  (false, "MonsterMeleeAttack",  USHORT, UINT, SOUND, INT),
+	RADIUSDAMAGE        (false, "RadiusDamage",        UINT, UINT),
 	NOISEALERT          (false, "NoiseAlert"),
-	HEALCHASE           (false, "HealChase", STATE, SOUND),
-	SEEKTRACER          (false, "SeekTracer", ANGLE_FIXED, ANGLE_FIXED),
-	FINDTRACER          (false, "FindTracer", ANGLE_FIXED, UINT),
+	HEALCHASE           (false, "HealChase",           STATE, SOUND),
+	SEEKTRACER          (false, "SeekTracer",          ANGLE_FIXED, ANGLE_FIXED),
+	FINDTRACER          (false, "FindTracer",          ANGLE_FIXED, UINT),
 	CLEARTRACER         (false, "ClearTracer"),
-	JUMPIFHEALTHBELOW   (false, "JumpIfHealthBelow", STATE, INT),
+	JUMPIFHEALTHBELOW   (false, "JumpIfHealthBelow",   STATE, INT),
 	JUMPIFTARGETINSIGHT (false, "JumpIfTargetInSight", STATE, ANGLE_FIXED),
-	JUMPIFTARGETCLOSER  (false, "JumpIfTargetCloser", STATE, FIXED),
+	JUMPIFTARGETCLOSER  (false, "JumpIfTargetCloser",  STATE, FIXED),
 	JUMPIFTRACERINSIGHT (false, "JumpIfTracerInSight", STATE, ANGLE_FIXED),
-	JUMPIFTRACERCLOSER  (false, "JumpIfTracerCloser", STATE, FIXED),
-	JUMPIFFLAGSSET      (false, "JumpIfFlagsSet", STATE, FLAGS, FLAGS),
-	ADDFLAGS            (false, "AddFlags", FLAGS, FLAGS),
-	REMOVEFLAGS         (false, "RemoveFlags", FLAGS, FLAGS),
+	JUMPIFTRACERCLOSER  (false, "JumpIfTracerCloser",  STATE, FIXED),
+	JUMPIFFLAGSSET      (false, "JumpIfFlagsSet",      STATE, FLAGS, FLAGS),
+	ADDFLAGS            (false, "AddFlags",            FLAGS, FLAGS),
+	REMOVEFLAGS         (false, "RemoveFlags",         FLAGS, FLAGS),
 
 	// MBF21 Weapon Action Pointers
-	WEAPONPROJECTILE    (true,  "WeaponProjectile", THING, ANGLE_FIXED, ANGLE_FIXED, FIXED, FIXED),
-	WEAPONBULLETATTACK  (true,  "WeaponBulletAttack", ANGLE_FIXED, ANGLE_FIXED, UINT, USHORT, UINT),
-	WEAPONMELEEATTACK   (true,  "WeaponMeleeAttack", USHORT, UINT, FIXED, SOUND, FIXED),
-	WEAPONSOUND         (true,  "WeaponSound", SOUND, BOOL),
+	WEAPONPROJECTILE    (true,  "WeaponProjectile",    THING, ANGLE_FIXED, ANGLE_FIXED, FIXED, FIXED),
+	WEAPONBULLETATTACK  (true,  "WeaponBulletAttack",  ANGLE_FIXED, ANGLE_FIXED, UINT, USHORT, UINT),
+	WEAPONMELEEATTACK   (true,  "WeaponMeleeAttack",   USHORT, UINT, FIXED, SOUND, FIXED),
+	WEAPONSOUND         (true,  "WeaponSound",         SOUND, BOOL),
 	WEAPONALERT         (true,  "WeaponAlert"),
-	WEAPONJUMP          (true,  "WeaponJump", STATE, UINT),
-	CONSUMEAMMO         (true,  "ConsumeAmmo", SHORT),
-	CHECKAMMO           (true,  "CheckAmmo", STATE, USHORT),
-	REFIRETO            (true,  "RefireTo", STATE, BOOL),
-	GUNFLASHTO          (true,  "GunFlashTo", STATE, BOOL);
+	WEAPONJUMP          (true,  "WeaponJump",          STATE, UINT),
+	CONSUMEAMMO         (true,  "ConsumeAmmo",         SHORT),
+	CHECKAMMO           (true,  "CheckAmmo",           STATE, USHORT),
+	REFIRETO            (true,  "RefireTo",            STATE, BOOL),
+	GUNFLASHTO          (true,  "GunFlashTo",          STATE, BOOL);
 	
 	/** Is weapon pointer. */
 	private boolean weapon;
@@ -63,6 +66,13 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 		this.params = params;
 	}
 
+	private static final Map<String, DEHActionPointerMBF21> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerMBF21.class);
+	
+	public static DEHActionPointer getActionPointerByMnemonic(String mnemonic)
+	{
+		return MNEMONIC_MAP.get(mnemonic);
+	}
+	
 	@Override
 	public int getFrame() 
 	{

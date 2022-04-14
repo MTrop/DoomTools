@@ -10,13 +10,10 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 
 /**
  * Enumeration of action pointers for frames.
- * NOTE: KEEP THIS ORDER SORTED IN THIS WAY! It is used as breaking categories for the pointer dumper!
  * @author Matthew Tropiano
  */
-public abstract class DEHActionPointerAbstract implements DEHActionPointer
+public class DEHActionPointerEntry implements DEHActionPointer
 {
-	/** Originating frame (for DEH 3.0 format 19). */
-	private int frame;
 	/** Is weapon pointer. */
 	private boolean weapon;
 	/** Mnemonic name for BEX/DECORATE. */
@@ -26,24 +23,23 @@ public abstract class DEHActionPointerAbstract implements DEHActionPointer
 	/** Action pointer parameters. */
 	private DEHActionPointerParamType[] params;
 
-	protected DEHActionPointerAbstract(int frame, String mnemonic)
+	protected DEHActionPointerEntry(String mnemonic)
 	{
-		this(frame, false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
+		this(false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
-	protected DEHActionPointerAbstract(int frame, boolean weapon, String mnemonic)
+	protected DEHActionPointerEntry(boolean weapon, String mnemonic)
 	{
-		this(frame, weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
+		this(weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
-	protected DEHActionPointerAbstract(int frame, boolean weapon, DEHActionPointerType type, String mnemonic)
+	protected DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic)
 	{
-		this(frame, weapon, type, mnemonic, new DEHActionPointerParamType[0]);
+		this(weapon, type, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
-	protected DEHActionPointerAbstract(int frame, boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
+	protected DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
 	{
-		this.frame = frame;
 		this.weapon = weapon;
 		this.mnemonic = mnemonic;
 		this.type = type;
@@ -53,7 +49,7 @@ public abstract class DEHActionPointerAbstract implements DEHActionPointer
 	@Override
 	public int getFrame() 
 	{
-		return frame;
+		return -1;
 	}
 	
 	@Override

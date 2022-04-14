@@ -5,11 +5,12 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
-import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition.*;
-
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+
+import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF.*;
+
 
 /**
  * Constants for MBF. 

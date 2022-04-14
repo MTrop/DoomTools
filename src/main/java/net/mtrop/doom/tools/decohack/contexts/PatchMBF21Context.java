@@ -5,12 +5,12 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchMBF21;
-import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Patch context for MBF21.
@@ -21,16 +21,19 @@ public class PatchMBF21Context extends PatchExtendedContext
 {
 	private static final DEHPatchBoom MBF21PATCH = new PatchMBF21();
 	
-	public PatchMBF21Context() 
-	{
-		super();
-		EnumUtils.addToNameMap(this.pointerMnemonicMap, DEHActionPointerMBF21.class);
-	}
-	
 	@Override
 	public DEHPatchBoom getSourcePatch()
 	{
 		return MBF21PATCH;
+	}
+
+	@Override
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic) 
+	{
+		DEHActionPointer out = super.getActionPointerByMnemonic(mnemonic);
+		if (out == null)
+			out = DEHActionPointerMBF21.getActionPointerByMnemonic(mnemonic);
+		return out;
 	}
 
 	@Override

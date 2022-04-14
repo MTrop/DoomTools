@@ -39,7 +39,6 @@ import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
 import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
@@ -2629,7 +2628,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (isBoom)
 			{
 				if (pointerIndex != null && parsedAction.pointer == null)
-					parsedAction.pointer = DEHActionPointerDefinition.NULL;
+					parsedAction.pointer = DEHActionPointer.NULL;
 			}
 			else if ((pointerIndex == null && parsedAction.pointer != null) || (pointerIndex != null && parsedAction.pointer == null))
 			{
@@ -2736,7 +2735,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else
 					{
-						action.pointer = DEHActionPointerDefinition.NULL;
+						action.pointer = DEHActionPointer.NULL;
 					}
 				}
 				else if (!parseActionClause(context, null, action, requireAction))
@@ -2745,7 +2744,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 	
 				if (isBoom && pointerIndex != null && action.pointer == null)
-					action.pointer = DEHActionPointerDefinition.NULL;
+					action.pointer = DEHActionPointer.NULL;
 				
 				if (pointerIndex != null)
 					context.setActionPointer(pointerIndex, action.pointer);
@@ -3440,7 +3439,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer pointerIndex = context.getStateActionPointerIndex(currentIndex);
 				
 				if (isBoom && pointerIndex != null && parsedAction.pointer == null)
-					parsedAction.pointer = DEHActionPointerDefinition.NULL;
+					parsedAction.pointer = DEHActionPointer.NULL;
 				
 				if (pointerIndex != null)
 					context.setActionPointer(pointerIndex, parsedAction.pointer);
@@ -3893,9 +3892,9 @@ public final class DecoHackParser extends Lexer.Parser
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
 		// FIXME: Switching to context is not equivalent. Fix!
-		if ((out = DEHActionPointerDefinition.getActionPointerByMnemonic(lexeme.substring(2))) == null)
+		if ((out = context.getActionPointerByMnemonic(lexeme.substring(2))) == null)
 			return null;
-		if (out == DEHActionPointerDefinition.NULL)
+		if (out == DEHActionPointer.NULL)
 			return null;
 
 		nextToken();

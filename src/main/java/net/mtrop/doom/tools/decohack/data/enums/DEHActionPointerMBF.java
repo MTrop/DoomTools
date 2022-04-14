@@ -6,8 +6,11 @@
 package net.mtrop.doom.tools.decohack.data.enums;
 
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.*;
+
+import java.util.Map;
 
 /**
  * Enumeration of action pointers for frames.
@@ -19,12 +22,12 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 {
 	// MBF Thing Action Pointers
 	DETONATE        ("Detonate"),
-	MUSHROOM        ("Mushroom", ANGLE_FIXED, FIXED),
-	SPAWN           ("Spawn", THING, FIXED),
-	TURN            ("Turn", ANGLE_INT),
-	FACE            ("Face", ANGLE_UINT),
-	SCRATCH         ("Scratch", SHORT, SOUND),
-	PLAYSOUND       ("PlaySound", SOUND, BOOL),
+	MUSHROOM        ("Mushroom",   ANGLE_FIXED, FIXED),
+	SPAWN           ("Spawn",      THING, FIXED),
+	TURN            ("Turn",       ANGLE_INT),
+	FACE            ("Face",       ANGLE_UINT),
+	SCRATCH         ("Scratch",    SHORT, SOUND),
+	PLAYSOUND       ("PlaySound",  SOUND, BOOL),
 	RANDOMJUMP      ("RandomJump", STATE, UINT),
 	LINEEFFECT      ("LineEffect", SHORT, SHORT),
 	DIE             ("Die"),
@@ -43,6 +46,13 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		this.params = params;
 	}
 
+	private static final Map<String, DEHActionPointerDoom19> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerDoom19.class);
+	
+	public static DEHActionPointer getActionPointerByMnemonic(String mnemonic)
+	{
+		return MNEMONIC_MAP.get(mnemonic);
+	}
+	
 	@Override
 	public int getFrame() 
 	{

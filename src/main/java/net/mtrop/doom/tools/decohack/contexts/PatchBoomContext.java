@@ -19,7 +19,6 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchBoom;
-import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Patch context for Boom.
@@ -37,7 +36,6 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 		super();
 		this.strings = new TreeMap<>();
 		this.pars = new TreeMap<>();
-		EnumUtils.addToNameMap(this.pointerMnemonicMap, DEHActionPointerDoom19.class);
 	}
 	
 	@Override
@@ -50,6 +48,15 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 	public DEHPatchBoom getSourcePatch()
 	{
 		return BOOMPATCH;
+	}
+
+	@Override
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic) 
+	{
+		DEHActionPointer out = super.getActionPointerByMnemonic(mnemonic);
+		if (out == null)
+			out = DEHActionPointerDoom19.getActionPointerByMnemonic(mnemonic);
+		return out;
 	}
 
 	@Override
