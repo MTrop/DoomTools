@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.decohack.data.enums;
 
 import java.util.Map;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**

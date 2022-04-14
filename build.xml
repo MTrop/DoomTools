@@ -105,6 +105,7 @@
 	<!-- Filenames -->
 	<property name="build.versions.dir" value="${build.dir}/versions" />
 	<property name="build.installer.dir" value="${build.dir}/installer" />
+	<property name="jar.dist.filename" value="${project.archive}-jar-${build.version.number}.zip" />
 	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version.number}.zip" />
 	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version.number}.tar.gz" />
 	<property name="installer.dist.name" value="${project.archive}-setup-${build.version.number}" />
@@ -273,6 +274,14 @@
 		</copy>
 	</target>
 
+	<target name="dist.jar" depends="init.dist, jar.one" description="Build JAR distribution.">
+		<zip destfile="${dist.dir}/${jar.dist.filename}" compress="true">
+			<zipfileset file="${jar.dir}/${jar.filename}" />
+			<zipfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset dir="docs" prefix="docs" />
+		</zip>
+	</target>	
+
 	<target name="dist.cmd" depends="jar.one, scripts, init.dist" description="Build CMD distribution.">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
@@ -350,13 +359,10 @@
 		</exec>
 	</target>
 
-	<target name="dist.installer" depends="init.dist, dist.installer.copy, dist.installer.dirs.exist, dist.installer.compile, dist.installer.jre.compile" description="Build Windows installer distribution (requires Inno Setup Path).">
+	<target name="dist.installer" depends="init.dist, dist.installer.copy, dist.installer.dirs.exist, dist.installer.compile, dist.installer.jre.compile" description="Build available Windows installer distributions (requires Inno Setup Path).">
 	</target>	
 	
-	<target name="dist.jar" depends="init.dist, jar.one" description="Build Windows installer distribution (requires Inno Setup Path).">
-	</target>	
-
-	<target name="dist" depends="dist.bash, dist.cmd, dist.installer" description="Zips together the application and shell scripts, and creates the installer.">
+	<target name="dist" depends="dist.jar, dist.bash, dist.cmd, dist.installer" description="Builds all distributions and installers.">
 	</target>
 
 	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION (requires deploy directory path).">

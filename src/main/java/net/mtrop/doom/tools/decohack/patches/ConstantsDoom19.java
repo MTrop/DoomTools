@@ -7,8 +7,8 @@ package net.mtrop.doom.tools.decohack.patches;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition.*;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHState;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 
