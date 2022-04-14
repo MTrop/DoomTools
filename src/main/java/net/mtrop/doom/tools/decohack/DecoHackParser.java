@@ -40,13 +40,13 @@ import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDefinition;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.Type;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
@@ -3167,7 +3167,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction action, Boolean requireAction) 
 	{
 		// Maybe parse action
-		DEHActionPointer pointer = matchActionPointerName();
+		DEHActionPointer pointer = matchActionPointerName(context);
 		action.pointer = pointer;
 		
 		if (requireAction != null)
@@ -3316,30 +3316,30 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Object parseActionPointerParameterValue(DEHActionPointerParam paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Object parseActionPointerParameterValue(DEHActionPointerParamType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 		{
-			if (paramType == DEHActionPointerParam.THING)
+			if (paramType == DEHActionPointerParamType.THING)
 				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
 			return parseThingOrThingStateIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 		{
-			if (paramType == DEHActionPointerParam.WEAPON)
+			if (paramType == DEHActionPointerParamType.WEAPON)
 				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
 			return parseWeaponOrWeaponStateIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 		{
-			if (paramType == DEHActionPointerParam.SOUND)
+			if (paramType == DEHActionPointerParamType.SOUND)
 				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
 			return parseSoundIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 		{
-			if (paramType == DEHActionPointerParam.FLAGS)
+			if (paramType == DEHActionPointerParamType.FLAGS)
 				addWarningMessage("The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
 			return matchNumericExpression(context, actor, Type.FLAGS);
 		}
@@ -3883,7 +3883,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier or string that references an action pointer name.
 	// If match, advance token and return action pointer.
 	// Else, return null.
-	private DEHActionPointer matchActionPointerName()
+	private DEHActionPointer matchActionPointerName(AbstractPatchContext<?> context)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
@@ -3892,7 +3892,7 @@ public final class DecoHackParser extends Lexer.Parser
 		DEHActionPointer out;
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
-		if ((out = DEHActionPointerDefinition.getByMnemonic(lexeme.substring(2))) == null)
+		if ((out = context.getActionPointerByMnemonic(lexeme.substring(2))) == null)
 			return null;
 		if (out == DEHActionPointerDefinition.NULL)
 			return null;
@@ -4231,7 +4231,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		DEHActionPointerParam param = action.getParam(index);
+		DEHActionPointerParamType param = action.getParam(index);
 		if (param == null)
 		{
 			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);

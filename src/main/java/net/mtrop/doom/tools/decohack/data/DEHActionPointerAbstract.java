@@ -5,7 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 
 /**
@@ -24,24 +24,24 @@ public abstract class DEHActionPointerAbstract implements DEHActionPointer
 	/** Action pointer type. */
 	private DEHActionPointerType type;
 	/** Action pointer parameters. */
-	private DEHActionPointerParam[] params;
+	private DEHActionPointerParamType[] params;
 
 	protected DEHActionPointerAbstract(int frame, String mnemonic)
 	{
-		this(frame, false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
 	protected DEHActionPointerAbstract(int frame, boolean weapon, String mnemonic)
 	{
-		this(frame, weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
 	protected DEHActionPointerAbstract(int frame, boolean weapon, DEHActionPointerType type, String mnemonic)
 	{
-		this(frame, weapon, type, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, weapon, type, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
-	protected DEHActionPointerAbstract(int frame, boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParam ... params)
+	protected DEHActionPointerAbstract(int frame, boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
 	{
 		this.frame = frame;
 		this.weapon = weapon;
@@ -75,13 +75,13 @@ public abstract class DEHActionPointerAbstract implements DEHActionPointer
 	}
 	
 	@Override
-	public DEHActionPointerParam[] getParams()
+	public DEHActionPointerParamType[] getParams()
 	{
 		return params;
 	}
 
 	@Override
-	public DEHActionPointerParam getParam(int index)
+	public DEHActionPointerParamType getParam(int index)
 	{
 		return index < 0 || index >= params.length ? null : params[index];
 	}

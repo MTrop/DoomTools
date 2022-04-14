@@ -5,10 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
-import java.util.Map;
-
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
-import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Enumeration of action pointers for frames.
@@ -100,50 +97,50 @@ public enum DEHActionPointerDefinition implements DEHActionPointer
 	
 	// MBF Thing Action Pointers
 	DETONATE            (-1,  false, DEHActionPointerType.MBF, "Detonate"),
-	MUSHROOM            (-1,  false, DEHActionPointerType.MBF, "Mushroom", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.FIXED),
-	SPAWN               (-1,  false, DEHActionPointerType.MBF, "Spawn", DEHActionPointerParam.THING, DEHActionPointerParam.FIXED),
-	TURN                (-1,  false, DEHActionPointerType.MBF, "Turn", DEHActionPointerParam.ANGLE_INT),
-	FACE                (-1,  false, DEHActionPointerType.MBF, "Face", DEHActionPointerParam.ANGLE_UINT),
-	SCRATCH             (-1,  false, DEHActionPointerType.MBF, "Scratch", DEHActionPointerParam.SHORT, DEHActionPointerParam.SOUND),
-	PLAYSOUND           (-1,  false, DEHActionPointerType.MBF, "PlaySound", DEHActionPointerParam.SOUND, DEHActionPointerParam.BOOL),
-	RANDOMJUMP          (-1,  false, DEHActionPointerType.MBF, "RandomJump", DEHActionPointerParam.STATE, DEHActionPointerParam.UINT),
-	LINEEFFECT          (-1,  false, DEHActionPointerType.MBF, "LineEffect", DEHActionPointerParam.SHORT, DEHActionPointerParam.SHORT),
+	MUSHROOM            (-1,  false, DEHActionPointerType.MBF, "Mushroom", DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.FIXED),
+	SPAWN               (-1,  false, DEHActionPointerType.MBF, "Spawn", DEHActionPointerParamType.THING, DEHActionPointerParamType.FIXED),
+	TURN                (-1,  false, DEHActionPointerType.MBF, "Turn", DEHActionPointerParamType.ANGLE_INT),
+	FACE                (-1,  false, DEHActionPointerType.MBF, "Face", DEHActionPointerParamType.ANGLE_UINT),
+	SCRATCH             (-1,  false, DEHActionPointerType.MBF, "Scratch", DEHActionPointerParamType.SHORT, DEHActionPointerParamType.SOUND),
+	PLAYSOUND           (-1,  false, DEHActionPointerType.MBF, "PlaySound", DEHActionPointerParamType.SOUND, DEHActionPointerParamType.BOOL),
+	RANDOMJUMP          (-1,  false, DEHActionPointerType.MBF, "RandomJump", DEHActionPointerParamType.STATE, DEHActionPointerParamType.UINT),
+	LINEEFFECT          (-1,  false, DEHActionPointerType.MBF, "LineEffect", DEHActionPointerParamType.SHORT, DEHActionPointerParamType.SHORT),
 	DIE                 (-1,  false, DEHActionPointerType.MBF, "Die"),
 	FIREOLDBFG          (-1,  false, DEHActionPointerType.MBF, "FireOldBFG"),
 	BETASKULLATTACK     (-1,  false, DEHActionPointerType.MBF, "BetaSkullAttack"),
 	STOP                (-1,  false, DEHActionPointerType.MBF, "Stop"),
 
 	// MBF21 Thing Action Pointers
-	SPAWNOBJECT         (-1,  false, DEHActionPointerType.MBF21, "SpawnObject", DEHActionPointerParam.THING, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED),
-	MONSTERPROJECTILE   (-1,  false, DEHActionPointerType.MBF21, "MonsterProjectile", DEHActionPointerParam.THING, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED),
-	MONSTERBULLETATTACK (-1,  false, DEHActionPointerType.MBF21, "MonsterBulletAttack", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT, DEHActionPointerParam.USHORT, DEHActionPointerParam.UINT),
-	MONSTERMELEEATTACK  (-1,  false, DEHActionPointerType.MBF21, "MonsterMeleeAttack", DEHActionPointerParam.USHORT, DEHActionPointerParam.UINT, DEHActionPointerParam.SOUND, DEHActionPointerParam.INT),
-	RADIUSDAMAGE        (-1,  false, DEHActionPointerType.MBF21, "RadiusDamage", DEHActionPointerParam.UINT, DEHActionPointerParam.UINT),
+	SPAWNOBJECT         (-1,  false, DEHActionPointerType.MBF21, "SpawnObject", DEHActionPointerParamType.THING, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED),
+	MONSTERPROJECTILE   (-1,  false, DEHActionPointerType.MBF21, "MonsterProjectile", DEHActionPointerParamType.THING, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED),
+	MONSTERBULLETATTACK (-1,  false, DEHActionPointerType.MBF21, "MonsterBulletAttack", DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.UINT, DEHActionPointerParamType.USHORT, DEHActionPointerParamType.UINT),
+	MONSTERMELEEATTACK  (-1,  false, DEHActionPointerType.MBF21, "MonsterMeleeAttack", DEHActionPointerParamType.USHORT, DEHActionPointerParamType.UINT, DEHActionPointerParamType.SOUND, DEHActionPointerParamType.INT),
+	RADIUSDAMAGE        (-1,  false, DEHActionPointerType.MBF21, "RadiusDamage", DEHActionPointerParamType.UINT, DEHActionPointerParamType.UINT),
 	NOISEALERT          (-1,  false, DEHActionPointerType.MBF21, "NoiseAlert"),
-	HEALCHASE           (-1,  false, DEHActionPointerType.MBF21, "HealChase", DEHActionPointerParam.STATE, DEHActionPointerParam.SOUND),
-	SEEKTRACER          (-1,  false, DEHActionPointerType.MBF21, "SeekTracer", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED),
-	FINDTRACER          (-1,  false, DEHActionPointerType.MBF21, "FindTracer", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT),
+	HEALCHASE           (-1,  false, DEHActionPointerType.MBF21, "HealChase", DEHActionPointerParamType.STATE, DEHActionPointerParamType.SOUND),
+	SEEKTRACER          (-1,  false, DEHActionPointerType.MBF21, "SeekTracer", DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.ANGLE_FIXED),
+	FINDTRACER          (-1,  false, DEHActionPointerType.MBF21, "FindTracer", DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.UINT),
 	CLEARTRACER         (-1,  false, DEHActionPointerType.MBF21, "ClearTracer"),
-	JUMPIFHEALTHBELOW   (-1,  false, DEHActionPointerType.MBF21, "JumpIfHealthBelow", DEHActionPointerParam.STATE, DEHActionPointerParam.INT),
-	JUMPIFTARGETINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetInSight", DEHActionPointerParam.STATE, DEHActionPointerParam.ANGLE_FIXED),
-	JUMPIFTARGETCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetCloser", DEHActionPointerParam.STATE, DEHActionPointerParam.FIXED),
-	JUMPIFTRACERINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerInSight", DEHActionPointerParam.STATE, DEHActionPointerParam.ANGLE_FIXED),
-	JUMPIFTRACERCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerCloser", DEHActionPointerParam.STATE, DEHActionPointerParam.FIXED),
-	JUMPIFFLAGSSET      (-1,  false, DEHActionPointerType.MBF21, "JumpIfFlagsSet", DEHActionPointerParam.STATE, DEHActionPointerParam.FLAGS, DEHActionPointerParam.FLAGS),
-	ADDFLAGS            (-1,  false, DEHActionPointerType.MBF21, "AddFlags", DEHActionPointerParam.FLAGS, DEHActionPointerParam.FLAGS),
-	REMOVEFLAGS         (-1,  false, DEHActionPointerType.MBF21, "RemoveFlags", DEHActionPointerParam.FLAGS, DEHActionPointerParam.FLAGS),
+	JUMPIFHEALTHBELOW   (-1,  false, DEHActionPointerType.MBF21, "JumpIfHealthBelow", DEHActionPointerParamType.STATE, DEHActionPointerParamType.INT),
+	JUMPIFTARGETINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetInSight", DEHActionPointerParamType.STATE, DEHActionPointerParamType.ANGLE_FIXED),
+	JUMPIFTARGETCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTargetCloser", DEHActionPointerParamType.STATE, DEHActionPointerParamType.FIXED),
+	JUMPIFTRACERINSIGHT (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerInSight", DEHActionPointerParamType.STATE, DEHActionPointerParamType.ANGLE_FIXED),
+	JUMPIFTRACERCLOSER  (-1,  false, DEHActionPointerType.MBF21, "JumpIfTracerCloser", DEHActionPointerParamType.STATE, DEHActionPointerParamType.FIXED),
+	JUMPIFFLAGSSET      (-1,  false, DEHActionPointerType.MBF21, "JumpIfFlagsSet", DEHActionPointerParamType.STATE, DEHActionPointerParamType.FLAGS, DEHActionPointerParamType.FLAGS),
+	ADDFLAGS            (-1,  false, DEHActionPointerType.MBF21, "AddFlags", DEHActionPointerParamType.FLAGS, DEHActionPointerParamType.FLAGS),
+	REMOVEFLAGS         (-1,  false, DEHActionPointerType.MBF21, "RemoveFlags", DEHActionPointerParamType.FLAGS, DEHActionPointerParamType.FLAGS),
 
 	// MBF21 Weapon Action Pointers
-	WEAPONPROJECTILE    (-1,  true,  DEHActionPointerType.MBF21, "WeaponProjectile", DEHActionPointerParam.THING, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.FIXED, DEHActionPointerParam.FIXED),
-	WEAPONBULLETATTACK  (-1,  true,  DEHActionPointerType.MBF21, "WeaponBulletAttack", DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.ANGLE_FIXED, DEHActionPointerParam.UINT, DEHActionPointerParam.USHORT, DEHActionPointerParam.UINT),
-	WEAPONMELEEATTACK   (-1,  true,  DEHActionPointerType.MBF21, "WeaponMeleeAttack", DEHActionPointerParam.USHORT, DEHActionPointerParam.UINT, DEHActionPointerParam.FIXED, DEHActionPointerParam.SOUND, DEHActionPointerParam.FIXED),
-	WEAPONSOUND         (-1,  true,  DEHActionPointerType.MBF21, "WeaponSound", DEHActionPointerParam.SOUND, DEHActionPointerParam.BOOL),
+	WEAPONPROJECTILE    (-1,  true,  DEHActionPointerType.MBF21, "WeaponProjectile", DEHActionPointerParamType.THING, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.FIXED),
+	WEAPONBULLETATTACK  (-1,  true,  DEHActionPointerType.MBF21, "WeaponBulletAttack", DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.ANGLE_FIXED, DEHActionPointerParamType.UINT, DEHActionPointerParamType.USHORT, DEHActionPointerParamType.UINT),
+	WEAPONMELEEATTACK   (-1,  true,  DEHActionPointerType.MBF21, "WeaponMeleeAttack", DEHActionPointerParamType.USHORT, DEHActionPointerParamType.UINT, DEHActionPointerParamType.FIXED, DEHActionPointerParamType.SOUND, DEHActionPointerParamType.FIXED),
+	WEAPONSOUND         (-1,  true,  DEHActionPointerType.MBF21, "WeaponSound", DEHActionPointerParamType.SOUND, DEHActionPointerParamType.BOOL),
 	WEAPONALERT         (-1,  true,  DEHActionPointerType.MBF21, "WeaponAlert"),
-	WEAPONJUMP          (-1,  true,  DEHActionPointerType.MBF21, "WeaponJump", DEHActionPointerParam.STATE, DEHActionPointerParam.UINT),
-	CONSUMEAMMO         (-1,  true,  DEHActionPointerType.MBF21, "ConsumeAmmo", DEHActionPointerParam.SHORT),
-	CHECKAMMO           (-1,  true,  DEHActionPointerType.MBF21, "CheckAmmo", DEHActionPointerParam.STATE, DEHActionPointerParam.USHORT),
-	REFIRETO            (-1,  true,  DEHActionPointerType.MBF21, "RefireTo", DEHActionPointerParam.STATE, DEHActionPointerParam.BOOL),
-	GUNFLASHTO          (-1,  true,  DEHActionPointerType.MBF21, "GunFlashTo", DEHActionPointerParam.STATE, DEHActionPointerParam.BOOL),
+	WEAPONJUMP          (-1,  true,  DEHActionPointerType.MBF21, "WeaponJump", DEHActionPointerParamType.STATE, DEHActionPointerParamType.UINT),
+	CONSUMEAMMO         (-1,  true,  DEHActionPointerType.MBF21, "ConsumeAmmo", DEHActionPointerParamType.SHORT),
+	CHECKAMMO           (-1,  true,  DEHActionPointerType.MBF21, "CheckAmmo", DEHActionPointerParamType.STATE, DEHActionPointerParamType.USHORT),
+	REFIRETO            (-1,  true,  DEHActionPointerType.MBF21, "RefireTo", DEHActionPointerParamType.STATE, DEHActionPointerParamType.BOOL),
+	GUNFLASHTO          (-1,  true,  DEHActionPointerType.MBF21, "GunFlashTo", DEHActionPointerParamType.STATE, DEHActionPointerParamType.BOOL),
 	;
 	
 	/** Originating frame (for DEH 3.0 format 19). */
@@ -155,31 +152,24 @@ public enum DEHActionPointerDefinition implements DEHActionPointer
 	/** Action pointer type. */
 	private DEHActionPointerType type;
 	/** Action pointer parameters. */
-	private DEHActionPointerParam[] params;
+	private DEHActionPointerParamType[] params;
 
-	private static final Map<String, DEHActionPointerDefinition> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerDefinition.class);
-
-	public static DEHActionPointerDefinition getByMnemonic(String mnemonic)
-	{
-		return MNEMONIC_MAP.get(mnemonic);
-	}
-	
 	private DEHActionPointerDefinition(int frame, String mnemonic)
 	{
-		this(frame, false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
 	private DEHActionPointerDefinition(int frame, boolean weapon, String mnemonic)
 	{
-		this(frame, weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
 	private DEHActionPointerDefinition(int frame, boolean weapon, DEHActionPointerType type, String mnemonic)
 	{
-		this(frame, weapon, type, mnemonic, new DEHActionPointerParam[0]);
+		this(frame, weapon, type, mnemonic, new DEHActionPointerParamType[0]);
 	}
 
-	private DEHActionPointerDefinition(int frame, boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParam ... params)
+	private DEHActionPointerDefinition(int frame, boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
 	{
 		this.frame = frame;
 		this.weapon = weapon;
@@ -213,13 +203,13 @@ public enum DEHActionPointerDefinition implements DEHActionPointer
 	}
 	
 	@Override
-	public DEHActionPointerParam[] getParams()
+	public DEHActionPointerParamType[] getParams()
 	{
 		return params;
 	}
 
 	@Override
-	public DEHActionPointerParam getParam(int index)
+	public DEHActionPointerParamType getParam(int index)
 	{
 		return index < 0 || index >= params.length ? null : params[index];
 	}

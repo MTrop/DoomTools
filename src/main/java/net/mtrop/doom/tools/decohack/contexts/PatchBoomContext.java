@@ -14,10 +14,12 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchBoom;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Patch context for Boom.
@@ -35,6 +37,7 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 		super();
 		this.strings = new TreeMap<>();
 		this.pars = new TreeMap<>();
+		EnumUtils.addToNameMap(this.pointerMnemonicMap, DEHActionPointerDoom19.class);
 	}
 	
 	@Override

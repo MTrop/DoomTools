@@ -5,10 +5,12 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchMBF;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Patch context for MBF (Marine's Best Friend).
@@ -17,6 +19,12 @@ import net.mtrop.doom.tools.decohack.patches.PatchMBF;
 public class PatchMBFContext extends PatchBoomContext
 {
 	private static final DEHPatchBoom MBFPATCH = new PatchMBF();
+	
+	public PatchMBFContext() 
+	{
+		super();
+		EnumUtils.addToNameMap(this.pointerMnemonicMap, DEHActionPointerMBF.class);
+	}
 	
 	@Override
 	public DEHPatchBoom getSourcePatch()

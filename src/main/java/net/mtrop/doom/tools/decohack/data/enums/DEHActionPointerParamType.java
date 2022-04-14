@@ -10,7 +10,7 @@ package net.mtrop.doom.tools.decohack.data.enums;
  * @author Xaser Acheron
  * @author Matthew Tropiano
  */
-public enum DEHActionPointerParam
+public enum DEHActionPointerParamType
 {
 	NONE        (Type.INTEGER, 0, 0),
 	BOOL        (Type.INTEGER, 0, 1),
@@ -45,7 +45,7 @@ public enum DEHActionPointerParam
 	private int valueMin;
 	private int valueMax;
 
-	private DEHActionPointerParam(Type typeGuess, int valueMin, int valueMax)
+	private DEHActionPointerParamType(Type typeGuess, int valueMin, int valueMax)
 	{
 		this.typeCheck = typeGuess;
 		this.valueMin = valueMin;

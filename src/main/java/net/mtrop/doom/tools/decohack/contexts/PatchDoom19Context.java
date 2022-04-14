@@ -12,10 +12,12 @@ import java.util.Map;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Patch context for Doom 1.9.
@@ -49,6 +51,8 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 		this.spriteStringIndex = new HashMap<>();
 		for (int i = 0; i < PatchDoom19.STRING_INDEX_SPRITES_COUNT; i++)
 			this.spriteStringIndex.put(strings[i + spriteStringStart].toUpperCase(), i);
+		
+		EnumUtils.addToNameMap(this.pointerMnemonicMap, DEHActionPointerDoom19.class);
 	}
 	
 	@Override

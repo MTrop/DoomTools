@@ -5,7 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 
 /**
@@ -40,13 +40,13 @@ public interface DEHActionPointer
 	/**
 	 * @return the parameter list.
 	 */
-	DEHActionPointerParam[] getParams();
+	DEHActionPointerParamType[] getParams();
 
 	/**
 	 * Gets a specific param using the param index.
 	 * @param index the parameter index.
 	 * @return the corresponding parameter, or <code>null</code> if no parameter.
 	 */
-	DEHActionPointerParam getParam(int index);
+	DEHActionPointerParamType getParam(int index);
 
 }
