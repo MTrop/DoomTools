@@ -3892,7 +3892,8 @@ public final class DecoHackParser extends Lexer.Parser
 		DEHActionPointer out;
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
-		if ((out = context.getActionPointerByMnemonic(lexeme.substring(2))) == null)
+		// FIXME: Switching to context is not equivalent. Fix!
+		if ((out = DEHActionPointerDefinition.getActionPointerByMnemonic(lexeme.substring(2))) == null)
 			return null;
 		if (out == DEHActionPointerDefinition.NULL)
 			return null;
