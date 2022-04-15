@@ -69,7 +69,7 @@ To create a distribution (Bash and CMD):
 
 To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):
 
-	ant deploy.cmd -Ddeploy.dir=[TARGETPATH] -Dnatives.windows.dir=[PathToDoomTools-GUI-Native]
+	ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
 	ant deploy.bash -Ddeploy.dir=[TARGETPATH]
 
 To clean up everything:
