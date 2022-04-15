@@ -985,7 +985,7 @@ public final class DecoHackParser extends Lexer.Parser
 						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHActionPointerParamType.values()));
 						return false;
 					}
-					if (params.size() + 1 >= type.getMaxCustomParams())
+					if (params.size() >= type.getMaxCustomParams())
 					{
 						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
 						return false;
@@ -3392,7 +3392,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
 					{
-						addErrorMessage("Expected a ')' after action parameters.");
+						addErrorMessage("Expected a ')' after action parameters. Are you adding too many parameters?");
 						return false;
 					}
 				}
@@ -3435,7 +3435,7 @@ public final class DecoHackParser extends Lexer.Parser
 						}
 						else if (!matchType(DecoHackKernel.TYPE_COMMA))
 						{
-							addErrorMessage("Expected a ')' after action parameters.");
+							addErrorMessage("Expected a ')' after action parameters. Are you adding too many parameters?");
 							return false;
 						}
 					}

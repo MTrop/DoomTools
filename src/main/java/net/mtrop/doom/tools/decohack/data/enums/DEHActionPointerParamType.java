@@ -18,8 +18,8 @@ public enum DEHActionPointerParamType
 {
 	BOOL       (Type.INTEGER, 0, 1),
 	UBYTE      (Type.INTEGER, 0, 255),
-	BYTE       (Type.INTEGER, -127, 127),
-	SHORT      (Type.INTEGER, -32767, 32767),
+	BYTE       (Type.INTEGER, -128, 127),
+	SHORT      (Type.INTEGER, -32768, 32767),
 	USHORT     (Type.INTEGER, 0, 65535),
 	INT        (Type.INTEGER, Integer.MIN_VALUE, Integer.MAX_VALUE),
 	UINT       (Type.INTEGER, 0, Integer.MAX_VALUE),

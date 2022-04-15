@@ -742,7 +742,8 @@ The alias works in every place you can use a weapon reference:
     }
 
 
-Weapon alias identifiers are case-insensitive.
+Weapon alias identifiers are case-insensitive. There are a few internal 
+"#includes" that will add these common ZDoom weapon names by default. 
 
 
 ==============================================================================
@@ -1030,7 +1031,8 @@ The alias works in every place you can use a thing reference or slot:
     }
 
 
-Thing alias identifiers are case-insensitive.
+Thing alias identifiers are case-insensitive. There are a few internal 
+"#includes" that will add these common ZDoom thing names by default. 
 
 
 ------------------------------------------------------------------------------
@@ -1222,6 +1224,80 @@ Example:
     +SOLID
     -NOGRAVITY
     +RANGEHALF
+
+
+==============================================================================
+===== Custom Action Pointers
+==============================================================================
+
+There may be some patches that accept bespoke actions or action functions that
+are not known to DECOHack, or actions that port authors include that may not
+be "standard". For those, you can specify custom pointers for use on Thing
+or Weapon states:
+
+    custom thing pointer <PatchType> A_PointerName ( <ParameterType> [ , <ParameterType> ...] )
+    custom weapon pointer <PatchType> A_PointerName ( <ParameterType> [ , <ParameterType> ...] )
+
+
+Where <PatchType> is:
+
+    boom       // no parameters, allow Offset
+    mbf        // two parameters max, store in Misc fields, disallow Offset
+    mbf21      // ten parameters max, store in Args fields, allow Offset
+
+
+...which describes how many parameters the function can take and how it's
+stored in the patch (misc fields, or args).
+
+<ParameterType> is:
+
+    bool       // 0 or 1
+    byte       // -127 to 127
+    ubyte      // 0 to 255
+    short      // -32767 to 32767
+    ushort     // 0 to 65535
+    int        // -2147483648 to 2147483647
+    uint       // 0 to 2147483647
+    angleint   // -359 to 359
+    angleuint  // 0 to 359
+    anglefixed // -359.99998 to 359.99998
+    fixed      // -32768.99998 to 32767.99998
+    state      // 0 to 2147483647, verify valid state index, reference, or label.
+    thing      // 0 to 2147483647, verify valid thing index.
+    weapon     // 0 to 2147483647, verify valid weapon index.
+    sound      // valid sound name.
+    flags      // -2147483648 to 2147483647, flag expression
+
+
+For example, a popular non-standard pointer, MonsterRail:
+
+    custom thing pointer boom A_MonsterRail()
+
+
+...and its counterpart, FireRailgun:
+
+    custom weapon pointer boom A_FireRailgun()
+
+
+...the Mushroom pointer from MBF:
+
+    custom thing pointer mbf A_Mushroom(anglefixed, fixed)
+
+
+...the WeaponMeleeAttack pointer from MBF21:
+
+    custom weapon pointer mbf21 A_WeaponMeleeAttack(ushort, uint, fixed, sound, fixed)
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: This is only supported for Boom and higher, since those 
+      patch formats refer to action pointers by mnemonic - defining a 
+      custom pointer as "A_PointerName" will write "PointerName" to the 
+      correct place in the [CODEPTR] section of the patch. Name your 
+      experimental pointers accordingly!
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 
 ==============================================================================

@@ -20,7 +20,7 @@ public enum DEHActionPointerType
 	DOOM19 (false, 0),
 	BOOM   (false, 0), // redundant for DOOM19, necessary for custom pointers
 	MBF    (false, 2),
-	MBF21  (true,  9);
+	MBF21  (true,  10);
 
 	private int maxCustomParams;
 	private boolean useArgs;
