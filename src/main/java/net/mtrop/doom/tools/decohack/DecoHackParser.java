@@ -3346,19 +3346,26 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
+					if (action.offset && pointer.getParams().length > 0)
+					{
+						addErrorMessage("Cannot use the 'offset' directive on a state with an MBF action function that takes parameters.");
+						return false;
+					}
+
 					// no arguments
 					if (matchType(DecoHackKernel.TYPE_RPAREN))
 						return true;
 
-					if (action.offset)
+					DEHActionPointerParamType paramType;
+					if ((paramType = pointer.getParam(0)) == null)
 					{
-						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
+						addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
 						return false;
 					}
-
+					
 					// get first argument
 					Object p;
-					if ((p = parseActionPointerParameterValue(pointer.getParam(0), context, actor)) == null)
+					if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 						return false;
 					else if (p instanceof Integer)
 					{
@@ -3372,10 +3379,15 @@ public final class DecoHackParser extends Lexer.Parser
 						action.misc1 = PLACEHOLDER_LABEL;
 					}
 
-
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						if ((p = parseActionPointerParameterValue(pointer.getParam(1), context, actor)) == null)
+						if ((paramType = pointer.getParam(0)) == null)
+						{
+							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
+							return false;
+						}
+						
+						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3414,8 +3426,16 @@ public final class DecoHackParser extends Lexer.Parser
 					{
 						// get argument
 						int argIndex = action.args.size();
+						
+						DEHActionPointerParamType paramType;
+						if ((paramType = pointer.getParam(argIndex)) == null)
+						{
+							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
+							return false;
+						}
+						
 						Object p;
-						if ((p = parseActionPointerParameterValue(pointer.getParam(argIndex), context, actor)) == null)
+						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -4363,12 +4383,6 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		DEHActionPointerParamType param = action.getParam(index);
-		if (param == null)
-		{
-			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
-			return false;
-		}
-
 		if (!param.isValueValid(value))
 		{
 			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, param.getValueMin(), param.getValueMax());

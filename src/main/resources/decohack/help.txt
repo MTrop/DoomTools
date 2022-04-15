@@ -1242,7 +1242,7 @@ or Weapon states:
 Where <PatchType> is:
 
     boom       // no parameters, allow Offset
-    mbf        // two parameters max, store in Misc fields, disallow Offset
+    mbf        // two parameters max, store in Misc fields, disallow Offset if at least one parameter
     mbf21      // ten parameters max, store in Args fields, allow Offset
 
 
