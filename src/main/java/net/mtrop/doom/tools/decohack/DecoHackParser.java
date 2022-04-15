@@ -3381,7 +3381,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						if ((paramType = pointer.getParam(0)) == null)
+						if ((paramType = pointer.getParam(1)) == null)
 						{
 							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
 							return false;
