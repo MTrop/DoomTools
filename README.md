@@ -87,7 +87,7 @@ Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-G
 It is not necessary for building or local deploying, but a package distributable will not be complete without it.
 
 The EXE build and copy to `src/maim/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set. You
-are better off not setting is for every build as the EXE will more than likely be built differently every time.
+are better off not setting it for every build as the EXE will more than likely be built differently every time.
 
 Building a Windows Installer requires [Inno Setup 6.2.0+](https://jrsoftware.org/isdl.php), and requires that the property `inno.setup.dir`
 is set to Inno Setup's directory to make use of `iscc`.
