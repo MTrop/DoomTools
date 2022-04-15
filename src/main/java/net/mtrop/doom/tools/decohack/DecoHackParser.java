@@ -340,7 +340,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!matchIdentifierIgnoreCase(KEYWORD_USING))
 		{
-			addErrorMessage("Expected \"using\" clause to set the patch format.");
+			addErrorMessage("Expected \"using\" clause to set the patch format (or better yet, use a built-in #include!).");
 			return null;
 		}
 		
@@ -930,12 +930,11 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a custom pointer clause.
-	// TODO: TEST THIS
 	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			addErrorMessage("Expected argument type: boom, mbf, or mbf21.");
+			addErrorMessage("Expected argument type: [boom, mbf, mbf21].");
 			return false;
 		}
 		
@@ -949,12 +948,13 @@ public final class DecoHackParser extends Lexer.Parser
 		nextToken();
 
 		String pointerName;
-		if ((pointerName = matchIdentifier()) == null)
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			addErrorMessage("Expected action pointer name (i.e. \"A_PointerName\").");
 			return false;
 		}
 
+		pointerName = currentToken().getLexeme();
 		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
 		{
 			addErrorMessage("Action pointer name must start with \"A_\".");
@@ -963,24 +963,29 @@ public final class DecoHackParser extends Lexer.Parser
 		nextToken();
 		
 		// Action mnemonic.
-		String pointerMnemonic = pointerName.substring(0, 2);
+		String pointerMnemonic = pointerName.substring(2);
 		
 		// Parameters
 		List<DEHActionPointerParamType> params = new LinkedList<>();
 		if (matchType(DecoHackKernel.TYPE_LPAREN))
 		{
 			String parameterTypeName;
-			if ((parameterTypeName = matchIdentifier()) != null)
+			if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			{
 				do {
-
+					if ((parameterTypeName = matchIdentifier()) == null)
+					{
+						addErrorMessage("Expected identifier for parameter type after \",\".");
+						return false;
+					}
+					
 					DEHActionPointerParamType paramType;
 					if ((paramType = DEHActionPointerParamType.getByName(parameterTypeName)) == null)
 					{
 						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHActionPointerParamType.values()));
 						return false;
 					}
-					if (type.getMaxCustomParams() >= params.size())
+					if (params.size() + 1 >= type.getMaxCustomParams())
 					{
 						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
 						return false;

@@ -16,9 +16,9 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
  */
 public enum DEHActionPointerParamType
 {
-	NONE       (Type.INTEGER, 0, 0),
 	BOOL       (Type.INTEGER, 0, 1),
-	BYTE       (Type.INTEGER, 0, 255),
+	UBYTE      (Type.INTEGER, 0, 255),
+	BYTE       (Type.INTEGER, -127, 127),
 	SHORT      (Type.INTEGER, -32767, 32767),
 	USHORT     (Type.INTEGER, 0, 65535),
 	INT        (Type.INTEGER, Integer.MIN_VALUE, Integer.MAX_VALUE),
