@@ -18,9 +18,8 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 public interface DEHObject<SELF>
 {
 	/**
-	 * Copies this object's values.
+	 * Copies this object's values/properties.
 	 * @param source the source object.
-	 * @param level the highest feature level to copy over.
 	 * @return this object.
 	 */
 	SELF copyFrom(SELF source);

@@ -23,22 +23,7 @@ public class DEHActionPointerEntry implements DEHActionPointer
 	/** Action pointer parameters. */
 	private DEHActionPointerParamType[] params;
 
-	protected DEHActionPointerEntry(String mnemonic)
-	{
-		this(false, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
-	}
-
-	protected DEHActionPointerEntry(boolean weapon, String mnemonic)
-	{
-		this(weapon, DEHActionPointerType.DOOM19, mnemonic, new DEHActionPointerParamType[0]);
-	}
-
-	protected DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic)
-	{
-		this(weapon, type, mnemonic, new DEHActionPointerParamType[0]);
-	}
-
-	protected DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
+	public DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
 	{
 		this.weapon = weapon;
 		this.mnemonic = mnemonic;

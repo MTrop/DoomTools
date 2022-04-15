@@ -62,7 +62,7 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 	@Override
 	public DEHActionPointerType getSupportedActionPointerType() 
 	{
-		return DEHActionPointerType.DOOM19;
+		return DEHActionPointerType.BOOM;
 	}
 	
 	@Override

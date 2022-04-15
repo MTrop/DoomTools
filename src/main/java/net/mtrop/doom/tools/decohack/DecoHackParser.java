@@ -29,6 +29,7 @@ import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -46,6 +47,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
@@ -171,6 +173,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_MBF21 = "mbf21";
+
+	private static final String KEYWORD_CUSTOM = "custom";
 	
 	private static final String KEYWORD_NULL = "null";
 
@@ -384,6 +388,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponBlock(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_MISC))
 			return parseMiscellaneousBlock(context);
+		else if (matchIdentifierIgnoreCase(KEYWORD_CUSTOM))
+			return parseCustomClause(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_EACH))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_THING))
@@ -874,6 +880,126 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
+		return true;
+	}
+
+	// Parses a custom element clause.
+	private boolean parseCustomClause(AbstractPatchContext<?> context)
+	{
+		if (matchIdentifierIgnoreCase(KEYWORD_THING))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+
+				return parseCustomPointerClause(context, false);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_THING);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+
+				return parseCustomPointerClause(context, true);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_WEAPON);
+				return false;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_WEAPON, KEYWORD_CUSTOM);
+			return false;
+		}
+	}
+	
+	// Parses a custom pointer clause.
+	// TODO: TEST THIS
+	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected argument type: boom, mbf, or mbf21.");
+			return false;
+		}
+		
+		DEHActionPointerType type;
+		String typeName = currentToken().getLexeme();
+		if ((type = DEHActionPointerType.getByName(typeName)) == null)
+		{
+			addErrorMessage("Expected \"boom\", \"mbf\", or \"mbf21\" for the parameter use type.");
+			return false;
+		}
+		nextToken();
+
+		String pointerName;
+		if ((pointerName = matchIdentifier()) == null)
+		{
+			addErrorMessage("Expected action pointer name (i.e. \"A_PointerName\").");
+			return false;
+		}
+
+		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
+		{
+			addErrorMessage("Action pointer name must start with \"A_\".");
+			return false;
+		}
+		nextToken();
+		
+		// Action mnemonic.
+		String pointerMnemonic = pointerName.substring(0, 2);
+		
+		// Parameters
+		List<DEHActionPointerParamType> params = new LinkedList<>();
+		if (matchType(DecoHackKernel.TYPE_LPAREN))
+		{
+			String parameterTypeName;
+			if ((parameterTypeName = matchIdentifier()) != null)
+			{
+				do {
+
+					DEHActionPointerParamType paramType;
+					if ((paramType = DEHActionPointerParamType.getByName(parameterTypeName)) == null)
+					{
+						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHActionPointerParamType.values()));
+						return false;
+					}
+					if (type.getMaxCustomParams() >= params.size())
+					{
+						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
+						return false;
+					}
+					
+					params.add(paramType);
+					
+				} while (matchType(DecoHackKernel.TYPE_COMMA));
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_RPAREN))
+			{
+				addErrorMessage("Expected \",\" to continue parameter types or \")\" to end parameter type list.");
+				return false;
+			}
+		}
+		
+		DEHActionPointerParamType[] parameters = params.toArray(new DEHActionPointerParamType[params.size()]);
+		context.addActionPointer(new DEHActionPointerEntry(weapon, type, pointerMnemonic, parameters));
 		return true;
 	}
 
@@ -3185,6 +3311,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		if (pointer != null)
 		{
+			// Sanity check - shouldn't even be true here, anymore.
 			if (!context.supports(pointer.getType()))
 			{
 				addErrorMessage(pointer.getType().name() + " action pointer used: " + pointer.getMnemonic() + ". Patch does not support this action type.");

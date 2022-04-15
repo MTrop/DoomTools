@@ -22,10 +22,10 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 {
 	// MBF Thing Action Pointers
 	DETONATE        ("Detonate"),
-	MUSHROOM        ("Mushroom",   ANGLE_FIXED, FIXED),
+	MUSHROOM        ("Mushroom",   ANGLEFIXED, FIXED),
 	SPAWN           ("Spawn",      THING, FIXED),
-	TURN            ("Turn",       ANGLE_INT),
-	FACE            ("Face",       ANGLE_UINT),
+	TURN            ("Turn",       ANGLEINT),
+	FACE            ("Face",       ANGLEUINT),
 	SCRATCH         ("Scratch",    SHORT, SOUND),
 	PLAYSOUND       ("PlaySound",  SOUND, BOOL),
 	RANDOMJUMP      ("RandomJump", STATE, UINT),
