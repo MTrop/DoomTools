@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-04-15** Changed DoomTools's update system to pull the JAR ZIP for the update.
 - **2022-04-05** Updated DoomStruct to `2.14.2`. (Entry/Texture name fixes).
 
 - **2022-03-14** GUI uses the FlatLaf Look and Feel.
