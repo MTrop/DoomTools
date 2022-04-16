@@ -46,7 +46,7 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-DECOHack v0.23.0 by Matt Tropiano (using DoomStruct v2.14.1)
+DECOHack v0.24.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -74,6 +74,8 @@ Usage: decohack [--help | -h | --version]
 [filenames]:
     &lt;filename&gt; ...           The input filenames. One or more can be added,
                              parsed in the order specified.
+
+    --                       Script input is from Standard In, not a file.
 
 [switches]:
     --output [file]          Outputs the resultant patch to [file].
@@ -837,7 +839,8 @@ The alias works in every place you can use a weapon reference:
     }
 
 
-Weapon alias identifiers are case-insensitive.
+Weapon alias identifiers are case-insensitive. There are a few internal 
+&quot;#includes&quot; that will add these common ZDoom weapon names by default. 
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1125,7 +1128,8 @@ The alias works in every place you can use a thing reference or slot:
     }
 
 
-Thing alias identifiers are case-insensitive.
+Thing alias identifiers are case-insensitive. There are a few internal 
+&quot;#includes&quot; that will add these common ZDoom thing names by default. 
 
 
 ------------------------------------------------------------------------------
@@ -1317,6 +1321,80 @@ Example:
     +SOLID
     -NOGRAVITY
     +RANGEHALF
+
+
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Custom Action Pointers
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+There may be some patches that accept bespoke actions or action functions that
+are not known to DECOHack, or actions that port authors include that may not
+be &quot;standard&quot;. For those, you can specify custom pointers for use on Thing
+or Weapon states:
+
+    custom thing pointer &lt;PatchType&gt; A_PointerName ( &lt;ParameterType&gt; [ , &lt;ParameterType&gt; ...] )
+    custom weapon pointer &lt;PatchType&gt; A_PointerName ( &lt;ParameterType&gt; [ , &lt;ParameterType&gt; ...] )
+
+
+Where &lt;PatchType&gt; is:
+
+    boom       &#x2F;&#x2F; no parameters, allow Offset
+    mbf        &#x2F;&#x2F; two parameters max, store in Misc fields, disallow Offset if at least one parameter
+    mbf21      &#x2F;&#x2F; ten parameters max, store in Args fields, allow Offset
+
+
+...which describes how many parameters the function can take and how it&#39;s
+stored in the patch (misc fields, or args).
+
+&lt;ParameterType&gt; is:
+
+    bool       &#x2F;&#x2F; 0 or 1
+    byte       &#x2F;&#x2F; -127 to 127
+    ubyte      &#x2F;&#x2F; 0 to 255
+    short      &#x2F;&#x2F; -32767 to 32767
+    ushort     &#x2F;&#x2F; 0 to 65535
+    int        &#x2F;&#x2F; -2147483648 to 2147483647
+    uint       &#x2F;&#x2F; 0 to 2147483647
+    angleint   &#x2F;&#x2F; -359 to 359
+    angleuint  &#x2F;&#x2F; 0 to 359
+    anglefixed &#x2F;&#x2F; -359.99998 to 359.99998
+    fixed      &#x2F;&#x2F; -32768.99998 to 32767.99998
+    state      &#x2F;&#x2F; 0 to 2147483647, verify valid state index, reference, or label.
+    thing      &#x2F;&#x2F; 0 to 2147483647, verify valid thing index.
+    weapon     &#x2F;&#x2F; 0 to 2147483647, verify valid weapon index.
+    sound      &#x2F;&#x2F; valid sound name.
+    flags      &#x2F;&#x2F; -2147483648 to 2147483647, flag expression
+
+
+For example, a popular non-standard pointer, MonsterRail:
+
+    custom thing pointer boom A_MonsterRail()
+
+
+...and its counterpart, FireRailgun:
+
+    custom weapon pointer boom A_FireRailgun()
+
+
+...the Mushroom pointer from MBF:
+
+    custom thing pointer mbf A_Mushroom(anglefixed, fixed)
+
+
+...the WeaponMeleeAttack pointer from MBF21:
+
+    custom weapon pointer mbf21 A_WeaponMeleeAttack(ushort, uint, fixed, sound, fixed)
+
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+      IMPORTANT: This is only supported for Boom and higher, since those 
+      patch formats refer to action pointers by mnemonic - defining a 
+      custom pointer as &quot;A_PointerName&quot; will write &quot;PointerName&quot; to the 
+      correct place in the [CODEPTR] section of the patch. Name your 
+      experimental pointers accordingly!
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;

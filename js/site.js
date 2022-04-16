@@ -86,20 +86,32 @@ function display_release_data(release, release_section_element, release_version_
 	const SORTASSET = function(asset)
 	{
 		const filename = asset.name;
-		if (filename.indexOf('-bash') >= 0)
-			return 1;
+		if (filename.indexOf('-jar') >= 0)
+			return 5;
+		else if (filename.indexOf('-bash') >= 0)
+			return 4;
 		else if (filename.indexOf('-cmd') >= 0)
+			return 3;
+		else if (filename.indexOf('-setup-jre') >= 0)
 			return 2;
+		else if (filename.indexOf('-setup') >= 0)
+			return 1;
 		else
 			return 0;
 	};
 
 	const GENTITLE = function(filename) 
 	{
-		if (filename.indexOf('-bash') >= 0)
+		if (filename.indexOf('-jar') >= 0)
+			return 'Standalone JAR';
+		else if (filename.indexOf('-bash') >= 0)
 			return 'Bash (macOS/Linux/Cygwin) Version';
 		else if (filename.indexOf('-cmd') >= 0)
 			return 'CMD (Windows) Version';
+		else if (filename.indexOf('-setup-jre') >= 0)
+			return 'Windows Installer w/ JRE';
+		else if (filename.indexOf('-setup') >= 0)
+			return 'Windows Installer (no JRE)';
 		else
 			return 'Download';
 	};
