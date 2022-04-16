@@ -965,6 +965,12 @@ public final class DecoHackParser extends Lexer.Parser
 		// Action mnemonic.
 		String pointerMnemonic = pointerName.substring(2);
 		
+		if (context.getActionPointerByMnemonic(pointerMnemonic) != null)
+		{
+			addErrorMessage("Action pointer \"%s\" is already defined.", pointerName);
+			return false;
+		}
+		
 		// Parameters
 		List<DEHActionPointerParamType> params = new LinkedList<>();
 		if (matchType(DecoHackKernel.TYPE_LPAREN))
