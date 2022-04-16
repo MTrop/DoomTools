@@ -111,8 +111,8 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 			json = getJSONResponse(repoURL
 				.replace("{owner}", UPDATE_REPO_OWNER)
 				.replace("{repo}", UPDATE_REPO_NAME)
-				+ "/releases"
-			).get(0).get("assets");
+				+ "/releases/latest"
+			).get("assets");
 
 			if (isCancelled())
 			{
@@ -132,8 +132,11 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 				JSONObject element = json.get(i);
 				if ("application/zip".equals(element.get("content_type").getString()))
 				{
-					assetJSON = element;
-					break;
+					if (element.get("name").getString().contains("-jar"))
+					{
+						assetJSON = element;
+						break;
+					}
 				}
 			}
 			
@@ -215,9 +218,9 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 					while (zipenum.hasMoreElements())
 					{
 						ZipEntry entry = zipenum.nextElement();
-						if (entry.getName().endsWith(".jar"))
+						if (entry.getName().endsWith(".jar") && !entry.getName().contains("jar/"))
 						{
-							File targetJarFile = new File(toolsRootDirectory.getAbsolutePath() + "/" + entry.getName());
+							File targetJarFile = new File(toolsRootDirectory.getAbsolutePath() + "/jar/" + entry.getName());
 							try (InputStream zin = zf.getInputStream(entry); FileOutputStream fos = new FileOutputStream(targetJarFile))
 							{
 								IOUtils.relay(zin, fos);

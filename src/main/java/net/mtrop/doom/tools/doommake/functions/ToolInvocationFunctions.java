@@ -182,14 +182,17 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 		{
 			return ScriptFunctionUsage.create()
 				.instructions(
-					"Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless overridden (see options). " +
-					"Do not use both [infile] and [infiles] as options. Use one or the other."
+					"Calls the DecoHack tool. Inherits STDOUT/STDERR/STDIN of this script unless overridden (see options). " +
+					"If [useStdin] is true, then it will read from the [stdin] stream, either set or inherited. " +
+					"Also, do not use both [infile] and [infiles] as options. Use one or the other."
 				)
 				.parameter("options", 
 					type(Type.MAP, 
 						"{" + Common.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
+							"stdin:OBJECTREF(InputStream)",
+							"useStdin:BOOLEAN",
 							"infile:OBJECTREF(File)",
 							"infiles:LIST[OBJECTREF(File), ...]",
 							"outfile:OBJECTREF(File)",
@@ -215,7 +218,8 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 			{
 				PrintStream stdout = scriptInstance.getEnvironment().getStandardOut();
 				PrintStream stderr = scriptInstance.getEnvironment().getStandardErr();
-				DecoHackMain.Options options = DecoHackMain.options(stdout, stderr);
+				InputStream stdin = scriptInstance.getEnvironment().getStandardIn();
+				DecoHackMain.Options options = DecoHackMain.options(stdout, stderr, stdin);
 				scriptInstance.popStackValue(temp);
 				if (!temp.isNull())
 				{

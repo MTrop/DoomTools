@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.contexts;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
@@ -22,6 +24,15 @@ public class PatchMBFContext extends PatchBoomContext
 	public DEHPatchBoom getSourcePatch()
 	{
 		return MBFPATCH;
+	}
+
+	@Override
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic) 
+	{
+		DEHActionPointer out = super.getActionPointerByMnemonic(mnemonic);
+		if (out == null)
+			out = DEHActionPointerMBF.getActionPointerByMnemonic(mnemonic);
+		return out;
 	}
 
 	@Override

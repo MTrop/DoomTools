@@ -1,6 +1,12 @@
 DECOHack
 --------
 
+### Changed for 0.24.0
+
+* `Added` The ability to read a DECOHack patch from STDIN.
+* `Added` The ability to add custom action pointers. (Enhancement #72)
+
+
 ### Changed for 0.23.0
 
 * `Added` A patch format for the Unity port, `doomunity`, which is `udoom19` but with no string limits (thanks, Xaser!). (PR #65).

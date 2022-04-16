@@ -13,7 +13,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
@@ -50,9 +51,18 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 	}
 
 	@Override
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic) 
+	{
+		DEHActionPointer out = super.getActionPointerByMnemonic(mnemonic);
+		if (out == null)
+			out = DEHActionPointerDoom19.getActionPointerByMnemonic(mnemonic);
+		return out;
+	}
+
+	@Override
 	public DEHActionPointerType getSupportedActionPointerType() 
 	{
-		return DEHActionPointerType.DOOM19;
+		return DEHActionPointerType.BOOM;
 	}
 	
 	@Override

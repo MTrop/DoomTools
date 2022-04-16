@@ -291,7 +291,7 @@ public final class DoomMakeMain
 			if (options.guiNewProject)
 			{
 				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, System.getProperty("user.dir"));
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, OSUtils.getWorkingDirectoryPath());
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start DoomMake New Project GUI!");
 					return ERROR_IOERROR;

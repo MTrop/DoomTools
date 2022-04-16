@@ -15,6 +15,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHObject;
@@ -22,7 +23,6 @@ import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
@@ -55,6 +55,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
+	protected Map<String, DEHActionPointer> pointerMnemonicMap;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -102,7 +103,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	/**
 	 * Creates a new patch context.
 	 */
-	public AbstractPatchContext()
+	protected AbstractPatchContext()
 	{
 		DEHPatch source = getSourcePatch();
 		
@@ -123,6 +124,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.freeThingsMap = new IntervalMap<>(0, getThingCount() - 1, false);
 		this.thingAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -265,6 +267,28 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return copy(index, pointers, (i) -> getSourcePatch().getActionPointer(i));
 	}
 
+	/**
+	 * Adds an available, custom action pointer.
+	 * Associates using its mnemonic. If another pointer uses the same mnemonic, it is overwritten. 
+	 * @param pointer the pointer to add.
+	 * @see DEHActionPointer#getMnemonic()
+	 */
+	public void addActionPointer(DEHActionPointer pointer)
+	{
+		pointerMnemonicMap.put(pointer.getMnemonic(), pointer);
+	}
+	
+	/**
+	 * Gets an action pointer by its mnemonic.
+	 * Custom action pointers get precedence.
+	 * @param mnemonic the action pointer mnemonic.
+	 * @return the corresponding pointer, or null if no pointer.
+	 */
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic)
+	{
+		return pointerMnemonicMap.get(mnemonic);
+	}
+	
 	/**
 	 * @return the set of used/fetched pointer indices.
 	 */

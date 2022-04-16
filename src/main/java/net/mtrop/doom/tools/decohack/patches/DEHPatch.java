@@ -5,13 +5,13 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 
 /**
  * Common DeHackEd Patch interface.

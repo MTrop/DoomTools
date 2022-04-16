@@ -40,6 +40,7 @@ public final class WadMergeMain
 	private static final String SWITCH_VERBOSE = "--verbose";
 	private static final String SWITCH_VERBOSE2 = "-v";
 	private static final String SWITCH_VERSION = "--version";
+
 	private static final String SWITCH_SYSTEMIN = "--";
 	
 	/**
@@ -66,6 +67,7 @@ public final class WadMergeMain
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
+			this.useStdin = false;
 			this.inputFile = new File("wadmerge.txt");
 			this.args = new LinkedList<>();
 		}

@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
@@ -159,6 +160,15 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 	public Integer getActionPointerFrame(int index)
 	{
 		return getSourcePatch().getActionPointerFrame(index);
+	}
+	
+	@Override
+	public DEHActionPointer getActionPointerByMnemonic(String mnemonic) 
+	{
+		DEHActionPointer out = super.getActionPointerByMnemonic(mnemonic);
+		if (out == null)
+			out = DEHActionPointerDoom19.getActionPointerByMnemonic(mnemonic);
+		return out;
 	}
 
 	@Override

@@ -28,6 +28,8 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -38,14 +40,14 @@ import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
 import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParam.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
@@ -171,6 +173,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private static final String KEYWORD_USING = "using";
 	private static final String KEYWORD_MBF21 = "mbf21";
+
+	private static final String KEYWORD_CUSTOM = "custom";
 	
 	private static final String KEYWORD_NULL = "null";
 
@@ -336,7 +340,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!matchIdentifierIgnoreCase(KEYWORD_USING))
 		{
-			addErrorMessage("Expected \"using\" clause to set the patch format.");
+			addErrorMessage("Expected \"using\" clause to set the patch format (or better yet, use a built-in #include!).");
 			return null;
 		}
 		
@@ -384,6 +388,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return parseWeaponBlock(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_MISC))
 			return parseMiscellaneousBlock(context);
+		else if (matchIdentifierIgnoreCase(KEYWORD_CUSTOM))
+			return parseCustomClause(context);
 		else if (matchIdentifierIgnoreCase(KEYWORD_EACH))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_THING))
@@ -874,6 +880,131 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
+		return true;
+	}
+
+	// Parses a custom element clause.
+	private boolean parseCustomClause(AbstractPatchContext<?> context)
+	{
+		if (matchIdentifierIgnoreCase(KEYWORD_THING))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+
+				return parseCustomPointerClause(context, false);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_THING);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+
+				return parseCustomPointerClause(context, true);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_WEAPON);
+				return false;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_WEAPON, KEYWORD_CUSTOM);
+			return false;
+		}
+	}
+	
+	// Parses a custom pointer clause.
+	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected argument type: [boom, mbf, mbf21].");
+			return false;
+		}
+		
+		DEHActionPointerType type;
+		String typeName = currentToken().getLexeme();
+		if ((type = DEHActionPointerType.getByName(typeName)) == null)
+		{
+			addErrorMessage("Expected \"boom\", \"mbf\", or \"mbf21\" for the parameter use type.");
+			return false;
+		}
+		nextToken();
+
+		String pointerName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected action pointer name (i.e. \"A_PointerName\").");
+			return false;
+		}
+
+		pointerName = currentToken().getLexeme();
+		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
+		{
+			addErrorMessage("Action pointer name must start with \"A_\".");
+			return false;
+		}
+		nextToken();
+		
+		// Action mnemonic.
+		String pointerMnemonic = pointerName.substring(2);
+		
+		// Parameters
+		List<DEHActionPointerParamType> params = new LinkedList<>();
+		if (matchType(DecoHackKernel.TYPE_LPAREN))
+		{
+			String parameterTypeName;
+			if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			{
+				do {
+					if ((parameterTypeName = matchIdentifier()) == null)
+					{
+						addErrorMessage("Expected identifier for parameter type after \",\".");
+						return false;
+					}
+					
+					DEHActionPointerParamType paramType;
+					if ((paramType = DEHActionPointerParamType.getByName(parameterTypeName)) == null)
+					{
+						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHActionPointerParamType.values()));
+						return false;
+					}
+					if (params.size() >= type.getMaxCustomParams())
+					{
+						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
+						return false;
+					}
+					
+					params.add(paramType);
+					
+				} while (matchType(DecoHackKernel.TYPE_COMMA));
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_RPAREN))
+			{
+				addErrorMessage("Expected \",\" to continue parameter types or \")\" to end parameter type list.");
+				return false;
+			}
+		}
+		
+		DEHActionPointerParamType[] parameters = params.toArray(new DEHActionPointerParamType[params.size()]);
+		context.addActionPointer(new DEHActionPointerEntry(weapon, type, pointerMnemonic, parameters));
 		return true;
 	}
 
@@ -3166,7 +3297,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction action, Boolean requireAction) 
 	{
 		// Maybe parse action
-		DEHActionPointer pointer = matchActionPointerName();
+		DEHActionPointer pointer = matchActionPointerName(context);
 		action.pointer = pointer;
 		
 		if (requireAction != null)
@@ -3185,6 +3316,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		if (pointer != null)
 		{
+			// Sanity check - shouldn't even be true here, anymore.
 			if (!context.supports(pointer.getType()))
 			{
 				addErrorMessage(pointer.getType().name() + " action pointer used: " + pointer.getMnemonic() + ". Patch does not support this action type.");
@@ -3210,23 +3342,30 @@ public final class DecoHackParser extends Lexer.Parser
 			// else, state body.
 
 			// MBF args (misc1/misc2)
-			if (!pointer.useArgs())
+			if (!pointer.getType().getUseArgs())
 			{
 				if (matchType(DecoHackKernel.TYPE_LPAREN))
 				{
+					if (action.offset && pointer.getParams().length > 0)
+					{
+						addErrorMessage("Cannot use the 'offset' directive on a state with an MBF action function that takes parameters.");
+						return false;
+					}
+
 					// no arguments
 					if (matchType(DecoHackKernel.TYPE_RPAREN))
 						return true;
 
-					if (action.offset)
+					DEHActionPointerParamType paramType;
+					if ((paramType = pointer.getParam(0)) == null)
 					{
-						addErrorMessage("Cannot use 'offset' directive on a state with an MBF action function parameter.");
+						addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
 						return false;
 					}
-
+					
 					// get first argument
 					Object p;
-					if ((p = parseActionPointerParameterValue(pointer.getParam(0), context, actor)) == null)
+					if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 						return false;
 					else if (p instanceof Integer)
 					{
@@ -3240,10 +3379,15 @@ public final class DecoHackParser extends Lexer.Parser
 						action.misc1 = PLACEHOLDER_LABEL;
 					}
 
-
 					if (matchType(DecoHackKernel.TYPE_COMMA))
 					{
-						if ((p = parseActionPointerParameterValue(pointer.getParam(1), context, actor)) == null)
+						if ((paramType = pointer.getParam(1)) == null)
+						{
+							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
+							return false;
+						}
+						
+						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3260,7 +3404,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 					if (!matchType(DecoHackKernel.TYPE_RPAREN))
 					{
-						addErrorMessage("Expected a ')' after action parameters.");
+						addErrorMessage("Expected a ')' after action parameters. Are you adding too many parameters?");
 						return false;
 					}
 				}
@@ -3282,8 +3426,16 @@ public final class DecoHackParser extends Lexer.Parser
 					{
 						// get argument
 						int argIndex = action.args.size();
+						
+						DEHActionPointerParamType paramType;
+						if ((paramType = pointer.getParam(argIndex)) == null)
+						{
+							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
+							return false;
+						}
+						
 						Object p;
-						if ((p = parseActionPointerParameterValue(pointer.getParam(argIndex), context, actor)) == null)
+						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3303,7 +3455,7 @@ public final class DecoHackParser extends Lexer.Parser
 						}
 						else if (!matchType(DecoHackKernel.TYPE_COMMA))
 						{
-							addErrorMessage("Expected a ')' after action parameters.");
+							addErrorMessage("Expected a ')' after action parameters. Are you adding too many parameters?");
 							return false;
 						}
 					}
@@ -3315,30 +3467,30 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Object parseActionPointerParameterValue(DEHActionPointerParam paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Object parseActionPointerParameterValue(DEHActionPointerParamType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 		{
-			if (paramType == DEHActionPointerParam.THING)
+			if (paramType == DEHActionPointerParamType.THING)
 				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
 			return parseThingOrThingStateIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 		{
-			if (paramType == DEHActionPointerParam.WEAPON)
+			if (paramType == DEHActionPointerParamType.WEAPON)
 				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
 			return parseWeaponOrWeaponStateIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 		{
-			if (paramType == DEHActionPointerParam.SOUND)
+			if (paramType == DEHActionPointerParamType.SOUND)
 				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
 			return parseSoundIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 		{
-			if (paramType == DEHActionPointerParam.FLAGS)
+			if (paramType == DEHActionPointerParamType.FLAGS)
 				addWarningMessage("The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
 			return matchNumericExpression(context, actor, Type.FLAGS);
 		}
@@ -3882,7 +4034,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier or string that references an action pointer name.
 	// If match, advance token and return action pointer.
 	// Else, return null.
-	private DEHActionPointer matchActionPointerName()
+	private DEHActionPointer matchActionPointerName(AbstractPatchContext<?> context)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
@@ -3891,7 +4043,7 @@ public final class DecoHackParser extends Lexer.Parser
 		DEHActionPointer out;
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
-		if ((out = DEHActionPointer.getByMnemonic(lexeme.substring(2))) == null)
+		if ((out = context.getActionPointerByMnemonic(lexeme.substring(2))) == null)
 			return null;
 		if (out == DEHActionPointer.NULL)
 			return null;
@@ -4230,13 +4382,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		DEHActionPointerParam param = action.getParam(index);
-		if (param == null)
-		{
-			addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.getMnemonic(), index);
-			return false;
-		}
-
+		DEHActionPointerParamType param = action.getParam(index);
 		if (!param.isValueValid(value))
 		{
 			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, param.getValueMin(), param.getValueMax());

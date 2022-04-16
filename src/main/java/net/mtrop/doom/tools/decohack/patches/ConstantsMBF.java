@@ -5,13 +5,15 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
-import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer.*;
-
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.NULL; // resolve ambiguity
+import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
+import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF.*;
 
 /**
  * Constants for MBF. 

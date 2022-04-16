@@ -5,6 +5,10 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.Map;
+
+import net.mtrop.doom.tools.struct.util.EnumUtils;
+
 /**
  * Enumeration of action pointer types.
  * Note: DO NOT CHANGE THE ORDERING of the enums! They are ordered in ascending feature set!
@@ -13,20 +17,43 @@ package net.mtrop.doom.tools.decohack.data.enums;
  */
 public enum DEHActionPointerType
 {
-	DOOM19(false),
-	MBF(false),
-	MBF21(true);
+	DOOM19 (false, 0),
+	BOOM   (false, 0), // redundant for DOOM19, necessary for custom pointers
+	MBF    (false, 2),
+	MBF21  (true,  10);
 
+	private int maxCustomParams;
 	private boolean useArgs;
 
-	private DEHActionPointerType(boolean useArgs)
+	private static final Map<String, DEHActionPointerType> NAME_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerType.class);
+	
+	public static DEHActionPointerType getByName(String mnemonic)
+	{
+		return NAME_MAP.get(mnemonic);
+	}
+	
+	private DEHActionPointerType(boolean useArgs, int maxCustomParams)
 	{
 		this.useArgs = useArgs;
+		this.maxCustomParams = maxCustomParams;
 	}
 
+	/**
+	 * @return true if this uses the "args" fields for values, false for the "misc" fields.
+	 */
 	public boolean getUseArgs()
 	{
 		return useArgs;
+	}
+	
+	/**
+	 * Gets the maximum amount of definable parameter types.
+	 * If used in a custom type, this is the max amount of params that a user is allowed to define.
+	 * @return the max amount of params. 
+	 */
+	public int getMaxCustomParams() 
+	{
+		return maxCustomParams;
 	}
 	
 	/**

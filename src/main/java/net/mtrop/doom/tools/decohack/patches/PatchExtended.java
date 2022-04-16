@@ -14,10 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer;
 
 /**
  * Patch implementation for Extended DeHackEd.
@@ -408,6 +408,7 @@ public class PatchExtended extends PatchMBF
 		return 4000;
 	}
 
+	@Override
 	protected PatchBoom.State getBoomState(int index)
 	{
 		int mbflen = DEHSTATE.length + DEHSTATEMBF.length;

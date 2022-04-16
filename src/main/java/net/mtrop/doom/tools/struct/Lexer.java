@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -2265,6 +2265,15 @@ public class Lexer
 		protected Lexer.Token currentToken()
 		{
 			return currentToken;
+		}
+
+		/**
+		 * @return the current token's lexeme, or null if no current token.
+		 * @see Lexer.Token#getLexeme()
+		 */
+		protected String currentLexeme()
+		{
+			return currentToken != null ? currentToken.getLexeme() : null;
 		}
 
 		/**

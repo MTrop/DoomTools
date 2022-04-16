@@ -5,7 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.patches;
 
-import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointer.*;
+import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
 
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
