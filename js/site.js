@@ -109,7 +109,7 @@ function display_release_data(release, release_section_element, release_version_
 		else if (filename.indexOf('-cmd') >= 0)
 			return 'CMD (Windows) Version';
 		else if (filename.indexOf('-setup-jre') >= 0)
-			return 'Windows Installer w/ JRE';
+			return 'Windows Installer w/ JRE (x64)';
 		else if (filename.indexOf('-setup') >= 0)
 			return 'Windows Installer (no JRE)';
 		else
