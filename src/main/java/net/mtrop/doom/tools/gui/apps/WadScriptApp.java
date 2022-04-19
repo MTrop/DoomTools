@@ -1,17 +1,24 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.JButton;
 import javax.swing.JMenuBar;
+import javax.swing.JPopupMenu;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.WadScriptMain;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.apps.swing.editors.MultiFileEditorPanel;
@@ -21,9 +28,13 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 import static javax.swing.BorderFactory.*;
@@ -48,6 +59,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private static final FileFilter[] TYPES = new FileFilter[] { fileExtensionFilter("WadScript Files (*.script)", "script") };
 	
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
+
+	private static final String[] NO_ARGUMENTS = new String[0];
 	
 	private static final String EMPTY_SCRIPT = (new StringBuilder())
 		.append("entry main(args) {\n")
@@ -58,6 +71,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
     // Singletons
 
 	private DoomToolsGUIUtils utils;
+	private DoomToolsTaskManager tasks;
 	private DoomToolsIconManager icons;
 	private DoomToolsLanguageManager language;
 	
@@ -67,14 +81,19 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private JFormField<File> workingDirFileField;
 	private JFormField<String> entryPointField;
 	private JButton runScriptButton;
+	private JButton popupButton;
+	private JPopupMenu runPopupMenu;
 	private DoomToolsStatusPanel statusPanel;
 	
 	// Fields
     
+	private File defaultWorkingDirectory;
 	private File currentWorkingDirectory;
 	private String entryPoint;
 
 	// State
+	
+	private EditorHandle currentHandle;
 	
 	// ...
 
@@ -94,9 +113,11 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	public WadScriptApp(final File defaultWorkingDirectory) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
+		this.tasks = DoomToolsTaskManager.get();
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		
+		this.defaultWorkingDirectory = defaultWorkingDirectory;
 		this.workingDirFileField = fileField(
 			currentWorkingDirectory, 
 			(current) -> chooseDirectory(
@@ -116,27 +137,23 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		this.runScriptButton = utils.createButtonFromLanguageKey(
 			icons.getImage("script-run.png"), 
 			"wadscript.entrypoint.action", 
-			(b, e) -> executeScript()
+			(b, e) -> onExecuteScript(false, IOUtils.getNullInputStream(), NO_ARGUMENTS)
 		);
+		this.runPopupMenu = popupMenu(
+			utils.createItemFromLanguageKey("wadscript.run.popup.item.log", (c, e) -> onExecuteScript(true, IOUtils.getNullInputStream(), NO_ARGUMENTS)),
+			utils.createItemFromLanguageKey("wadscript.run.popup.item.args", (c, e) -> onExecuteScriptArgs())
+		);
+		this.popupButton = button("\u2228", (b, e) -> {
+			this.runPopupMenu.show((Component)e.getSource(), 0, b.getHeight());
+		});
+		
 		this.editorPanel = new WadScriptEditorPanel(new WadScriptEditorPanel.Listener()
 		{
 			@Override
 			public void onCurrentEditorChange(EditorHandle handle) 
 			{
-				if (handle != null)
-				{
-					File sourceFile = handle.getContentSourceFile();
-					setWorkingDirectoryField(sourceFile == null ? defaultWorkingDirectory : sourceFile.getParentFile());
-					workingDirFileField.setEnabled(true);
-					entryPointField.setEnabled(true);
-					runScriptButton.setEnabled(true);
-				}
-				else
-				{
-					workingDirFileField.setEnabled(false);
-					entryPointField.setEnabled(false);
-					runScriptButton.setEnabled(false);
-				}
+				currentHandle = handle;
+				onHandleChange();
 			}
 
 			@Override
@@ -148,6 +165,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
+		this.currentHandle = null;
 	}
 	
 	@Override
@@ -166,7 +184,10 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 					node(BorderLayout.NORTH, utils.createTitlePanel(language.getText("wadscript.workdir.title"), workingDirFileField)),
 					node(BorderLayout.SOUTH, utils.createTitlePanel(language.getText("wadscript.entrypoint.title"), containerOf(new BorderLayout(4, 0),
 						node(BorderLayout.CENTER, entryPointField),
-						node(BorderLayout.LINE_END, runScriptButton)
+						node(BorderLayout.LINE_END, containerOf(
+							node(BorderLayout.CENTER, runScriptButton),
+							node(BorderLayout.LINE_END, popupButton)
+						))
 					)))
 				)),
 				node(BorderLayout.SOUTH, statusPanel)
@@ -180,8 +201,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		// TODO Finish me.
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file",
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.new", (c, e) -> newEditor()),
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> openEditor()),
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.new", (c, e) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> onOpenEditor()),
 				separator(),
 				utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 				utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -219,7 +240,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	{
 		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
-			newEditor();
+			onNewEditor();
 	}
 
 	@Override
@@ -232,14 +253,37 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	
 	// ====================================================================
 
-	private void newEditor()
+	private void onHandleChange()
 	{
-		editorPanel.newEditor("New " + NEW_COUNTER.getAndIncrement(), EMPTY_SCRIPT);
+		if (currentHandle != null)
+		{
+			File sourceFile = currentHandle.getContentSourceFile();
+			setWorkingDirectoryField(sourceFile == null ? defaultWorkingDirectory : sourceFile.getParentFile());
+			workingDirFileField.setEnabled(true);
+			entryPointField.setEnabled(true);
+			runScriptButton.setEnabled(sourceFile != null);
+			popupButton.setEnabled(sourceFile != null);
+		}
+		else
+		{
+			workingDirFileField.setEnabled(false);
+			entryPointField.setEnabled(false);
+			runScriptButton.setEnabled(false);
+			popupButton.setEnabled(false);
+		}
+
 	}
 	
-	private void openEditor()
+	private void onNewEditor()
 	{
-		Container parent = receiver.getApplicationContainer();
+		String editorName = "New " + NEW_COUNTER.getAndIncrement();
+		editorPanel.newEditor(editorName, EMPTY_SCRIPT);
+		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor", editorName));
+	}
+	
+	private void onOpenEditor()
+	{
+		final Container parent = receiver.getApplicationContainer();
 		
 		File file = utils.chooseFile(
 			parent, 
@@ -253,14 +297,18 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		{
 			try {
 				editorPanel.openFileEditor(file, Charset.defaultCharset());
+				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor", file.getName()));
 			} catch (FileNotFoundException e) {
 				LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
+				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
 				SwingUtils.error(parent, language.getText("wadscript.open.error.notfound", file.getAbsolutePath()));
 			} catch (IOException e) {
 				LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
+				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
 				SwingUtils.error(parent, language.getText("wadscript.open.error.ioerror", file.getAbsolutePath()));
 			} catch (SecurityException e) {
 				LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
+				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error.security", file.getName()));
 				SwingUtils.error(parent, language.getText("wadscript.open.error.security", file.getAbsolutePath()));
 			}
 		}
@@ -271,11 +319,97 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		workingDirFileField.setValue(directory);
 	}
 	
-	private void executeScript()
+	private void onExecuteScriptArgs()
 	{
-		// TODO: Do this. 
+		// TODO: Finish this with args.
+	}
+	
+	private void onExecuteScript(boolean showLog, final InputStream standardIn, final String[] args)
+	{
+		final Container parent = receiver.getApplicationContainer();
+
+		if (currentHandle.needsToSave())
+		{
+			Boolean saveChoice = modal(parent, utils.getWindowIcons(), 
+				language.getText("wadscript.run.save.modal.title"),
+				containerOf(label(language.getText("wadscript.run.save.modal.message", currentHandle.getEditorTabName()))), 
+				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
+				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
+				utils.createChoiceFromLanguageKey("doomtools.cancel", null)
+			).openThenDispose();
+			
+			if (saveChoice == null)
+				return;
+			else if (saveChoice == true)
+			{
+				if (!editorPanel.saveCurrentEditor())
+					return;
+			}
+		}
+		
+		File scriptFile = currentHandle.getContentSourceFile();
+		
+		if (showLog)
+		{
+			utils.createProcessModal(
+				receiver.getApplicationContainer(), 
+				language.getText("wadscript.run.message.title"), 
+				language.getText("wadscript.run.message.running", entryPoint), 
+				language.getText("wadscript.run.message.success"), 
+				language.getText("wadscript.run.message.error"), 
+				(stream) -> execute(scriptFile, currentWorkingDirectory, entryPoint, args, stream, stream, standardIn)
+			).start(tasks);
+		}
+		else
+		{
+			execute(scriptFile, currentWorkingDirectory, entryPoint, args, null, null, standardIn);
+		}
 	}
 
+	private InstancedFuture<Integer> execute(final File scriptFile, final File workingDirectory, String entryPoint, String[] args, final PrintStream out, final PrintStream err, final InputStream in)
+	{
+		return tasks.spawn(() -> {
+			Integer result = null;
+			try {
+				statusPanel.setActivityMessage(language.getText("wadscript.run.message.running", scriptFile.getName()));
+				result = callWadScript(scriptFile, workingDirectory, entryPoint, args, out, err, in).get();
+				if (result == 0)
+				{
+					statusPanel.setSuccessMessage(language.getText("wadscript.run.message.success"));
+				}
+				else
+				{
+					LOG.errorf("Error on WadScript invoke (%s) result was %d: %s", entryPoint, result, scriptFile.getAbsolutePath());
+					statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
+				}
+			} catch (InterruptedException e) {
+				LOG.warnf("Call to WadScript invoke interrupted (%s): %s", entryPoint, scriptFile.getAbsolutePath());
+				statusPanel.setErrorMessage(language.getText("wadscript.run.message.interrupt"));
+			} catch (ExecutionException e) {
+				LOG.errorf(e, "Error on WadScript invoke (%s): %s", entryPoint, scriptFile.getAbsolutePath());
+				statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
+			}
+			return result;
+		});
+	}
+	
+	private static InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	{
+		ProcessCallable callable = Common.spawnJava(WadScriptMain.class).setWorkingDirectory(workingDirectory);
+		callable.arg("--entry").arg(entryPoint)
+			.arg(scriptFile.getAbsolutePath())
+			.args(args)
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(stdin)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDERR."))
+			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDIN."));
+		
+		LOG.infof("Calling WadScript (%s:%s).", scriptFile, entryPoint);
+		return InstancedFuture.instance(callable).spawn();
+	}
+	
 	private static class WadScriptEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = -2590465129796097892L;

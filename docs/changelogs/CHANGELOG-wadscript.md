@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.4.1
+
+* `Fixed` The `--entry` switch didn't parse the command line properly after its use.
+
+
 ### Changed for 1.4.0
 
 * `Added` A switch for printing the entry points for a script.

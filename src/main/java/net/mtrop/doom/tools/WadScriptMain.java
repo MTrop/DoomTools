@@ -1321,6 +1321,7 @@ public final class WadScriptMain
 				{
 					arg = arg.trim();
 					options.entryPointName = arg.length() > 0 ? arg : null;
+					state = STATE_START;
 				}
 				break;
 				

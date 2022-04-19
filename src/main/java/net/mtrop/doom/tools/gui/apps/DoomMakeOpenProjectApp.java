@@ -11,7 +11,6 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JCheckBox;
@@ -35,11 +34,9 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
-import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 
 import static javax.swing.BorderFactory.*;
 
@@ -447,39 +444,14 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		if (currentTarget == null)
 			return;
 
-		Container modalParentContainer = receiver.getApplicationContainer();
-		String modalTitle = language.getText("doommake.project.logging.title", currentTarget);
-		String modalActivityStatusMessage = language.getText("doommake.project.build.message.running", currentTarget);  
-		String modalActivitySuccessMessage = language.getText("doommake.project.build.message.success");  
-		String modalActivityErrorMessage = language.getText("doommake.project.build.message.error");  
-		final Function<PrintStream, InstancedFuture<Integer>> modalOutFunction = (stream) -> runTarget(currentTarget, stream, stream, false);
-		
-		// TODO: Break out into generic modal (for other utilities).
-		
-		// Show output.
-		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
-		final DoomToolsStatusPanel status = new DoomToolsStatusPanel();
-		status.setActivityMessage(modalActivityStatusMessage);
-		
-		Modal<Void> outputModal = modal(
-			modalParentContainer, 
-			modalTitle,
-			containerOf(new BorderLayout(0, 4),
-				node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, outputPanel)),
-				node(BorderLayout.SOUTH, status)
-			)
-		);
-		
-		final PrintStream outStream = outputPanel.getPrintStream();
-		tasks.spawn(() -> {
-			InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream);
-			Integer result = runInstance.result();
-			if (result == 0)
-				status.setSuccessMessage(modalActivitySuccessMessage);
-			else
-				status.setErrorMessage(modalActivityErrorMessage);
-		});
-		outputModal.openThenDispose();
+		utils.createProcessModal(
+			receiver.getApplicationContainer(), 
+			language.getText("doommake.project.logging.title", currentTarget), 
+			language.getText("doommake.project.build.message.running", currentTarget), 
+			language.getText("doommake.project.build.message.success"), 
+			language.getText("doommake.project.build.message.error"), 
+			(stream) -> runTarget(currentTarget, stream, stream, false)
+		).start(tasks);
 	}
 
 	private InstancedFuture<Integer> runTarget(final String targetName, final PrintStream out, final PrintStream err, final boolean agentOverride)

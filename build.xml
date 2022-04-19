@@ -51,7 +51,7 @@
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${flatlaf.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>

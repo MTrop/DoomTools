@@ -679,6 +679,14 @@ public class MultiFileEditorPanel extends JPanel
 		}
 		
 		/**
+		 * @return the editor tab name.
+		 */
+		public String getEditorTabName()
+		{
+			return editorTab.getTabTitle();
+		}
+		
+		/**
 		 * @return the source file. Can be null.
 		 */
 		public File getContentSourceFile() 
@@ -693,7 +701,15 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return editorPanel.textArea.getText();
 		}
-		
+
+		/**
+		 * @return true if this editor has unsaved data.
+		 */
+		public boolean needsToSave()
+		{
+			return contentLastModified > contentSourceFileLastModified;
+		}
+
 		private EditorHandle(File contentSourceFile, Charset sourceCharset, RSyntaxTextArea textArea)
 		{
 			this(contentSourceFile.getName(), textArea);
@@ -702,11 +718,6 @@ public class MultiFileEditorPanel extends JPanel
 			this.contentLastModified = contentSourceFile.lastModified();
 			this.contentSourceFileLastModified = contentSourceFile.lastModified();
 			this.editorTab.setTabIcon(savedIcon);
-		}
-
-		private boolean needsToSave()
-		{
-			return contentLastModified > contentSourceFileLastModified;
 		}
 
 		// Should call to update title on tab and timestamps.

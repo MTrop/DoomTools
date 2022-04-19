@@ -6,8 +6,10 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -21,10 +23,15 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
+import net.mtrop.doom.tools.struct.swing.ContainerFactory.Modal;
 import net.mtrop.doom.tools.struct.swing.ContainerFactory.ModalChoice;
+import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
@@ -276,6 +283,52 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * Creates a process modal, prepped to start and open.
+	 * @param parent
+	 * @param title
+	 * @param activityMessage
+	 * @param successMessage
+	 * @param errorMessage
+	 * @param modalOutFunction
+	 * @return a modal handle to start with a task manager.
+	 */
+	public ProcessModal createProcessModal(final Container parent, final String title, final String activityMessage, final String successMessage, final String errorMessage, final Function<PrintStream, InstancedFuture<Integer>> modalOutFunction) 
+	{
+		// Show output.
+		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
+		final DoomToolsStatusPanel status = new DoomToolsStatusPanel();
+		
+		status.setActivityMessage(activityMessage);
+		
+		final Modal<Void> outputModal = modal(
+			parent, 
+			title,
+			containerOf(new BorderLayout(0, 4),
+				node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, outputPanel)),
+				node(BorderLayout.SOUTH, status)
+			)
+		);
+		
+		return new ProcessModal() 
+		{
+			@Override
+			public void start(DoomToolsTaskManager tasks) 
+			{
+				final PrintStream outStream = outputPanel.getPrintStream();
+				tasks.spawn(() -> {
+					InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream);
+					Integer result = runInstance.result();
+					if (result == 0)
+						status.setSuccessMessage(successMessage);
+					else
+						status.setErrorMessage(errorMessage);
+				});
+				outputModal.openThenDispose();
+			}
+		};
+	}
+
+	/**
 	 * @return the common window icons to use.
 	 */
 	public List<Image> getWindowIcons() 
@@ -289,6 +342,18 @@ public final class DoomToolsGUIUtils
 	public Icon getWindowIcon() 
 	{
 		return windowIcon;
+	}
+	
+	/**
+	 * Process modal.
+	 */
+	public interface ProcessModal
+	{
+		/**
+		 * Starts the task and opens the modal.
+		 * @param tasks
+		 */
+		void start(DoomToolsTaskManager tasks);
 	}
 	
 }
