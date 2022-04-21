@@ -46,7 +46,7 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		this.params = params;
 	}
 
-	private static final Map<String, DEHActionPointerDoom19> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerDoom19.class);
+	private static final Map<String, DEHActionPointerMBF> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerMBF.class);
 	
 	public static DEHActionPointer getActionPointerByMnemonic(String mnemonic)
 	{
