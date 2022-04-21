@@ -3,7 +3,8 @@ DECOHack
 
 ### Changed for 0.24.1
 
-* `Fixed` DECOHack now throws an error if you are attempting to define a custom action pointer that already exists.
+* `Fixed` MBF Action Pointers were not recognized. This has been fixed.
+* `Fixed` An error is now thrown if you are attempting to define a custom action pointer that already exists.
 
 
 ### Changed for 0.24.0

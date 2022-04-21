@@ -1004,7 +1004,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			if (!matchType(DecoHackKernel.TYPE_RPAREN))
 			{
-				addErrorMessage("Expected \",\" to continue parameter types or \")\" to end parameter type list.");
+				addErrorMessage("Expected ',' to continue parameter types or ')' to end parameter type list.");
 				return false;
 			}
 		}
@@ -1041,8 +1041,18 @@ public final class DecoHackParser extends Lexer.Parser
 	
 			if (!matchType(DecoHackKernel.TYPE_RBRACE))
 			{
-				addErrorMessage("Expected '}' after \"%s\" definition.", KEYWORD_STATE);
-				return false;
+				String lexeme = currentLexeme();
+				// be a little smart
+				if (lexeme != null && lexeme.length() >= 2 && "A_".equalsIgnoreCase(currentLexeme().substring(0, 2)))
+				{
+					addErrorMessage("Unknown or unsupported action pointer \"%s\".", lexeme);
+					return false;
+				}
+				else
+				{
+					addErrorMessage("Expected '}' after \"%s\" definition.", KEYWORD_STATE);
+					return false;
+				}
 			}
 	
 			return true;
