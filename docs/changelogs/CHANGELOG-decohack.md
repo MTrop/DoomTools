@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.24.2
+
+* `Changed` Added a better error message for bad action pointers.
+
+
 ### Changed for 0.24.1
 
 * `Fixed` MBF Action Pointers were not recognized. This has been fixed.
