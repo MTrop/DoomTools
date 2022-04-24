@@ -312,10 +312,10 @@ public final class DecoHackParser extends Lexer.Parser
 			 * be treated like a comment in other situations. Passive parsing of these
 			 * key comments seems to be the "best of both worlds" approach.
 			 */
-			if (currentType(DecoHackKernel.TYPE_LINE_COMMENT) && currentToken().getLexeme().startsWith("$"))
+			if (currentType(DecoHackKernel.TYPE_LINE_COMMENT) && currentLexeme().startsWith("$"))
 			{
 				// Lazily split this thing.
-				String content = currentToken().getLexeme().substring(1).trim();
+				String content = currentLexeme().substring(1).trim();
 				int splitIndex = content.indexOf(' ');
 				if (splitIndex > 0)
 				{
@@ -426,7 +426,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (currentToken() != null)
 		{
-			addErrorMessage("Unknown section or command \"%s\".", currentToken().getLexeme());
+			addErrorMessage("Unknown section or command \"%s\".", currentLexeme());
 			return false;
 		}
 		else
@@ -484,7 +484,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			if (currentType(DecoHackKernel.TYPE_STRING))
 			{
-				context.setString(stringIndex, currentToken().getLexeme());
+				context.setString(stringIndex, currentLexeme());
 				nextToken();
 			}
 			else
@@ -939,7 +939,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		DEHActionPointerType type;
-		String typeName = currentToken().getLexeme();
+		String typeName = currentLexeme();
 		if ((type = DEHActionPointerType.getByName(typeName)) == null)
 		{
 			addErrorMessage("Expected \"boom\", \"mbf\", or \"mbf21\" for the parameter use type.");
@@ -954,7 +954,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		pointerName = currentToken().getLexeme();
+		pointerName = currentLexeme();
 		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
 		{
 			addErrorMessage("Action pointer name must start with \"A_\".");
@@ -2587,7 +2587,7 @@ public final class DecoHackParser extends Lexer.Parser
 					labelList.add(label);
 				}
 				
-				label = currentToken().getLexeme();
+				label = currentLexeme();
 				nextToken();
 				
 			} while (matchType(DecoHackKernel.TYPE_COLON) && currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING));
@@ -2979,7 +2979,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer spriteIndex;
 		if ((spriteIndex = matchSpriteIndexName(context)) == null)
 		{
-			addErrorMessage("Expected valid sprite name. \"%s\" is not a valid name.", currentToken().getLexeme());
+			addErrorMessage("Expected valid sprite name. \"%s\" is not a valid name.", currentLexeme());
 			return false;
 		}
 		
@@ -3075,7 +3075,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (actor == null)
 			{
-				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentToken().getLexeme());
+				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentLexeme());
 				return null;
 			}
 			return matchIdentifier();
@@ -3084,7 +3084,7 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (actor == null)
 			{
-				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentToken().getLexeme());
+				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentLexeme());
 				return null;
 			}
 			return matchString();
@@ -3129,7 +3129,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		}
 		
-		labelName = currentToken().getLexeme();
+		labelName = currentLexeme();
 
 		Integer stateIndex;
 		if ((stateIndex = thing.getLabel(labelName)) == 0)
@@ -3171,7 +3171,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return parseWeaponLabel(context, index);
 
-		labelName = currentToken().getLexeme();
+		labelName = currentLexeme();
 	
 		Integer stateIndex;
 		if ((stateIndex = weapon.getLabel(labelName)) == 0)
@@ -3221,7 +3221,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		}
 		
-		labelName = currentToken().getLexeme();
+		labelName = currentLexeme();
 
 		Integer stateIndex;
 		if ((stateIndex = weapon.getLabel(labelName)) == 0)
@@ -3667,7 +3667,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return false;
 
-		switch (currentToken().getLexeme().toLowerCase())
+		switch (currentLexeme().toLowerCase())
 		{
 			case KEYWORD_STOP:
 			case KEYWORD_GOTO:
@@ -3688,7 +3688,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		else
 		{
-			String sprite = currentToken().getLexeme();
+			String sprite = currentLexeme();
 			if (sprite.length() != 4)
 				return false;
 			return patch.getSpriteIndex(sprite) != null;
@@ -3700,7 +3700,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return false;
-		if (!currentToken().getLexeme().equalsIgnoreCase(lexeme))
+		if (!currentLexeme().equalsIgnoreCase(lexeme))
 			return false;
 		return true;
 	}
@@ -3711,7 +3711,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return false;
 		
-		switch (currentToken().getLexeme().toLowerCase())
+		switch (currentLexeme().toLowerCase())
 		{
 			case KEYWORD_THINGSTATE_SPAWN:
 			case KEYWORD_THINGSTATE_SEE:
@@ -3733,7 +3733,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return false;
 		
-		switch (currentToken().getLexeme().toLowerCase())
+		switch (currentLexeme().toLowerCase())
 		{
 			case KEYWORD_WEAPONSTATE_READY:
 			case KEYWORD_WEAPONSTATE_DESELECT:
@@ -3882,7 +3882,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
-		String out = currentToken().getLexeme();
+		String out = currentLexeme();
 		nextToken();
 		return out;
 	}
@@ -3906,7 +3906,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
 		Integer out;
-		if ((out = patch.getSpriteIndex(currentToken().getLexeme())) == null)
+		if ((out = patch.getSpriteIndex(currentLexeme())) == null)
 			return null;
 		nextToken();
 		return out;
@@ -3921,7 +3921,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 
 		Deque<Integer> frameList = new LinkedList<>();
-		String lexeme = currentToken().getLexeme();
+		String lexeme = currentLexeme();
 		for (int i = 0; i < lexeme.length(); i++)
 		{
 			char c = lexeme.charAt(i);
@@ -3986,7 +3986,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		Integer out = null;
 		DEHThingFlag flag;
-		if ((flag = DEHThingFlag.getByMnemonic(currentToken().getLexeme())) != null)
+		if ((flag = DEHThingFlag.getByMnemonic(currentLexeme())) != null)
 		{
 			out = flag.getValue();
 			nextToken();
@@ -4005,7 +4005,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		Integer out = null;
 		DEHThingMBF21Flag flag;
-		if ((flag = DEHThingMBF21Flag.getByMnemonic(currentToken().getLexeme())) != null)
+		if ((flag = DEHThingMBF21Flag.getByMnemonic(currentLexeme())) != null)
 		{
 			out = flag.getValue();
 
@@ -4031,7 +4031,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		Integer out = null;
 		DEHWeaponMBF21Flag flag;
-		if ((flag = DEHWeaponMBF21Flag.getByMnemonic(currentToken().getLexeme())) != null)
+		if ((flag = DEHWeaponMBF21Flag.getByMnemonic(currentLexeme())) != null)
 		{
 			out = flag.getValue();
 
@@ -4055,7 +4055,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 	
-		String lexeme = currentToken().getLexeme();
+		String lexeme = currentLexeme();
 		DEHActionPointer out;
 		if (lexeme.length() < 2 || !lexeme.substring(0, 2).toUpperCase().startsWith("A_"))
 			return null;
@@ -4079,7 +4079,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
 		
-		String name = currentToken().getLexeme();
+		String name = currentLexeme();
 		
 		Integer out;
 		if (name.length() == 0)
@@ -4106,7 +4106,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
 		
-		String lexeme = currentToken().getLexeme();
+		String lexeme = currentLexeme();
 		if (MAPLUMP_EXMY.matcher(lexeme).matches())
 		{
 			int midx = Math.max(lexeme.indexOf('m'), lexeme.indexOf('M'));
@@ -4134,7 +4134,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (!currentType(DecoHackKernel.TYPE_STRING))
 			return null;
-		String out = currentToken().getLexeme();
+		String out = currentLexeme();
 		nextToken();
 		return out;
 	}
@@ -4270,7 +4270,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_NUMBER))
 			return null;
 		
-		String lexeme = currentToken().getLexeme();
+		String lexeme = currentLexeme();
 		// Always take hex numbers as raw.
 		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
 		{
@@ -4307,7 +4307,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (!currentType(DecoHackKernel.TYPE_NUMBER))
 			return null;
 		
-		String lexeme = currentToken().getLexeme();
+		String lexeme = currentLexeme();
 		// Always take hex numbers as raw.
 		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
 		{
