@@ -425,6 +425,15 @@ public final class ComponentFactory
 	}
 	
 	/**
+	 * Creates a new blank label.
+	 * @return a created label.
+	 */
+	public static JLabel label()
+	{
+		return new JLabel("");
+	}
+	
+	/**
 	 * Creates an uneditable text area styled like a label, such that it can display multi-line, wrapped text.
 	 * @param label the label.
 	 * @return a created text area.
@@ -467,7 +476,7 @@ public final class ComponentFactory
 	 * @param icon the check box icon.
 	 * @param label the check box label.
 	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
@@ -482,7 +491,7 @@ public final class ComponentFactory
 	 * Creates a button.
 	 * @param icon the check box icon.
 	 * @param label the check box label.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(Icon icon, String label, ComponentActionHandler<JButton> handler)
@@ -494,7 +503,7 @@ public final class ComponentFactory
 	 * Creates a button.
 	 * @param icon the check box icon.
 	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(Icon icon, int mnemonic, ComponentActionHandler<JButton> handler)
@@ -505,7 +514,7 @@ public final class ComponentFactory
 	/**
 	 * Creates a button.
 	 * @param icon the check box icon.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(Icon icon, ComponentActionHandler<JButton> handler)
@@ -517,7 +526,7 @@ public final class ComponentFactory
 	 * Creates a button.
 	 * @param label the check box label.
 	 * @param mnemonic the button mnemonic.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(String label, int mnemonic, ComponentActionHandler<JButton> handler)
@@ -528,7 +537,7 @@ public final class ComponentFactory
 	/**
 	 * Creates a button.
 	 * @param label the check box label.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
 	public static JButton button(String label, ComponentActionHandler<JButton> handler)
@@ -537,7 +546,80 @@ public final class ComponentFactory
 	}
 	
 	/**
-	 * Creates a button.
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param mnemonic the button mnemonic.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, String label, int mnemonic, final JPopupMenu menu)
+	{
+		return button(icon, label, mnemonic, (b, e) -> {
+			menu.show(b, 0, b.getHeight());
+		});
+	}
+
+	/**
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, String label, JPopupMenu menu)
+	{
+		return button(icon, label, 0, menu);
+	}
+	
+	/**
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param icon the check box icon.
+	 * @param mnemonic the button mnemonic.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, int mnemonic, JPopupMenu menu)
+	{
+		return button(icon, null, 0, menu);
+	}
+
+	/**
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param icon the check box icon.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(Icon icon, JPopupMenu menu)
+	{
+		return button(icon, 0, menu);
+	}
+	
+	/**
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param label the check box label.
+	 * @param mnemonic the button mnemonic.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(String label, int mnemonic, JPopupMenu menu)
+	{
+		return button(null, label, 0, menu);
+	}
+
+	/**
+	 * Creates a button that shows a pop-up menu on click.
+	 * @param label the check box label.
+	 * @param menu the menu to display.
+	 * @return a new button.
+	 */
+	public static JButton button(String label, JPopupMenu menu)
+	{
+		return button(label, 0, menu);
+	}
+	
+	/**
+	 * Creates a button bound to an action.
 	 * @param mnemonic the button mnemonic.
 	 * @param action the action on the button.
 	 * @return a new button.
@@ -551,7 +633,7 @@ public final class ComponentFactory
 	}
 
 	/**
-	 * Creates a button.
+	 * Creates a button bound to an action.
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
@@ -569,7 +651,7 @@ public final class ComponentFactory
 	 * @param icon the check box icon.
 	 * @param label the check box label.
 	 * @param selected the selected state.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
 	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
@@ -583,7 +665,7 @@ public final class ComponentFactory
 	 * Creates a check box.
 	 * @param label the check box label.
 	 * @param selected the selected state.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
 	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
@@ -597,7 +679,7 @@ public final class ComponentFactory
 	 * Creates a check box.
 	 * @param icon the check box icon.
 	 * @param selected the selected state.
-	 * @param handler the check box label.
+	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
 	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)

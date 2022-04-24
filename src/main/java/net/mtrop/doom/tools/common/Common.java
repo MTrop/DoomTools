@@ -29,6 +29,7 @@ import java.util.Map;
 
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
@@ -689,13 +690,7 @@ public final class Common
 				.replace("JAR_NAME", jarName)
 			;
 			
-			int b;
-			char[] cbuf = new char[8192];
-			while ((b = reader.read(cbuf)) >= 0)
-			{
-				writer.write(cbuf, 0, b);
-				writer.flush();
-			}
+			IOUtils.relay(reader, writer);
 		}
 	}
 	

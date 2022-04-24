@@ -10,9 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * A project module definition for DoomMake. 
@@ -198,14 +198,7 @@ public final class ProjectModuleDescriptor
 									OutputStreamWriter writer = new OutputStreamWriter(fos)
 								){
 									reader.replace(replacerMap);
-									
-									int b;
-									char[] cbuf = new char[8192];
-									while ((b = reader.read(cbuf)) >= 0)
-									{
-										writer.write(cbuf, 0, b);
-										writer.flush();
-									}
+									IOUtils.relay(reader, writer, 8192);
 								}
 							}
 						}

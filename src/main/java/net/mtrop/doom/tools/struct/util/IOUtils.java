@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -15,7 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * Simple IO utility functions.
@@ -27,6 +28,7 @@ public final class IOUtils
 	private static int RELAY_BUFFER_SIZE = 8192;
 	/** The input wrapper used by getLine(). */
 	private static BufferedReader SYSTEM_IN_READER;
+	
 	/** A null outputstream. */
 	private static final OutputStream OUTPUTSTREAM_NULL = new OutputStream() 
 	{
@@ -58,7 +60,7 @@ public final class IOUtils
 			return -1;
 		}
 	};
-	
+
 	/** A null file. */
 	private static final File NULL_FILE = new File(System.getProperty("os.name").contains("Windows") ? "NUL" : "/dev/null");
 
@@ -318,9 +320,80 @@ public final class IOUtils
 			if (maxLength >= 0)
 				maxLength -= buf;
 		}
+		out.flush();
 		return total;
 	}
 
+	/**
+	 * Reads from an input stream, reading in a consistent set of data
+	 * and writing it to the output stream. The read/write is buffered
+	 * so that it does not bog down the OS's other I/O requests.
+	 * This method finishes when the end of the source stream is reached.
+	 * Note that this may block if the input stream is a type of stream
+	 * that will block if the input stream blocks for additional input.
+	 * This method is thread-safe.
+	 * @param reader the reader to grab characters from.
+	 * @param writer the writer to write the characters to.
+	 * @return the total amount of characters relayed.
+	 * @throws IOException if a read or write error occurs.
+	 */
+	public static int relay(Reader reader, Writer writer) throws IOException
+	{
+		return relay(reader, writer, RELAY_BUFFER_SIZE, -1);
+	}	
+	
+	/**
+	 * Reads from an input stream, reading in a consistent set of data
+	 * and writing it to the output stream. The read/write is buffered
+	 * so that it does not bog down the OS's other I/O requests.
+	 * This method finishes when the end of the source stream is reached.
+	 * Note that this may block if the input stream is a type of stream
+	 * that will block if the input stream blocks for additional input.
+	 * This method is thread-safe.
+	 * @param reader the reader to grab characters from.
+	 * @param writer the writer to write the characters to.
+	 * @param bufferSize the buffer size in characters for the I/O. Must be &gt; 0.
+	 * @return the total amount of characters relayed.
+	 * @throws IOException if a read or write error occurs.
+	 */
+	public static int relay(Reader reader, Writer writer, int bufferSize) throws IOException
+	{
+		return relay(reader, writer, bufferSize, -1);
+	}	
+	
+	/**
+	 * Reads from an input stream, reading in a consistent set of data
+	 * and writing it to the output stream. The read/write is buffered
+	 * so that it does not bog down the OS's other I/O requests.
+	 * This method finishes when the end of the source stream is reached.
+	 * Note that this may block if the input stream is a type of stream
+	 * that will block if the input stream blocks for additional input.
+	 * This method is thread-safe.
+	 * @param reader the reader to grab characters from.
+	 * @param writer the writer to write the characters to.
+	 * @param bufferSize the buffer size in characters for the I/O. Must be &gt; 0.
+	 * @param maxLength the maximum amount of characters to relay, or a value &lt; 0 for no max.
+	 * @return the total amount of characters relayed.
+	 * @throws IOException if a read or write error occurs.
+	 */
+	public static int relay(Reader reader, Writer writer, int bufferSize, int maxLength) throws IOException
+	{
+		int total = 0;
+		int buf = 0;
+			
+		char[] RELAY_BUFFER = new char[bufferSize];
+		
+		while ((buf = reader.read(RELAY_BUFFER, 0, Math.min(maxLength < 0 ? Integer.MAX_VALUE : maxLength, bufferSize))) > 0)
+		{
+			writer.write(RELAY_BUFFER, 0, buf);
+			total += buf;
+			if (maxLength >= 0)
+				maxLength -= buf;
+		}
+		writer.flush();
+		return total;
+	}	
+	
 	/**
 	 * Sets the size of the buffer in bytes for {@link #relay(InputStream, OutputStream)}.
 	 * Although you may not encounter this problem, it would be unwise to set this during a call to relay().
@@ -366,14 +439,6 @@ public final class IOUtils
 	/**
 	 * @return a null output stream, where all writes are accepted and not used.
 	 */
-	public static PrintStream getNullPrintStream()
-	{
-		return new PrintStream(OUTPUTSTREAM_NULL);
-	}
-
-	/**
-	 * @return a null output stream, where all writes are accepted and not used.
-	 */
 	public static OutputStream getNullOutputStream()
 	{
 		return OUTPUTSTREAM_NULL;
@@ -385,16 +450,16 @@ public final class IOUtils
 	public static InputStream getNullInputStream()
 	{
 		return INPUTSTREAM_NULL;
-	}
-
+	}	
+	
 	/**
 	 * @return a handle to the null file for this platform.
 	 */
 	public static File getNullFile()
 	{
 		return NULL_FILE;
-	}
-
+	}	
+	
 	/**
 	 * Attempts to close a {@link Closeable} object.
 	 * If the object is null, this does nothing.

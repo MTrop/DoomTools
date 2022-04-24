@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.apps.swing.editors;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,13 +15,14 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -28,19 +30,27 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileFilter;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
+import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
@@ -54,7 +64,7 @@ public class MultiFileEditorPanel extends JPanel
 	private static final long serialVersionUID = -3208735521175265227L;
 	
 	private static final FileFilter[] NO_FILTERS = new FileFilter[0];
-
+	
 	public interface ActionNames
 	{
 		String ACTION_SAVE = "save";
@@ -74,6 +84,8 @@ public class MultiFileEditorPanel extends JPanel
 	
 	// ======================================================================
 	
+	private DoomToolsEditorProvider editorProvider;
+	private DoomToolsSettingsManager settings;
 	private DoomToolsIconManager icons;
 	private DoomToolsLanguageManager language;
 	private DoomToolsGUIUtils utils;
@@ -82,6 +94,19 @@ public class MultiFileEditorPanel extends JPanel
 
 	/** The main editor tabs. */
 	private JTabbedPane mainEditorTabs;
+	/** File path. */
+	private JLabel filePathLabel;
+	/** Caret position data. */
+	private JLabel caretPositionLabel;
+	/** Spacing mode. */
+	private JLabel spacingModeLabel;
+	/** Encoding mode. */
+	private JLabel encodingModeLabel;
+	/** Syntax style mode. */
+	private JLabel syntaxStyleLabel;
+	
+	// ======================================================================
+
 	/** The action map that is a mapping of {@link RTextArea} actions to redirected ones for this panel. */
 	private Map<String, Action> unifiedActionMap;
 	
@@ -118,8 +143,6 @@ public class MultiFileEditorPanel extends JPanel
 	private Map<Component, EditorHandle> allEditors;
 	/** The currently selected editor. */
 	private EditorHandle currentEditor;
-	/** The text area factory function. */
-	private Function<String, RSyntaxTextArea> textAreaProvider;
 	/** The panel listener. */
 	private Listener listener;
 
@@ -128,7 +151,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public MultiFileEditorPanel()
 	{
-		this((unused) -> new RSyntaxTextArea(), null);
+		this(null);
 	}
 	
 	/**
@@ -137,23 +160,14 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public MultiFileEditorPanel(Listener listener)
 	{
-		this((unused) -> new RSyntaxTextArea(), listener);
-	}
-	
-	/**
-	 * Creates a new multi-file editor panel.
-	 * @param textAreaProvider the text area provider factory function. Must make new {@link RSyntaxTextArea}s. Input is file name (can be null).
-	 * @param listener the listener.
-	 */
-	public MultiFileEditorPanel(Function<String, RSyntaxTextArea> textAreaProvider, Listener listener)
-	{
+		this.editorProvider = DoomToolsEditorProvider.get();
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
+		this.settings = DoomToolsSettingsManager.get();
 		this.utils = DoomToolsGUIUtils.get();
 		
 		this.allEditors = new HashMap<>();
 		this.currentEditor = null;
-		this.textAreaProvider = textAreaProvider;
 		this.listener = listener;
 		
 		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
@@ -170,6 +184,11 @@ public class MultiFileEditorPanel extends JPanel
 				}
 			});
 		});
+		this.filePathLabel = label();
+		this.caretPositionLabel = label();
+		this.spacingModeLabel = label();
+		this.encodingModeLabel = label();
+		this.syntaxStyleLabel = label();
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
 		this.saveAsAction = utils.createActionFromLanguageKey("texteditor.action.saveas", (event) -> saveCurrentEditorAs());
@@ -202,8 +221,17 @@ public class MultiFileEditorPanel extends JPanel
 			map.put(ActionNames.ACTION_REDO, redoAction);
 		});
 		
-		containerOf(this, 
-			node(BorderLayout.CENTER, this.mainEditorTabs)
+		containerOf(this, new BorderLayout(0, 2),
+			node(BorderLayout.CENTER, this.mainEditorTabs),
+			node(BorderLayout.SOUTH, containerOf(new GridLayout(1, 2),
+				node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(filePathLabel))),
+				node(containerOf(new GridLayout(1, 4),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(syntaxStyleLabel))),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(encodingModeLabel))),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(caretPositionLabel)))
+				))
+			))
 		);
 	}
 	
@@ -231,13 +259,10 @@ public class MultiFileEditorPanel extends JPanel
 		if (file.isDirectory())
 			return;
 		
-		char[] cbuf = new char[8192];
 		StringWriter writer = new StringWriter();
 		try (Reader reader = new InputStreamReader(new FileInputStream(file), encoding))
 		{
-			int c;
-			while ((c = reader.read(cbuf)) > 0)
-				writer.write(cbuf, 0, c);
+			IOUtils.relay(reader, writer, 8192);
 		}
 		
 		// Handle special case - if the only editor open is a new buffer with no file and no changes, remove it.
@@ -376,6 +401,25 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
+	 * Calls a consumer function for the current editor, if any.
+	 * @param consumer the consumer to call and pass the current editor handle to.
+	 */
+	public void forCurrentEditor(Consumer<EditorHandle> consumer)
+	{
+		if (currentEditor != null)
+			consumer.accept(currentEditor);
+	}
+
+	/**
+	 * Calls a consumer function for each open editor.
+	 * @param consumer the consumer to call and pass the editor handle to.
+	 */
+	public void forEachOpenEditor(Consumer<EditorHandle> consumer)
+	{
+		allEditors.values().forEach(consumer);
+	}
+
+	/**
 	 * Gets the action for manipulating the currently selected editor.
 	 * @param actionName am action name {@link ActionNames}.
 	 * @return the corresponding action, or null if no action.
@@ -411,6 +455,19 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Changes the encoding of the text in the current editor.
+	 * @param charset the new charset for the editor.
+	 */
+	public void changeCurrentEditorEncoding(Charset charset)
+	{
+		if (currentEditor != null)
+		{
+			currentEditor.changeEncoding(charset);
+			updateLabels();
+		}
+	}
+	
+	/**
 	 * Creates a new editor, returning the editor tab.
 	 * @param title the tab title.
 	 * @param content the content.
@@ -420,16 +477,32 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String content)
 	{
-		RSyntaxTextArea textArea = textAreaProvider.apply(attachedFile != null ? attachedFile.getAbsolutePath() : null);
+		RSyntaxTextArea textArea = new RSyntaxTextArea();
+		
+		String styleName;
+		if (attachedFile != null)
+			styleName = editorProvider.getStyleByFile(attachedFile);
+		else
+			styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
+		
 		textArea.setText(content);
 		textArea.setCaretPosition(0);
 		
 		EditorHandle handle = attachedFile != null 
-			? new EditorHandle(attachedFile, fileCharset, textArea) 
-			: new EditorHandle(title, textArea)
+			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
+			: new EditorHandle(title, styleName, textArea)
 		;
-		allEditors.put(handle.editorTab, handle);
+
+		// ==================================================================
 		
+		// TODO: Apply themes/editor default settings.
+		
+		settings.getEditorViewSettings("default").applyTo(textArea);
+		
+		// ==================================================================
+		
+		allEditors.put(handle.editorTab, handle);
+
 		mainEditorTabs.addTab(null, handle.editorPanel);
 		
 		// The tab just added will be at the end.
@@ -440,6 +513,9 @@ public class MultiFileEditorPanel extends JPanel
 		if (mainEditorTabs.getTabCount() == 1) // workaround for weird implementation.
 			setCurrentEditor(handle);
 		textArea.requestFocus();
+		
+		if (listener != null)
+			listener.onOpen(handle);
 		return handle;
 	}
 
@@ -465,6 +541,7 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		currentEditor = handle;
 		updateActionStates();
+		updateLabels();
 		if (listener != null)
 			listener.onCurrentEditorChange(handle);
 	}
@@ -475,7 +552,9 @@ public class MultiFileEditorPanel extends JPanel
 		if ((index = mainEditorTabs.indexOfTabComponent(tabComponent)) >= 0)
 		{
 			mainEditorTabs.remove(index);
-			allEditors.remove(tabComponent);
+			EditorHandle handle = allEditors.remove(tabComponent);
+			if (handle != null && listener != null)
+				listener.onClose(handle);
 		}
 		
 		updateActionStates();
@@ -496,18 +575,65 @@ public class MultiFileEditorPanel extends JPanel
 			redoAction.setEnabled(currentEditor.editorPanel.textArea.canRedo());
 		}
 	}
+
+	private void updateTextActionStates()
+	{
+		boolean editorPresent = currentEditor != null;
+		if (editorPresent)
+		{
+			RSyntaxTextArea textArea = currentEditor.editorPanel.textArea;
+			boolean hasSelection = (textArea.getSelectionEnd() - textArea.getSelectionStart()) > 0; 
+			cutAction.setEnabled(hasSelection);
+			copyAction.setEnabled(hasSelection);
+			deleteAction.setEnabled(hasSelection);
+		}
+		else
+		{
+			cutAction.setEnabled(false);
+			copyAction.setEnabled(false);
+			deleteAction.setEnabled(false);
+		}
+	}
 	
 	private void updateActionStates()
 	{
 		updateActionEditorStates();
+		updateTextActionStates();
 		boolean editorPresent = currentEditor != null;
 		saveAsAction.setEnabled(editorPresent);
 		saveAllAction.setEnabled(getOpenEditorCount() > 0);
-		cutAction.setEnabled(editorPresent);
-		copyAction.setEnabled(editorPresent);
 		pasteAction.setEnabled(editorPresent);
-		deleteAction.setEnabled(editorPresent);
 		selectAllAction.setEnabled(editorPresent);
+	}
+	
+	private void updateLabels()
+	{
+		if (currentEditor != null)
+		{
+			RSyntaxTextArea textArea = currentEditor.editorPanel.textArea;
+			int line = textArea.getCaretLineNumber() + 1;
+			int offset = textArea.getCaretOffsetFromLineStart();
+			int characterOffset = textArea.getCaretPosition();
+			int tabSize = textArea.getTabSize();
+			boolean usesSpaces = textArea.getTabsEmulated();
+			
+			int selection = textArea.getSelectionEnd() - textArea.getSelectionStart(); 
+			
+			File file = currentEditor.getContentSourceFile();
+			filePathLabel.setText(file != null ? file.getAbsolutePath() : "");
+			syntaxStyleLabel.setText(currentEditor.currentStyle);
+			caretPositionLabel.setText(line + " : " + offset + " : " + characterOffset + (selection > 0 ? " [" + selection + "]" : ""));
+			encodingModeLabel.setText(currentEditor.contentCharset.displayName());
+			spacingModeLabel.setText((usesSpaces ? "Spaces: " : "Tabs: ") + tabSize);
+		}
+		else
+		{
+			syntaxStyleLabel.setText("");
+			filePathLabel.setText("");
+			caretPositionLabel.setText("");
+			encodingModeLabel.setText("");
+			spacingModeLabel.setText("");
+		}
 	}
 	
 	private void updateActionsIfCurrent(EditorHandle handle)
@@ -521,14 +647,8 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	private void attemptToCloseEditor(EditorHandle handle)
 	{
-		if (!handle.needsToSave())
-		{
+		if (editorCanClose(handle))
 			removeEditorByTab(handle.editorTab);
-		}
-		else if (editorCanClose(handle))
-		{
-			removeEditorByTab(handle.editorTab);
-		}
 	}
 	
 	/**
@@ -579,29 +699,19 @@ public class MultiFileEditorPanel extends JPanel
 		Charset targetCharset = handle.contentCharset;
 		String content = handle.editorPanel.textArea.getText();
 	
-		try {
-			saveContentToFile(content, targetFile, targetCharset);
-			handle.onSaveChange(targetFile);
-			updateActionStates();
-			if (listener != null)
-				listener.onSave(handle);
-			return true;
+		StringReader reader = new StringReader(content);
+		try (Writer writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset)) {
+			IOUtils.relay(reader, writer, 8192);
 		} catch (IOException e) {
 			error(this, language.getText("texteditor.action.save.error", targetFile.getAbsolutePath()));
 			return false;
 		}
-	}
-
-	private static void saveContentToFile(String content, File path, Charset charset) throws IOException
-	{
-		char[] cbuf = new char[8192];
-		StringReader reader = new StringReader(content);
-		try (Writer writer = new OutputStreamWriter(new FileOutputStream(path), charset))
-		{
-			int c;
-			while ((c = reader.read(cbuf)) > 0)
-				writer.write(cbuf, 0, c);
-		}
+		
+		handle.onSaveChange(targetFile);
+		updateActionStates();
+		if (listener != null)
+			listener.onSave(handle);
+		return true;
 	}
 
 	/**
@@ -610,16 +720,34 @@ public class MultiFileEditorPanel extends JPanel
 	public interface Listener
 	{
 		/**
-		 * Called on a current editor changing.
+		 * Called on a current editor changing focus.
 		 * @param handle the new current handle.
 		 */
 		void onCurrentEditorChange(EditorHandle handle);
 		
 		/**
+		 * Called when an editor is opened or created.
+		 * Assume that the editor was successfully opened.
+		 * Can be called multiple times, if many at once were opened.
+		 * @param handle the handle opened.
+		 */
+		void onOpen(EditorHandle handle);
+		
+		/**
 		 * Called when an editor is saved.
+		 * Assume that the editor was successfully saved.
+		 * Can be called multiple times, if many at once were saved.
 		 * @param handle the handle saved.
 		 */
 		void onSave(EditorHandle handle);
+		
+		/**
+		 * Called when an editor is closed.
+		 * Assume that all precautions and checks were taken to ensure that it can be closed.
+		 * Can be called multiple times, if many at once were closed.
+		 * @param handle the handle closed.
+		 */
+		void onClose(EditorHandle handle);
 	}
 	
 	/**
@@ -638,13 +766,15 @@ public class MultiFileEditorPanel extends JPanel
 		private long contentLastModified;
 		/** Timestamp of last change to file. */
 		private long contentSourceFileLastModified;
+		/** Current RSyntaxTextArea style. */
+		private String currentStyle;
 		
 		/** Tab component panel. */
 		private EditorTab editorTab;
 		/** Editor panel. */
 		private EditorPanel editorPanel;
 		
-		private EditorHandle(String title, RSyntaxTextArea textArea)
+		private EditorHandle(String title, String styleName, RSyntaxTextArea textArea)
 		{
 			this.savedIcon = icons.getImage("script.png");
 			this.unsavedIcon = icons.getImage("script-unsaved.png");
@@ -653,7 +783,8 @@ public class MultiFileEditorPanel extends JPanel
 			this.contentCharset = Charset.defaultCharset();
 			this.contentLastModified = -1L;
 			this.contentSourceFileLastModified = -1L;
-
+			this.currentStyle = styleName;
+			
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
 			textArea.getDocument().addDocumentListener(new DocumentListener()
@@ -676,6 +807,39 @@ public class MultiFileEditorPanel extends JPanel
 					onChange();
 				}
 			});
+			
+			textArea.setSyntaxEditingStyle(styleName);
+		}
+		
+		private EditorHandle(File contentSourceFile, Charset sourceCharset, String styleName, RSyntaxTextArea textArea)
+		{
+			this(contentSourceFile.getName(), styleName, textArea);
+			this.contentSourceFile = contentSourceFile;
+			this.contentCharset = sourceCharset;
+			this.contentLastModified = contentSourceFile.lastModified();
+			this.contentSourceFileLastModified = contentSourceFile.lastModified();
+			this.editorTab.setTabIcon(savedIcon);
+		}
+
+		/**
+		 * Changes the encoding of the editor.
+		 * @param newCharset the new charset.
+		 */
+		public void changeEncoding(Charset newCharset)
+		{
+			contentCharset = newCharset;
+			updateLabels();
+		}
+		
+		/**
+		 * Changes the syntax style.
+		 * @param styleName the new style.
+		 */
+		public void changeStyleName(String styleName)
+		{
+			currentStyle = styleName;
+			editorPanel.textArea.setSyntaxEditingStyle(styleName);
+			updateLabels();
 		}
 		
 		/**
@@ -685,7 +849,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return editorTab.getTabTitle();
 		}
-		
+
 		/**
 		 * @return the source file. Can be null.
 		 */
@@ -693,7 +857,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return contentSourceFile;
 		}
-		
+
 		/**
 		 * @return the editor content.
 		 */
@@ -709,17 +873,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return contentLastModified > contentSourceFileLastModified;
 		}
-
-		private EditorHandle(File contentSourceFile, Charset sourceCharset, RSyntaxTextArea textArea)
-		{
-			this(contentSourceFile.getName(), textArea);
-			this.contentSourceFile = contentSourceFile;
-			this.contentCharset = sourceCharset;
-			this.contentLastModified = contentSourceFile.lastModified();
-			this.contentSourceFileLastModified = contentSourceFile.lastModified();
-			this.editorTab.setTabIcon(savedIcon);
-		}
-
+		
 		// Should call to update title on tab and timestamps.
 		private void onSaveChange(File path)
 		{
@@ -793,6 +947,23 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			this.textArea = textArea;
 			this.scrollPane = new RTextScrollPane(textArea);
+			
+			textArea.addCaretListener((e) -> {
+				updateTextActionStates();
+				updateLabels();
+			});
+			
+			textArea.addHyperlinkListener((hevent) -> {
+				if (hevent.getEventType() != HyperlinkEvent.EventType.ACTIVATED)
+					return;
+
+				try {
+					SwingUtils.browse(hevent.getURL().toURI());
+				} catch (IOException | URISyntaxException e1) {
+					// Do nothing.
+				}
+			});
+			
 			containerOf(this, node(BorderLayout.CENTER, scrollPane));
 		}
 		
@@ -801,6 +972,116 @@ public class MultiFileEditorPanel extends JPanel
 			return textArea;
 		}
 		
+	}
+	
+	/**
+	 * An encapsulation of a series of editor settings for the current editor.  
+	 */
+	public static class EditorViewSettings
+	{
+		private int tabSize;
+		private boolean tabsEmulated;
+		private boolean lineWrap;
+		private boolean wrapStyleWord;
+		
+		public EditorViewSettings()
+		{
+			setTabSize(4);
+			setTabsEmulated(false);
+			setLineWrap(false);
+			setWrapStyleWord(false);
+		}
+		
+		public int getTabSize() 
+		{
+			return tabSize;
+		}
+
+		public boolean isTabsEmulated() 
+		{
+			return tabsEmulated;
+		}
+
+		public boolean isLineWrap()
+		{
+			return lineWrap;
+		}
+
+		public boolean isWrapStyleWord()
+		{
+			return wrapStyleWord;
+		}
+
+		public void setTabSize(int tabSize)
+		{
+			this.tabSize = tabSize;
+		}
+
+		public void setTabsEmulated(boolean tabsEmulated) 
+		{
+			this.tabsEmulated = tabsEmulated;
+		}
+
+		public void setLineWrap(boolean lineWrap)
+		{
+			this.lineWrap = lineWrap;
+		}
+
+		public void setWrapStyleWord(boolean wrapStyleWord) 
+		{
+			this.wrapStyleWord = wrapStyleWord;
+		}
+
+		public void applyTo(RSyntaxTextArea target)
+		{
+			target.setTabSize(tabSize);
+			target.setTabsEmulated(tabsEmulated);
+			target.setLineWrap(lineWrap);
+			target.setWrapStyleWord(wrapStyleWord);
+		}
+	}
+	
+	/**
+	 * An encapsulation of a series of editor settings around code building.  
+	 */
+	public static class EditorSettings
+	{
+		public EditorSettings()
+		{
+			/*
+			setMarginLineEnabled(boolean)
+			setMarginLinePosition(int)
+			setRoundedSelectionEdges(boolean)
+			setHighlightCurrentLine(boolean)
+			setAnimateBracketMatching(boolean)
+			setAutoIndentEnabled(boolean)
+			setBracketMatchingEnabled(boolean)
+			setClearWhitespaceLinesEnabled(boolean)
+			setCloseCurlyBraces(boolean)
+			setCloseMarkupTags(boolean)
+			setCodeFoldingEnabled(boolean)
+			setEOLMarkersVisible(boolean)
+			setHighlighter(Highlighter)
+			setHighlightSecondaryLanguages(boolean)
+			setShowMatchedBracketPopup(boolean)
+			setUseFocusableTips(boolean)
+			setWhitespaceVisible(boolean)
+			setPaintTabLines(boolean)
+			setMarkOccurrences(boolean)
+			setMarkAllOnOccurrenceSearches(boolean)
+			setMarkOccurrencesDelay(int)
+			setPaintMatchedBracketPair(boolean)
+			setPaintMarkOccurrencesBorder(boolean)
+			setUseSelectedTextColor(boolean);
+
+			setParserDelay(int)
+
+			setHyperlinksEnabled(boolean)
+			setLinkScanningMask(int)
+			setLinkGenerator(LinkGenerator)
+
+			 */
+		}
 	}
 	
 }

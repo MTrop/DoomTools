@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -143,9 +142,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			utils.createItemFromLanguageKey("wadscript.run.popup.item.log", (c, e) -> onExecuteScript(true, IOUtils.getNullInputStream(), NO_ARGUMENTS)),
 			utils.createItemFromLanguageKey("wadscript.run.popup.item.args", (c, e) -> onExecuteScriptArgs())
 		);
-		this.popupButton = button("\u2228", (b, e) -> {
-			this.runPopupMenu.show((Component)e.getSource(), 0, b.getHeight());
-		});
+		this.popupButton = button("\u2228", this.runPopupMenu);
 		
 		this.editorPanel = new WadScriptEditorPanel(new WadScriptEditorPanel.Listener()
 		{
@@ -163,6 +160,18 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.saved", sourceFile.getName()));
 				setWorkingDirectoryField(sourceFile.getParentFile());
 			}
+
+			@Override
+			public void onOpen(EditorHandle handle) 
+			{
+				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor.open", handle.getEditorTabName()));
+			}
+
+			@Override
+			public void onClose(EditorHandle handle) 
+			{
+				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor.close", handle.getEditorTabName()));
+			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		this.currentHandle = null;
@@ -177,7 +186,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(640, 480), createEmptyBorder(4, 4, 4, 4), new BorderLayout(0, 4), 
+		return containerOf(dimension(650, 500), createEmptyBorder(4, 4, 4, 4), new BorderLayout(0, 4), 
 			node(BorderLayout.CENTER, editorPanel),
 			node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
 				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
@@ -278,7 +287,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	{
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
 		editorPanel.newEditor(editorName, EMPTY_SCRIPT);
-		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor", editorName));
 	}
 	
 	private void onOpenEditor()
@@ -297,7 +305,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		{
 			try {
 				editorPanel.openFileEditor(file, Charset.defaultCharset());
-				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor", file.getName()));
 			} catch (FileNotFoundException e) {
 				LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));

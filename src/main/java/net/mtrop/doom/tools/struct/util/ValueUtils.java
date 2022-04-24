@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.struct.util;
 
+import java.util.concurrent.Callable;
+
 /**
  * Simple utility functions around values.
  * @author Matthew Tropiano
@@ -14,6 +16,23 @@ public final class ValueUtils
 	private static final String PARSE_ARRAY_SEPARATOR_PATTERN = "(\\s|\\,)+";
 
 	private ValueUtils() {}
+	
+	/**
+	 * This function calls the provided callable and returns its value.
+	 * This is mostly for filling static fields on classes that would otherwise only need to be put in a static block. 
+	 * @param <T> the return type.
+	 * @param callable the callable to call.
+	 * @return the result of the callable.
+	 * @throws RuntimeException if an exception occurs.
+	 */
+	public static <T> T get(Callable<T> callable)
+	{
+		try {
+			return callable.call();
+		} catch (Throwable t) {
+			throw new RuntimeException("Uncaught exception: " + t.getClass().getSimpleName(), t);
+		}
+	}
 	
 	/**
 	 * Attempts to parse a boolean from a string.
