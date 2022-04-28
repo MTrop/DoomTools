@@ -285,9 +285,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		{
 			default:
 			case STRING:
-				field = stringTextField(
-					defaultValue, false, (value) -> stringValue.set(value)
-				);
+				field = stringField(defaultValue, (value) -> stringValue.set(value));
 				break;
 			case FILE:
 				field = fileField(

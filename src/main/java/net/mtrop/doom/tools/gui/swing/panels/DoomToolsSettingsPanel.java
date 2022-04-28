@@ -11,8 +11,6 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain.Theme;
 import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 
 import static javax.swing.BorderFactory.*;
 
@@ -69,7 +67,7 @@ public class DoomToolsSettingsPanel extends JPanel
 		themeField.setValue(settings.getThemeName());
 		
 		return containerOf(
-			node(BorderLayout.NORTH, form(LabelSide.LEFT, LabelJustification.LEFT, 96)
+			node(BorderLayout.NORTH, form(96)
 				.addField(language.getText("doomtools.settings.theme"), themeField)
 			),
 			node(BorderLayout.CENTER, containerOf()),

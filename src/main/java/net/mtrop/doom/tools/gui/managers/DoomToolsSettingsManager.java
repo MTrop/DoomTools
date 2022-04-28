@@ -15,7 +15,7 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
-import net.mtrop.doom.tools.gui.apps.swing.editors.MultiFileEditorPanel.EditorViewSettings;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorViewSettings;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.ValueUtils;

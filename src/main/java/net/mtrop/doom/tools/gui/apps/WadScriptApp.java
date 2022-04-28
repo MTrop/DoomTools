@@ -20,9 +20,9 @@ import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
-import net.mtrop.doom.tools.gui.apps.swing.editors.MultiFileEditorPanel;
-import net.mtrop.doom.tools.gui.apps.swing.editors.MultiFileEditorPanel.ActionNames;
-import net.mtrop.doom.tools.gui.apps.swing.editors.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.ActionNames;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorHandle;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -132,7 +132,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		);
 		
 		this.entryPoint = "main";
-		this.entryPointField = stringTextField(entryPoint, (value) -> entryPoint = value);
+		this.entryPointField = stringField(entryPoint, (value) -> entryPoint = value);
 		this.runScriptButton = utils.createButtonFromLanguageKey(
 			icons.getImage("script-run.png"), 
 			"wadscript.entrypoint.action", 
@@ -233,6 +233,10 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				separator(),
 				utils.createItemFromLanguageKey("texteditor.action.delete", editorPanel.getActionFor(ActionNames.ACTION_DELETE)),
 				utils.createItemFromLanguageKey("texteditor.action.selectall", editorPanel.getActionFor(ActionNames.ACTION_SELECT_ALL))
+			),
+			utils.createMenuFromLanguageKey("wadscript.menu.editor",
+				utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
+				utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND))
 			)
 		);
 	}

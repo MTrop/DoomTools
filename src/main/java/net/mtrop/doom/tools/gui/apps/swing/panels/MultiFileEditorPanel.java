@@ -1,9 +1,12 @@
-package net.mtrop.doom.tools.gui.apps.swing.editors;
+package net.mtrop.doom.tools.gui.apps.swing.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,6 +30,7 @@ import java.util.function.Consumer;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -41,6 +45,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.SearchEngine;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
@@ -80,6 +85,8 @@ public class MultiFileEditorPanel extends JPanel
 		String ACTION_SELECT_ALL = "select-all";
 		String ACTION_UNDO = "undo";
 		String ACTION_REDO = "redo";
+		String ACTION_GOTO = "goto";
+		String ACTION_FIND = "find";
 	}
 	
 	// ======================================================================
@@ -104,6 +111,8 @@ public class MultiFileEditorPanel extends JPanel
 	private JLabel encodingModeLabel;
 	/** Syntax style mode. */
 	private JLabel syntaxStyleLabel;
+	/** Find/Replace panel. */
+	private FindReplacePanel findReplacePanel;
 	
 	// ======================================================================
 
@@ -136,6 +145,10 @@ public class MultiFileEditorPanel extends JPanel
 	private Action undoAction;
 	/** Redo Action */
 	private Action redoAction;
+	/** Goto Action */
+	private Action gotoAction;
+	/** Find Action */
+	private Action findAction;
 	
 	// ======================================================================
 	
@@ -145,6 +158,8 @@ public class MultiFileEditorPanel extends JPanel
 	private EditorHandle currentEditor;
 	/** The panel listener. */
 	private Listener listener;
+	/** Find replace modal */
+	private volatile Modal<Void> findModal;
 
 	/**
 	 * Creates a new multi-file editor panel.
@@ -189,6 +204,7 @@ public class MultiFileEditorPanel extends JPanel
 		this.spacingModeLabel = label();
 		this.encodingModeLabel = label();
 		this.syntaxStyleLabel = label();
+		this.findReplacePanel = new FindReplacePanel();
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
 		this.saveAsAction = utils.createActionFromLanguageKey("texteditor.action.saveas", (event) -> saveCurrentEditorAs());
@@ -205,6 +221,9 @@ public class MultiFileEditorPanel extends JPanel
 		this.undoAction = utils.createActionFromLanguageKey("texteditor.action.undo", (event) -> currentEditor.editorPanel.textArea.undoLastAction());
 		this.redoAction = utils.createActionFromLanguageKey("texteditor.action.redo", (event) -> currentEditor.editorPanel.textArea.redoLastAction());
 		
+		this.gotoAction = utils.createActionFromLanguageKey("texteditor.action.goto", (event) -> goToLine());
+		this.findAction = utils.createActionFromLanguageKey("texteditor.action.find", (event) -> openFindDialog());
+		
 		this.unifiedActionMap = apply(new HashMap<>(), (map) -> {
 			map.put(ActionNames.ACTION_SAVE, saveAction);
 			map.put(ActionNames.ACTION_SAVE_AS, saveAsAction);
@@ -219,6 +238,8 @@ public class MultiFileEditorPanel extends JPanel
 			map.put(ActionNames.ACTION_SELECT_ALL, selectAllAction);
 			map.put(ActionNames.ACTION_UNDO, undoAction);
 			map.put(ActionNames.ACTION_REDO, redoAction);
+			map.put(ActionNames.ACTION_GOTO, gotoAction);
+			map.put(ActionNames.ACTION_FIND, findAction);
 		});
 		
 		containerOf(this, new BorderLayout(0, 2),
@@ -455,16 +476,18 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
-	 * Changes the encoding of the text in the current editor.
-	 * @param charset the new charset for the editor.
+	 * Gets the currently-selected text in the current editor.
+	 * @return the currently-selected text, an empty string if no selection, or null if no current editor.
 	 */
-	public void changeCurrentEditorEncoding(Charset charset)
+	public String getCurrentEditorSelectedText()
 	{
-		if (currentEditor != null)
-		{
-			currentEditor.changeEncoding(charset);
-			updateLabels();
-		}
+		if (currentEditor == null)
+			return null;
+		String text = getCurrentEditorTextArea().getSelectedText();
+		if (text == null)
+			return "";
+		else
+			return text;
 	}
 	
 	/**
@@ -542,6 +565,7 @@ public class MultiFileEditorPanel extends JPanel
 		currentEditor = handle;
 		updateActionStates();
 		updateLabels();
+		updateEditorHooks();
 		if (listener != null)
 			listener.onCurrentEditorChange(handle);
 	}
@@ -560,6 +584,13 @@ public class MultiFileEditorPanel extends JPanel
 		updateActionStates();
 	}
 
+	private void updateEditorHooks()
+	{
+		if (currentEditor == null)
+			return;
+		findReplacePanel.setTarget(currentEditor.editorPanel.textArea);
+	}
+	
 	private void updateActionEditorStates()
 	{
 		if (currentEditor == null)
@@ -604,6 +635,8 @@ public class MultiFileEditorPanel extends JPanel
 		saveAllAction.setEnabled(getOpenEditorCount() > 0);
 		pasteAction.setEnabled(editorPresent);
 		selectAllAction.setEnabled(editorPresent);
+		gotoAction.setEnabled(editorPresent);
+		findAction.setEnabled(editorPresent);
 	}
 	
 	private void updateLabels()
@@ -715,6 +748,81 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
+	 * Gets the currently-selected text in the current editor.
+	 * @return the currently-selected text, an empty string if no selection, or null if no current editor.
+	 */
+	private RSyntaxTextArea getCurrentEditorTextArea()
+	{
+		if (currentEditor == null)
+			return null;
+		return currentEditor.editorPanel.textArea;
+	}
+	
+	/**
+	 * Clears all highlights/markers on the every editor.
+	 */
+	private void clearAllHighlights()
+	{
+		forEachOpenEditor((editor) -> editor.editorPanel.textArea.getHighlighter().removeAllHighlights());
+	}
+	
+	/**
+	 * Changes the encoding of the text in the current editor.
+	 * @param charset the new charset for the editor.
+	 */
+	private void changeCurrentEditorEncoding(final Charset charset)
+	{
+		forCurrentEditor((editor) -> editor.changeEncoding(charset));
+		updateLabels();
+	}
+
+	/**
+	 * Changes the language style in the current editor.
+	 * @param styleName the style name.
+	 */
+	private void changeCurrentEditorStyle(final String styleName)
+	{
+		forCurrentEditor((editor) -> editor.changeStyleName(styleName));
+		updateLabels();
+	}
+
+	// Opens the "Go to Line" dialog. 
+	private void goToLine()
+	{
+		// TODO: Finish this.
+	}
+
+	// Opens the find dialog.
+	private void openFindDialog()
+	{
+		findReplacePanel.setFind(getCurrentEditorSelectedText());
+		
+		if (findModal != null)
+		{
+			findModal.requestFocus();
+			return;
+		}
+		
+		findModal = modal(
+			utils.getWindowIcons(),
+			language.getText("texteditor.modal.find.title"),
+			ModalityType.MODELESS,
+			containerOf(createEmptyBorder(8, 8, 8, 8), node(findReplacePanel))
+		);
+		findModal.addWindowListener(new WindowAdapter() 
+		{
+			@Override
+			public void windowClosed(WindowEvent e) 
+			{
+				clearAllHighlights();
+				findModal.dispose();
+				findModal = null;
+			}
+		});
+		findModal.open();
+	}
+
+	/**
 	 * The listener.
 	 */
 	public interface Listener
@@ -749,7 +857,7 @@ public class MultiFileEditorPanel extends JPanel
 		 */
 		void onClose(EditorHandle handle);
 	}
-	
+
 	/**
 	 * Editor handle.
 	 */

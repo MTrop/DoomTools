@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
@@ -191,7 +192,7 @@ public final class FormFactory
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(String initialValue, final boolean nullable, JValueChangeListener<String> changeListener)
+	public static JFormField<String> stringField(String initialValue, final boolean nullable, JValueChangeListener<String> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -205,14 +206,24 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores a string type.
+	 * Creates a new non-nullable text field that stores a string type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(String initialValue, JValueChangeListener<String> changeListener)
+	public static JFormField<String> stringField(String initialValue, JValueChangeListener<String> changeListener)
 	{
-		return stringTextField(initialValue, false, changeListener); 
+		return stringField(initialValue, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a string type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(JValueChangeListener<String> changeListener)
+	{
+		return stringField("", false, changeListener); 
 	}
 
 	/**
@@ -223,30 +234,49 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(String initialValue, final boolean nullable)
+	public static JFormField<String> stringField(String initialValue, boolean nullable)
 	{
-		return stringTextField(initialValue, false, null); 
+		return stringField(initialValue, nullable, null); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a string type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(String initialValue)
+	{
+		return stringField(initialValue, false, null); 
 	}
 
 	/**
 	 * Creates a new text field that stores a string type.
-	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(String initialValue)
+	public static JFormField<String> stringField(boolean nullable)
 	{
-		return stringTextField(initialValue, false, null); 
+		return stringField("", nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores an double type.
+	 * Creates a new non-nullable text field that stores a string type.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField()
+	{
+		return stringField("", false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a double type.
 	 * A blank value means null.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(Double initialValue, final boolean nullable, JValueChangeListener<Double> changeListener)
+	public static JFormField<Double> doubleField(Double initialValue, final boolean nullable, JValueChangeListener<Double> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -263,36 +293,65 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores an double type.
+	 * Creates a new non-nullable text field that stores a double type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(Double initialValue, JValueChangeListener<Double> changeListener)
+	public static JFormField<Double> doubleField(double initialValue, JValueChangeListener<Double> changeListener)
 	{
-		return doubleTextField(initialValue, false, changeListener); 
+		return doubleField(initialValue, false, changeListener); 
 	}
 
 	/**
-	 * Creates a new text field that stores an double type.
+	 * Creates a new non-nullable text field that stores a double type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleField(JValueChangeListener<Double> changeListener)
+	{
+		return doubleField(0.0, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a double type.
 	 * A blank value means null.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(Double initialValue, final boolean nullable)
+	public static JFormField<Double> doubleField(Double initialValue, boolean nullable)
 	{
-		return doubleTextField(initialValue, nullable, null); 
+		return doubleField(initialValue, nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores an double type.
+	 * Creates a new non-nullable text field that stores a double type.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(Double initialValue)
+	public static JFormField<Double> doubleField(double initialValue)
 	{
-		return doubleTextField(initialValue, false, null); 
+		return doubleField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a double type.
+	 * @param nullable if true, this is a nullable field.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleField(boolean nullable)
+	{
+		return doubleField(0.0, nullable, null); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a double type.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleField()
+	{
+		return doubleField(0.0, false, null); 
 	}
 
 	/**
@@ -303,7 +362,7 @@ public final class FormFactory
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(Float initialValue, final boolean nullable, JValueChangeListener<Float> changeListener)
+	public static JFormField<Float> floatField(Float initialValue, final boolean nullable, JValueChangeListener<Float> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -320,14 +379,24 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores a float type.
+	 * Creates a new non-nullable text field that stores a float type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(Float initialValue, JValueChangeListener<Float> changeListener)
+	public static JFormField<Float> floatField(float initialValue, JValueChangeListener<Float> changeListener)
 	{
-		return floatTextField(initialValue, false, changeListener); 
+		return floatField(initialValue, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a float type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatField(JValueChangeListener<Float> changeListener)
+	{
+		return floatField(0f, false, changeListener); 
 	}
 
 	/**
@@ -337,30 +406,49 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(Float initialValue, final boolean nullable)
+	public static JFormField<Float> floatField(Float initialValue, boolean nullable)
 	{
-		return floatTextField(initialValue, nullable, null); 
+		return floatField(initialValue, nullable, null); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a float type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatField(float initialValue)
+	{
+		return floatField(initialValue, false, null); 
 	}
 
 	/**
 	 * Creates a new text field that stores a float type.
-	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(Float initialValue)
+	public static JFormField<Float> floatField(boolean nullable)
 	{
-		return floatTextField(initialValue, false, null); 
+		return floatField(0f, nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores an long integer type.
+	 * Creates a new non-nullable text field that stores a float type.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatField()
+	{
+		return floatField(0f, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a long integer type.
 	 * A blank value means null.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(Long initialValue, final boolean nullable, JValueChangeListener<Long> changeListener)
+	public static JFormField<Long> longField(Long initialValue, final boolean nullable, JValueChangeListener<Long> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -377,36 +465,65 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores an long integer type.
+	 * Creates a new non-nullable text field that stores a long integer type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(Long initialValue, JValueChangeListener<Long> changeListener)
+	public static JFormField<Long> longField(long initialValue, JValueChangeListener<Long> changeListener)
 	{
-		return longTextField(initialValue, false, changeListener); 
+		return longField(initialValue, false, changeListener); 
 	}
 
 	/**
-	 * Creates a new text field that stores an long integer type.
+	 * Creates a new non-nullable text field that stores a long integer type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longField(JValueChangeListener<Long> changeListener)
+	{
+		return longField(0L, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a long integer type.
 	 * A blank value means null.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(Long initialValue, final boolean nullable)
+	public static JFormField<Long> longField(Long initialValue, boolean nullable)
 	{
-		return longTextField(initialValue, nullable, null); 
+		return longField(initialValue, nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores an long integer type.
+	 * Creates a new non-nullable text field that stores a long integer type.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(Long initialValue)
+	public static JFormField<Long> longField(long initialValue)
 	{
-		return longTextField(initialValue, false, null); 
+		return longField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a long integer type.
+	 * @param nullable if true, this is a nullable field.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longField(boolean nullable)
+	{
+		return longField(0L, nullable, null); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a long integer type.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longField()
+	{
+		return longField(0L, false, null); 
 	}
 
 	/**
@@ -417,7 +534,7 @@ public final class FormFactory
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(Integer initialValue, final boolean nullable, JValueChangeListener<Integer> changeListener)
+	public static JFormField<Integer> integerField(Integer initialValue, final boolean nullable, JValueChangeListener<Integer> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -434,14 +551,24 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores an integer type.
+	 * Creates a new non-nullable text field that stores an integer type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(Integer initialValue, JValueChangeListener<Integer> changeListener)
+	public static JFormField<Integer> integerField(int initialValue, JValueChangeListener<Integer> changeListener)
 	{
-		return integerTextField(initialValue, false, changeListener);
+		return integerField(initialValue, false, changeListener);
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores an integer type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerField(JValueChangeListener<Integer> changeListener)
+	{
+		return integerField(0, false, changeListener);
 	}
 
 	/**
@@ -451,19 +578,38 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(Integer initialValue, boolean nullable)
+	public static JFormField<Integer> integerField(Integer initialValue, boolean nullable)
 	{
-		return integerTextField(initialValue, nullable, null);
+		return integerField(initialValue, nullable, null);
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores an integer type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerField(int initialValue)
+	{
+		return integerField(initialValue, false, null);
 	}
 
 	/**
 	 * Creates a new text field that stores an integer type.
-	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(Integer initialValue)
+	public static JFormField<Integer> integerField(boolean nullable)
 	{
-		return integerTextField(initialValue, false, null);
+		return integerField(0, nullable, null);
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores an integer type.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerField()
+	{
+		return integerField(0, false, null);
 	}
 
 	/**
@@ -474,7 +620,7 @@ public final class FormFactory
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(Short initialValue, final boolean nullable, JValueChangeListener<Short> changeListener)
+	public static JFormField<Short> shortField(Short initialValue, final boolean nullable, JValueChangeListener<Short> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -491,14 +637,24 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores a short type.
+	 * Creates a new non-nullable text field that stores a short type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(Short initialValue, JValueChangeListener<Short> changeListener)
+	public static JFormField<Short> shortField(short initialValue, JValueChangeListener<Short> changeListener)
 	{
-		return shortTextField(initialValue, false, changeListener); 
+		return shortField(initialValue, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a short type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Short> shortField(JValueChangeListener<Short> changeListener)
+	{
+		return shortField((short)0, false, changeListener); 
 	}
 
 	/**
@@ -508,19 +664,19 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(Short initialValue, boolean nullable)
+	public static JFormField<Short> shortField(Short initialValue, boolean nullable)
 	{
-		return shortTextField(initialValue, nullable, null); 
+		return shortField(initialValue, nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores a short type.
+	 * Creates a new non-nullable text field that stores a short type.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(Short initialValue)
+	public static JFormField<Short> shortField(short initialValue)
 	{
-		return shortTextField(initialValue, false, null); 
+		return shortField(initialValue, false, null); 
 	}
 
 	/**
@@ -531,7 +687,7 @@ public final class FormFactory
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(Byte initialValue, final boolean nullable, JValueChangeListener<Byte> changeListener)
+	public static JFormField<Byte> byteField(Byte initialValue, final boolean nullable, JValueChangeListener<Byte> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
@@ -548,14 +704,24 @@ public final class FormFactory
 	}
 
 	/**
-	 * Creates a new text field that stores a byte type.
+	 * Creates a new non-nullable text field that stores a byte type.
 	 * @param initialValue the field's initial value.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(Byte initialValue, JValueChangeListener<Byte> changeListener)
+	public static JFormField<Byte> byteField(byte initialValue, JValueChangeListener<Byte> changeListener)
 	{
-		return byteTextField(initialValue, false, changeListener); 
+		return byteField(initialValue, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new non-nullable text field that stores a byte type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Byte> byteField(JValueChangeListener<Byte> changeListener)
+	{
+		return byteField((byte)0, false, changeListener);
 	}
 
 	/**
@@ -565,19 +731,19 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(Byte initialValue, boolean nullable)
+	public static JFormField<Byte> byteField(Byte initialValue, boolean nullable)
 	{
-		return byteTextField(initialValue, nullable, null); 
+		return byteField(initialValue, nullable, null); 
 	}
 
 	/**
-	 * Creates a new text field that stores a byte type.
+	 * Creates a new non-nullable text field that stores a byte type.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(Byte initialValue)
+	public static JFormField<Byte> byteField(byte initialValue)
 	{
-		return byteTextField(initialValue, false, null); 
+		return byteField(initialValue, false, null); 
 	}
 
 	/* ==================================================================== */
@@ -747,6 +913,44 @@ public final class FormFactory
 			{
 				setLayout(new BorderLayout());
 				add(BorderLayout.CENTER, this.field = checkBox);
+			}
+			
+			@Override
+			public Boolean getValue()
+			{
+				return field.isSelected();
+			}
+
+			@Override
+			public void setValue(Boolean value)
+			{
+				field.setSelected(value);
+			}
+
+			@Override
+			protected Component getFormComponent() 
+			{
+				return field;
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field from a check box.
+	 * @param radio the radio button to encapsulate.
+	 * @return a new form field that encapsulates a radio button.
+	 */
+	public static JFormField<Boolean> radioField(final JRadioButton radio)
+	{
+		return new JFormField<Boolean>() 
+		{
+			private static final long serialVersionUID = -9153299653112501886L;
+			
+			private JRadioButton field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = radio);
 			}
 			
 			@Override
@@ -962,6 +1166,48 @@ public final class FormFactory
 	
 	/* ==================================================================== */
 
+	/**
+	 * Creates a form panel where the label side matches the justification.
+	 * @param labelSide the label side.
+	 * @param labelWidth the label width.
+	 * @return a new form panel.
+	 */
+	public static JFormPanel form(JFormPanel.LabelSide labelSide, int labelWidth)
+	{
+		JFormPanel.LabelJustification justification;
+		switch (labelSide)
+		{
+			default:
+				justification = null;
+				break;
+			case LEADING:
+				justification = JFormPanel.LabelJustification.LEADING;
+				break;
+			case TRAILING:
+				justification = JFormPanel.LabelJustification.TRAILING;
+				break;
+			case LEFT:
+				justification = JFormPanel.LabelJustification.LEFT;
+				break;
+			case RIGHT:
+				justification = JFormPanel.LabelJustification.RIGHT;
+				break;
+		}
+		return form(labelSide, justification, labelWidth);
+	}
+
+	/**
+	 * Creates a form panel where the label side and justification are the leading side.
+	 * @param labelWidth the label width.
+	 * @return a new form panel.
+	 */
+	public static JFormPanel form(int labelWidth)
+	{
+		return form(JFormPanel.LabelSide.LEADING, JFormPanel.LabelJustification.LEADING, labelWidth);
+	}
+
+	/* ==================================================================== */
+	
 	/**
 	 * Creates a value converter component for text fields that use a string represent a value.
 	 * @param <T> the final field type.

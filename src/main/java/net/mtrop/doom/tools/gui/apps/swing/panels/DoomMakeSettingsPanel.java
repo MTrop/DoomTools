@@ -7,8 +7,6 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelJustification;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -38,7 +36,7 @@ public class DoomMakeSettingsPanel extends JPanel
 		this.settings = DoomToolsSettingsManager.get();
 		
 		containerOf(this, dimension(450, 100),
-			node(BorderLayout.NORTH, form(LabelSide.LEFT, LabelJustification.LEFT, 96)
+			node(BorderLayout.NORTH, form(96)
 				.addField(language.getText("doommake.settings.vscode.label"), fileField(
 					settings.getPathToVSCode(), 
 					(currentFile) -> chooseFile(

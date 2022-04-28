@@ -15,8 +15,10 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BoundedRangeModel;
+import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.DefaultComboBoxModel;
@@ -34,6 +36,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -546,6 +549,16 @@ public final class ComponentFactory
 	}
 	
 	/**
+	 * Creates a button.
+	 * @param handler the handler for button click.
+	 * @return a new button.
+	 */
+	public static JButton button(ComponentActionHandler<JButton> handler)
+	{
+		return button((String)null, handler);
+	}
+	
+	/**
 	 * Creates a button that shows a pop-up menu on click.
 	 * @param icon the check box icon.
 	 * @param label the check box label.
@@ -650,70 +663,276 @@ public final class ComponentFactory
 	 * Creates a check box.
 	 * @param icon the check box icon.
 	 * @param label the check box label.
-	 * @param selected the selected state.
+	 * @param checked the checked state.
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, String label, boolean checked, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(actionItem(icon, label, handler));
-		out.setSelected(selected);
-		return out;
+		return checkBox(checked, actionItem(icon, label, handler));
 	}
 
 	/**
 	 * Creates a check box.
 	 * @param label the check box label.
-	 * @param selected the selected state.
+	 * @param checked the checked state.
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(String label, boolean checked, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(actionItem(label, handler));
-		out.setSelected(selected);
-		return out;
+		return checkBox(checked, actionItem(label, handler));
 	}
 
 	/**
 	 * Creates a check box.
 	 * @param icon the check box icon.
-	 * @param selected the selected state.
+	 * @param checked the checked state.
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, boolean checked, ComponentActionHandler<JCheckBox> handler)
 	{
-		JCheckBox out = new JCheckBox(actionItem(icon, handler));
-		out.setSelected(selected);
-		return out;
+		return checkBox(checked, actionItem(icon, handler));
 	}
 
 	/**
-	 * Creates a checkbox.
-	 * @param selected the selected state.
-	 * @param action the action for the checkbox.
-	 * @return a new checkbox.
+	 * Creates a check box.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(boolean selected, Action action)
+	public static JCheckBox checkBox(boolean checked, ComponentActionHandler<JCheckBox> handler)
+	{
+		return checkBox(checked, actionItem(handler));
+	}
+
+	/**
+	 * Creates a check box, unchecked.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, String label, ComponentActionHandler<JCheckBox> handler)
+	{
+		return checkBox(false, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a check box, unchecked.
+	 * @param label the check box label.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(String label, ComponentActionHandler<JCheckBox> handler)
+	{
+		return checkBox(false, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a check box, unchecked.
+	 * @param icon the check box icon.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, ComponentActionHandler<JCheckBox> handler)
+	{
+		return checkBox(false, actionItem(icon, handler));
+	}
+
+	/**
+	 * Creates a check box, unchecked.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(ComponentActionHandler<JCheckBox> handler)
+	{
+		return checkBox(false, actionItem(handler));
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param checked the checked state.
+	 * @param action the action for the check box.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(boolean checked, Action action)
 	{
 		JCheckBox out = new JCheckBox(action);
-		out.setSelected(selected);
+		out.setSelected(checked);
 		return out;
 	}
 
 	/**
 	 * Creates a check box.
-	 * @param selected the selected state.
+	 * @param checked the checked state.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(boolean selected)
+	public static JCheckBox checkBox(boolean checked)
 	{
 		JCheckBox out = new JCheckBox();
-		out.setSelected(selected);
+		out.setSelected(checked);
 		return out;
 	}
 
+	/**
+	 * Creates a check box, unchecked.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox()
+	{
+		return checkBox(false);
+	}
+
+	/* ==================================================================== */
+	/* ==== Radio Buttons                                              ==== */
+	/* ==================================================================== */
+	
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param label the radio button label.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, String label, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(checked, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param label the radio button label.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(String label, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(checked, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(checked, actionItem(icon, handler));
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(boolean checked, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(checked, actionItem(handler));
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param icon the radio button icon.
+	 * @param label the radio button label.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, String label, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(false, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param label the radio button label.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(String label, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(false, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param icon the radio button icon.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(false, actionItem(icon, handler));
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(ComponentActionHandler<JRadioButton> handler)
+	{
+		return radio(false, actionItem(handler));
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param checked the checked state.
+	 * @param action the action for the radio button.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(boolean checked, Action action)
+	{
+		JRadioButton out = new JRadioButton(action);
+		out.setSelected(checked);
+		return out;
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param checked the checked state.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(boolean checked)
+	{
+		JRadioButton out = new JRadioButton();
+		out.setSelected(checked);
+		return out;
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio()
+	{
+		return radio(false);
+	}
+
+	/* ==================================================================== */
+	/* ==== Button Groups                                              ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Crates a button group that manages a set of buttons.
+	 * @param buttons the buttons to add.
+	 * @return the button group.
+	 */
+	public static ButtonGroup group(AbstractButton ... buttons)
+	{
+		ButtonGroup out = new ButtonGroup();
+		for (AbstractButton button : buttons)
+			out.add(button);
+		return out;
+	}
+
+	
 	/* ==================================================================== */
 	/* ==== Sliders                                                    ==== */
 	/* ==================================================================== */
@@ -1561,6 +1780,21 @@ public final class ComponentFactory
 	/**
 	 * Creates a new menu tree.
 	 * @param icon the icon for the menu entry.
+	 * @param label the label for the menu entry.
+	 * @param mnemonic the key mnemonic for accessing (VK).
+	 * @param handler the code called when the action is triggered.
+	 * @return a new JMenu.
+	 */
+	public static JMenu menu(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenu> handler)
+	{
+		JMenu out = new JMenu(actionItem(icon, label, handler));
+		out.setMnemonic(mnemonic);
+		return out;
+	}
+
+	/**
+	 * Creates a new menu tree.
+	 * @param icon the icon for the menu entry.
 	 * @param name the name of the menu.
 	 * @param mnemonic the key mnemonic for accessing (VK).
 	 * @param nodes the menu nodes to add.
@@ -1605,21 +1839,6 @@ public final class ComponentFactory
 	}
 	
 	/**
-	 * Creates a new menu tree.
-	 * @param icon the icon for the menu entry.
-	 * @param label the label for the menu entry.
-	 * @param mnemonic the key mnemonic for accessing (VK).
-	 * @param handler the code called when the action is triggered.
-	 * @return a new JMenu.
-	 */
-	public static JMenu menu(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenu> handler)
-	{
-		JMenu out = new JMenu(actionItem(icon, label, handler));
-		out.setMnemonic(mnemonic);
-		return out;
-	}
-	
-	/**
 	 * Creates a menu item node.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param accelerator the keystroke shortcut for the item.
@@ -1628,9 +1847,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(int mnemonic, KeyStroke accelerator, Action action)
 	{
-		return new MenuItemNode(action, mnemonic, accelerator);
+		return new MenuItemNode(mnemonic, accelerator, action);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param accelerator the keystroke shortcut for the item.
@@ -1639,9 +1858,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(KeyStroke accelerator, Action action)
 	{
-		return new MenuItemNode(action, 0, accelerator);
+		return menuItem(0, accelerator, action);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param mnemonic the key mnemonic for the item.
@@ -1650,9 +1869,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(int mnemonic, Action action)
 	{
-		return new MenuItemNode(action, mnemonic, null);
+		return menuItem(mnemonic, null, action);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param action the action for the menu item.
@@ -1660,9 +1879,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Action action)
 	{
-		return new MenuItemNode(action, 0, null);
+		return menuItem(0, null, action);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param icon the icon for the menu entry.
@@ -1674,9 +1893,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Icon icon, String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(icon, label, handler), mnemonic, accelerator);
+		return menuItem(mnemonic, accelerator, actionItem(icon, label, handler));
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param label the label for the menu entry.
@@ -1687,9 +1906,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(label, handler), mnemonic, accelerator);
+		return menuItem(null, label, mnemonic, accelerator, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param icon the icon for the menu entry.
@@ -1700,9 +1919,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(icon, label, handler), mnemonic, null);
+		return menuItem(icon, label, mnemonic, null, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param label the label for the menu entry.
@@ -1712,9 +1931,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(label, handler), mnemonic, null);
+		return menuItem(null, label, mnemonic, null, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param icon the icon for the menu entry.
@@ -1725,9 +1944,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Icon icon, String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(icon, label, handler), 0, accelerator);
+		return menuItem(icon, label, 0, accelerator, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param label the label for the menu entry.
@@ -1737,9 +1956,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(label, handler), 0, accelerator);
+		return menuItem(null, label, 0, accelerator, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param icon the icon for the menu entry.
@@ -1749,9 +1968,9 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Icon icon, String label, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(icon, label, handler), 0, null);
+		return menuItem(icon, label, 0, null, handler);
 	}
-	
+
 	/**
 	 * Creates a menu item node.
 	 * @param label the label for the menu entry.
@@ -1760,9 +1979,19 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, ComponentActionHandler<JMenuItem> handler)
 	{
-		return new MenuItemNode(actionItem(label, handler), 0, null);
+		return menuItem(null, label, 0, null, handler);
 	}
-	
+
+	/**
+	 * Creates a menu item node.
+	 * @param handler the code called when the action is triggered.
+	 * @return a menu node.
+	 */
+	public static MenuNode menuItem(ComponentActionHandler<JMenuItem> handler)
+	{
+		return menuItem(null, null, 0, null, handler);
+	}
+
 	/**
 	 * Creates a menu item submenu.
 	 * @param icon the icon for the menu entry.
@@ -1785,7 +2014,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, int mnemonic, MenuNode ... nodes)
 	{
-		return new MenuBranchNode(null, label, mnemonic, nodes);
+		return menuItem(null, label, mnemonic, nodes);
 	}
 	
 	/**
@@ -1797,7 +2026,7 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(Icon icon, String label, MenuNode ... nodes)
 	{
-		return new MenuBranchNode(icon, label, 0, nodes);
+		return menuItem(icon, label, 0, nodes);
 	}
 	
 	/**
@@ -1808,62 +2037,72 @@ public final class ComponentFactory
 	 */
 	public static MenuNode menuItem(String label, MenuNode ... nodes)
 	{
-		return new MenuBranchNode(null, label, 0, nodes);
+		return menuItem(null, label, 0, nodes);
 	}
 
 	/**
 	 * Creates a check box menu item node.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param accelerator the keystroke shortcut for the item.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(int mnemonic, KeyStroke accelerator, boolean selected, Action action)
 	{
-		return new MenuCheckBoxNode(action, selected, mnemonic, accelerator);
+		return new MenuCheckBoxNode(selected, mnemonic, accelerator, action);
 	}
-	
+
 	/**
 	 * Creates a check box menu item node.
 	 * @param accelerator the keystroke shortcut for the item.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(KeyStroke accelerator, boolean selected, Action action)
 	{
-		return new MenuCheckBoxNode(action, selected, 0, accelerator);
+		return checkBoxItem(0, accelerator, selected, action);
 	}
-	
+
 	/**
 	 * Creates a check box menu item node.
 	 * @param mnemonic the key mnemonic for the item.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(int mnemonic, boolean selected, Action action)
 	{
-		return new MenuCheckBoxNode(action, selected, mnemonic, null);
+		return checkBoxItem(mnemonic, null, selected, action);
 	}
-	
+
 	/**
 	 * Creates a check box menu item node.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param action the action for the menu item.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(boolean selected, Action action)
 	{
-		return new MenuCheckBoxNode(action, selected, 0, null);
+		return checkBoxItem(0, null, selected, action);
 	}
-	
+
+	/**
+	 * Creates a check box menu item node, unchecked.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode checkBoxItem(Action action)
+	{
+		return checkBoxItem(0, null, false, action);
+	}
+
 	/**
 	 * Creates a check box menu item node.
 	 * @param icon the icon for the menu entry.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param accelerator the keystroke shortcut for the item.
 	 * @param handler the change handler to add.
@@ -1871,13 +2110,13 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, mnemonic, accelerator);
+		return checkBoxItem(mnemonic, accelerator, selected, actionItem(icon, label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param accelerator the keystroke shortcut for the item.
 	 * @param handler the change handler to add.
@@ -1885,86 +2124,252 @@ public final class ComponentFactory
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(label, handler), selected, mnemonic, accelerator);
+		return checkBoxItem(mnemonic, accelerator, selected, actionItem(label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param icon the icon for the menu entry.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, mnemonic, null);
+		return checkBoxItem(mnemonic, null, selected, actionItem(icon, label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param mnemonic the key mnemonic for the item.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(label, handler), selected, mnemonic, null);
+		return checkBoxItem(mnemonic, null, selected, actionItem(label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param icon the icon for the menu entry.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param accelerator the keystroke shortcut for the item.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, 0, accelerator);
+		return checkBoxItem(0, accelerator, selected, actionItem(icon, label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param accelerator the keystroke shortcut for the item.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(label, handler), selected, 0, accelerator);
+		return checkBoxItem(0, accelerator, selected, actionItem(label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param icon the icon for the menu entry.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(icon, label, handler), selected, 0, null);
+		return checkBoxItem(0, null, selected, actionItem(icon, label, handler));
 	}
 
 	/**
 	 * Creates a check box menu item.
 	 * @param label the label for the menu entry.
-	 * @param selected the state of the checkbox.
+	 * @param selected the state of the check box.
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
 	public static MenuNode checkBoxItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
-		return new MenuCheckBoxNode(actionItem(label, handler), selected, 0, null);
+		return checkBoxItem(0, null, selected, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item node.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param selected the state of the radio button.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(int mnemonic, KeyStroke accelerator, boolean selected, Action action)
+	{
+		return new MenuRadioNode(selected, mnemonic, accelerator, action);
+	}
+
+	/**
+	 * Creates a radio button menu item node.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param selected the state of the radio button.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(KeyStroke accelerator, boolean selected, Action action)
+	{
+		return radioItem(0, accelerator, selected, action);
+	}
+
+	/**
+	 * Creates a radio button menu item node.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param selected the state of the radio button.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(int mnemonic, boolean selected, Action action)
+	{
+		return radioItem(mnemonic, null, selected, action);
+	}
+
+	/**
+	 * Creates a radio button menu item node.
+	 * @param selected the state of the radio button.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(boolean selected, Action action)
+	{
+		return radioItem(0, null, selected, action);
+	}
+
+	/**
+	 * Creates a radio button menu item node, unchecked.
+	 * @param action the action for the menu item.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(Action action)
+	{
+		return radioItem(0, null, false, action);
+	}
+
+	/**
+	 * Creates a radio button menu item node.
+	 * @param icon the icon for the menu entry.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(mnemonic, accelerator, selected, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(mnemonic, accelerator, selected, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param icon the icon for the menu entry.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(mnemonic, null, selected, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param mnemonic the key mnemonic for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(mnemonic, null, selected, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param icon the icon for the menu entry.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(0, accelerator, selected, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param accelerator the keystroke shortcut for the item.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(0, accelerator, selected, actionItem(label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param icon the icon for the menu entry.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(0, null, selected, actionItem(icon, label, handler));
+	}
+
+	/**
+	 * Creates a radio button menu item.
+	 * @param label the label for the menu entry.
+	 * @param selected the state of the radio button.
+	 * @param handler the change handler to add.
+	 * @return a menu node.
+	 */
+	public static MenuNode radioItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	{
+		return radioItem(0, null, selected, actionItem(label, handler));
 	}
 
 	/**
@@ -1995,31 +2400,32 @@ public final class ComponentFactory
 		/** The accelerator for the item. */
 		protected KeyStroke accelerator;
 		
-		private MenuItemNode(Action action, int mnemonic, KeyStroke accelerator)
+		private MenuItemNode(int mnemonic, KeyStroke accelerator, Action action)
 		{
 			this.action = action;
 			this.mnemonic = mnemonic;
 			this.accelerator = accelerator;
 		}
 	
-		@Override
-		protected void addTo(JMenu menu)
+		private JMenuItem createItem()
 		{
 			JMenuItem item = new JMenuItem(action);
 			if (mnemonic > 0)
 				item.setMnemonic(mnemonic);
 			item.setAccelerator(accelerator);
-			menu.add(item);
+			return item;
+		}
+		
+		@Override
+		protected void addTo(JMenu menu)
+		{
+			menu.add(createItem());
 		}
 	
 		@Override
 		protected void addTo(JPopupMenu menu)
 		{
-			JMenuItem item = new JMenuItem(action);
-			if (mnemonic > 0)
-				item.setMnemonic(mnemonic);
-			item.setAccelerator(accelerator);
-			menu.add(item);
+			menu.add(createItem());
 		}
 		
 	}
@@ -2036,7 +2442,7 @@ public final class ComponentFactory
 		/** The accelerator for the item. */
 		protected KeyStroke accelerator;
 		
-		private MenuCheckBoxNode(Action action, boolean selected, int mnemonic, KeyStroke accelerator)
+		private MenuCheckBoxNode(boolean selected, int mnemonic, KeyStroke accelerator, Action action)
 		{
 			this.action = action;
 			this.selected = selected;
@@ -2044,26 +2450,70 @@ public final class ComponentFactory
 			this.accelerator = accelerator;
 		}
 	
-		@Override
-		protected void addTo(JMenu menu)
+		private JCheckBoxMenuItem createItem()
 		{
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
-			item.setState(selected);
+			item.setSelected(selected);
 			if (mnemonic > 0)
 				item.setMnemonic(mnemonic);
 			item.setAccelerator(accelerator);
-			menu.add(item);
+			return item;
+		}
+		
+		@Override
+		protected void addTo(JMenu menu)
+		{
+			menu.add(createItem());
 		}
 	
 		@Override
 		protected void addTo(JPopupMenu menu)
 		{
+			menu.add(createItem());
+		}
+		
+	}
+
+	/** Menu radio button node. */
+	private static class MenuRadioNode extends MenuNode
+	{
+		/** The item action. */
+		protected Action action;
+		/** Starts selected. */
+		protected boolean selected;
+		/** The mnemonic for the item. */
+		protected int mnemonic;
+		/** The accelerator for the item. */
+		protected KeyStroke accelerator;
+		
+		private MenuRadioNode(boolean selected, int mnemonic, KeyStroke accelerator, Action action)
+		{
+			this.action = action;
+			this.selected = selected;
+			this.mnemonic = mnemonic;
+			this.accelerator = accelerator;
+		}
+	
+		private JCheckBoxMenuItem createItem()
+		{
 			JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
-			item.setState(selected);
+			item.setSelected(selected);
 			if (mnemonic > 0)
 				item.setMnemonic(mnemonic);
 			item.setAccelerator(accelerator);
-			menu.add(item);
+			return item;
+		}
+		
+		@Override
+		protected void addTo(JMenu menu)
+		{
+			menu.add(createItem());
+		}
+	
+		@Override
+		protected void addTo(JPopupMenu menu)
+		{
+			menu.add(createItem());
 		}
 		
 	}
@@ -2088,8 +2538,7 @@ public final class ComponentFactory
 			this.nodes = nodes;
 		}
 	
-		@Override
-		protected void addTo(JMenu menu)
+		private JMenu createMenu()
 		{
 			JMenu next = new JMenu(label);
 			next.setIcon(icon);
@@ -2099,21 +2548,19 @@ public final class ComponentFactory
 			for (MenuNode mn : nodes)
 				mn.addTo(next);
 			
-			menu.add(next);
+			return next;
+		}
+		
+		@Override
+		protected void addTo(JMenu menu)
+		{
+			menu.add(createMenu());
 		}
 	
 		@Override
 		protected void addTo(JPopupMenu menu)
 		{
-			JMenu next = new JMenu(label);
-			next.setIcon(icon);
-			if (mnemonic > 0)
-				next.setMnemonic(mnemonic);
-			
-			for (MenuNode mn : nodes)
-				mn.addTo(next);
-			
-			menu.add(next);
+			menu.add(createMenu());
 		}
 		
 	}
@@ -2173,6 +2620,16 @@ public final class ComponentFactory
 	public static Action actionItem(Icon icon, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, null, handler);
+	}
+
+	/**
+	 * Creates a new action.
+	 * @param handler the code called when the action is triggered.
+	 * @return a new action.
+	 */
+	public static Action actionItem(ActionEventHandler handler)
+	{
+		return new HandledAction(null, null, handler);
 	}
 
 	/**

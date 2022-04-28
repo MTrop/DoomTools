@@ -9,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -124,6 +125,18 @@ public final class ContainerFactory
 	/* ==================================================================== */
 	/* ==== Containers                                                 ==== */
 	/* ==================================================================== */
+
+	/**
+	 * Starts a container layout tree, returns a component.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), null, border, layout, children);
+	}
 
 	/**
 	 * Starts a layout tree, returning the provided container.
@@ -281,18 +294,6 @@ public final class ContainerFactory
 	public static Container containerOf(Dimension preferredSize, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
-	}
-
-	/**
-	 * Starts a container layout tree, returns a component.
-	 * @param border the border to set on the container.
-	 * @param layout the layout to use for this tree's children.
-	 * @param children the component's children.
-	 * @return a component that is the result of creating the tree.
-	 */
-	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
-	{
-		return containerOf(new JPanel(), null, border, layout, children);
 	}
 
 	/**
@@ -792,7 +793,130 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Modal<T> out = new Modal<>(owner);
+		out.setModalityType(modality);
+		out.setTitle(title);
+		if (icons != null)
+			out.setIconImages(icons);
+		return modal(out, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the icon image.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, Image icon, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		Modal<T> out = new Modal<>(owner);
+		out.setModalityType(modality);
+		out.setTitle(title);
+		if (icon != null)
+			out.setIconImage(icon);
+		return modal(out, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(owner, (Image)null, title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(List<Image> icons, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icons, title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icon the icon image.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Image icon, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icon, title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal((Container)null, title, modality, contentPane, choices);
+	}
+	
+	/* ==================================================================== */
+	/* ==== Modals                                                     ==== */
+	/* ==================================================================== */
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
 	 * You can get the result of the modal via {@link Modal#getValue()}.
 	 * @param <T> the return type.
 	 * @param owner the owning component.
@@ -805,15 +929,12 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		Modal<T> out = new Modal<>(owner);
-		out.setTitle(title);
-		out.setIconImages(icons);
-		return modal(out, contentPane, choices);
+		return modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	/**
 	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore.
+	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
 	 * You can get the result of the modal via {@link Modal#getValue()}.
 	 * @param <T> the return type.
 	 * @param owner the owning component.
@@ -826,12 +947,9 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(Container owner, Image icon, String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		Modal<T> out = new Modal<>(owner);
-		out.setTitle(title);
-		out.setIconImage(icon);
-		return modal(out, contentPane, choices);
+		return modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -846,11 +964,9 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(Container owner, String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		Modal<T> out = new Modal<>(owner);
-		out.setTitle(title);
-		return modal(out, contentPane, choices);
+		return modal(owner, (Image)null, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -865,9 +981,9 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		return modal(null, icons, title, contentPane, choices);
+		return modal(null, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -882,9 +998,9 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(Image icon, String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		return modal(null, icon, title, contentPane, choices);
+		return modal(null, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -898,9 +1014,9 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <T> Modal<T> modal(String title, Container contentPane, final ModalChoice<T> ... choices)
 	{
-		return modal((Container)null, title, contentPane, choices);
+		return modal((Container)null, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
-	
+
 	@SafeVarargs
 	private static <T> Modal<T> modal(final Modal<T> modal, Container contentPane, final ModalChoice<T> ... choices)
 	{
@@ -948,6 +1064,7 @@ public final class ContainerFactory
 		modal.setMinimumSize(modal.getSize());
 		modal.setResizable(false);
 		modal.setLocationRelativeTo(modal.getOwner());
+		modal.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		return modal;
 	}
 	
@@ -1123,7 +1240,6 @@ public final class ContainerFactory
 		private Modal(Container owner)
 		{
 			super(getWindowForComponent(owner));
-			setModalityType(ModalityType.APPLICATION_MODAL);
 		}
 
 		private static Window getWindowForComponent(Component parent) throws HeadlessException 
@@ -1185,5 +1301,9 @@ public final class ContainerFactory
 			return out;
 		}
 	}
+
+	/* ==================================================================== */
+	/* ==== Modals                                                     ==== */
+	/* ==================================================================== */
 	
 }
