@@ -17,6 +17,7 @@ import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Utility singleton for invoking DoomMake functions for a project.
@@ -129,7 +130,7 @@ public final class DoomMakeProjectHelper
 	{
 		Properties props = getProjectProperties(projectDirectory);
 		String path = props.getProperty(property);
-		if (Common.isEmpty(path))
+		if (ObjectUtils.isEmpty(path))
 			path = defaultValue;
 		return new File(projectDirectory + File.separator + path);
 	}

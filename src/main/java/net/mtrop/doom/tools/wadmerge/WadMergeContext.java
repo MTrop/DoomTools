@@ -38,7 +38,8 @@ import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.common.Utility;
-import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
@@ -302,7 +303,7 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 	
-		Common.createPathForFile(outFile);
+		FileUtils.createPathForFile(outFile);
 		
 		if (buffer instanceof WadBuffer)
 		{
@@ -755,7 +756,7 @@ public class WadMergeContext
 				}
 				else if (filter.accept(f))
 				{
-					if (Common.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
+					if (FileUtils.getFileExtension(f).equalsIgnoreCase("wad") && Wad.isWAD(f))
 					{
 						if (adder != null)
 						{
@@ -769,18 +770,18 @@ public class WadMergeContext
 					{
 						if (adder == null)
 							adder = ((WadFile)buffer).createAdder();
-						if ((resp = mergeFileData(adder, symbol, f, subCharString(Common.getFileNameWithoutExtension(f)), buffer.getEntryCount())) != Response.OK)
+						if ((resp = mergeFileData(adder, symbol, f, subCharString(FileUtils.getFileNameWithoutExtension(f)), buffer.getEntryCount())) != Response.OK)
 							return resp; 
 					}
 					else
 					{
-						if ((resp = mergeFile(symbol, f, subCharString(Common.getFileNameWithoutExtension(f)))) != Response.OK)
+						if ((resp = mergeFile(symbol, f, subCharString(FileUtils.getFileNameWithoutExtension(f)))) != Response.OK)
 							return resp; 
 					}
 				}
 			}
 		} finally {
-			Common.close(adder);
+			IOUtils.close(adder);
 		}
 		
 		return Response.OK;
@@ -958,7 +959,7 @@ public class WadMergeContext
 				else
 				{
 					Response resp;
-					String namenoext = subCharString(Common.getFileNameWithoutExtension(f));
+					String namenoext = subCharString(FileUtils.getFileNameWithoutExtension(f));
 					if (adder != null)
 					{
 						if ((resp = mergeFileData(adder, symbol, f, namenoext, insertIndex)) != Response.OK)
@@ -979,7 +980,7 @@ public class WadMergeContext
 				}
 			}
 		} finally {
-			Common.close(adder);
+			IOUtils.close(adder);
 		}
 
 		if (strife)
@@ -1064,7 +1065,7 @@ public class WadMergeContext
 	{
 		try (FileInputStream fis = new FileInputStream(f))
 		{
-			if (Common.getFileExtension(f).toLowerCase().equals("png"))
+			if (FileUtils.getFileExtension(f).toLowerCase().equals("png"))
 			{
 				PNGPicture picture = new PNGPicture();
 				picture.readBytes(fis);
@@ -1117,7 +1118,7 @@ public class WadMergeContext
 				targetIndex++;
 			}
 		} finally {
-			Common.close(adder);
+			IOUtils.close(adder);
 		}
 		return Response.OK;
 	}

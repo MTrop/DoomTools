@@ -34,6 +34,7 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 import com.blackrook.rookscript.struct.PatternUtils;
 
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 
@@ -889,7 +890,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	// Return value is file.
 	private static void writeFile(InputStream in, File destFile, boolean createDirs, ScriptValue returnValue) 
 	{
-		if (createDirs && !Common.createPathForFile(destFile))
+		if (createDirs && !FileUtils.createPathForFile(destFile))
 		{
 			returnValue.setError("IOError", "Could not create directories for target file: " + destFile.getPath());
 			return;

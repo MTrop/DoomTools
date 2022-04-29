@@ -22,7 +22,9 @@ import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
@@ -206,16 +208,16 @@ public final class DoomToolsGUIMain
 		        	
 					case ApplicationNames.DOOMMAKE_NEW:
 					{
-						startApplication(new DoomMakeNewProjectApp(Common.arrayElement(args, 1)));
+						startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
 						break;
 					}
 					
 					case ApplicationNames.DOOMMAKE_OPEN:
 					{
-						String path = Common.arrayElement(args, 1);
+						String path = ArrayUtils.arrayElement(args, 1);
 						
 						// No path. Open file.
-						if (Common.isEmpty(path))
+						if (ObjectUtils.isEmpty(path))
 						{
 							DoomMakeOpenProjectApp app;
 							if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)

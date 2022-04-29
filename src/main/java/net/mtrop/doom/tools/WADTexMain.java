@@ -27,9 +27,9 @@ import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
 import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.TextureSet;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.tools.common.Utility;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 
@@ -233,7 +233,7 @@ public final class WADTexMain
 					replacePatchNames = false;
 				}
 		
-				String textureLumpName = NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(options.sourceFile));
+				String textureLumpName = NameUtils.toValidEntryName(FileUtils.getFileNameWithoutExtension(options.sourceFile));
 				
 				CommonTextureList<?> textures;
 				boolean replaceTextures;

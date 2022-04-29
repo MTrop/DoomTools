@@ -26,8 +26,10 @@ import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Main class for DoomTools.
@@ -67,7 +69,7 @@ public final class DoomToolsMain
 	);
 		
 	private static final FileFilter JAR_FILES = (f) -> {
-		return Common.getFileExtension(f.getName()).equalsIgnoreCase("jar");
+		return FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
 
 	private static final String SWITCH_HELP = "--help";
@@ -188,7 +190,7 @@ public final class DoomToolsMain
 				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
-			if (Common.isEmpty(path))
+			if (ObjectUtils.isEmpty(path))
 			{
 				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
 				return ERROR_NOWHERE;
@@ -218,7 +220,7 @@ public final class DoomToolsMain
 			if (OSUtils.isWindows())
 			{
 				File outputFilePath = new File(path + "/doomtools-gui.exe");
-				try (InputStream in = Common.openResource("shell/exe/doomtools-gui.exe"); FileOutputStream fos = new FileOutputStream(outputFilePath))
+				try (InputStream in = IOUtils.openResource("shell/exe/doomtools-gui.exe"); FileOutputStream fos = new FileOutputStream(outputFilePath))
 				{
 					IOUtils.relay(in, fos);
 					options.stdout.println("Created `" + outputFilePath.getPath() + "`.");
@@ -243,7 +245,7 @@ public final class DoomToolsMain
 				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
-			if (Common.isEmpty(path))
+			if (ObjectUtils.isEmpty(path))
 			{
 				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
 				return ERROR_NOWHERE;
@@ -274,7 +276,7 @@ public final class DoomToolsMain
 				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
-			if (Common.isEmpty(path))
+			if (ObjectUtils.isEmpty(path))
 			{
 				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
 				return ERROR_NOWHERE;
@@ -398,7 +400,7 @@ public final class DoomToolsMain
 					return ERROR_SECURITY;
 				}
 				
-				if (Common.isEmpty(path))
+				if (ObjectUtils.isEmpty(path))
 				{
 					options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
 					return ERROR_NOWHERE;

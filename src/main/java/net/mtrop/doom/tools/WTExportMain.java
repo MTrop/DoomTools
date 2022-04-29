@@ -38,8 +38,9 @@ import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Texture;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wtexport.TextureTables;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
@@ -956,7 +957,7 @@ public final class WTExportMain
 			WadFile baseWadFile = openWadFile(baseFile, false);
 			if (baseWadFile == null)
 			{
-				Common.close(outWadFile);
+				IOUtils.close(outWadFile);
 				return false;
 			}
 		
@@ -971,8 +972,8 @@ public final class WTExportMain
 				options.printf("ERROR: %s: %s\n", baseWadFile.getFilePath(), e.getMessage());
 				return false;
 			} finally {
-				Common.close(baseWadFile);
-				Common.close(outWadFile);
+				IOUtils.close(baseWadFile);
+				IOUtils.close(outWadFile);
 			}
 			
 			return true;
@@ -1104,14 +1105,14 @@ public final class WTExportMain
 				return ERROR_NO_FILES;
 			}
 		
-			if (Common.isEmpty(options.baseWad))
+			if (ObjectUtils.isEmpty(options.baseWad))
 			{
 				options.errln("ERROR: No base WAD specified.");
 				usage(options.stdout);
 				return ERROR_NO_FILES;
 			}
 		
-			if (Common.isEmpty(options.outWad))
+			if (ObjectUtils.isEmpty(options.outWad))
 			{
 				options.errln("ERROR: No output WAD specified.");
 				usage(options.stdout);
@@ -1125,7 +1126,7 @@ public final class WTExportMain
 				return ERROR_NO_FILES;
 			}
 
-			if (!options.help && !options.version && !options.filePaths.isEmpty() && !Common.isEmpty(options.outWad) && options.additive != null)
+			if (!options.help && !options.version && !options.filePaths.isEmpty() && !ObjectUtils.isEmpty(options.outWad) && options.additive != null)
 			{
 				// Read list from Standard In		
 				options.println("Read texture/flat list...");

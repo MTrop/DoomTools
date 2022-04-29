@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.BiPredicate;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
@@ -38,6 +37,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * Main class for DECOHack.
@@ -275,7 +275,7 @@ public final class DecoHackMain
 					return ERROR_MISSING_RESOURCE;
 				}
 				
-				InputStream resIn = Common.openResource(options.dumpResource);
+				InputStream resIn = IOUtils.openResource(options.dumpResource);
 				if (resIn == null)
 				{
 					options.stderr.printf("ERROR: Bad resource path (%s not found).\n", options.dumpResource);
@@ -692,7 +692,7 @@ public final class DecoHackMain
 		out.println();
 		if (full)
 		{
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(Common.openResource("decohack/help.txt")))) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(IOUtils.openResource("decohack/help.txt")))) {
 				String line;
 				while ((line = br.readLine()) != null)
 					out.println(line);

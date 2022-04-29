@@ -45,7 +45,10 @@ import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.StringUtils;
 
 /**
  * Main class for DoomMake.
@@ -329,7 +332,7 @@ public final class DoomMakeMain
 							
 							String description = template.getDescription();
 							options.stdout.println("    " + template.getName());
-							Common.printWrapped(options.stdout, 0, 8, 72, Common.isEmpty(description) ? "" : description);
+							StringUtils.printWrapped(options.stdout, ObjectUtils.isEmpty(description) ? "" : description, 0, 8, 72);
 							options.stdout.println();
 						}
 						options.stdout.println();
@@ -555,7 +558,7 @@ public final class DoomMakeMain
 		
 		private int createProject(ProjectGenerator generator)
 		{
-			if (Common.isEmpty(options.targetName))
+			if (ObjectUtils.isEmpty(options.targetName))
 			{
 				options.stderr.println("ERROR: No directory path.");
 				return ERROR_BAD_PROJECT;
@@ -621,13 +624,13 @@ public final class DoomMakeMain
 				return ERROR_SECURITY;
 			}
 			
-			if (Common.isEmpty(path))
+			if (ObjectUtils.isEmpty(path))
 			{
 				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
 				return ERROR_BAD_TOOL_PATH;
 			}
 			
-			if (Common.isEmpty(jarName))
+			if (ObjectUtils.isEmpty(jarName))
 			{
 				options.stderr.println("ERROR: DOOMTOOLS_JAR ENVVAR not set. Not invoked via shell?");
 				return ERROR_BAD_TOOL_PATH;
@@ -642,7 +645,7 @@ public final class DoomMakeMain
 			
 			try 
 			{
-				if (!Common.createPathForFile(targetJARFile))
+				if (!FileUtils.createPathForFile(targetJARFile))
 				{
 					options.stderr.println("ERROR: Could not create tools directory for embed.");
 					return ERROR_IOERROR;
@@ -936,7 +939,7 @@ public final class DoomMakeMain
 	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
 	{
 		String path = properties.getProperty(property);
-		if (Common.isEmpty(path))
+		if (ObjectUtils.isEmpty(path))
 			path = defaultValue;
 		return new File(projectDirectory.getPath() + File.separator + path);
 	}
@@ -957,7 +960,7 @@ public final class DoomMakeMain
 		if (!projectDirectory.exists())
 			return JSONObject.createEmptyObject();
 		
-		if (!Common.createPathForFile(fullFilePath))
+		if (!FileUtils.createPathForFile(fullFilePath))
 			throw new IOException("Could not create directories for lock file.");
 		
 		if (!fullFilePath.exists())
@@ -983,7 +986,7 @@ public final class DoomMakeMain
 	{
 		File fullFilePath = getLockFile(projectDirectory, properties);
 	
-		if (!Common.createPathForFile(fullFilePath))
+		if (!FileUtils.createPathForFile(fullFilePath))
 			throw new IOException("Could not create directories for lock file.");
 		
 		JSONWriter.Options jsonOptions = new JSONWriter.Options();
@@ -1015,7 +1018,7 @@ public final class DoomMakeMain
 	{
 		File buildDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
 		String lockFile = properties.getProperty("doommake.file.lock", "lock.json");
-		if (Common.isEmpty(lockFile))
+		if (ObjectUtils.isEmpty(lockFile))
 			lockFile = "lock.json";
 		File fullFilePath = new File(buildDir.getPath() + File.separator + lockFile);
 		return fullFilePath;

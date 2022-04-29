@@ -22,9 +22,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 import net.mtrop.doom.sound.DMXSound;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.ProcessCallable;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 
 /**
  * Main class for Utility.
@@ -220,12 +220,12 @@ public final class DMXConvertMain
 					continue;
 				}
 				
-				String outName = Common.getFileNameWithoutExtension(f) + ".dmx";
+				String outName = FileUtils.getFileNameWithoutExtension(f) + ".dmx";
 				File outputFile = options.outputDirectory != null
 					? new File(options.outputDirectory + File.separator + outName) 
 					: new File((f.getParent() == null ? "." + File.separator : f.getParent() + File.separator) + outName);
 				
-				if (!Common.createPathForFile(outputFile))
+				if (!FileUtils.createPathForFile(outputFile))
 				{
 					options.stderr.printf("ERROR: Could not create path for %s. Skipping...\n", outputFile);
 					continue;

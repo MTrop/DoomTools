@@ -23,6 +23,7 @@ import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Patch;
 import net.mtrop.doom.texture.TextureSet.Texture;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.util.NameUtils;
 
 /**
@@ -76,9 +77,9 @@ public final class Utility
 			return VERSION_MAP.get(name);
 		
 		String out = null;
-		try (InputStream in = Common.openResource("net/mtrop/doom/tools/" + name + ".version")) {
+		try (InputStream in = IOUtils.openResource("net/mtrop/doom/tools/" + name + ".version")) {
 			if (in != null)
-				VERSION_MAP.put(name, out = Common.getTextualContents(in, "UTF-8").trim());
+				VERSION_MAP.put(name, out = IOUtils.getTextualContents(in, "UTF-8").trim());
 		} catch (IOException e) {
 			/* Do nothing. */
 		}

@@ -13,11 +13,11 @@ import static net.mtrop.doom.tools.decohack.patches.ConstantsExtended.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
 /**
  * Patch implementation for Extended DeHackEd.
@@ -381,7 +381,7 @@ public class PatchExtended extends PatchMBF
 	public DEHSound getSound(int index)
 	{
 		if (index >= SOUND_INDEX_EXTENDED_START)
-			return Common.arrayElement(DEHSOUNDEXTENDED, index - SOUND_INDEX_EXTENDED_START);
+			return ArrayUtils.arrayElement(DEHSOUNDEXTENDED, index - SOUND_INDEX_EXTENDED_START);
 		else
 			return super.getSound(index);
 	}
@@ -397,7 +397,7 @@ public class PatchExtended extends PatchMBF
 	{
 		int mbflen = DEHTHING.length + DEHTHINGBOOM.length + DEHTHINGMBF.length;
 		if (index >= mbflen)
-			return Common.arrayElement(DEHTHINGEXTENDED, index - mbflen);
+			return ArrayUtils.arrayElement(DEHTHINGEXTENDED, index - mbflen);
 		else
 			return super.getThing(index);
 	}
@@ -419,7 +419,7 @@ public class PatchExtended extends PatchMBF
 		else if (index >= extlen)
 			return PatchBoom.State.create(DEHState.create(SPRITE_INDEX_TNT1, 0, false, index, -1), DEHActionPointer.NULL);
 		else if (index >= mbflen)
-			return Common.arrayElement(DEHSTATEEXTENDED, index - mbflen);
+			return ArrayUtils.arrayElement(DEHSTATEEXTENDED, index - mbflen);
 		else
 			return super.getBoomState(index);
 	}

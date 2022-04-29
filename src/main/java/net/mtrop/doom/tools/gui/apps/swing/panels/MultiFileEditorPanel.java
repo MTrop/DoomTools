@@ -20,8 +20,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,7 +32,6 @@ import java.util.function.Consumer;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -40,12 +41,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.BadLocationException;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
-import org.fife.ui.rtextarea.SearchEngine;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
@@ -58,6 +59,7 @@ import net.mtrop.doom.tools.struct.util.IOUtils;
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 
 /**
@@ -149,6 +151,11 @@ public class MultiFileEditorPanel extends JPanel
 	private Action gotoAction;
 	/** Find Action */
 	private Action findAction;
+
+	/** Change encoding item. */
+	private MenuNode changeEncodingMenuItem;
+	/** Change language item. */
+	private MenuNode changeLanguageMenuItem;
 	
 	// ======================================================================
 	
@@ -199,11 +206,22 @@ public class MultiFileEditorPanel extends JPanel
 				}
 			});
 		});
+		
+		MenuNode[] encodingNodes = createEditorEncodingMenuItems();
+		MenuNode[] languageNodes = createEditorStyleMenuItems();
+		MenuNode[] spacingNodes = createEditorSpacingMenuItems();
+		
 		this.filePathLabel = label();
 		this.caretPositionLabel = label();
-		this.spacingModeLabel = label();
-		this.encodingModeLabel = label();
-		this.syntaxStyleLabel = label();
+		this.encodingModeLabel = apply(label(), (e) -> {
+			e.setComponentPopupMenu(popupMenu(spacingNodes));
+		});
+		this.encodingModeLabel = apply(label(), (e) -> {
+			e.setComponentPopupMenu(popupMenu(encodingNodes));
+		});
+		this.syntaxStyleLabel = apply(label(), (e) -> {
+			e.setComponentPopupMenu(popupMenu(languageNodes));
+		});;
 		this.findReplacePanel = new FindReplacePanel();
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
@@ -241,6 +259,9 @@ public class MultiFileEditorPanel extends JPanel
 			map.put(ActionNames.ACTION_GOTO, gotoAction);
 			map.put(ActionNames.ACTION_FIND, findAction);
 		});
+		
+		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
+		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
 		
 		containerOf(this, new BorderLayout(0, 2),
 			node(BorderLayout.CENTER, this.mainEditorTabs),
@@ -448,6 +469,22 @@ public class MultiFileEditorPanel extends JPanel
 	public Action getActionFor(String actionName)
 	{
 		return unifiedActionMap.get(actionName);
+	}
+	
+	/**
+	 * @return the change encoding menu item.
+	 */
+	public MenuNode getChangeEncodingMenuItem() 
+	{
+		return changeEncodingMenuItem;
+	}
+
+	/**
+	 * @return the change language menu item.
+	 */
+	public MenuNode getChangeLanguageMenuItem() 
+	{
+		return changeLanguageMenuItem;
 	}
 	
 	/**
@@ -766,6 +803,46 @@ public class MultiFileEditorPanel extends JPanel
 		forEachOpenEditor((editor) -> editor.editorPanel.textArea.getHighlighter().removeAllHighlights());
 	}
 	
+	private MenuNode[] createEditorEncodingMenuItems()
+	{
+		Set<Charset> charsets = editorProvider.getAvailableCommonCharsets();
+		Set<Charset> otherCharsets = editorProvider.getAvailableOtherCharsets();
+		
+		List<MenuNode> out = new ArrayList<>();
+		for (Charset charset : charsets)
+			out.add(menuItem(charset.displayName(), (c, e) -> changeCurrentEditorEncoding(charset)));
+		out.add(separator());
+		
+		List<MenuNode> others = new ArrayList<>();
+		for (Charset charset : otherCharsets)
+			others.add(menuItem(charset.displayName(), (c, e) -> changeCurrentEditorEncoding(charset)));
+		out.add(utils.createItemFromLanguageKey("texteditor.action.encodings.other", others.toArray(new MenuNode[others.size()])));
+		return out.toArray(new MenuNode[out.size()]);
+	}
+	
+	private MenuNode[] createEditorStyleMenuItems()
+	{
+		Map<String, String> languages = editorProvider.getAvailableLanguageMap();
+		Map<String, String> otherLanguages = editorProvider.getOtherAvailableLanguageMap();
+		
+		List<MenuNode> out = new ArrayList<>();
+		for (Map.Entry<String, String> entry : languages.entrySet())
+			out.add(menuItem(entry.getKey(), (c, e) -> changeCurrentEditorStyle(entry.getValue())));
+		out.add(separator());
+		
+		List<MenuNode> others = new ArrayList<>();
+		for (Map.Entry<String, String> entry : otherLanguages.entrySet())
+			others.add(menuItem(entry.getKey(), (c, e) -> changeCurrentEditorStyle(entry.getValue())));
+		out.add(utils.createItemFromLanguageKey("texteditor.action.languages.other", others.toArray(new MenuNode[others.size()])));
+		return out.toArray(new MenuNode[out.size()]);
+	}
+	
+	private MenuNode[] createEditorSpacingMenuItems()
+	{
+		// TODO: Finish this.
+		return new MenuNode[0]; 
+	}
+	
 	/**
 	 * Changes the encoding of the text in the current editor.
 	 * @param charset the new charset for the editor.
@@ -789,7 +866,28 @@ public class MultiFileEditorPanel extends JPanel
 	// Opens the "Go to Line" dialog. 
 	private void goToLine()
 	{
-		// TODO: Finish this.
+		final RSyntaxTextArea textArea = getCurrentEditorTextArea();
+		final JFormField<Integer> lineField = integerField(textArea.getCaretLineNumber() + 1);
+		int lineMax = textArea.getLineCount();
+		
+		Integer selected = utils.createModal(
+			language.getText("texteditor.modal.goto.title"),
+			containerOf(new GridLayout(2, 1, 0, 4),
+				node(label(language.getText("texteditor.modal.goto.message", lineMax))),
+				node(lineField)
+			),
+			utils.createChoiceFromLanguageKey("texteditor.modal.goto.choice.goto", ()->lineField.getValue()),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Integer)null)
+		).openThenDispose();
+		
+		if (selected != null) 
+		{
+			try {
+				textArea.setCaretPosition(textArea.getLineStartOffset(selected - 1));
+			} catch (BadLocationException e) {
+				error(this, language.getText("texteditor.modal.goto.error"));
+			}
+		}
 	}
 
 	// Opens the find dialog.
@@ -803,8 +901,7 @@ public class MultiFileEditorPanel extends JPanel
 			return;
 		}
 		
-		findModal = modal(
-			utils.getWindowIcons(),
+		findModal = utils.createModal(
 			language.getText("texteditor.modal.find.title"),
 			ModalityType.MODELESS,
 			containerOf(createEmptyBorder(8, 8, 8, 8), node(findReplacePanel))

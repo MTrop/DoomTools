@@ -54,6 +54,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
@@ -702,7 +703,7 @@ public final class WadScriptMain
 		@Override
 		public void finishRender() throws IOException
 		{
-			Common.close(htmlout);
+			IOUtils.close(htmlout);
 		}
 
 		private String getTitleCode(String title)

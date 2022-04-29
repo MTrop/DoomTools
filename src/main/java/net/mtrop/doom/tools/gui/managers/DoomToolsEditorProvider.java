@@ -1,9 +1,12 @@
 package net.mtrop.doom.tools.gui.managers;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -11,7 +14,9 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 
 import net.mtrop.doom.tools.struct.SingletonProvider;
-import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Utility singleton for generating {@link RSyntaxTextArea} instances.
@@ -166,6 +171,33 @@ public final class DoomToolsEditorProvider
 		}
     });
     
+    private static final Set<Charset> COMMON_CHARSETS = Collections.unmodifiableSet(new TreeSet<Charset>() 
+    {
+		private static final long serialVersionUID = -4915381545931926947L;
+		{
+			if (OSUtils.isWindows())
+				add(Charset.forName("Windows-1252"));
+			add(Charset.defaultCharset());
+			add(Charset.forName("ASCII"));
+			add(Charset.forName("UTF-8"));
+			add(Charset.forName("UTF-16"));
+		}
+    });
+    
+    private static final Set<Charset> OTHER_CHARSETS = Collections.unmodifiableSet(new TreeSet<Charset>() 
+    {
+		private static final long serialVersionUID = -6067321778091486285L;
+		{
+			for (Charset cs : Charset.availableCharsets().values())
+			{
+				if (COMMON_CHARSETS.contains(cs))
+					continue;
+				else
+					add(cs);
+			}
+		}
+    });
+    
 	/**
 	 * @return the singleton instance of this object.
 	 */
@@ -186,7 +218,7 @@ public final class DoomToolsEditorProvider
 	 * This is for drop-down or pop-up menus and the like.
 	 * @return the map.
 	 */
-	public static final Map<String, String> getAvailableLanguageMap()
+	public final Map<String, String> getAvailableLanguageMap()
 	{
 		return NAME_TO_STYLE_MAP;
 	}
@@ -196,9 +228,25 @@ public final class DoomToolsEditorProvider
 	 * This is for drop-down or pop-up menus and the like.
 	 * @return the map.
 	 */
-	public static final Map<String, String> getOtherAvailableLanguageMap()
+	public final Map<String, String> getOtherAvailableLanguageMap()
 	{
 		return OTHER_NAME_TO_STYLE_MAP;
+	}
+
+	/**
+	 * @return the common charsets.
+	 */
+	public final Set<Charset> getAvailableCommonCharsets()
+	{
+		return COMMON_CHARSETS;
+	}
+	
+	/**
+	 * @return the uncommon charsets.
+	 */
+	public final Set<Charset> getAvailableOtherCharsets()
+	{
+		return OTHER_CHARSETS;
 	}
 	
 	private static void initCustomLanguages()
@@ -214,8 +262,8 @@ public final class DoomToolsEditorProvider
 	 */
 	public String getStyleByFile(File file)
 	{
-		String ext = Common.getFileExtension(file);
-		if (Common.isEmpty(ext))
+		String ext = FileUtils.getFileExtension(file);
+		if (ObjectUtils.isEmpty(ext))
 			ext = file.getName();
 		
 		String styleName;

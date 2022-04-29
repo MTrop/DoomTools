@@ -5,15 +5,17 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -61,16 +63,19 @@ public class FindReplacePanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.utils = DoomToolsGUIUtils.get();
 
-		this.findField = stringField((unused) -> updateSearchContext());
-		this.replaceField = stringField((unused) -> updateSearchContext());
-		
+		final ComponentActionHandler<JCheckBox> updateHandler = (c, e) -> updateSearchContext();
+		final JValueChangeListener<String> changeUpdateListener = (unused) -> updateSearchContext();
+
 		this.backwards = false;
 		this.selectionOnly = false;
 		
-		this.wholeWord = checkBoxField(checkBox((c, e) -> updateSearchContext()));
-		this.matchCase = checkBoxField(checkBox((c, e) -> updateSearchContext()));
-		this.regularExpression = checkBoxField(checkBox((c, e) -> updateSearchContext()));
-		this.wrapSearch = checkBoxField(checkBox((c, e) -> updateSearchContext()));
+		this.findField = stringField(changeUpdateListener);
+		this.replaceField = stringField(changeUpdateListener);
+		
+		this.wholeWord = checkBoxField(checkBox(updateHandler));
+		this.matchCase = checkBoxField(checkBox(updateHandler));
+		this.regularExpression = checkBoxField(checkBox(updateHandler));
+		this.wrapSearch = checkBoxField(checkBox(updateHandler));
 		
 		this.currentTarget = null;
 		this.context = null;
@@ -201,7 +206,7 @@ public class FindReplacePanel extends JPanel
 	
 	private void showMessage(String text)
 	{
-		if (!Common.isEmpty(text))
+		if (!ObjectUtils.isEmpty(text))
 			Toolkit.getDefaultToolkit().beep();
 		message.setText(text);
 	}

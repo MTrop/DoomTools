@@ -13,11 +13,11 @@ import java.util.Properties;
 import org.fife.ui.rsyntaxtextarea.Theme;
 
 import net.mtrop.doom.tools.Version;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorViewSettings;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 /**
@@ -89,7 +89,7 @@ public final class DoomToolsSettingsManager
 	private void saveProperties()
 	{
 		File propertiesFile = getConfigFile(SETTINGS_FILENAME);
-		if (!Common.createPathForFile(propertiesFile))
+		if (!FileUtils.createPathForFile(propertiesFile))
 			return;
 		
 		try (FileOutputStream fos = new FileOutputStream(propertiesFile))

@@ -18,7 +18,7 @@ import com.blackrook.json.JSONConversionException;
 import com.blackrook.json.JSONObject;
 
 import net.mtrop.doom.tools.DoomMakeMain;
-import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
@@ -157,11 +157,11 @@ public class AutoBuildAgent
 			return;
 		
 		// Add directories not in the project root.
-		if (file.isDirectory() && !Common.filePathEquals(file.getParentFile(), projectDirectory))
+		if (file.isDirectory() && !FileUtils.filePathEquals(file.getParentFile(), projectDirectory))
 			watchThread.registerDirectory(file);
 		
 		// If source directory was created, add it and its subdirectories.
-		if (Common.filePathEquals(file, sourceDirectory))
+		if (FileUtils.filePathEquals(file, sourceDirectory))
 			watchThread.registerSubdirectoriesOf(file);
 		
 		fireFileCreate(file);
@@ -175,12 +175,12 @@ public class AutoBuildAgent
 		if (currentlyBuilding)
 			return;
 
-		if (Common.filePathEquals(file, propertiesPath) || Common.filePathEquals(file, projectPropertiesPath))
+		if (FileUtils.filePathEquals(file, propertiesPath) || FileUtils.filePathEquals(file, projectPropertiesPath))
 		{
 			mergedProperties = createProjectProperties();
 			File oldSourceDir = new File(sourceDirectory.getPath());
 			sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
-			if (!Common.filePathEquals(oldSourceDir, sourceDirectory))
+			if (!FileUtils.filePathEquals(oldSourceDir, sourceDirectory))
 				watchThread.registerSubdirectoriesOf(sourceDirectory);
 		}
 		
@@ -514,7 +514,7 @@ public class AutoBuildAgent
 		
 		private void registerSubdirectoriesOf(File d)
 		{
-			File[] directories = Common.getSubdirectories(d, true, (f) -> !f.isHidden());
+			File[] directories = FileUtils.getSubdirectories(d, true, (f) -> !f.isHidden());
 			if (directories != null ) for (File subdir : directories)
 				registerDirectory(subdir);
 		}

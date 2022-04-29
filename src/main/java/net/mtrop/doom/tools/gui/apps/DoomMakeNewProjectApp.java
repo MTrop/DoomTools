@@ -23,7 +23,6 @@ import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
 import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
@@ -36,6 +35,7 @@ import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -85,7 +85,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		
 		this.projectGenerator = new WADProjectGenerator();
 		
-		this.targetDirectory = Common.isEmpty(targetDirectoryPath) ? null : new File(targetDirectoryPath);
+		this.targetDirectory = ObjectUtils.isEmpty(targetDirectoryPath) ? null : new File(targetDirectoryPath);
 		this.templateNameSet = new TreeSet<>();
 	}
 	

@@ -25,10 +25,10 @@ import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.struct.TokenScanner;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.util.NameUtils;
 
 /**
@@ -319,9 +319,9 @@ public final class DoomImageConvertMain
 			if (!options.outputPath.exists())
 			{
 				// Is WAD?
-				if (Common.getFileExtension(options.outputPath).equalsIgnoreCase("wad"))
+				if (FileUtils.getFileExtension(options.outputPath).equalsIgnoreCase("wad"))
 				{
-					if (!Common.createPathForFile(options.outputPath))
+					if (!FileUtils.createPathForFile(options.outputPath))
 					{
 						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
 						return ERROR_BAD_OUTPUT;
@@ -339,9 +339,9 @@ public final class DoomImageConvertMain
 					}
 				}
 				// Is directory (no extension).
-				else if (Common.getFileExtension(options.outputPath).length() == 0)
+				else if (FileUtils.getFileExtension(options.outputPath).length() == 0)
 				{
-					if (!Common.createPath(options.outputPath.getPath()))
+					if (!FileUtils.createPath(options.outputPath.getPath()))
 					{
 						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
 						return ERROR_BAD_OUTPUT;
@@ -352,7 +352,7 @@ public final class DoomImageConvertMain
 				// Is file, and source is file.
 				else if (!options.sourcePath.isDirectory())
 				{
-					if (!Common.createPathForFile(options.outputPath))
+					if (!FileUtils.createPathForFile(options.outputPath))
 					{
 						options.stderr.println("ERROR: Could not create path for " + options.outputPath.getPath());
 						return ERROR_BAD_OUTPUT;
@@ -414,7 +414,7 @@ public final class DoomImageConvertMain
 					{
 						final File dest = outputDir;
 						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
-							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + Common.getFileNameWithoutExtension(path) + ".lmp"))
+							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + FileUtils.getFileNameWithoutExtension(path) + ".lmp"))
 						);
 					}
 					catch (IOException e)
@@ -488,7 +488,7 @@ public final class DoomImageConvertMain
 				{
 					try
 					{
-						File file = new File(outputDir.getPath() + File.separator + Common.getFileNameWithoutExtension(options.sourcePath) + ".lmp");
+						File file = new File(outputDir.getPath() + File.separator + FileUtils.getFileNameWithoutExtension(options.sourcePath) + ".lmp");
 						int err;
 						if ((err = readFile(options.sourcePath, palette, options.metaInfoFallback, file)) != ERROR_NONE)
 							return err;
@@ -561,7 +561,7 @@ public final class DoomImageConvertMain
 				}
 				else if (!f.getName().equals(options.metaInfoFilename))
 				{
-					String fileName = Common.getFileNameWithoutExtension(f);
+					String fileName = FileUtils.getFileNameWithoutExtension(f);
 					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
 					info = info == null ? fallback : info;
 					if ((err = adder.addFile(f, palette, info, treeName)) != ERROR_NONE)
@@ -640,7 +640,7 @@ public final class DoomImageConvertMain
 
 		private int readFile(File input, Palette palette, MetaInfo info, WadFile.Adder output) throws IOException
 		{
-			String entryName = NameUtils.toValidEntryName(Common.getFileNameWithoutExtension(input));
+			String entryName = NameUtils.toValidEntryName(FileUtils.getFileNameWithoutExtension(input));
 			switch (info.mode)
 			{
 				case PALETTE:
@@ -691,7 +691,7 @@ public final class DoomImageConvertMain
 		private Picture readPictureFile(File input, Palette palette, MetaInfo info) throws IOException, FileNotFoundException
 		{
 			Picture picture;
-			if (Common.getFileExtension(input).equalsIgnoreCase("png"))
+			if (FileUtils.getFileExtension(input).equalsIgnoreCase("png"))
 			{
 				options.verboseln("Reading " + input.getPath() + " as PNG graphic...");
 				PNGPicture png = new PNGPicture();

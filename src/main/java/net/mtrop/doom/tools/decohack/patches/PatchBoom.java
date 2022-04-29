@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
@@ -21,6 +20,7 @@ import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
 /**
  * Patch implementation for Doom 1.9.
@@ -740,7 +740,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
-		return Common.arrayElement(DEHAMMO, index);
+		return ArrayUtils.arrayElement(DEHAMMO, index);
 	}
 
 	@Override
@@ -782,7 +782,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHSound getSound(int index)
 	{
-		return Common.arrayElement(DEHSOUND, index);
+		return ArrayUtils.arrayElement(DEHSOUND, index);
 	}
 
 	@Override
@@ -795,9 +795,9 @@ public class PatchBoom implements DEHPatchBoom
 	public DEHThing getThing(int index)
 	{
 		if (index >= DEHTHING.length)
-			return Common.arrayElement(DEHTHINGBOOM, index - DEHTHING.length);
+			return ArrayUtils.arrayElement(DEHTHINGBOOM, index - DEHTHING.length);
 		else
-			return Common.arrayElement(DEHTHING, index);
+			return ArrayUtils.arrayElement(DEHTHING, index);
 	}
 
 	@Override
@@ -809,7 +809,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHWeapon getWeapon(int index)
 	{
-		return Common.arrayElement(DEHWEAPON, index);
+		return ArrayUtils.arrayElement(DEHWEAPON, index);
 	}
 
 	@Override
@@ -820,7 +820,7 @@ public class PatchBoom implements DEHPatchBoom
 
 	protected PatchBoom.State getBoomState(int index)
 	{
-		return Common.arrayElement(DEHSTATE, index);
+		return ArrayUtils.arrayElement(DEHSTATE, index);
 	}
 
 	@Override

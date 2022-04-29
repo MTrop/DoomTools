@@ -46,6 +46,7 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -317,7 +318,7 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
-		if (Common.isEmpty(path))
+		if (ObjectUtils.isEmpty(path))
 		{
 			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
 			return;
@@ -450,7 +451,7 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
-		if (Common.isEmpty(path))
+		if (ObjectUtils.isEmpty(path))
 		{
 			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
 			return;

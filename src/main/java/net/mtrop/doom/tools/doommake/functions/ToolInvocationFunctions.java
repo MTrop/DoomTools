@@ -26,8 +26,8 @@ import net.mtrop.doom.tools.WTExportMain;
 import net.mtrop.doom.tools.WTexScanMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.struct.util.StringUtils;
 
 /**
  * Script functions for invoking the tools directly.
@@ -46,7 +46,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"openWebsite:BOOLEAN",
@@ -113,7 +113,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
@@ -188,7 +188,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
@@ -261,7 +261,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"sourcePath:OBJECTREF(File)",
@@ -334,7 +334,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"files:LIST[STRING, ...]",
@@ -418,7 +418,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
@@ -502,7 +502,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
@@ -587,7 +587,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"sourcefile:OBJECTREF(File)",
@@ -654,7 +654,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"sourcefile:OBJECTREF(File)",
@@ -719,7 +719,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
@@ -807,7 +807,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				)
 				.parameter("options", 
 					type(Type.MAP, 
-						"{" + Common.joinStrings(", ",
+						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"wadfiles:LIST[STRING, ...]",

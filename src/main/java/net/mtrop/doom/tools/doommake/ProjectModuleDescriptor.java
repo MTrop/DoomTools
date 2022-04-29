@@ -12,6 +12,7 @@ import java.util.Map;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.ReplacerReader;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
@@ -160,12 +161,12 @@ public final class ProjectModuleDescriptor
 			String targetPath = directory.getPath() + File.separator + e.outputPath;
 			if (e.isDirectory())
 			{
-				if (!Common.createPath(targetPath))
+				if (!FileUtils.createPath(targetPath))
 					throw new IOException("Could not create necessary directory: " + targetPath);
 			}
 			else
 			{
-				if (!Common.createPathForFile(targetPath))
+				if (!FileUtils.createPathForFile(targetPath))
 					throw new IOException("Could not create necessary directory for file: " + targetPath);
 				if (e.pathsAreContentLines)
 				{
@@ -186,7 +187,7 @@ public final class ProjectModuleDescriptor
 							if (e.binary)
 							{
 								try (
-									InputStream fin = Common.openResource(resourcePath); 
+									InputStream fin = IOUtils.openResource(resourcePath); 
 								){
 									IOUtils.relay(fin, fos);
 								}

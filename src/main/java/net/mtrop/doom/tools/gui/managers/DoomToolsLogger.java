@@ -3,10 +3,10 @@ package net.mtrop.doom.tools.gui.managers;
 import java.io.File;
 import java.io.IOException;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.struct.LoggingFactory;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
@@ -51,7 +51,7 @@ public final class DoomToolsLogger
 		try {
 			if (LOG_FILE.exists())
 				LOG_FILE.delete();
-			if (!Common.createPathForFile(LOG_FILE))
+			if (!FileUtils.createPathForFile(LOG_FILE))
 				return;
 			this.loggingFactory.addDriver(new LoggingFactory.FileLogger(LOG_FILE)); 
 		} catch (IOException e) {

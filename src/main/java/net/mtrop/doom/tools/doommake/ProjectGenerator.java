@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.UtilityException;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * Class used for generating project structures.
@@ -169,7 +169,7 @@ public abstract class ProjectGenerator
 	public static Map<String, String> consoleReplacer(List<ProjectTokenReplacer> replacerList, PrintStream stdout, InputStream stdin) throws IOException
 	{
 		Map<String, String> out = new HashMap<>();
-		try (BufferedReader br = Common.openTextStream(stdin))
+		try (BufferedReader br = IOUtils.openTextStream(stdin))
 		{
 			for (ProjectTokenReplacer replacer : replacerList)
 				insertReplacer(replacer, stdout, br, out);

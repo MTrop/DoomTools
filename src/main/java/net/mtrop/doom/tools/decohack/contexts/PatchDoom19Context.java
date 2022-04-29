@@ -10,13 +10,13 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchDoom19;
 import net.mtrop.doom.tools.decohack.patches.PatchDoom19;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
 /**
  * Patch context for Doom 1.9.
@@ -101,7 +101,7 @@ public class PatchDoom19Context extends AbstractPatchContext<DEHPatchDoom19> imp
 	@Override
 	public String getString(int index)
 	{
-		return Common.arrayElement(strings, index);
+		return ArrayUtils.arrayElement(strings, index);
 	}
 
 	@Override

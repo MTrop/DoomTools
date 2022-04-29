@@ -12,9 +12,9 @@ import static net.mtrop.doom.tools.decohack.patches.ConstantsMBF.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
 /**
  * Patch implementation for MBF.
@@ -82,7 +82,7 @@ public class PatchMBF extends PatchBoom
 	public DEHSound getSound(int index)
 	{
 		if (index >= DEHSOUND.length)
-			return Common.arrayElement(DEHSOUNDMBF, index - DEHSOUND.length);
+			return ArrayUtils.arrayElement(DEHSOUNDMBF, index - DEHSOUND.length);
 		else
 			return super.getSound(index);
 	}
@@ -98,7 +98,7 @@ public class PatchMBF extends PatchBoom
 	{
 		int boomlen = DEHTHING.length + DEHTHINGBOOM.length;
 		if (index >= boomlen)
-			return Common.arrayElement(DEHTHINGMBF, index - boomlen);
+			return ArrayUtils.arrayElement(DEHTHINGMBF, index - boomlen);
 		else
 			return super.getThing(index);
 	}
@@ -112,7 +112,7 @@ public class PatchMBF extends PatchBoom
 	protected PatchBoom.State getBoomState(int index)
 	{
 		if (index >= DEHSTATE.length)
-			return Common.arrayElement(DEHSTATEMBF, index - DEHSTATE.length);			
+			return ArrayUtils.arrayElement(DEHSTATEMBF, index - DEHSTATE.length);			
 		else
 			return super.getBoomState(index);
 	}

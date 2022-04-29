@@ -5,11 +5,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
+import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.swing.Action;
 import javax.swing.Icon;
@@ -84,6 +86,66 @@ public final class DoomToolsGUIUtils
 		this.windowIcon = new ImageIcon(icon16);
 	}
 	
+	/**
+	 * Creates a new modal window with the proper icons set.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public final <T> Modal<T> createModal(String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(getWindowIcons(), title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window with the proper icons set.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @return a new modal dialog.
+	 */
+	public final Modal<Void> createModal(String title, ModalityType modality, Container contentPane)
+	{
+		return modal(getWindowIcons(), title, modality, contentPane);
+	}
+	
+	/**
+	 * Creates a new modal window with the proper icons set.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public final <T> Modal<T> createModal(String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return createModal(title, ModalityType.APPLICATION_MODAL, contentPane, choices);
+	}
+
+	/**
+	 * Creates a new modal window with the proper icons set.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @return a new modal dialog.
+	 */
+	public Modal<Void> createModal(String title, Container contentPane)
+	{
+		return createModal(title, ModalityType.APPLICATION_MODAL, contentPane);
+	}
+
 	/**
 	 * Creates a menu from a language key, getting the necessary pieces to assemble it.
 	 * @param keyPrefix the key prefix.
@@ -202,6 +264,21 @@ public final class DoomToolsGUIUtils
 	public JButton createButtonFromLanguageKey(String keyPrefix, ComponentActionHandler<JButton> handler)
 	{
 		return createButtonFromLanguageKey(null, keyPrefix, handler);
+	}
+
+	/**
+	 * Creates a modal choice from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param result the choice result supplier.
+	 * @return the new menu item node.
+	 */
+	public <T> ModalChoice<T> createChoiceFromLanguageKey(String keyPrefix, Supplier<T> result)
+	{
+		return choice(
+			language.getText(keyPrefix),
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			result
+		);
 	}
 
 	/**

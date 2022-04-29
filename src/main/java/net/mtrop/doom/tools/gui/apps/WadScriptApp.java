@@ -33,6 +33,7 @@ import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -204,40 +205,62 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		);
 	}
 
+	private MenuNode[] createCommonFileMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("wadscript.menu.file.item.new", (c, e) -> onNewEditor()),
+			utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> onOpenEditor()),
+			separator(),
+			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
+			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
+			utils.createItemFromLanguageKey("texteditor.action.closeall", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL)),
+			separator(),
+			utils.createItemFromLanguageKey("texteditor.action.save", editorPanel.getActionFor(ActionNames.ACTION_SAVE)),
+			utils.createItemFromLanguageKey("texteditor.action.saveas", editorPanel.getActionFor(ActionNames.ACTION_SAVE_AS)),
+			utils.createItemFromLanguageKey("texteditor.action.saveall", editorPanel.getActionFor(ActionNames.ACTION_SAVE_ALL))
+		);
+	}
+	
+	private MenuNode[] createCommonEditMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
+			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
+			separator(),
+			utils.createItemFromLanguageKey("texteditor.action.cut", editorPanel.getActionFor(ActionNames.ACTION_CUT)),
+			utils.createItemFromLanguageKey("texteditor.action.copy", editorPanel.getActionFor(ActionNames.ACTION_COPY)),
+			utils.createItemFromLanguageKey("texteditor.action.paste", editorPanel.getActionFor(ActionNames.ACTION_PASTE)),
+			separator(),
+			utils.createItemFromLanguageKey("texteditor.action.delete", editorPanel.getActionFor(ActionNames.ACTION_DELETE)),
+			utils.createItemFromLanguageKey("texteditor.action.selectall", editorPanel.getActionFor(ActionNames.ACTION_SELECT_ALL))
+		);
+	}
+
+	private MenuNode[] createCommonEditorMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
+			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
+			separator(),
+			editorPanel.getChangeLanguageMenuItem(),
+			editorPanel.getChangeEncodingMenuItem()
+		);
+	}
+	
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
 		// TODO Finish me.
 		return menuBar(
-			utils.createMenuFromLanguageKey("wadscript.menu.file",
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.new", (c, e) -> onNewEditor()),
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> onOpenEditor()),
-				separator(),
-				utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
-				utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
-				utils.createItemFromLanguageKey("texteditor.action.closeall", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL)),
-				separator(),
-				utils.createItemFromLanguageKey("texteditor.action.save", editorPanel.getActionFor(ActionNames.ACTION_SAVE)),
-				utils.createItemFromLanguageKey("texteditor.action.saveas", editorPanel.getActionFor(ActionNames.ACTION_SAVE_AS)),
-				utils.createItemFromLanguageKey("texteditor.action.saveall", editorPanel.getActionFor(ActionNames.ACTION_SAVE_ALL)),
-				separator(),
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> receiver.attemptClose())
-			),
-			utils.createMenuFromLanguageKey("wadscript.menu.edit",
-				utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
-				utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
-				separator(),
-				utils.createItemFromLanguageKey("texteditor.action.cut", editorPanel.getActionFor(ActionNames.ACTION_CUT)),
-				utils.createItemFromLanguageKey("texteditor.action.copy", editorPanel.getActionFor(ActionNames.ACTION_COPY)),
-				utils.createItemFromLanguageKey("texteditor.action.paste", editorPanel.getActionFor(ActionNames.ACTION_PASTE)),
-				separator(),
-				utils.createItemFromLanguageKey("texteditor.action.delete", editorPanel.getActionFor(ActionNames.ACTION_DELETE)),
-				utils.createItemFromLanguageKey("texteditor.action.selectall", editorPanel.getActionFor(ActionNames.ACTION_SELECT_ALL))
-			),
-			utils.createMenuFromLanguageKey("wadscript.menu.editor",
-				utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
-				utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND))
-			)
+			utils.createMenuFromLanguageKey("wadscript.menu.file", ArrayUtils.joinArrays(
+				createCommonFileMenuItems(),
+				ArrayUtils.arrayOf(
+					separator(),
+					utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> receiver.attemptClose())
+				)
+			)),
+			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems())
 		);
 	}
 	

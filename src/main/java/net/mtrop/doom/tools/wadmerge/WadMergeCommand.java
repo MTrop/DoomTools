@@ -14,12 +14,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import net.mtrop.doom.exception.WadException;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.Response;
 import net.mtrop.doom.tools.struct.ArgumentScanner;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.TokenScanner.ParseException;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 
 /**
  * The Wad Merge commands.
@@ -570,7 +570,7 @@ public enum WadMergeCommand
 			
 			try {
 				File f = new File(file);
-				return context.mergeFile(symbol, f, entryName == null ? context.subCharString(Common.getFileNameWithoutExtension(f)) : entryName);
+				return context.mergeFile(symbol, f, entryName == null ? context.subCharString(FileUtils.getFileNameWithoutExtension(f)) : entryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;
@@ -840,7 +840,7 @@ public enum WadMergeCommand
 			}
 			else
 			{
-				textureEntryName = Common.getFileNameWithoutExtension(file);
+				textureEntryName = FileUtils.getFileNameWithoutExtension(file);
 			}
 
 			try {
