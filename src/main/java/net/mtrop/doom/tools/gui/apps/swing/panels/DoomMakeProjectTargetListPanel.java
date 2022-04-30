@@ -71,7 +71,7 @@ public class DoomMakeProjectTargetListPanel extends JPanel
 			}
 		});
 		refreshTargets(targetNames);
-		containerOf(this, new BorderLayout(), node(BorderLayout.CENTER, targetList));
+		containerOf(this, node(BorderLayout.CENTER, targetList));
 	}
 	
 	@Override

@@ -1577,7 +1577,6 @@ public final class FormFactory
 		protected JValueTextField(T initialValue, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
 		{
 			this.converter = Objects.requireNonNull(converter);
-			this.changeListener = changeListener;
 	
 			this.textField = createTextField();
 			this.textField.addKeyListener(new KeyAdapter() 
@@ -1610,10 +1609,11 @@ public final class FormFactory
 					refreshValue();
 				}
 			});
+			setValue(initialValue);
+			this.changeListener = changeListener;
 			
 			setLayout(new BorderLayout());
 			add(BorderLayout.CENTER, this.textField);
-			setValue(initialValue);
 		}
 		
 		/**

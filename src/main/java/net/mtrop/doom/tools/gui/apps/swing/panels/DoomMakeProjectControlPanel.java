@@ -1,6 +1,5 @@
 package net.mtrop.doom.tools.gui.apps.swing.panels;
 
-import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +16,8 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
 
 /**
  * A DoomMake control panel for a single project directory.
@@ -86,7 +87,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 			}
 		};
 		
-		containerOf(this, new FlowLayout(FlowLayout.RIGHT),
+		containerOf(this, flowLayout(Flow.RIGHT),
 			node(button(icon(folderImage.result()), folderAction)),
 			node(button(icon(vsCodeImage.result()), vsCodeAction)),
 			node(button(icon(sladeImage.result()), sladeAction))

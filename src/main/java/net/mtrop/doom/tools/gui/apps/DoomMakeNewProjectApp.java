@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
@@ -43,6 +41,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 
 /**
@@ -139,7 +138,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			)))
 		);
 		
-		Container controlPane = containerOf(new FlowLayout(FlowLayout.TRAILING, 4, 4), node(
+		Container controlPane = containerOf(flowLayout(Flow.TRAILING, 4, 4), node(
 			utils.createButtonFromLanguageKey("doommake.newproject.create", (c, e) -> createProject())
 		));
 	
@@ -148,11 +147,11 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			scroll(projectPanel), 
 			(p) -> p.setBorder(null)
 		);
-		containerOf(projectPanel, new BoxLayout(projectPanel, BoxLayout.Y_AXIS), getWADGeneratorOptionNodes());
+		containerOf(projectPanel, boxLayout(projectPanel, BoxAxis.Y_AXIS), getWADGeneratorOptionNodes());
 		
 		return containerOf(
 			createEmptyBorder(4, 4, 4, 4),
-			node(BorderLayout.CENTER, containerOf(out, createEmptyBorder(4, 4, 4, 4), new BorderLayout(),
+			node(BorderLayout.CENTER, containerOf(out, createEmptyBorder(4, 4, 4, 4),
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.NORTH, projectTypePanel),
 					node(BorderLayout.SOUTH, projectDirectoryPanel)
@@ -204,7 +203,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 
 		return new Node[]
 		{
-			node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(new BorderLayout(),
+			node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
 				node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (c, e) -> {
 					if (c.isSelected())
 						addTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
@@ -302,8 +301,8 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		
 		final Container contentPane = containerOf(
-			apply(new JPanel(), (p) -> p.setBorder(createEmptyBorder(8, 8, 8, 8))), 
-			new BorderLayout(8, 8),
+			createEmptyBorder(8, 8, 8, 8), 
+			borderLayout(8, 8),
 			node(BorderLayout.CENTER, label(prompt)),
 			node(BorderLayout.SOUTH, field)
 		);
@@ -403,7 +402,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			receiver.getApplicationContainer(), 
 			utils.getWindowIcons(), 
 			language.getText("doommake.newproject.modal.openproject.title"),
-			containerOf(new BorderLayout(4, 4),
+			containerOf(borderLayout(4, 4),
 				node(BorderLayout.CENTER, wrappedLabel(language.getText("doommake.newproject.modal.openproject.message")))
 			),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.folder", true),

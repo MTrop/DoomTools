@@ -3,8 +3,6 @@ package net.mtrop.doom.tools.gui.apps.swing.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -60,7 +58,9 @@ import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
+
 
 /**
  * The editor panel for editing many files at once.
@@ -214,10 +214,10 @@ public class MultiFileEditorPanel extends JPanel
 		this.filePathLabel = label();
 		this.caretPositionLabel = label();
 		this.encodingModeLabel = apply(label(), (e) -> {
-			e.setComponentPopupMenu(popupMenu(spacingNodes));
-		});
-		this.encodingModeLabel = apply(label(), (e) -> {
 			e.setComponentPopupMenu(popupMenu(encodingNodes));
+		});
+		this.spacingModeLabel = apply(label(), (e) -> {
+			e.setComponentPopupMenu(popupMenu(spacingNodes));
 		});
 		this.syntaxStyleLabel = apply(label(), (e) -> {
 			e.setComponentPopupMenu(popupMenu(languageNodes));
@@ -263,11 +263,11 @@ public class MultiFileEditorPanel extends JPanel
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
 		
-		containerOf(this, new BorderLayout(0, 2),
+		containerOf(this, borderLayout(0, 2),
 			node(BorderLayout.CENTER, this.mainEditorTabs),
-			node(BorderLayout.SOUTH, containerOf(new GridLayout(1, 2),
+			node(BorderLayout.SOUTH, containerOf(gridLayout(1, 2),
 				node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(filePathLabel))),
-				node(containerOf(new GridLayout(1, 4),
+				node(containerOf(gridLayout(1, 4),
 					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(syntaxStyleLabel))),
 					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(encodingModeLabel))),
 					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))),
@@ -284,7 +284,19 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content)
 	{
-		createNewTab(tabName, null, null, content);
+		createNewTab(tabName, null, Charset.defaultCharset(), null, content);
+	}
+	
+	/**
+	 * Creates a new editor tab with a name.
+	 * @param tabName the name of the tab.
+	 * @param content the initial content of the new editor.
+	 * @param encoding the default encoding.
+	 * @param styleName the default style. Can be null to not force a style. 
+	 */
+	public void newEditor(String tabName, String content, Charset encoding, String styleName)
+	{
+		createNewTab(tabName, null, encoding, styleName, content);
 	}
 	
 	/**
@@ -311,7 +323,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, writer.toString());
+		createNewTab(file.getName(), file, encoding, null, writer.toString());
 	}
 	
 	/**
@@ -530,27 +542,30 @@ public class MultiFileEditorPanel extends JPanel
 	/**
 	 * Creates a new editor, returning the editor tab.
 	 * @param title the tab title.
-	 * @param content the content.
 	 * @param attachedFile the content source file (if any, can be null).
 	 * @param fileCharset the file's source charset.
+	 * @param styleName the default style. Can be null to not force a style. 
+	 * @param content the content.
 	 * @return the editor handle created.
 	 */
-	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String content)
+	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, String content)
 	{
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
-		String styleName;
-		if (attachedFile != null)
-			styleName = editorProvider.getStyleByFile(attachedFile);
-		else
-			styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
+		if (styleName == null)
+		{
+			if (attachedFile != null)
+				styleName = editorProvider.getStyleByFile(attachedFile);
+			else
+				styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
+		}
 		
 		textArea.setText(content);
 		textArea.setCaretPosition(0);
 		
 		EditorHandle handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
-			: new EditorHandle(title, styleName, textArea)
+			: new EditorHandle(title, fileCharset, styleName, textArea)
 		;
 
 		// ==================================================================
@@ -576,6 +591,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		if (listener != null)
 			listener.onOpen(handle);
+		
 		return handle;
 	}
 
@@ -605,6 +621,8 @@ public class MultiFileEditorPanel extends JPanel
 		updateEditorHooks();
 		if (listener != null)
 			listener.onCurrentEditorChange(handle);
+		if (currentEditor != null)
+			currentEditor.editorPanel.textArea.requestFocus();
 	}
 	
 	private void removeEditorByTab(Component tabComponent)
@@ -735,7 +753,7 @@ public class MultiFileEditorPanel extends JPanel
 			containerOf(label(language.getText("texteditor.action.save.modal.message", handle.editorTab.getTabTitle()))), 
 			utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 			utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
-			utils.createChoiceFromLanguageKey("doomtools.cancel", null)
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
 		).openThenDispose();
 		
 		if (saveChoice == null)
@@ -872,7 +890,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		Integer selected = utils.createModal(
 			language.getText("texteditor.modal.goto.title"),
-			containerOf(new GridLayout(2, 1, 0, 4),
+			containerOf(gridLayout(2, 1, 0, 4),
 				node(label(language.getText("texteditor.modal.goto.message", lineMax))),
 				node(lineField)
 			),
@@ -979,19 +997,20 @@ public class MultiFileEditorPanel extends JPanel
 		/** Editor panel. */
 		private EditorPanel editorPanel;
 		
-		private EditorHandle(String title, String styleName, RSyntaxTextArea textArea)
+		private EditorHandle(String title, Charset sourceCharset, String styleName, RSyntaxTextArea textArea)
 		{
 			this.savedIcon = icons.getImage("script.png");
 			this.unsavedIcon = icons.getImage("script-unsaved.png");
 
 			this.contentSourceFile = null;
-			this.contentCharset = Charset.defaultCharset();
+			this.contentCharset = sourceCharset;
 			this.contentLastModified = -1L;
 			this.contentSourceFileLastModified = -1L;
 			this.currentStyle = styleName;
 			
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
+			textArea.setSyntaxEditingStyle(styleName);
 			textArea.getDocument().addDocumentListener(new DocumentListener()
 			{
 				@Override
@@ -1013,12 +1032,11 @@ public class MultiFileEditorPanel extends JPanel
 				}
 			});
 			
-			textArea.setSyntaxEditingStyle(styleName);
 		}
 		
 		private EditorHandle(File contentSourceFile, Charset sourceCharset, String styleName, RSyntaxTextArea textArea)
 		{
-			this(contentSourceFile.getName(), styleName, textArea);
+			this(contentSourceFile.getName(), sourceCharset, styleName, textArea);
 			this.contentSourceFile = contentSourceFile;
 			this.contentCharset = sourceCharset;
 			this.contentLastModified = contentSourceFile.lastModified();
@@ -1115,7 +1133,7 @@ public class MultiFileEditorPanel extends JPanel
 				b.setOpaque(false);
 			});
 			setOpaque(false);
-			containerOf(this, (Border)null, new FlowLayout(FlowLayout.LEADING, 8, 0),
+			containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
 				node(titleLabel),
 				node(closeButton)
 			);

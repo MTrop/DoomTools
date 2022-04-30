@@ -793,6 +793,14 @@ public class ProcessCallable implements Callable<Integer>
 	{
 		String[] cmd = command.toArray(new String[command.size()]);
 		String[] env = envMap.isEmpty() ? null : new String[envMap.size() * 2];
+		
+		// fix empty args.
+		for (int i = 0; i < cmd.length; i++)
+		{
+			if (cmd[i].length() == 0)
+				cmd[i] = "\"\"";
+		}
+		
 		if (env != null)
 		{
 			int i = 0;

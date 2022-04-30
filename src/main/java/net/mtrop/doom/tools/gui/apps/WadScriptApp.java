@@ -1,6 +1,7 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,11 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.JButton;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.filechooser.FileFilter;
 
@@ -23,6 +27,7 @@ import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.ActionNames;
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -43,6 +48,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
 /**
@@ -187,12 +193,12 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(650, 500), createEmptyBorder(4, 4, 4, 4), new BorderLayout(0, 4), 
+		return containerOf(dimension(650, 500), createEmptyBorder(4, 4, 4, 4), borderLayout(0, 4), 
 			node(BorderLayout.CENTER, editorPanel),
-			node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
-				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
+			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
+				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
 					node(BorderLayout.NORTH, utils.createTitlePanel(language.getText("wadscript.workdir.title"), workingDirFileField)),
-					node(BorderLayout.SOUTH, utils.createTitlePanel(language.getText("wadscript.entrypoint.title"), containerOf(new BorderLayout(4, 0),
+					node(BorderLayout.SOUTH, utils.createTitlePanel(language.getText("wadscript.entrypoint.title"), containerOf(borderLayout(4, 0),
 						node(BorderLayout.CENTER, entryPointField),
 						node(BorderLayout.LINE_END, containerOf(
 							node(BorderLayout.CENTER, runScriptButton),
@@ -313,7 +319,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private void onNewEditor()
 	{
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, EMPTY_SCRIPT);
+		editorPanel.newEditor(editorName, EMPTY_SCRIPT, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
 	}
 	
 	private void onOpenEditor()
@@ -352,13 +358,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	{
 		workingDirFileField.setValue(directory);
 	}
-	
-	private void onExecuteScriptArgs()
-	{
-		// TODO: Finish this with args.
-	}
-	
-	private void onExecuteScript(boolean showLog, final InputStream standardIn, final String[] args)
+
+	private boolean saveBeforeExecute()
 	{
 		final Container parent = receiver.getApplicationContainer();
 
@@ -369,19 +370,47 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				containerOf(label(language.getText("wadscript.run.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
-				utils.createChoiceFromLanguageKey("doomtools.cancel", null)
+				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
 			).openThenDispose();
 			
 			if (saveChoice == null)
-				return;
+				return false;
 			else if (saveChoice == true)
 			{
 				if (!editorPanel.saveCurrentEditor())
-					return;
+					return false;
 			}
 		}
 		
+		return true;
+	}
+	
+	private void onExecuteScriptArgs()
+	{
+		if (!saveBeforeExecute())
+			return;
+
+		final ExecuteWithArgsPanel argsPanel = new ExecuteWithArgsPanel(0);
+		Boolean run = modal(
+			language.getText("wadscript.run.message.withargs.title"),
+			argsPanel,
+			utils.createChoiceFromLanguageKey("wadscript.run.message.withargs.choice.run", true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel")
+		).openThenDispose();
+		
+		if (run == null)
+			return;
+		
+		// TODO: Optional inputstream.
+		onExecuteScript(true, IOUtils.getNullInputStream(), argsPanel.getArgs());
+	}
+	
+	private void onExecuteScript(boolean showLog, final InputStream standardIn, final String[] args)
+	{
 		File scriptFile = currentHandle.getContentSourceFile();
+		
+		if (!saveBeforeExecute())
+			return;
 		
 		if (showLog)
 		{
@@ -465,6 +494,81 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			return TYPES;
 		}
 	
+	}
+	
+	private class ExecuteWithArgsPanel extends JPanel
+	{
+		private static final long serialVersionUID = 7224502874487792742L;
+		
+		private JFormField<Integer> numArgsField; 
+		private Container fieldPanel;
+		private List<JFormField<String>> fieldList;
+		private List<Component> componentList;
+		
+		private ExecuteWithArgsPanel(final int initArgCount)
+		{
+			this.numArgsField = integerField(initArgCount, (v) -> adjustFields(v));
+			this.fieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
+			this.fieldList = new ArrayList<>(Math.max(initArgCount, 4));
+			this.componentList = new ArrayList<>(Math.max(initArgCount, 4));
+			
+			containerOf(this,
+				node(BorderLayout.NORTH, form(96).addField(language.getText("wadscript.run.message.withargs.argfield"), numArgsField)),
+				node(BorderLayout.CENTER, dimension(256, 128), scroll(containerOf(
+					node(BorderLayout.NORTH, fieldPanel),
+					node(BorderLayout.CENTER, containerOf())
+				)))
+			);
+			adjustFields(initArgCount);
+		}
+		
+		private void adjustFields(int newLen)
+		{
+			final int start = fieldList.size();
+			newLen = Math.max(newLen, 0);
+			
+			if (newLen < start)
+			{
+				while (fieldList.size() > newLen)
+				{
+					int idx = fieldList.size() - 1;
+					fieldList.remove(idx);
+					fieldPanel.remove(componentList.remove(idx));
+				}
+			}
+			else if (start < newLen)
+			{
+				while (fieldList.size() < newLen)
+				{
+					int idx = fieldList.size();
+					JFormField<String> argField = stringField();
+					Container container = containerOf(
+						node(BorderLayout.LINE_START, dimension(48, 20), label(String.valueOf(idx))),
+						node(BorderLayout.CENTER, argField)
+					);
+					fieldList.add(argField);
+					fieldPanel.add(container);
+					componentList.add(container);
+				}
+			}
+			// Refresh panel.
+			SwingUtils.invoke(() -> {
+				fieldPanel.revalidate();
+			});
+		}
+		
+		/**
+		 * @return an array of the entered arguments.
+		 */
+		public String[] getArgs()
+		{
+			int size = fieldList.size();
+			List<String> argList = new ArrayList<>(size);
+			for (JFormField<String> field : fieldList)
+				argList.add(field.getValue());
+			return argList.toArray(new String[size]);
+		}
+		
 	}
 	
 }

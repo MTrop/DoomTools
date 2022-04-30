@@ -18,6 +18,7 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
+
 /**
  * The settings panel for all of DoomTools (and individual apps).
  * @author Matthew Tropiano
@@ -39,7 +40,7 @@ public class DoomToolsSettingsPanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomToolsSettingsManager.get();
 		
-		containerOf(this, new BorderLayout(),
+		containerOf(this,
 			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
 				tab("DoomTools", containerOf(createEmptyBorder(4, 4, 4, 4),
 					node(createMainPanel())

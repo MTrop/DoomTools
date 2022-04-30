@@ -8,11 +8,11 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
-import static net.mtrop.doom.tools.struct.swing.ComponentFactory.icon;
-import static net.mtrop.doom.tools.struct.swing.ContainerFactory.containerOf;
-import static net.mtrop.doom.tools.struct.swing.ContainerFactory.node;
-
 import java.awt.BorderLayout;
+
+import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 /**
  * A message panel that shows a status icon and a message.
@@ -47,7 +47,7 @@ public class DoomToolsStatusPanel extends JPanel
 		this.errorIcon = icon(images.getImage("error.png"));
 		
 		this.setBorder(null);
-		containerOf(this, new BorderLayout(0, 4), 
+		containerOf(this, borderLayout(0, 4), 
 			node(BorderLayout.CENTER, messageLabel)
 		);
 	}

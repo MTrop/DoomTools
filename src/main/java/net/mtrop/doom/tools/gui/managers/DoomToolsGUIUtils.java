@@ -36,11 +36,11 @@ import net.mtrop.doom.tools.struct.swing.ContainerFactory.ModalChoice;
 import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 
-import static javax.swing.BorderFactory.createEmptyBorder;
-import static javax.swing.BorderFactory.createLineBorder;
-import static javax.swing.BorderFactory.createTitledBorder;
+import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
 
 /**
  * DoomTools GUI Utilities and component building.
@@ -303,7 +303,7 @@ public final class DoomToolsGUIUtils
 	 */
 	public <T> ModalChoice<T> createChoiceFromLanguageKey(String keyPrefix)
 	{
-		return createChoiceFromLanguageKey(keyPrefix, null);
+		return createChoiceFromLanguageKey(keyPrefix, (T)null);
 	}
 
 	/**
@@ -380,7 +380,7 @@ public final class DoomToolsGUIUtils
 		final Modal<Void> outputModal = modal(
 			parent, 
 			title,
-			containerOf(new BorderLayout(0, 4),
+			containerOf(borderLayout(0, 4),
 				node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, outputPanel)),
 				node(BorderLayout.SOUTH, status)
 			)

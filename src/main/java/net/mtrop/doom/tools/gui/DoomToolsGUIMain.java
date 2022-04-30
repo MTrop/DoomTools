@@ -284,11 +284,11 @@ public final class DoomToolsGUIMain
 		});
     	
     	Rectangle windowBounds;
-    	if ((windowBounds = settings.getWindowBounds()) != null)
+    	if ((windowBounds = settings.getWindowBounds("doomtools")) != null)
     		window.setBounds(windowBounds);
     	
     	window.setVisible(true);
-		if (settings.getWindowMaximized())
+		if (settings.getWindowMaximized("doomtools"))
 			window.setExtendedState(window.getExtendedState() | DoomToolsMainWindow.MAXIMIZED_BOTH);
 		
     	LOG.info("Window created.");
@@ -315,9 +315,7 @@ public final class DoomToolsGUIMain
     	window.shutDownApps();
     	
     	LOG.debug("Disposing main window...");
-    	settings.setWindowBounds(window.getX(), window.getY(), window.getWidth(), window.getHeight(), 
-    		(window.getExtendedState() & DoomToolsMainWindow.MAXIMIZED_BOTH) != 0
-    	);
+    	settings.setWindowBounds("doomtools", window);
     	window.setVisible(false);
     	window.dispose();
     	LOG.debug("Main window disposed.");

@@ -10,6 +10,8 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
 
 /**
  * A progress panel that displays a message and a progress bar.
@@ -34,7 +36,7 @@ public class DoomToolsProgressPanel extends JPanel
 		this.progressLabel = SwingUtils.apply(label(JLabel.TRAILING, ""), 
 			(label) -> label.setPreferredSize(dimension(progressLabelWidth, 32))
 		);
-		containerOf(this, new BorderLayout(8, 4),
+		containerOf(this, borderLayout(8, 4),
 			node(BorderLayout.NORTH, statusPanel),
 			node(BorderLayout.CENTER, progressBar),
 			node(BorderLayout.EAST, progressLabel)

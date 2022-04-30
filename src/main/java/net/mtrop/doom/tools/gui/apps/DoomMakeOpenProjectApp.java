@@ -42,6 +42,7 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
 
 /**
@@ -217,13 +218,13 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.EAST, control)
 				)),
-				node(BorderLayout.CENTER, containerOf(new BorderLayout(0, 4),
+				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
 					node(BorderLayout.CENTER, containerOf(targetsBorder, 
 						node(containerOf(createEmptyBorder(4, 4, 4, 4), 
 							node(scroll(listPanel))
 						))
 					)),
-					node(BorderLayout.SOUTH, containerOf(new BorderLayout(0, 4),
+					node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 						node(BorderLayout.CENTER, autoBuildCheckbox),
 						node(BorderLayout.EAST, button(targetRunAction)),
 						node(BorderLayout.SOUTH, statusPanel)

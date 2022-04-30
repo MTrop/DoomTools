@@ -6,6 +6,8 @@ import java.io.PrintStream;
 import javax.swing.JPanel;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
 
 /**
  * A Swing panel that tracks a process or a call to DoomTools.
@@ -25,7 +27,7 @@ public class DoomToolsProcessPanel extends JPanel
 		this.textOutputPanel = new DoomToolsTextOutputPanel();
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		containerOf(this, new BorderLayout(0, 4), 
+		containerOf(this, borderLayout(0, 4), 
 			node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, textOutputPanel)),
 			node(BorderLayout.SOUTH, statusPanel)
 		);

@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.managers;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,17 +47,18 @@ public final class DoomToolsSettingsManager
 	/* ==================================================================== */
 	
     private static final String DOOMTOOLS_THEME = "doomtools.theme";
-    private static final String DOOMTOOLS_WINDOW_X = "doomtools.window.x";
-    private static final String DOOMTOOLS_WINDOW_Y = "doomtools.window.y";
-    private static final String DOOMTOOLS_WINDOW_WIDTH = "doomtools.window.width";
-    private static final String DOOMTOOLS_WINDOW_HEIGHT = "doomtools.window.height";
-    private static final String DOOMTOOLS_WINDOW_MAXIMIZED = "doomtools.window.max";
-    private static final String DOOMTOOLS_LAST_PATH = "doomtools.lastPath";
     private static final String DOOMMAKE_PATH_LAST_PROJECT = "doommake.path.lastProject";
     private static final String DOOMMAKE_PATH_SLADE = "doommake.path.slade";
     private static final String DOOMMAKE_PATH_VSCODE = "doommake.path.vscode";
 
     private static final String EDITOR_VIEW = ".editor.view";
+    private static final String WINDOW_X = ".window.x";
+    private static final String WINDOW_Y = ".window.y";
+    private static final String WINDOW_WIDTH = ".window.width";
+    private static final String WINDOW_HEIGHT = ".window.height";
+    private static final String WINDOW_MAXIMIZED = ".window.max";
+    private static final String LAST_PATH = ".lastPath";
+    
 
 	/* ==================================================================== */
 
@@ -137,43 +139,56 @@ public final class DoomToolsSettingsManager
 	}
 	
 	/**
-	 * Sets the main DoomTools window bounds.
+	 * Sets window bounds.
+	 * @param keyName an associated key.
+	 * @param window the window to get size from.
+	 */
+	public void setWindowBounds(String keyName, Frame window)
+	{
+		setWindowBounds(keyName, window.getX(), window.getY(), window.getWidth(), window.getHeight(), (window.getExtendedState() & Frame.MAXIMIZED_BOTH) != 0);
+	}
+	
+	/**
+	 * Sets window bounds.
+	 * @param keyName an associated key.
 	 * @param x 
 	 * @param y 
 	 * @param width 
 	 * @param height 
 	 * @param maximized if window was maximized
 	 */
-	public void setWindowBounds(int x, int y, int width, int height, boolean maximized) 
+	public void setWindowBounds(String keyName, int x, int y, int width, int height, boolean maximized) 
 	{
-		properties.setProperty(DOOMTOOLS_WINDOW_X, String.valueOf(x));
-		properties.setProperty(DOOMTOOLS_WINDOW_Y, String.valueOf(y));
-		properties.setProperty(DOOMTOOLS_WINDOW_WIDTH, String.valueOf(width));
-		properties.setProperty(DOOMTOOLS_WINDOW_HEIGHT, String.valueOf(height));
-		properties.setProperty(DOOMTOOLS_WINDOW_MAXIMIZED, String.valueOf(maximized));
+		properties.setProperty(keyName + WINDOW_X, String.valueOf(x));
+		properties.setProperty(keyName + WINDOW_Y, String.valueOf(y));
+		properties.setProperty(keyName + WINDOW_WIDTH, String.valueOf(width));
+		properties.setProperty(keyName + WINDOW_HEIGHT, String.valueOf(height));
+		properties.setProperty(keyName + WINDOW_MAXIMIZED, String.valueOf(maximized));
 		saveProperties();
 	}
 
 	/**
-	 * Gets the main DoomTools window bounds.
+	 * Gets window bounds.
+	 * @param keyName an associated key.
 	 * @return the bounds.
 	 */
-	public Rectangle getWindowBounds()
+	public Rectangle getWindowBounds(String keyName)
 	{
 		return new Rectangle(
-			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_X), 0),
-			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_Y), 0),
-			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_WIDTH), 720),
-			ValueUtils.parseInt(properties.getProperty(DOOMTOOLS_WINDOW_HEIGHT), 480)
+			ValueUtils.parseInt(properties.getProperty(keyName + WINDOW_X), 0),
+			ValueUtils.parseInt(properties.getProperty(keyName + WINDOW_Y), 0),
+			ValueUtils.parseInt(properties.getProperty(keyName + WINDOW_WIDTH), 720),
+			ValueUtils.parseInt(properties.getProperty(keyName + WINDOW_HEIGHT), 480)
 		);
 	}
 	
 	/**
+	 * @param keyName an associated key.
 	 * @return if the main DoomTools window should be maximized.
 	 */
-	public boolean getWindowMaximized()
+	public boolean getWindowMaximized(String keyName)
 	{
-		return ValueUtils.parseBoolean(properties.getProperty(DOOMTOOLS_WINDOW_MAXIMIZED), false);
+		return ValueUtils.parseBoolean(properties.getProperty(keyName + WINDOW_MAXIMIZED), false);
 	}
 	
 	/**
@@ -183,7 +198,7 @@ public final class DoomToolsSettingsManager
 	 */
 	public void setLastPath(String keyName, File path) 
 	{
-		properties.setProperty(DOOMTOOLS_LAST_PATH + "." + keyName, path != null ? path.getAbsolutePath() : "");
+		properties.setProperty(keyName + LAST_PATH, path != null ? path.getAbsolutePath() : "");
 		saveProperties();
 	}
 
@@ -193,7 +208,7 @@ public final class DoomToolsSettingsManager
 	 */
 	public File getLastPath(String keyName) 
 	{
-		String path = properties.getProperty(DOOMTOOLS_LAST_PATH + "." + keyName);
+		String path = properties.getProperty(keyName + LAST_PATH);
 		return path != null && path.length() >= 0 ? new File(path) : null;
 	}
 

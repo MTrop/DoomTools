@@ -8,10 +8,17 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.swing.text.Segment;
+
+import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.TokenMap;
+import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
+import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
@@ -108,6 +115,7 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = -2069191041359249343L;
 		{
+			put("Plain Text",         SyntaxConstants.SYNTAX_STYLE_NONE);
 			put("DECOHack",           SYNTAX_STYLE_DECOHACK);
 			put("DoomMake",           SYNTAX_STYLE_DOOMMAKE);
 			put("RookScript",         SYNTAX_STYLE_ROOKSCRIPT);
@@ -206,6 +214,20 @@ public final class DoomToolsEditorProvider
 		return INSTANCE.get();
 	}
 	
+	// Adds all the custom stuff.
+	private static void initCustomLanguages()
+	{
+		AbstractTokenMakerFactory tokenMakers = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
+		FoldParserManager foldManager = FoldParserManager.get();
+		
+		/*
+		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT, RookScriptTokenMaker.class.getName());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT, new CurlyFoldParser());
+		*/
+		
+		// TODO: Add the rest.
+	}
+
 	/* ==================================================================== */
 	
 	public DoomToolsEditorProvider()
@@ -249,12 +271,6 @@ public final class DoomToolsEditorProvider
 		return OTHER_CHARSETS;
 	}
 	
-	private static void initCustomLanguages()
-	{
-		AbstractTokenMakerFactory atmf = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
-		//atmf.putMapping("text/x-wadscript", "fully.qualified.classNameOfYourSyntaxStyle");
-	}
-	
 	/**
 	 * Creates a text area using the file's name as a basis for type.
 	 * @param file the file to use to find a type from.
@@ -271,6 +287,66 @@ public final class DoomToolsEditorProvider
 			styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
 
 		return styleName;
+	}
+
+	/**
+	 * Token maker for DoomMake/WadScript/RookScript. 
+	 */
+	public static class RookScriptTokenMaker extends AbstractTokenMaker
+	{
+		protected static void addRookScriptKeywords(TokenMap targetMap)
+		{
+			// Rookscript Common.
+			targetMap.put("if",       Token.RESERVED_WORD);
+			targetMap.put("else",     Token.RESERVED_WORD);
+			targetMap.put("return",   Token.RESERVED_WORD);
+			targetMap.put("while",    Token.RESERVED_WORD);
+			targetMap.put("for",      Token.RESERVED_WORD);
+			targetMap.put("each",     Token.RESERVED_WORD);
+			targetMap.put("entry",    Token.RESERVED_WORD);
+			targetMap.put("function", Token.RESERVED_WORD);
+			targetMap.put("break",    Token.RESERVED_WORD);
+			targetMap.put("continue", Token.RESERVED_WORD);
+			targetMap.put("check",    Token.RESERVED_WORD);
+			
+			targetMap.put("null",     Token.LITERAL_NUMBER_DECIMAL_INT);
+			targetMap.put("true",     Token.LITERAL_BOOLEAN);
+			targetMap.put("false",    Token.LITERAL_BOOLEAN);
+			targetMap.put("infinity", Token.LITERAL_NUMBER_FLOAT);
+			targetMap.put("nan",      Token.LITERAL_NUMBER_FLOAT);
+		}
+		
+		@Override
+		public TokenMap getWordsToHighlight() 
+		{
+			TokenMap map = new TokenMap(true);
+			addRookScriptKeywords(map);
+			return new TokenMap();
+		}
+
+		@Override
+		public void addToken(char[] segment, int start, int end, int tokenType, int startOffset, boolean hyperLink) 
+		{
+			// This assumes all keywords, etc. were parsed as "identifiers."
+			if (tokenType == Token.IDENTIFIER) 
+			{
+				int value;
+				if ((value = wordsToHighlight.get(segment, start, end)) != -1) 
+					tokenType = value;
+			}
+			super.addToken(segment, start, end, tokenType, startOffset, hyperLink);
+		}
+		
+		@Override
+		public Token getTokenList(Segment text, int initialTokenType, int startOffset)
+		{
+			resetTokenList();
+			
+			// TODO: Write parser.
+			
+			return firstToken;
+		}
+		
 	}
 	
 }

@@ -12,7 +12,6 @@ import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 
 import javax.swing.JCheckBox;
@@ -25,6 +24,8 @@ import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
 
 /**
  * A Find/Replace panel.
@@ -115,13 +116,13 @@ public class FindReplacePanel extends JPanel
 		forwardButton.setSelected(true);
 		allButton.setSelected(true);
 		
-		containerOf(this, new BorderLayout(0, 4),
-			node(BorderLayout.NORTH, containerOf(new GridLayout(3, 1, 0, 4),
+		containerOf(this, borderLayout(0, 4),
+			node(BorderLayout.NORTH, containerOf(gridLayout(3, 1, 0, 4),
 				node(form(96)
 					.addField(language.getText("texteditor.modal.find.field.find"), findField)
 					.addField(language.getText("texteditor.modal.find.field.replace"), replaceField)
 				),
-				node(containerOf(new GridLayout(1, 2, 4, 0),
+				node(containerOf(gridLayout(1, 2, 4, 0),
 					node(containerOf(createTitledBorder(createEtchedBorder(), language.getText("texteditor.modal.find.field.direction"), TitledBorder.LEADING, TitledBorder.TOP), 
 						node(form(112)
 							.addField(language.getText("texteditor.modal.find.field.direction.forward"), radioField(forwardButton))
@@ -135,7 +136,7 @@ public class FindReplacePanel extends JPanel
 						)
 					))
 				)),
-				node(containerOf(createTitledBorder(createEtchedBorder(), language.getText("texteditor.modal.find.field.options"), TitledBorder.LEADING, TitledBorder.TOP), new GridLayout(1, 2, 4, 4),
+				node(containerOf(createTitledBorder(createEtchedBorder(), language.getText("texteditor.modal.find.field.options"), TitledBorder.LEADING, TitledBorder.TOP), gridLayout(1, 2, 4, 4),
 					node(form(112)
 						.addField(language.getText("texteditor.modal.find.field.options.case"), matchCase)
 						.addField(language.getText("texteditor.modal.find.field.options.wholeword"), wholeWord)
@@ -149,7 +150,7 @@ public class FindReplacePanel extends JPanel
 			node(BorderLayout.CENTER, dimension(256, 16), message), // empty
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, containerOf()), // empty
-				node(BorderLayout.LINE_END, containerOf(new GridLayout(2, 2, 4, 4),
+				node(BorderLayout.LINE_END, containerOf(gridLayout(2, 2, 4, 4),
 					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.find", (c, e) -> onFind())),
 					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replace", (c, e) -> onReplace())),
 					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replaceall", (c, e) -> onReplaceAll()))

@@ -1244,6 +1244,21 @@ public final class WadScriptMain
 		}
 		
 	}
+
+	/**
+	 * Gets all known host function signatures.
+	 * @return an array of all of the types.
+	 */
+	public static ScriptFunctionType[] getAllHostFunctions()
+	{
+		List<ScriptFunctionType> outList = new LinkedList<>();
+		for (int i = 0; i < RESOLVERS.length; i++)
+		{
+			for (ScriptFunctionType type : RESOLVERS[i].resolver.getFunctions())
+				outList.add(type);
+		}
+		return outList.toArray(new ScriptFunctionType[outList.size()]); 
+	}
 	
 	/**
 	 * Reads command line arguments and sets options.

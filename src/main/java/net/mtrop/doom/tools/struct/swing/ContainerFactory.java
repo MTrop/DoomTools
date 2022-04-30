@@ -1171,7 +1171,7 @@ public final class ContainerFactory
 	 */
 	public static <T> ModalChoice<T> choice(String label, int mnemonic)
 	{
-		return choice(null, label, mnemonic, (T)null);
+		return choice(null, label, mnemonic, () -> null);
 	}
 	
 	/**
@@ -1194,7 +1194,7 @@ public final class ContainerFactory
 	 */
 	public static <T> ModalChoice<T> choice(String label)
 	{
-		return choice(null, label, 0, (T)null);
+		return choice(null, label, 0, () -> null);
 	}
 	
 	/**
@@ -1205,7 +1205,7 @@ public final class ContainerFactory
 	 */
 	public static <T> ModalChoice<T> choice(Icon icon)
 	{
-		return choice(icon, null, 0, (T)null);
+		return choice(icon, null, 0, () -> null);
 	}
 	
 	/**

@@ -28,6 +28,7 @@ import com.blackrook.json.JSONConversionException;
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
+import com.blackrook.rookscript.lang.ScriptFunctionType;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
@@ -705,6 +706,22 @@ public final class DoomMakeMain
 			return ERROR_NONE;
 		}
 		
+	}
+	
+	/**
+	 * Gets all known host function signatures.
+	 * @return an array of all of the types.
+	 */
+	public static ScriptFunctionType[] getAllHostFunctions()
+	{
+		List<ScriptFunctionType> outList = new LinkedList<>();
+		for (ScriptFunctionType type : WadScriptMain.getAllHostFunctions())
+			outList.add(type);
+		for (ScriptFunctionType type : DoomMakeFunctions.createResolver().getFunctions())
+			outList.add(type);
+		for (ScriptFunctionType type : ToolInvocationFunctions.createResolver().getFunctions())
+			outList.add(type);
+		return outList.toArray(new ScriptFunctionType[outList.size()]); 
 	}
 	
 	/**
