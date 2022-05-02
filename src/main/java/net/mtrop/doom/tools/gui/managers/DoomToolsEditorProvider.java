@@ -8,22 +8,18 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.swing.text.Segment;
-
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.TokenMap;
-import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
+import net.mtrop.doom.tools.gui.managers.tokenizers.RookScriptTokenMaker;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+
 
 /**
  * Utility singleton for generating {@link RSyntaxTextArea} instances.
@@ -214,9 +210,14 @@ public final class DoomToolsEditorProvider
 		return INSTANCE.get();
 	}
 	
+	private static volatile boolean initLanguages = false;
+	
 	// Adds all the custom stuff.
 	private static void initCustomLanguages()
 	{
+		if (initLanguages)
+			return;
+		
 		AbstractTokenMakerFactory tokenMakers = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
 		FoldParserManager foldManager = FoldParserManager.get();
 		
@@ -226,6 +227,8 @@ public final class DoomToolsEditorProvider
 		*/
 		
 		// TODO: Add the rest.
+		
+		initLanguages = true;
 	}
 
 	/* ==================================================================== */
@@ -289,64 +292,4 @@ public final class DoomToolsEditorProvider
 		return styleName;
 	}
 
-	/**
-	 * Token maker for DoomMake/WadScript/RookScript. 
-	 */
-	public static class RookScriptTokenMaker extends AbstractTokenMaker
-	{
-		protected static void addRookScriptKeywords(TokenMap targetMap)
-		{
-			// Rookscript Common.
-			targetMap.put("if",       Token.RESERVED_WORD);
-			targetMap.put("else",     Token.RESERVED_WORD);
-			targetMap.put("return",   Token.RESERVED_WORD);
-			targetMap.put("while",    Token.RESERVED_WORD);
-			targetMap.put("for",      Token.RESERVED_WORD);
-			targetMap.put("each",     Token.RESERVED_WORD);
-			targetMap.put("entry",    Token.RESERVED_WORD);
-			targetMap.put("function", Token.RESERVED_WORD);
-			targetMap.put("break",    Token.RESERVED_WORD);
-			targetMap.put("continue", Token.RESERVED_WORD);
-			targetMap.put("check",    Token.RESERVED_WORD);
-			
-			targetMap.put("null",     Token.LITERAL_NUMBER_DECIMAL_INT);
-			targetMap.put("true",     Token.LITERAL_BOOLEAN);
-			targetMap.put("false",    Token.LITERAL_BOOLEAN);
-			targetMap.put("infinity", Token.LITERAL_NUMBER_FLOAT);
-			targetMap.put("nan",      Token.LITERAL_NUMBER_FLOAT);
-		}
-		
-		@Override
-		public TokenMap getWordsToHighlight() 
-		{
-			TokenMap map = new TokenMap(true);
-			addRookScriptKeywords(map);
-			return new TokenMap();
-		}
-
-		@Override
-		public void addToken(char[] segment, int start, int end, int tokenType, int startOffset, boolean hyperLink) 
-		{
-			// This assumes all keywords, etc. were parsed as "identifiers."
-			if (tokenType == Token.IDENTIFIER) 
-			{
-				int value;
-				if ((value = wordsToHighlight.get(segment, start, end)) != -1) 
-					tokenType = value;
-			}
-			super.addToken(segment, start, end, tokenType, startOffset, hyperLink);
-		}
-		
-		@Override
-		public Token getTokenList(Segment text, int initialTokenType, int startOffset)
-		{
-			resetTokenList();
-			
-			// TODO: Write parser.
-			
-			return firstToken;
-		}
-		
-	}
-	
 }

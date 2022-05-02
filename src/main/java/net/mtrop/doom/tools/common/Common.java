@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -119,117 +118,6 @@ public final class Common
 	}
 	
 	/**
-	 * Creates a key-value entry.
-	 * @param key the key.
-	 * @param value the value.
-	 * @return a new entry.
-	 */
-	public static <K, V> Map.Entry<K, V> keyValue(K key, V value)
-	{
-		KeyValue<K, V> out = new KeyValue<>();
-		out.key = key;
-		out.value = value;
-		return out;
-	}
-	
-	/**
-	 * Creates a new immutable map.
-	 * @param <K> the key type.
-	 * @param <V> the value type.
-	 * @param entries the entries to add.
-	 * @return the new map.
-	 */
-	@SafeVarargs
-	public static <K, V> Map<K, V> map(Map.Entry<K, V> ... entries)
-	{
-		Map<K, V> out = new HashMap<>();
-		for (Map.Entry<K, V> e : entries)
-			out.put(e.getKey(), e.getValue());
-		return Collections.unmodifiableMap(out);
-	}
-	
-	/**
-	 * Replaces a series of keys in an input character sequence.
-	 * <p>Each keyword is wrapped in <code>${}</code> and a map is provided that maps
-	 * keyword to object to replace with (the {@link String#toString()}). You can output a
-	 * <code>$</code> by doubling it up in the input character sequence. If a replace key 
-	 * is not found in the provided map, the whole expression is not replaced.
-	 * @param source the source characters to parse.
-	 * @param replacerMap the list of replacers.
-	 * @return the resultant string.
-	 */
-	public static String replace(CharSequence source, Map<String, ?> replacerMap)
-	{
-		StringBuilder sb = new StringBuilder();
-		StringBuilder token = new StringBuilder();
-		final int STATE_TEXT = 0;
-		final int STATE_REPLACER_START = 1;
-		final int STATE_REPLACER_TOKEN = 2;
-		
-		int state = STATE_TEXT;
-		for (int i = 0; i < source.length(); i++)
-		{
-			char c = source.charAt(i);
-			switch (state)
-			{
-				case STATE_TEXT:
-				{
-					if (c == '$')
-						state = STATE_REPLACER_START;
-					else
-						sb.append(c);
-				}
-				break;
-				
-				case STATE_REPLACER_START:
-				{
-					if (c == '$')
-					{
-						state = STATE_TEXT;
-						sb.append('$');
-					}
-					else if (c == '{')
-					{
-						state = STATE_REPLACER_TOKEN;
-					}
-					else
-					{
-						sb.append(c);
-					}
-				}
-				break;
-				
-				case STATE_REPLACER_TOKEN:
-				{
-					if (c == '}')
-					{
-						state = STATE_TEXT;
-						String key = token.toString();
-						token.delete(0, token.length());
-						Object value = replacerMap.get(key);
-						if (value != null)
-							sb.append(String.valueOf(value));
-						else
-							sb.append("${").append(key).append('}');
-					}
-					else
-					{
-						token.append(c);
-					}
-				}
-				break;
-			}
-		}
-			
-		if (state == STATE_REPLACER_START)
-			sb.append('$');
-		else if (state == STATE_REPLACER_TOKEN)
-			sb.append("${").append(token.toString());
-			
-		return sb.toString();
-	}
-	
-	/**
 	 * Exports a shell script to a directory.
 	 * @param resourceName the source resource to read from.
 	 * @param mainClass the main class to invoke.
@@ -265,35 +153,6 @@ public final class Common
 	public static ProcessCallable spawnJava(Class<?> mainClass)
 	{
 		return ProcessCallable.java(mainClass, "-Xms64M", "-Xmx768M");
-	}
-	
-	/**
-	 * A single replacer for the text replacers.
-	 */
-	private static class KeyValue<K, V> implements Map.Entry<K, V>
-	{
-		private K key;
-		private V value;
-
-		@Override
-		public K getKey()
-		{
-			return key;
-		}
-		
-		@Override
-		public V getValue()
-		{
-			return value;
-		}
-		
-		@Override
-		public V setValue(V value)
-		{
-			V old = this.value;
-			this.value = value;
-			return old;
-		}
 	}
 	
 }

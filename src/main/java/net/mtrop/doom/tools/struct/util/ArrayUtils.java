@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.struct.util;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 /**
  * Simple utility functions around Arrays.
@@ -303,6 +304,142 @@ public final class ArrayUtils
 			return -1;
 	}
 
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(byte[], int)
+	 */
+	public static byte[] copyAnd(byte[] arr, Consumer<byte[]> operation)
+	{
+		byte[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(short[], int)
+	 */
+	public static short[] copyAnd(short[] arr, Consumer<short[]> operation)
+	{
+		short[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(int[], int)
+	 */
+	public static int[] copyAnd(int[] arr, Consumer<int[]> operation)
+	{
+		int[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(long[], int)
+	 */
+	public static long[] copyAnd(long[] arr, Consumer<long[]> operation)
+	{
+		long[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(float[], int)
+	 */
+	public static float[] copyAnd(float[] arr, Consumer<float[]> operation)
+	{
+		float[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(double[], int)
+	 */
+	public static double[] copyAnd(double[] arr, Consumer<double[]> operation)
+	{
+		double[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(boolean[], int)
+	 */
+	public static boolean[] copyAnd(boolean[] arr, Consumer<boolean[]> operation)
+	{
+		boolean[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation), and returns the copy.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(char[], int)
+	 */
+	public static char[] copyAnd(char[] arr, Consumer<char[]> operation)
+	{
+		char[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
+	/**
+	 * Creates a shallow copy of an array, performs an operation on the copy
+	 * (usually an in-place operation) and returns the copy.
+	 * @param <T> the array type.
+	 * @param arr the input array.
+	 * @param operation the operation to perform. Input is a copy of <code>arr</code>.
+	 * @return a copy of the provided array, post-operation.
+	 * @see Arrays#copyOf(T[], int)
+	 */
+	public static <T> T[] copyAnd(T[] arr, Consumer<T[]> operation)
+	{
+		T[] copy = Arrays.copyOf(arr, arr.length);
+		operation.accept(copy);
+		return copy;
+	}
+	
 	/**
 	 * Shifts an object to an appropriate position according to the object's {@link Comparable#compareTo(Object)} function.
 	 * @param <T> the object type stored in the array that extends {@link Comparable}.

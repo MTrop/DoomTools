@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * String manipulation functions.
@@ -194,6 +195,87 @@ public final class StringUtils
 			return input.substring(0, input.length() - sequence.length());
 		else
 			return input;
+	}
+
+	/**
+	 * Replaces a series of keys in an input character sequence.
+	 * <p>Each keyword is wrapped in <code>${}</code> and a map is provided that maps
+	 * keyword to object to replace with (the {@link String#toString()}). You can output a
+	 * <code>$</code> by doubling it up in the input character sequence. If a replace key 
+	 * is not found in the provided map, the whole expression is not replaced.
+	 * @param source the source characters to parse.
+	 * @param replacerMap the map of replacer identifiers to object.
+	 * @return the resultant string.
+	 */
+	public static String replace(CharSequence source, Map<String, ?> replacerMap)
+	{
+		StringBuilder sb = new StringBuilder();
+		StringBuilder token = new StringBuilder();
+		final int STATE_TEXT = 0;
+		final int STATE_REPLACER_START = 1;
+		final int STATE_REPLACER_TOKEN = 2;
+		
+		int state = STATE_TEXT;
+		for (int i = 0; i < source.length(); i++)
+		{
+			char c = source.charAt(i);
+			switch (state)
+			{
+				case STATE_TEXT:
+				{
+					if (c == '$')
+						state = STATE_REPLACER_START;
+					else
+						sb.append(c);
+				}
+				break;
+				
+				case STATE_REPLACER_START:
+				{
+					if (c == '$')
+					{
+						state = STATE_TEXT;
+						sb.append('$');
+					}
+					else if (c == '{')
+					{
+						state = STATE_REPLACER_TOKEN;
+					}
+					else
+					{
+						sb.append(c);
+					}
+				}
+				break;
+				
+				case STATE_REPLACER_TOKEN:
+				{
+					if (c == '}')
+					{
+						state = STATE_TEXT;
+						String key = token.toString();
+						token.delete(0, token.length());
+						Object value = replacerMap.get(key);
+						if (value != null)
+							sb.append(String.valueOf(value));
+						else
+							sb.append("${").append(key).append('}');
+					}
+					else
+					{
+						token.append(c);
+					}
+				}
+				break;
+			}
+		}
+			
+		if (state == STATE_REPLACER_START)
+			sb.append('$');
+		else if (state == STATE_REPLACER_TOKEN)
+			sb.append("${").append(token.toString());
+			
+		return sb.toString();
 	}
 
 	/**

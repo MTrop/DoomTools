@@ -53,19 +53,19 @@ public final class DoomToolsMain
 
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	
-	private static final Map<String, Class<?>> SHELL_DATA = Common.map(
-		Common.keyValue("doomtools",  DoomToolsMain.class),
-		Common.keyValue("wadmerge",   WadMergeMain.class),
-		Common.keyValue("wswantbl",   WSwAnTablesMain.class),
-		Common.keyValue("wadtex",     WADTexMain.class),
-		Common.keyValue("wtexscan",   WTexScanMain.class),
-		Common.keyValue("wtexport",   WTExportMain.class),
-		Common.keyValue("wadscript",  WadScriptMain.class),
-		Common.keyValue("decohack",   DecoHackMain.class),
-		Common.keyValue("dmxconv",    DMXConvertMain.class),
-		Common.keyValue("dimgconv",   DoomImageConvertMain.class),
-		Common.keyValue("doommake",   DoomMakeMain.class),
-		Common.keyValue("rookscript", ScriptExecutor.class)
+	private static final Map<String, Class<?>> SHELL_DATA = ObjectUtils.createMap(
+		ObjectUtils.keyValue("doomtools",  DoomToolsMain.class),
+		ObjectUtils.keyValue("wadmerge",   WadMergeMain.class),
+		ObjectUtils.keyValue("wswantbl",   WSwAnTablesMain.class),
+		ObjectUtils.keyValue("wadtex",     WADTexMain.class),
+		ObjectUtils.keyValue("wtexscan",   WTexScanMain.class),
+		ObjectUtils.keyValue("wtexport",   WTExportMain.class),
+		ObjectUtils.keyValue("wadscript",  WadScriptMain.class),
+		ObjectUtils.keyValue("decohack",   DecoHackMain.class),
+		ObjectUtils.keyValue("dmxconv",    DMXConvertMain.class),
+		ObjectUtils.keyValue("dimgconv",   DoomImageConvertMain.class),
+		ObjectUtils.keyValue("doommake",   DoomMakeMain.class),
+		ObjectUtils.keyValue("rookscript", ScriptExecutor.class)
 	);
 		
 	private static final FileFilter JAR_FILES = (f) -> {

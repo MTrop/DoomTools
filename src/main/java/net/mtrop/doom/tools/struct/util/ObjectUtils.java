@@ -6,7 +6,19 @@
 package net.mtrop.doom.tools.struct.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 
 /**
  * Simple utility functions around plain objects.
@@ -96,4 +108,161 @@ public final class ObjectUtils
 			return false;
 	}
 
+	/**
+	 * Creates a new immutable set from a list of elements.
+	 * The underlying set is a {@link HashSet}.
+	 * @param <T> the object type in the Set.
+	 * @param elements the list of elements in the set.
+	 * @return a new set with the provided elements in it.
+	 */
+	@SafeVarargs
+	public static <T> Set<T> createSet(T ... elements)
+	{
+		HashSet<T> out = new HashSet<>();
+		for (T t : elements)
+			out.add(t);
+		return Collections.unmodifiableSet(out);
+	}
+
+	/**
+	 * Creates a new immutable sorted set from a list of elements.
+	 * The underlying set is a {@link TreeSet}.
+	 * @param <T> the object type in the Set.
+	 * @param elements the list of elements in the set.
+	 * @return a new set with the provided elements in it.
+	 */
+	@SafeVarargs
+	public static <T> SortedSet<T> createSortedSet(T ... elements)
+	{
+		TreeSet<T> out = new TreeSet<>();
+		for (T t : elements)
+			out.add(t);
+		return Collections.unmodifiableSortedSet(out);
+	}
+
+	/**
+	 * Creates a new immutable sorted set from a list of strings, where case-insensitive lookup is possible.
+	 * The underlying set is a {@link TreeSet}.
+	 * @param elements the list of elements in the set.
+	 * @return a new set with the provided elements in it.
+	 */
+	@SafeVarargs
+	public static SortedSet<String> createCaseInsensitiveSortedSet(String ... elements)
+	{
+		TreeSet<String> out = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+		for (String t : elements)
+			out.add(t);
+		return Collections.unmodifiableSortedSet(out);
+	}
+
+	/**
+	 * Creates a new immutable map.
+	 * The underlying map is a {@link HashMap}.
+	 * @param <K> the key type.
+	 * @param <V> the value type.
+	 * @param entries the entries to add.
+	 * @return a new map with the provided key-value pairs in it.
+	 */
+	@SafeVarargs
+	public static <K, V> Map<K, V> createMap(Map.Entry<K, V> ... entries)
+	{
+		Map<K, V> out = new HashMap<>(entries.length);
+		for (Map.Entry<K, V> e : entries)
+			out.put(e.getKey(), e.getValue());
+		return Collections.unmodifiableMap(out);
+	}
+
+	/**
+	 * Creates a new immutable sorted map.
+	 * The underlying map is a {@link TreeMap}.
+	 * @param <K> the key type.
+	 * @param <V> the value type.
+	 * @param entries the entries to add.
+	 * @return a new map with the provided key-value pairs in it.
+	 */
+	@SafeVarargs
+	public static <K extends Comparable<K>, V> SortedMap<K, V> createSortedMap(Map.Entry<K, V> ... entries)
+	{
+		SortedMap<K, V> out = new TreeMap<>();
+		for (Map.Entry<K, V> e : entries)
+			out.put(e.getKey(), e.getValue());
+		return Collections.unmodifiableSortedMap(out);
+	}
+
+	/**
+	 * Creates a new immutable sorted map from a keyset of strings, where case-insensitive lookup is possible.
+	 * The underlying map is a {@link TreeMap}.
+	 * @param <V> the value type.
+	 * @param entries the entries to add.
+	 * @return a new map with the provided key-value pairs in it.
+	 */
+	@SafeVarargs
+	public static <V> SortedMap<String, V> createCaseInsensitiveSortedMap(Map.Entry<String, V> ... entries)
+	{
+		SortedMap<String, V> out = new TreeMap<>();
+		for (Map.Entry<String, V> e : entries)
+			out.put(e.getKey(), e.getValue());
+		return Collections.unmodifiableSortedMap(out);
+	}
+
+	/**
+	 * Creates a new immutable list.
+	 * The underlying map is an {@link ArrayList}.
+	 * @param <T> the object type in the List.
+	 * @param entries the entries to add.
+	 * @return a new map with the provided key-value pairs in it.
+	 */
+	@SafeVarargs
+	public static <T> List<T> createList(T ... entries)
+	{
+		List<T> out = new ArrayList<>(entries.length);
+		for (T t : entries)
+			out.add(t);
+		return Collections.unmodifiableList(out);
+	}
+
+	/**
+	 * Creates a simple key-value entry.
+	 * @param key the key.
+	 * @param value the value.
+	 * @return a new entry.
+	 * @see #createMap(java.util.Map.Entry...)
+	 */
+	public static <K, V> Map.Entry<K, V> keyValue(K key, V value)
+	{
+		KeyValue<K, V> out = new KeyValue<>();
+		out.key = key;
+		out.value = value;
+		return out;
+	}
+
+	/**
+	 * A single replacer for the text replacers.
+	 */
+	private static class KeyValue<K, V> implements Map.Entry<K, V>
+	{
+		private K key;
+		private V value;
+	
+		@Override
+		public K getKey()
+		{
+			return key;
+		}
+		
+		@Override
+		public V getValue()
+		{
+			return value;
+		}
+		
+		@Override
+		public V setValue(V value)
+		{
+			V old = this.value;
+			this.value = value;
+			return old;
+		}
+	}
+	
 }
