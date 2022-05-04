@@ -26,22 +26,34 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 	};
 	
 	private static final char[] SEPARATORS = ALPHABET.apply("[]{}()");
-	private static final char[] DELIMITER_BREAK = ALPHABET.apply("[]{}().,!~+-*/%&|^=<>\"`:;?");
+	private static final char[] DELIMITER_BREAK = ALPHABET.apply("[]{}(),.!~+-*/%&|^=<>\"`:;?");
 	private static final char[] HEXDIGITS = ALPHABET.apply("0123456789abcdefABCDEF");
 
 	private static final Set<String> OPERATORS = ObjectUtils.createSet(
 		"+", "-", "!", "~", "*", "/", "%", "&", "&&", "|", "||", "^", "=", "==", "!=", "===", "!==",
 		"<", ">", "<<", ">>", ">>>", "?", ":", "?:", "??", "+=", "-=", "*=", "/=", "%=", "&=", "|=",
-		">>=", "<<=", ">>>=", ";", "::", "->"
+		">>=", "<<=", ">>>=", ";", "::", "->", ",", "."
 	);
 	
-	private static final int TYPE_START =                  Token.DEFAULT_NUM_TOKEN_TYPES;
-	private static final int TYPE_MAYBE_NUMERIC =          TYPE_START + 0;
-	private static final int TYPE_MAYBE_DELIMITER =        TYPE_START + 1;
-	private static final int TYPE_FLOAT_EXPONENT =         TYPE_START + 2;
-	private static final int TYPE_FLOAT_EXPONENT_SIGN =    TYPE_START + 3;
-	private static final int TYPE_PREPROCESSOR_MULTILINE = TYPE_START + 4;
-	private static final int TYPE_MAYBE_COMMENT =          TYPE_START + 5;
+	private static final int TYPE_START =                           Token.DEFAULT_NUM_TOKEN_TYPES;
+	private static final int TYPE_MAYBE_NUMERIC =                   TYPE_START + 0;
+	private static final int TYPE_MAYBE_DELIMITER =                 TYPE_START + 1;
+	private static final int TYPE_FLOAT_EXPONENT =                  TYPE_START + 2;
+	private static final int TYPE_FLOAT_EXPONENT_SIGN =             TYPE_START + 3;
+	private static final int TYPE_FLOAT_EXPONENT_SIGN_0 =           TYPE_START + 4;
+	private static final int TYPE_PREPROCESSOR_MULTILINE =          TYPE_START + 5;
+	private static final int TYPE_MAYBE_COMMENT =                   TYPE_START + 6;
+	private static final int TYPE_MAYBE_COMMENT_MULTILINE_END =     TYPE_START + 7;
+	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION_END = TYPE_START + 8;
+	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION =     TYPE_START + 9;
+	private static final int TYPE_STRING_ESCAPE =                   TYPE_START + 10;
+	private static final int ERROR_TYPE_STRING_ESCAPE =             TYPE_START + 11;
+	private static final int TYPE_STRING_ESCAPE_HEX =               TYPE_START + 12;
+	private static final int TYPE_STRING_ESCAPE_HEX_0 =             TYPE_START + 13;
+	private static final int TYPE_STRING_ESCAPE_UNICODE =           TYPE_START + 14;
+	private static final int TYPE_STRING_ESCAPE_UNICODE_0 =         TYPE_START + 15;
+	private static final int TYPE_STRING_ESCAPE_UNICODE_1 =         TYPE_START + 16;
+	private static final int TYPE_STRING_ESCAPE_UNICODE_2 =         TYPE_START + 17;
 
 	
 	/**
@@ -95,7 +107,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 	{
 		TokenMap map = new TokenMap(true);
 		addRookScriptKeywords(map);
-		return new TokenMap();
+		return map;
 	}
 
 	@Override
@@ -132,11 +144,10 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 						currentType = Token.LITERAL_BACKQUOTE;
 					else if (c == '/')
 						currentType = TYPE_MAYBE_COMMENT;
+					else if (isSeparator(c))
+						currentType = Token.SEPARATOR;
 					else if (isDelimiterBreak(c))
-					{
 						currentType = TYPE_MAYBE_DELIMITER;
-						i--; // wait one char.
-					}
 					else if (c == '0')
 						currentType = TYPE_MAYBE_NUMERIC;
 					else if (Character.isDigit(c))
@@ -213,6 +224,14 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				}
 				break;
 
+				case Token.SEPARATOR:
+				{
+					addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+					currentType = Token.NULL;
+					i--; // wait one char.
+				}
+				break;
+				
 				case TYPE_MAYBE_DELIMITER:
 				{
 					if (Character.isWhitespace(c))
@@ -254,61 +273,434 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 
 				case Token.LITERAL_NUMBER_DECIMAL_INT:
 				{
-					// TODO: Finish this.
+					if (c == 'e' || c == 'E')
+					{
+						currentType = TYPE_FLOAT_EXPONENT_SIGN;
+					}
+					else if (c == '.')
+					{
+						currentType = Token.LITERAL_NUMBER_FLOAT;
+					}
+					else if (Character.isLetter(c))
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (Character.isDigit(c))
+					{
+						// Do nothing and continue.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+				}
+				break;
+				
+				case Token.LITERAL_NUMBER_HEXADECIMAL:
+				{
+					if (isHexDigit(c))
+					{
+						// Do nothing and continue.
+					}
+					else if (Character.isLetter(c))
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
 				}
 				break;
 
 				case Token.LITERAL_NUMBER_FLOAT:
 				{
-					// TODO: Finish this.
-				}
-				break;
-
-				case TYPE_FLOAT_EXPONENT:
-				{
-					// TODO: Finish this.
+					if (c == 'e' || c == 'E')
+					{
+						currentType = TYPE_FLOAT_EXPONENT_SIGN;
+					}
+					else if (Character.isDigit(c))
+					{
+						// Do nothing and continue.
+					}
+					else if (Character.isLetter(c))
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
 				}
 				break;
 
 				case TYPE_FLOAT_EXPONENT_SIGN:
 				{
-					// TODO: Finish this.
+					if (c == '+' || c == '-')
+					{
+						currentType = TYPE_FLOAT_EXPONENT_SIGN_0;
+					}
+					else if (Character.isDigit(c))
+					{
+						currentType = TYPE_FLOAT_EXPONENT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+				}
+				break;
+				
+				case TYPE_FLOAT_EXPONENT_SIGN_0:
+				{
+					if (Character.isDigit(c))
+					{
+						currentType = TYPE_FLOAT_EXPONENT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+				}
+				break;
+
+				case TYPE_FLOAT_EXPONENT:
+				{
+					if (Character.isDigit(c))
+					{
+						// Do nothing and continue.
+					}
+					else if (Character.isLetter(c))
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
+					else if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						currentType = Token.ERROR_NUMBER_FORMAT;
+					}
 				}
 				break;
 
 				case Token.LITERAL_STRING_DOUBLE_QUOTE:
 				{
-					// TODO: Finish this.
+					if (c == '\\')
+					{
+						currentType = TYPE_STRING_ESCAPE;
+					}
+					else if (c == '"')
+					{
+						addToken(chars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+					}
+					// Do nothing and continue.
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE:
+				{
+					if (c == 'x' || c == 'X')
+					{
+						currentType = TYPE_STRING_ESCAPE_HEX;
+					}
+					else if (c == 'u' || c == 'U')
+					{
+						currentType = TYPE_STRING_ESCAPE_UNICODE;
+					}
+					else
+					{
+						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
+					}
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_HEX:
+				{
+					if (isHexDigit(c))
+						currentType = TYPE_STRING_ESCAPE_HEX_0;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_HEX_0:
+				{
+					if (isHexDigit(c))
+						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_UNICODE:
+				{
+					if (isHexDigit(c))
+						currentType = TYPE_STRING_ESCAPE_UNICODE_0;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_UNICODE_0:
+				{
+					if (isHexDigit(c))
+						currentType = TYPE_STRING_ESCAPE_UNICODE_1;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_UNICODE_1:
+				{
+					if (isHexDigit(c))
+						currentType = TYPE_STRING_ESCAPE_UNICODE_2;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
+				}
+				break;
+
+				case TYPE_STRING_ESCAPE_UNICODE_2:
+				{
+					if (isHexDigit(c))
+						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
+					else
+						currentType = Token.ERROR_STRING_DOUBLE;
 				}
 				break;
 
 				case Token.LITERAL_BACKQUOTE:
 				{
-					// TODO: Finish this.
+					if (c == '`')
+					{
+						addToken(chars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+					}
+					// Do nothing and continue.
 				}
 				break;
 
 				case TYPE_MAYBE_COMMENT:
 				{
-					// TODO: Finish this.
+					if (c == '*')
+					{
+						currentType = TYPE_MAYBE_COMMENT_DOCUMENTATION;
+					}
+					else if (c == '/')
+					{
+						currentType = Token.COMMENT_EOL;
+					}
+					else
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
 				}
 				break;
 				
 				case Token.COMMENT_EOL:
 				{
-					// TODO: Finish this.
+					// Eat characters.
+				}
+				break;
+				
+				case TYPE_MAYBE_COMMENT_DOCUMENTATION:
+				{
+					if (c == '*')
+						currentType = TYPE_MAYBE_COMMENT_DOCUMENTATION_END;
+					else
+						currentType = Token.COMMENT_MULTILINE;
+				}
+				break;
+				
+				case TYPE_MAYBE_COMMENT_DOCUMENTATION_END:
+				{
+					if (c == '/')
+					{
+						addToken(chars, currentTokenStart, i, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+					}
+					else if (c == '*')
+					{
+						// Do nothing.
+					}
+					else
+					{
+						currentType = Token.COMMENT_DOCUMENTATION;
+					}
 				}
 				break;
 				
 				case Token.COMMENT_MULTILINE:
 				{
-					// TODO: Finish this.
+					if (c == '*')
+					{
+						currentType = TYPE_MAYBE_COMMENT_MULTILINE_END;
+					}
+					// Eat characters.
+				}
+				break;
+				
+				case TYPE_MAYBE_COMMENT_MULTILINE_END:
+				{
+					if (c == '/')
+					{
+						addToken(chars, currentTokenStart, i, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+					}
+					else if (c == '*')
+					{
+						// Do nothing.
+					}
+					else
+					{
+						currentType = Token.COMMENT_MULTILINE;
+					}
 				}
 				break;
 				
 				case Token.COMMENT_DOCUMENTATION:
 				{
-					// TODO: Finish this.
+					if (c == '*')
+					{
+						currentType = TYPE_MAYBE_COMMENT_DOCUMENTATION_END;
+					}
+					else
+					{
+						// Eat characters.
+					}
+				}
+				break;
+				
+				case Token.IDENTIFIER:
+				{
+					if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else
+					{
+						// Do nothing and continue.
+					}
+				}
+				break;
+				
+				case Token.ERROR_NUMBER_FORMAT:
+				{
+					if (Character.isWhitespace(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (isDelimiterBreak(c))
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					// Eat character.
+				}
+				break;
+				
+				case Token.ERROR_STRING_DOUBLE:
+				{
+					if (c == '"')
+					{
+						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						currentType = Token.NULL;
+						i--; // wait one char.
+					}
+					else if (c == '\\')
+					{
+						currentType = ERROR_TYPE_STRING_ESCAPE;
+					}
+					// Eat character.
+				}
+				break;
+				
+				case ERROR_TYPE_STRING_ESCAPE:
+				{
+					currentType = Token.ERROR_STRING_DOUBLE;
 				}
 				break;
 				
@@ -329,8 +721,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					// Eat character.
 				}
 				break;
-				
-				// TODO: Finish this.
 			}
 		}
 		
@@ -361,6 +751,40 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				// start COMMENT_MULTILINE next line
 				break;
 			
+			case TYPE_MAYBE_COMMENT_DOCUMENTATION: // just "/*"
+			{
+				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				// start COMMENT_MULTILINE next line
+				break;
+			}
+			
+			case TYPE_MAYBE_COMMENT_DOCUMENTATION_END:
+			{
+				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				// start COMMENT_DOCUMENTATION next line
+				break;
+			}
+			
+			case TYPE_MAYBE_COMMENT_MULTILINE_END:
+			{
+				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				// start COMMENT_MULTILINE next line
+				break;
+			}
+			
+			case TYPE_STRING_ESCAPE:
+			case ERROR_TYPE_STRING_ESCAPE:
+			case TYPE_STRING_ESCAPE_HEX:
+			case TYPE_STRING_ESCAPE_HEX_0:
+			case TYPE_STRING_ESCAPE_UNICODE:
+			case TYPE_STRING_ESCAPE_UNICODE_0:
+			case TYPE_STRING_ESCAPE_UNICODE_1:
+			case TYPE_STRING_ESCAPE_UNICODE_2:
+			case Token.LITERAL_STRING_DOUBLE_QUOTE:
+				addToken(chars, currentTokenStart, end - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
+				addNullToken();
+				break;
+			
 			default:
 				addToken(chars, currentTokenStart, end - 1, currentType, currentTokenDocumentStart, false);
 				addNullToken();
@@ -385,7 +809,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 			
 			case TYPE_MAYBE_DELIMITER:
 			{
-				String str = new String(segment, start, end - start);
+				String str = new String(segment, start, end + 1 - start);
 				if (isOperator(str))
 					tokenType = Token.OPERATOR;
 				else
@@ -399,17 +823,25 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 			}
 			break;
 
+			case TYPE_FLOAT_EXPONENT:
+			{
+				tokenType = Token.LITERAL_NUMBER_FLOAT;
+			}
+			break;
+			
 			case TYPE_MAYBE_COMMENT: // just "/"
 			{
 				tokenType = Token.OPERATOR;
 			}
 			break;
 			
-			case TYPE_FLOAT_EXPONENT_SIGN:  // incomplete float with exponent
+			case TYPE_FLOAT_EXPONENT_SIGN:  // incomplete float with exponent signifier
+			case TYPE_FLOAT_EXPONENT_SIGN_0:  // incomplete float with sign char
 			{
 				tokenType = Token.ERROR_NUMBER_FORMAT;
 			}
 			break;
+			
 		}
 		
 		super.addToken(segment, start, end, tokenType, startOffset, hyperLink);

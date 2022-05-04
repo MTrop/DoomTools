@@ -12,9 +12,11 @@ import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
 import net.mtrop.doom.tools.gui.managers.tokenizers.RookScriptTokenMaker;
+import net.mtrop.doom.tools.gui.managers.tokenizers.WadMergeTokenMaker;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
@@ -221,12 +223,17 @@ public final class DoomToolsEditorProvider
 		AbstractTokenMakerFactory tokenMakers = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
 		FoldParserManager foldManager = FoldParserManager.get();
 		
-		/*
+		tokenMakers.putMapping(SYNTAX_STYLE_DOOMMAKE, RookScriptTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT, RookScriptTokenMaker.class.getName());
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT, new CurlyFoldParser());
-		*/
+		tokenMakers.putMapping(SYNTAX_STYLE_ROOKSCRIPT, RookScriptTokenMaker.class.getName());
+
+		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE, WadMergeTokenMaker.class.getName());
+		//tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK, DECOHackTokenMaker.class.getName());
 		
-		// TODO: Add the rest.
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_ROOKSCRIPT, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_DECOHACK, new CurlyFoldParser());
 		
 		initLanguages = true;
 	}

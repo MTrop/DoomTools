@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.mtrop.doom.struct.io.SerialWriter;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * I can't believe I have to write this garbage.
@@ -60,10 +60,10 @@ public final class MakeICNSMain
 		ByteArrayOutputStream iconsOut = new ByteArrayOutputStream();
 
 		final List<Map.Entry<File, byte[]>> images = Arrays.asList(
-			Common.keyValue(new File("src/main/resources/gui/images/doomtools-logo-16.png"),  TYPE_16),
-			Common.keyValue(new File("src/main/resources/gui/images/doomtools-logo-32.png"),  TYPE_32),
-			Common.keyValue(new File("src/main/resources/gui/images/doomtools-logo-48.png"),  TYPE_48),
-			Common.keyValue(new File("src/main/resources/gui/images/doomtools-logo-128.png"), TYPE_128)
+			ObjectUtils.keyValue(new File("src/main/resources/gui/images/doomtools-logo-16.png"),  TYPE_16),
+			ObjectUtils.keyValue(new File("src/main/resources/gui/images/doomtools-logo-32.png"),  TYPE_32),
+			ObjectUtils.keyValue(new File("src/main/resources/gui/images/doomtools-logo-48.png"),  TYPE_48),
+			ObjectUtils.keyValue(new File("src/main/resources/gui/images/doomtools-logo-128.png"), TYPE_128)
 		);
 		
 		for (Map.Entry<File, byte[]> entry : images)
