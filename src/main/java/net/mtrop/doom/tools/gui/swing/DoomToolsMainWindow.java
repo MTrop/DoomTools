@@ -38,6 +38,7 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
@@ -60,7 +61,7 @@ import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
  */
 public class DoomToolsMainWindow extends JFrame 
 {
-	private static final long serialVersionUID = -8837485206120777188L;
+    private static final long serialVersionUID = -8837485206120777188L;
 
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
@@ -75,7 +76,12 @@ public class DoomToolsMainWindow extends JFrame
 	private DoomToolsTaskManager tasks;
     /** Language manager. */
     private DoomToolsLanguageManager language;
-	/** Desktop pane. */
+    /** Settings manager. */
+    private DoomToolsSettingsManager settings;
+
+	/* ==================================================================== */
+
+    /** Desktop pane. */
 	private DoomToolsDesktopPane desktop;
 
 	/** Shutdown hook. */
@@ -629,9 +635,10 @@ public class DoomToolsMainWindow extends JFrame
 		
 		File workspaceFile = utils.chooseFile(
 			this,
-			"workspace",
 			language.getText("doomtools.workspace.saveas.browse.title"),
 			language.getText("doomtools.workspace.saveas.browse.accept"),
+			settings::getLastProjectDirectory,
+			settings::setLastProjectDirectory,
 			FileFilters.WORKSPACES
 		);
 		

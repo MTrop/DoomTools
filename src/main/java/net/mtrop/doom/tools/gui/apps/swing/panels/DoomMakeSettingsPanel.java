@@ -5,8 +5,8 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
+import net.mtrop.doom.tools.gui.managers.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -25,7 +25,7 @@ public class DoomMakeSettingsPanel extends JPanel
 	/** Language singleton. */
 	private final DoomToolsLanguageManager language;
 	/** Settings singleton. */
-	private final DoomToolsSettingsManager settings;
+	private final DoomMakeSettingsManager settings;
 	
 	/**
 	 * Creates the settings panel.
@@ -33,7 +33,7 @@ public class DoomMakeSettingsPanel extends JPanel
 	public DoomMakeSettingsPanel()
 	{
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = DoomToolsSettingsManager.get();
+		this.settings = DoomMakeSettingsManager.get();
 		
 		containerOf(this, dimension(450, 100),
 			node(BorderLayout.NORTH, form(96)

@@ -30,9 +30,9 @@ import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
+import net.mtrop.doom.tools.gui.managers.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -67,7 +67,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     /** Project helper. */
     private DoomMakeProjectHelper helper;
     /** Settings manager. */
-	private DoomToolsSettingsManager settings;
+	private DoomMakeSettingsManager settings;
 
 	// Components
 	
@@ -110,7 +110,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		this.language = DoomToolsLanguageManager.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.helper = DoomMakeProjectHelper.get();
-		this.settings = DoomToolsSettingsManager.get();
+		this.settings = DoomMakeSettingsManager.get();
 
 		this.listPanel = new DoomMakeProjectTargetListPanel(
 			Collections.emptySortedSet(),
@@ -147,12 +147,15 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	public static File openAndGetDirectory(Component parent)
 	{
 		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
+		DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
+		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
-		File projectDir = DoomToolsGUIUtils.get().chooseDirectory(
+		File projectDir = utils.chooseDirectory(
 			parent,
-			"projectDirectory",
 			language.getText("doommake.project.open.browse.title"),
-			language.getText("doommake.project.open.browse.accept")
+			language.getText("doommake.project.open.browse.accept"),
+			settings::getLastProjectDirectory,
+			settings::setLastProjectDirectory
 		);
 		
 		if (projectDir == null)

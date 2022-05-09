@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.apps.swing.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -21,6 +22,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,8 +52,10 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.EditorSettingsManager;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 import static javax.swing.BorderFactory.*;
@@ -71,7 +75,16 @@ public class MultiFileEditorPanel extends JPanel
 	private static final long serialVersionUID = -3208735521175265227L;
 	
 	private static final FileFilter[] NO_FILTERS = new FileFilter[0];
-	
+
+	private static final Options DEFAULT_OPTIONS = new MultiFileEditorPanel.Options()
+	{
+		@Override
+		public boolean hideStyleChangePanel()
+		{
+			return false;
+		}
+	};
+
 	public interface ActionNames
 	{
 		String ACTION_SAVE = "save";
@@ -94,9 +107,9 @@ public class MultiFileEditorPanel extends JPanel
 	// ======================================================================
 	
 	private DoomToolsEditorProvider editorProvider;
-	private DoomToolsSettingsManager settings;
 	private DoomToolsIconManager icons;
 	private DoomToolsLanguageManager language;
+	private EditorSettingsManager settings;
 	private DoomToolsGUIUtils utils;
 	
 	// ======================================================================
@@ -156,7 +169,9 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode changeEncodingMenuItem;
 	/** Change language item. */
 	private MenuNode changeLanguageMenuItem;
-	
+	/** Change spacing item. */
+	private MenuNode changeSpacingMenuItem;
+
 	// ======================================================================
 	
 	/** All editors. */
@@ -169,24 +184,34 @@ public class MultiFileEditorPanel extends JPanel
 	private volatile Modal<Void> findModal;
 
 	/**
-	 * Creates a new multi-file editor panel.
+	 * Creates a new multi-file editor panel with default options.
 	 */
 	public MultiFileEditorPanel()
 	{
-		this(null);
+		this(DEFAULT_OPTIONS, null);
 	}
-	
+
 	/**
-	 * Creates a new multi-file editor panel.
+	 * Creates a new multi-file editor panel with default options.
 	 * @param listener the listener.
 	 */
 	public MultiFileEditorPanel(Listener listener)
 	{
+		this(DEFAULT_OPTIONS, listener);
+	}
+	
+	/**
+	 * Creates a new multi-file editor panel.
+	 * @param options the panel options.
+	 * @param listener the listener.
+	 */
+	public MultiFileEditorPanel(Options options, Listener listener)
+	{
 		this.editorProvider = DoomToolsEditorProvider.get();
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = DoomToolsSettingsManager.get();
 		this.utils = DoomToolsGUIUtils.get();
+		this.settings = EditorSettingsManager.get();
 		
 		this.allEditors = new HashMap<>();
 		this.currentEditor = null;
@@ -262,17 +287,20 @@ public class MultiFileEditorPanel extends JPanel
 		
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
+		this.changeSpacingMenuItem = utils.createItemFromLanguageKey("texteditor.action.spacing", spacingNodes);
+		
+		List<Node> labelNodes = new LinkedList<>();
+		if (!options.hideStyleChangePanel())
+			labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(syntaxStyleLabel))));
+		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(encodingModeLabel))));
+		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))));
+		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(caretPositionLabel))));
 		
 		containerOf(this, borderLayout(0, 2),
 			node(BorderLayout.CENTER, this.mainEditorTabs),
 			node(BorderLayout.SOUTH, containerOf(gridLayout(1, 2),
 				node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(filePathLabel))),
-				node(containerOf(gridLayout(1, 4),
-					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(syntaxStyleLabel))),
-					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(encodingModeLabel))),
-					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))),
-					node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(caretPositionLabel)))
-				))
+				node(containerOf(gridLayout(1, 0), labelNodes.toArray(new Node[labelNodes.size()])))
 			))
 		);
 	}
@@ -310,6 +338,21 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void openFileEditor(File file, Charset encoding) throws FileNotFoundException, IOException
 	{
+		openFileEditor(file, encoding, null);
+	}
+	
+	/**
+	 * Opens a file into a new tab.
+	 * Does nothing if the file is a directory.
+	 * @param file the file to load.
+	 * @param encoding the file encoding.
+	 * @param styleName the style name to use for syntax highlighting and such. Can be null to autodetect.
+	 * @throws FileNotFoundException if the file could not be found. 
+	 * @throws IOException if the file could not be read.
+	 * @throws SecurityException if the OS is forbidding the read.
+	 */
+	public void openFileEditor(File file, Charset encoding, String styleName) throws FileNotFoundException, IOException
+	{
 		if (file.isDirectory())
 			return;
 		
@@ -323,7 +366,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, null, writer.toString());
+		createNewTab(file.getName(), file, encoding, styleName, writer.toString());
 	}
 	
 	/**
@@ -350,9 +393,11 @@ public class MultiFileEditorPanel extends JPanel
 		if (currentEditor == null)
 			return false;
 		
-		File editorFile = utils.chooseFile(this, getLastPathKey(), 
+		File editorFile = utils.chooseFile(this,
 			language.getText("texteditor.action.save.title", currentEditor.editorTab.getTabTitle()), 
-			language.getText("texteditor.action.save.approve"), 
+			language.getText("texteditor.action.save.approve"),
+			this::getLastPathTouched,
+			this::setLastPathTouched,
 			getSaveFileTypes()
 		);
 		
@@ -376,9 +421,11 @@ public class MultiFileEditorPanel extends JPanel
 			File editorFile;
 			if ((editorFile = handle.contentSourceFile) == null)
 			{
-				editorFile = utils.chooseFile(this, getLastPathKey(), 
+				editorFile = utils.chooseFile(this,
 					language.getText("texteditor.action.save.title", handle.editorTab.getTabTitle()), 
 					language.getText("texteditor.action.save.approve"), 
+					this::getLastPathTouched,
+					this::setLastPathTouched,
 					getSaveFileTypes()
 				);
 
@@ -500,6 +547,14 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * @return the change spacing menu item.
+	 */
+	public MenuNode getChangeSpacingMenuItem() 
+	{
+		return changeSpacingMenuItem;
+	}
+	
+	/**
 	 * Gets the amount of open editors.
 	 * @return the amount of editors still open.
 	 */
@@ -570,9 +625,9 @@ public class MultiFileEditorPanel extends JPanel
 
 		// ==================================================================
 		
-		// TODO: Apply themes/editor default settings.
+		settings.getDefaultEditorViewSettings().applyTo(textArea);
 		
-		settings.getEditorViewSettings("default").applyTo(textArea);
+		// TODO: Scan content for tab type and set accordingly.
 		
 		// ==================================================================
 		
@@ -596,12 +651,21 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
-	 * Called to get the key for the "last path" accessed by the editor for saving or opening a file.
-	 * @return the key.
+	 * Called to get the last path accessed by the editor for saving or opening a file.
+	 * @return the file, or null for no file.
 	 */
-	protected String getLastPathKey()
+	protected File getLastPathTouched()
 	{
-		return "editor.file";
+		return null;
+	}
+
+	/**
+	 * Called to get the last path accessed by the editor for saving or opening a file.
+	 * @param saved the file saved.
+	 */
+	protected void setLastPathTouched(File saved)
+	{
+		// Do nothing by default.
 	}
 
 	/**
@@ -769,9 +833,11 @@ public class MultiFileEditorPanel extends JPanel
 		File editorFile;
 		if ((editorFile = handle.contentSourceFile) == null)
 		{
-			editorFile = utils.chooseFile(this, getLastPathKey(), 
+			editorFile = utils.chooseFile(this,
 				language.getText("texteditor.action.save.title", handle.editorTab.getTabTitle()), 
 				language.getText("texteditor.action.save.approve"), 
+				this::getLastPathTouched,
+				this::setLastPathTouched,
 				getSaveFileTypes()
 			);
 			
@@ -857,8 +923,25 @@ public class MultiFileEditorPanel extends JPanel
 	
 	private MenuNode[] createEditorSpacingMenuItems()
 	{
-		// TODO: Finish this.
-		return new MenuNode[0]; 
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.spacing.spaces",
+				menuItem("2", KeyEvent.VK_2, (c, e) -> changeCurrentEditorSpacing(true, 2)),
+				menuItem("3", KeyEvent.VK_3, (c, e) -> changeCurrentEditorSpacing(true, 3)),
+				menuItem("4", KeyEvent.VK_4, (c, e) -> changeCurrentEditorSpacing(true, 4)),
+				menuItem("5", KeyEvent.VK_5, (c, e) -> changeCurrentEditorSpacing(true, 5)),
+				menuItem("6", KeyEvent.VK_6, (c, e) -> changeCurrentEditorSpacing(true, 6)),
+				menuItem("7", KeyEvent.VK_7, (c, e) -> changeCurrentEditorSpacing(true, 7)),
+				menuItem("8", KeyEvent.VK_8, (c, e) -> changeCurrentEditorSpacing(true, 8))
+			), utils.createItemFromLanguageKey("texteditor.action.spacing.tabs",
+				menuItem("2", KeyEvent.VK_2, (c, e) -> changeCurrentEditorSpacing(false, 2)),
+				menuItem("3", KeyEvent.VK_3, (c, e) -> changeCurrentEditorSpacing(false, 3)),
+				menuItem("4", KeyEvent.VK_4, (c, e) -> changeCurrentEditorSpacing(false, 4)),
+				menuItem("5", KeyEvent.VK_5, (c, e) -> changeCurrentEditorSpacing(false, 5)),
+				menuItem("6", KeyEvent.VK_6, (c, e) -> changeCurrentEditorSpacing(false, 6)),
+				menuItem("7", KeyEvent.VK_7, (c, e) -> changeCurrentEditorSpacing(false, 7)),
+				menuItem("8", KeyEvent.VK_8, (c, e) -> changeCurrentEditorSpacing(false, 8))
+			)
+		); 
 	}
 	
 	/**
@@ -878,6 +961,15 @@ public class MultiFileEditorPanel extends JPanel
 	private void changeCurrentEditorStyle(final String styleName)
 	{
 		forCurrentEditor((editor) -> editor.changeStyleName(styleName));
+		updateLabels();
+	}
+
+	/**
+	 * Changes the spacing style and input in the current editor.
+	 */
+	private void changeCurrentEditorSpacing(final boolean spaces, final int amount)
+	{
+		forCurrentEditor((editor) -> editor.changeSpacing(spaces, amount));
 		updateLabels();
 	}
 
@@ -974,6 +1066,17 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
+	 * Panel options.
+	 */
+	public interface Options
+	{
+		/**
+		 * @return true to allow style changing, false to forbid it.
+		 */
+		boolean hideStyleChangePanel();
+	}
+	
+	/**
 	 * Editor handle.
 	 */
 	public class EditorHandle
@@ -1062,6 +1165,18 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			currentStyle = styleName;
 			editorPanel.textArea.setSyntaxEditingStyle(styleName);
+			updateLabels();
+		}
+		
+		/**
+		 * Changes the spacing style.
+		 * @param spaces if true, spaces. false is tabs.
+		 * @param amount the amount of spaces.
+		 */
+		public void changeSpacing(boolean spaces, int amount)
+		{
+			editorPanel.textArea.setTabsEmulated(spaces);
+			editorPanel.textArea.setTabSize(amount);
 			updateLabels();
 		}
 		

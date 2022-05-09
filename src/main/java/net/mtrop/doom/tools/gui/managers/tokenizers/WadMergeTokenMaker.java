@@ -368,8 +368,6 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 					tokenType = value;
 			}
 			break;
-			
-			
 		}
 		
 		super.addToken(segment, start, end, tokenType, startOffset, hyperLink);

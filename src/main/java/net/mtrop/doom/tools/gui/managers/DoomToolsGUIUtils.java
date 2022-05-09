@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,7 +65,6 @@ public final class DoomToolsGUIUtils
 	
 	private DoomToolsImageManager images;
 	private DoomToolsLanguageManager language;
-	private DoomToolsSettingsManager settings;
 	
 	private List<Image> windowIcons;
 	private Icon windowIcon;
@@ -73,7 +73,6 @@ public final class DoomToolsGUIUtils
 	{
 		this.images = DoomToolsImageManager.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = DoomToolsSettingsManager.get();
 		
 		final Image icon16  = images.getImage("doomtools-logo-16.png"); 
 		final Image icon32  = images.getImage("doomtools-logo-32.png"); 
@@ -328,17 +327,18 @@ public final class DoomToolsGUIUtils
 	 * Brings up the file chooser to select a file, but on successful selection, returns the file
 	 * and sets the last file path used in settings. Initial file is also the last file used.
 	 * @param parent the parent component for the chooser modal.
-	 * @param keyName the last path key.
 	 * @param title the dialog title.
 	 * @param approveText the text to put on the approval button.
+	 * @param lastPathSupplier the supplier to call for the last path used.
+	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
-	public File chooseFile(Component parent, String keyName, String title, String approveText, FileFilter ... choosableFilters)
+	public File chooseFile(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, FileFilter ... choosableFilters)
 	{
 		File selected;
-		if ((selected = FileChooserFactory.chooseFile(parent, title, settings.getLastPath(keyName), approveText, choosableFilters)) != null)
-			settings.setLastPath(keyName, selected);
+		if ((selected = FileChooserFactory.chooseFile(parent, title, lastPathSupplier.get(), approveText, choosableFilters)) != null)
+			lastPathSaver.accept(selected);
 		return selected;
 	}
 
@@ -346,16 +346,17 @@ public final class DoomToolsGUIUtils
 	 * Brings up the file chooser to select a directory, but on successful selection, returns the directory
 	 * and sets the last project path used in settings. Initial file is also the last project directory used.
 	 * @param parent the parent component for the chooser modal.
-	 * @param keyName the last path key.
 	 * @param title the dialog title.
 	 * @param approveText the text to put on the approval button.
+	 * @param lastPathSupplier the supplier to call for the last path used.
+	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
-	public File chooseDirectory(Component parent, String keyName, String title, String approveText)
+	public File chooseDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver)
 	{
 		File selected;
-		if ((selected = FileChooserFactory.chooseDirectory(parent, title, settings.getLastPath(keyName), approveText, FileFilters.DIRECTORIES)) != null)
-			settings.setLastPath(keyName, selected);
+		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPathSupplier.get(), approveText, FileFilters.DIRECTORIES)) != null)
+			lastPathSaver.accept(selected);
 		return selected;
 	}
 

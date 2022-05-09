@@ -33,6 +33,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.managers.WadScriptSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -60,8 +61,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptApp.class); 
 
-    private static final String LASTPATH_KEY = "wadscript.editor"; 
-
 	private static final FileFilter[] TYPES = new FileFilter[] { fileExtensionFilter("WadScript Files (*.script)", "script") };
 	
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
@@ -80,6 +79,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private DoomToolsTaskManager tasks;
 	private DoomToolsIconManager icons;
 	private DoomToolsLanguageManager language;
+	private WadScriptSettingsManager settings;
 	
 	// Components
 	
@@ -122,6 +122,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		this.tasks = DoomToolsTaskManager.get();
 		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
+		this.settings = WadScriptSettingsManager.get();
 		
 		this.defaultWorkingDirectory = defaultWorkingDirectory;
 		this.workingDirFileField = fileField(
@@ -151,7 +152,15 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		);
 		this.popupButton = button("\u2228", this.runPopupMenu);
 		
-		this.editorPanel = new WadScriptEditorPanel(new WadScriptEditorPanel.Listener()
+		this.editorPanel = new WadScriptEditorPanel(new MultiFileEditorPanel.Options() 
+		{
+			@Override
+			public boolean hideStyleChangePanel() 
+			{
+				return true;
+			}
+		}, 
+		new WadScriptEditorPanel.Listener()
 		{
 			@Override
 			public void onCurrentEditorChange(EditorHandle handle) 
@@ -249,7 +258,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
 			separator(),
 			editorPanel.getChangeLanguageMenuItem(),
-			editorPanel.getChangeEncodingMenuItem()
+			editorPanel.getChangeEncodingMenuItem(),
+			editorPanel.getChangeSpacingMenuItem()
 		);
 	}
 	
@@ -285,6 +295,12 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			onNewEditor();
 	}
 
+	@Override
+	public void onClose() 
+	{
+		// TODO: Do something here.
+	}
+	
 	@Override
 	public boolean shouldClose() 
 	{
@@ -328,9 +344,10 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		
 		File file = utils.chooseFile(
 			parent, 
-			LASTPATH_KEY, 
 			language.getText("wadscript.open.title"), 
-			language.getText("wadscript.open.accept"), 
+			language.getText("wadscript.open.accept"),
+			settings::getLastTouchedFile,
+			settings::setLastTouchedFile,
 			TYPES
 		);
 		
@@ -473,19 +490,25 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		return InstancedFuture.instance(callable).spawn();
 	}
 	
-	private static class WadScriptEditorPanel extends MultiFileEditorPanel
+	private class WadScriptEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = -2590465129796097892L;
 
-		public WadScriptEditorPanel(Listener listener)
+		public WadScriptEditorPanel(Options options, Listener listener)
 		{
-			super(listener);
+			super(options, listener);
 		}
 
 		@Override
-		protected String getLastPathKey() 
+		protected File getLastPathTouched() 
 		{
-			return LASTPATH_KEY;
+			return settings.getLastTouchedFile();
+		}
+		
+		@Override
+		protected void setLastPathTouched(File saved) 
+		{
+			settings.setLastTouchedFile(saved);
 		}
 		
 		@Override

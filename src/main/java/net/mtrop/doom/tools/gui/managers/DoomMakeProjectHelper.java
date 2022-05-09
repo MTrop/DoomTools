@@ -41,11 +41,11 @@ public final class DoomMakeProjectHelper
 	
 	/* ==================================================================== */
 	
-	private DoomToolsSettingsManager settings;
+	private DoomMakeSettingsManager settings;
 	
 	private DoomMakeProjectHelper()
 	{
-		this.settings = DoomToolsSettingsManager.get();
+		this.settings = DoomMakeSettingsManager.get();
 	}
 
 	/**
