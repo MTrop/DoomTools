@@ -290,7 +290,7 @@ public final class FileUtils
 		int extindex = filename.lastIndexOf(extensionSeparator);
 		if (extindex >= 0)
 			return filename.substring(0, extindex);
-		return "";
+		return filename;
 	}
 
 	/**
@@ -358,6 +358,88 @@ public final class FileUtils
 	public static String getFileExtension(File file)
 	{
 		return getFileExtension(file.getName(), ".");
+	}
+	
+	/**
+	 * Appends an extension to a file.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addExtension(File file, String extensionSeparator, String extension)
+	{
+		String parent = file.getParent();
+		return new File((parent != null ? file.getParent() + File.separator : "") + file.getName() + extensionSeparator + extension);
+	}
+
+	/**
+	 * Appends an extension to a file.
+	 * Assumes the separator to be ".".
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addExtension(File file, String extension)
+	{
+		return addExtension(file, ".", extension);
+	}
+
+	/**
+	 * Appends an extension to a file, if it is missing an extension.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addMissingExtension(File file, String extensionSeparator, String extension)
+	{
+		String ext = getFileExtension(file, extensionSeparator);
+		if (ext.length() == 0)
+			return new File(file.getPath() + extensionSeparator + extension);
+		return file;
+	}
+
+	/**
+	 * Appends an extension to a file.
+	 * Assumes the separator to be ".".
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addMissingExtension(File file, String extension)
+	{
+		return addMissingExtension(file, ".", extension);
+	}
+
+	/**
+	 * Appends an extension to a file, if it already has an extension, replacing its final extension.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File changeExtension(File file, String extensionSeparator, String extension)
+	{
+		String ext = getFileExtension(file, extensionSeparator);
+		if (ext.length() >= 0)
+		{
+			String fileName = getFileNameWithoutExtension(file);
+			String parent = file.getParent();
+			return new File((parent != null ? file.getParent() + File.separator : "") + fileName + extensionSeparator + extension);
+		}
+		return file;
+	}
+
+	/**
+	 * Appends an extension to a file, if it already has an extension, replacing its final extension.
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File changeExtension(File file, String extension)
+	{
+		return changeExtension(file, ".", extension);
 	}
 
 	/**

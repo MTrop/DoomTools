@@ -392,19 +392,7 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		if (currentEditor == null)
 			return false;
-		
-		File editorFile = utils.chooseFile(this,
-			language.getText("texteditor.action.save.title", currentEditor.editorTab.getTabTitle()), 
-			language.getText("texteditor.action.save.approve"),
-			this::getLastPathTouched,
-			this::setLastPathTouched,
-			getSaveFileTypes()
-		);
-		
-		if (editorFile == null)
-			return false;
-		
-		return saveEditorToFile(currentEditor, editorFile);
+		return chooseAndSaveFile(currentEditor);
 	}
 
 	/**
@@ -420,20 +408,9 @@ public class MultiFileEditorPanel extends JPanel
 			
 			File editorFile;
 			if ((editorFile = handle.contentSourceFile) == null)
-			{
-				editorFile = utils.chooseFile(this,
-					language.getText("texteditor.action.save.title", handle.editorTab.getTabTitle()), 
-					language.getText("texteditor.action.save.approve"), 
-					this::getLastPathTouched,
-					this::setLastPathTouched,
-					getSaveFileTypes()
-				);
-
-				if (editorFile == null)
-					return;
-				
+				chooseAndSaveFile(handle);
+			else
 				saveEditorToFile(handle, editorFile);
-			}
 		}
 	}
 
@@ -670,13 +647,48 @@ public class MultiFileEditorPanel extends JPanel
 
 	/**
 	 * Called to get the save file types.
-	 * @return the file filters for the
+	 * @return the file filters for saving files.
 	 */
 	protected FileFilter[] getSaveFileTypes()
 	{
 		return NO_FILTERS;
 	}
 	
+	/**
+	 * Called on a file chosen for saving in order to do some kind of operation
+	 * like fill in a missing extension or whatever.
+	 * By default, this does nothing, returning the selected file as-is.
+	 * @param selectedFilter the currently selected file filter (can be used to determine type).
+	 * @param selectedFile the selected file (no null)
+	 * @return the new file path.
+	 */
+	protected File transformSaveFile(FileFilter selectedFilter, File selectedFile)
+	{
+		return selectedFile;
+	}
+	
+	// Opens the save file dialog for saving a file.
+	private boolean chooseAndSaveFile(EditorHandle handle) 
+	{
+		File editorFile;
+		editorFile = utils.chooseFile(this,
+			language.getText("texteditor.action.save.title", handle.editorTab.getTabTitle()), 
+			language.getText("texteditor.action.save.approve"), 
+			this::getLastPathTouched,
+			this::setLastPathTouched,
+			this::transformSaveFile,
+			getSaveFileTypes()
+		);
+	
+		if (editorFile == null)
+			return false;
+		
+		if (editorFile.exists() && SwingUtils.noTo(this, language.getText("texteditor.action.save.overwrite", editorFile)))
+			return false;
+		
+		return saveEditorToFile(handle, editorFile);
+	}
+
 	private void setCurrentEditor(EditorHandle handle)
 	{
 		currentEditor = handle;
@@ -720,7 +732,7 @@ public class MultiFileEditorPanel extends JPanel
 		}
 		else
 		{
-			saveAction.setEnabled(currentEditor.needsToSave());
+			saveAction.setEnabled(true);
 			undoAction.setEnabled(currentEditor.editorPanel.textArea.canUndo());
 			redoAction.setEnabled(currentEditor.editorPanel.textArea.canRedo());
 		}
@@ -833,19 +845,16 @@ public class MultiFileEditorPanel extends JPanel
 		File editorFile;
 		if ((editorFile = handle.contentSourceFile) == null)
 		{
-			editorFile = utils.chooseFile(this,
-				language.getText("texteditor.action.save.title", handle.editorTab.getTabTitle()), 
-				language.getText("texteditor.action.save.approve"), 
-				this::getLastPathTouched,
-				this::setLastPathTouched,
-				getSaveFileTypes()
-			);
-			
-			if (editorFile == null)
-				return false;
+			return chooseAndSaveFile(handle);
 		}
-		
-		return saveEditorToFile(handle, editorFile);
+		else if (currentEditor.needsToSave())
+		{
+			return saveEditorToFile(handle, editorFile);
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	private boolean saveEditorToFile(EditorHandle handle, File targetFile)
@@ -863,6 +872,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		handle.onSaveChange(targetFile);
 		updateActionStates();
+		
 		if (listener != null)
 			listener.onSave(handle);
 		return true;

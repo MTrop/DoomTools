@@ -40,6 +40,7 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -58,10 +59,12 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WadScriptApp extends DoomToolsApplicationInstance
 {
-    /** Logger. */
+	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptApp.class); 
 
-	private static final FileFilter[] TYPES = new FileFilter[] { fileExtensionFilter("WadScript Files (*.script)", "script") };
+    private static final FileFilter WADSCRIPT_EXTENSION_FILTER = fileExtensionFilter("WadScript Files (*.script)", "script");
+
+	private static final FileFilter[] TYPES = new FileFilter[] { WADSCRIPT_EXTENSION_FILTER };
 	
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -175,6 +178,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.saved", sourceFile.getName()));
 				setWorkingDirectoryField(sourceFile.getParentFile());
+				onHandleChange();
 			}
 
 			@Override
@@ -202,18 +206,25 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(650, 500), createEmptyBorder(4, 4, 4, 4), borderLayout(0, 4), 
+		final int labelWidth = 128;
+		return containerOf(dimension(650, 500), createEmptyBorder(8, 8, 8, 8), borderLayout(0, 8), 
 			node(BorderLayout.CENTER, editorPanel),
-			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
+			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 8),
 				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
-					node(BorderLayout.NORTH, utils.createTitlePanel(language.getText("wadscript.workdir.title"), workingDirFileField)),
-					node(BorderLayout.SOUTH, utils.createTitlePanel(language.getText("wadscript.entrypoint.title"), containerOf(borderLayout(4, 0),
-						node(BorderLayout.CENTER, entryPointField),
-						node(BorderLayout.LINE_END, containerOf(
-							node(BorderLayout.CENTER, runScriptButton),
-							node(BorderLayout.LINE_END, popupButton)
+					node(BorderLayout.NORTH, containerOf(borderLayout(4, 0),
+						node(BorderLayout.LINE_START, dimension(labelWidth, 20), label(language.getText("wadscript.workdir.title"))),
+						node(BorderLayout.CENTER, workingDirFileField)
+					)),
+					node(BorderLayout.SOUTH, containerOf(borderLayout(4, 0),
+						node(BorderLayout.LINE_START, dimension(labelWidth, 20), label(language.getText("wadscript.entrypoint.title"))),
+						node(containerOf(
+							node(BorderLayout.CENTER, entryPointField),
+							node(BorderLayout.LINE_END, containerOf(
+								node(BorderLayout.CENTER, runScriptButton),
+								node(BorderLayout.LINE_END, popupButton)
+							))
 						))
-					)))
+					))
 				)),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
@@ -517,6 +528,12 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			return TYPES;
 		}
 	
+		@Override
+		protected File transformSaveFile(FileFilter selectedFilter, File selectedFile) 
+		{
+			return selectedFilter == WADSCRIPT_EXTENSION_FILTER ? FileUtils.addMissingExtension(selectedFile, "script") : selectedFile;
+		}
+		
 	}
 	
 	private class ExecuteWithArgsPanel extends JPanel

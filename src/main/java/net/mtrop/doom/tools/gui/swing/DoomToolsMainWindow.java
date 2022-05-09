@@ -47,6 +47,7 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
@@ -639,6 +640,7 @@ public class DoomToolsMainWindow extends JFrame
 			language.getText("doomtools.workspace.saveas.browse.accept"),
 			settings::getLastProjectDirectory,
 			settings::setLastProjectDirectory,
+			(filter, file) -> filter == FileFilters.WORKSPACES ? FileUtils.addMissingExtension(file, "dtw") : file,
 			FileFilters.WORKSPACES
 		);
 		

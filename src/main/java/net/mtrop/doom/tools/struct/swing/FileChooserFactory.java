@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.struct.swing;
 
 import java.awt.Component;
 import java.io.File;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import javax.swing.JFileChooser;
@@ -18,6 +19,8 @@ import javax.swing.filechooser.FileFilter;
  */
 public final class FileChooserFactory
 {
+	private static final BiFunction<FileFilter, File, File> NO_CHANGE_TRANSFORM = (x0, file) -> file;
+	
 	/**
 	 * Opens a directory chooser dialog.
 	 * @param parent the parent component for the chooser modal.
@@ -96,10 +99,11 @@ public final class FileChooserFactory
 	 * @param title the dialog title.
 	 * @param initPath the initial path for the file chooser.
 	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
-	public static File chooseFile(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	public static File chooseFile(Component parent, String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
 	{
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -120,8 +124,126 @@ public final class FileChooserFactory
 			case JFileChooser.ERROR_OPTION:
 				return null;
 			case JFileChooser.APPROVE_OPTION:
-				return jfc.getSelectedFile();
+				return transformFileFunction.apply(jfc.getFileFilter(), jfc.getSelectedFile());
 		}
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(Component parent, String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(parent, title, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(Component parent, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(parent, null, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(Component parent, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(parent, null, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, null, null, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, null, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, null, null, null, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFile(parent, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -134,7 +256,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(Component parent, String title, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(parent, title, null, approveText, choosableFilters);
+		return chooseFile(parent, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -147,7 +269,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(parent, null, initPath, approveText, choosableFilters);
+		return chooseFile(parent, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -159,7 +281,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(Component parent, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(parent, null, null, approveText, choosableFilters);
+		return chooseFile(parent, null, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -172,7 +294,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(String title, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(null, title, initPath, approveText, choosableFilters);
+		return chooseFile(null, title, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -184,7 +306,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(String title, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(null, title, null, approveText, choosableFilters);
+		return chooseFile(null, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -195,7 +317,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(String title, FileFilter ... choosableFilters)
 	{
-		return chooseFile(null, title, null, null, choosableFilters);
+		return chooseFile(null, title, null, null, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -207,7 +329,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(null, null, initPath, approveText, choosableFilters);
+		return chooseFile(null, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
@@ -217,7 +339,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(FileFilter ... choosableFilters)
 	{
-		return chooseFile(null, null, null, null, choosableFilters);
+		return chooseFile(null, null, null, null, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**
