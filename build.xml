@@ -54,7 +54,7 @@
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${flatlaf.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -65,7 +65,6 @@
 		net.mtrop.doom.tools.decohack.contexts,
 		net.mtrop.doom.tools.decohack.data,
 		net.mtrop.doom.tools.decohack.data.enums,
-		net.mtrop.doom.tools.decohack.exception,
 		net.mtrop.doom.tools.decohack.patches,
 		net.mtrop.doom.tools.doommake,
 		net.mtrop.doom.tools.doommake.functions,
@@ -77,6 +76,7 @@
 		net.mtrop.doom.tools.gui.apps.swing,
 		net.mtrop.doom.tools.gui.apps.swing.panels,
 		net.mtrop.doom.tools.gui.managers,
+		net.mtrop.doom.tools.gui.managers.tokenizers,
 		net.mtrop.doom.tools.gui.swing,
 		net.mtrop.doom.tools.gui.swing.panels,
 		net.mtrop.doom.tools.struct,
