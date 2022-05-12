@@ -14,10 +14,10 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 
 /**
- * Token maker for DoomMake/WadScript/RookScript.
+ * Token maker for DECOHack.
  * @author Matthew Tropiano 
  */
-public class RookScriptTokenMaker extends AbstractTokenMaker
+public class DecoHackTokenMaker extends AbstractTokenMaker
 {
 	private static final Function<String, char[]> ALPHABET = (str) -> {
 		char[] chars = str.toCharArray();
@@ -25,61 +25,71 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 		return chars;
 	};
 	
-	private static final char[] SEPARATORS = ALPHABET.apply("[]{}()");
-	private static final char[] DELIMITER_BREAK = ALPHABET.apply("[]{}(),.!~+-*/%&|^=<>\"`:;?");
+	private static final char[] SEPARATORS = ALPHABET.apply("{}()");
+	private static final char[] DELIMITER_BREAK = ALPHABET.apply("{}(),.+-|:\"`/");
 	private static final char[] HEXDIGITS = ALPHABET.apply("0123456789abcdefABCDEF");
 
-	private static final Set<String> OPERATORS = ObjectUtils.createSet(
-		"+", "-", "!", "~", "*", "/", "%", "&", "&&", "|", "||", "^", "=", "==", "!=", "===", "!==",
-		"<", ">", "<<", ">>", ">>>", "?", ":", "?:", "??", "+=", "-=", "*=", "/=", "%=", "&=", "|=",
-		">>=", "<<=", ">>>=", ";", "::", "->", ",", "."
-	);
+	private static final Set<String> OPERATORS = ObjectUtils.createSet("+", "-", "|");
 	
 	private static final int TYPE_START =                           Token.DEFAULT_NUM_TOKEN_TYPES;
 	private static final int TYPE_MAYBE_NUMERIC =                   TYPE_START + 0;
 	private static final int TYPE_MAYBE_DELIMITER =                 TYPE_START + 1;
-	private static final int TYPE_FLOAT_EXPONENT =                  TYPE_START + 2;
-	private static final int TYPE_FLOAT_EXPONENT_SIGN =             TYPE_START + 3;
-	private static final int TYPE_FLOAT_EXPONENT_SIGN_0 =           TYPE_START + 4;
-	private static final int TYPE_PREPROCESSOR_MULTILINE =          TYPE_START + 5;
-	private static final int TYPE_MAYBE_COMMENT =                   TYPE_START + 6;
-	private static final int TYPE_MAYBE_COMMENT_MULTILINE_END =     TYPE_START + 7;
-	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION_END = TYPE_START + 8;
-	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION =     TYPE_START + 9;
-	private static final int TYPE_STRING_ESCAPE =                   TYPE_START + 10;
-	private static final int ERROR_TYPE_STRING_ESCAPE =             TYPE_START + 11;
-	private static final int TYPE_STRING_ESCAPE_HEX =               TYPE_START + 12;
-	private static final int TYPE_STRING_ESCAPE_HEX_0 =             TYPE_START + 13;
-	private static final int TYPE_STRING_ESCAPE_UNICODE =           TYPE_START + 14;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_0 =         TYPE_START + 15;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_1 =         TYPE_START + 16;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_2 =         TYPE_START + 17;
+	private static final int TYPE_PREPROCESSOR_MULTILINE =          TYPE_START + 2;
+	private static final int TYPE_MAYBE_COMMENT =                   TYPE_START + 3;
+	private static final int TYPE_MAYBE_COMMENT_MULTILINE_END =     TYPE_START + 4;
+	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION_END = TYPE_START + 5;
+	private static final int TYPE_MAYBE_COMMENT_DOCUMENTATION =     TYPE_START + 6;
+	private static final int TYPE_STRING_ESCAPE =                   TYPE_START + 7;
+	private static final int ERROR_TYPE_STRING_ESCAPE =             TYPE_START + 8;
+	private static final int TYPE_STRING_ESCAPE_HEX =               TYPE_START + 9;
+	private static final int TYPE_STRING_ESCAPE_HEX_0 =             TYPE_START + 10;
 
 	
 	/**
 	 * Adds the common RookScript keywords to a TokenMap.
 	 * @param targetMap the target map to add to.
 	 */
-	protected static void addRookScriptKeywords(TokenMap targetMap)
+	protected static void addDecoHackKeywords(TokenMap targetMap)
 	{
-		// Rookscript Common.
-		targetMap.put("if",       Token.RESERVED_WORD);
-		targetMap.put("else",     Token.RESERVED_WORD);
-		targetMap.put("return",   Token.RESERVED_WORD);
-		targetMap.put("while",    Token.RESERVED_WORD);
-		targetMap.put("for",      Token.RESERVED_WORD);
-		targetMap.put("each",     Token.RESERVED_WORD);
-		targetMap.put("entry",    Token.RESERVED_WORD);
-		targetMap.put("function", Token.RESERVED_WORD);
-		targetMap.put("break",    Token.RESERVED_WORD);
-		targetMap.put("continue", Token.RESERVED_WORD);
-		targetMap.put("check",    Token.RESERVED_WORD);
-		
-		targetMap.put("null",     Token.LITERAL_NUMBER_DECIMAL_INT);
-		targetMap.put("true",     Token.LITERAL_BOOLEAN);
-		targetMap.put("false",    Token.LITERAL_BOOLEAN);
-		targetMap.put("infinity", Token.LITERAL_NUMBER_FLOAT);
-		targetMap.put("nan",      Token.LITERAL_NUMBER_FLOAT);
+		targetMap.put("using",      Token.RESERVED_WORD);
+
+		targetMap.put("misc",       Token.RESERVED_WORD);
+		targetMap.put("pars",       Token.RESERVED_WORD);
+		targetMap.put("state",      Token.RESERVED_WORD);
+		targetMap.put("sound",      Token.RESERVED_WORD);
+		targetMap.put("strings",    Token.RESERVED_WORD);
+		targetMap.put("weapon",     Token.RESERVED_WORD);
+		targetMap.put("thing",      Token.RESERVED_WORD);
+
+		targetMap.put("custom",     Token.RESERVED_WORD);
+		targetMap.put("auto",       Token.RESERVED_WORD);
+		targetMap.put("fill",       Token.RESERVED_WORD);
+		targetMap.put("alias",      Token.RESERVED_WORD);
+
+		targetMap.put("clear",      Token.RESERVED_WORD);
+		targetMap.put("properties", Token.RESERVED_WORD);
+		targetMap.put("sounds",     Token.RESERVED_WORD);
+		targetMap.put("states",     Token.RESERVED_WORD);
+
+		targetMap.put("goto",       Token.RESERVED_WORD);
+		targetMap.put("loop",       Token.RESERVED_WORD);
+		targetMap.put("wait",       Token.RESERVED_WORD);
+		targetMap.put("stop",       Token.RESERVED_WORD);
+
+		targetMap.put("free",       Token.RESERVED_WORD);
+		targetMap.put("protect",    Token.RESERVED_WORD);
+		targetMap.put("unprotect",  Token.RESERVED_WORD);
+
+		targetMap.put("each",       Token.RESERVED_WORD);
+		targetMap.put("in",         Token.RESERVED_WORD);
+		targetMap.put("to",         Token.RESERVED_WORD);
+		targetMap.put("from",       Token.RESERVED_WORD);
+		targetMap.put("with",       Token.RESERVED_WORD);
+		targetMap.put("swap",       Token.RESERVED_WORD);
+
+		targetMap.put("null",       Token.LITERAL_NUMBER_DECIMAL_INT);
+		targetMap.put("true",       Token.LITERAL_BOOLEAN);
+		targetMap.put("false",      Token.LITERAL_BOOLEAN);
 	}
 	
 	protected static boolean isSeparator(char c)
@@ -106,7 +116,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 	public TokenMap getWordsToHighlight() 
 	{
 		TokenMap map = new TokenMap(true);
-		addRookScriptKeywords(map);
+		addDecoHackKeywords(map);
 		return map;
 	}
 
@@ -279,11 +289,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 
 				case Token.LITERAL_NUMBER_DECIMAL_INT:
 				{
-					if (c == 'e' || c == 'E')
-					{
-						currentType = TYPE_FLOAT_EXPONENT_SIGN;
-					}
-					else if (c == '.')
+					if (c == '.')
 					{
 						currentType = Token.LITERAL_NUMBER_FLOAT;
 					}
@@ -345,93 +351,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 
 				case Token.LITERAL_NUMBER_FLOAT:
 				{
-					if (c == 'e' || c == 'E')
-					{
-						currentType = TYPE_FLOAT_EXPONENT_SIGN;
-					}
-					else if (Character.isDigit(c))
-					{
-						// Do nothing and continue.
-					}
-					else if (Character.isLetter(c))
-					{
-						currentType = Token.ERROR_NUMBER_FORMAT;
-					}
-					else if (Character.isWhitespace(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else if (isDelimiterBreak(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else
-					{
-						currentType = Token.ERROR_NUMBER_FORMAT;
-					}
-				}
-				break;
-
-				case TYPE_FLOAT_EXPONENT_SIGN:
-				{
-					if (c == '+' || c == '-')
-					{
-						currentType = TYPE_FLOAT_EXPONENT_SIGN_0;
-					}
-					else if (Character.isDigit(c))
-					{
-						currentType = TYPE_FLOAT_EXPONENT;
-					}
-					else if (Character.isWhitespace(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else if (isDelimiterBreak(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else
-					{
-						currentType = Token.ERROR_NUMBER_FORMAT;
-					}
-				}
-				break;
-				
-				case TYPE_FLOAT_EXPONENT_SIGN_0:
-				{
-					if (Character.isDigit(c))
-					{
-						currentType = TYPE_FLOAT_EXPONENT;
-					}
-					else if (Character.isWhitespace(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else if (isDelimiterBreak(c))
-					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
-						currentType = Token.NULL;
-						i--; // wait one char.
-					}
-					else
-					{
-						currentType = Token.ERROR_NUMBER_FORMAT;
-					}
-				}
-				break;
-
-				case TYPE_FLOAT_EXPONENT:
-				{
 					if (Character.isDigit(c))
 					{
 						// Do nothing and continue.
@@ -480,10 +399,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					{
 						currentType = TYPE_STRING_ESCAPE_HEX;
 					}
-					else if (c == 'u' || c == 'U')
-					{
-						currentType = TYPE_STRING_ESCAPE_UNICODE;
-					}
 					else
 					{
 						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
@@ -501,42 +416,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				break;
 
 				case TYPE_STRING_ESCAPE_HEX_0:
-				{
-					if (isHexDigit(c))
-						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
-					else
-						currentType = Token.ERROR_STRING_DOUBLE;
-				}
-				break;
-
-				case TYPE_STRING_ESCAPE_UNICODE:
-				{
-					if (isHexDigit(c))
-						currentType = TYPE_STRING_ESCAPE_UNICODE_0;
-					else
-						currentType = Token.ERROR_STRING_DOUBLE;
-				}
-				break;
-
-				case TYPE_STRING_ESCAPE_UNICODE_0:
-				{
-					if (isHexDigit(c))
-						currentType = TYPE_STRING_ESCAPE_UNICODE_1;
-					else
-						currentType = Token.ERROR_STRING_DOUBLE;
-				}
-				break;
-
-				case TYPE_STRING_ESCAPE_UNICODE_1:
-				{
-					if (isHexDigit(c))
-						currentType = TYPE_STRING_ESCAPE_UNICODE_2;
-					else
-						currentType = Token.ERROR_STRING_DOUBLE;
-				}
-				break;
-
-				case TYPE_STRING_ESCAPE_UNICODE_2:
 				{
 					if (isHexDigit(c))
 						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
@@ -782,10 +661,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 			case ERROR_TYPE_STRING_ESCAPE:
 			case TYPE_STRING_ESCAPE_HEX:
 			case TYPE_STRING_ESCAPE_HEX_0:
-			case TYPE_STRING_ESCAPE_UNICODE:
-			case TYPE_STRING_ESCAPE_UNICODE_0:
-			case TYPE_STRING_ESCAPE_UNICODE_1:
-			case TYPE_STRING_ESCAPE_UNICODE_2:
 			case Token.LITERAL_STRING_DOUBLE_QUOTE:
 				addToken(chars, currentTokenStart, end - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
 				addNullToken();
@@ -810,6 +685,12 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				int value;
 				if ((value = wordsToHighlight.get(segment, start, end)) != -1) 
 					tokenType = value;
+				else
+				{
+					String str = new String(segment, start, end + 1 - start);
+					if (str.length() >= 2 && str.substring(0, 2).equalsIgnoreCase("a_"))
+						tokenType = Token.FUNCTION;
+				}
 			}
 			break;
 			
@@ -829,22 +710,9 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 			}
 			break;
 
-			case TYPE_FLOAT_EXPONENT:
-			{
-				tokenType = Token.LITERAL_NUMBER_FLOAT;
-			}
-			break;
-			
 			case TYPE_MAYBE_COMMENT: // just "/"
 			{
 				tokenType = Token.OPERATOR;
-			}
-			break;
-			
-			case TYPE_FLOAT_EXPONENT_SIGN:  // incomplete float with exponent signifier
-			case TYPE_FLOAT_EXPONENT_SIGN_0:  // incomplete float with sign char
-			{
-				tokenType = Token.ERROR_NUMBER_FORMAT;
 			}
 			break;
 			

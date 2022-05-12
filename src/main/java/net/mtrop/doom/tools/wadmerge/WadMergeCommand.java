@@ -30,9 +30,15 @@ public enum WadMergeCommand
 	END
 	{
 		@Override
+		public String usage() 
+		{
+			return "END";
+		}
+		
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("END"); 
+			out.println(usage()); 
 			out.println("    Ends script read.");
 		}
 		
@@ -47,9 +53,15 @@ public enum WadMergeCommand
 	ECHO
 	{
 		@Override
+		public String usage()
+		{
+			return "ECHO [...]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("ECHO [...]"); 
+			out.println(usage()); 
 			out.println("    Prints tokens to output."); 
 			out.println("    [...]: The tokens to print.");
 		}
@@ -72,9 +84,15 @@ public enum WadMergeCommand
 	CREATE
 	{
 		@Override
+		public String usage()
+		{
+			return "CREATE [symbol] [opt:iwad]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("CREATE [symbol] [opt:iwad]"); 
+			out.println(usage()); 
 			out.println("    Creates a new in-memory buffer, errors out if the symbol exists."); 
 			out.println("    Buffers are best used for speed, but large merges will consume"); 
 			out.println("    lots of memory during merge."); 
@@ -99,9 +117,15 @@ public enum WadMergeCommand
 	CREATEFILE
 	{
 		@Override
+		public String usage()
+		{
+			return "CREATEFILE [symbol] [path] [opt:iwad]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("CREATEFILE [symbol] [path] [opt:iwad]"); 
+			out.println(usage()); 
 			out.println("    Creates a new WAD file (on disk - not in memory), errors out if ");
 			out.println("    the symbol exists or the new file could not be created."); 
 			out.println("    WARNING: If the file already exists, it is OVERWRITTEN!"); 
@@ -139,9 +163,15 @@ public enum WadMergeCommand
 	CLEAR
 	{
 		@Override
+		public String usage() 
+		{
+			return "CLEAR [symbol]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("CLEAR [symbol]"); 
+			out.println(usage()); 
 			out.println("    Clears an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is deleted and rebuilt."); 
 			out.println("    [symbol]: The symbol for the existing buffer to clear.");
@@ -166,9 +196,15 @@ public enum WadMergeCommand
 	DISCARD
 	{
 		@Override
+		public String usage() 
+		{
+			return "DISCARD [symbol]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("DISCARD [symbol]"); 
+			out.println(usage()); 
 			out.println("    Discards an existing buffer, errors out if the symbol does not exist."); 
 			out.println("    If the symbol is a file, it is closed."); 
 			out.println("    [symbol]: The symbol for the existing buffer to discard.");
@@ -193,9 +229,15 @@ public enum WadMergeCommand
 	SAVE
 	{
 		@Override
+		public String usage()
+		{
+			return "SAVE [symbol] [file]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("SAVE [symbol] [file]");
+			out.println(usage());
 			out.println("    Exports the content of a symbol to a WAD file. Directories are created for");
 			out.println("    the file, if they don't exist. If the symbol is a WAD file (not buffer)");
 			out.println("    and the destination is the same file, nothing happens.");
@@ -234,9 +276,15 @@ public enum WadMergeCommand
 	LOAD
 	{
 		@Override
+		public String usage() 
+		{
+			return "LOAD [symbol] [file]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("LOAD [symbol] [file]");
+			out.println(usage());
 			out.println("    Creates a new in-memory buffer by loading an existing WAD file");
 			out.println("    into memory. The symbol must not already exist.");
 			out.println("    [symbol]: The buffer to create.");
@@ -268,9 +316,15 @@ public enum WadMergeCommand
 	FINISH
 	{
 		@Override
+		public String usage()
+		{
+			return "FINISH [symbol] [file]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("FINISH [symbol] [file]");
+			out.println(usage());
 			out.println("    Exports the content of a symbol to a WAD file. Directories are created for");
 			out.println("    the file, if they don't exist. If the symbol is a WAD file (not buffer) and");
 			out.println("    the destination is the same file, nothing happens. The symbol is discarded.");
@@ -309,9 +363,15 @@ public enum WadMergeCommand
 	VALID
 	{
 		@Override
+		public String usage()
+		{
+			return "VALID [symbol]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("VALID [symbol]"); 
+			out.println(usage()); 
 			out.println("    Asserts that a symbol is a valid buffer."); 
 			out.println("    [symbol]: The symbol to test.");
 			out.println("    ................................");
@@ -329,9 +389,15 @@ public enum WadMergeCommand
 	MARKER
 	{
 		@Override
+		public String usage() 
+		{
+			return "MARKER [symbol] [name]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MARKER [symbol] [name]"); 
+			out.println(usage()); 
 			out.println("    Adds an empty entry to [symbol] called [name]."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
@@ -356,9 +422,15 @@ public enum WadMergeCommand
 	DATEMARKER
 	{
 		@Override
+		public String usage()
+		{
+			return "DATEMARKER [symbol] [name]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("DATEMARKER [symbol] [name]"); 
+			out.println(usage()); 
 			out.println("    Adds an entry to [symbol] called [name] with the current date."); 
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [name]:   The name of the marker.");
@@ -383,9 +455,15 @@ public enum WadMergeCommand
 	MERGE
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGE [dest-symbol] [src-symbol]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGE [dest-symbol] [src-symbol]");
+			out.println(usage());
 			out.println("    Adds all entries from [src-symbol] into [dest-symbol].");
 			out.println("    [dest-symbol]: Destination symbol.");
 			out.println("    [src-symbol]:  Source symbol.");
@@ -411,9 +489,15 @@ public enum WadMergeCommand
 	MERGEWAD
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGEWAD [symbol] [path]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEWAD [symbol] [path]"); 
+			out.println(usage()); 
 			out.println("    Reads WAD entries from [path] into buffer [symbol].");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The WAD contents to add.");
@@ -450,9 +534,15 @@ public enum WadMergeCommand
 	MERGENAMESPACE
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGENAMESPACE [dest-symbol] [src-symbol] [namespace] [opt:amend]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGENAMESPACE [dest-symbol] [src-symbol] [namespace] [opt:amend]"); 
+			out.println(usage()); 
 			out.println("    Adds all entries from [src-symbol] into [dest-symbol] that");
 			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
 			out.println("    the START/END namespace markers.");
@@ -491,9 +581,15 @@ public enum WadMergeCommand
 	MERGENAMESPACEFILE
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGENAMESPACEFILE [symbol] [path] [namespace] [opt:amend]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGENAMESPACEFILE [symbol] [path] [namespace] [opt:amend]"); 
+			out.println(usage()); 
 			out.println("    Reads WAD entries from [path] into buffer [symbol] that");
 			out.println("    lie between [namespace]_START and  [namespace]_END, excluding");
 			out.println("    the START/END namespace markers.");
@@ -543,9 +639,15 @@ public enum WadMergeCommand
 	MERGEFILE
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGEFILE [symbol] [path] [opt:entryname]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEFILE [symbol] [path] [opt:entryname]"); 
+			out.println(usage()); 
 			out.println("    Reads file from [path] into [symbol].");
 			out.println("    NOTE: Specifying a target entry name will override any replacement");
 			out.println("    behavior set by FILECHARSUB.");
@@ -587,9 +689,15 @@ public enum WadMergeCommand
 	MERGEMAP
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGEMAP [dest-symbol] [targetmap] [src-symbol] [opt:sourcemap]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEMAP [dest-symbol] [targetmap] [src-symbol] [opt:sourcemap]"); 
+			out.println(usage()); 
 			out.println("    Reads a single map from the source, appending it to the destination.");
 			out.println("    [dest-symbol]: The symbol to add to.");
 			out.println("    [targetmap]:   The map to add (map header).");
@@ -627,9 +735,15 @@ public enum WadMergeCommand
 	MERGEMAPFILE
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGEMAPFILE [symbol] [targetmap] [path] [opt:sourcemap]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEMAPFILE [symbol] [targetmap] [path] [opt:sourcemap]"); 
+			out.println(usage()); 
 			out.println("    Reads a single map from the source WAD, appending it to the destination.");
 			out.println("    [symbol]:    The symbol to add to.");
 			out.println("    [targetmap]: The map to add (target header).");
@@ -677,9 +791,15 @@ public enum WadMergeCommand
 	MERGEDIR
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGEDIR [symbol] [path] [opt:nomarkers]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEDIR [symbol] [path] [opt:nomarkers]");
+			out.println(usage());
 			out.println("    Adds a directory and its subdirectories recursively (files first, then");
 			out.println("    directory contents, per directory).");
 		    out.println("    For each FILE in [path],"); 
@@ -725,9 +845,15 @@ public enum WadMergeCommand
 	MERGEWADDIR
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGEWADDIR [symbol] [path]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEWADDIR [symbol] [path]");
+			out.println(usage());
 			out.println("    Adds a directory and its subdirectories recursively (files first, then");
 			out.println("    directory contents, per directory), but only the WAD files (by type and");
 			out.println("    extension).");
@@ -769,9 +895,15 @@ public enum WadMergeCommand
 	MERGESWANTBLS
 	{
 		@Override
+		public String usage() 
+		{
+			return "MERGESWANTBLS [symbol] [path]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGESWANTBLS [symbol] [path]");
+			out.println(usage());
 			out.println("    Reads file from [path], interprets it as a SWANTBLS file, creates two");
 			out.println("    entries in [symbol]: ANIMATED and SWITCHES.");
 			out.println("    [symbol]: The symbol to add to.");
@@ -806,9 +938,15 @@ public enum WadMergeCommand
 	MERGEDEUTEXFILE
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGEDEUTEXFILE [symbol] [path] [opt:entry] [opt:strife]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGEDEUTEXFILE [symbol] [path] [opt:entry] [opt:strife]");
+			out.println(usage());
 			out.println("    Reads file from [path], interprets it as a DEUTeX texture/patch assembly");
 			out.println("    file, creates/amends TEXTUREx/PNAMES. The name of the file is the name of");
 			out.println("    the texture lump.");
@@ -861,9 +999,15 @@ public enum WadMergeCommand
 	MERGETEXTUREDIR
 	{
 		@Override
+		public String usage()
+		{
+			return "MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]");
+			out.println(usage());
 			out.println("    Imports a directory's files as Doom Patches (or PNGs) and adds them");
 			out.println("    to either a new or already-existing PP namespace and texture set entry");
 			out.println("    (plus PNAMES).");
@@ -908,9 +1052,15 @@ public enum WadMergeCommand
 	FILECHARSUB
 	{
 		@Override
+		public String usage()
+		{
+			return "FILECHARSUB [char] [replacement]";
+		}
+
+		@Override
 		public void help(PrintStream out)
 		{
-			out.println("FILECHARSUB [char] [replacement]");
+			out.println(usage());
 			out.println("    Sets a character replacement mapping (from this command onward) for");
 			out.println("    auto-merged lumps that come from file names. The intended use for this is");
 			out.println("    for renaming files to lump names that may have characters that can't be");
@@ -941,6 +1091,11 @@ public enum WadMergeCommand
 	 * @param out the output stream for messages.
 	 */
 	public abstract void help(PrintStream out);
+	
+	/**
+	 * @return the usage line.
+	 */
+	public abstract String usage();
 	
 	/**
 	 * Executes the commands.

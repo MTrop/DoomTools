@@ -1,7 +1,9 @@
 package net.mtrop.doom.tools.gui.managers;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -30,6 +32,12 @@ import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.WadScriptMain.Resolver;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
+import net.mtrop.doom.tools.gui.managers.tokenizers.DecoHackTokenMaker;
 import net.mtrop.doom.tools.gui.managers.tokenizers.RookScriptTokenMaker;
 import net.mtrop.doom.tools.gui.managers.tokenizers.WadMergeTokenMaker;
 import net.mtrop.doom.tools.struct.FactoryMap;
@@ -39,6 +47,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 
 
 /**
@@ -105,6 +114,7 @@ public final class DoomToolsEditorProvider
 			put("sca",        SyntaxConstants.SYNTAX_STYLE_SCALA);
 			put("sql",        SyntaxConstants.SYNTAX_STYLE_SQL);
 			put("tcl",        SyntaxConstants.SYNTAX_STYLE_TCL);
+			put("txt",        SyntaxConstants.SYNTAX_STYLE_NONE);
 			put("ts",         SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
 			put("sh",         SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL);
 			put("vb",         SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC);
@@ -120,7 +130,6 @@ public final class DoomToolsEditorProvider
 			put("script",     SYNTAX_STYLE_DOOMMAKE);
 			put("rscript",    SYNTAX_STYLE_ROOKSCRIPT);
 			put("wadmerge",   SYNTAX_STYLE_WADMERGE);
-			put("wadm",       SYNTAX_STYLE_WADMERGE);
 			put("wadm",       SYNTAX_STYLE_WADMERGE);
 			put("wscript",    SYNTAX_STYLE_WADSCRIPT);
 			put("wsx",        SYNTAX_STYLE_WADSCRIPT);
@@ -230,7 +239,7 @@ public final class DoomToolsEditorProvider
 			put(SYNTAX_STYLE_ROOKSCRIPT, () -> new RookScriptCompletionProvider());
 			put(SYNTAX_STYLE_WADSCRIPT, () -> new WadScriptCompletionProvider());
 			put(SYNTAX_STYLE_DOOMMAKE, () -> new DoomMakeCompletionProvider());
-			put(SYNTAX_STYLE_DECOHACK, () -> new DECOHackCompletionProvider());
+			put(SYNTAX_STYLE_DECOHACK, () -> new DecoHackCompletionProvider());
 		}
     });
     
@@ -267,7 +276,7 @@ public final class DoomToolsEditorProvider
 		tokenMakers.putMapping(SYNTAX_STYLE_ROOKSCRIPT, RookScriptTokenMaker.class.getName());
 
 		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE, WadMergeTokenMaker.class.getName());
-		//tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK, DECOHackTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK, DecoHackTokenMaker.class.getName());
 		
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE, new CurlyFoldParser());
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT, new CurlyFoldParser());
@@ -433,16 +442,18 @@ public final class DoomToolsEditorProvider
 	/* ==================================================================== */
 
 	
-	// WadMerge Completion.
+	// WadMerge Completion Provider.
 	private static class WadMergeCompletionProvider extends DefaultCompletionProvider
 	{
 		private WadMergeCompletionProvider()
 		{
 			super();
+			for (WadMergeCommand command : WadMergeCommand.values())
+				addCompletion(new WadMergeCommandCompletion(this, command));
 		}
 	}
 	
-	// RookScript Completion.
+	// RookScript Completion Provider.
 	private static class RookScriptCompletionProvider extends DefaultCompletionProvider
 	{
 		private RookScriptCompletionProvider()
@@ -454,7 +465,7 @@ public final class DoomToolsEditorProvider
 		}
 	}
 	
-	// WadScript Completion.
+	// WadScript Completion Provider.
 	private static class WadScriptCompletionProvider extends RookScriptCompletionProvider
 	{
 		private WadScriptCompletionProvider()
@@ -465,7 +476,7 @@ public final class DoomToolsEditorProvider
 		}
 	}
 	
-	// DoomMake Completion.
+	// DoomMake Completion Provider.
 	private static class DoomMakeCompletionProvider extends WadScriptCompletionProvider
 	{
 		private DoomMakeCompletionProvider()
@@ -477,13 +488,120 @@ public final class DoomToolsEditorProvider
 		}
 	}
 	
-	// DECOHack Completion.
-	private static class DECOHackCompletionProvider extends DefaultCompletionProvider
+	// DECOHack Completion Provider.
+	private static class DecoHackCompletionProvider extends DefaultCompletionProvider
 	{
-		private DECOHackCompletionProvider()
+		private DecoHackCompletionProvider()
 		{
 			super();
+			for (DEHActionPointerDoom19 pointer : DEHActionPointerDoom19.values())
+				addCompletion(new DecoHackPointerCompletion(this, pointer));
+			for (DEHActionPointerMBF pointer : DEHActionPointerMBF.values())
+				addCompletion(new DecoHackPointerCompletion(this, pointer));
+			for (DEHActionPointerMBF21 pointer : DEHActionPointerMBF21.values())
+				addCompletion(new DecoHackPointerCompletion(this, pointer));
+			// TODO: Add macros.
 		}
+	}
+
+	// Special completion for WadMerge-based stuff.
+	private static class DecoHackPointerCompletion extends AbstractCompletion
+	{
+		private final String name;
+		private final String paramTypeText; 
+		private final String summaryText;
+		
+		public DecoHackPointerCompletion(CompletionProvider parent, DEHActionPointer pointer)
+		{
+			super(parent);
+			this.name = "A_" + pointer.getMnemonic();
+			
+			boolean first = true;
+			StringBuilder sb = new StringBuilder();
+			for (DEHActionPointerParamType ptype : pointer.getParams())
+			{
+				if (!first)
+					sb.append(", ");
+				sb.append(ptype.name().toLowerCase());
+				first = false;
+			}
+			this.paramTypeText = sb.toString();
+			
+			// TODO: Write actual docs for each pointer.
+			this.summaryText = this.name + "(" + this.paramTypeText + ")";
+		}
+		
+		@Override
+		public String getInputText()
+		{
+			return name;
+		}
+
+		@Override
+		public String getReplacementText()
+		{
+			return name + "(" + paramTypeText + ")";
+		}
+
+		@Override
+		public String getSummary()
+		{
+			return summaryText;
+		}
+
+		@Override
+		public String toString() 
+		{
+			return name + "(" + paramTypeText + ")";
+		}
+		
+	}
+	
+	// Special completion for WadMerge-based stuff.
+	private static class WadMergeCommandCompletion extends AbstractCompletion
+	{
+		private final String name;
+		private final String usage; 
+		private final String summaryText;
+		
+		private WadMergeCommandCompletion(CompletionProvider parent, WadMergeCommand command) 
+		{
+			super(parent);
+			this.name = command.name().toLowerCase();
+			this.usage = command.usage().toLowerCase();
+
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+			try (PrintStream textOut = new PrintStream(bos, true))
+			{
+				command.help(textOut);
+			}
+			this.summaryText = "<html><body><pre>" + (new String(bos.toByteArray())) + "</pre></body></html>";
+		}
+		
+		@Override
+		public String getInputText()
+		{
+			return name;
+		}
+
+		@Override
+		public String getReplacementText()
+		{
+			return usage;
+		}
+
+		@Override
+		public String getSummary()
+		{
+			return summaryText;
+		}
+
+		@Override
+		public String toString() 
+		{
+			return usage;
+		}
+		
 	}
 	
 	// Special completion for RookScript-based stuff.
