@@ -6,6 +6,7 @@ import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +36,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
@@ -43,6 +45,7 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 
+import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
@@ -180,8 +183,13 @@ public class MultiFileEditorPanel extends JPanel
 	private EditorHandle currentEditor;
 	/** The panel listener. */
 	private Listener listener;
-	/** Find replace modal */
+	/** Find replace modal instance. */
 	private volatile Modal<Void> findModal;
+
+	/** Editor coding settings. */
+	private EditorCodeSettings codeSettings;
+	/** Editor auto-completion settings. */
+	private EditorAutoCompleteSettings autoCompleteSettings;
 
 	/**
 	 * Creates a new multi-file editor panel with default options.
@@ -216,6 +224,9 @@ public class MultiFileEditorPanel extends JPanel
 		this.allEditors = new HashMap<>();
 		this.currentEditor = null;
 		this.listener = listener;
+		
+		this.codeSettings = settings.getDefaultEditorCodeSettings();
+		this.autoCompleteSettings = settings.getDefaultEditorAutoCompleteSettings();
 		
 		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
 			tabs.addChangeListener((event) -> {
@@ -603,8 +614,8 @@ public class MultiFileEditorPanel extends JPanel
 		// ==================================================================
 		
 		settings.getDefaultEditorViewSettings().applyTo(textArea);
-		
-		// TODO: Scan content for tab type and set accordingly.
+		codeSettings.applyTo(textArea);
+		setEditorViewSettingsByContent(textArea, content);
 		
 		// ==================================================================
 		
@@ -1039,6 +1050,37 @@ public class MultiFileEditorPanel extends JPanel
 		findModal.open();
 	}
 
+	// Sets editor view settings by scanning content.
+	private static void setEditorViewSettingsByContent(RSyntaxTextArea textArea, String content)
+	{
+		try (BufferedReader br = new BufferedReader(new StringReader(content)))
+		{
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				if (line.startsWith(" ")) // spaces?
+				{
+					int i = 1;
+					textArea.setTabsEmulated(true);
+					while (line.startsWith(" ", i))
+						i++;
+					if (i > 1)
+						textArea.setTabSize(Math.min(i, 8));
+					break;
+				}
+				else if (line.startsWith("\t"))
+				{
+					textArea.setTabsEmulated(false);
+					break;
+				}
+			}
+		}
+		catch (IOException e) 
+		{
+			// Do nothing.
+		}
+	}
+	
 	/**
 	 * The listener.
 	 */
@@ -1104,7 +1146,10 @@ public class MultiFileEditorPanel extends JPanel
 		private long contentSourceFileLastModified;
 		/** Current RSyntaxTextArea style. */
 		private String currentStyle;
-		
+
+		/** Current AutoCompletion engine. */
+		private AutoCompletion currentAutoCompletion;
+
 		/** Tab component panel. */
 		private EditorTab editorTab;
 		/** Editor panel. */
@@ -1124,6 +1169,7 @@ public class MultiFileEditorPanel extends JPanel
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
 			textArea.setSyntaxEditingStyle(styleName);
+			applyAutoComplete(styleName);
 			textArea.getDocument().addDocumentListener(new DocumentListener()
 			{
 				@Override
@@ -1175,6 +1221,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			currentStyle = styleName;
 			editorPanel.textArea.setSyntaxEditingStyle(styleName);
+			applyAutoComplete(styleName);
 			updateLabels();
 		}
 		
@@ -1220,6 +1267,17 @@ public class MultiFileEditorPanel extends JPanel
 		public boolean needsToSave()
 		{
 			return contentLastModified > contentSourceFileLastModified;
+		}
+		
+		// Applies the auto-complete.
+		private void applyAutoComplete(String styleName)
+		{
+			AutoCompletion autoCompletion = editorProvider.createAutoCompletionByStyle(styleName);
+			autoCompleteSettings.applyTo(autoCompletion);
+			if (currentAutoCompletion != null)
+				currentAutoCompletion.uninstall();
+			autoCompletion.install(editorPanel.textArea);
+			currentAutoCompletion = autoCompletion;
 		}
 		
 		// Should call to update title on tab and timestamps.
@@ -1323,7 +1381,7 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
-	 * An encapsulation of a series of editor settings for the current editor.  
+	 * An encapsulation of a series of editor view settings.  
 	 */
 	public static class EditorViewSettings
 	{
@@ -1392,43 +1450,511 @@ public class MultiFileEditorPanel extends JPanel
 	/**
 	 * An encapsulation of a series of editor settings around code building.  
 	 */
-	public static class EditorSettings
+	public static class EditorCodeSettings
 	{
-		public EditorSettings()
+		private boolean marginLineEnabled;
+		private int marginLinePosition;
+		
+		private boolean roundedSelectionEdges;
+		private boolean highlightCurrentLine;
+		private boolean animateBracketMatching;
+		private boolean autoIndentEnabled;
+		private boolean bracketMatchingEnabled;
+		private boolean clearWhitespaceLinesEnabled;
+		private boolean closeCurlyBraces;
+		private boolean closeMarkupTags;
+		private boolean codeFoldingEnabled;
+		private boolean eolMarkersVisible;
+		private boolean highlightSecondaryLanguages;
+		private boolean showMatchedBracketPopup;
+		private boolean useFocusableTips;
+		private boolean whitespaceVisible;
+		private boolean paintTabLines;
+		private boolean markOccurrences;
+		private boolean markAllOnOccurrenceSearches;
+		private int markOccurrencesDelay;
+		private boolean paintMatchedBracketPair;
+		private boolean paintMarkOccurrencesBorder;
+		private boolean useSelectedTextColor;
+		private int parserDelay;
+		
+		private boolean hyperlinksEnabled;
+		private int linkScanningMask;
+
+		public EditorCodeSettings()
 		{
-			/*
-			setMarginLineEnabled(boolean)
-			setMarginLinePosition(int)
-			setRoundedSelectionEdges(boolean)
-			setHighlightCurrentLine(boolean)
-			setAnimateBracketMatching(boolean)
-			setAutoIndentEnabled(boolean)
-			setBracketMatchingEnabled(boolean)
-			setClearWhitespaceLinesEnabled(boolean)
-			setCloseCurlyBraces(boolean)
-			setCloseMarkupTags(boolean)
-			setCodeFoldingEnabled(boolean)
-			setEOLMarkersVisible(boolean)
-			setHighlighter(Highlighter)
-			setHighlightSecondaryLanguages(boolean)
-			setShowMatchedBracketPopup(boolean)
-			setUseFocusableTips(boolean)
-			setWhitespaceVisible(boolean)
-			setPaintTabLines(boolean)
-			setMarkOccurrences(boolean)
-			setMarkAllOnOccurrenceSearches(boolean)
-			setMarkOccurrencesDelay(int)
-			setPaintMatchedBracketPair(boolean)
-			setPaintMarkOccurrencesBorder(boolean)
-			setUseSelectedTextColor(boolean);
+			setMarginLineEnabled(true);
+			setMarginLinePosition(80);
+			
+			setCodeFoldingEnabled(true);
+			setCloseCurlyBraces(true);
+			setCloseMarkupTags(true);
 
-			setParserDelay(int)
+			setAutoIndentEnabled(true);
+			setPaintTabLines(true);
+			setWhitespaceVisible(false);
+			setEOLMarkersVisible(false);
+			setClearWhitespaceLinesEnabled(true);
 
-			setHyperlinksEnabled(boolean)
-			setLinkScanningMask(int)
-			setLinkGenerator(LinkGenerator)
+			setBracketMatchingEnabled(true);
+			setShowMatchedBracketPopup(true);
+			setPaintMatchedBracketPair(true);
+			setAnimateBracketMatching(false);
+			
+			setMarkOccurrences(true);
+			setMarkAllOnOccurrenceSearches(false);
+			setMarkOccurrencesDelay(500);
+			setPaintMarkOccurrencesBorder(false);
 
-			 */
+			setUseSelectedTextColor(false);
+			setRoundedSelectionEdges(false);
+			setHighlightCurrentLine(true);
+			setHighlightSecondaryLanguages(true);
+
+			setParserDelay(1000);
+			setUseFocusableTips(false);
+
+			setHyperlinksEnabled(true);
+			setLinkScanningMask(KeyEvent.CTRL_DOWN_MASK);
+		}
+
+		public boolean isMarginLineEnabled()
+		{
+			return marginLineEnabled;
+		}
+
+		public int getMarginLinePosition() 
+		{
+			return marginLinePosition;
+		}
+		
+		public boolean isRoundedSelectionEdges()
+		{
+			return roundedSelectionEdges;
+		}
+
+		public boolean isHighlightCurrentLine() 
+		{
+			return highlightCurrentLine;
+		}
+
+		public boolean isAnimateBracketMatching()
+		{
+			return animateBracketMatching;
+		}
+
+		public boolean isAutoIndentEnabled()
+		{
+			return autoIndentEnabled;
+		}
+
+		public boolean isBracketMatchingEnabled()
+		{
+			return bracketMatchingEnabled;
+		}
+
+		public boolean isClearWhitespaceLinesEnabled()
+		{
+			return clearWhitespaceLinesEnabled;
+		}
+
+		public boolean isCloseCurlyBraces()
+		{
+			return closeCurlyBraces;
+		}
+
+		public boolean isCloseMarkupTags()
+		{
+			return closeMarkupTags;
+		}
+
+		public boolean isCodeFoldingEnabled()
+		{
+			return codeFoldingEnabled;
+		}
+
+		public boolean isEOLMarkersVisible()
+		{
+			return eolMarkersVisible;
+		}
+
+		public boolean isHighlightSecondaryLanguages()
+		{
+			return highlightSecondaryLanguages;
+		}
+
+		public boolean isShowMatchedBracketPopup()
+		{
+			return showMatchedBracketPopup;
+		}
+
+		public boolean isUseFocusableTips()
+		{
+			return useFocusableTips;
+		}
+
+		public boolean isWhitespaceVisible()
+		{
+			return whitespaceVisible;
+		}
+
+		public boolean isPaintTabLines()
+		{
+			return paintTabLines;
+		}
+
+		public boolean isMarkOccurrences()
+		{
+			return markOccurrences;
+		}
+
+		public boolean isMarkAllOnOccurrenceSearches()
+		{
+			return markAllOnOccurrenceSearches;
+		}
+
+		public int getMarkOccurrencesDelay()
+		{
+			return markOccurrencesDelay;
+		}
+
+		public boolean isPaintMatchedBracketPair() 
+		{
+			return paintMatchedBracketPair;
+		}
+
+		public boolean isPaintMarkOccurrencesBorder()
+		{
+			return paintMarkOccurrencesBorder;
+		}
+
+		public boolean isUseSelectedTextColor()
+		{
+			return useSelectedTextColor;
+		}
+
+		public int getParserDelay()
+		{
+			return parserDelay;
+		}
+
+		public boolean isHyperlinksEnabled()
+		{
+			return hyperlinksEnabled;
+		}
+
+		public int getLinkScanningMask()
+		{
+			return linkScanningMask;
+		}
+
+		public void setMarginLineEnabled(boolean marginLineEnabled)
+		{
+			this.marginLineEnabled = marginLineEnabled;
+		}
+		
+		public void setMarginLinePosition(int marginLinePosition) 
+		{
+			this.marginLinePosition = marginLinePosition;
+		}
+
+		public void setRoundedSelectionEdges(boolean roundedSelectionEdges)
+		{
+			this.roundedSelectionEdges = roundedSelectionEdges;
+		}
+
+		public void setHighlightCurrentLine(boolean highlightCurrentLine)
+		{
+			this.highlightCurrentLine = highlightCurrentLine;
+		}
+
+		public void setAnimateBracketMatching(boolean animateBracketMatching)
+		{
+			this.animateBracketMatching = animateBracketMatching;
+		}
+
+		public void setAutoIndentEnabled(boolean autoIndentEnabled)
+		{
+			this.autoIndentEnabled = autoIndentEnabled;
+		}
+
+		public void setBracketMatchingEnabled(boolean bracketMatchingEnabled)
+		{
+			this.bracketMatchingEnabled = bracketMatchingEnabled;
+		}
+
+		public void setClearWhitespaceLinesEnabled(boolean clearWhitespaceLinesEnabled)
+		{
+			this.clearWhitespaceLinesEnabled = clearWhitespaceLinesEnabled;
+		}
+
+		public void setCloseCurlyBraces(boolean closeCurlyBraces)
+		{
+			this.closeCurlyBraces = closeCurlyBraces;
+		}
+
+		public void setCloseMarkupTags(boolean closeMarkupTags) 
+		{
+			this.closeMarkupTags = closeMarkupTags;
+		}
+
+		public void setCodeFoldingEnabled(boolean codeFoldingEnabled)
+		{
+			this.codeFoldingEnabled = codeFoldingEnabled;
+		}
+
+		public void setEOLMarkersVisible(boolean eolMarkersVisible)
+		{
+			this.eolMarkersVisible = eolMarkersVisible;
+		}
+
+		public void setHighlightSecondaryLanguages(boolean highlightSecondaryLanguages)
+		{
+			this.highlightSecondaryLanguages = highlightSecondaryLanguages;
+		}
+
+		public void setShowMatchedBracketPopup(boolean showMatchedBracketPopup)
+		{
+			this.showMatchedBracketPopup = showMatchedBracketPopup;
+		}
+
+		public void setUseFocusableTips(boolean useFocusableTips)
+		{
+			this.useFocusableTips = useFocusableTips;
+		}
+
+		public void setWhitespaceVisible(boolean whitespaceVisible)
+		{
+			this.whitespaceVisible = whitespaceVisible;
+		}
+
+		public void setPaintTabLines(boolean paintTabLines) 
+		{
+			this.paintTabLines = paintTabLines;
+		}
+
+		public void setMarkOccurrences(boolean markOccurrences)
+		{
+			this.markOccurrences = markOccurrences;
+		}
+
+		public void setMarkAllOnOccurrenceSearches(boolean markAllOnOccurrenceSearches)
+		{
+			this.markAllOnOccurrenceSearches = markAllOnOccurrenceSearches;
+		}
+
+		public void setMarkOccurrencesDelay(int markOccurrencesDelay)
+		{
+			this.markOccurrencesDelay = markOccurrencesDelay;
+		}
+
+		public void setPaintMatchedBracketPair(boolean paintMatchedBracketPair)
+		{
+			this.paintMatchedBracketPair = paintMatchedBracketPair;
+		}
+
+		public void setPaintMarkOccurrencesBorder(boolean paintMarkOccurrencesBorder)
+		{
+			this.paintMarkOccurrencesBorder = paintMarkOccurrencesBorder;
+		}
+
+		public void setUseSelectedTextColor(boolean useSelectedTextColor)
+		{
+			this.useSelectedTextColor = useSelectedTextColor;
+		}
+
+		public void setParserDelay(int parserDelay)
+		{
+			this.parserDelay = parserDelay;
+		}
+
+		public void setHyperlinksEnabled(boolean hyperlinksEnabled)
+		{
+			this.hyperlinksEnabled = hyperlinksEnabled;
+		}
+
+		public void setLinkScanningMask(int linkScanningMask)
+		{
+			this.linkScanningMask = linkScanningMask;
+		}
+
+		public void applyTo(RSyntaxTextArea target)
+		{
+			target.setMarginLineEnabled(marginLineEnabled);
+			target.setMarginLinePosition(marginLinePosition);
+			
+			target.setRoundedSelectionEdges(roundedSelectionEdges);
+			target.setHighlightCurrentLine(highlightCurrentLine);
+			target.setAnimateBracketMatching(animateBracketMatching);
+			target.setAutoIndentEnabled(autoIndentEnabled);
+			target.setBracketMatchingEnabled(bracketMatchingEnabled);
+			target.setClearWhitespaceLinesEnabled(clearWhitespaceLinesEnabled);
+			target.setCloseCurlyBraces(closeCurlyBraces);
+			target.setCloseMarkupTags(closeMarkupTags);
+			target.setCodeFoldingEnabled(codeFoldingEnabled);
+			target.setEOLMarkersVisible(eolMarkersVisible);
+			target.setHighlightSecondaryLanguages(highlightSecondaryLanguages);
+			target.setShowMatchedBracketPopup(showMatchedBracketPopup);
+			target.setUseFocusableTips(useFocusableTips);
+			target.setWhitespaceVisible(whitespaceVisible);
+			target.setPaintTabLines(paintTabLines);
+			target.setMarkOccurrences(markOccurrences);
+			target.setMarkAllOnOccurrenceSearches(markAllOnOccurrenceSearches);
+			target.setMarkOccurrencesDelay(markOccurrencesDelay);
+			target.setPaintMatchedBracketPair(paintMatchedBracketPair);
+			target.setPaintMarkOccurrencesBorder(paintMarkOccurrencesBorder);
+			target.setUseSelectedTextColor(useSelectedTextColor);
+
+			target.setParserDelay(parserDelay);
+
+			target.setHyperlinksEnabled(hyperlinksEnabled);
+			target.setLinkScanningMask(linkScanningMask);
+		}
+	}
+	
+	/**
+	 * Encapsulation of auto-complete settings.
+	 */
+	public static class EditorAutoCompleteSettings
+	{
+		private int choicesWindowSizeWidth;
+		private int choicesWindowSizeHeight;
+		private int descriptionWindowSizeWidth;
+		private int descriptionWindowSizeHeight;
+
+		private KeyStroke triggerKey;
+
+		private boolean autoCompleteEnabled;
+		private boolean autoCompleteSingleChoices;
+		private boolean autoActivationEnabled;
+
+		private boolean showDescWindow;
+		private int parameterDescriptionTruncateThreshold;
+
+		public EditorAutoCompleteSettings()
+		{
+			setAutoCompleteEnabled(true);
+			setChoicesWindowSizeWidth(350);
+			setChoicesWindowSizeHeight(200);
+			setDescriptionWindowSizeWidth(450);
+			setDescriptionWindowSizeHeight(300);
+			setTriggerKey(AutoCompletion.getDefaultTriggerKey());
+			setAutoCompleteSingleChoices(true);
+			setAutoActivationEnabled(false);
+			setShowDescWindow(true);
+			setParameterDescriptionTruncateThreshold(300);
+		}
+		
+		public int getChoicesWindowSizeWidth()
+		{
+			return choicesWindowSizeWidth;
+		}
+
+		public int getChoicesWindowSizeHeight()
+		{
+			return choicesWindowSizeHeight;
+		}
+
+		public int getDescriptionWindowSizeWidth()
+		{
+			return descriptionWindowSizeWidth;
+		}
+
+		public int getDescriptionWindowSizeHeight()
+		{
+			return descriptionWindowSizeHeight;
+		}
+
+		public KeyStroke getTriggerKey()
+		{
+			return triggerKey;
+		}
+
+		public boolean isAutoCompleteEnabled()
+		{
+			return autoCompleteEnabled;
+		}
+
+		public boolean isAutoCompleteSingleChoices() 
+		{
+			return autoCompleteSingleChoices;
+		}
+
+		public boolean isAutoActivationEnabled() 
+		{
+			return autoActivationEnabled;
+		}
+
+		public boolean isShowDescWindow()
+		{
+			return showDescWindow;
+		}
+
+		public int getParameterDescriptionTruncateThreshold()
+		{
+			return parameterDescriptionTruncateThreshold;
+		}
+
+		public void setChoicesWindowSizeWidth(int choicesWindowSizeWidth) 
+		{
+			this.choicesWindowSizeWidth = choicesWindowSizeWidth;
+		}
+
+		public void setChoicesWindowSizeHeight(int choicesWindowSizeHeight)
+		{
+			this.choicesWindowSizeHeight = choicesWindowSizeHeight;
+		}
+
+		public void setDescriptionWindowSizeWidth(int descriptionWindowSizeWidth) 
+		{
+			this.descriptionWindowSizeWidth = descriptionWindowSizeWidth;
+		}
+
+		public void setDescriptionWindowSizeHeight(int descriptionWindowSizeHeight) 
+		{
+			this.descriptionWindowSizeHeight = descriptionWindowSizeHeight;
+		}
+
+		public void setTriggerKey(KeyStroke triggerKey) 
+		{
+			this.triggerKey = triggerKey;
+		}
+
+		public void setAutoCompleteEnabled(boolean autoCompleteEnabled)
+		{
+			this.autoCompleteEnabled = autoCompleteEnabled;
+		}
+
+		public void setAutoCompleteSingleChoices(boolean autoCompleteSingleChoices)
+		{
+			this.autoCompleteSingleChoices = autoCompleteSingleChoices;
+		}
+
+		public void setAutoActivationEnabled(boolean autoActivationEnabled) 
+		{
+			this.autoActivationEnabled = autoActivationEnabled;
+		}
+
+		public void setShowDescWindow(boolean showDescWindow) 
+		{
+			this.showDescWindow = showDescWindow;
+		}
+
+		public void setParameterDescriptionTruncateThreshold(int parameterDescriptionTruncateThreshold)
+		{
+			this.parameterDescriptionTruncateThreshold = parameterDescriptionTruncateThreshold;
+		}
+
+		public void applyTo(AutoCompletion target)
+		{
+			target.setChoicesWindowSize(choicesWindowSizeWidth, choicesWindowSizeHeight);
+			target.setDescriptionWindowSize(descriptionWindowSizeWidth, descriptionWindowSizeHeight);
+			target.setTriggerKey(triggerKey);
+			target.setAutoCompleteEnabled(autoCompleteEnabled);
+			target.setAutoCompleteSingleChoices(autoCompleteSingleChoices);
+			target.setAutoActivationEnabled(autoActivationEnabled);
+			target.setShowDescWindow(showDescWindow);
+			target.setParameterDescriptionTruncateThreshold(parameterDescriptionTruncateThreshold);
 		}
 	}
 	

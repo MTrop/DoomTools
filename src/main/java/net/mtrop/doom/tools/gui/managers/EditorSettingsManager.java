@@ -1,6 +1,8 @@
 package net.mtrop.doom.tools.gui.managers;
 
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
+import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorViewSettings;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
@@ -48,7 +50,45 @@ public final class EditorSettingsManager extends DoomToolsSettings
 	public void setDefaultEditorViewSettings(EditorViewSettings settings)
 	{
 		setEditorViewSettings("default", settings);
+		commit();
 	}
 	
+	/**
+	 * Gets the default editor code settings.
+	 * @return the default settings.
+	 */
+	public EditorCodeSettings getDefaultEditorCodeSettings()
+	{
+		return getEditorCodeSettings("default");
+	}
+	
+	/**
+	 * Sets the default editor code settings.
+	 * @param settings the new default settings.
+	 */
+	public void setDefaultEditorCodeSettings(EditorCodeSettings settings)
+	{
+		setEditorCodeSettings("default", settings);
+		commit();
+	}
+	
+	/**
+	 * Gets the default editor auto-complete settings.
+	 * @return the default settings.
+	 */
+	public EditorAutoCompleteSettings getDefaultEditorAutoCompleteSettings()
+	{
+		return getEditorAutoCompleteSettings("default");
+	}
+	
+	/**
+	 * Sets the default editor auto-complete settings.
+	 * @param settings the new default settings.
+	 */
+	public void setDefaultEditorAutoCompleteSettings(EditorAutoCompleteSettings settings)
+	{
+		setEditorAutoCompleteSettings("default", settings);
+		commit();
+	}
 	
 }

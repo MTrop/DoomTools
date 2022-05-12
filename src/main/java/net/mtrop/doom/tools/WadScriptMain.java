@@ -54,6 +54,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
@@ -102,7 +103,8 @@ public final class WadScriptMain
 	private static final String SWITCH_SEPARATOR = "--";
 	private static final String SWITCH_SEPARATORBASH = "--X";
 	
-	private static final Resolver[] RESOLVERS = 
+	// RookScript-specific
+	private static final Resolver[] RESOLVERS_BASE =
 	{
 		new Resolver("Common", MiscFunctions.createResolver()),
 		new Resolver("Printing/Logging", PrintFunctions.createResolver()),
@@ -123,7 +125,12 @@ public final class WadScriptMain
 		new Resolver("JSON", JSONFunctions.createResolver()),
 		new Resolver("System", SystemFunctions.createResolver()),
 		new Resolver("Images", ImageFunctions.createResolver()),
-		new Resolver("Desktop", "DESKTOP", DesktopFunctions.createResolver()),
+		new Resolver("Desktop", "DESKTOP", DesktopFunctions.createResolver())
+	};
+	
+	// WadScript-specific
+	private static final Resolver[] RESOLVERS_WADSCRIPT = 
+	{
 		new Resolver("WADs", WadFunctions.createResolver()),
 		new Resolver("PK3/PKEs", PK3Functions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
@@ -135,20 +142,23 @@ public final class WadScriptMain
 		new Scope("GLOBAL", new DefaultVariableResolver())
 	};
 	
-	private static class Resolver
+	/**
+	 * A resolver encapsulator for all scripts.
+	 */
+	public static class Resolver
 	{
-		private String sectionName;
-		private String namespace;
-		private ScriptFunctionResolver resolver;
+		public final String sectionName;
+		public final String namespace;
+		public final ScriptFunctionResolver resolver;
 		
-		private Resolver(String sectionName, ScriptFunctionResolver resolver)
+		public Resolver(String sectionName, ScriptFunctionResolver resolver)
 		{
 			this.sectionName = sectionName;
 			this.namespace = null;
 			this.resolver = resolver;
 		}
 
-		private Resolver(String sectionName, String namespace, ScriptFunctionResolver resolver)
+		public Resolver(String sectionName, String namespace, ScriptFunctionResolver resolver)
 		{
 			this.sectionName = sectionName;
 			this.namespace = namespace;
@@ -156,12 +166,15 @@ public final class WadScriptMain
 		}
 	}
 
-	private static class Scope
+	/**
+	 * A scope encapsulator for all scripts.
+	 */
+	public static class Scope
 	{
-		private String scopeName;
-		private ScriptVariableResolver variableResolver;
+		public final String scopeName;
+		public final ScriptVariableResolver variableResolver;
 
-		private Scope(String scopeName, ScriptVariableResolver variableResolver)
+		public Scope(String scopeName, ScriptVariableResolver variableResolver)
 		{
 			this.scopeName = scopeName;
 			this.variableResolver = variableResolver;
@@ -986,6 +999,8 @@ public final class WadScriptMain
 
 				// ============ Add Functions =============
 				
+				final Resolver[] RESOLVERS = ArrayUtils.joinArrays(RESOLVERS_BASE, RESOLVERS_WADSCRIPT);
+				
 				for (int i = 0; i < RESOLVERS.length; i++)
 				{
 					if (i == 0)
@@ -1222,6 +1237,8 @@ public final class WadScriptMain
 		{
 			renderer.startRender();
 
+			final Resolver[] RESOLVERS = ArrayUtils.joinArrays(RESOLVERS_BASE, RESOLVERS_WADSCRIPT);
+
 			List<String> resolverName = new LinkedList<>();
 			List<Resolver> resolverList = new LinkedList<>();
 			for (int i = 0; i < RESOLVERS.length; i++)
@@ -1246,18 +1263,33 @@ public final class WadScriptMain
 	}
 
 	/**
-	 * Gets all known host function signatures.
-	 * @return an array of all of the types.
+	 * Gets all known host function resolvers.
+	 * @return an array of all of the resolvers.
 	 */
-	public static ScriptFunctionType[] getAllHostFunctions()
+	public static Resolver[] getAllBaseResolvers()
 	{
-		List<ScriptFunctionType> outList = new LinkedList<>();
-		for (int i = 0; i < RESOLVERS.length; i++)
-		{
-			for (ScriptFunctionType type : RESOLVERS[i].resolver.getFunctions())
-				outList.add(type);
-		}
-		return outList.toArray(new ScriptFunctionType[outList.size()]); 
+		return RESOLVERS_BASE;
+	}
+	
+	/**
+	 * Gets all known host function resolvers specifically for WadScript.
+	 * @return an array of all of the resolvers.
+	 */
+	public static Resolver[] getAllWadScriptResolvers()
+	{
+		return RESOLVERS_WADSCRIPT;
+	}
+	
+	/**
+	 * Gets all known host scopes.
+	 * @return an array of all of the scopes.
+	 */
+	public static Scope[] getAllScopes()
+	{
+		List<Scope> outList = new LinkedList<>();
+		for (int i = 0; i < SCOPES.length; i++)
+			outList.add(SCOPES[i]);
+		return outList.toArray(new Scope[outList.size()]); 
 	}
 	
 	/**

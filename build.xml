@@ -47,6 +47,9 @@
 	<property name="rsyntaxtextarea.lib.version" value="3.2.0" />
 	<property name="rsyntaxtextarea.jar" value="rsyntaxtextarea-${rsyntaxtextarea.lib.version}.jar" />
 
+	<property name="autocomplete.lib.version" value="3.2.0" />
+	<property name="autocomplete.jar" value="autocomplete-${autocomplete.lib.version}.jar" />
+
 	
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
@@ -132,6 +135,7 @@
 		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.desktop.lib.version}" />
 		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
+		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -173,6 +177,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${rookscript.desktop.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rsyntaxtextarea.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${autocomplete.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
@@ -210,7 +215,12 @@
 		<maven-jar-sources-dl group-path="com/fifesoft" artifact="rsyntaxtextarea" version="${rsyntaxtextarea.lib.version}" />
 	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.autocomplete">
+		<maven-jar-dl group-path="com/fifesoft" artifact="autocomplete" version="${autocomplete.lib.version}" />
+		<maven-jar-sources-dl group-path="com/fifesoft" artifact="autocomplete" version="${autocomplete.lib.version}" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.autocomplete, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />

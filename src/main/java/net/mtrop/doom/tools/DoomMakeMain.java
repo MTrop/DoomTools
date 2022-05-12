@@ -28,10 +28,10 @@ import com.blackrook.json.JSONConversionException;
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
-import com.blackrook.rookscript.lang.ScriptFunctionType;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
+import net.mtrop.doom.tools.WadScriptMain.Resolver;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.ProjectGenerator;
@@ -102,6 +102,13 @@ public final class DoomMakeMain
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	
+	// WadScript-specific
+	private static final Resolver[] RESOLVERS_DOOMMAKE = 
+	{
+		new Resolver("DoomMake Functions", DoomMakeFunctions.createResolver()),
+		new Resolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
+	};
+
 	/**
 	 * Project types.
 	 */
@@ -709,19 +716,12 @@ public final class DoomMakeMain
 	}
 	
 	/**
-	 * Gets all known host function signatures.
-	 * @return an array of all of the types.
+	 * Gets all known host function resolvers specifically for WadScript.
+	 * @return an array of all of the resolvers.
 	 */
-	public static ScriptFunctionType[] getAllHostFunctions()
+	public static Resolver[] getAllDoomMakeResolvers()
 	{
-		List<ScriptFunctionType> outList = new LinkedList<>();
-		for (ScriptFunctionType type : WadScriptMain.getAllHostFunctions())
-			outList.add(type);
-		for (ScriptFunctionType type : DoomMakeFunctions.createResolver().getFunctions())
-			outList.add(type);
-		for (ScriptFunctionType type : ToolInvocationFunctions.createResolver().getFunctions())
-			outList.add(type);
-		return outList.toArray(new ScriptFunctionType[outList.size()]); 
+		return RESOLVERS_DOOMMAKE;
 	}
 	
 	/**

@@ -1,13 +1,21 @@
 package net.mtrop.doom.tools.gui.managers;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
+import org.fife.ui.autocomplete.AbstractCompletion;
+import org.fife.ui.autocomplete.AutoCompletion;
+import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -15,8 +23,18 @@ import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
+import com.blackrook.rookscript.lang.ScriptFunctionType;
+import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.ParameterUsage;
+import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
+
+import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.WadScriptMain;
+import net.mtrop.doom.tools.WadScriptMain.Resolver;
 import net.mtrop.doom.tools.gui.managers.tokenizers.RookScriptTokenMaker;
 import net.mtrop.doom.tools.gui.managers.tokenizers.WadMergeTokenMaker;
+import net.mtrop.doom.tools.struct.FactoryMap;
+import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.HTMLWriter.Options;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
@@ -204,6 +222,27 @@ public final class DoomToolsEditorProvider
 		}
     });
     
+    private static final Map<String, Supplier<CompletionProvider>> COMPLETION_PROVIDERS = Collections.unmodifiableMap(new TreeMap<String, Supplier<CompletionProvider>>() 
+    {
+		private static final long serialVersionUID = 1638202185490860804L;
+		{
+			put(SYNTAX_STYLE_WADMERGE, () -> new WadMergeCompletionProvider());
+			put(SYNTAX_STYLE_ROOKSCRIPT, () -> new RookScriptCompletionProvider());
+			put(SYNTAX_STYLE_WADSCRIPT, () -> new WadScriptCompletionProvider());
+			put(SYNTAX_STYLE_DOOMMAKE, () -> new DoomMakeCompletionProvider());
+			put(SYNTAX_STYLE_DECOHACK, () -> new DECOHackCompletionProvider());
+		}
+    });
+    
+    private static final FactoryMap<String, CompletionProvider> FACTORY = new FactoryMap<String, CompletionProvider>()
+    {
+		@Override
+		protected Supplier<CompletionProvider> getSupplierForKey(String key)
+		{
+			return COMPLETION_PROVIDERS.getOrDefault(key, () -> new DefaultCompletionProvider());
+		}
+    };
+    
 	/**
 	 * @return the singleton instance of this object.
 	 */
@@ -250,7 +289,7 @@ public final class DoomToolsEditorProvider
 	 * This is for drop-down or pop-up menus and the like.
 	 * @return the map.
 	 */
-	public final Map<String, String> getAvailableLanguageMap()
+	public Map<String, String> getAvailableLanguageMap()
 	{
 		return NAME_TO_STYLE_MAP;
 	}
@@ -260,7 +299,7 @@ public final class DoomToolsEditorProvider
 	 * This is for drop-down or pop-up menus and the like.
 	 * @return the map.
 	 */
-	public final Map<String, String> getOtherAvailableLanguageMap()
+	public Map<String, String> getOtherAvailableLanguageMap()
 	{
 		return OTHER_NAME_TO_STYLE_MAP;
 	}
@@ -268,7 +307,7 @@ public final class DoomToolsEditorProvider
 	/**
 	 * @return the common charsets.
 	 */
-	public final Set<Charset> getAvailableCommonCharsets()
+	public Set<Charset> getAvailableCommonCharsets()
 	{
 		return COMMON_CHARSETS;
 	}
@@ -276,7 +315,7 @@ public final class DoomToolsEditorProvider
 	/**
 	 * @return the uncommon charsets.
 	 */
-	public final Set<Charset> getAvailableOtherCharsets()
+	public Set<Charset> getAvailableOtherCharsets()
 	{
 		return OTHER_CHARSETS;
 	}
@@ -299,4 +338,215 @@ public final class DoomToolsEditorProvider
 		return styleName;
 	}
 
+	/**
+	 * Gets a corresponding auto-completion engine by a style name.
+	 * @param styleName the style name.
+	 * @return a new auto-completion instance for a style.
+	 */
+	public AutoCompletion createAutoCompletionByStyle(String styleName)
+	{
+		return new AutoCompletion(getProviderByStyle(styleName));
+	}
+
+	// Style name.
+	private CompletionProvider getProviderByStyle(String styleName)
+	{
+		return FACTORY.get(styleName);
+	}
+
+	/* ==================================================================== */
+
+	private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages) throws IOException
+	{
+		html.push("ul");
+		for (TypeUsage tusage : typeUsages)
+		{
+			html.push("li")
+				.push("span")
+					.tag("strong", tusage.getType() != null ? tusage.getType().name() : "ANY")
+					.tag("em", tusage.getSubType() != null ? ":" + tusage.getSubType() : "")
+					.html(" &mdash; ").text(tusage.getDescription())
+				.pop()
+			.pop();
+		}
+		html.pop();
+	}
+	
+	private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage) throws IOException
+	{
+		// Signature.
+		html.push("div");
+		html.push("strong");
+		html.text((namespace != null ? namespace.toLowerCase() + "::" : "") + name);
+		html.text(" (");
+		boolean first = true;
+		for (ParameterUsage pusage : usage.getParameterInstructions())
+		{
+			if (!first)
+				html.text(", ");
+			html.tag("em", pusage.getParameterName());
+			first = false;
+		}
+		html.text(")");
+		html.pop();
+		html.pop();
+
+		// Full instructions.
+		html.push("div").text(usage.getInstructions()).pop();
+		
+		// Parameters
+		if (!usage.getParameterInstructions().isEmpty())
+		{
+			html.push("div");
+			for (ParameterUsage pusage : usage.getParameterInstructions())
+			{
+				html.push("div")
+					.tag("strong", pusage.getParameterName())
+				.pop();
+				
+				writeFunctionTypeUsageHTML(html, pusage.getTypes());			
+			}
+			html.pop();
+		}
+		
+		html.push("div")
+			.tag("strong", "Returns:")
+		.pop();
+	
+		writeFunctionTypeUsageHTML(html, usage.getReturnTypes());			
+	}
+	
+	private static String getFunctionDescriptionHTML(String namespace, ScriptFunctionType type)
+	{
+		StringWriter out = new StringWriter(1024);
+		try (HTMLWriter html = new HTMLWriter(out, Options.SLASHES_IN_SINGLE_TAGS)) 
+		{
+			html.push("html").push("body");
+			writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
+			html.end();
+		} catch (IOException e) {
+			// Do nothing - shouldn't be thrown.
+		}
+		return out.toString();
+	}
+	
+	/* ==================================================================== */
+
+	
+	// WadMerge Completion.
+	private static class WadMergeCompletionProvider extends DefaultCompletionProvider
+	{
+		private WadMergeCompletionProvider()
+		{
+			super();
+		}
+	}
+	
+	// RookScript Completion.
+	private static class RookScriptCompletionProvider extends DefaultCompletionProvider
+	{
+		private RookScriptCompletionProvider()
+		{
+			super();
+			for (Resolver r : WadScriptMain.getAllBaseResolvers())
+				for (ScriptFunctionType type : r.resolver.getFunctions())
+					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
+		}
+	}
+	
+	// WadScript Completion.
+	private static class WadScriptCompletionProvider extends RookScriptCompletionProvider
+	{
+		private WadScriptCompletionProvider()
+		{
+			for (Resolver r : WadScriptMain.getAllWadScriptResolvers())
+				for (ScriptFunctionType type : r.resolver.getFunctions())
+					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
+		}
+	}
+	
+	// DoomMake Completion.
+	private static class DoomMakeCompletionProvider extends WadScriptCompletionProvider
+	{
+		private DoomMakeCompletionProvider()
+		{
+			super();
+			for (Resolver r : DoomMakeMain.getAllDoomMakeResolvers())
+				for (ScriptFunctionType type : r.resolver.getFunctions())
+					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
+		}
+	}
+	
+	// DECOHack Completion.
+	private static class DECOHackCompletionProvider extends DefaultCompletionProvider
+	{
+		private DECOHackCompletionProvider()
+		{
+			super();
+		}
+	}
+	
+	// Special completion for RookScript-based stuff.
+	private static class RookScriptFunctionCompletion extends AbstractCompletion
+	{
+		private final String functionName;
+		private final String instructions; 
+		private final String functionParameterText;
+		private final String summaryText;
+
+		private static String getParameterSignature(ScriptFunctionType.Usage usage)
+		{
+			StringBuilder sb = new StringBuilder();
+			boolean first = true;
+			for (ParameterUsage pusage : usage.getParameterInstructions())
+			{
+				if (!first)
+					sb.append(", ");
+				sb.append(pusage.getParameterName());
+				first = false;
+			}
+			return sb.toString();
+		}
+		
+		private RookScriptFunctionCompletion(CompletionProvider parent, String namespace, ScriptFunctionType type) 
+		{
+			super(parent);
+
+			// Truncate blurb to first sentence, if possible.
+			String instructions = type.getUsage().getInstructions();
+			int endidx = instructions.indexOf('.');
+			instructions = endidx >= 0 ? instructions.substring(0, endidx + 1) : instructions;
+
+			this.functionName = (namespace != null ? namespace.toLowerCase() + "::" : "") + type.name().toLowerCase();
+			this.instructions = instructions;
+			this.functionParameterText = getParameterSignature(type.getUsage());
+			this.summaryText = getFunctionDescriptionHTML(namespace, type);
+		}
+		
+		@Override
+		public String getInputText()
+		{
+			return functionName;
+		}
+
+		@Override
+		public String getReplacementText()
+		{
+			return functionName + "(" + functionParameterText + ")";
+		}
+
+		@Override
+		public String getSummary()
+		{
+			return summaryText;
+		}
+
+		@Override
+		public String toString() 
+		{
+			return getInputText() + " - " + instructions;
+		}
+		
+	}
+	
 }

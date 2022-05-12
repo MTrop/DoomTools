@@ -13,6 +13,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -35,6 +36,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import static javax.swing.BorderFactory.*;
@@ -757,11 +759,67 @@ public final class FormFactory
 	public static JFormField<String> passwordField(String initialValue, JValueChangeListener<String> changeListener)
 	{
 		return new JValuePasswordField<String>(initialValue, converter(
-			(text) -> text,
+			Function.identity(),
 			(value) -> (
 				value != null ? String.valueOf(value) : ""
 			)
 		), changeListener);
+	}	
+	
+	/**
+	 * Creates a password field.
+	 * @param initialValue the initial value of the field.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> passwordField(String initialValue)
+	{
+		return passwordField(initialValue, null);
+	}	
+	
+	/* ==================================================================== */
+
+	/**
+	 * Creates a keystroke field.
+	 * @param initialValue the initial value of the field.
+	 * @param transformer the transformer function for altering an incoming keystroke before set.
+	 * @param changeListener the change listener.
+	 * @return the generated field.
+	 */
+	public static JFormField<KeyStroke> keyStrokeField(KeyStroke initialValue, Function<KeyStroke, KeyStroke> transformer, JValueChangeListener<KeyStroke> changeListener)
+	{
+		return new JValueKeystrokeField(initialValue, transformer, changeListener);
+	}	
+	
+	/**
+	 * Creates a keystroke field.
+	 * @param initialValue the initial value of the field.
+	 * @param changeListener the change listener.
+	 * @return the generated field.
+	 */
+	public static JFormField<KeyStroke> keyStrokeField(KeyStroke initialValue, JValueChangeListener<KeyStroke> changeListener)
+	{
+		return keyStrokeField(initialValue, Function.identity(), changeListener);
+	}	
+	
+	/**
+	 * Creates a keystroke field.
+	 * @param initialValue the initial value of the field.
+	 * @param transformer the transformer function for altering an incoming keystroke before set.
+	 * @return the generated field.
+	 */
+	public static JFormField<KeyStroke> keyStrokeField(KeyStroke initialValue, Function<KeyStroke, KeyStroke> transformer)
+	{
+		return new JValueKeystrokeField(initialValue, transformer, null);
+	}	
+	
+	/**
+	 * Creates a keystroke field.
+	 * @param initialValue the initial value of the field.
+	 * @return the generated field.
+	 */
+	public static JFormField<KeyStroke> keyStrokeField(KeyStroke initialValue)
+	{
+		return keyStrokeField(initialValue, Function.identity(), null);
 	}	
 	
 	/* ==================================================================== */
@@ -1547,6 +1605,98 @@ public final class FormFactory
 		protected JTextField createTextField() 
 		{
 			return new JPasswordField();
+		}
+		
+	}
+
+	/**
+	 * A text field that accepts, listens for, and renders keystrokes.
+	 */
+	public static class JValueKeystrokeField extends JFormField<KeyStroke>
+	{
+		private static final long serialVersionUID = 9003830001566335088L;
+		
+		/** The stored value. */
+		private KeyStroke value;
+		/** The stored value. */
+		private JTextField textField;
+		/** The change listener. */
+		private JValueChangeListener<KeyStroke> changeListener;
+
+		/**
+		 * Creates a new keystroke field.
+		 * @param initialValue the initial value.
+		 * @param transformer the transformer function for altering an incoming keystroke before set.
+		 * @param changeListener the listener to call when the value changes.
+		 */
+		protected JValueKeystrokeField(KeyStroke initialValue, Function<KeyStroke, KeyStroke> transformer, JValueChangeListener<KeyStroke> changeListener)
+		{
+			this.value = null;
+			this.textField = new JTextField();
+			this.textField.addKeyListener(new KeyListener() 
+			{
+				@Override
+				public void keyTyped(KeyEvent e) 
+				{
+					e.consume();
+				}
+				
+				@Override
+				public void keyReleased(KeyEvent e) 
+				{
+					e.consume();
+				}
+				
+				@Override
+				public void keyPressed(KeyEvent e) 
+				{
+					e.consume();
+
+					int code = e.getKeyCode();
+					int modifiers = e.getModifiers();
+					
+					switch (code) // alter just meta keys
+					{
+						case KeyEvent.VK_CONTROL:
+						case KeyEvent.VK_ALT:
+						case KeyEvent.VK_META:
+						case KeyEvent.VK_SHIFT:
+							modifiers = 0;
+					}
+					
+					KeyStroke input = transformer.apply(KeyStroke.getKeyStroke(code, modifiers)); 
+					if ((value != null && !value.equals(input)) || (value == null && input != null))
+						setValue(input);
+				}
+			});
+			setValue(initialValue);
+			this.changeListener = changeListener;
+
+			setLayout(new BorderLayout());
+			add(BorderLayout.CENTER, this.textField);
+		}
+		
+		@Override
+		public KeyStroke getValue() 
+		{
+			return value;
+		}
+
+		@Override
+		public void setValue(KeyStroke value) 
+		{
+			if (value == null)
+				this.textField.setText("");
+			this.textField.setText(value.toString().replace("pressed ", "")); // remove "pressed" - redundant.
+			this.value = value;
+			if (changeListener != null)
+				changeListener.onChange(value);
+		}
+
+		@Override
+		protected Component getFormComponent() 
+		{
+			return textField;
 		}
 		
 	}
