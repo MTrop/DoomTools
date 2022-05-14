@@ -153,7 +153,7 @@ public final class DoomToolsGUIMain
 				if (applicationInstance.shouldClose())
 				{
 					frame.setVisible(false);
-					applicationInstance.onClose();
+					applicationInstance.onClose(e.getSource());
 					frame.dispose();
 				}
 			}

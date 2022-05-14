@@ -112,6 +112,26 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
+	 * Called when the application is opened.
+	 * <p> This should NEVER be called by the application itself.
+	 * @param frame the source object that "opened" - which is usually a window container of some kind.
+	 */
+	public void onOpen(Object frame)
+	{
+		// Do nothing.
+	}
+	
+	/**
+	 * Called when the application is closed (after {@link #shouldClose()} is called and returns true).
+	 * <p> This should NEVER be called by the application itself.
+	 * @param frame the source object that "closed" - which is usually a window container of some kind.
+	 */
+	public void onClose(Object frame)
+	{
+		// Do nothing.
+	}
+
+	/**
 	 * Called when the application is about to close. 
 	 * By default, this returns true. You may ask the user if they wish to close it, here.
 	 * <p> This should NEVER be called by the application itself.
@@ -121,16 +141,7 @@ public abstract class DoomToolsApplicationInstance
 	{
 		return true;
 	}
-	
-	/**
-	 * Called when the application is opened.
-	 * <p> This should NEVER be called by the application itself.
-	 */
-	public void onOpen()
-	{
-		// Do nothing.
-	}
-	
+
 	/**
 	 * Called when the application is minimized.
 	 * <p> This should NEVER be called by the application itself.
@@ -167,13 +178,9 @@ public abstract class DoomToolsApplicationInstance
 		// Do nothing.
 	}
 
-	/**
-	 * Called when the application is closed (after {@link #shouldClose()} is called and returns true).
-	 * <p> This should NEVER be called by the application itself.
-	 */
-	public void onClose()
-	{
-		// Do nothing.
+	public void onOpen() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

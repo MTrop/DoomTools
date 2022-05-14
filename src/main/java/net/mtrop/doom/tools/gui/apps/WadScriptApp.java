@@ -84,7 +84,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	private DoomToolsLanguageManager language;
 	private WadScriptSettingsManager settings;
 	
-	// Components
+	// Referenced Components
 	
 	private MultiFileEditorPanel editorPanel;
 	private JFormField<File> workingDirFileField;
@@ -268,7 +268,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
 			separator(),
-			editorPanel.getChangeLanguageMenuItem(),
+			//editorPanel.getChangeLanguageMenuItem(),
 			editorPanel.getChangeEncodingMenuItem(),
 			editorPanel.getChangeSpacingMenuItem()
 		);
@@ -299,7 +299,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
-	public void onOpen() 
+	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
@@ -307,7 +307,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
-	public void onClose() 
+	public void onClose(Object frame) 
 	{
 		// TODO: Do something here.
 	}
@@ -365,7 +365,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		if (file != null)
 		{
 			try {
-				editorPanel.openFileEditor(file, Charset.defaultCharset());
+				editorPanel.openFileEditor(file, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
 			} catch (FileNotFoundException e) {
 				LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
@@ -448,7 +448,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				language.getText("wadscript.run.message.running", entryPoint), 
 				language.getText("wadscript.run.message.success"), 
 				language.getText("wadscript.run.message.error"), 
-				(stream) -> execute(scriptFile, currentWorkingDirectory, entryPoint, args, stream, stream, standardIn)
+				(stream, errstream) -> execute(scriptFile, currentWorkingDirectory, entryPoint, args, stream, errstream, standardIn)
 			).start(tasks);
 		}
 		else
@@ -471,7 +471,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				else
 				{
 					LOG.errorf("Error on WadScript invoke (%s) result was %d: %s", entryPoint, result, scriptFile.getAbsolutePath());
-					statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
+					statusPanel.setErrorMessage(language.getText("wadscript.run.message.error.result", result));
 				}
 			} catch (InterruptedException e) {
 				LOG.warnf("Call to WadScript invoke interrupted (%s): %s", entryPoint, scriptFile.getAbsolutePath());

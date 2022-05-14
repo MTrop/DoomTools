@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.Action;
@@ -385,10 +384,10 @@ public final class DoomToolsGUIUtils
 	 * @param activityMessage
 	 * @param successMessage
 	 * @param errorMessage
-	 * @param modalOutFunction
+	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR).
 	 * @return a modal handle to start with a task manager.
 	 */
-	public ProcessModal createProcessModal(final Container parent, final String title, final String activityMessage, final String successMessage, final String errorMessage, final Function<PrintStream, InstancedFuture<Integer>> modalOutFunction) 
+	public ProcessModal createProcessModal(final Container parent, final String title, final String activityMessage, final String successMessage, final String errorMessage, final BiFunction<PrintStream, PrintStream, InstancedFuture<Integer>> modalOutFunction) 
 	{
 		// Show output.
 		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
@@ -411,8 +410,9 @@ public final class DoomToolsGUIUtils
 			public void start(DoomToolsTaskManager tasks) 
 			{
 				final PrintStream outStream = outputPanel.getPrintStream();
+				final PrintStream errorStream = outputPanel.getErrorPrintStream();
 				tasks.spawn(() -> {
-					InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream);
+					InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream);
 					Integer result = runInstance.result();
 					if (result == 0)
 						status.setSuccessMessage(successMessage);

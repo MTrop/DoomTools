@@ -41,7 +41,7 @@ public class DoomToolsApplicationFrame extends JFrame
 			@Override
 			public void windowOpened(WindowEvent e) 
 			{
-				instance.onOpen();
+				instance.onOpen(e.getSource());
 			}
 			
 			@Override

@@ -305,7 +305,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		frames.remove(frame);
 		frame.setVisible(false);
 		frame.dispose();
-		instance.onClose();
+		instance.onClose(frame);
 		LOG.infof("Closed application: %s", instance.getClass().getSimpleName());
 	}
 	

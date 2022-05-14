@@ -262,7 +262,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public void onOpen() 
+	public void onOpen(Object frame) 
 	{
 		if (projectDirectory == null)
 			throw new IllegalStateException("Project directory not set!");
@@ -272,7 +272,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public void onClose() 
+	public void onClose(Object frame) 
 	{
 		if (autoBuildAgent != null)
 			autoBuildAgent.shutDown();
@@ -454,7 +454,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			language.getText("doommake.project.build.message.running", currentTarget), 
 			language.getText("doommake.project.build.message.success"), 
 			language.getText("doommake.project.build.message.error"), 
-			(stream) -> runTarget(currentTarget, stream, stream, false)
+			(stream, errstream) -> runTarget(currentTarget, stream, errstream, false)
 		).start(tasks);
 	}
 

@@ -50,7 +50,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 			@Override
 			public void internalFrameOpened(InternalFrameEvent e) 
 			{
-				instance.onOpen();
+				instance.onOpen(e.getSource());
 			}
 			
 			@Override
