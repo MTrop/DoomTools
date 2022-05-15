@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.function.Function;
 
 import javax.swing.KeyStroke;
 
@@ -68,8 +69,6 @@ public final class DoomToolsLanguageManager
 	{
 		String resourceName;
 		InputStream in = LOADER.getResourceAsStream(resourceName = resourcePath + "language." + iso3language + ".properties");
-		if (in == null)
-			in = LOADER.getResourceAsStream(resourceName = resourcePath + "language." + DEFAULT_LANGUAGE + ".properties");
 		if (in != null)
 		{
 			try {
@@ -95,6 +94,65 @@ public final class DoomToolsLanguageManager
 	public boolean hasKey(String key)
 	{
 		return languageMap.getProperty(key) != null;
+	}
+	
+	/**
+	 * Gets an integer value using a language key.
+	 * @param key the language key.
+	 * @param defaultValue the value to use if the key isn't found.
+	 * @param modifier the function called after fetch to optionally modify the incoming value. Incoming value may be null!
+	 * @return the desired value, or the provided default value if not found or parseable as an integer.
+	 */
+	public Integer getInteger(String key, Integer defaultValue, Function<Integer, Integer> modifier)
+	{
+		Integer out;
+		String str = languageMap.getProperty(key);
+		if (str == null)
+		{
+			out = defaultValue;
+		}
+		else
+		{
+			try {
+				out = Integer.parseInt(str);
+			} catch (NumberFormatException e) {
+				out = defaultValue;
+			}
+		}
+		
+		return modifier != null ? modifier.apply(out) : out;
+	}
+	
+	/**
+	 * Gets an integer value using a language key.
+	 * @param key the language key.
+	 * @param modifier the function called after fetch to optionally modify the incoming value. Incoming value may be null!
+	 * @return the desired value, after the modifier is called.
+	 */
+	public Integer getInteger(String key, Function<Integer, Integer> modifier)
+	{
+		return getInteger(key, null, modifier);
+	}
+	
+	/**
+	 * Gets an integer value using a language key.
+	 * @param key the language key.
+	 * @param defaultValue the value to use if the key isn't found.
+	 * @return the desired value, or the provided default value if not found or parseable as an integer.
+	 */
+	public Integer getInteger(String key, Integer defaultValue)
+	{
+		return getInteger(key, defaultValue, null);
+	}
+	
+	/**
+	 * Gets an integer value using a language key.
+	 * @param key the language key.
+	 * @return the desired value, or null if not found.
+	 */
+	public Integer getInteger(String key)
+	{
+		return getInteger(key, null, null);
 	}
 	
 	/**

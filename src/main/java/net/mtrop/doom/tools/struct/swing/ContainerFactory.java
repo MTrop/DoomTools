@@ -20,6 +20,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -286,10 +287,6 @@ public final class ContainerFactory
 		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
 	}
 
-	/* ==================================================================== */
-	/* ==== Containers                                                 ==== */
-	/* ==================================================================== */
-	
 	/**
 	 * Starts a container layout tree, returns a component.
 	 * @param border the border to set on the container.
@@ -314,7 +311,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Starts a layout tree, returns a component.
+	 * Starts a container layout tree, returns a component.
 	 * @param layout the layout to use for this tree's children.
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
@@ -335,7 +332,23 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Starts a new branch off of this branch. 
+	 * Creates a leaf node (no children). 
+	 * @param <C> the component type.
+	 * @param constraints the constraints to use for the added branch (using parent layout).
+	 * @param preferredSize the dimensions for the preferred size.
+	 * @param component the component to add.
+	 * @param applier an additional function to run to alter the component before adding.
+	 * @return a new branch node.
+	 */
+	public static <C extends Component> Node node(Object constraints, Dimension preferredSize, C component, Consumer<C> applier)
+	{
+		if (applier != null)
+			applier.accept(component);
+		return new Node(constraints, preferredSize, component);
+	}
+
+	/**
+	 * Creates a leaf node (no children).
 	 * @param constraints the constraints to use for the added branch (using parent layout).
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param component the component to add.
@@ -343,18 +356,44 @@ public final class ContainerFactory
 	 */
 	public static Node node(Object constraints, Dimension preferredSize, Component component)
 	{
-		return new Node(constraints, preferredSize, component);
+		return node(constraints, preferredSize, component, null);
 	}
 
 	/**
-	 * Starts a new branch off of this branch. 
+	 * Creates a leaf node (no children). 
+	 * @param <C> the component type.
+	 * @param preferredSize the dimensions for the preferred size.
+	 * @param component the component to add.
+	 * @param applier an additional function to run to alter the component before adding.
+	 * @return a new branch node.
+	 */
+	public static <C extends Component> Node node(Dimension preferredSize, C component, Consumer<C> applier)
+	{
+		return node(null, preferredSize, component, applier);
+	}
+
+	/**
+	 * Creates a leaf node (no children). 
 	 * @param preferredSize the dimensions for the preferred size.
 	 * @param component the component to add.
 	 * @return a new branch node.
 	 */
 	public static Node node(Dimension preferredSize, Component component)
 	{
-		return node(null, preferredSize, component);
+		return node(null, preferredSize, component, null);
+	}
+
+	/**
+	 * Creates a leaf node (no children).
+	 * @param <C> the component type.
+	 * @param constraints the constraints to use for the added leaf (using parent layout).
+	 * @param component the component to add.
+	 * @param applier an additional function to run to alter the component before adding.
+	 * @return a new leaf node.
+	 */
+	public static <C extends Component> Node node(Object constraints, C component, Consumer<C> applier)
+	{
+		return node(constraints, null, component, applier);
 	}
 
 	/**
@@ -365,7 +404,19 @@ public final class ContainerFactory
 	 */
 	public static Node node(Object constraints, Component component)
 	{
-		return node(constraints, null, component);
+		return node(constraints, null, component, null);
+	}
+
+	/**
+	 * Creates a leaf node, no constraints (no children).
+	 * @param <C> the component type.
+	 * @param component the component to add.
+	 * @param applier an additional function to run to alter the component before adding.
+	 * @return a new leaf node.
+	 */
+	public static <C extends Component> Node node(C component, Consumer<C> applier)
+	{
+		return node(null, null, component, applier);
 	}
 
 	/**
@@ -375,7 +426,7 @@ public final class ContainerFactory
 	 */
 	public static Node node(Component component)
 	{
-		return node(null, null, component);
+		return node(null, null, component, null);
 	}
 
 	/**

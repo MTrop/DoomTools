@@ -1362,8 +1362,19 @@ public final class ComponentFactory
 	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
 	{
 		JSpinner out = new JSpinner(model);
-		out.addChangeListener(handler);
+		if (handler != null)
+			out.addChangeListener(handler);
 		return out;
+	}
+
+	/**
+	 * Creates a value spinner.
+	 * @param model the spinner model.
+	 * @return the resultant spinner.
+	 */
+	public static JSpinner spinner(SpinnerModel model)
+	{
+		return spinner(model, null);
 	}
 
 	/* ==================================================================== */
