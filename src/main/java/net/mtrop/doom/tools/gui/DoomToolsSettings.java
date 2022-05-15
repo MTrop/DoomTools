@@ -324,8 +324,8 @@ public class DoomToolsSettings
 		}
 		else
 		{
-	        StringBuilder sb = new StringBuilder(Integer.toHexString(value.getRGB() & 0x00ffffff));
-			while (sb.length() < 6) 
+	        StringBuilder sb = new StringBuilder(Integer.toHexString(value.getRGB() & 0xffffffff));
+			while (sb.length() < 8) 
 	            sb.insert(0, "0");
 			properties.setProperty(keyName, sb.toString());
 		}
@@ -340,7 +340,25 @@ public class DoomToolsSettings
 	protected Color getColor(String keyName, Color defaultValue)
 	{
 		String value = getString(keyName);
-		return value != null && value.trim().length() > 0 ? new Color(Integer.parseInt(value, 16)) : defaultValue;
+		
+		if (value != null && value.trim().length() > 0)
+		{
+			try {
+				long argb = Long.parseLong(value, 16);
+				return new Color(
+					(int)((argb & 0x000ff0000L) >> 16),
+					(int)((argb & 0x00000ff00L) >> 8),
+					(int)(argb & 0x0000000ffL),
+					(int)((argb & 0x0ff000000L) >> 24)
+				);
+			} catch (NumberFormatException e) {
+				return defaultValue;
+			}
+		}
+		else
+		{
+			return defaultValue;
+		}
 	}
 	
 	/**

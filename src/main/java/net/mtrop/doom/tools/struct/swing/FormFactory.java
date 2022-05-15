@@ -1753,9 +1753,19 @@ public final class FormFactory
 				final int width = getWidth();
 				final int height = getHeight();
 				Color prev = g.getColor();
-				g.setColor(getValue());
-				g.fillRect(0, 0, width, height);
-				g.setColor(prev);
+				Color current = getValue();
+				if (current != null)
+				{
+					g.setColor(getValue());
+					g.fillRect(0, 0, width, height);
+					g.setColor(prev);
+				}
+				else
+				{
+					g.setColor(new Color(0, 0, 0, 0));
+					g.fillRect(0, 0, width, height);
+					g.setColor(prev);
+				}
 			}
 		}
 		
