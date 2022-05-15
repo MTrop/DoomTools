@@ -63,10 +63,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptApp.class); 
 
-    private static final FileFilter WADSCRIPT_EXTENSION_FILTER = fileExtensionFilter("WadScript Files (*.script)", "script");
-
-	private static final FileFilter[] TYPES = new FileFilter[] { WADSCRIPT_EXTENSION_FILTER };
-	
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
 	private static final String EMPTY_SCRIPT = (new StringBuilder())
@@ -301,7 +297,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			language.getText("wadscript.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			TYPES
+			utils.getWadScriptFileFilter()
 		);
 		
 		if (file != null)
@@ -478,6 +474,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	{
 		private static final long serialVersionUID = -2590465129796097892L;
 
+		private FileFilter[] TYPES = null;
+		
 		public WadScriptEditorPanel(Options options, Listener listener)
 		{
 			super(options, listener);
@@ -498,13 +496,13 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{utils.getWadScriptFileFilter()} : TYPES;
 		}
 	
 		@Override
 		protected File transformSaveFile(FileFilter selectedFilter, File selectedFile) 
 		{
-			return selectedFilter == WADSCRIPT_EXTENSION_FILTER ? FileUtils.addMissingExtension(selectedFile, "script") : selectedFile;
+			return selectedFilter == getSaveFileTypes()[0] ? FileUtils.addMissingExtension(selectedFile, "wscript") : selectedFile;
 		}
 		
 	}

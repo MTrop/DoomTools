@@ -14,6 +14,7 @@ import javax.swing.KeyStroke;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
@@ -23,7 +24,14 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 public final class DoomToolsLanguageManager
 {
 	/** Default language. */
-	private static final String DEFAULT_LANGUAGE = "eng";
+	private static final String DEFAULT_LANGUAGE = "default";
+	/** OS: Windows. */
+	private static final String OS_WINDOWS = "win";
+	/** OS: OSX/macOS. */
+	private static final String OS_MACOS = "mac";
+	/** OS: Default Linux. */
+	private static final String OS_LINUX = "linux";
+	
 	/** Missing text. */
 	private static final String MISSING_TEXT = "[[NO LANGUAGE MATCH]]";
 	
@@ -55,20 +63,34 @@ public final class DoomToolsLanguageManager
 	 */
 	private DoomToolsLanguageManager()
 	{
-		String iso3language = Locale.getDefault().getISO3Language().toLowerCase();
+		final String iso3language = Locale.getDefault().getISO3Language().toLowerCase();
+		final String operatingSystem = 
+			OSUtils.isWindows() ? OS_WINDOWS :
+			OSUtils.isOSX()     ? OS_MACOS :
+			OSUtils.isLinux()   ? OS_LINUX : 
+			null;
 		
 		this.resourcePath = "gui/language/";
 		this.languageMap = new Properties();
 		
-		loadIntoMap(DEFAULT_LANGUAGE);
-		if (!DEFAULT_LANGUAGE.equals(iso3language))
-			loadIntoMap(iso3language);
+		loadIntoMap(DEFAULT_LANGUAGE, null);
+		if (operatingSystem != null)
+			loadIntoMap(DEFAULT_LANGUAGE, operatingSystem);
+		loadIntoMap(iso3language, null);
+		if (operatingSystem != null)
+			loadIntoMap(iso3language, operatingSystem);
 	}
 
-	private void loadIntoMap(String iso3language)
+	private void loadIntoMap(String iso3language, String operatingSystem)
 	{
 		String resourceName;
-		InputStream in = LOADER.getResourceAsStream(resourceName = resourcePath + "language." + iso3language + ".properties");
+		InputStream in = LOADER.getResourceAsStream(resourceName = 
+			resourcePath + 
+			"language" + 
+			(iso3language != null ? "." + iso3language : "") + 
+			(operatingSystem != null ? "." + operatingSystem : "") + 
+			".properties"
+		);
 		if (in != null)
 		{
 			try {

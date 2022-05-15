@@ -41,6 +41,7 @@ import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileExtensionFilter;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
@@ -473,6 +474,14 @@ public final class DoomToolsGUIUtils
 	public Icon getWindowIcon() 
 	{
 		return windowIcon;
+	}
+	
+	/**
+	 * @return the WadScript file filter.
+	 */
+	public FileFilter getWadScriptFileFilter()
+	{
+		return fileExtensionFilter("WadScript (*.wscript/*.wscr/*.wsx)", "wscript", "wscr", "wsx");
 	}
 	
 	/**

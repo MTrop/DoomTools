@@ -56,11 +56,11 @@ import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
  */
 public final class DoomToolsEditorProvider 
 {
-	public static final String SYNTAX_STYLE_DECOHACK = "text/decohack";
+	public static final String SYNTAX_STYLE_DECOHACK =   "text/decohack";
 	public static final String SYNTAX_STYLE_ROOKSCRIPT = "text/rookscript";
-	public static final String SYNTAX_STYLE_WADMERGE = "text/wadmerge";
-	public static final String SYNTAX_STYLE_WADSCRIPT = "text/wadscript";
-	public static final String SYNTAX_STYLE_DOOMMAKE = "text/doommake";
+	public static final String SYNTAX_STYLE_WADMERGE =   "text/wadmerge";
+	public static final String SYNTAX_STYLE_WADSCRIPT =  "text/wadscript";
+	public static final String SYNTAX_STYLE_DOOMMAKE =   "text/doommake";
 	
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomToolsEditorProvider> INSTANCE = new SingletonProvider<>(() -> new DoomToolsEditorProvider());
@@ -131,6 +131,7 @@ public final class DoomToolsEditorProvider
 			put("rscript",    SYNTAX_STYLE_ROOKSCRIPT);
 			put("wadmerge",   SYNTAX_STYLE_WADMERGE);
 			put("wadm",       SYNTAX_STYLE_WADMERGE);
+			put("wscr",       SYNTAX_STYLE_WADSCRIPT);
 			put("wscript",    SYNTAX_STYLE_WADSCRIPT);
 			put("wsx",        SYNTAX_STYLE_WADSCRIPT);
 		}

@@ -369,17 +369,22 @@ public final class FileChooserFactory
 	/**
 	 * Creates a file extension filter for file dialogs.
 	 * @param description the description of the filter.
-	 * @param extension the qualifying extension.
+	 * @param extensions the qualifying extensions.
 	 * @return the new filter.
 	 */
-	public static FileFilter fileExtensionFilter(final String description, final String extension)
+	public static FileFilter fileExtensionFilter(final String description, final String ... extensions)
 	{
 		return fileFilter(description, (file) -> {
 			if (file.isDirectory())
 				return true;
 			String filename = file.getName();
 			int lastIndexOf = filename.indexOf('.');
-			return lastIndexOf >= 0 && filename.substring(lastIndexOf + 1).equalsIgnoreCase(extension);
+			if (lastIndexOf < 0)
+				return false;
+			for (int i = 0; i < extensions.length; i++)
+				if (filename.substring(lastIndexOf + 1).equalsIgnoreCase(extensions[i]))
+					return true;
+			return false;
 		});
 	}
 
