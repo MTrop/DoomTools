@@ -803,11 +803,11 @@ public class MultiFileEditorPanel extends JPanel
 		}
 		else
 		{
-			syntaxStyleLabel.setText("");
-			filePathLabel.setText("");
-			caretPositionLabel.setText("");
-			encodingModeLabel.setText("");
-			spacingModeLabel.setText("");
+			filePathLabel.setText(" ");
+			syntaxStyleLabel.setText(" ");
+			caretPositionLabel.setText(" ");
+			encodingModeLabel.setText(" ");
+			spacingModeLabel.setText(" ");
 		}
 	}
 	
@@ -1001,15 +1001,16 @@ public class MultiFileEditorPanel extends JPanel
 		final JFormField<Integer> lineField = integerField(textArea.getCaretLineNumber() + 1);
 		int lineMax = textArea.getLineCount();
 		
-		Integer selected = utils.createModal(
+		Integer selected = utils.createSettingsModal(
 			language.getText("texteditor.modal.goto.title"),
 			containerOf(gridLayout(2, 1, 0, 4),
 				node(label(language.getText("texteditor.modal.goto.message", lineMax))),
 				node(lineField)
 			),
-			utils.createChoiceFromLanguageKey("texteditor.modal.goto.choice.goto", ()->lineField.getValue()),
-			utils.createChoiceFromLanguageKey("doomtools.cancel", (Integer)null)
-		).openThenDispose();
+			(panel) -> lineField.getValue(),
+			utils.createChoiceFromLanguageKey("texteditor.modal.goto.choice.goto", true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", false)
+		);
 		
 		if (selected != null) 
 		{

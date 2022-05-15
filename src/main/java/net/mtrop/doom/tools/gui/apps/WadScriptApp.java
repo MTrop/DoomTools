@@ -4,20 +4,22 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.swing.JButton;
+import javax.swing.Action;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.WadScriptMain;
@@ -29,7 +31,6 @@ import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.ActionNam
 import net.mtrop.doom.tools.gui.apps.swing.panels.MultiFileEditorPanel.EditorHandle;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
@@ -38,11 +39,11 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -68,8 +69,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
-	private static final String[] NO_ARGUMENTS = new String[0];
-	
 	private static final String EMPTY_SCRIPT = (new StringBuilder())
 		.append("entry main(args) {\n")
 		.append("\n")
@@ -80,29 +79,21 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 
 	private DoomToolsGUIUtils utils;
 	private DoomToolsTaskManager tasks;
-	private DoomToolsIconManager icons;
 	private DoomToolsLanguageManager language;
 	private WadScriptSettingsManager settings;
 	
 	// Referenced Components
 	
 	private MultiFileEditorPanel editorPanel;
-	private JFormField<File> workingDirFileField;
-	private JFormField<String> entryPointField;
-	private JButton runScriptButton;
-	private JButton popupButton;
-	private JPopupMenu runPopupMenu;
 	private DoomToolsStatusPanel statusPanel;
-	
-	// Fields
-    
-	private File defaultWorkingDirectory;
-	private File currentWorkingDirectory;
-	private String entryPoint;
 
+	private Action runAction;
+	private Action runParametersAction;
+	
 	// State
 	
 	private EditorHandle currentHandle;
+	private Map<EditorHandle, ExecutionSettings> handleToSettingsMap;
 	
 	// ...
 
@@ -112,48 +103,10 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	 */
 	public WadScriptApp() 
 	{
-		this(new File(OSUtils.getWorkingDirectoryPath()).getAbsoluteFile());
-	}
-	
-	/**
-	 * Create a new WadScript application.
-	 * @param defaultWorkingDirectory the working directory for new files.
-	 */
-	public WadScriptApp(final File defaultWorkingDirectory) 
-	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
-		this.icons = DoomToolsIconManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadScriptSettingsManager.get();
-		
-		this.defaultWorkingDirectory = defaultWorkingDirectory;
-		this.workingDirFileField = fileField(
-			currentWorkingDirectory, 
-			(current) -> chooseDirectory(
-				receiver.getApplicationContainer(),
-				language.getText("wadscript.workdir.browse.title"), 
-				current, 
-				language.getText("wadscript.workdir.browse.accept"), 
-				FileFilters.DIRECTORIES
-			), 
-			(selected) -> {
-				currentWorkingDirectory = selected;
-			}
-		);
-		
-		this.entryPoint = "main";
-		this.entryPointField = stringField(entryPoint, (value) -> entryPoint = value);
-		this.runScriptButton = utils.createButtonFromLanguageKey(
-			icons.getImage("script-run.png"), 
-			"wadscript.entrypoint.action", 
-			(b, e) -> onExecuteScript(false, IOUtils.getNullInputStream(), NO_ARGUMENTS)
-		);
-		this.runPopupMenu = popupMenu(
-			utils.createItemFromLanguageKey("wadscript.run.popup.item.log", (c, e) -> onExecuteScript(true, IOUtils.getNullInputStream(), NO_ARGUMENTS)),
-			utils.createItemFromLanguageKey("wadscript.run.popup.item.args", (c, e) -> onExecuteScriptArgs())
-		);
-		this.popupButton = button("\u2228", this.runPopupMenu);
 		
 		this.editorPanel = new WadScriptEditorPanel(new MultiFileEditorPanel.Options() 
 		{
@@ -177,7 +130,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			{
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.saved", sourceFile.getName()));
-				setWorkingDirectoryField(sourceFile.getParentFile());
 				onHandleChange();
 			}
 
@@ -191,10 +143,16 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			public void onClose(EditorHandle handle) 
 			{
 				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor.close", handle.getEditorTabName()));
+				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
+		
+		this.runAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.run", (e) -> onRunAgain());
+		this.runParametersAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.params", (e) -> onRunWithArgs());
+		
 		this.currentHandle = null;
+		this.handleToSettingsMap = new HashMap<>();
 	}
 	
 	@Override
@@ -206,28 +164,9 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		final int labelWidth = 128;
 		return containerOf(dimension(650, 500), createEmptyBorder(8, 8, 8, 8), borderLayout(0, 8), 
 			node(BorderLayout.CENTER, editorPanel),
-			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 8),
-				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
-					node(BorderLayout.NORTH, containerOf(borderLayout(4, 0),
-						node(BorderLayout.LINE_START, dimension(labelWidth, 20), label(language.getText("wadscript.workdir.title"))),
-						node(BorderLayout.CENTER, workingDirFileField)
-					)),
-					node(BorderLayout.SOUTH, containerOf(borderLayout(4, 0),
-						node(BorderLayout.LINE_START, dimension(labelWidth, 20), label(language.getText("wadscript.entrypoint.title"))),
-						node(containerOf(
-							node(BorderLayout.CENTER, entryPointField),
-							node(BorderLayout.LINE_END, containerOf(
-								node(BorderLayout.CENTER, runScriptButton),
-								node(BorderLayout.LINE_END, popupButton)
-							))
-						))
-					))
-				)),
-				node(BorderLayout.SOUTH, statusPanel)
-			))
+			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
 
@@ -262,13 +201,20 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		);
 	}
 
+	private MenuNode[] createWadScriptRunMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("wadscript.menu.run.item.run", runAction),
+			utils.createItemFromLanguageKey("wadscript.menu.run.item.params", runParametersAction)
+		);
+	}
+
 	private MenuNode[] createCommonEditorMenuItems()
 	{
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
 			separator(),
-			//editorPanel.getChangeLanguageMenuItem(),
 			editorPanel.getChangeEncodingMenuItem(),
 			editorPanel.getChangeSpacingMenuItem()
 		);
@@ -287,6 +233,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 				)
 			)),
 			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wadscript.menu.run", createWadScriptRunMenuItems()),
 			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems())
 		);
 	}
@@ -326,19 +273,14 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	{
 		if (currentHandle != null)
 		{
-			File sourceFile = currentHandle.getContentSourceFile();
-			setWorkingDirectoryField(sourceFile == null ? defaultWorkingDirectory : sourceFile.getParentFile());
-			workingDirFileField.setEnabled(true);
-			entryPointField.setEnabled(true);
-			runScriptButton.setEnabled(sourceFile != null);
-			popupButton.setEnabled(sourceFile != null);
+			boolean hasFile = currentHandle.getContentSourceFile() != null;
+			runAction.setEnabled(hasFile);
+			runParametersAction.setEnabled(hasFile);
 		}
 		else
 		{
-			workingDirFileField.setEnabled(false);
-			entryPointField.setEnabled(false);
-			runScriptButton.setEnabled(false);
-			popupButton.setEnabled(false);
+			runAction.setEnabled(false);
+			runParametersAction.setEnabled(false);
 		}
 
 	}
@@ -382,11 +324,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		}
 	}
 	
-	private void setWorkingDirectoryField(File directory)
-	{
-		workingDirFileField.setValue(directory);
-	}
-
 	private boolean saveBeforeExecute()
 	{
 		final Container parent = receiver.getApplicationContainer();
@@ -409,61 +346,95 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 					return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
-	private void onExecuteScriptArgs()
+
+	private void onRunWithArgs()
 	{
 		if (!saveBeforeExecute())
 			return;
 
-		final ExecuteWithArgsPanel argsPanel = new ExecuteWithArgsPanel(0);
-		Boolean run = modal(
-			language.getText("wadscript.run.message.withargs.title"),
-			argsPanel,
-			utils.createChoiceFromLanguageKey("wadscript.run.message.withargs.choice.run", true),
-			utils.createChoiceFromLanguageKey("doomtools.cancel")
-		).openThenDispose();
-		
-		if (run == null)
-			return;
-		
-		// TODO: Optional inputstream.
-		onExecuteScript(true, IOUtils.getNullInputStream(), argsPanel.getArgs());
-	}
-	
-	private void onExecuteScript(boolean showLog, final InputStream standardIn, final String[] args)
-	{
+		// Should be set if saveBeforeExecute() succeeds.
 		File scriptFile = currentHandle.getContentSourceFile();
 		
-		if (!saveBeforeExecute())
+		ExecutionSettings executionSettings = handleToSettingsMap.get(currentHandle);
+		executionSettings = createExecutionSettings(executionSettings != null ? executionSettings : new ExecutionSettings(scriptFile.getParentFile()));
+		
+		if (executionSettings == null)
 			return;
 		
-		if (showLog)
-		{
-			utils.createProcessModal(
-				receiver.getApplicationContainer(), 
-				language.getText("wadscript.run.message.title"), 
-				language.getText("wadscript.run.message.running", entryPoint), 
-				language.getText("wadscript.run.message.success"), 
-				language.getText("wadscript.run.message.error"), 
-				(stream, errstream) -> execute(scriptFile, currentWorkingDirectory, entryPoint, args, stream, errstream, standardIn)
-			).start(tasks);
-		}
-		else
-		{
-			execute(scriptFile, currentWorkingDirectory, entryPoint, args, null, null, standardIn);
-		}
+		handleToSettingsMap.put(currentHandle, executionSettings);
+		onExecuteWithSettings(scriptFile, executionSettings);
+	}
+	
+	private void onRunAgain()
+	{
+		if (!saveBeforeExecute())
+			return;
+
+		// Should be set if saveBeforeExecute() succeeds.
+		File scriptFile = currentHandle.getContentSourceFile();
+		
+		ExecutionSettings executionSettings;
+		if ((executionSettings = handleToSettingsMap.get(currentHandle)) == null)
+			executionSettings = createExecutionSettings(new ExecutionSettings(scriptFile.getParentFile()));
+		
+		if (executionSettings == null)
+			return;
+		
+		handleToSettingsMap.put(currentHandle, executionSettings);
+		onExecuteWithSettings(scriptFile, executionSettings);
 	}
 
-	private InstancedFuture<Integer> execute(final File scriptFile, final File workingDirectory, String entryPoint, String[] args, final PrintStream out, final PrintStream err, final InputStream in)
+	private void onExecuteWithSettings(File scriptFile, ExecutionSettings executionSettings)
+	{
+		final File workingDirectory = executionSettings.workingDirectory;
+		final File standardInPath = executionSettings.standardInPath;
+		final String entryPoint = executionSettings.entryPoint;
+		final String[] args = executionSettings.args;
+		
+		utils.createProcessModal(
+			receiver.getApplicationContainer(), 
+			language.getText("wadscript.run.message.title"), 
+			language.getText("wadscript.run.message.running", entryPoint), 
+			language.getText("wadscript.run.message.success"), 
+			language.getText("wadscript.run.message.error"), 
+			(stream, errstream) -> execute(scriptFile, workingDirectory, entryPoint, args, stream, errstream, standardInPath)
+		).start(tasks);
+	}
+
+	private ExecutionSettings createExecutionSettings(ExecutionSettings initSettings) 
+	{
+		final ExecuteWithArgsPanel argsPanel = new ExecuteWithArgsPanel(initSettings);
+		ExecutionSettings settings = utils.createSettingsModal(
+			language.getText("wadscript.run.withargs.title"),
+			argsPanel,
+			(panel) -> {
+				ExecutionSettings out = new ExecutionSettings();
+				out.workingDirectory = panel.getWorkingDirectory();
+				out.standardInPath = panel.getStandardInPath();
+				out.entryPoint = panel.getEntryPoint();
+				out.args = panel.getArgs();
+				return out;
+			},
+			utils.createChoiceFromLanguageKey("wadscript.run.withargs.choice.run", true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel")
+		);
+		
+		return settings;
+	}
+
+	private InstancedFuture<Integer> execute(final File scriptFile, final File workingDirectory, String entryPoint, String[] args, final PrintStream out, final PrintStream err, final File input)
 	{
 		return tasks.spawn(() -> {
 			Integer result = null;
-			try {
+			InputStream stdin = null;
+			try
+			{
+				stdin = input != null ? new FileInputStream(input) : IOUtils.getNullInputStream();
 				statusPanel.setActivityMessage(language.getText("wadscript.run.message.running", scriptFile.getName()));
-				result = callWadScript(scriptFile, workingDirectory, entryPoint, args, out, err, in).get();
+				result = callWadScript(scriptFile, workingDirectory, entryPoint, args, out, err, stdin).get();
 				if (result == 0)
 				{
 					statusPanel.setSuccessMessage(language.getText("wadscript.run.message.success"));
@@ -479,6 +450,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			} catch (ExecutionException e) {
 				LOG.errorf(e, "Error on WadScript invoke (%s): %s", entryPoint, scriptFile.getAbsolutePath());
 				statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
+			} finally {
+				IOUtils.close(stdin);
 			}
 			return result;
 		});
@@ -536,65 +509,140 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		
 	}
 	
+	private static class ExecutionSettings
+	{
+		private File workingDirectory;
+		private File standardInPath;
+		private String entryPoint;
+		private String[] args;
+		
+		private ExecutionSettings()
+		{
+			this(null);
+		}
+		
+		private ExecutionSettings(File workingDirectory)
+		{
+			this.workingDirectory = workingDirectory;
+			this.standardInPath = null;
+			this.entryPoint = "main";
+			this.args = new String[0];
+		}
+	}
+	
 	private class ExecuteWithArgsPanel extends JPanel
 	{
-		private static final long serialVersionUID = 7224502874487792742L;
+		private static final long serialVersionUID = 3311704543488697542L;
 		
+		private JFormField<File> workingDirFileField;
+		private JFormField<File> standardInPathField;
+		private JFormField<String> entryPointField;
+
 		private JFormField<Integer> numArgsField; 
-		private Container fieldPanel;
-		private List<JFormField<String>> fieldList;
-		private List<Component> componentList;
+		private Container argsFieldPanel;
+		private List<JFormField<String>> argsFieldList;
+		private List<Component> argsComponentList;
 		
-		private ExecuteWithArgsPanel(final int initArgCount)
+		private ExecuteWithArgsPanel(ExecutionSettings executionSettings)
 		{
-			this.numArgsField = integerField(initArgCount, (v) -> adjustFields(v));
-			this.fieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
-			this.fieldList = new ArrayList<>(Math.max(initArgCount, 4));
-			this.componentList = new ArrayList<>(Math.max(initArgCount, 4));
+			final File workingDirectory = executionSettings.workingDirectory;
+			final File standardInPath = executionSettings.standardInPath;
+			final String entryPoint = executionSettings.entryPoint;
+			final String[] initArgs = executionSettings.args;
+			
+			this.workingDirFileField = fileField(
+				workingDirectory, 
+				(current) -> chooseDirectory(
+					this,
+					language.getText("wadscript.run.workdir.browse.title"), 
+					current, 
+					language.getText("wadscript.run.workdir.browse.accept"), 
+					FileFilters.DIRECTORIES
+				)
+			);
+			
+			this.standardInPathField = fileField(
+				standardInPath, 
+				(current) -> chooseFile(
+					this,
+					language.getText("wadscript.run.stdin.browse.title"), 
+					current, 
+					language.getText("wadscript.run.stdin.browse.accept") 
+				)
+			);
+			
+			this.entryPointField = stringField(entryPoint);
+
+			this.numArgsField = integerField(initArgs.length, (v) -> adjustFields(v));
+			this.argsFieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
+			this.argsFieldList = new ArrayList<>(Math.max(initArgs.length, 4));
+			this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 			
 			containerOf(this,
-				node(BorderLayout.NORTH, form(96).addField(language.getText("wadscript.run.message.withargs.argfield"), numArgsField)),
-				node(BorderLayout.CENTER, dimension(256, 128), scroll(containerOf(
-					node(BorderLayout.NORTH, fieldPanel),
+				node(BorderLayout.NORTH, form(104)
+					.addField(language.getText("wadscript.run.withargs.workdir"), workingDirFileField)
+					.addField(language.getText("wadscript.run.withargs.stdin"), standardInPathField)
+					.addField(language.getText("wadscript.run.withargs.entrypoint"), entryPointField)
+					.addField(language.getText("wadscript.run.withargs.argfield"), numArgsField)
+				),
+				node(BorderLayout.CENTER, dimension(320, 128), scroll(containerOf(
+					node(BorderLayout.NORTH, argsFieldPanel),
 					node(BorderLayout.CENTER, containerOf())
 				)))
 			);
-			adjustFields(initArgCount);
+			adjustFields(initArgs.length);
+			for (int i = 0; i < initArgs.length; i++)
+				this.argsFieldList.get(i).setValue(initArgs[i]);
 		}
 		
 		private void adjustFields(int newLen)
 		{
-			final int start = fieldList.size();
+			final int start = argsFieldList.size();
 			newLen = Math.max(newLen, 0);
 			
 			if (newLen < start)
 			{
-				while (fieldList.size() > newLen)
+				while (argsFieldList.size() > newLen)
 				{
-					int idx = fieldList.size() - 1;
-					fieldList.remove(idx);
-					fieldPanel.remove(componentList.remove(idx));
+					int idx = argsFieldList.size() - 1;
+					argsFieldList.remove(idx);
+					argsFieldPanel.remove(argsComponentList.remove(idx));
 				}
 			}
 			else if (start < newLen)
 			{
-				while (fieldList.size() < newLen)
+				while (argsFieldList.size() < newLen)
 				{
-					int idx = fieldList.size();
+					int idx = argsFieldList.size();
 					JFormField<String> argField = stringField();
 					Container container = containerOf(
 						node(BorderLayout.LINE_START, dimension(48, 20), label(String.valueOf(idx))),
 						node(BorderLayout.CENTER, argField)
 					);
-					fieldList.add(argField);
-					fieldPanel.add(container);
-					componentList.add(container);
+					argsFieldList.add(argField);
+					argsFieldPanel.add(container);
+					argsComponentList.add(container);
 				}
 			}
 			// Refresh panel.
 			SwingUtils.invoke(() -> {
-				fieldPanel.revalidate();
+				argsFieldPanel.revalidate();
 			});
+		}
+		
+		public File getWorkingDirectory()
+		{
+			return workingDirFileField.getValue();
+		}
+
+		public File getStandardInPath()
+		{
+			return standardInPathField.getValue();
+		}
+
+		public String getEntryPoint()
+		{
+			return entryPointField.getValue();
 		}
 		
 		/**
@@ -602,9 +650,9 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		 */
 		public String[] getArgs()
 		{
-			int size = fieldList.size();
+			int size = argsFieldList.size();
 			List<String> argList = new ArrayList<>(size);
-			for (JFormField<String> field : fieldList)
+			for (JFormField<String> field : argsFieldList)
 				argList.add(field.getValue());
 			return argList.toArray(new String[size]);
 		}

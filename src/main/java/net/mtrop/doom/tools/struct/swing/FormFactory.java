@@ -6,8 +6,10 @@
 package net.mtrop.doom.tools.struct.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -26,7 +28,9 @@ import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -825,6 +829,56 @@ public final class FormFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a new color field with a color picker button.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseText, String browseTitle, JValueChangeListener<Color> changeListener)
+	{
+		return new JValueColorField(initialValue, browseText, browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button.
+	 * @param initialValue the field's initial value.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseTitle, JValueChangeListener<Color> changeListener)
+	{
+		return new JValueColorField(initialValue, "...", browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseText, String browseTitle)
+	{
+		return new JValueColorField(initialValue, browseText, browseTitle, null);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button.
+	 * @param initialValue the field's initial value.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseTitle)
+	{
+		return new JValueColorField(initialValue, "...", browseTitle, null);
+	}
+	
+	/* ==================================================================== */
+
+	/**
 	 * Creates a new file field with a button to browse for a file.
 	 * @param initialValue the field's initial value.
 	 * @param browseText the browse button text.
@@ -1576,7 +1630,7 @@ public final class FormFactory
 						setValue(value);
 				}
 				
-			}), BorderLayout.EAST);
+			}), BorderLayout.LINE_END);
 		}
 		
 		@Override
@@ -1612,13 +1666,111 @@ public final class FormFactory
 	/**
 	 * A text field that accepts, listens for, and renders keystrokes.
 	 */
+	public static class JValueColorField extends JValueTextField<Color>
+	{
+		private static final long serialVersionUID = 751347919836098377L;
+		
+		/** Picker button. */
+		private JButton browseButton;
+		/** Preview panel. */
+		private PreviewPanel previewPanel;
+		
+		protected JValueColorField(Color initialValue, final String browseText, final String browseTitle, JValueChangeListener<Color> changeListener)
+		{
+			super(initialValue, converter(
+				(text) -> convertToColor(text), 
+				(color) -> convertToText(color)
+			), changeListener);
+			
+			final JValueColorField SELF = this;
+			
+			this.previewPanel = new PreviewPanel();
+			this.previewPanel.setPreferredSize(new Dimension(20, 20));
+			
+			JPanel controls = new JPanel();
+			controls.setLayout(new BorderLayout());
+			controls.add(previewPanel, BorderLayout.LINE_START);
+			controls.add(this.browseButton = new JButton(new AbstractAction(browseText)
+			{
+				private static final long serialVersionUID = -7921055731899664758L;
+
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					Color value = JColorChooser.showDialog(SELF, browseTitle, SELF.getValue());
+					if (value != null)
+						setValue(value);
+				}
+				
+			}), BorderLayout.LINE_END);
+			add(controls, BorderLayout.LINE_END);
+		}
+		
+		public void setValue(Color value) 
+		{
+			super.setValue(value);
+			if (previewPanel != null)
+				previewPanel.repaint();
+		}
+		
+		@Override
+		public void setEnabled(boolean enabled)
+		{
+			super.setEnabled(enabled);			
+			browseButton.setEnabled(enabled);
+		}
+		
+		private static Color convertToColor(String text)
+		{
+			try {
+				long argb = Long.parseLong(text, 16);
+				return new Color(
+					(int)((argb & 0x000ff0000L) >> 16),
+					(int)((argb & 0x00000ff00L) >> 8),
+					(int)(argb & 0x0000000ffL),
+					(int)((argb & 0x0ff000000L) >> 24)
+				);
+			} catch (NumberFormatException e) {
+				return Color.BLACK;
+			}
+		}
+
+		private static String convertToText(Color color)
+		{
+	        StringBuilder sb = new StringBuilder(Integer.toHexString(color.getRGB() & 0xffffffff));
+			while (sb.length() < 8) 
+	            sb.insert(0, "0");
+			return sb.toString();
+		}
+		
+		private class PreviewPanel extends JComponent
+		{
+			private static final long serialVersionUID = -7158120389159943477L;
+
+			@Override
+			protected void paintComponent(Graphics g) 
+			{
+				final int width = getWidth();
+				final int height = getHeight();
+				Color prev = g.getColor();
+				g.setColor(getValue());
+				g.fillRect(0, 0, width, height);
+				g.setColor(prev);
+			}
+		}
+		
+	}
+	
+	/**
+	 * A text field that accepts, listens for, and renders keystrokes.
+	 */
 	public static class JValueKeystrokeField extends JFormField<KeyStroke>
 	{
 		private static final long serialVersionUID = 9003830001566335088L;
 		
 		/** The stored value. */
 		private KeyStroke value;
-		/** The stored value. */
+		/** The text field for display. */
 		private JTextField textField;
 		/** The change listener. */
 		private JValueChangeListener<KeyStroke> changeListener;

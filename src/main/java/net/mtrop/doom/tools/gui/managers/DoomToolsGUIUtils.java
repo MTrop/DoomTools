@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.Action;
@@ -85,6 +86,40 @@ public final class DoomToolsGUIUtils
 		this.windowIcon = new ImageIcon(icon16);
 	}
 	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(getWindowIcons(), title, contentPane, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(getWindowIcons(), title, contentPane, settingExtractor);
+	}
+
 	/**
 	 * Creates a new modal window with the proper icons set.
 	 * Modals hold the thread of execution until it is not visible anymore.

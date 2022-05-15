@@ -18,7 +18,9 @@ import java.awt.Image;
 import java.awt.LayoutManager;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractAction;
@@ -125,18 +127,6 @@ public final class ContainerFactory
 	/* ==================================================================== */
 	/* ==== Containers                                                 ==== */
 	/* ==================================================================== */
-
-	/**
-	 * Starts a container layout tree, returns a component.
-	 * @param border the border to set on the container.
-	 * @param layout the layout to use for this tree's children.
-	 * @param children the component's children.
-	 * @return a component that is the result of creating the tree.
-	 */
-	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
-	{
-		return containerOf(new JPanel(), null, border, layout, children);
-	}
 
 	/**
 	 * Starts a layout tree, returning the provided container.
@@ -294,6 +284,22 @@ public final class ContainerFactory
 	public static Container containerOf(Dimension preferredSize, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
+	}
+
+	/* ==================================================================== */
+	/* ==== Containers                                                 ==== */
+	/* ==================================================================== */
+	
+	/**
+	 * Starts a container layout tree, returns a component.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), null, border, layout, children);
 	}
 
 	/**
@@ -695,7 +701,8 @@ public final class ContainerFactory
 	{
 		JFrame out = new JFrame(title);
 		out.setIconImages(icons);
-		out.add(menuBar);
+		if (menuBar != null)
+			out.add(menuBar);
 		out.setContentPane(content);
 		out.setLocationByPlatform(true);
 		out.pack();
@@ -711,12 +718,7 @@ public final class ContainerFactory
 	 */
 	public static JFrame frame(List<Image> icons, String title, Container content)
 	{
-		JFrame out = new JFrame(title);
-		out.setIconImages(icons);
-		out.setContentPane(content);
-		out.setLocationByPlatform(true);
-		out.pack();
-		return out;
+		return frame(icons, title, null, content);
 	}
 	
 	/**
@@ -730,8 +732,10 @@ public final class ContainerFactory
 	public static JFrame frame(Image icon, String title, JMenuBar menuBar, Container content)
 	{
 		JFrame out = new JFrame(title);
-		out.setIconImage(icon);
-		out.add(menuBar);
+		if (icon != null)
+			out.setIconImage(icon);
+		if (menuBar != null)
+			out.add(menuBar);
 		out.setContentPane(content);
 		out.setLocationByPlatform(true);
 		out.pack();
@@ -747,12 +751,7 @@ public final class ContainerFactory
 	 */
 	public static JFrame frame(Image icon, String title, Container content)
 	{
-		JFrame out = new JFrame(title);
-		out.setIconImage(icon);
-		out.setContentPane(content);
-		out.setLocationByPlatform(true);
-		out.pack();
-		return out;
+		return frame(icon, title, null, content);
 	}
 	
 	/**
@@ -764,12 +763,7 @@ public final class ContainerFactory
 	 */
 	public static JFrame frame(String title, JMenuBar menuBar, Container content)
 	{
-		JFrame out = new JFrame(title);
-		out.setJMenuBar(menuBar);
-		out.setContentPane(content);
-		out.setLocationByPlatform(true);
-		out.pack();
-		return out;
+		return frame((Image)null, title, menuBar, content);
 	}
 	
 	/**
@@ -780,13 +774,253 @@ public final class ContainerFactory
 	 */
 	public static JFrame frame(String title, Container content)
 	{
-		JFrame out = new JFrame(title);
-		out.setContentPane(content);
-		out.setLocationByPlatform(true);
-		out.pack();
-		return out;
+		return frame((Image)null, title, null, content);
 	}
 
+	
+	/* ==================================================================== */
+	/* ==== Special Modals                                             ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
+		if (out == null || out == Boolean.FALSE)
+			return null;
+		return settingExtractor.apply(contentPane);
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, icons, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
+		if (out == null || out == Boolean.FALSE)
+			return null;
+		return settingExtractor.apply(contentPane);
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, icon, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}	
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(owner, (Image)null, title, contentPane, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, (Image)null, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = modal(null, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
+		if (out == null || out == Boolean.FALSE)
+			return null;
+		return settingExtractor.apply(contentPane);
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, icons, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = modal(null, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
+		if (out == null || out == Boolean.FALSE)
+			return null;
+		return settingExtractor.apply(contentPane);
+	}	
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, icon, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}	
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(null, (Image)null, title, contentPane, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, (Image)null, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
+
+	
 	/* ==================================================================== */
 	/* ==== Modals                                                     ==== */
 	/* ==================================================================== */
@@ -821,6 +1055,24 @@ public final class ContainerFactory
 	 * You can get the result of the modal via {@link Modal#getValue()}.
 	 * @param <T> the return type.
 	 * @param owner the owning component.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
+	}
+
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
 	 * @param icon the icon image.
 	 * @param title the modal title.
 	 * @param modality the modality type for the modal.
@@ -839,99 +1091,6 @@ public final class ContainerFactory
 		return modal(out, contentPane, choices);
 	}
 	
-	/**
-	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore.
-	 * You can get the result of the modal via {@link Modal#getValue()}.
-	 * @param <T> the return type.
-	 * @param owner the owning component.
-	 * @param title the modal title.
-	 * @param modality the modality type for the modal.
-	 * @param contentPane the content pane for the modal.
-	 * @param choices the modal choices.
-	 * @return a new modal dialog.
-	 */
-	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
-	{
-		return modal(owner, (Image)null, title, modality, contentPane, choices);
-	}
-	
-	/**
-	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore.
-	 * You can get the result of the modal via {@link Modal#getValue()}.
-	 * @param <T> the return type.
-	 * @param icons the icon images in different dimensions.
-	 * @param title the modal title.
-	 * @param modality the modality type for the modal.
-	 * @param contentPane the content pane for the modal.
-	 * @param choices the modal choices.
-	 * @return a new modal dialog.
-	 */
-	@SafeVarargs
-	public static <T> Modal<T> modal(List<Image> icons, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
-	{
-		return modal(null, icons, title, modality, contentPane, choices);
-	}
-	
-	/**
-	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore.
-	 * You can get the result of the modal via {@link Modal#getValue()}.
-	 * @param <T> the return type.
-	 * @param icon the icon image.
-	 * @param title the modal title.
-	 * @param modality the modality type for the modal.
-	 * @param contentPane the content pane for the modal.
-	 * @param choices the modal choices.
-	 * @return a new modal dialog.
-	 */
-	@SafeVarargs
-	public static <T> Modal<T> modal(Image icon, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
-	{
-		return modal(null, icon, title, modality, contentPane, choices);
-	}
-	
-	/**
-	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore.
-	 * You can get the result of the modal via {@link Modal#getValue()}.
-	 * @param <T> the return type.
-	 * @param title the modal title.
-	 * @param modality the modality type for the modal.
-	 * @param contentPane the content pane for the modal.
-	 * @param choices the modal choices.
-	 * @return a new modal dialog.
-	 */
-	@SafeVarargs
-	public static <T> Modal<T> modal(String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
-	{
-		return modal((Container)null, title, modality, contentPane, choices);
-	}
-	
-	/* ==================================================================== */
-	/* ==== Modals                                                     ==== */
-	/* ==================================================================== */
-	
-	/**
-	 * Creates a new modal window.
-	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
-	 * You can get the result of the modal via {@link Modal#getValue()}.
-	 * @param <T> the return type.
-	 * @param owner the owning component.
-	 * @param icons the icon images in different dimensions.
-	 * @param title the modal title.
-	 * @param contentPane the content pane for the modal.
-	 * @param choices the modal choices.
-	 * @return a new modal dialog.
-	 */
-	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, final ModalChoice<T> ... choices)
-	{
-		return modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
-	}
-
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore, if the modality type makes it so.
@@ -957,6 +1116,24 @@ public final class ContainerFactory
 	 * @param <T> the return type.
 	 * @param owner the owning component.
 	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Container owner, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(owner, (Image)null, title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
 	 * @param contentPane the content pane for the modal.
 	 * @param choices the modal choices.
 	 * @return a new modal dialog.
@@ -967,6 +1144,24 @@ public final class ContainerFactory
 		return modal(owner, (Image)null, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
 
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icons the icon images in different dimensions.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(List<Image> icons, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icons, title, modality, contentPane, choices);
+	}
+	
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -991,6 +1186,24 @@ public final class ContainerFactory
 	 * @param <T> the return type.
 	 * @param icon the icon image.
 	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(Image icon, String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal(null, icon, title, modality, contentPane, choices);
+	}
+	
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param icon the icon image.
+	 * @param title the modal title.
 	 * @param contentPane the content pane for the modal.
 	 * @param choices the modal choices.
 	 * @return a new modal dialog.
@@ -1001,6 +1214,23 @@ public final class ContainerFactory
 		return modal(null, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
 	}
 
+	/**
+	 * Creates a new modal window.
+	 * Modals hold the thread of execution until it is not visible anymore.
+	 * You can get the result of the modal via {@link Modal#getValue()}.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param modality the modality type for the modal.
+	 * @param contentPane the content pane for the modal.
+	 * @param choices the modal choices.
+	 * @return a new modal dialog.
+	 */
+	@SafeVarargs
+	public static <T> Modal<T> modal(String title, ModalityType modality, Container contentPane, final ModalChoice<T> ... choices)
+	{
+		return modal((Container)null, title, modality, contentPane, choices);
+	}
+	
 	/**
 	 * Creates a new modal window.
 	 * Modals hold the thread of execution until it is not visible anymore.
@@ -1018,7 +1248,7 @@ public final class ContainerFactory
 	}
 
 	@SafeVarargs
-	private static <T> Modal<T> modal(final Modal<T> modal, Container contentPane, final ModalChoice<T> ... choices)
+	private static <T> Modal<T> modal(final Modal<T> modal, final Container contentPane, final ModalChoice<T> ... choices)
 	{
 		Node[] nodes = new Node[choices.length];
 		for (int i = 0; i < nodes.length; i++)
@@ -1302,8 +1532,4 @@ public final class ContainerFactory
 		}
 	}
 
-	/* ==================================================================== */
-	/* ==== Modals                                                     ==== */
-	/* ==================================================================== */
-	
 }
