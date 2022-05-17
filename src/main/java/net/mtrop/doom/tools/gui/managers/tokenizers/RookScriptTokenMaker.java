@@ -121,9 +121,9 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 		int segmentEnd = segmentOffset + segmentCount;
 		int currentType = initialTokenType;
 
+		int newDocumentStartOffset = documentStartOffset - segmentOffset;
 		int currentTokenStart = segmentOffset;
-		int currentTokenDocumentStart = documentStartOffset;
-
+		
 		for (int i = segmentOffset; i < segmentEnd; i++)
 		{
 			char c = segmentChars[i];
@@ -132,7 +132,6 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				case Token.NULL: // starting type
 				{
 					currentTokenStart = i;
-					currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 					
 					if (c == '#')
 						currentType = Token.PREPROCESSOR;
@@ -165,7 +164,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -209,13 +208,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -232,7 +231,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 
 				case Token.SEPARATOR:
 				{
-					addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+					addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 					currentType = Token.NULL;
 					i--; // wait one char.
 				}
@@ -242,25 +241,25 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (Character.isDigit(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (Character.isLetter(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isSeparator(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -270,7 +269,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -293,13 +292,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -326,13 +325,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -359,13 +358,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -388,13 +387,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -413,13 +412,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -442,13 +441,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -467,7 +466,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else if (c == '"')
 					{
-						addToken(segmentChars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 					}
 					// Do nothing and continue.
@@ -549,7 +548,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '`')
 					{
-						addToken(segmentChars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 					}
 					// Do nothing and continue.
@@ -568,7 +567,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -594,7 +593,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '/')
 					{
-						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_DOCUMENTATION, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 					}
 					else if (c == '*')
@@ -622,7 +621,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '/')
 					{
-						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_MULTILINE, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 					}
 					else if (c == '*')
@@ -653,13 +652,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -674,13 +673,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -692,7 +691,7 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '"')
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -714,13 +713,13 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -738,42 +737,42 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 				break;
 				
 			case TYPE_PREPROCESSOR_MULTILINE:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.PREPROCESSOR, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.PREPROCESSOR, newDocumentStartOffset + currentTokenStart, false);
 				// start PREPROCESSOR next line
 				break;
 			
 			case Token.LITERAL_BACKQUOTE:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.LITERAL_BACKQUOTE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.LITERAL_BACKQUOTE, newDocumentStartOffset + currentTokenStart, false);
 				// start LITERAL_BACKQUOTE next line
 				break;
 			
 			case Token.COMMENT_DOCUMENTATION:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, newDocumentStartOffset + currentTokenStart, false);
 				// start COMMENT_DOCUMENTATION next line
 				break;
 			
 			case Token.COMMENT_MULTILINE:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, newDocumentStartOffset + currentTokenStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			
 			case TYPE_MAYBE_COMMENT_DOCUMENTATION: // just "/*"
 			{
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, newDocumentStartOffset + currentTokenStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			}
 			
 			case TYPE_MAYBE_COMMENT_DOCUMENTATION_END:
 			{
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, newDocumentStartOffset + currentTokenStart, false);
 				// start COMMENT_DOCUMENTATION next line
 				break;
 			}
 			
 			case TYPE_MAYBE_COMMENT_MULTILINE_END:
 			{
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, newDocumentStartOffset + currentTokenStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			}
@@ -787,12 +786,12 @@ public class RookScriptTokenMaker extends AbstractTokenMaker
 			case TYPE_STRING_ESCAPE_UNICODE_1:
 			case TYPE_STRING_ESCAPE_UNICODE_2:
 			case Token.LITERAL_STRING_DOUBLE_QUOTE:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.ERROR_STRING_DOUBLE, newDocumentStartOffset + currentTokenStart, false);
 				addNullToken();
 				break;
 			
 			default:
-				addToken(segmentChars, currentTokenStart, segmentEnd - 1, currentType, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, currentType, newDocumentStartOffset + currentTokenStart, false);
 				addNullToken();
 				break;
 		}
