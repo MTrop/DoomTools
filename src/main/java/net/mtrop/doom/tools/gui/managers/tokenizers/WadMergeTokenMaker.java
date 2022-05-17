@@ -53,28 +53,28 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public Token getTokenList(final Segment segment, final int initialTokenType, final int startOffset)
+	public Token getTokenList(final Segment segment, final int initialTokenType, final int documentStartOffset)
 	{
 		resetTokenList();
 		
-		char[] chars = segment.array;
-		int offset = segment.offset;
-		int count = segment.count;
-		int end = offset + count;
+		char[] segmentChars = segment.array;
+		int segmentOffset = segment.offset;
+		int segmentCount = segment.count;
+		int segmentEnd = segmentOffset + segmentCount;
 		int currentType = initialTokenType;
 
-		int currentTokenStart = offset;
-		int currentTokenDocumentStart = startOffset;
+		int currentTokenStart = segmentOffset;
+		int currentTokenDocumentStart = documentStartOffset;
 
-		for (int i = offset; i < end; i++)
+		for (int i = segmentOffset; i < segmentEnd; i++)
 		{
-			char c = chars[i];
+			char c = segmentChars[i];
 			switch (currentType)
 			{
 				case Token.NULL: // starting type
 				{
 					currentTokenStart = i;
-					currentTokenDocumentStart = startOffset + (i - offset);
+					currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 					
 					if (c == '#')
 						currentType = Token.COMMENT_EOL;
@@ -99,7 +99,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -114,14 +114,14 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 					}
 					else if (c == '"')
 					{
-						addToken(chars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 					}
 					else if (c == '$')
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentTokenStart = i;
-						currentTokenDocumentStart = startOffset + (i - offset);
+						currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 						currentType = TYPE_STRING_ARGUMENT;
 					}
 					// Do nothing and continue.
@@ -209,15 +209,15 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (c == '$')
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentTokenStart = i;
-						currentTokenDocumentStart = startOffset + (i - offset);
+						currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 						currentType = TYPE_IDENTIFIER_ARGUMENT;
 					}
 					else
@@ -231,7 +231,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -241,9 +241,9 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 					}
 					else 
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false);
 						currentTokenStart = i;
-						currentTokenDocumentStart = startOffset + (i - offset);
+						currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 						currentType = Token.IDENTIFIER;
 					}
 				}
@@ -253,7 +253,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -263,9 +263,9 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, Token.VARIABLE, currentTokenDocumentStart, false);
 						currentTokenStart = i;
-						currentTokenDocumentStart = startOffset + (i - offset);
+						currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 						currentType = Token.LITERAL_STRING_DOUBLE_QUOTE;
 					}
 				}
@@ -275,7 +275,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '"')
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -297,7 +297,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -315,12 +315,12 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 				break;
 				
 			case Token.LITERAL_BACKQUOTE:
-				addToken(chars, currentTokenStart, end - 1, Token.LITERAL_BACKQUOTE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.LITERAL_BACKQUOTE, currentTokenDocumentStart, false);
 				// start LITERAL_BACKQUOTE next line
 				break;
 			
 			case Token.COMMENT_DOCUMENTATION:
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
 				// start COMMENT_DOCUMENTATION next line
 				break;
 			
@@ -333,22 +333,22 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 			case TYPE_STRING_ESCAPE_UNICODE_1:
 			case TYPE_STRING_ESCAPE_UNICODE_2:
 			case Token.LITERAL_STRING_DOUBLE_QUOTE:
-				addToken(chars, currentTokenStart, end - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 
 			case TYPE_IDENTIFIER_ARGUMENT:
-				addToken(chars, currentTokenStart, end - 1, Token.VARIABLE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.VARIABLE, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 
 			case TYPE_STRING_ARGUMENT:
-				addToken(chars, currentTokenStart, end - 1, Token.VARIABLE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.VARIABLE, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 
 			default:
-				addToken(chars, currentTokenStart, end - 1, currentType, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, currentType, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 		}
@@ -357,7 +357,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public void addToken(char[] segment, int start, int end, int tokenType, int startOffset, boolean hyperLink) 
+	public void addToken(char[] segment, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
 	{
 		switch (tokenType)
 		{
@@ -370,7 +370,7 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 			break;
 		}
 		
-		super.addToken(segment, start, end, tokenType, startOffset, hyperLink);
+		super.addToken(segment, start, end, tokenType, documentStartOffset, hyperLink);
 	}
 	
 }

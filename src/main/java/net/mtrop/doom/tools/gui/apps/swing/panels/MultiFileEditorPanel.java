@@ -247,15 +247,15 @@ public class MultiFileEditorPanel extends JPanel
 		MenuNode[] languageNodes = createEditorStyleMenuItems();
 		MenuNode[] spacingNodes = createEditorSpacingMenuItems();
 		
-		this.filePathLabel = label();
-		this.caretPositionLabel = label();
-		this.encodingModeLabel = apply(label(), (e) -> {
+		this.filePathLabel = label(" ");
+		this.caretPositionLabel = label(" ");
+		this.encodingModeLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(encodingNodes));
 		});
-		this.spacingModeLabel = apply(label(), (e) -> {
+		this.spacingModeLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(spacingNodes));
 		});
-		this.syntaxStyleLabel = apply(label(), (e) -> {
+		this.syntaxStyleLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(languageNodes));
 		});;
 		this.findReplacePanel = new FindReplacePanel();

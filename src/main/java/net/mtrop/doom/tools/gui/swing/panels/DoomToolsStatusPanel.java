@@ -41,7 +41,7 @@ public class DoomToolsStatusPanel extends JPanel
 	{
 		this.icons = DoomToolsIconManager.get();
 		this.images = DoomToolsImageManager.get();
-		this.messageLabel = new JLabel();
+		this.messageLabel = label(" ");
 		this.successIcon = icon(images.getImage("success.png"));
 		this.activityIcon = icons.getImage("activity.gif");
 		this.errorIcon = icon(images.getImage("error.png"));

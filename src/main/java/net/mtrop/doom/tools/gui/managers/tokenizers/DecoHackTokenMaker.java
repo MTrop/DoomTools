@@ -121,28 +121,28 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public Token getTokenList(final Segment segment, final int initialTokenType, final int startOffset)
+	public Token getTokenList(final Segment segment, final int initialTokenType, final int documentStartOffset)
 	{
 		resetTokenList();
 		
-		char[] chars = segment.array;
-		int offset = segment.offset;
-		int count = segment.count;
-		int end = offset + count;
+		char[] segmentChars = segment.array;
+		int segmentOffset = segment.offset;
+		int segmentCount = segment.count;
+		int segmentEnd = segmentOffset + segmentCount;
 		int currentType = initialTokenType;
 
-		int currentTokenStart = offset;
-		int currentTokenDocumentStart = startOffset;
+		int currentTokenStart = segmentOffset;
+		int currentTokenDocumentStart = documentStartOffset;
 
-		for (int i = offset; i < end; i++)
+		for (int i = segmentOffset; i < segmentEnd; i++)
 		{
-			char c = chars[i];
+			char c = segmentChars[i];
 			switch (currentType)
 			{
 				case Token.NULL: // starting type
 				{
 					currentTokenStart = i;
-					currentTokenDocumentStart = startOffset + (i - offset);
+					currentTokenDocumentStart = documentStartOffset + (i - segmentOffset);
 					
 					if (c == '#')
 						currentType = Token.PREPROCESSOR;
@@ -175,7 +175,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -219,13 +219,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, Token.LITERAL_NUMBER_DECIMAL_INT, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -242,7 +242,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 
 				case Token.SEPARATOR:
 				{
-					addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+					addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 					currentType = Token.NULL;
 					i--; // wait one char.
 				}
@@ -252,25 +252,25 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (Character.isDigit(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (Character.isLetter(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isSeparator(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -280,7 +280,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -299,13 +299,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -332,13 +332,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -361,13 +361,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -386,7 +386,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else if (c == '"')
 					{
-						addToken(chars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 					}
 					// Do nothing and continue.
@@ -428,7 +428,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '`')
 					{
-						addToken(chars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 					}
 					// Do nothing and continue.
@@ -447,7 +447,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 					}
 					else
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -473,7 +473,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '/')
 					{
-						addToken(chars, currentTokenStart, i, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 					}
 					else if (c == '*')
@@ -501,7 +501,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '/')
 					{
-						addToken(chars, currentTokenStart, i, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 					}
 					else if (c == '*')
@@ -532,13 +532,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false); 
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -553,13 +553,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -571,7 +571,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (c == '"')
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -593,13 +593,13 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				{
 					if (Character.isWhitespace(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
 					else if (isDelimiterBreak(c))
 					{
-						addToken(chars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, currentTokenDocumentStart, false);
 						currentType = Token.NULL;
 						i--; // wait one char.
 					}
@@ -617,42 +617,42 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 				break;
 				
 			case TYPE_PREPROCESSOR_MULTILINE:
-				addToken(chars, currentTokenStart, end - 1, Token.PREPROCESSOR, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.PREPROCESSOR, currentTokenDocumentStart, false);
 				// start PREPROCESSOR next line
 				break;
 			
 			case Token.LITERAL_BACKQUOTE:
-				addToken(chars, currentTokenStart, end - 1, Token.LITERAL_BACKQUOTE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.LITERAL_BACKQUOTE, currentTokenDocumentStart, false);
 				// start LITERAL_BACKQUOTE next line
 				break;
 			
 			case Token.COMMENT_DOCUMENTATION:
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
 				// start COMMENT_DOCUMENTATION next line
 				break;
 			
 			case Token.COMMENT_MULTILINE:
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			
 			case TYPE_MAYBE_COMMENT_DOCUMENTATION: // just "/*"
 			{
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			}
 			
 			case TYPE_MAYBE_COMMENT_DOCUMENTATION_END:
 			{
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_DOCUMENTATION, currentTokenDocumentStart, false);
 				// start COMMENT_DOCUMENTATION next line
 				break;
 			}
 			
 			case TYPE_MAYBE_COMMENT_MULTILINE_END:
 			{
-				addToken(chars, currentTokenStart, end - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.COMMENT_MULTILINE, currentTokenDocumentStart, false);
 				// start COMMENT_MULTILINE next line
 				break;
 			}
@@ -662,12 +662,12 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 			case TYPE_STRING_ESCAPE_HEX:
 			case TYPE_STRING_ESCAPE_HEX_0:
 			case Token.LITERAL_STRING_DOUBLE_QUOTE:
-				addToken(chars, currentTokenStart, end - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, Token.ERROR_STRING_DOUBLE, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 			
 			default:
-				addToken(chars, currentTokenStart, end - 1, currentType, currentTokenDocumentStart, false);
+				addToken(segmentChars, currentTokenStart, segmentEnd - 1, currentType, currentTokenDocumentStart, false);
 				addNullToken();
 				break;
 		}
@@ -676,7 +676,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public void addToken(char[] segment, int start, int end, int tokenType, int startOffset, boolean hyperLink) 
+	public void addToken(char[] segment, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
 	{
 		switch (tokenType)
 		{
@@ -718,7 +718,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 			
 		}
 		
-		super.addToken(segment, start, end, tokenType, startOffset, hyperLink);
+		super.addToken(segment, start, end, tokenType, documentStartOffset, hyperLink);
 	}
 	
 }

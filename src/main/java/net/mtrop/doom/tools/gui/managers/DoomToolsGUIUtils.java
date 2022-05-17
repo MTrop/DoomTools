@@ -415,11 +415,11 @@ public final class DoomToolsGUIUtils
 
 	/**
 	 * Creates a process modal, prepped to start and open.
-	 * @param parent
-	 * @param title
-	 * @param activityMessage
-	 * @param successMessage
-	 * @param errorMessage
+	 * @param parent the parent owner.
+	 * @param title the title of the modal.
+	 * @param activityMessage the message to display during execution.
+	 * @param successMessage the success message if the process terminates with a zero result.
+	 * @param errorMessage the error message if the process terminates with a nonzero result.
 	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR).
 	 * @return a modal handle to start with a task manager.
 	 */
