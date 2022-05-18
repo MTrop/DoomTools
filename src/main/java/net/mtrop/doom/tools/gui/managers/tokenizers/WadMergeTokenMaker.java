@@ -1,11 +1,9 @@
 package net.mtrop.doom.tools.gui.managers.tokenizers;
 
 import java.util.Arrays;
-import java.util.function.Function;
 
 import javax.swing.text.Segment;
 
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMap;
 
@@ -16,27 +14,9 @@ import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
  * Token maker for WadMerge.
  * @author Matthew Tropiano 
  */
-public class WadMergeTokenMaker extends AbstractTokenMaker
+public class WadMergeTokenMaker extends CommonTokenMaker
 {
-	private static final Function<String, char[]> ALPHABET = (str) -> {
-		char[] chars = str.toCharArray();
-		Arrays.sort(chars);
-		return chars;
-	};
-	
-	private static final char[] HEXDIGITS = ALPHABET.apply("0123456789abcdefABCDEF");
-
-	private static final int TYPE_START =                   Token.DEFAULT_NUM_TOKEN_TYPES;
-	private static final int TYPE_STRING_ESCAPE =           TYPE_START + 0;
-	private static final int ERROR_TYPE_STRING_ESCAPE =     TYPE_START + 1;
-	private static final int TYPE_STRING_ESCAPE_HEX =       TYPE_START + 2;
-	private static final int TYPE_STRING_ESCAPE_HEX_0 =     TYPE_START + 3;
-	private static final int TYPE_STRING_ESCAPE_UNICODE =   TYPE_START + 4;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_0 = TYPE_START + 5;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_1 = TYPE_START + 6;
-	private static final int TYPE_STRING_ESCAPE_UNICODE_2 = TYPE_START + 7;
-	private static final int TYPE_IDENTIFIER_ARGUMENT =     TYPE_START + 8;
-	private static final int TYPE_STRING_ARGUMENT =         TYPE_START + 9;
+	private static final char[] HEXDIGITS = createAlphabet("0123456789abcdefABCDEF");
 
 	protected static boolean isHexDigit(char c)
 	{
@@ -44,12 +24,10 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 	}
 	
 	@Override
-	public TokenMap getWordsToHighlight() 
+	protected void addKeywords(TokenMap targetMap) 
 	{
-		TokenMap map = new TokenMap(true);
 		for (WadMergeCommand command : WadMergeCommand.values())
-			map.put(command.name(), Token.RESERVED_WORD);
-		return map;
+			targetMap.put(command.name(), Token.RESERVED_WORD);
 	}
 
 	@Override
@@ -352,20 +330,23 @@ public class WadMergeTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public void addToken(char[] segment, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
+	public void addToken(char[] segmentChars, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
 	{
 		switch (tokenType)
 		{
 			case Token.IDENTIFIER:
 			{
 				int value;
-				if ((value = wordsToHighlight.get(segment, start, end)) != -1) 
+				if ((value = wordsToHighlight.get(segmentChars, start, end)) != -1) 
 					tokenType = value;
 			}
 			break;
 		}
 		
-		super.addToken(segment, start, end, tokenType, documentStartOffset, hyperLink);
+		if (!hyperLink && isHyperlinkableType(tokenType))
+			addPossibleHyperlinkTokens(segmentChars, start, end, tokenType, documentStartOffset);
+		else
+			super.addToken(segmentChars, start, end, tokenType, documentStartOffset, hyperLink);
 	}
 	
 }

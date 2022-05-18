@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 import javax.swing.text.Segment;
 
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMaker;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rsyntaxtextarea.TokenMap;
 
@@ -17,7 +16,7 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
  * Token maker for DECOHack.
  * @author Matthew Tropiano 
  */
-public class DecoHackTokenMaker extends AbstractTokenMaker
+public class DecoHackTokenMaker extends CommonTokenMaker
 {
 	private static final Function<String, char[]> ALPHABET = (str) -> {
 		char[] chars = str.toCharArray();
@@ -44,12 +43,9 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 	private static final int TYPE_STRING_ESCAPE_HEX =               TYPE_START + 9;
 	private static final int TYPE_STRING_ESCAPE_HEX_0 =             TYPE_START + 10;
 
-	
-	/**
-	 * Adds the common RookScript keywords to a TokenMap.
-	 * @param targetMap the target map to add to.
-	 */
-	protected static void addDecoHackKeywords(TokenMap targetMap)
+
+	@Override
+	protected void addKeywords(TokenMap targetMap)
 	{
 		targetMap.put("using",      Token.RESERVED_WORD);
 
@@ -112,14 +108,6 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 		return OPERATORS.contains(token);
 	}
 	
-	@Override
-	public TokenMap getWordsToHighlight() 
-	{
-		TokenMap map = new TokenMap(true);
-		addDecoHackKeywords(map);
-		return map;
-	}
-
 	@Override
 	public Token getTokenList(final Segment segment, final int initialTokenType, final int documentStartOffset)
 	{
@@ -675,18 +663,18 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 	}
 
 	@Override
-	public void addToken(char[] segment, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
+	public void addToken(char[] segmentChars, int start, int end, int tokenType, int documentStartOffset, boolean hyperLink) 
 	{
 		switch (tokenType)
 		{
 			case Token.IDENTIFIER:
 			{
 				int value;
-				if ((value = wordsToHighlight.get(segment, start, end)) != -1) 
+				if ((value = wordsToHighlight.get(segmentChars, start, end)) != -1) 
 					tokenType = value;
 				else
 				{
-					String str = new String(segment, start, end + 1 - start);
+					String str = new String(segmentChars, start, end + 1 - start);
 					if (str.length() >= 2 && str.substring(0, 2).equalsIgnoreCase("a_"))
 						tokenType = Token.FUNCTION;
 				}
@@ -695,7 +683,7 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 			
 			case TYPE_MAYBE_DELIMITER:
 			{
-				String str = new String(segment, start, end + 1 - start);
+				String str = new String(segmentChars, start, end + 1 - start);
 				if (isOperator(str))
 					tokenType = Token.OPERATOR;
 				else
@@ -717,7 +705,10 @@ public class DecoHackTokenMaker extends AbstractTokenMaker
 			
 		}
 		
-		super.addToken(segment, start, end, tokenType, documentStartOffset, hyperLink);
+		if (!hyperLink && isHyperlinkableType(tokenType))
+			addPossibleHyperlinkTokens(segmentChars, start, end, tokenType, documentStartOffset);
+		else
+			super.addToken(segmentChars, start, end, tokenType, documentStartOffset, hyperLink);
 	}
 	
 }
