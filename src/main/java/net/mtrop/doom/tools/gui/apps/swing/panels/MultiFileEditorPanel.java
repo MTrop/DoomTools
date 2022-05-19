@@ -51,6 +51,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
@@ -325,13 +326,18 @@ public class MultiFileEditorPanel extends JPanel
 			});
 		});
 		
-		MenuNode[] encodingNodes = createEditorEncodingMenuItems();
-		MenuNode[] languageNodes = createEditorStyleMenuItems();
-		MenuNode[] spacingNodes = createEditorSpacingMenuItems();
-		MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
+		final MenuNode[] encodingNodes = createEditorEncodingMenuItems();
+		final MenuNode[] languageNodes = createEditorStyleMenuItems();
+		final MenuNode[] spacingNodes = createEditorSpacingMenuItems();
+		final MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
+		final MenuNode[] editorFileNodes = createEditorCurrentFileMenuItems();
 		
-		this.filePathLabel = label(" ");
-		this.caretPositionLabel = label(" ");
+		this.filePathLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(editorFileNodes));
+		});
+		this.syntaxStyleLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(languageNodes));
+		});
 		this.encodingModeLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(encodingNodes));
 		});
@@ -341,9 +347,7 @@ public class MultiFileEditorPanel extends JPanel
 		this.lineEndingLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(lineEndingNodes));
 		});
-		this.syntaxStyleLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(languageNodes));
-		});
+		this.caretPositionLabel = label(" ");
 		this.findReplacePanel = new FindReplacePanel();
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
@@ -806,12 +810,13 @@ public class MultiFileEditorPanel extends JPanel
 
 	private void setCurrentEditor(EditorHandle handle)
 	{
+		EditorHandle previous = currentEditor;
 		currentEditor = handle;
 		updateActionStates();
 		updateLabels();
 		updateEditorHooks();
 		if (listener != null)
-			listener.onCurrentEditorChange(handle);
+			listener.onCurrentEditorChange(previous, handle);
 		if (currentEditor != null)
 			currentEditor.editorPanel.textArea.requestFocus();
 	}
@@ -1064,7 +1069,27 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
-	 * Clears all highlights/markers on the every editor.
+	 * Opens the current editor's file in system explorer. 
+	 */
+	private boolean openCurrentEditorFileInSystem()
+	{
+		if (currentEditor == null)
+			return false;
+		return openEditorFileInSystem(currentEditor);
+	}
+	
+	/**
+	 * Opens the an editor's file in system explorer. 
+	 */
+	private static boolean openEditorFileInSystem(EditorHandle handle)
+	{
+		if (handle.contentSourceFile == null)
+			return false;
+		return Common.openInSystemBrowser(handle.contentSourceFile);
+	}
+	
+	/**
+	 * Clears all highlights/markers on every editor.
 	 */
 	private void clearAllHighlights()
 	{
@@ -1127,6 +1152,13 @@ public class MultiFileEditorPanel extends JPanel
 			utils.createItemFromLanguageKey("texteditor.action.lineending.crlf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CRLF)),
 			utils.createItemFromLanguageKey("texteditor.action.lineending.lf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.LF)),
 			utils.createItemFromLanguageKey("texteditor.action.lineending.cr", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CR))
+		);
+	}
+	
+	private MenuNode[] createEditorCurrentFileMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.system", (c, e) -> openCurrentEditorFileInSystem())
 		);
 	}
 	
@@ -1324,9 +1356,10 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		/**
 		 * Called on a current editor changing focus.
-		 * @param handle the new current handle.
+		 * @param previous the previous editor handle selected. Can be null.
+		 * @param next the next (and new current) editor handle. Can be null.
 		 */
-		void onCurrentEditorChange(EditorHandle handle);
+		void onCurrentEditorChange(EditorHandle previous, EditorHandle next);
 		
 		/**
 		 * Called when an editor is opened or created.
@@ -1566,11 +1599,23 @@ public class MultiFileEditorPanel extends JPanel
 				b.setBorder(null);
 				b.setOpaque(false);
 			});
+			
+			this.titleLabel.setComponentPopupMenu(popupMenu(
+				utils.createItemFromLanguageKey("texteditor.action.system", (c, e) -> openInSystem())
+			));
+			
 			setOpaque(false);
 			containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
 				node(titleLabel),
 				node(closeButton)
 			);
+		}
+		
+		private void openInSystem()
+		{
+			EditorHandle handle = allEditors.get(this);
+			if (handle != null)
+				openEditorFileInSystem(handle);
 		}
 		
 		private void setTabIcon(Icon icon)

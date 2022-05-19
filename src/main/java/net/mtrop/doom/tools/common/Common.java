@@ -20,6 +20,8 @@ import java.util.Map;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.ReplacerReader;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
+
 
 /**
  * Common shared functions.
@@ -153,6 +155,29 @@ public final class Common
 	public static ProcessCallable spawnJava(Class<?> mainClass)
 	{
 		return ProcessCallable.java(mainClass, "-Xms64M", "-Xmx768M");
+	}
+	
+	/**
+	 * Opens the system explorer/finder to highlight a file.
+	 * @param target the target file to open.
+	 * @return true if the command succeeded, false if not.
+	 */
+	public static boolean openInSystemBrowser(File target)
+	{
+		ProcessCallable pc = 
+			OSUtils.isWindows() ? ProcessCallable.create("explorer.exe", "/select,"+target.getAbsolutePath()) :
+			OSUtils.isOSX() ? ProcessCallable.create("open", target.getAbsoluteFile().getParent()) :
+			null;
+		
+		if (pc == null)
+			return false;
+
+		try {
+			pc.exec();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 	
 }

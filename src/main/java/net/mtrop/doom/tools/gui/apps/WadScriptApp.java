@@ -115,9 +115,9 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		new WadScriptEditorPanel.Listener()
 		{
 			@Override
-			public void onCurrentEditorChange(EditorHandle handle) 
+			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next) 
 			{
-				currentHandle = handle;
+				currentHandle = next;
 				onHandleChange();
 			}
 
