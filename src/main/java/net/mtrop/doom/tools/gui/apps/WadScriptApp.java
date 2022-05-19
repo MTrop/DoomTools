@@ -212,7 +212,8 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
 			separator(),
 			editorPanel.getChangeEncodingMenuItem(),
-			editorPanel.getChangeSpacingMenuItem()
+			editorPanel.getChangeSpacingMenuItem(),
+			editorPanel.getChangeLineEndingMenuItem()
 		);
 	}
 	

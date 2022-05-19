@@ -60,6 +60,7 @@ import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -107,6 +108,82 @@ public class MultiFileEditorPanel extends JPanel
 		String ACTION_FIND = "find";
 	}
 	
+	/**
+	 * Line ending mode.
+	 */
+	public enum LineEnding
+	{
+		/** Windows */
+		CRLF 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\r\n");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return true;
+			}
+		},
+		
+		/** Unknown! */
+		LFCR
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\n\r");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return true;
+			}
+		},
+
+		/** Unix */
+		LF 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				// Do nothing.
+				return content;
+			}
+
+			@Override
+			public boolean isTwoCharEnding()
+			{
+				return false;
+			}
+		},
+
+		/** Macintosh */
+		CR 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\r");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return false;
+			}
+		},
+
+		;
+		
+		public abstract String convertContent(String content);
+		public abstract boolean isTwoCharEnding();
+	}
+	
 	// ======================================================================
 	
 	private DoomToolsEditorProvider editorProvider;
@@ -129,6 +206,9 @@ public class MultiFileEditorPanel extends JPanel
 	private JLabel encodingModeLabel;
 	/** Syntax style mode. */
 	private JLabel syntaxStyleLabel;
+	/** Line ending mode. */
+	private JLabel lineEndingLabel;
+	
 	/** Find/Replace panel. */
 	private FindReplacePanel findReplacePanel;
 	
@@ -174,7 +254,9 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode changeLanguageMenuItem;
 	/** Change spacing item. */
 	private MenuNode changeSpacingMenuItem;
-
+	/** Change line ending item. */
+	private MenuNode changeLineEndingMenuItem;
+	
 	// ======================================================================
 	
 	/** All editors. */
@@ -246,6 +328,7 @@ public class MultiFileEditorPanel extends JPanel
 		MenuNode[] encodingNodes = createEditorEncodingMenuItems();
 		MenuNode[] languageNodes = createEditorStyleMenuItems();
 		MenuNode[] spacingNodes = createEditorSpacingMenuItems();
+		MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
 		
 		this.filePathLabel = label(" ");
 		this.caretPositionLabel = label(" ");
@@ -255,9 +338,12 @@ public class MultiFileEditorPanel extends JPanel
 		this.spacingModeLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(spacingNodes));
 		});
+		this.lineEndingLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(lineEndingNodes));
+		});
 		this.syntaxStyleLabel = apply(label(" "), (e) -> {
 			e.setComponentPopupMenu(popupMenu(languageNodes));
-		});;
+		});
 		this.findReplacePanel = new FindReplacePanel();
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
@@ -299,12 +385,18 @@ public class MultiFileEditorPanel extends JPanel
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
 		this.changeSpacingMenuItem = utils.createItemFromLanguageKey("texteditor.action.spacing", spacingNodes);
+		this.changeLineEndingMenuItem = utils.createItemFromLanguageKey("texteditor.action.lineending", lineEndingNodes);
 		
 		List<Node> labelNodes = new LinkedList<>();
 		if (!options.hideStyleChangePanel())
 			labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(syntaxStyleLabel))));
 		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(encodingModeLabel))));
-		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))));
+		labelNodes.add(node(
+			containerOf(gridLayout(1, 0), 
+				node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(spacingModeLabel))),
+				node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(lineEndingLabel)))
+			)
+		));
 		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(caretPositionLabel))));
 		
 		containerOf(this, borderLayout(0, 2),
@@ -543,6 +635,14 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * @return the change line ending menu item.
+	 */
+	public MenuNode getChangeLineEndingMenuItem() 
+	{
+		return changeLineEndingMenuItem;
+	}
+	
+	/**
 	 * Gets the amount of open editors.
 	 * @return the amount of editors still open.
 	 */
@@ -588,10 +688,10 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param attachedFile the content source file (if any, can be null).
 	 * @param fileCharset the file's source charset.
 	 * @param styleName the default style. Can be null to not force a style. 
-	 * @param content the content.
+	 * @param originalContent the incoming content for the editor.
 	 * @return the editor handle created.
 	 */
-	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, String content)
+	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent)
 	{
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
@@ -603,9 +703,11 @@ public class MultiFileEditorPanel extends JPanel
 				styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
 		}
 		
-		textArea.setText(content);
+		// Remove all CRs for editor, keep LFs.
+		final String textAreaContent = originalContent.replace("\r", "");
+		textArea.setText(textAreaContent);
 		textArea.setCaretPosition(0);
-		
+
 		EditorHandle handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
 			: new EditorHandle(title, fileCharset, styleName, textArea)
@@ -615,7 +717,9 @@ public class MultiFileEditorPanel extends JPanel
 		
 		settings.getDefaultEditorViewSettings().applyTo(textArea);
 		codeSettings.applyTo(textArea);
-		setEditorViewSettingsByContent(textArea, content);
+		setEditorViewSettingsByContent(textArea, originalContent);
+		if (attachedFile != null) // only scan for ending if existing file
+			setEditorHandleSettingsByContent(handle, originalContent);
 		
 		// ==================================================================
 		
@@ -781,34 +885,92 @@ public class MultiFileEditorPanel extends JPanel
 		findAction.setEnabled(editorPresent);
 	}
 	
-	private void updateLabels()
+	private void updateEncodingLabel()
+	{
+		if (currentEditor != null)
+			encodingModeLabel.setText(currentEditor.contentCharset.displayName());
+		else
+			encodingModeLabel.setText(" ");
+	}
+	
+	private void updateStyleLabel() 
+	{
+		if (currentEditor != null)
+			syntaxStyleLabel.setText(currentEditor.currentStyle);
+		else
+			syntaxStyleLabel.setText(" ");
+	}
+	
+	private void updateSpacingLabel() 
 	{
 		if (currentEditor != null)
 		{
 			RSyntaxTextArea textArea = currentEditor.editorPanel.textArea;
-			int line = textArea.getCaretLineNumber() + 1;
-			int offset = textArea.getCaretOffsetFromLineStart();
-			int characterOffset = textArea.getCaretPosition();
 			int tabSize = textArea.getTabSize();
 			boolean usesSpaces = textArea.getTabsEmulated();
-			
-			int selection = textArea.getSelectionEnd() - textArea.getSelectionStart(); 
-			
-			File file = currentEditor.getContentSourceFile();
-			filePathLabel.setText(file != null ? file.getAbsolutePath() : "");
-			syntaxStyleLabel.setText(currentEditor.currentStyle);
-			caretPositionLabel.setText(line + " : " + offset + " : " + characterOffset + (selection > 0 ? " [" + selection + "]" : ""));
-			encodingModeLabel.setText(currentEditor.contentCharset.displayName());
 			spacingModeLabel.setText((usesSpaces ? "Spaces: " : "Tabs: ") + tabSize);
 		}
 		else
 		{
-			filePathLabel.setText(" ");
-			syntaxStyleLabel.setText(" ");
-			caretPositionLabel.setText(" ");
-			encodingModeLabel.setText(" ");
 			spacingModeLabel.setText(" ");
 		}
+	}
+
+	private void updateLineEndingLabel() 
+	{
+		if (currentEditor != null)
+			lineEndingLabel.setText(currentEditor.currentLineEnding.name());
+		else
+			lineEndingLabel.setText(" ");
+	}
+
+	private void updateFilePathLabel()
+	{
+		if (currentEditor != null)
+		{
+			File file = currentEditor.getContentSourceFile();
+			filePathLabel.setText(file != null ? file.getAbsolutePath() : "");
+		}
+		else
+		{
+			filePathLabel.setText(" ");
+		}
+	}
+
+	private void updateCaratPositionLabel()
+	{
+		if (currentEditor != null)
+		{
+			RSyntaxTextArea textArea = currentEditor.editorPanel.textArea;
+			boolean twoCharEnding = currentEditor.currentLineEnding.isTwoCharEnding();
+			int line = textArea.getCaretLineNumber() + 1;
+			int offset = textArea.getCaretOffsetFromLineStart();
+			int characterOffset = textArea.getCaretPosition() + (twoCharEnding ? textArea.getCaretLineNumber() : 0);
+			
+			int selection = textArea.getSelectionEnd() - textArea.getSelectionStart(); 
+			String selected = textArea.getSelectedText();
+			if (selected != null)
+			{
+				int selectedLineSpan = selection - textArea.getSelectedText().replace("\n",	"").length();
+				selection = selection + (twoCharEnding ? selectedLineSpan : 0);
+			}
+			
+			caretPositionLabel.setText("L " + line + ", C " + offset + ", P " + characterOffset + (selection > 0 ? ", [" + selection + "]" : ""));
+		}
+		else
+		{
+			caretPositionLabel.setText(" ");
+		}
+	}
+	
+	private void updateLabels()
+	{
+		updateFilePathLabel();
+		updateStyleLabel();
+		updateEncodingLabel();
+		updateSpacingLabel();
+		updateLineEndingLabel();
+		updateCaratPositionLabel();
 	}
 	
 	private void updateActionsIfCurrent(EditorHandle handle)
@@ -872,6 +1034,7 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		Charset targetCharset = handle.contentCharset;
 		String content = handle.editorPanel.textArea.getText();
+		content = handle.currentLineEnding.convertContent(content);
 	
 		StringReader reader = new StringReader(content);
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset)) {
@@ -911,17 +1074,10 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode[] createEditorEncodingMenuItems()
 	{
 		Set<Charset> charsets = editorProvider.getAvailableCommonCharsets();
-		Set<Charset> otherCharsets = editorProvider.getAvailableOtherCharsets();
 		
 		List<MenuNode> out = new ArrayList<>();
 		for (Charset charset : charsets)
 			out.add(menuItem(charset.displayName(), (c, e) -> changeCurrentEditorEncoding(charset)));
-		out.add(separator());
-		
-		List<MenuNode> others = new ArrayList<>();
-		for (Charset charset : otherCharsets)
-			others.add(menuItem(charset.displayName(), (c, e) -> changeCurrentEditorEncoding(charset)));
-		out.add(utils.createItemFromLanguageKey("texteditor.action.encodings.other", others.toArray(new MenuNode[others.size()])));
 		return out.toArray(new MenuNode[out.size()]);
 	}
 	
@@ -964,6 +1120,15 @@ public class MultiFileEditorPanel extends JPanel
 			)
 		); 
 	}
+
+	private MenuNode[] createEditorLineEndingMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.lineending.crlf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CRLF)),
+			utils.createItemFromLanguageKey("texteditor.action.lineending.lf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.LF)),
+			utils.createItemFromLanguageKey("texteditor.action.lineending.cr", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CR))
+		);
+	}
 	
 	/**
 	 * Changes the encoding of the text in the current editor.
@@ -972,7 +1137,6 @@ public class MultiFileEditorPanel extends JPanel
 	private void changeCurrentEditorEncoding(final Charset charset)
 	{
 		forCurrentEditor((editor) -> editor.changeEncoding(charset));
-		updateLabels();
 	}
 
 	/**
@@ -982,7 +1146,6 @@ public class MultiFileEditorPanel extends JPanel
 	private void changeCurrentEditorStyle(final String styleName)
 	{
 		forCurrentEditor((editor) -> editor.changeStyleName(styleName));
-		updateLabels();
 	}
 
 	/**
@@ -991,7 +1154,15 @@ public class MultiFileEditorPanel extends JPanel
 	private void changeCurrentEditorSpacing(final boolean spaces, final int amount)
 	{
 		forCurrentEditor((editor) -> editor.changeSpacing(spaces, amount));
-		updateLabels();
+	}
+
+	/**
+	 * Changes the line-ending output style in the current editor.
+	 * @param lineEnding the new line ending for the editor.
+	 */
+	private void changeCurrentEditorLineEnding(final LineEnding lineEnding)
+	{
+		forCurrentEditor((editor) -> editor.changeLineEnding(lineEnding));
 	}
 
 	// Opens the "Go to Line" dialog. 
@@ -1082,6 +1253,70 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	}
 	
+	// Sets editor handle settings by scanning content.
+	private static void setEditorHandleSettingsByContent(EditorHandle handle, String content)
+	{
+		boolean sawCR = false;
+		boolean sawLF = false;
+		try (Reader reader = new StringReader(content))
+		{
+			int code;
+			while ((code = reader.read()) >= 0)
+			{
+				char c = (char)code;
+				if (c == '\r') // CR
+				{
+					if (sawCR)
+					{
+						handle.currentLineEnding = LineEnding.CR;
+						return;
+					}
+					else if (sawLF)
+					{
+						handle.currentLineEnding = LineEnding.LFCR;
+						return;
+					}
+					
+					sawCR = true;
+				}
+				else if (c == '\n') // LF
+				{
+					if (sawCR)
+					{
+						handle.currentLineEnding = LineEnding.CRLF;
+						return;
+					}
+					else if (sawLF)
+					{
+						handle.currentLineEnding = LineEnding.LF;
+						return;
+					}
+					
+					sawLF = true;
+				}
+				else // not CR nor LF
+				{
+					if (sawCR)
+					{
+						handle.currentLineEnding = LineEnding.CR;
+						return;
+					}
+					else if (sawLF)
+					{
+						handle.currentLineEnding = LineEnding.LF;
+						return;
+					}
+				}
+			}
+		}
+		catch (IOException e) 
+		{
+			// Do nothing.
+		}
+		
+		// Nothing happened. Keep current setting.
+	}
+	
 	/**
 	 * The listener.
 	 */
@@ -1147,7 +1382,9 @@ public class MultiFileEditorPanel extends JPanel
 		private long contentSourceFileLastModified;
 		/** Current RSyntaxTextArea style. */
 		private String currentStyle;
-
+		/** Current line ending. */
+		private LineEnding currentLineEnding;
+		
 		/** Current AutoCompletion engine. */
 		private AutoCompletion currentAutoCompletion;
 
@@ -1166,7 +1403,8 @@ public class MultiFileEditorPanel extends JPanel
 			this.contentLastModified = -1L;
 			this.contentSourceFileLastModified = -1L;
 			this.currentStyle = styleName;
-			
+			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
+
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
 			textArea.setSyntaxEditingStyle(styleName);
@@ -1202,6 +1440,7 @@ public class MultiFileEditorPanel extends JPanel
 			this.contentLastModified = contentSourceFile.lastModified();
 			this.contentSourceFileLastModified = contentSourceFile.lastModified();
 			this.editorTab.setTabIcon(savedIcon);
+			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
 		}
 
 		/**
@@ -1211,7 +1450,7 @@ public class MultiFileEditorPanel extends JPanel
 		public void changeEncoding(Charset newCharset)
 		{
 			contentCharset = newCharset;
-			updateLabels();
+			updateEncodingLabel();
 		}
 		
 		/**
@@ -1223,7 +1462,7 @@ public class MultiFileEditorPanel extends JPanel
 			currentStyle = styleName;
 			editorPanel.textArea.setSyntaxEditingStyle(styleName);
 			applyAutoComplete(styleName);
-			updateLabels();
+			updateStyleLabel();
 		}
 		
 		/**
@@ -1235,7 +1474,18 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			editorPanel.textArea.setTabsEmulated(spaces);
 			editorPanel.textArea.setTabSize(amount);
-			updateLabels();
+			updateSpacingLabel();
+		}
+		
+		/**
+		 * Changes the line ending style.
+		 * @param lineEnding if true, spaces. false is tabs.
+		 */
+		public void changeLineEnding(LineEnding lineEnding)
+		{
+			currentLineEnding = lineEnding; 
+			updateCaratPositionLabel();
+			updateLineEndingLabel();
 		}
 		
 		/**
@@ -1357,7 +1607,7 @@ public class MultiFileEditorPanel extends JPanel
 			
 			textArea.addCaretListener((e) -> {
 				updateTextActionStates();
-				updateLabels();
+				updateCaratPositionLabel();
 			});
 			
 			textArea.addHyperlinkListener((hevent) -> {

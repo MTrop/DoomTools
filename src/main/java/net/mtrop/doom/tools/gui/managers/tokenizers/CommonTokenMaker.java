@@ -38,6 +38,7 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 	protected static final int TYPE_STRING_ESCAPE_UNICODE_2 =         TYPE_START + 17;
 	protected static final int TYPE_IDENTIFIER_ARGUMENT =             TYPE_START + 18;
 	protected static final int TYPE_STRING_ARGUMENT =                 TYPE_START + 19;
+	protected static final int COMMON_NUM_TOKEN_TYPES =               TYPE_START + 20; // keep at end!
 
 	@Override
 	public TokenMap getWordsToHighlight() 
@@ -96,7 +97,7 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 	protected void addPossibleHyperlinkTokens(char[] segmentChars, int start, int end, int tokenType, int documentSegmentStartOffset)
 	{
 		String input = new String(segmentChars, start, end + 1 - start);
-		Matcher matcher = createURLMatcherFor(input);
+		Matcher matcher = URL_PATTERN.matcher(input);
 		
 		int prevScanEnd = start;
 		int currentScan = start;
@@ -129,16 +130,6 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 		{
 			super.addToken(segmentChars, start, end, tokenType, documentSegmentStartOffset, false);
 		}
-	}
-
-	/**
-	 * Creates a matcher for scanning for URLs.
-	 * @param input the input string to scan.
-	 * @return a new matcher.
-	 */
-	private static Matcher createURLMatcherFor(String input)
-	{
-		return URL_PATTERN.matcher(input);
 	}
 
 }

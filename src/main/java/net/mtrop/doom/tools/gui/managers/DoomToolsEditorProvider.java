@@ -215,20 +215,14 @@ public final class DoomToolsEditorProvider
 			add(Charset.forName("ASCII"));
 			add(Charset.forName("UTF-8"));
 			add(Charset.forName("UTF-16"));
-		}
-    });
-    
-    private static final Set<Charset> OTHER_CHARSETS = Collections.unmodifiableSet(new TreeSet<Charset>() 
-    {
-		private static final long serialVersionUID = -6067321778091486285L;
-		{
-			for (Charset cs : Charset.availableCharsets().values())
-			{
-				if (COMMON_CHARSETS.contains(cs))
-					continue;
-				else
-					add(cs);
-			}
+			add(Charset.forName("ISO-8859-1")); // Web ISO Standard
+			add(Charset.forName("CP437"));      // IBM PC Extended ASCII
+			add(Charset.forName("GB18030"));    // Simplified Chinese
+			add(Charset.forName("Big5"));       // Traditional Chinese
+			add(Charset.forName("Shift-JIS"));  // Japanese
+			add(Charset.forName("EUC-JP"));     // Japanese
+			add(Charset.forName("EUC-KR"));     // Korean
+			add(Charset.forName("KOI8-R"));     // Russian
 		}
     });
     
@@ -320,14 +314,6 @@ public final class DoomToolsEditorProvider
 	public Set<Charset> getAvailableCommonCharsets()
 	{
 		return COMMON_CHARSETS;
-	}
-	
-	/**
-	 * @return the uncommon charsets.
-	 */
-	public Set<Charset> getAvailableOtherCharsets()
-	{
-		return OTHER_CHARSETS;
 	}
 	
 	/**

@@ -9,6 +9,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
@@ -76,7 +77,7 @@ public class FindReplacePanel extends JPanel
 		this.wholeWord = checkBoxField(checkBox(updateHandler));
 		this.matchCase = checkBoxField(checkBox(updateHandler));
 		this.regularExpression = checkBoxField(checkBox(updateHandler));
-		this.wrapSearch = checkBoxField(checkBox(updateHandler));
+		this.wrapSearch = checkBoxField(checkBox(true, updateHandler));
 		
 		this.currentTarget = null;
 		this.context = null;
@@ -103,13 +104,14 @@ public class FindReplacePanel extends JPanel
 				updateSearchContext();
 			}
 		});
-		JRadioButton selectedButton = radio(false, (c, e) -> {
+		JRadioButton selectedButton = SwingUtils.apply(radio(false, (c, e) -> {
 			if (c.isSelected())
 			{
 				selectionOnly = true;
 				updateSearchContext();
 			}
-		});
+		}), (b) -> b.setEnabled(false));
+		
 		group(forwardButton, backButton);
 		group(allButton, selectedButton);
 		
