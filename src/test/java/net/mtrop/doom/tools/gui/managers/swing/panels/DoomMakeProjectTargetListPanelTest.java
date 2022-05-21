@@ -3,9 +3,9 @@ package net.mtrop.doom.tools.gui.managers.swing.panels;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
-import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeProjectTargetListPanel;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
+import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectTargetListPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;

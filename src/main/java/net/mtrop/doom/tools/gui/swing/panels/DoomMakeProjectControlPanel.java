@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.apps.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

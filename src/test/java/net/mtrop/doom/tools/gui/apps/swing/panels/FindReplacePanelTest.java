@@ -5,6 +5,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.frame;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.swing.panels.FindReplacePanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
 public final class FindReplacePanelTest

@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.apps.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels;
 
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.SearchContext;

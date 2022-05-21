@@ -1,11 +1,11 @@
-package net.mtrop.doom.tools.gui.apps.swing;
+package net.mtrop.doom.tools.gui.swing;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
-import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 

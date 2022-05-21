@@ -8,7 +8,6 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.Theme;
-import net.mtrop.doom.tools.gui.apps.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 

@@ -20,7 +20,6 @@ import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
@@ -46,8 +45,9 @@ import net.mtrop.doom.tools.struct.HTMLWriter.Options;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
-import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
+
+import static org.fife.ui.rsyntaxtextarea.SyntaxConstants.*;
 
 
 /**
@@ -64,66 +64,77 @@ public final class DoomToolsEditorProvider
 	
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomToolsEditorProvider> INSTANCE = new SingletonProvider<>(() -> new DoomToolsEditorProvider());
+
+    // For specific files.
+    private static final Map<String, String> FILENAME_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
+    {
+		private static final long serialVersionUID = -2713345708437194651L;
+		{
+			put("doommake.script",      SYNTAX_STYLE_DOOMMAKE);
+			put("doommake-lib.script",  SYNTAX_STYLE_DOOMMAKE);
+			put("doommake-init.script", SYNTAX_STYLE_DOOMMAKE);
+			put("dockerfile",           SYNTAX_STYLE_DOCKERFILE);
+			put("makefile",             SYNTAX_STYLE_MAKEFILE);
+			put("hosts",                SYNTAX_STYLE_HOSTS);
+		}
+    };
     
     private static final Map<String, String> EXTENSION_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
     {
 		private static final long serialVersionUID = -1713345708437194651L;
 		{
-			put("asc",        SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT);
-			put("as2",        SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT);
-			put("as3",        SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT);
-			put("asm",        SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86);
-			put("bbc",        SyntaxConstants.SYNTAX_STYLE_BBCODE);
-			put("c",          SyntaxConstants.SYNTAX_STYLE_C);
-			put("cljs",       SyntaxConstants.SYNTAX_STYLE_CLOJURE);
-			put("cpp",        SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
-			put("cs",         SyntaxConstants.SYNTAX_STYLE_CSHARP);
-			put("css",        SyntaxConstants.SYNTAX_STYLE_CSS);
-			put("csv",        SyntaxConstants.SYNTAX_STYLE_CSV);
-			put("d",          SyntaxConstants.SYNTAX_STYLE_D);
-			put("dockerfile", SyntaxConstants.SYNTAX_STYLE_DOCKERFILE);
-			put("dart",       SyntaxConstants.SYNTAX_STYLE_DART);
-			put("dtd",        SyntaxConstants.SYNTAX_STYLE_DTD);
-			put("fortran",    SyntaxConstants.SYNTAX_STYLE_FORTRAN);
-			put("go",         SyntaxConstants.SYNTAX_STYLE_GO);
-			put("groovy",     SyntaxConstants.SYNTAX_STYLE_GROOVY);
-			put("hosts",      SyntaxConstants.SYNTAX_STYLE_HOSTS);
-			put("htaccess",   SyntaxConstants.SYNTAX_STYLE_HTACCESS);
-			put("htm",        SyntaxConstants.SYNTAX_STYLE_HTML);
-			put("html",       SyntaxConstants.SYNTAX_STYLE_HTML);
-			put("ini",        SyntaxConstants.SYNTAX_STYLE_INI);
-			put("java",       SyntaxConstants.SYNTAX_STYLE_JAVA);
-			put("js",         SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-			put("json",       SyntaxConstants.SYNTAX_STYLE_JSON);
-			put("jsp",        SyntaxConstants.SYNTAX_STYLE_JSP);
-			put("kt",         SyntaxConstants.SYNTAX_STYLE_KOTLIN);
-			put("tex",        SyntaxConstants.SYNTAX_STYLE_LATEX);
-			put("lss",        SyntaxConstants.SYNTAX_STYLE_LESS);
-			put("lsp",        SyntaxConstants.SYNTAX_STYLE_LISP);
-			put("lua",        SyntaxConstants.SYNTAX_STYLE_LUA);
-			put("makefile",   SyntaxConstants.SYNTAX_STYLE_MAKEFILE);
-			put("md",         SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-			put("mxml",       SyntaxConstants.SYNTAX_STYLE_MXML);
-			put("nsis",       SyntaxConstants.SYNTAX_STYLE_NSIS);
-			put("pl",         SyntaxConstants.SYNTAX_STYLE_PERL);
-			put("php",        SyntaxConstants.SYNTAX_STYLE_PHP);
-			put("properties", SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
-			put("py",         SyntaxConstants.SYNTAX_STYLE_PYTHON);
-			put("rb",         SyntaxConstants.SYNTAX_STYLE_RUBY);
-			put("sas",        SyntaxConstants.SYNTAX_STYLE_SAS);
-			put("sca",        SyntaxConstants.SYNTAX_STYLE_SCALA);
-			put("sql",        SyntaxConstants.SYNTAX_STYLE_SQL);
-			put("tcl",        SyntaxConstants.SYNTAX_STYLE_TCL);
-			put("txt",        SyntaxConstants.SYNTAX_STYLE_NONE);
-			put("ts",         SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
-			put("sh",         SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL);
-			put("vb",         SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC);
-			put("vbs",        SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC);
-			put("bat",        SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH);
-			put("cmd",        SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH);
-			put("xml",        SyntaxConstants.SYNTAX_STYLE_XML);
-			put("yml",        SyntaxConstants.SYNTAX_STYLE_YAML);
-			put("yaml",       SyntaxConstants.SYNTAX_STYLE_YAML);
+			put("asc",        SYNTAX_STYLE_ACTIONSCRIPT);
+			put("as2",        SYNTAX_STYLE_ACTIONSCRIPT);
+			put("as3",        SYNTAX_STYLE_ACTIONSCRIPT);
+			put("asm",        SYNTAX_STYLE_ASSEMBLER_X86);
+			put("bbc",        SYNTAX_STYLE_BBCODE);
+			put("c",          SYNTAX_STYLE_C);
+			put("cljs",       SYNTAX_STYLE_CLOJURE);
+			put("cpp",        SYNTAX_STYLE_CPLUSPLUS);
+			put("cs",         SYNTAX_STYLE_CSHARP);
+			put("css",        SYNTAX_STYLE_CSS);
+			put("csv",        SYNTAX_STYLE_CSV);
+			put("d",          SYNTAX_STYLE_D);
+			put("dart",       SYNTAX_STYLE_DART);
+			put("dtd",        SYNTAX_STYLE_DTD);
+			put("fortran",    SYNTAX_STYLE_FORTRAN);
+			put("go",         SYNTAX_STYLE_GO);
+			put("groovy",     SYNTAX_STYLE_GROOVY);
+			put("htaccess",   SYNTAX_STYLE_HTACCESS);
+			put("htm",        SYNTAX_STYLE_HTML);
+			put("html",       SYNTAX_STYLE_HTML);
+			put("ini",        SYNTAX_STYLE_INI);
+			put("java",       SYNTAX_STYLE_JAVA);
+			put("js",         SYNTAX_STYLE_JAVASCRIPT);
+			put("json",       SYNTAX_STYLE_JSON);
+			put("jsp",        SYNTAX_STYLE_JSP);
+			put("kt",         SYNTAX_STYLE_KOTLIN);
+			put("tex",        SYNTAX_STYLE_LATEX);
+			put("lss",        SYNTAX_STYLE_LESS);
+			put("lsp",        SYNTAX_STYLE_LISP);
+			put("lua",        SYNTAX_STYLE_LUA);
+			put("md",         SYNTAX_STYLE_MARKDOWN);
+			put("mxml",       SYNTAX_STYLE_MXML);
+			put("nsis",       SYNTAX_STYLE_NSIS);
+			put("pl",         SYNTAX_STYLE_PERL);
+			put("php",        SYNTAX_STYLE_PHP);
+			put("properties", SYNTAX_STYLE_PROPERTIES_FILE);
+			put("py",         SYNTAX_STYLE_PYTHON);
+			put("rb",         SYNTAX_STYLE_RUBY);
+			put("sas",        SYNTAX_STYLE_SAS);
+			put("sca",        SYNTAX_STYLE_SCALA);
+			put("sql",        SYNTAX_STYLE_SQL);
+			put("tcl",        SYNTAX_STYLE_TCL);
+			put("txt",        SYNTAX_STYLE_NONE);
+			put("ts",         SYNTAX_STYLE_TYPESCRIPT);
+			put("sh",         SYNTAX_STYLE_UNIX_SHELL);
+			put("vb",         SYNTAX_STYLE_VISUAL_BASIC);
+			put("vbs",        SYNTAX_STYLE_VISUAL_BASIC);
+			put("bat",        SYNTAX_STYLE_WINDOWS_BATCH);
+			put("cmd",        SYNTAX_STYLE_WINDOWS_BATCH);
+			put("xml",        SYNTAX_STYLE_XML);
+			put("yml",        SYNTAX_STYLE_YAML);
+			put("yaml",       SYNTAX_STYLE_YAML);
 			
 			// Custom
 			put("dh",         SYNTAX_STYLE_DECOHACK);
@@ -141,7 +152,7 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = -2069191041359249343L;
 		{
-			put("Plain Text",         SyntaxConstants.SYNTAX_STYLE_NONE);
+			put("Plain Text",         SYNTAX_STYLE_NONE);
 			put("DECOHack",           SYNTAX_STYLE_DECOHACK);
 			put("DoomMake",           SYNTAX_STYLE_DOOMMAKE);
 			put("RookScript",         SYNTAX_STYLE_ROOKSCRIPT);
@@ -154,54 +165,54 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = -2069191041359249342L;
 		{
-			put("ActionScript",       SyntaxConstants.SYNTAX_STYLE_ACTIONSCRIPT);
-			put("Assembler (x86)",    SyntaxConstants.SYNTAX_STYLE_ASSEMBLER_X86);
-			put("BBCode",             SyntaxConstants.SYNTAX_STYLE_BBCODE);
-			put("C",                  SyntaxConstants.SYNTAX_STYLE_C);
-			put("Clojure",            SyntaxConstants.SYNTAX_STYLE_CLOJURE);
-			put("C++",                SyntaxConstants.SYNTAX_STYLE_CPLUSPLUS);
-			put("C#",                 SyntaxConstants.SYNTAX_STYLE_CSHARP);
-			put("CSS",                SyntaxConstants.SYNTAX_STYLE_CSS);
-			put("CSV",                SyntaxConstants.SYNTAX_STYLE_CSV);
-			put("D",                  SyntaxConstants.SYNTAX_STYLE_D);
-			put("Dockerfile",         SyntaxConstants.SYNTAX_STYLE_DOCKERFILE);
-			put("Dart",               SyntaxConstants.SYNTAX_STYLE_DART);
-			put("DTD",                SyntaxConstants.SYNTAX_STYLE_DTD);
-			put("Fortran",            SyntaxConstants.SYNTAX_STYLE_FORTRAN);
-			put("Golang",             SyntaxConstants.SYNTAX_STYLE_GO);
-			put("Groovy",             SyntaxConstants.SYNTAX_STYLE_GROOVY);
-			put("Etc/Hosts",          SyntaxConstants.SYNTAX_STYLE_HOSTS);
-			put("HTAccess",           SyntaxConstants.SYNTAX_STYLE_HTACCESS);
-			put("HTML",               SyntaxConstants.SYNTAX_STYLE_HTML);
-			put("INI",                SyntaxConstants.SYNTAX_STYLE_INI);
-			put("Java",               SyntaxConstants.SYNTAX_STYLE_JAVA);
-			put("JavaScript",         SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT);
-			put("JSON",               SyntaxConstants.SYNTAX_STYLE_JSON);
-			put("JSP",                SyntaxConstants.SYNTAX_STYLE_JSP);
-			put("Kotlin",             SyntaxConstants.SYNTAX_STYLE_KOTLIN);
-			put("LaTeX",              SyntaxConstants.SYNTAX_STYLE_LATEX);
-			put("LESS",               SyntaxConstants.SYNTAX_STYLE_LESS);
-			put("Lisp",               SyntaxConstants.SYNTAX_STYLE_LISP);
-			put("Lua",                SyntaxConstants.SYNTAX_STYLE_LUA);
-			put("Makefile",           SyntaxConstants.SYNTAX_STYLE_MAKEFILE);
-			put("Markdown",           SyntaxConstants.SYNTAX_STYLE_MARKDOWN);
-			put("MXML",               SyntaxConstants.SYNTAX_STYLE_MXML);
-			put("Nullsoft Installer", SyntaxConstants.SYNTAX_STYLE_NSIS);
-			put("Perl",               SyntaxConstants.SYNTAX_STYLE_PERL);
-			put("PHP",                SyntaxConstants.SYNTAX_STYLE_PHP);
-			put("Properties",         SyntaxConstants.SYNTAX_STYLE_PROPERTIES_FILE);
-			put("Python",             SyntaxConstants.SYNTAX_STYLE_PYTHON);
-			put("Ruby",               SyntaxConstants.SYNTAX_STYLE_RUBY);
-			put("SAS",                SyntaxConstants.SYNTAX_STYLE_SAS);
-			put("Scala",              SyntaxConstants.SYNTAX_STYLE_SCALA);
-			put("SQL",                SyntaxConstants.SYNTAX_STYLE_SQL);
-			put("TCL",                SyntaxConstants.SYNTAX_STYLE_TCL);
-			put("TypeScript",         SyntaxConstants.SYNTAX_STYLE_TYPESCRIPT);
-			put("Bash",               SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL);
-			put("VisualBasic",        SyntaxConstants.SYNTAX_STYLE_VISUAL_BASIC);
-			put("CMD/BAT",            SyntaxConstants.SYNTAX_STYLE_WINDOWS_BATCH);
-			put("XML",                SyntaxConstants.SYNTAX_STYLE_XML);
-			put("YAML",               SyntaxConstants.SYNTAX_STYLE_YAML);
+			put("ActionScript",       SYNTAX_STYLE_ACTIONSCRIPT);
+			put("Assembler (x86)",    SYNTAX_STYLE_ASSEMBLER_X86);
+			put("BBCode",             SYNTAX_STYLE_BBCODE);
+			put("C",                  SYNTAX_STYLE_C);
+			put("Clojure",            SYNTAX_STYLE_CLOJURE);
+			put("C++",                SYNTAX_STYLE_CPLUSPLUS);
+			put("C#",                 SYNTAX_STYLE_CSHARP);
+			put("CSS",                SYNTAX_STYLE_CSS);
+			put("CSV",                SYNTAX_STYLE_CSV);
+			put("D",                  SYNTAX_STYLE_D);
+			put("Dockerfile",         SYNTAX_STYLE_DOCKERFILE);
+			put("Dart",               SYNTAX_STYLE_DART);
+			put("DTD",                SYNTAX_STYLE_DTD);
+			put("Fortran",            SYNTAX_STYLE_FORTRAN);
+			put("Golang",             SYNTAX_STYLE_GO);
+			put("Groovy",             SYNTAX_STYLE_GROOVY);
+			put("Etc/Hosts",          SYNTAX_STYLE_HOSTS);
+			put("HTAccess",           SYNTAX_STYLE_HTACCESS);
+			put("HTML",               SYNTAX_STYLE_HTML);
+			put("INI",                SYNTAX_STYLE_INI);
+			put("Java",               SYNTAX_STYLE_JAVA);
+			put("JavaScript",         SYNTAX_STYLE_JAVASCRIPT);
+			put("JSON",               SYNTAX_STYLE_JSON);
+			put("JSP",                SYNTAX_STYLE_JSP);
+			put("Kotlin",             SYNTAX_STYLE_KOTLIN);
+			put("LaTeX",              SYNTAX_STYLE_LATEX);
+			put("LESS",               SYNTAX_STYLE_LESS);
+			put("Lisp",               SYNTAX_STYLE_LISP);
+			put("Lua",                SYNTAX_STYLE_LUA);
+			put("Makefile",           SYNTAX_STYLE_MAKEFILE);
+			put("Markdown",           SYNTAX_STYLE_MARKDOWN);
+			put("MXML",               SYNTAX_STYLE_MXML);
+			put("Nullsoft Installer", SYNTAX_STYLE_NSIS);
+			put("Perl",               SYNTAX_STYLE_PERL);
+			put("PHP",                SYNTAX_STYLE_PHP);
+			put("Properties",         SYNTAX_STYLE_PROPERTIES_FILE);
+			put("Python",             SYNTAX_STYLE_PYTHON);
+			put("Ruby",               SYNTAX_STYLE_RUBY);
+			put("SAS",                SYNTAX_STYLE_SAS);
+			put("Scala",              SYNTAX_STYLE_SCALA);
+			put("SQL",                SYNTAX_STYLE_SQL);
+			put("TCL",                SYNTAX_STYLE_TCL);
+			put("TypeScript",         SYNTAX_STYLE_TYPESCRIPT);
+			put("Bash",               SYNTAX_STYLE_UNIX_SHELL);
+			put("VisualBasic",        SYNTAX_STYLE_VISUAL_BASIC);
+			put("CMD/BAT",            SYNTAX_STYLE_WINDOWS_BATCH);
+			put("XML",                SYNTAX_STYLE_XML);
+			put("YAML",               SYNTAX_STYLE_YAML);
 		}
     });
     
@@ -222,7 +233,7 @@ public final class DoomToolsEditorProvider
 			add(Charset.forName("Shift-JIS"));  // Japanese
 			add(Charset.forName("EUC-JP"));     // Japanese
 			add(Charset.forName("EUC-KR"));     // Korean
-			add(Charset.forName("KOI8-R"));     // Russian
+			add(Charset.forName("KOI8-R"));     // Cyrillic
 		}
     });
     
@@ -230,11 +241,11 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = 1638202185490860804L;
 		{
-			put(SYNTAX_STYLE_WADMERGE, () -> new WadMergeCompletionProvider());
+			put(SYNTAX_STYLE_WADMERGE,   () -> new WadMergeCompletionProvider());
 			put(SYNTAX_STYLE_ROOKSCRIPT, () -> new RookScriptCompletionProvider());
-			put(SYNTAX_STYLE_WADSCRIPT, () -> new WadScriptCompletionProvider());
-			put(SYNTAX_STYLE_DOOMMAKE, () -> new DoomMakeCompletionProvider());
-			put(SYNTAX_STYLE_DECOHACK, () -> new DecoHackCompletionProvider());
+			put(SYNTAX_STYLE_WADSCRIPT,  () -> new WadScriptCompletionProvider());
+			put(SYNTAX_STYLE_DOOMMAKE,   () -> new DoomMakeCompletionProvider());
+			put(SYNTAX_STYLE_DECOHACK,   () -> new DecoHackCompletionProvider());
 		}
     });
     
@@ -266,17 +277,16 @@ public final class DoomToolsEditorProvider
 		AbstractTokenMakerFactory tokenMakers = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
 		FoldParserManager foldManager = FoldParserManager.get();
 		
-		tokenMakers.putMapping(SYNTAX_STYLE_DOOMMAKE, RookScriptTokenMaker.class.getName());
-		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT, RookScriptTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DOOMMAKE,   RookScriptTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT,  RookScriptTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_ROOKSCRIPT, RookScriptTokenMaker.class.getName());
-
-		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE, WadMergeTokenMaker.class.getName());
-		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK, DecoHackTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE,   WadMergeTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK,   DecoHackTokenMaker.class.getName());
 		
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE, new CurlyFoldParser());
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE,   new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT,  new CurlyFoldParser());
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_ROOKSCRIPT, new CurlyFoldParser());
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_DECOHACK, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_DECOHACK,   new CurlyFoldParser());
 		
 		initLanguages = true;
 	}
@@ -323,15 +333,17 @@ public final class DoomToolsEditorProvider
 	 */
 	public String getStyleByFile(File file)
 	{
-		String ext = FileUtils.getFileExtension(file);
-		if (ObjectUtils.isEmpty(ext))
-			ext = file.getName();
-		
 		String styleName;
-		if ((styleName = EXTENSION_TO_STYLE_MAP.get(ext)) == null)
-			styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
 
-		return styleName;
+		String fileName = file.getName();
+		if ((styleName = FILENAME_TO_STYLE_MAP.get(fileName)) != null)
+			return styleName;
+		
+		String ext = FileUtils.getFileExtension(fileName);
+		if ((styleName = EXTENSION_TO_STYLE_MAP.get(ext)) != null)
+			return styleName;
+
+		return SYNTAX_STYLE_NONE;
 	}
 
 	/**
@@ -350,82 +362,6 @@ public final class DoomToolsEditorProvider
 		return FACTORY.get(styleName);
 	}
 
-	/* ==================================================================== */
-
-	private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages) throws IOException
-	{
-		html.push("ul");
-		for (TypeUsage tusage : typeUsages)
-		{
-			html.push("li")
-				.push("span")
-					.tag("strong", tusage.getType() != null ? tusage.getType().name() : "ANY")
-					.tag("em", tusage.getSubType() != null ? ":" + tusage.getSubType() : "")
-					.html(" &mdash; ").text(tusage.getDescription())
-				.pop()
-			.pop();
-		}
-		html.pop();
-	}
-	
-	private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage) throws IOException
-	{
-		// Signature.
-		html.push("div");
-		html.push("strong");
-		html.text((namespace != null ? namespace.toLowerCase() + "::" : "") + name);
-		html.text(" (");
-		boolean first = true;
-		for (ParameterUsage pusage : usage.getParameterInstructions())
-		{
-			if (!first)
-				html.text(", ");
-			html.tag("em", pusage.getParameterName());
-			first = false;
-		}
-		html.text(")");
-		html.pop();
-		html.pop();
-
-		// Full instructions.
-		html.push("div").text(usage.getInstructions()).pop();
-		
-		// Parameters
-		if (!usage.getParameterInstructions().isEmpty())
-		{
-			html.push("div");
-			for (ParameterUsage pusage : usage.getParameterInstructions())
-			{
-				html.push("div")
-					.tag("strong", pusage.getParameterName())
-				.pop();
-				
-				writeFunctionTypeUsageHTML(html, pusage.getTypes());			
-			}
-			html.pop();
-		}
-		
-		html.push("div")
-			.tag("strong", "Returns:")
-		.pop();
-	
-		writeFunctionTypeUsageHTML(html, usage.getReturnTypes());			
-	}
-	
-	private static String getFunctionDescriptionHTML(String namespace, ScriptFunctionType type)
-	{
-		StringWriter out = new StringWriter(1024);
-		try (HTMLWriter html = new HTMLWriter(out, Options.SLASHES_IN_SINGLE_TAGS)) 
-		{
-			html.push("html").push("body");
-			writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
-			html.end();
-		} catch (IOException e) {
-			// Do nothing - shouldn't be thrown.
-		}
-		return out.toString();
-	}
-	
 	/* ==================================================================== */
 
 	
@@ -599,20 +535,6 @@ public final class DoomToolsEditorProvider
 		private final String functionParameterText;
 		private final String summaryText;
 
-		private static String getParameterSignature(ScriptFunctionType.Usage usage)
-		{
-			StringBuilder sb = new StringBuilder();
-			boolean first = true;
-			for (ParameterUsage pusage : usage.getParameterInstructions())
-			{
-				if (!first)
-					sb.append(", ");
-				sb.append(pusage.getParameterName());
-				first = false;
-			}
-			return sb.toString();
-		}
-		
 		private RookScriptFunctionCompletion(CompletionProvider parent, String namespace, ScriptFunctionType type) 
 		{
 			super(parent);
@@ -650,6 +572,94 @@ public final class DoomToolsEditorProvider
 		public String toString() 
 		{
 			return getInputText() + " - " + instructions;
+		}
+
+		private static String getParameterSignature(ScriptFunctionType.Usage usage)
+		{
+			StringBuilder sb = new StringBuilder();
+			boolean first = true;
+			for (ParameterUsage pusage : usage.getParameterInstructions())
+			{
+				if (!first)
+					sb.append(", ");
+				sb.append(pusage.getParameterName());
+				first = false;
+			}
+			return sb.toString();
+		}
+
+		private static String getFunctionDescriptionHTML(String namespace, ScriptFunctionType type)
+		{
+			StringWriter out = new StringWriter(1024);
+			try (HTMLWriter html = new HTMLWriter(out, Options.SLASHES_IN_SINGLE_TAGS)) 
+			{
+				html.push("html").push("body");
+				writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
+				html.end();
+			} catch (IOException e) {
+				// Do nothing - shouldn't be thrown.
+			}
+			return out.toString();
+		}
+
+		private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages) throws IOException
+		{
+			html.push("ul");
+			for (TypeUsage tusage : typeUsages)
+			{
+				html.push("li")
+					.push("span")
+						.tag("strong", tusage.getType() != null ? tusage.getType().name() : "ANY")
+						.tag("em", tusage.getSubType() != null ? ":" + tusage.getSubType() : "")
+						.html(" &mdash; ").text(tusage.getDescription())
+					.pop()
+				.pop();
+			}
+			html.pop();
+		}
+
+		private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage) throws IOException
+		{
+			// Signature.
+			html.push("div");
+			html.push("strong");
+			html.text((namespace != null ? namespace.toLowerCase() + "::" : "") + name);
+			html.text(" (");
+			boolean first = true;
+			for (ParameterUsage pusage : usage.getParameterInstructions())
+			{
+				if (!first)
+					html.text(", ");
+				html.tag("em", pusage.getParameterName());
+				first = false;
+			}
+			html.text(")");
+			html.pop();
+			html.pop();
+		
+			// Full instructions.
+			html.push("div").text(usage.getInstructions()).pop();
+			
+			// Parameters
+			if (!usage.getParameterInstructions().isEmpty())
+			{
+				html.push("div");
+				for (ParameterUsage pusage : usage.getParameterInstructions())
+				{
+					html.push("div")
+						.tag("strong", pusage.getParameterName())
+					.pop();
+					
+					writeFunctionTypeUsageHTML(html, pusage.getTypes());			
+				}
+				html.pop();
+			}
+			
+			html.push("div")
+				.tag("strong", "Returns:")
+			.pop();
+		
+			writeFunctionTypeUsageHTML(html, usage.getReturnTypes());			
 		}
 		
 	}

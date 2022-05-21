@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.apps.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -107,6 +107,7 @@ public class MultiFileEditorPanel extends JPanel
 		String ACTION_REDO = "redo";
 		String ACTION_GOTO = "goto";
 		String ACTION_FIND = "find";
+		String ACTION_REVEAL = "reveal";
 	}
 	
 	/**
@@ -248,6 +249,8 @@ public class MultiFileEditorPanel extends JPanel
 	private Action gotoAction;
 	/** Find Action */
 	private Action findAction;
+	/** Reveal Action */
+	private Action revealAction;
 
 	/** Change encoding item. */
 	private MenuNode changeEncodingMenuItem;
@@ -326,30 +329,6 @@ public class MultiFileEditorPanel extends JPanel
 			});
 		});
 		
-		final MenuNode[] encodingNodes = createEditorEncodingMenuItems();
-		final MenuNode[] languageNodes = createEditorStyleMenuItems();
-		final MenuNode[] spacingNodes = createEditorSpacingMenuItems();
-		final MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
-		final MenuNode[] editorFileNodes = createEditorCurrentFileMenuItems();
-		
-		this.filePathLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(editorFileNodes));
-		});
-		this.syntaxStyleLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(languageNodes));
-		});
-		this.encodingModeLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(encodingNodes));
-		});
-		this.spacingModeLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(spacingNodes));
-		});
-		this.lineEndingLabel = apply(label(" "), (e) -> {
-			e.setComponentPopupMenu(popupMenu(lineEndingNodes));
-		});
-		this.caretPositionLabel = label(" ");
-		this.findReplacePanel = new FindReplacePanel();
-		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
 		this.saveAsAction = utils.createActionFromLanguageKey("texteditor.action.saveas", (event) -> saveCurrentEditorAs());
 		this.saveAllAction = utils.createActionFromLanguageKey("texteditor.action.saveall", (event) -> saveAllEditors());
@@ -368,6 +347,14 @@ public class MultiFileEditorPanel extends JPanel
 		this.gotoAction = utils.createActionFromLanguageKey("texteditor.action.goto", (event) -> goToLine());
 		this.findAction = utils.createActionFromLanguageKey("texteditor.action.find", (event) -> openFindDialog());
 		
+		this.revealAction = utils.createActionFromLanguageKey("texteditor.action.reveal", (event) -> openCurrentEditorFileInSystem());
+		
+		final MenuNode[] encodingNodes = createEditorEncodingMenuItems();
+		final MenuNode[] languageNodes = createEditorStyleMenuItems();
+		final MenuNode[] spacingNodes = createEditorSpacingMenuItems();
+		final MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
+		final MenuNode[] editorFileNodes = createEditorCurrentFileMenuItems();
+		
 		this.unifiedActionMap = apply(new HashMap<>(), (map) -> {
 			map.put(ActionNames.ACTION_SAVE, saveAction);
 			map.put(ActionNames.ACTION_SAVE_AS, saveAsAction);
@@ -384,7 +371,26 @@ public class MultiFileEditorPanel extends JPanel
 			map.put(ActionNames.ACTION_REDO, redoAction);
 			map.put(ActionNames.ACTION_GOTO, gotoAction);
 			map.put(ActionNames.ACTION_FIND, findAction);
+			map.put(ActionNames.ACTION_REVEAL, revealAction);
 		});
+		
+		this.filePathLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(editorFileNodes));
+		});
+		this.syntaxStyleLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(languageNodes));
+		});
+		this.encodingModeLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(encodingNodes));
+		});
+		this.spacingModeLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(spacingNodes));
+		});
+		this.lineEndingLabel = apply(label(" "), (e) -> {
+			e.setComponentPopupMenu(popupMenu(lineEndingNodes));
+		});
+		this.caretPositionLabel = label(" ");
+		this.findReplacePanel = new FindReplacePanel();
 		
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
@@ -888,6 +894,7 @@ public class MultiFileEditorPanel extends JPanel
 		selectAllAction.setEnabled(editorPresent);
 		gotoAction.setEnabled(editorPresent);
 		findAction.setEnabled(editorPresent);
+		revealAction.setEnabled(editorPresent && currentEditor.contentSourceFile != null);
 	}
 	
 	private void updateEncodingLabel()
@@ -1079,16 +1086,6 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
-	 * Opens the an editor's file in system explorer. 
-	 */
-	private static boolean openEditorFileInSystem(EditorHandle handle)
-	{
-		if (handle.contentSourceFile == null)
-			return false;
-		return Common.openInSystemBrowser(handle.contentSourceFile);
-	}
-	
-	/**
 	 * Clears all highlights/markers on every editor.
 	 */
 	private void clearAllHighlights()
@@ -1158,7 +1155,7 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode[] createEditorCurrentFileMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("texteditor.action.system", (c, e) -> openCurrentEditorFileInSystem())
+			utils.createItemFromLanguageKey("texteditor.action.reveal", revealAction)
 		);
 	}
 	
@@ -1252,6 +1249,16 @@ public class MultiFileEditorPanel extends JPanel
 			}
 		});
 		findModal.open();
+	}
+
+	/**
+	 * Opens the an editor's file in system explorer. 
+	 */
+	private static boolean openEditorFileInSystem(EditorHandle handle)
+	{
+		if (handle.contentSourceFile == null)
+			return false;
+		return Common.openInSystemBrowser(handle.contentSourceFile);
 	}
 
 	// Sets editor view settings by scanning content.
@@ -1418,6 +1425,8 @@ public class MultiFileEditorPanel extends JPanel
 		/** Current line ending. */
 		private LineEnding currentLineEnding;
 		
+		/** Current reveal location action. */
+		private Action fileRevealAction;
 		/** Current AutoCompletion engine. */
 		private AutoCompletion currentAutoCompletion;
 
@@ -1438,6 +1447,8 @@ public class MultiFileEditorPanel extends JPanel
 			this.currentStyle = styleName;
 			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
 
+			this.fileRevealAction = actionItem(language.getText("texteditor.action.reveal"), (e) -> openEditorFileInSystem(this));
+			
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
 			textArea.setSyntaxEditingStyle(styleName);
@@ -1462,18 +1473,20 @@ public class MultiFileEditorPanel extends JPanel
 					onChange();
 				}
 			});
-			
+			updateActions();
 		}
 		
 		private EditorHandle(File contentSourceFile, Charset sourceCharset, String styleName, RSyntaxTextArea textArea)
 		{
 			this(contentSourceFile.getName(), sourceCharset, styleName, textArea);
+			
 			this.contentSourceFile = contentSourceFile;
 			this.contentCharset = sourceCharset;
 			this.contentLastModified = contentSourceFile.lastModified();
 			this.contentSourceFileLastModified = contentSourceFile.lastModified();
 			this.editorTab.setTabIcon(savedIcon);
 			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
+			updateActions();
 		}
 
 		/**
@@ -1553,6 +1566,11 @@ public class MultiFileEditorPanel extends JPanel
 			return contentLastModified > contentSourceFileLastModified;
 		}
 		
+		private void updateActions()
+		{
+			fileRevealAction.setEnabled(contentSourceFile != null);
+		}
+		
 		// Applies the auto-complete.
 		private void applyAutoComplete(String styleName)
 		{
@@ -1571,6 +1589,7 @@ public class MultiFileEditorPanel extends JPanel
 			editorTab.setTabTitle(path.getName());
 			contentSourceFile = path;
 			contentSourceFileLastModified = path.lastModified();
+			updateActions();
 		}
 		
 		private void onChange()
@@ -1595,27 +1614,17 @@ public class MultiFileEditorPanel extends JPanel
 		private EditorTab(Icon icon, String title, ComponentActionHandler<JButton> closeHandler)
 		{
 			this.titleLabel = label(JLabel.LEADING, icon, title);
+			
 			this.closeButton = apply(button(icons.getImage("close-icon.png"), closeHandler), (b) -> {
 				b.setBorder(null);
 				b.setOpaque(false);
 			});
-			
-			this.titleLabel.setComponentPopupMenu(popupMenu(
-				utils.createItemFromLanguageKey("texteditor.action.system", (c, e) -> openInSystem())
-			));
 			
 			setOpaque(false);
 			containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
 				node(titleLabel),
 				node(closeButton)
 			);
-		}
-		
-		private void openInSystem()
-		{
-			EditorHandle handle = allEditors.get(this);
-			if (handle != null)
-				openEditorFileInSystem(handle);
 		}
 		
 		private void setTabIcon(Icon icon)
