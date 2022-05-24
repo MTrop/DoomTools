@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public enum DEHActionPointerMBF implements DEHActionPointer
 {
+	// TODO: Finish docs!!
+
 	// MBF Thing Action Pointers
 	DETONATE        ("Detonate"),
 	MUSHROOM        ("Mushroom",   ANGLEFIXED, FIXED),

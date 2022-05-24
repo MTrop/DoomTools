@@ -31,6 +31,8 @@ import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage.Parameter;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
@@ -246,9 +248,11 @@ public final class DecoHackMain
 							options.stdout.print("# ");
 							options.stdout.print(pointer.getType().name());
 							options.stdout.println(pointer.isWeapon() ? " Weapon Pointer" : " Thing Pointer");
+							options.stdout.println();
 							firstCategory = false;
 						}
 						
+						// Print pointer and usage.
 						options.stdout.print("A_");
 						options.stdout.print(pointer.getMnemonic());
 						options.stdout.print("(");
@@ -259,6 +263,26 @@ public final class DecoHackMain
 								options.stdout.print(", ");
 						}
 						options.stdout.println(")");
+						
+						Usage usage = pointer.getUsage();
+						for (String instruction : usage.getInstructions())
+						{
+							options.stdout.print("    ");
+							options.stdout.println(instruction);
+						}
+						for (Parameter parameter : usage.getParameters())
+						{
+							options.stdout.print("    ");
+							options.stdout.print(parameter.getName());
+							options.stdout.println(" (" + parameter.getType().name().toLowerCase() + ")");
+							for (String instruction : parameter.getInstructions())
+							{
+								options.stdout.print("        ");
+								options.stdout.println(instruction);
+							}
+							options.stdout.println();
+						}
+						options.stdout.println();
 					}
 
 					prev = pointer;

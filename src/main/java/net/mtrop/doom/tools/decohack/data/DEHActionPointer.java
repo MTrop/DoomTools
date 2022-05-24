@@ -5,6 +5,9 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 
@@ -14,6 +17,8 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
  */
 public interface DEHActionPointer
 {
+	static Usage BLANK_USAGE = usage();
+	
 	/** The NULL pointer. */
 	static DEHActionPointer NULL = new DEHActionPointer() 
 	{
@@ -91,6 +96,14 @@ public interface DEHActionPointer
 	DEHActionPointerParamType getParam(int index);
 
 	/**
+	 * @return the Usage documentation for this pointer.
+	 */
+	default Usage getUsage()
+	{
+		return BLANK_USAGE;
+	}
+	
+	/**
 	 * Checks if two pointers are semantically equal.
 	 * This only checks the mnemonics case-insensitively.
 	 * @param pointer the other pointer.
@@ -100,6 +113,107 @@ public interface DEHActionPointer
 	default boolean equals(DEHActionPointer pointer)
 	{
 		return pointer != null && getMnemonic().equalsIgnoreCase(pointer.getMnemonic());
+	}
+	
+	/**
+	 * Creates a Usage object. 
+	 * Usage can be built from these.
+	 * @param instructions a list of instructions strings, representing paragraphs.
+	 * @return a new Usage object.
+	 */
+	static Usage usage(String ... instructions)
+	{
+		Usage out = new Usage();
+		for (int i = 0; i < instructions.length; i++)
+			out.instructions.add(instructions[i]);
+		return out;
+	}
+	
+	/**
+	 * Usage info for an action pointer.
+	 */
+	public static class Usage
+	{
+		private List<String> instructions;
+		private List<Parameter> parameters;
+		
+		public static class Parameter
+		{
+			private String name;
+			private DEHActionPointerParamType type;
+			private List<String> instructions;
+			
+			private Parameter(String name, DEHActionPointerParamType type)
+			{
+				this.name = name;
+				this.type = type;
+				this.instructions = new LinkedList<>();
+			}
+			
+			/**
+			 * @return the parameter name.
+			 */
+			public String getName() 
+			{
+				return name;
+			}
+			
+			/**
+			 * @return the parameter's expected type.
+			 */
+			public DEHActionPointerParamType getType() 
+			{
+				return type;
+			}
+			
+			/**
+			 * @return the usage instructions paragraphs.
+			 */
+			public Iterable<String> getInstructions() 
+			{
+				return instructions;
+			}
+			
+		}
+		
+		private Usage()
+		{
+			this.instructions = new LinkedList<>();
+			this.parameters = new LinkedList<>();
+		}
+		
+		/**
+		 * Adds a parameter usage.
+		 * @param name the parameter name.
+		 * @param type the parameter type.
+		 * @param instructions a list of instructions strings, representing paragraphs.
+		 * @return this Usage object.
+		 */
+		public Usage parameter(String name, DEHActionPointerParamType type, String ... instructions)
+		{
+			Parameter out;
+			parameters.add(out = new Parameter(name, type));
+			for (int i = 0; i < instructions.length; i++)
+				out.instructions.add(instructions[i]);
+			return this;
+		}
+		
+		/**
+		 * @return the usage instructions paragraphs.
+		 */
+		public Iterable<String> getInstructions() 
+		{
+			return instructions;
+		}
+		
+		/**
+		 * @return the action pointer parameters.
+		 */
+		public Iterable<Parameter> getParameters()
+		{
+			return parameters;
+		}
+		
 	}
 	
 }

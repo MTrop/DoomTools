@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public enum DEHActionPointerMBF21 implements DEHActionPointer
 {
+	// TODO: Finish docs!!
+
 	// MBF21 Thing Action Pointers
 	SPAWNOBJECT         (false, "SpawnObject",         THING, ANGLEFIXED, FIXED, FIXED, FIXED, FIXED, FIXED, FIXED),
 	MONSTERPROJECTILE   (false, "MonsterProjectile",   THING, ANGLEFIXED, ANGLEFIXED, FIXED, FIXED),
