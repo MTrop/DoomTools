@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -48,6 +49,7 @@ import javax.swing.text.BadLocationException;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -56,8 +58,10 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.EditorSettingsManager;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -79,7 +83,10 @@ public class MultiFileEditorPanel extends JPanel
 {
 	private static final long serialVersionUID = -3208735521175265227L;
 	
-	private static final FileFilter[] NO_FILTERS = new FileFilter[0];
+    /** Logger. */
+    private static final Logger LOG = DoomToolsLogger.getLogger(MultiFileEditorPanel.class); 
+
+    private static final FileFilter[] NO_FILTERS = new FileFilter[0];
 
 	private static final Options DEFAULT_OPTIONS = new MultiFileEditorPanel.Options()
 	{
@@ -276,6 +283,8 @@ public class MultiFileEditorPanel extends JPanel
 	private EditorCodeSettings codeSettings;
 	/** Editor auto-completion settings. */
 	private EditorAutoCompleteSettings autoCompleteSettings;
+	/** Editor theme. */
+	private Theme currentTheme;
 
 	/**
 	 * Creates a new multi-file editor panel with default options.
@@ -313,6 +322,9 @@ public class MultiFileEditorPanel extends JPanel
 		
 		this.codeSettings = settings.getDefaultEditorCodeSettings();
 		this.autoCompleteSettings = settings.getDefaultEditorAutoCompleteSettings();
+		
+		// TODO: Load from settings!!
+		this.currentTheme = loadTheme(EditorThemeType.ECLIPSE);
 		
 		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
 			tabs.addChangeListener((event) -> {
@@ -693,6 +705,17 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Sets a theme across all editors (and future ones).
+	 * @param themeType the theme type.
+	 */
+	public void setTheme(EditorThemeType themeType)
+	{
+		final Theme theme = loadTheme(themeType);
+		currentTheme = theme;
+		forEachOpenEditor((handle) -> theme.apply(handle.editorPanel.textArea));
+	}
+
+	/**
 	 * Creates a new editor, returning the editor tab.
 	 * @param title the tab title.
 	 * @param attachedFile the content source file (if any, can be null).
@@ -727,6 +750,8 @@ public class MultiFileEditorPanel extends JPanel
 		
 		settings.getDefaultEditorViewSettings().applyTo(textArea);
 		codeSettings.applyTo(textArea);
+		currentTheme.apply(textArea);
+		
 		setEditorViewSettingsByContent(textArea, originalContent);
 		if (attachedFile != null) // only scan for ending if existing file
 			setEditorHandleSettingsByContent(handle, originalContent);
@@ -1356,6 +1381,19 @@ public class MultiFileEditorPanel extends JPanel
 		// Nothing happened. Keep current setting.
 	}
 	
+	private Theme loadTheme(EditorThemeType themeType) 
+	{
+		try (InputStream in = IOUtils.openResource(themeType.resourceName))
+		{
+			return Theme.load(in);
+		} 
+		catch (IOException e) 
+		{
+			LOG.errorf(e, "Could not load theme: %s", themeType.resourceName);
+			return null;
+		}
+	}
+
 	/**
 	 * The listener.
 	 */
@@ -2263,4 +2301,31 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	}
 	
+	public enum EditorThemeType
+	{
+		DEFAULT("Default", "org/fife/ui/rsyntaxtextarea/themes/default.xml"),
+		DEFAULT_ALT("Default (Alternate)", "org/fife/ui/rsyntaxtextarea/themes/default-alt.xml"),
+		DARK("Default", "org/fife/ui/rsyntaxtextarea/themes/dark.xml"),
+		DRUID("Druid", "org/fife/ui/rsyntaxtextarea/themes/druid.xml"),
+		ECLIPSE("Eclipse", "org/fife/ui/rsyntaxtextarea/themes/eclipse.xml"),
+		IDEA("IntelliJ IDEA", "org/fife/ui/rsyntaxtextarea/themes/idea.xml"),
+		MONOKAI("Monokai", "org/fife/ui/rsyntaxtextarea/themes/monokai.xml"),
+		VS("Visual Studio", "org/fife/ui/rsyntaxtextarea/themes/vs.xml");
+		
+		private final String friendlyName;
+		private final String resourceName;
+		
+		private EditorThemeType(String friendlyName, String resourceName)
+		{
+			this.friendlyName = friendlyName;
+			this.resourceName = resourceName;
+		}
+		
+		public String getFriendlyName() 
+		{
+			return friendlyName;
+		}
+		
+	}
+
 }

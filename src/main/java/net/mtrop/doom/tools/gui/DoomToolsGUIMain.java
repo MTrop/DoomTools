@@ -49,18 +49,18 @@ public final class DoomToolsGUIMain
 	/**
 	 * Supported GUI Themes
 	 */
-	public enum Theme
+	public enum GUIThemeType
 	{
 		LIGHT("com.formdev.flatlaf.FlatLightLaf"),
 		DARK("com.formdev.flatlaf.FlatDarkLaf"),
 		INTELLIJ("com.formdev.flatlaf.FlatIntelliJLaf"),
 		DARCULA("com.formdev.flatlaf.FlatDarculaLaf");
 		
-		public static final Map<String, Theme> MAP = EnumUtils.createCaseInsensitiveNameMap(Theme.class);
+		public static final Map<String, GUIThemeType> MAP = EnumUtils.createCaseInsensitiveNameMap(GUIThemeType.class);
 		
 		private final String className;
 		
-		private Theme(String className)
+		private GUIThemeType(String className)
 		{
 			this.className = className;
 		}
@@ -166,8 +166,8 @@ public final class DoomToolsGUIMain
 	 */
 	public static void setLAF() 
 	{
-		Theme theme = Theme.MAP.get(DoomToolsSettingsManager.get().getThemeName());
-		SwingUtils.setLAF(theme != null ? theme.className : Theme.LIGHT.className);
+		GUIThemeType theme = GUIThemeType.MAP.get(DoomToolsSettingsManager.get().getThemeName());
+		SwingUtils.setLAF(theme != null ? theme.className : GUIThemeType.LIGHT.className);
 	}
 
     /* ==================================================================== */

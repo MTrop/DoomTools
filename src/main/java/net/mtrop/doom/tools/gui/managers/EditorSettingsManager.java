@@ -91,4 +91,23 @@ public final class EditorSettingsManager extends DoomToolsSettings
 		commit();
 	}
 	
+	/**
+	 * Gets the default editor theme.
+	 * @return the theme name.
+	 */
+	public String getEditorThemeName()
+	{
+		return getString("theme.name", "default");
+	}
+	
+	/**
+	 * Sets the default editor theme.
+	 * @param name the theme name.
+	 */
+	public void setEditorThemeName(String name)
+	{
+		setString("theme.name", name);
+		commit();
+	}
+	
 }

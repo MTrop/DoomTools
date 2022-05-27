@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsGUIMain.Theme;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.GUIThemeType;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 
@@ -55,10 +55,10 @@ public class DoomToolsSettingsPanel extends JPanel
 	private Container createMainPanel()
 	{
 		List<String> themes = Arrays.asList(
-			Theme.LIGHT.name(),
-			Theme.DARK.name(),
-			Theme.INTELLIJ.name(),
-			Theme.DARCULA.name()
+			GUIThemeType.LIGHT.name(),
+			GUIThemeType.DARK.name(),
+			GUIThemeType.INTELLIJ.name(),
+			GUIThemeType.DARCULA.name()
 		);
 		
 		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (c, i) -> {

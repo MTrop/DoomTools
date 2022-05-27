@@ -36,17 +36,12 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 		
 		this.viewSettings = settings.getDefaultEditorViewSettings();
 
-		final JFormField<Integer> tabSizeField = spinnerField(spinner(spinnerModel(viewSettings.getTabSize(), 2, 8, 1)));
-		final JFormField<Boolean> hardTabsField = checkBoxField(checkBox(viewSettings.isTabsEmulated()));
-		final JFormField<Boolean> lineWrapField = checkBoxField(checkBox(viewSettings.isLineWrap()));
-		final JFormField<Boolean> wordWrapField = checkBoxField(checkBox(viewSettings.isWrapStyleWord()));
-		
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, form(136)
-				.addField(language.getText("texteditor.settings.view.tabsize"), tabSizeField)
-				.addField(language.getText("texteditor.settings.view.hardtabs"), hardTabsField)
-				.addField(language.getText("texteditor.settings.view.linewrap"), lineWrapField)
-				.addField(language.getText("texteditor.settings.view.wordwrap"), wordWrapField)
+			node(BorderLayout.CENTER, form(language.getInteger("texteditor.settings.label.width", 180))
+				.addField(language.getText("texteditor.settings.view.tabsize"), spinnerField(spinner(spinnerModel(viewSettings.getTabSize(), 2, 8, 1))))
+				.addField(language.getText("texteditor.settings.view.hardtabs"), checkBoxField(checkBox(viewSettings.isTabsEmulated())))
+				.addField(language.getText("texteditor.settings.view.linewrap"), checkBoxField(checkBox(viewSettings.isLineWrap())))
+				.addField(language.getText("texteditor.settings.view.wordwrap"), checkBoxField(checkBox(viewSettings.isWrapStyleWord())))
 			)
 		);
 	}
