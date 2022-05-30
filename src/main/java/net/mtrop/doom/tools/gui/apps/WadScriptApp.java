@@ -308,8 +308,12 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public Map<String, String> getApplicationState() 
 	{
-		// TODO Finish this.
-		return super.getApplicationState();
+		Map<String, String> state = new HashMap<>();
+		editorPanel.forEachOpenEditor((handle) -> {
+			
+		});
+		
+		return state;
 	}
 	
 	@Override

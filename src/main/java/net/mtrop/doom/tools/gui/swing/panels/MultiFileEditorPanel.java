@@ -492,6 +492,19 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Opens an editor into a new tab.
+	 * @param editorName the buffer name.
+	 * @param file the associated file.
+	 * @param encoding the file encoding.
+	 * @param styleName the syntax style name.
+	 * @param content the editor content.
+	 */
+	public void openEditor(String editorName, File file, Charset encoding, String styleName, String content)
+	{
+		createNewTab(editorName, file, encoding, styleName, content);
+	}
+	
+	/**
 	 * Saves the current editor to its current file, or a new file if no current file.
 	 * If no current editor, this does nothing.
 	 * @return true if a successful save occurred, false otherwise.
@@ -1595,6 +1608,7 @@ public class MultiFileEditorPanel extends JPanel
 			
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
+			
 			textArea.setSyntaxEditingStyle(styleName);
 			applyAutoComplete(styleName);
 			textArea.getDocument().addDocumentListener(new DocumentListener()

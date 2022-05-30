@@ -1,4 +1,4 @@
-package net.mtrop.doom.tools.gui.managers.tokenizers;
+package net.mtrop.doom.tools.gui.managers.parsing;
 
 import java.util.Arrays;
 import java.util.Set;

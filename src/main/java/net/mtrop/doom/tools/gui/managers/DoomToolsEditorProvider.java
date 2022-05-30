@@ -1,52 +1,35 @@
 package net.mtrop.doom.tools.gui.managers;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Supplier;
 
-import org.fife.ui.autocomplete.AbstractCompletion;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
-import org.fife.ui.autocomplete.TemplateCompletion;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
-import com.blackrook.rookscript.lang.ScriptFunctionType;
-import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.ParameterUsage;
-import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
-
-import net.mtrop.doom.tools.DoomMakeMain;
-import net.mtrop.doom.tools.WadScriptMain;
-import net.mtrop.doom.tools.WadScriptMain.Resolver;
-import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
-import net.mtrop.doom.tools.gui.managers.tokenizers.DecoHackTokenMaker;
-import net.mtrop.doom.tools.gui.managers.tokenizers.RookScriptTokenMaker;
-import net.mtrop.doom.tools.gui.managers.tokenizers.WadMergeTokenMaker;
+import net.mtrop.doom.tools.gui.managers.parsing.DecoHackCompletionProvider;
+import net.mtrop.doom.tools.gui.managers.parsing.DecoHackTokenMaker;
+import net.mtrop.doom.tools.gui.managers.parsing.DoomMakeCompletionProvider;
+import net.mtrop.doom.tools.gui.managers.parsing.RookScriptCompletionProvider;
+import net.mtrop.doom.tools.gui.managers.parsing.RookScriptTokenMaker;
+import net.mtrop.doom.tools.gui.managers.parsing.WadMergeCompletionProvider;
+import net.mtrop.doom.tools.gui.managers.parsing.WadMergeTokenMaker;
+import net.mtrop.doom.tools.gui.managers.parsing.WadScriptCompletionProvider;
 import net.mtrop.doom.tools.struct.FactoryMap;
-import net.mtrop.doom.tools.struct.HTMLWriter;
-import net.mtrop.doom.tools.struct.HTMLWriter.Options;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
-import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 
 import static org.fife.ui.rsyntaxtextarea.SyntaxConstants.*;
 
@@ -363,313 +346,4 @@ public final class DoomToolsEditorProvider
 		return FACTORY.get(styleName);
 	}
 
-	/* ==================================================================== */
-
-	
-	// WadMerge Completion Provider.
-	private static class WadMergeCompletionProvider extends DefaultCompletionProvider
-	{
-		private WadMergeCompletionProvider()
-		{
-			super();
-			for (WadMergeCommand command : WadMergeCommand.values())
-				addCompletion(new WadMergeCommandCompletion(this, command));
-		}
-	}
-	
-	// RookScript Completion Provider.
-	private static class RookScriptCompletionProvider extends DefaultCompletionProvider
-	{
-		private static final String TEMPLATE_FORLIST = (new StringBuilder())
-			.append("for (${i} = 0; ${i} < length(${list}); ${i} += 1) {\n")
-			.append("\t${cursor}\n")
-			.append("}\n")
-		.toString();
-		
-		private RookScriptCompletionProvider()
-		{
-			super();
-			for (Resolver r : WadScriptMain.getAllBaseResolvers())
-				for (ScriptFunctionType type : r.resolver.getFunctions())
-					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
-			addCompletion(new TemplateCompletion(this, "forl", "for (i = 0; i < length(list); i += 1) { }", TEMPLATE_FORLIST, "for loop thorugh list/set", TEMPLATE_FORLIST));
-		}
-	}
-	
-	// WadScript Completion Provider.
-	private static class WadScriptCompletionProvider extends RookScriptCompletionProvider
-	{
-		private WadScriptCompletionProvider()
-		{
-			for (Resolver r : WadScriptMain.getAllWadScriptResolvers())
-				for (ScriptFunctionType type : r.resolver.getFunctions())
-					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
-		}
-	}
-	
-	// DoomMake Completion Provider.
-	private static class DoomMakeCompletionProvider extends WadScriptCompletionProvider
-	{
-		private DoomMakeCompletionProvider()
-		{
-			super();
-			for (Resolver r : DoomMakeMain.getAllDoomMakeResolvers())
-				for (ScriptFunctionType type : r.resolver.getFunctions())
-					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
-		}
-	}
-	
-	// DECOHack Completion Provider.
-	private static class DecoHackCompletionProvider extends DefaultCompletionProvider
-	{
-		private DecoHackCompletionProvider()
-		{
-			super();
-			for (DEHActionPointerDoom19 pointer : DEHActionPointerDoom19.values())
-				addCompletion(new DecoHackPointerCompletion(this, pointer));
-			for (DEHActionPointerMBF pointer : DEHActionPointerMBF.values())
-				addCompletion(new DecoHackPointerCompletion(this, pointer));
-			for (DEHActionPointerMBF21 pointer : DEHActionPointerMBF21.values())
-				addCompletion(new DecoHackPointerCompletion(this, pointer));
-			// TODO: Add macros.
-		}
-	}
-
-	// Special completion for WadMerge-based stuff.
-	private static class DecoHackPointerCompletion extends AbstractCompletion
-	{
-		private final String name;
-		private final String paramTypeText; 
-		private final String summaryText;
-		
-		public DecoHackPointerCompletion(CompletionProvider parent, DEHActionPointer pointer)
-		{
-			super(parent);
-			this.name = "A_" + pointer.getMnemonic();
-			
-			boolean first = true;
-			StringBuilder sb = new StringBuilder();
-			for (DEHActionPointerParamType ptype : pointer.getParams())
-			{
-				if (!first)
-					sb.append(", ");
-				sb.append(ptype.name().toLowerCase());
-				first = false;
-			}
-			this.paramTypeText = sb.toString();
-			
-			// TODO: Write actual docs for each pointer.
-			this.summaryText = this.name + "(" + this.paramTypeText + ")";
-		}
-		
-		@Override
-		public String getInputText()
-		{
-			return name;
-		}
-
-		@Override
-		public String getReplacementText()
-		{
-			return name + "(" + paramTypeText + ")";
-		}
-
-		@Override
-		public String getSummary()
-		{
-			return summaryText;
-		}
-
-		@Override
-		public String toString() 
-		{
-			return name + "(" + paramTypeText + ")";
-		}
-		
-	}
-	
-	// Special completion for WadMerge-based stuff.
-	private static class WadMergeCommandCompletion extends AbstractCompletion
-	{
-		private final String name;
-		private final String usage; 
-		private final String summaryText;
-		
-		private WadMergeCommandCompletion(CompletionProvider parent, WadMergeCommand command) 
-		{
-			super(parent);
-			this.name = command.name().toLowerCase();
-			this.usage = command.usage().toLowerCase();
-
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
-			try (PrintStream textOut = new PrintStream(bos, true))
-			{
-				command.help(textOut);
-			}
-			this.summaryText = "<html><body><pre>" + (new String(bos.toByteArray())) + "</pre></body></html>";
-		}
-		
-		@Override
-		public String getInputText()
-		{
-			return name;
-		}
-
-		@Override
-		public String getReplacementText()
-		{
-			return usage;
-		}
-
-		@Override
-		public String getSummary()
-		{
-			return summaryText;
-		}
-
-		@Override
-		public String toString() 
-		{
-			return usage;
-		}
-		
-	}
-	
-	// Special completion for RookScript-based stuff.
-	private static class RookScriptFunctionCompletion extends AbstractCompletion
-	{
-		private final String functionName;
-		private final String instructions; 
-		private final String functionParameterText;
-		private final String summaryText;
-
-		private RookScriptFunctionCompletion(CompletionProvider parent, String namespace, ScriptFunctionType type) 
-		{
-			super(parent);
-
-			// Truncate blurb to first sentence, if possible.
-			String instructions = type.getUsage().getInstructions();
-			int endidx = instructions.indexOf('.');
-			instructions = endidx >= 0 ? instructions.substring(0, endidx + 1) : instructions;
-
-			this.functionName = (namespace != null ? namespace.toLowerCase() + "::" : "") + type.name().toLowerCase();
-			this.instructions = instructions;
-			this.functionParameterText = getParameterSignature(type.getUsage());
-			this.summaryText = getFunctionDescriptionHTML(namespace, type);
-		}
-		
-		@Override
-		public String getInputText()
-		{
-			return functionName;
-		}
-
-		@Override
-		public String getReplacementText()
-		{
-			return functionName + "(" + functionParameterText + ")";
-		}
-
-		@Override
-		public String getSummary()
-		{
-			return summaryText;
-		}
-
-		@Override
-		public String toString() 
-		{
-			return getInputText() + " - " + instructions;
-		}
-
-		private static String getParameterSignature(ScriptFunctionType.Usage usage)
-		{
-			StringBuilder sb = new StringBuilder();
-			boolean first = true;
-			for (ParameterUsage pusage : usage.getParameterInstructions())
-			{
-				if (!first)
-					sb.append(", ");
-				sb.append(pusage.getParameterName());
-				first = false;
-			}
-			return sb.toString();
-		}
-
-		private static String getFunctionDescriptionHTML(String namespace, ScriptFunctionType type)
-		{
-			StringWriter out = new StringWriter(1024);
-			try (HTMLWriter html = new HTMLWriter(out, Options.SLASHES_IN_SINGLE_TAGS)) 
-			{
-				html.push("html").push("body");
-				writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
-				html.end();
-			} catch (IOException e) {
-				// Do nothing - shouldn't be thrown.
-			}
-			return out.toString();
-		}
-
-		private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages) throws IOException
-		{
-			html.push("ul");
-			for (TypeUsage tusage : typeUsages)
-			{
-				html.push("li")
-					.push("span")
-						.tag("strong", tusage.getType() != null ? tusage.getType().name() : "ANY")
-						.tag("em", tusage.getSubType() != null ? ":" + tusage.getSubType() : "")
-						.html(" &mdash; ").text(tusage.getDescription())
-					.pop()
-				.pop();
-			}
-			html.pop();
-		}
-
-		private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage) throws IOException
-		{
-			// Signature.
-			html.push("div");
-			html.push("strong");
-			html.text((namespace != null ? namespace.toLowerCase() + "::" : "") + name);
-			html.text(" (");
-			boolean first = true;
-			for (ParameterUsage pusage : usage.getParameterInstructions())
-			{
-				if (!first)
-					html.text(", ");
-				html.tag("em", pusage.getParameterName());
-				first = false;
-			}
-			html.text(")");
-			html.pop();
-			html.pop();
-		
-			// Full instructions.
-			html.push("div").text(usage.getInstructions()).pop();
-			
-			// Parameters
-			if (!usage.getParameterInstructions().isEmpty())
-			{
-				html.push("div");
-				for (ParameterUsage pusage : usage.getParameterInstructions())
-				{
-					html.push("div")
-						.tag("strong", pusage.getParameterName())
-					.pop();
-					
-					writeFunctionTypeUsageHTML(html, pusage.getTypes());			
-				}
-				html.pop();
-			}
-			
-			html.push("div")
-				.tag("strong", "Returns:")
-			.pop();
-		
-			writeFunctionTypeUsageHTML(html, usage.getReturnTypes());			
-		}
-		
-	}
-	
 }
