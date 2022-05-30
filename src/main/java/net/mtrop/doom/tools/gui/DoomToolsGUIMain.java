@@ -312,7 +312,11 @@ public final class DoomToolsGUIMain
     	LOG.info("Shutting down DoomTools GUI...");
     	
     	LOG.info("Sending close to all open apps...");
-    	window.shutDownApps();
+    	if (!window.shutDownApps())
+    	{
+        	LOG.info("Shutdown aborted. All apps could not be closed!");
+    		return;
+    	}
     	
     	LOG.debug("Disposing main window...");
     	settings.setFrameBounds("doomtools", window);

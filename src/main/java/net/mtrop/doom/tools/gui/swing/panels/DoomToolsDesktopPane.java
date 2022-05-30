@@ -212,12 +212,15 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	
 	/**
 	 * Closes all workspace applications.
+	 * @return true if all applications were closed, false if not.
 	 */
-	public void clearWorkspace()
+	public boolean clearWorkspace()
 	{
 		Set<DoomToolsApplicationInstance> instanceSet = new HashSet<>(instances.keySet()); // copy set
 		for (DoomToolsApplicationInstance instance : instanceSet)
-			attemptCloseApplication(instance);
+			if (!attemptCloseApplication(instance))
+				return false;
+		return true;
 	}
 	
 	/**
@@ -287,13 +290,20 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		}
 	}
 	
-	private void attemptCloseApplication(DoomToolsApplicationInstance instance)
+	private boolean attemptCloseApplication(DoomToolsApplicationInstance instance)
 	{
 		if (!instances.containsKey(instance))
-			return;
+			return true;
 		
 		if (instance.shouldClose())
+		{
 			closeApplication(instance);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	private void closeApplication(DoomToolsApplicationInstance instance)

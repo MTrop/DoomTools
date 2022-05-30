@@ -18,6 +18,7 @@ import org.fife.ui.autocomplete.AbstractCompletion;
 import org.fife.ui.autocomplete.AutoCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
+import org.fife.ui.autocomplete.TemplateCompletion;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
@@ -379,12 +380,19 @@ public final class DoomToolsEditorProvider
 	// RookScript Completion Provider.
 	private static class RookScriptCompletionProvider extends DefaultCompletionProvider
 	{
+		private static final String TEMPLATE_FORLIST = (new StringBuilder())
+			.append("for (${i} = 0; ${i} < length(${list}); ${i} += 1) {\n")
+			.append("\t${cursor}\n")
+			.append("}\n")
+		.toString();
+		
 		private RookScriptCompletionProvider()
 		{
 			super();
 			for (Resolver r : WadScriptMain.getAllBaseResolvers())
 				for (ScriptFunctionType type : r.resolver.getFunctions())
 					addCompletion(new RookScriptFunctionCompletion(this, r.namespace, type));
+			addCompletion(new TemplateCompletion(this, "forl", "for (i = 0; i < length(list); i += 1) { }", TEMPLATE_FORLIST, "for loop thorugh list/set", TEMPLATE_FORLIST));
 		}
 	}
 	

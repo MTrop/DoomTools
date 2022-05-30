@@ -165,10 +165,11 @@ public class DoomToolsMainWindow extends JFrame
 
 	/**
 	 * Shuts down all the apps in the window.
+	 * @return true if all applications were closed, false if not.
 	 */
-	public void shutDownApps()
+	public boolean shutDownApps()
 	{
-		desktop.clearWorkspace();
+		return desktop.clearWorkspace();
 	}
 
 	// Saves a workspace to a target file.
