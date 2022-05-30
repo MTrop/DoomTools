@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Function;
 
@@ -83,11 +84,12 @@ public final class DoomToolsLanguageManager
 
 	private void loadIntoMap(String iso3language, String operatingSystem)
 	{
+		Objects.requireNonNull(iso3language);
+		
 		String resourceName;
 		InputStream in = LOADER.getResourceAsStream(resourceName = 
 			resourcePath + 
-			"language" + 
-			(iso3language != null ? "." + iso3language : "") + 
+			iso3language + 
 			(operatingSystem != null ? "." + operatingSystem : "") + 
 			".properties"
 		);

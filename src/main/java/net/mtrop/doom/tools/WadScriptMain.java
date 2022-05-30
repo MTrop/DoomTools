@@ -56,7 +56,6 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
 import net.mtrop.doom.tools.wadscript.UtilityFunctions;
@@ -888,7 +887,7 @@ public final class WadScriptMain
 			if (options.gui)
 			{
 				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADSCRIPT, OSUtils.getWorkingDirectoryPath());
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADSCRIPT);
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start WadScript GUI!");
 					return ERROR_IOERROR;

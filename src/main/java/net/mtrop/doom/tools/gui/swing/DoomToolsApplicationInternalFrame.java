@@ -99,6 +99,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 		});
 		pack();
 		setMinimumSize(getSize());
+		instance.onCreate(this);
 	}
 	
 	// Attempt to close.

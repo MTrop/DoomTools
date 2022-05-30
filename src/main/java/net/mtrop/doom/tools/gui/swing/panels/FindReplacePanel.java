@@ -7,7 +7,6 @@ import org.fife.ui.rtextarea.SearchResult;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -15,7 +14,6 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
 
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -65,7 +63,7 @@ public class FindReplacePanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.utils = DoomToolsGUIUtils.get();
 
-		final ComponentActionHandler<JCheckBox> updateHandler = (c, e) -> updateSearchContext();
+		final ToggleHandler updateHandler = (v) -> updateSearchContext();
 		final JValueChangeListener<String> changeUpdateListener = (unused) -> updateSearchContext();
 
 		this.backwards = false;
@@ -83,29 +81,29 @@ public class FindReplacePanel extends JPanel
 		this.context = null;
 		this.message = label();
 		
-		JRadioButton forwardButton = radio(true, (c, e) -> {
-			if (c.isSelected())
+		JRadioButton forwardButton = radio(true, (v) -> {
+			if (v)
 			{
 				backwards = false;
 				updateSearchContext();
 			}
 		});
-		JRadioButton backButton = radio(false, (c, e) -> {
-			if (c.isSelected())
+		JRadioButton backButton = radio(false, (v) -> {
+			if (v)
 			{
 				backwards = true;
 				updateSearchContext();
 			}
 		});
-		JRadioButton allButton = radio(true, (c, e) -> {
-			if (c.isSelected())
+		JRadioButton allButton = radio(true, (v) -> {
+			if (v)
 			{
 				selectionOnly = false;
 				updateSearchContext();
 			}
 		});
-		JRadioButton selectedButton = SwingUtils.apply(radio(false, (c, e) -> {
-			if (c.isSelected())
+		JRadioButton selectedButton = SwingUtils.apply(radio(false, (v) -> {
+			if (v)
 			{
 				selectionOnly = true;
 				updateSearchContext();

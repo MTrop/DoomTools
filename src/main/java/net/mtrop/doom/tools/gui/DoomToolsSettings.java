@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Properties;
 
 import javax.swing.KeyStroke;
@@ -35,6 +36,7 @@ public class DoomToolsSettings
     private static final String EDITOR_AUTOCOMPLETE = ".editor.autocomplete";
     private static final String EDITOR_THEME = ".editor.theme";
 
+    private static final String VIEW_ENCODING = ".encoding";
     private static final String VIEW_TABSIZE = ".tabsize";
 	private static final String VIEW_SOFTTABS = ".softtabs";
 	private static final String VIEW_WRAPPING = ".wrapping";
@@ -515,6 +517,7 @@ public class DoomToolsSettings
 	protected void setEditorViewSettings(String subsetName, EditorViewSettings viewSettings)
 	{
 		String prefix = subsetName + EDITOR_VIEW;
+		setString(prefix + VIEW_ENCODING, viewSettings.getDefaultEncoding().name());
 		setInteger(prefix + VIEW_TABSIZE, viewSettings.getTabSize());
 		setBoolean(prefix + VIEW_SOFTTABS, viewSettings.isTabsEmulated());
 		setBoolean(prefix + VIEW_WRAPPING, viewSettings.isLineWrap());
@@ -530,6 +533,7 @@ public class DoomToolsSettings
 	{
 		EditorViewSettings out = new EditorViewSettings();
 		String prefix = subsetName + EDITOR_VIEW;
+		out.setDefaultEncoding(Charset.forName(getString(prefix + VIEW_ENCODING, out.getDefaultEncoding().name())));
 		out.setTabSize(getInteger(prefix + VIEW_TABSIZE, out.getTabSize()));
 		out.setTabsEmulated(getBoolean(prefix + VIEW_SOFTTABS, out.isTabsEmulated()));
 		out.setLineWrap(getBoolean(prefix + VIEW_WRAPPING, out.isLineWrap()));

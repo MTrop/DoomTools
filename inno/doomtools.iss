@@ -68,12 +68,15 @@ Source: "{#SrcJREDirectory}\*"; DestDir: "{app}\jre"; Flags: ignoreversion recur
 #endif
 
 [Icons]
-Name: "{group}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"
-Name: "{group}\{#DTAppName} CMD"; Filename: "{cmd}"; Parameters: "/k ""{app}\doomtools-shell.cmd"""; WorkingDir: "%USERPROFILE%"
-Name: "{group}\{#DTAppName} Documentation"; Filename: "{app}\docs"; Flags: foldershortcut
-Name: "{group}\{#DTAppName} Website"; Filename: "https://mtrop.github.io/DoomTools/";
+Name: "{group}\{#DTAppName}";                       Filename: "{app}\{#DTAppExeName}"
+Name: "{group}\{#DTAppName} CMD";                   Filename: "{cmd}"; Parameters: "/k ""{app}\doomtools-shell.cmd"""; WorkingDir: "%USERPROFILE%"
+Name: "{group}\{#DTAppName} Documentation";         Filename: "{app}\docs"; Flags: foldershortcut
+Name: "{group}\{#DTAppName} Website";               Filename: "https://mtrop.github.io/DoomTools/"
+Name: "{group}\Utilities\DoomMake";                 Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-open"
+Name: "{group}\Utilities\DoomMake (New Project)";   Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-new"
+Name: "{group}\Utilities\WadScript";                Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
 Name: "{group}\{cm:UninstallProgram,{#DTAppName}}"; Filename: {uninstallexe}
-Name: "{autodesktop}\{#DTAppName}"; Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#DTAppName}";                 Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#DTAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DTAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

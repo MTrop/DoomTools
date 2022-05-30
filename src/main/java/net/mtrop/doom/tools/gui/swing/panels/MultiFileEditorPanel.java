@@ -3,6 +3,9 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -38,6 +41,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.TransferHandler;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
@@ -64,6 +68,7 @@ import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -259,6 +264,8 @@ public class MultiFileEditorPanel extends JPanel
 	/** Reveal Action */
 	private Action revealAction;
 
+	/** Editor preferences item. */
+	private MenuNode editorPreferencesMenuItem;
 	/** Change encoding item. */
 	private MenuNode changeEncodingMenuItem;
 	/** Change language item. */
@@ -267,6 +274,8 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode changeSpacingMenuItem;
 	/** Change line ending item. */
 	private MenuNode changeLineEndingMenuItem;
+	/** Toggle line wrapping item. */
+	private MenuNode toggleLineWrapMenuItem;
 	
 	// ======================================================================
 	
@@ -279,12 +288,15 @@ public class MultiFileEditorPanel extends JPanel
 	/** Find replace modal instance. */
 	private volatile Modal<Void> findModal;
 
+	/** Editor theme. */
+	private Theme currentTheme;
+	/** Editor coding settings. */
+	private EditorViewSettings defaultViewSettings;
+
 	/** Editor coding settings. */
 	private EditorCodeSettings codeSettings;
 	/** Editor auto-completion settings. */
 	private EditorAutoCompleteSettings autoCompleteSettings;
-	/** Editor theme. */
-	private Theme currentTheme;
 
 	/**
 	 * Creates a new multi-file editor panel with default options.
@@ -320,11 +332,7 @@ public class MultiFileEditorPanel extends JPanel
 		this.currentEditor = null;
 		this.listener = listener;
 		
-		this.codeSettings = settings.getDefaultEditorCodeSettings();
-		this.autoCompleteSettings = settings.getDefaultEditorAutoCompleteSettings();
-		
-		// TODO: Load from settings!!
-		this.currentTheme = loadTheme(EditorThemeType.ECLIPSE);
+		reloadSettings();
 		
 		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
 			tabs.addChangeListener((event) -> {
@@ -404,10 +412,14 @@ public class MultiFileEditorPanel extends JPanel
 		this.caretPositionLabel = label(" ");
 		this.findReplacePanel = new FindReplacePanel();
 		
+		this.editorPreferencesMenuItem = utils.createItemFromLanguageKey("texteditor.action.prefs", (c, e) -> openEditorPreferences());
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
 		this.changeSpacingMenuItem = utils.createItemFromLanguageKey("texteditor.action.spacing", spacingNodes);
 		this.changeLineEndingMenuItem = utils.createItemFromLanguageKey("texteditor.action.lineending", lineEndingNodes);
+		this.toggleLineWrapMenuItem = utils.createItemFromLanguageKey("texteditor.action.linewrap", (c, e) -> toggleCurrentEditorLineWrap());
+
+		setTransferHandler(new FileTransferHandler());
 		
 		List<Node> labelNodes = new LinkedList<>();
 		if (!options.hideStyleChangePanel())
@@ -437,7 +449,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content)
 	{
-		createNewTab(tabName, null, Charset.defaultCharset(), null, content);
+		createNewTab(tabName, null, defaultViewSettings.getDefaultEncoding(), null, content);
 	}
 	
 	/**
@@ -463,21 +475,6 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void openFileEditor(File file, Charset encoding) throws FileNotFoundException, IOException
 	{
-		openFileEditor(file, encoding, null);
-	}
-	
-	/**
-	 * Opens a file into a new tab.
-	 * Does nothing if the file is a directory.
-	 * @param file the file to load.
-	 * @param encoding the file encoding.
-	 * @param styleName the style name to use for syntax highlighting and such. Can be null to autodetect.
-	 * @throws FileNotFoundException if the file could not be found. 
-	 * @throws IOException if the file could not be read.
-	 * @throws SecurityException if the OS is forbidding the read.
-	 */
-	public void openFileEditor(File file, Charset encoding, String styleName) throws FileNotFoundException, IOException
-	{
 		if (file.isDirectory())
 			return;
 		
@@ -491,7 +488,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, styleName, writer.toString());
+		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString());
 	}
 	
 	/**
@@ -633,6 +630,14 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * @return the editor preferences menu item.
+	 */
+	public MenuNode getEditorPreferencesMenuItem() 
+	{
+		return editorPreferencesMenuItem;
+	}
+	
+	/**
 	 * @return the change encoding menu item.
 	 */
 	public MenuNode getChangeEncodingMenuItem() 
@@ -662,6 +667,14 @@ public class MultiFileEditorPanel extends JPanel
 	public MenuNode getChangeLineEndingMenuItem() 
 	{
 		return changeLineEndingMenuItem;
+	}
+	
+	/**
+	 * @return the toggle line wrap meni item.
+	 */
+	public MenuNode getToggleLineWrapMenuItem() 
+	{
+		return toggleLineWrapMenuItem;
 	}
 	
 	/**
@@ -705,6 +718,20 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Reloads the theme from settings and applies it to all open editors.
+	 */
+	public void reloadSettings()
+	{
+		defaultViewSettings = settings.getDefaultEditorViewSettings();
+		codeSettings = settings.getDefaultEditorCodeSettings();
+		autoCompleteSettings = settings.getDefaultEditorAutoCompleteSettings();
+		setTheme(EditorThemeType.THEME_MAP.getOrDefault(settings.getEditorThemeName(), EditorThemeType.DEFAULT));
+		forEachOpenEditor((handle) -> codeSettings.apply(handle.editorPanel.textArea));
+		forEachOpenEditor((handle) -> autoCompleteSettings.apply(handle.currentAutoCompletion));
+		forEachOpenEditor((handle) -> handle.editorPanel.textArea.setWrapStyleWord(defaultViewSettings.isWrapStyleWord()));
+	}
+
+	/**
 	 * Sets a theme across all editors (and future ones).
 	 * @param themeType the theme type.
 	 */
@@ -724,7 +751,7 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param originalContent the incoming content for the editor.
 	 * @return the editor handle created.
 	 */
-	protected final EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent)
+	protected final synchronized EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent)
 	{
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
@@ -743,13 +770,13 @@ public class MultiFileEditorPanel extends JPanel
 
 		EditorHandle handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
-			: new EditorHandle(title, fileCharset, styleName, textArea)
+			: new EditorHandle(title, defaultViewSettings.getDefaultEncoding(), styleName, textArea)
 		;
 
 		// ==================================================================
 		
-		settings.getDefaultEditorViewSettings().applyTo(textArea);
-		codeSettings.applyTo(textArea);
+		defaultViewSettings.apply(textArea);
+		codeSettings.apply(textArea);
 		currentTheme.apply(textArea);
 		
 		setEditorViewSettingsByContent(textArea, originalContent);
@@ -775,6 +802,15 @@ public class MultiFileEditorPanel extends JPanel
 			listener.onOpen(handle);
 		
 		return handle;
+	}
+
+	/**
+	 * Called to get the default parser style name opening a file.
+	 * @return the default style, or null for auto-detect on open.
+	 */
+	protected String getDefaultStyleName()
+	{
+		return null;
 	}
 
 	/**
@@ -945,7 +981,11 @@ public class MultiFileEditorPanel extends JPanel
 			RSyntaxTextArea textArea = currentEditor.editorPanel.textArea;
 			int tabSize = textArea.getTabSize();
 			boolean usesSpaces = textArea.getTabsEmulated();
-			spacingModeLabel.setText((usesSpaces ? "Spaces: " : "Tabs: ") + tabSize);
+			boolean lineWrap = textArea.getLineWrap();
+			spacingModeLabel.setText(
+				(usesSpaces ? "SPC " : "TAB ") + tabSize +
+				(lineWrap ? ", WRP" : "")
+			);
 		}
 		else
 		{
@@ -1219,6 +1259,15 @@ public class MultiFileEditorPanel extends JPanel
 		forCurrentEditor((editor) -> editor.changeLineEnding(lineEnding));
 	}
 
+	/**
+	 * Changes line wrapping state in the current editor.
+	 * @param lineWrap the new line wrap state for the editor.
+	 */
+	private void toggleCurrentEditorLineWrap()
+	{
+		forCurrentEditor((editor) -> editor.toggleLineWrap());
+	}
+
 	// Opens the "Go to Line" dialog. 
 	private void goToLine()
 	{
@@ -1274,6 +1323,20 @@ public class MultiFileEditorPanel extends JPanel
 			}
 		});
 		findModal.open();
+	}
+
+	/**
+	 * Opens the editor preferences, then reloads the settings on close.
+	 */
+	private void openEditorPreferences() 
+	{
+		EditorSettingsPanel settingsPanel = new EditorSettingsPanel();
+		utils.createModal(
+			language.getText("texteditor.settings"),
+			containerOf(createEmptyBorder(8, 8, 8, 8), node(dimension(500, 600), settingsPanel))
+		).openThenDispose();
+		settingsPanel.commitSettings();
+		reloadSettings();
 	}
 
 	/**
@@ -1443,6 +1506,49 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Handle only drag-and-dropped files.
+	 */
+	private class FileTransferHandler extends TransferHandler
+	{
+		private static final long serialVersionUID = 1667964095084519427L;
+
+		@Override
+		public boolean canImport(TransferSupport support) 
+		{
+			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean importData(TransferSupport support) 
+		{
+			if (!support.isDrop())
+				return false;
+			
+			Transferable transferable = support.getTransferable();
+			List<File> files;
+			try {
+				files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+			} catch (UnsupportedFlavorException | IOException e) {
+				LOG.warn("Could not handle DnD import for file drop.");
+				return false;
+			} 
+			
+			for (final File f : files)
+			{
+				try {
+					openFileEditor(f, defaultViewSettings.getDefaultEncoding());
+				} catch (IOException e) {
+					error(language.getText("texteditor.dnd.droperror", f.getAbsolutePath()));
+				}
+			}
+			
+			return true;
+		}
+		
+	}
+
+	/**
 	 * Editor handle.
 	 */
 	public class EditorHandle
@@ -1573,6 +1679,15 @@ public class MultiFileEditorPanel extends JPanel
 		}
 		
 		/**
+		 * Toggles the line wrapping style.
+		 */
+		public void toggleLineWrap()
+		{
+			editorPanel.textArea.setLineWrap(!editorPanel.textArea.getLineWrap());
+			updateSpacingLabel();
+		}
+		
+		/**
 		 * @return the editor tab name.
 		 */
 		public String getEditorTabName()
@@ -1613,7 +1728,7 @@ public class MultiFileEditorPanel extends JPanel
 		private void applyAutoComplete(String styleName)
 		{
 			AutoCompletion autoCompletion = editorProvider.createAutoCompletionByStyle(styleName);
-			autoCompleteSettings.applyTo(autoCompletion);
+			autoCompleteSettings.apply(autoCompletion);
 			if (currentAutoCompletion != null)
 				currentAutoCompletion.uninstall();
 			autoCompletion.install(editorPanel.textArea);
@@ -1728,6 +1843,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public static class EditorViewSettings
 	{
+		private Charset defaultEncoding;
 		private int tabSize;
 		private boolean tabsEmulated;
 		private boolean lineWrap;
@@ -1735,12 +1851,18 @@ public class MultiFileEditorPanel extends JPanel
 		
 		public EditorViewSettings()
 		{
+			setDefaultEncoding(Charset.defaultCharset());
 			setTabSize(4);
 			setTabsEmulated(false);
 			setLineWrap(false);
-			setWrapStyleWord(false);
+			setWrapStyleWord(true);
 		}
 		
+		public Charset getDefaultEncoding() 
+		{
+			return defaultEncoding;
+		}
+
 		public int getTabSize() 
 		{
 			return tabSize;
@@ -1759,6 +1881,11 @@ public class MultiFileEditorPanel extends JPanel
 		public boolean isWrapStyleWord()
 		{
 			return wrapStyleWord;
+		}
+
+		public void setDefaultEncoding(Charset defaultEncoding) 
+		{
+			this.defaultEncoding = defaultEncoding;
 		}
 
 		public void setTabSize(int tabSize)
@@ -1781,13 +1908,14 @@ public class MultiFileEditorPanel extends JPanel
 			this.wrapStyleWord = wrapStyleWord;
 		}
 
-		public void applyTo(RSyntaxTextArea target)
+		public void apply(RSyntaxTextArea target)
 		{
 			target.setTabSize(tabSize);
 			target.setTabsEmulated(tabsEmulated);
 			target.setLineWrap(lineWrap);
 			target.setWrapStyleWord(wrapStyleWord);
 		}
+
 	}
 	
 	/**
@@ -2121,7 +2249,7 @@ public class MultiFileEditorPanel extends JPanel
 			this.linkScanningMask = linkScanningMask;
 		}
 
-		public void applyTo(RSyntaxTextArea target)
+		public void apply(RSyntaxTextArea target)
 		{
 			target.setMarginLineEnabled(marginLineEnabled);
 			target.setMarginLinePosition(marginLinePosition);
@@ -2182,7 +2310,7 @@ public class MultiFileEditorPanel extends JPanel
 			setDescriptionWindowSizeWidth(450);
 			setDescriptionWindowSizeHeight(300);
 			setTriggerKey(AutoCompletion.getDefaultTriggerKey());
-			setAutoCompleteSingleChoices(true);
+			setAutoCompleteSingleChoices(false);
 			setAutoActivationEnabled(false);
 			setShowDescWindow(true);
 			setParameterDescriptionTruncateThreshold(300);
@@ -2288,7 +2416,7 @@ public class MultiFileEditorPanel extends JPanel
 			this.parameterDescriptionTruncateThreshold = parameterDescriptionTruncateThreshold;
 		}
 
-		public void applyTo(AutoCompletion target)
+		public void apply(AutoCompletion target)
 		{
 			target.setChoicesWindowSize(choicesWindowSizeWidth, choicesWindowSizeHeight);
 			target.setDescriptionWindowSize(descriptionWindowSizeWidth, descriptionWindowSizeHeight);
@@ -2301,11 +2429,14 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	}
 	
+	/**
+	 * Theme types.
+	 */
 	public enum EditorThemeType
 	{
 		DEFAULT("Default", "org/fife/ui/rsyntaxtextarea/themes/default.xml"),
 		DEFAULT_ALT("Default (Alternate)", "org/fife/ui/rsyntaxtextarea/themes/default-alt.xml"),
-		DARK("Default", "org/fife/ui/rsyntaxtextarea/themes/dark.xml"),
+		DARK("Dark", "org/fife/ui/rsyntaxtextarea/themes/dark.xml"),
 		DRUID("Druid", "org/fife/ui/rsyntaxtextarea/themes/druid.xml"),
 		ECLIPSE("Eclipse", "org/fife/ui/rsyntaxtextarea/themes/eclipse.xml"),
 		IDEA("IntelliJ IDEA", "org/fife/ui/rsyntaxtextarea/themes/idea.xml"),
@@ -2314,6 +2445,8 @@ public class MultiFileEditorPanel extends JPanel
 		
 		private final String friendlyName;
 		private final String resourceName;
+		
+		public static final Map<String, EditorThemeType> THEME_MAP = EnumUtils.createCaseInsensitiveNameMap(EditorThemeType.class);
 		
 		private EditorThemeType(String friendlyName, String resourceName)
 		{

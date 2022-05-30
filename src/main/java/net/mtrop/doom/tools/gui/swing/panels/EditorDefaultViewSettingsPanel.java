@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 
 import javax.swing.JPanel;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;
@@ -12,6 +13,8 @@ import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 import java.awt.BorderLayout;
+import java.nio.charset.Charset;
+import java.util.Set;
 
 /**
  * A panel that manages the default editor view settings. 
@@ -25,6 +28,13 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 	private EditorSettingsManager settings;
 	
 	private EditorViewSettings viewSettings;
+	private EditorViewSettings defaultSettings;
+	
+	private JFormField<Charset> defaultEncodingField;
+	private JFormField<Integer> tabSizeField;
+	private JFormField<Boolean> tabEmulatedField;
+	private JFormField<Boolean> lineWrapField;
+	private JFormField<Boolean> wrapStyleField;
 	
 	/**
 	 * Creates a new panel.
@@ -35,15 +45,50 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 		this.settings = EditorSettingsManager.get();
 		
 		this.viewSettings = settings.getDefaultEditorViewSettings();
+		this.defaultSettings = new EditorViewSettings();
 
+		Set<Charset> charsets = DoomToolsEditorProvider.get().getAvailableCommonCharsets();
+		
+		this.defaultEncodingField = comboField(comboBox(comboBoxModel(charsets), 
+			(c, i) -> viewSettings.setDefaultEncoding(i)
+		));
+		this.defaultEncodingField.setValue(viewSettings.getDefaultEncoding());
+		
+		this.tabSizeField = spinnerField(spinner(spinnerModel(viewSettings.getTabSize(), 2, 8, 1), 
+			(s) -> viewSettings.setTabSize((Integer)s.getValue())
+		));
+		this.tabEmulatedField = checkBoxField(checkBox(viewSettings.isTabsEmulated(),
+			(v) -> viewSettings.setTabsEmulated(v)
+		));
+		this.lineWrapField = checkBoxField(checkBox(viewSettings.isLineWrap(),
+			(v) -> viewSettings.setLineWrap(v)
+		));
+		this.wrapStyleField = checkBoxField(checkBox(viewSettings.isWrapStyleWord(),
+			(v) -> viewSettings.setWrapStyleWord(v)
+		));
+		
 		containerOf(this, borderLayout(),
 			node(BorderLayout.CENTER, form(language.getInteger("texteditor.settings.label.width", 180))
-				.addField(language.getText("texteditor.settings.view.tabsize"), spinnerField(spinner(spinnerModel(viewSettings.getTabSize(), 2, 8, 1))))
-				.addField(language.getText("texteditor.settings.view.hardtabs"), checkBoxField(checkBox(viewSettings.isTabsEmulated())))
-				.addField(language.getText("texteditor.settings.view.linewrap"), checkBoxField(checkBox(viewSettings.isLineWrap())))
-				.addField(language.getText("texteditor.settings.view.wordwrap"), checkBoxField(checkBox(viewSettings.isWrapStyleWord())))
+				.addField(language.getText("texteditor.settings.view.encoding"), defaultEncodingField)
+				.addField(language.getText("texteditor.settings.view.tabsize"), tabSizeField)
+				.addField(language.getText("texteditor.settings.view.spacetabs"), tabEmulatedField)
+				.addField(language.getText("texteditor.settings.view.linewrap"), lineWrapField)
+				.addField(language.getText("texteditor.settings.view.wordwrap"), wrapStyleField)
+				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
 			)
 		);
+	}
+	
+	/**
+	 * Resets the settings.
+	 */
+	public void resetSettings()
+	{
+		defaultEncodingField.setValue(defaultSettings.getDefaultEncoding());
+		tabSizeField.setValue(defaultSettings.getTabSize());
+		tabEmulatedField.setValue(defaultSettings.isTabsEmulated());
+		lineWrapField.setValue(defaultSettings.isLineWrap());
+		wrapStyleField.setValue(defaultSettings.isWrapStyleWord());
 	}
 
 	/**

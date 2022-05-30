@@ -90,6 +90,7 @@ public class DoomToolsApplicationFrame extends JFrame
 		});
 		pack();
 		setMinimumSize(getSize());
+		instance.onCreate(this);
 	}
 	
 	// Attempt to close.

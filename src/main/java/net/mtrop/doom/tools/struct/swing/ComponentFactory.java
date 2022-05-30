@@ -369,6 +369,25 @@ public final class ComponentFactory
 		void onItemChangeEvent(C component, T item);
 	}
 	
+	/**
+	 * A handler interface for listening for change events on toggleable components like checkboxes or radio buttons.
+	 */
+	@FunctionalInterface
+	public interface ToggleHandler extends ItemListener
+	{
+		@Override
+		default void itemStateChanged(ItemEvent event)
+		{
+			onChangeEvent(((AbstractButton)event.getSource()).isSelected());
+		}
+		
+		/**
+		 * Called when a component emits an item change event.
+		 * @param selected the selected state.
+		 */
+		void onChangeEvent(boolean selected);
+	}
+	
 	/* ==================================================================== */
 	/* ==== Labels                                                     ==== */
 	/* ==================================================================== */
@@ -667,9 +686,15 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, String label, boolean checked, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, String label, boolean checked, ToggleHandler handler)
 	{
-		return checkBox(checked, actionItem(icon, label, handler));
+		final JCheckBox out = new JCheckBox(label);
+		if (icon != null)
+			out.setIcon(icon);
+		if (handler != null)
+			out.addItemListener(handler);
+		out.setSelected(checked);
+		return out;
 	}
 
 	/**
@@ -679,9 +704,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(String label, boolean checked, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(String label, boolean checked, ToggleHandler handler)
 	{
-		return checkBox(checked, actionItem(label, handler));
+		return checkBox(null, label, checked, handler);
 	}
 
 	/**
@@ -691,9 +716,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, boolean checked, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, boolean checked, ToggleHandler handler)
 	{
-		return checkBox(checked, actionItem(icon, handler));
+		return checkBox(icon, null, checked, handler);
 	}
 
 	/**
@@ -702,9 +727,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(boolean checked, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(boolean checked, ToggleHandler handler)
 	{
-		return checkBox(checked, actionItem(handler));
+		return checkBox(null, null, checked, handler);
 	}
 
 	/**
@@ -714,9 +739,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, String label, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, String label, ToggleHandler handler)
 	{
-		return checkBox(false, actionItem(icon, label, handler));
+		return checkBox(icon, label, false, handler);
 	}
 
 	/**
@@ -725,9 +750,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(String label, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(String label, ToggleHandler handler)
 	{
-		return checkBox(false, actionItem(label, handler));
+		return checkBox(null, label, false, handler);
 	}
 
 	/**
@@ -736,9 +761,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(Icon icon, ToggleHandler handler)
 	{
-		return checkBox(false, actionItem(icon, handler));
+		return checkBox(icon, null, false, handler);
 	}
 
 	/**
@@ -746,9 +771,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(ComponentActionHandler<JCheckBox> handler)
+	public static JCheckBox checkBox(ToggleHandler handler)
 	{
-		return checkBox(false, actionItem(handler));
+		return checkBox(null, null, false, handler);
 	}
 
 	/**
@@ -797,9 +822,15 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(Icon icon, String label, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(Icon icon, String label, boolean checked, ToggleHandler handler)
 	{
-		return radio(checked, actionItem(icon, label, handler));
+		JRadioButton out = new JRadioButton(label);
+		if (icon != null)
+			out.setIcon(icon);
+		if (handler != null)
+			out.addItemListener(handler);
+		out.setSelected(checked);
+		return out;
 	}
 
 	/**
@@ -809,9 +840,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(String label, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(String label, boolean checked, ToggleHandler handler)
 	{
-		return radio(checked, actionItem(label, handler));
+		return radio(null, label, checked, handler);
 	}
 
 	/**
@@ -821,9 +852,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(Icon icon, boolean checked, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(Icon icon, boolean checked, ToggleHandler handler)
 	{
-		return radio(checked, actionItem(icon, handler));
+		return radio(icon, null, checked, handler);
 	}
 
 	/**
@@ -832,9 +863,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(boolean checked, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(boolean checked, ToggleHandler handler)
 	{
-		return radio(checked, actionItem(handler));
+		return radio(null, null, checked, handler);
 	}
 
 	/**
@@ -844,9 +875,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(Icon icon, String label, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(Icon icon, String label, ToggleHandler handler)
 	{
-		return radio(false, actionItem(icon, label, handler));
+		return radio(icon, label, false, handler);
 	}
 
 	/**
@@ -855,9 +886,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(String label, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(String label, ToggleHandler handler)
 	{
-		return radio(false, actionItem(label, handler));
+		return radio(null, label, false, handler);
 	}
 
 	/**
@@ -866,9 +897,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(Icon icon, ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(Icon icon, ToggleHandler handler)
 	{
-		return radio(false, actionItem(icon, handler));
+		return radio(icon, null, false, handler);
 	}
 
 	/**
@@ -876,9 +907,9 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new radio button.
 	 */
-	public static JRadioButton radio(ComponentActionHandler<JRadioButton> handler)
+	public static JRadioButton radio(ToggleHandler handler)
 	{
-		return radio(false, actionItem(handler));
+		return radio(null, null, false, handler);
 	}
 
 	/**

@@ -26,13 +26,15 @@ public class DoomToolsAboutPanel extends JPanel
 		
 		StringBuilder sb = new StringBuilder("<html>");
 		sb.append("<h2>DoomTools v").append(versionString).append("</h2>");
-		sb.append("by Matt Tropiano").append("<br/>");
+		sb.append("by Matt Tropiano and friends (see AUTHORS.TXT)").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Using <b>DoomStruct v").append(Version.DOOMSTRUCT).append("</b>").append("<br/>");
 		sb.append("Using <b>Black Rook JSON v").append(Version.JSON).append("</b>").append("<br/>");
 		sb.append("Using <b>Rookscript v").append(Version.ROOKSCRIPT).append("</b>").append("<br/>");
 		sb.append("Using <b>Rookscript-Desktop v").append(Version.ROOKSCRIPT_DESKTOP).append("</b>").append("<br/>");
 		sb.append("Using <b>FlatLaf v").append(Version.FLATLAF).append("</b>").append("<br/>");
+		sb.append("Using <b>RSyntaxTextArea v").append(Version.RSYNTAXTEXTAREA).append("</b>").append("<br/>");
+		sb.append("Using <b>AutoComplete v").append(Version.AUTOCOMPLETE).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Contains <b>DECOHack v").append(Version.DECOHACK).append("</b>").append("<br/>");
 		sb.append("Contains <b>DImgConv v").append(Version.DIMGCONV).append("</b>").append("<br/>");
@@ -46,12 +48,14 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
-		sb.append("<b>RSyntaxTextArea</b> (C) 2021 Robert Futrell").append("<br/>");
+		sb.append("<b>RSyntaxTextArea</b> and <b>AutoComplete</b> (C) 2021 Robert Futrell").append("<br/>");
 		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
 		sb.append("<b>SLADE3</b> Icon by Sir Juddington").append("<br/>");
 		sb.append("<b>Folder and VSCode Icons</b> (C) Microsoft Corp. 2021").append("<br/>");
 		sb.append("<br/>");
-		sb.append("Thank you for using DoomTools!");
+		sb.append("All third-party licenses are available in the \"licenses\" folder in the documentation folder.").append("<br/>");
+		sb.append("<br/>");
+		sb.append("<b>Thank you for using DoomTools!</b>");
 		sb.append("</html>");
 		
 		containerOf(this, node(BorderLayout.CENTER, label(sb.toString())));

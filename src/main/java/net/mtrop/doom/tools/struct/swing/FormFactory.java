@@ -9,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -19,7 +20,10 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -52,6 +56,7 @@ import static javax.swing.BorderFactory.*;
  */
 public final class FormFactory
 {
+	// Don't instantiate.
 	private FormFactory() {}
 	
 	/**
@@ -1314,6 +1319,97 @@ public final class FormFactory
 		};
 	}
 	
+	/**
+	 * Creates a form field that is a series of buttons.
+	 * No value is held, nor set.
+	 * @param buttons the buttons to encapsulate.
+	 * @return a new form field that encapsulates a set of buttons.
+	 */
+	public static JFormField<Void> buttonField(final JButton ... buttons)
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -7511474019499338246L;
+			
+			private JPanel field;
+			private List<JButton> buttonList;
+			
+			{
+				setLayout(new BorderLayout());
+				JPanel panel = new JPanel();
+				panel.setLayout(new FlowLayout(FlowLayout.LEADING));
+				for (int i = 0; i < buttons.length; i++)
+					panel.add(buttons[i]);
+				this.buttonList = Collections.unmodifiableList(Arrays.asList(buttons));
+				add(BorderLayout.LINE_START, this.field = panel);
+			}
+			
+			@Override
+			public void setEnabled(boolean enabled) 
+			{
+				super.setEnabled(enabled);
+				for (JButton button : buttonList)
+					button.setEnabled(enabled);
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field that is a blank space.
+	 * No value is held, nor set.
+	 * @return a new form field.
+	 */
+	public static JFormField<Void> separatorField()
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -7511474019499338246L;
+			
+			private JPanel field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = new JPanel());
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
 	/* ==================================================================== */
 	
 	/**
@@ -1328,8 +1424,6 @@ public final class FormFactory
 		return new JFormPanel(labelSide, labelJustification, labelWidth);
 	}
 	
-	/* ==================================================================== */
-
 	/**
 	 * Creates a form panel where the label side matches the justification.
 	 * @param labelSide the label side.
@@ -1451,6 +1545,17 @@ public final class FormFactory
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		}
 
+		/**
+		 * Adds a field to this form panel with no label.
+		 * @param <V> the field value type.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addField(JFormField<V> field)
+		{
+			return addField(null, "", field);
+		}
+		
 		/**
 		 * Adds a field to this form panel.
 		 * @param <V> the field value type.

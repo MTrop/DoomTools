@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.apps;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -18,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.Action;
+import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
@@ -88,6 +90,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	
 	// State
 	
+	private File fileToOpenFirst;
 	private EditorHandle currentHandle;
 	private Map<EditorHandle, ExecutionSettings> handleToSettingsMap;
 	
@@ -95,9 +98,17 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 
 	/**
 	 * Create a new WadScript application.
-	 * The default working directory for new files is the application working directory.
 	 */
 	public WadScriptApp() 
+	{
+		this(null);
+	}
+	
+	/**
+	 * Create a new WadScript application.
+	 * @param fileToOpenFirst if not null, open this file on create.
+	 */
+	public WadScriptApp(File fileToOpenFirst) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
@@ -149,6 +160,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
+		this.fileToOpenFirst = fileToOpenFirst;
 	}
 	
 	@Override
@@ -211,16 +223,18 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
 			separator(),
+			editorPanel.getToggleLineWrapMenuItem(),
 			editorPanel.getChangeEncodingMenuItem(),
 			editorPanel.getChangeSpacingMenuItem(),
-			editorPanel.getChangeLineEndingMenuItem()
+			editorPanel.getChangeLineEndingMenuItem(),
+			separator(),
+			editorPanel.getEditorPreferencesMenuItem()
 		);
 	}
 	
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		// TODO Finish me.
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -238,22 +252,49 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		// TODO Finish me.
-		return super.createInternalMenuBar();
+		return menuBar(
+			utils.createMenuFromLanguageKey("wadscript.menu.file", createCommonFileMenuItems()),
+			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wadscript.menu.run", createWadScriptRunMenuItems()),
+			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems())
+		);
 	}
 
+	@Override
+	public void onCreate(Object frame) 
+	{
+		if (frame instanceof JFrame)
+		{
+			JFrame f = (JFrame)frame;
+			Rectangle bounds = settings.getBounds();
+			boolean maximized = settings.getBoundsMaximized();
+			f.setBounds(bounds);
+			if (maximized)
+				f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		}
+	}
+	
 	@Override
 	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
-			onNewEditor();
+		{
+			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
+				onOpenFile(fileToOpenFirst);
+			else
+				onNewEditor();
+		}
 	}
 
 	@Override
 	public void onClose(Object frame) 
 	{
-		// TODO: Do something here.
+		if (frame instanceof JFrame)
+		{
+			JFrame f = (JFrame)frame;
+			settings.setBounds(f);
+		}
 	}
 	
 	@Override
@@ -262,6 +303,20 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		if (editorPanel.getUnsavedEditorCount() > 0)
 			return editorPanel.closeAllEditors();
 		return true;
+	}
+	
+	@Override
+	public Map<String, String> getApplicationState() 
+	{
+		// TODO Finish this.
+		return super.getApplicationState();
+	}
+	
+	@Override
+	public void setApplicationState(Map<String, String> state) 
+	{
+		// TODO Finish this.
+		super.setApplicationState(state);
 	}
 	
 	// ====================================================================
@@ -302,22 +357,26 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 		);
 		
 		if (file != null)
-		{
-			try {
-				editorPanel.openFileEditor(file, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
-			} catch (FileNotFoundException e) {
-				LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-				SwingUtils.error(parent, language.getText("wadscript.open.error.notfound", file.getAbsolutePath()));
-			} catch (IOException e) {
-				LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-				SwingUtils.error(parent, language.getText("wadscript.open.error.ioerror", file.getAbsolutePath()));
-			} catch (SecurityException e) {
-				LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error.security", file.getName()));
-				SwingUtils.error(parent, language.getText("wadscript.open.error.security", file.getAbsolutePath()));
-			}
+			onOpenFile(file);
+	}
+	
+	private void onOpenFile(File file)
+	{
+		final Container parent = receiver.getApplicationContainer();
+		try {
+			editorPanel.openFileEditor(file, Charset.defaultCharset());
+		} catch (FileNotFoundException e) {
+			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
+			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
+			SwingUtils.error(parent, language.getText("wadscript.open.error.notfound", file.getAbsolutePath()));
+		} catch (IOException e) {
+			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
+			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
+			SwingUtils.error(parent, language.getText("wadscript.open.error.ioerror", file.getAbsolutePath()));
+		} catch (SecurityException e) {
+			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
+			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error.security", file.getName()));
+			SwingUtils.error(parent, language.getText("wadscript.open.error.security", file.getAbsolutePath()));
 		}
 	}
 	
@@ -482,6 +541,12 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 			super(options, listener);
 		}
 
+		@Override
+		protected String getDefaultStyleName() 
+		{
+			return DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT;
+		}
+		
 		@Override
 		protected File getLastPathTouched() 
 		{

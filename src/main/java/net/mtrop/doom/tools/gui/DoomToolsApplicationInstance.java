@@ -112,6 +112,16 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
+	 * Called when the application is created but not made visible yet.
+	 * <p> This should NEVER be called by the application itself.
+	 * @param frame the source object that was "created" - which is usually a window container of some kind.
+	 */
+	public void onCreate(Object frame)
+	{
+		// Do nothing.
+	}
+	
+	/**
 	 * Called when the application is opened.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that "opened" - which is usually a window container of some kind.

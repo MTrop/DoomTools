@@ -12,7 +12,6 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 
 import static javax.swing.BorderFactory.*;
-
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
@@ -31,6 +30,10 @@ public class DoomToolsSettingsPanel extends JPanel
 	/** Settings singleton. */
 	private final DoomToolsSettingsManager settings;
 	
+	/** DoomMake setting panel. */
+	private DoomMakeSettingsPanel doomMakeSettingsPanel;
+	
+	
 	/**
 	 * Creates the settings panel.
 	 */
@@ -39,13 +42,15 @@ public class DoomToolsSettingsPanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomToolsSettingsManager.get();
 		
+		this.doomMakeSettingsPanel = new DoomMakeSettingsPanel();
+		
 		containerOf(this,
 			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
 				tab("DoomTools", containerOf(createEmptyBorder(4, 4, 4, 4),
 					node(createMainPanel())
 				)),
 				tab("DoomMake", containerOf(createEmptyBorder(4, 4, 4, 4),
-					node(new DoomMakeSettingsPanel())
+					node(doomMakeSettingsPanel)
 				))
 			))
 		);
@@ -75,6 +80,14 @@ public class DoomToolsSettingsPanel extends JPanel
 				node(BorderLayout.CENTER, wrappedLabel(language.getText("doomtools.settings.theme.notice")))
 			))
 		);
+	}
+	
+	/**
+	 * Commits unsaved settings.
+	 */
+	public void commitSettings()
+	{
+		// Do nothing. Fill this with stuff later, maybe.
 	}
 	
 }

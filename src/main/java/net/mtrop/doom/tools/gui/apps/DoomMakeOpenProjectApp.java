@@ -120,8 +120,8 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 				runCurrentTarget();
 			}
 		);
-		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (c, e) -> {
-			if (c.isSelected())
+		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (v) -> {
+			if (v)
 				startAgent();
 			else
 				shutDownAgent();

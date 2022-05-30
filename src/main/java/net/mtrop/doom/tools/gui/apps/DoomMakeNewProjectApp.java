@@ -204,14 +204,14 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		return new Node[]
 		{
 			node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
-				node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (c, e) -> {
-					if (c.isSelected())
+				node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (v) -> {
+					if (v)
 						addTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
 					else
 						removeTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
 				})),
-				node(BorderLayout.SOUTH, checkBox(language.getText("doommake.newproject.wadgen.contain.assets"), false, (c, e) -> {
-					if (c.isSelected())
+				node(BorderLayout.SOUTH, checkBox(language.getText("doommake.newproject.wadgen.contain.assets"), false, (v) -> {
+					if (v)
 						addTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
 					else
 						removeTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
