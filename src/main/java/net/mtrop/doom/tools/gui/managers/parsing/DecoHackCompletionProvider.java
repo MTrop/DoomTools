@@ -33,8 +33,17 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 
 		for (DecoHackTemplateCompletion completion : DecoHackTemplateCompletion.values())
 			addCompletion(completion.createCompletion(this));
+		
+		// TODO: Add thing slot defines (with associated hardcode info for certain slots).
+		// TODO: Add friendly thing slot defines (with associated hardcode info for certain slots).
+		// TODO: Add weapon slot defines (with associated hardcode info for certain slots).
+		// TODO: Add state defines (with associated hardcode info for certain slots).
+		// TODO: Add thing aliases (with associated hardcode info for certain slots).
+		// TODO: Add weapon aliases (with associated hardcode info for certain slots).
+		// TODO: Add ammo defines.
+		// TODO: Add string defines.
 	}
-	
+
 	/**
 	 * A completion object for editor function.
 	 */
