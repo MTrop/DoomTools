@@ -32,7 +32,7 @@ import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage;
-import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage.Parameter;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage.PointerParameter;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
@@ -270,7 +270,7 @@ public final class DecoHackMain
 							options.stdout.print("    ");
 							options.stdout.println(instruction);
 						}
-						for (Parameter parameter : usage.getParameters())
+						for (PointerParameter parameter : usage.getParameters())
 						{
 							options.stdout.print("    ");
 							options.stdout.print(parameter.getName());

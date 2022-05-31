@@ -102,7 +102,9 @@ public class RookScriptCompletionProvider extends DefaultCompletionProvider
 				html.push("html").push("body");
 				writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
 				html.end();
-			} catch (IOException e) {
+			} 
+			catch (IOException e) 
+			{
 				// Do nothing - shouldn't be thrown.
 			}
 			return out.toString();

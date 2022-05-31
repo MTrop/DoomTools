@@ -82,7 +82,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	
 	// Referenced Components
 	
-	private MultiFileEditorPanel editorPanel;
+	private WadScriptEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
 
 	private Action runAction;
@@ -309,10 +309,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState() 
 	{
 		Map<String, String> state = new HashMap<>();
-		editorPanel.forEachOpenEditor((handle) -> {
-			
-		});
-		
+		// TODO Finish this.
 		return state;
 	}
 	
@@ -320,7 +317,6 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state) 
 	{
 		// TODO Finish this.
-		super.setApplicationState(state);
 	}
 	
 	// ====================================================================

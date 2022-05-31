@@ -135,15 +135,15 @@ public interface DEHActionPointer
 	public static class Usage
 	{
 		private List<String> instructions;
-		private List<Parameter> parameters;
+		private List<PointerParameter> parameters;
 		
-		public static class Parameter
+		public static class PointerParameter
 		{
 			private String name;
 			private DEHActionPointerParamType type;
 			private List<String> instructions;
 			
-			private Parameter(String name, DEHActionPointerParamType type)
+			private PointerParameter(String name, DEHActionPointerParamType type)
 			{
 				this.name = name;
 				this.type = type;
@@ -191,8 +191,8 @@ public interface DEHActionPointer
 		 */
 		public Usage parameter(String name, DEHActionPointerParamType type, String ... instructions)
 		{
-			Parameter out;
-			parameters.add(out = new Parameter(name, type));
+			PointerParameter out;
+			parameters.add(out = new PointerParameter(name, type));
 			for (int i = 0; i < instructions.length; i++)
 				out.instructions.add(instructions[i]);
 			return this;
@@ -209,9 +209,17 @@ public interface DEHActionPointer
 		/**
 		 * @return the action pointer parameters.
 		 */
-		public Iterable<Parameter> getParameters()
+		public Iterable<PointerParameter> getParameters()
 		{
 			return parameters;
+		}
+		
+		/**
+		 * @return true if this has parameters.
+		 */
+		public boolean hasParameters()
+		{
+			return !parameters.isEmpty();
 		}
 		
 	}
