@@ -35,7 +35,7 @@ import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
-import net.mtrop.doom.tools.gui.apps.WadScriptApp;
+import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -276,7 +276,7 @@ public class DoomToolsMainWindow extends JFrame
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new", (c, e) -> newDoomMakeProject()),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open", (c, e) -> openDoomMakeProject())
 				),
-				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript", (c, e) -> addApplication(new WadScriptApp()))
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript", (c, e) -> addApplication(new WadScriptEditorApp()))
 			),
 
 			// View

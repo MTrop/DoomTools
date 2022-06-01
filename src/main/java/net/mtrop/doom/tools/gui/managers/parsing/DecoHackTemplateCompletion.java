@@ -10,17 +10,37 @@ import org.fife.ui.autocomplete.TemplateCompletion;
 public enum DecoHackTemplateCompletion
 {
 	AUTOTHING("Adds an auto-thing.", (
-		"auto thing ${thingname} {\n" +
+		"auto thing ${thingalias} \"${thingname}\" {\n" +
 		"\t${cursor}\n" +
-		"}"
+		"}\n"
 	)),
 	
 	AUTOTHINGI("Adds an auto-thing copied from another thing.", (
-		"auto thing ${thingname} : thing ${sourcething} {\n" +
+		"auto thing ${thingalias} \"${thingname}\" : thing ${sourcething} {\n" +
 		"\t${cursor}\n" +
-		"}"
+		"}\n"
 	)),
 
+	AMMO("Creates an ammo block.", (
+		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
+		"\tmax ${MaxAmount}\n" +
+		"\tpickup ${PickupAmount}\n" +
+		"}\n"
+	)),
+		
+	SOUND("Creates a sound block.", (
+		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
+		"\tmax ${MaxAmount}\n" +
+		"\tpickup ${PickupAmount}\n" +
+		"}\n"
+	)),
+			
+	STRINGS("Creates a strings block.", (
+		"strings {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
 	;
 	
 	private final String inputText;

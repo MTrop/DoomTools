@@ -30,7 +30,7 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String WADSCRIPT_PATH_LAST_FILE = "path.lastFile";
+    private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 
@@ -72,7 +72,7 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	 */
 	public void setLastTouchedFile(File path) 
 	{
-		setFile(WADSCRIPT_PATH_LAST_FILE, path);
+		setFile(PATH_LAST_FILE, path);
 		commit();
 	}
 
@@ -81,7 +81,7 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	 */
 	public File getLastTouchedFile() 
 	{
-		return getFile(WADSCRIPT_PATH_LAST_FILE);
+		return getFile(PATH_LAST_FILE);
 	}
 
 }

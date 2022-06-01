@@ -32,7 +32,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	WEAPONREADY   (2,   true,  "WeaponReady", usage(
-		"Enables weapon ready checks.",
+		"Enables weapon ready checks for the calling player.",
 		"Listens for the calling player's weapon fire input flag for firing a weapon. If so, weapon enters the FIRE state.",
 		"Also sets the calling actor to S_PLAY (state 149) if the actor is in the S_PLAY_ATK1 or S_PLAY_ATK2 states (154 or 155).",
 		"Also if the current weapon is WP_CHAINSAW (slot 7) and it is called on state S_SAW (67), it will play sound \"SAWIDL\".",
@@ -41,19 +41,21 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	LOWER         (3,   true,  "Lower", usage(
-		"Lowers the weapon for one frame.",
+		"Lowers the weapon by a specific offset amount.",
 		"The weapon is lowered by a certain offset amount (LOWERSPEED) until it is off the screen. If it is, the pending weapon is switched to and enters its RAISE state.",
-		"Can be called multiple times in one gametic to lower a weapon more quickly."
+		"Can be called multiple times during one gametic to lower a weapon more quickly.",
+		"Since this is affected by graphic offset, you can use the offset parameters to influence this behavior."
 	)),
 	
 	RAISE         (4,   true,  "Raise", usage(
-		"Raises the weapon for one frame.",
+		"Raises the weapon by a specific offset amount.",
 		"The weapon is raised by a certain offset amount (RAISESPEED) until it reaches a certain offset (WEAPONTOP). Once it does, it enters the READY state.",
-		"Can be called multiple times in one gametic to raise a weapon more quickly."
+		"Can be called multiple times during one gametic to raise a weapon more quickly.",
+		"Since this is affected by graphic offset, you can use the offset parameters to influence this behavior."
 	)),
 	
 	PUNCH         (6,   true,  "Punch", usage(
-		"Performs a punch hitscan attack.",
+		"Performs a punch hitscan attack from the calling player.",
 		"If it is in range of a shootable actor, it plays the \"PUNCH\" sound, deals 1d10 x2 damage to that actor, multiplied by 10 if berserk.",
 		"If the attack deals damage, it will turn the player towards what it punched.",
 		"The range of the attack is 64 map units."
@@ -68,10 +70,11 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIREPISTOL    (14,  true,  "FirePistol", usage(
-		"Fires a pistol shot.",
+		"Fires a pistol shot from the calling player.",
 		"Plays the sound \"PISTOL\", fires one hitscan attack, and subtracts 1 from the ammo type of this weapon.",
+		"The hitscan attack does 5 x 1d3 damage.",
 		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD.",
-		"If \"refire\" is 0, the hitscan is dead center."
+		"If \"refire\" is 0, the hitscan is dead center, with no random angle."
 	)),
 	
 	LIGHT1        (17,  true,  "Light1", usage(
@@ -80,8 +83,9 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIRESHOTGUN   (22,  true,  "FireShotgun", usage(
-		"Fires a shotgun shot.",
+		"Fires a shotgun shot from the calling player.",
 		"Plays the sound \"SHOTGN\", fires 7 hitscan attacks, and subtracts 1 from the ammo type of this weapon.",
+		"Each hitscan attack does 5 x 1d3 damage.",
 		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD."
 	)),
 	
@@ -91,13 +95,14 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIRESHOTGUN2  (36,  true,  "FireShotgun2", usage(
-		"Fires a super-shotgun shot.",
+		"Fires a super-shotgun shot from the calling player.",
 		"Plays the sound \"DSHTGN\", fires 20 hitscan attacks, and subtracts 2 from the ammo type of this weapon.",
+		"Each hitscan attack does 5 x 1d3 damage.",
 		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD."
 	)),
 	
 	CHECKRELOAD   (38,  true,  "CheckReload", usage(
-		"Checks if the player has sufficient ammo to fire for this weapon.",
+		"Checks if the calling player has sufficient ammo to fire for this weapon.",
 		"If the player does not have sufficient ammo, this starts a switch to the next preferred weapon.",
 		"If the weapon is in slot 8 (Super Shotgun), it checks for 2 for the current weapon.",
 		"If the weapon is in slot 6 (BFG), it checks for [BFGCells] for the current weapon.",
@@ -206,7 +211,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	FACETARGET    (184, false, "FaceTarget", usage(
 		"Faces the calling actor towards its current target.",
-		"Note that this does not affect the aiming of attacks.",
+		"Note that this does not affect the aiming of attacks, just actor facing angle.",
 		"See also: A_Chase, A_Look."
 	)),
 	
@@ -263,9 +268,25 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		"Calls A_Fire and plays sound \"FLAME\" from the calling actor."
 	)),
 	
-	TRACER        (316, false, "Tracer"),
-	SKELWHOOSH    (336, false, "SkelWhoosh"),
-	SKELFIST      (338, false, "SkelFist"),
+	TRACER        (316, false, "Tracer", usage(
+		"Turns the trajectory of a missile with a tracer reference towards its target.",
+		"The angle adjustment only occurs on a gametic that is not a multiple of 4.",
+		"If the adjustment occurs, this also spawns a bullet puff (MT_PUFF, slot 38) AND rocket smoke (MT_SMOKE, slot 8) at the calling actor's position. A lot of source ports correct this behavior to remove the puff.",
+		"If the calling actor has no tracer target, this does no adjustment, but may still spawn puffs/smoke.",
+		"Older versions of the Doom Engine will also align the \"gametics\" to a global ticker, potentially ruining demo playback through the title screen."
+	)),
+	
+	SKELWHOOSH    (336, false, "SkelWhoosh", usage(
+		"Calls A_FaceTarget and plays sound \"SKESWG\" from the calling actor.",
+		"If the calling actor has no target, this does nothing."
+	)),
+	
+	SKELFIST      (338, false, "SkelFist", usage(
+		"Calls A_FaceTarget and attempts a melee attack from the calling actor.",
+		"If the attack connects, this does 1d10 x 6 damage ",
+		"If the calling actor has no target, this does nothing."
+	)),
+
 	SKELMISSILE   (341, false, "SkelMissile"),
 	FATRAISE      (376, false, "FatRaise"),
 	FATATTACK1    (377, false, "FatAttack1"),

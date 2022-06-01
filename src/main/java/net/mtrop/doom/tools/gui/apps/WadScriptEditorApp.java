@@ -60,10 +60,10 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  * The WadScript application.
  * @author Matthew Tropiano
  */
-public class WadScriptApp extends DoomToolsApplicationInstance
+public class WadScriptEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptApp.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -99,7 +99,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	/**
 	 * Create a new WadScript application.
 	 */
-	public WadScriptApp() 
+	public WadScriptEditorApp() 
 	{
 		this(null);
 	}
@@ -108,7 +108,7 @@ public class WadScriptApp extends DoomToolsApplicationInstance
 	 * Create a new WadScript application.
 	 * @param fileToOpenFirst if not null, open this file on create.
 	 */
-	public WadScriptApp(File fileToOpenFirst) 
+	public WadScriptEditorApp(File fileToOpenFirst) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();

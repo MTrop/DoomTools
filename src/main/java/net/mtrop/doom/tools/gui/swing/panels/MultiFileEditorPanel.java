@@ -449,7 +449,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content)
 	{
-		createNewTab(tabName, null, defaultViewSettings.getDefaultEncoding(), null, content);
+		newEditor(tabName, content, 0);
 	}
 	
 	/**
@@ -461,7 +461,31 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content, Charset encoding, String styleName)
 	{
-		createNewTab(tabName, null, encoding, styleName, content);
+		newEditor(tabName, content, encoding, styleName, 0);
+	}
+	
+	/**
+	 * Creates a new editor tab with a name.
+	 * @param tabName the name of the tab.
+	 * @param content the initial content of the new editor.
+	 * @param caretPosition the starting caret position.
+	 */
+	public void newEditor(String tabName, String content, int caretPosition)
+	{
+		createNewTab(tabName, null, defaultViewSettings.getDefaultEncoding(), null, content, caretPosition);
+	}
+	
+	/**
+	 * Creates a new editor tab with a name.
+	 * @param tabName the name of the tab.
+	 * @param content the initial content of the new editor.
+	 * @param encoding the default encoding.
+	 * @param styleName the default style. Can be null to not force a style. 
+	 * @param caretPosition the starting caret position.
+	 */
+	public void newEditor(String tabName, String content, Charset encoding, String styleName, int caretPosition)
+	{
+		createNewTab(tabName, null, encoding, styleName, content, caretPosition);
 	}
 	
 	/**
@@ -488,7 +512,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString());
+		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString(), 0);
 	}
 	
 	/**
@@ -501,7 +525,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void openEditor(String editorName, File file, Charset encoding, String styleName, String content)
 	{
-		createNewTab(editorName, file, encoding, styleName, content);
+		createNewTab(editorName, file, encoding, styleName, content, 0);
 	}
 	
 	/**
@@ -762,9 +786,10 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param fileCharset the file's source charset.
 	 * @param styleName the default style. Can be null to not force a style. 
 	 * @param originalContent the incoming content for the editor.
+	 * @param caretPosition the starting caret position.
 	 * @return the editor handle created.
 	 */
-	protected final synchronized EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent)
+	protected final synchronized EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent, int caretPosition)
 	{
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
@@ -779,7 +804,7 @@ public class MultiFileEditorPanel extends JPanel
 		// Remove all CRs for editor, keep LFs.
 		final String textAreaContent = originalContent.replace("\r", "");
 		textArea.setText(textAreaContent);
-		textArea.setCaretPosition(0);
+		textArea.setCaretPosition(caretPosition);
 
 		EditorHandle handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 

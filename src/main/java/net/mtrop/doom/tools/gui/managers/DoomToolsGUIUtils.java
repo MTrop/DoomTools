@@ -485,6 +485,14 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
+	 * @return the DECOHack file filter.
+	 */
+	public FileFilter getDecoHackFileFilter()
+	{
+		return fileExtensionFilter("DECOHack Source (*.dh)", "dh");
+	}
+	
+	/**
 	 * Process modal.
 	 */
 	public interface ProcessModal

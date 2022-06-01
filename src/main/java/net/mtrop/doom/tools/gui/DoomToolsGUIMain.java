@@ -12,9 +12,10 @@ import java.util.Map;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
-import net.mtrop.doom.tools.gui.apps.WadScriptApp;
+import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
@@ -44,6 +45,8 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_OPEN = "doommake-open";
 		/** WadScript. */
 		String WADSCRIPT = "wadscript";
+		/** DECOHack. */
+		String DECOHACK = "decohack";
 	}
 	
 	/**
@@ -236,7 +239,13 @@ public final class DoomToolsGUIMain
 
 					case ApplicationNames.WADSCRIPT:
 					{
-						startApplication(new WadScriptApp());
+						startApplication(new WadScriptEditorApp());
+						break;
+					}
+
+					case ApplicationNames.DECOHACK:
+					{
+						startApplication(new DecoHackEditorApp());
 						break;
 					}
 					
@@ -284,11 +293,11 @@ public final class DoomToolsGUIMain
 		});
     	
     	Rectangle windowBounds;
-    	if ((windowBounds = settings.getFrameBounds("doomtools")) != null)
+    	if ((windowBounds = settings.getBounds()) != null)
     		window.setBounds(windowBounds);
     	
     	window.setVisible(true);
-		if (settings.getFrameMaximized("doomtools"))
+		if (settings.getBoundsMaximized())
 			window.setExtendedState(window.getExtendedState() | DoomToolsMainWindow.MAXIMIZED_BOTH);
 		
     	LOG.info("Window created.");
@@ -319,7 +328,7 @@ public final class DoomToolsGUIMain
     	}
     	
     	LOG.debug("Disposing main window...");
-    	settings.setFrameBounds("doomtools", window);
+    	settings.setBounds(window);
     	window.setVisible(false);
     	window.dispose();
     	LOG.debug("Main window disposed.");
