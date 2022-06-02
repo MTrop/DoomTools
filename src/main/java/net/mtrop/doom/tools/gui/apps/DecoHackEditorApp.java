@@ -151,7 +151,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.file.item.export", (e) -> onExport());
+		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.fileToOpenFirst = fileToOpenFirst;
@@ -160,7 +160,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return "DECOHack";
+		return language.getText("decohack.editor.title");
 	}
 
 	@Override
@@ -187,9 +187,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.save", editorPanel.getActionFor(ActionNames.ACTION_SAVE)),
 			utils.createItemFromLanguageKey("texteditor.action.saveas", editorPanel.getActionFor(ActionNames.ACTION_SAVE_AS)),
-			utils.createItemFromLanguageKey("texteditor.action.saveall", editorPanel.getActionFor(ActionNames.ACTION_SAVE_ALL)),
-			separator(),
-			utils.createItemFromLanguageKey("decohack.menu.file.item.export", exportAction)
+			utils.createItemFromLanguageKey("texteditor.action.saveall", editorPanel.getActionFor(ActionNames.ACTION_SAVE_ALL))
 		);
 	}
 	
@@ -208,6 +206,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		);
 	}
 
+	private MenuNode[] createCommonPatchMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("decohack.menu.patch.item.export", exportAction)
+		);
+	}
+	
 	private MenuNode[] createCommonEditorMenuItems()
 	{
 		return ArrayUtils.arrayOf(
@@ -235,6 +240,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				)
 			)),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
 		);
 	}
@@ -245,6 +251,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
 		);
 	}
@@ -413,7 +420,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
 			).openThenDispose();
 			
-			if (saveChoice == null)
+			if (saveChoice == null || saveChoice == false)
 				return false;
 			else if (saveChoice == true)
 			{

@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
@@ -11,9 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,13 +18,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -35,6 +30,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.WadScriptSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
@@ -51,8 +47,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
@@ -166,7 +160,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return "WadScript";
+		return language.getText("wadscript.editor.title");
 	}
 
 	@Override
@@ -462,7 +456,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private ExecutionSettings createExecutionSettings(ExecutionSettings initSettings) 
 	{
-		final ExecuteWithArgsPanel argsPanel = new ExecuteWithArgsPanel(initSettings);
+		final WadScriptExecuteWithArgsPanel argsPanel = new WadScriptExecuteWithArgsPanel(initSettings);
 		ExecutionSettings settings = utils.createSettingsModal(
 			language.getText("wadscript.run.withargs.title"),
 			argsPanel,
@@ -573,7 +567,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		
 	}
 	
-	private static class ExecutionSettings
+	public static class ExecutionSettings
 	{
 		private File workingDirectory;
 		private File standardInPath;
@@ -592,133 +586,25 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			this.entryPoint = "main";
 			this.args = new String[0];
 		}
-	}
-	
-	private class ExecuteWithArgsPanel extends JPanel
-	{
-		private static final long serialVersionUID = 3311704543488697542L;
 		
-		private JFormField<File> workingDirFileField;
-		private JFormField<File> standardInPathField;
-		private JFormField<String> entryPointField;
-
-		private JFormField<Integer> numArgsField; 
-		private Container argsFieldPanel;
-		private List<JFormField<String>> argsFieldList;
-		private List<Component> argsComponentList;
-		
-		private ExecuteWithArgsPanel(ExecutionSettings executionSettings)
+		public File getWorkingDirectory() 
 		{
-			final File workingDirectory = executionSettings.workingDirectory;
-			final File standardInPath = executionSettings.standardInPath;
-			final String entryPoint = executionSettings.entryPoint;
-			final String[] initArgs = executionSettings.args;
-			
-			this.workingDirFileField = fileField(
-				workingDirectory, 
-				(current) -> chooseDirectory(
-					this,
-					language.getText("wadscript.run.workdir.browse.title"), 
-					current, 
-					language.getText("wadscript.run.workdir.browse.accept"), 
-					FileFilters.DIRECTORIES
-				)
-			);
-			
-			this.standardInPathField = fileField(
-				standardInPath, 
-				(current) -> chooseFile(
-					this,
-					language.getText("wadscript.run.stdin.browse.title"), 
-					current, 
-					language.getText("wadscript.run.stdin.browse.accept") 
-				)
-			);
-			
-			this.entryPointField = stringField(entryPoint);
-
-			this.numArgsField = integerField(initArgs.length, (v) -> adjustFields(v));
-			this.argsFieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
-			this.argsFieldList = new ArrayList<>(Math.max(initArgs.length, 4));
-			this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
-			
-			containerOf(this,
-				node(BorderLayout.NORTH, form(104)
-					.addField(language.getText("wadscript.run.withargs.workdir"), workingDirFileField)
-					.addField(language.getText("wadscript.run.withargs.stdin"), standardInPathField)
-					.addField(language.getText("wadscript.run.withargs.entrypoint"), entryPointField)
-					.addField(language.getText("wadscript.run.withargs.argfield"), numArgsField)
-				),
-				node(BorderLayout.CENTER, dimension(320, 128), scroll(containerOf(
-					node(BorderLayout.NORTH, argsFieldPanel),
-					node(BorderLayout.CENTER, containerOf())
-				)))
-			);
-			adjustFields(initArgs.length);
-			for (int i = 0; i < initArgs.length; i++)
-				this.argsFieldList.get(i).setValue(initArgs[i]);
+			return workingDirectory;
 		}
 		
-		private void adjustFields(int newLen)
+		public File getStandardInPath() 
 		{
-			final int start = argsFieldList.size();
-			newLen = Math.max(newLen, 0);
-			
-			if (newLen < start)
-			{
-				while (argsFieldList.size() > newLen)
-				{
-					int idx = argsFieldList.size() - 1;
-					argsFieldList.remove(idx);
-					argsFieldPanel.remove(argsComponentList.remove(idx));
-				}
-			}
-			else if (start < newLen)
-			{
-				while (argsFieldList.size() < newLen)
-				{
-					int idx = argsFieldList.size();
-					JFormField<String> argField = stringField();
-					Container container = containerOf(
-						node(BorderLayout.LINE_START, dimension(48, 20), label(String.valueOf(idx))),
-						node(BorderLayout.CENTER, argField)
-					);
-					argsFieldList.add(argField);
-					argsFieldPanel.add(container);
-					argsComponentList.add(container);
-				}
-			}
-			// Refresh panel.
-			SwingUtils.invoke(() -> {
-				argsFieldPanel.revalidate();
-			});
+			return standardInPath;
 		}
 		
-		public File getWorkingDirectory()
+		public String getEntryPoint() 
 		{
-			return workingDirFileField.getValue();
-		}
-
-		public File getStandardInPath()
-		{
-			return standardInPathField.getValue();
-		}
-
-		public String getEntryPoint()
-		{
-			return entryPointField.getValue();
+			return entryPoint;
 		}
 		
-		/**
-		 * @return an array of the entered arguments.
-		 */
-		public String[] getArgs()
+		public String[] getArgs() 
 		{
-			int size = argsFieldList.size();
-			List<String> argList = new ArrayList<>(size);
-			for (JFormField<String> field : argsFieldList)
-				argList.add(field.getValue());
-			return argList.toArray(new String[size]);
+			return args;
 		}
 		
 	}

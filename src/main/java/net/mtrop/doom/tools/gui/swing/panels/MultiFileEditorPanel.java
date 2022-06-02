@@ -22,11 +22,13 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.ref.WeakReference;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +94,8 @@ public class MultiFileEditorPanel extends JPanel
     private static final Logger LOG = DoomToolsLogger.getLogger(MultiFileEditorPanel.class); 
 
     private static final FileFilter[] NO_FILTERS = new FileFilter[0];
+
+	private static final Set<WeakReference<MultiFileEditorPanel>> ACTIVE_PANELS = new HashSet<>(8);
 
 	private static final Options DEFAULT_OPTIONS = new MultiFileEditorPanel.Options()
 	{
@@ -334,8 +338,10 @@ public class MultiFileEditorPanel extends JPanel
 		
 		reloadSettings();
 		
-		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
-			tabs.addChangeListener((event) -> {
+		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> 
+		{
+			tabs.addChangeListener((event) -> 
+			{
 				int index = tabs.getSelectedIndex();
 				if (index >= 0)
 				{
@@ -440,6 +446,11 @@ public class MultiFileEditorPanel extends JPanel
 				node(containerOf(gridLayout(1, 0), labelNodes.toArray(new Node[labelNodes.size()])))
 			))
 		);
+		
+		synchronized (ACTIVE_PANELS) 
+		{
+			ACTIVE_PANELS.add(new WeakReference<MultiFileEditorPanel>(this));
+		}
 	}
 	
 	/**
@@ -769,6 +780,26 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
+	 * Calls {@link #reloadSettings()} across all un-disposed editors.
+	 */
+	public static void reloadAllSettings()
+	{
+		synchronized (ACTIVE_PANELS) 
+		{
+			Iterator<WeakReference<MultiFileEditorPanel>> it = ACTIVE_PANELS.iterator();
+			while (it.hasNext())
+			{
+				WeakReference<MultiFileEditorPanel> panelRef = it.next();
+				MultiFileEditorPanel panel;
+				if ((panel = panelRef.get()) != null)
+					panel.reloadSettings();
+				else
+					it.remove();
+			}
+		}
+	}
+
+	/**
 	 * Sets a theme across all editors (and future ones).
 	 * @param themeType the theme type.
 	 */
@@ -778,7 +809,7 @@ public class MultiFileEditorPanel extends JPanel
 		currentTheme = theme;
 		forEachOpenEditor((handle) -> theme.apply(handle.editorPanel.textArea));
 	}
-
+	
 	/**
 	 * Creates a new editor, returning the editor tab.
 	 * @param title the tab title.
@@ -1374,7 +1405,7 @@ public class MultiFileEditorPanel extends JPanel
 			containerOf(createEmptyBorder(8, 8, 8, 8), node(dimension(500, 600), settingsPanel))
 		).openThenDispose();
 		settingsPanel.commitSettings();
-		reloadSettings();
+		reloadAllSettings();
 	}
 
 	/**

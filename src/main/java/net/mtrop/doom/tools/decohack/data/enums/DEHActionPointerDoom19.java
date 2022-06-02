@@ -56,7 +56,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	PUNCH         (6,   true,  "Punch", usage(
 		"Performs a punch hitscan attack from the calling player.",
-		"If it is in range of a shootable actor, it plays the \"PUNCH\" sound, deals 1d10 x2 damage to that actor, multiplied by 10 if berserk.",
+		"If it is in range of a shootable actor, it plays the \"PUNCH\" sound, deals 1d10 x2 damage to that actor, further multiplied by 10 if the calling player has the Berserk powerup.",
 		"If the attack deals damage, it will turn the player towards what it punched.",
 		"The range of the attack is 64 map units."
 	)),
@@ -73,7 +73,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		"Fires a pistol shot from the calling player.",
 		"Plays the sound \"PISTOL\", fires one hitscan attack, and subtracts 1 from the ammo type of this weapon.",
 		"The hitscan attack does 5 x 1d3 damage.",
-		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD.",
+		"This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD.",
 		"If \"refire\" is 0, the hitscan is dead center, with no random angle."
 	)),
 	
@@ -86,7 +86,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		"Fires a shotgun shot from the calling player.",
 		"Plays the sound \"SHOTGN\", fires 7 hitscan attacks, and subtracts 1 from the ammo type of this weapon.",
 		"Each hitscan attack does 5 x 1d3 damage.",
-		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD."
+		"This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD."
 	)),
 	
 	LIGHT2        (31,  true,  "Light2", usage(
@@ -98,7 +98,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		"Fires a super-shotgun shot from the calling player.",
 		"Plays the sound \"DSHTGN\", fires 20 hitscan attacks, and subtracts 2 from the ammo type of this weapon.",
 		"Each hitscan attack does 5 x 1d3 damage.",
-		"This also sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD."
+		"This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD."
 	)),
 	
 	CHECKRELOAD   (38,  true,  "CheckReload", usage(
@@ -140,7 +140,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	SAW           (71,  true,  "Saw", usage(
 		"Performs a single chainsaw scan attack.",
-		"If it is in range of a shootable actor, it plays the \"SAWHIT\" sound from the calling player, deals 1d10 x2 damage to that actor, multiplied by 10 if berserk.",
+		"If it is in range of a shootable actor, it plays the \"SAWHIT\" sound from the calling player, deals 1d10 x2 damage to that actor.",
 		"If the attack deals damage, it will turn the player towards what it punched.",
 		"The range of the attack is 64 map units.",
 		"If the attack misses, it plays the \"SAWFUL\" sound from the calling player."
@@ -195,7 +195,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	LOOK          (174, false, "Look", usage(
 		"Looks for a valid target for the calling actor.",
 		"When a target is found, the calling actor's SIGHT sound is played, if defined, its target is set to the seen actor, and it enters its SEE state.",
-		"If the calling actor is in thing slot MT_SPIDER (20) or MT_CYBORG (22), the SIGHT sound is played at full volume.",
+		"If the calling actor is in thing slot MT_SPIDER (20) or MT_CYBORG (22), the SIGHT sound is played at full volume (in MBF21 patches, this can be altered via the FULLVOLSOUNDS flag).",
 		"This MUST be called before A_Chase is called - A_Chase requires a target to pursue, or this actor jumps back to its SPAWN state.",
 		"This pointer, along with A_Chase, comprises the \"AI\" of Doom monsters."
 	)),

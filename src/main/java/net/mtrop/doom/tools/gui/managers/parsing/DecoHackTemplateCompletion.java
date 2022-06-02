@@ -10,37 +10,135 @@ import org.fife.ui.autocomplete.TemplateCompletion;
 public enum DecoHackTemplateCompletion
 {
 	AUTOTHING("Adds an auto-thing.", (
-		"auto thing ${thingalias} \"${thingname}\" {\n" +
+		"auto thing ${ThingAlias} \"${ThingName}\" {\n" +
 		"\t${cursor}\n" +
 		"}\n"
 	)),
 	
-	AUTOTHINGI("Adds an auto-thing copied from another thing.", (
-		"auto thing ${thingalias} \"${thingname}\" : thing ${sourcething} {\n" +
+	AUTOTHINGCOPY("Adds an auto-thing copied from another thing.", (
+		"auto thing ${ThingAlias} : thing ${SourceThing} \"${ThingName}\" {\n" +
 		"\t${cursor}\n" +
 		"}\n"
 	)),
 
-	AMMO("Creates an ammo block.", (
+	AMMOBLOCK("Adds an ammo block.", (
 		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
 		"\tmax ${MaxAmount}\n" +
 		"\tpickup ${PickupAmount}\n" +
 		"}\n"
 	)),
 		
-	SOUND("Creates a sound block.", (
-		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
-		"\tmax ${MaxAmount}\n" +
-		"\tpickup ${PickupAmount}\n" +
+	EACHTHINGFROM("Adds an \"each thing\" range block.", (
+		"each thing from ${ThingIDStart} to ${ThingIDEnd} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
+	EACHTHINGIN("Adds an \"each thing\" set block.", (
+		"each thing in (${ThingList}) {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
+	EACHWEAPONFROM("Adds an \"each weapon\" range block.", (
+		"each weapon from ${WeaponIDStart} to ${WeaponIDEnd} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
+	EACHWEAPONIN("Adds an \"each weapon\" set block.", (
+		"each weapon in (${WeaponList}) {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
+	SOUNDBLOCK("Adds a sound block.", (
+		"sound \"${SoundName}\" {\n" +
+		"\tpriority ${Priority}\n" +
+		"\tsingular ${Singular}\n" +
 		"}\n"
 	)),
 			
-	STRINGS("Creates a strings block.", (
+	STATEFREE1("Adds a \"state free\" clause.", (
+		"state free ${StateID}\n"
+	)),
+
+	STATEFREE2("Adds a \"state free\" range clause.", (
+		"state free ${StateIDStart} to ${StateIDEnd}\n"
+	)),
+
+	STATEFREE3("Adds a \"state free\" from a starting state clause.", (
+		"state free from ${StateIDStart}\n"
+	)),
+
+	STATEFILL("Adds a \"state fill\" block.", (
+		"state fill ${StateIDStart} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	STRINGSBLOCK("Adds a strings block.", (
 		"strings {\n" +
 		"\t${cursor}\n" +
 		"}\n"
 	)),
 		
+	THINGBLOCK("Adds a thing block.", (
+		"thing ${ThingID} \"${ThingName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	THINGBLOCKCOPY("Adds a thing block copied from another thing.", (
+		"thing ${ThingID} : thing ${SourceThing} \"${ThingName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	THINGFREE1("Adds a \"Thing free\" clause.", (
+		"thing free ${ThingID}\n"
+	)),
+
+	THINGFREE2("Adds a \"Thing free\" range clause.", (
+		"thing free ${ThingIDStart} to ${ThingIDEnd}\n"
+	)),
+
+	THINGFREESTATES("Adds a \"free a thing's connected states\" clause.", (
+		"thing ${ThingID} free states\n"
+	)),
+
+	THINGFREESTATES2("Adds a \"free a thing's specific connected states\" clause.", (
+		"thing ${ThingID} free #{StateLabel}\n"
+	)),
+
+	THINGSWAP("Adds a thing swap clause.", (
+		"thing ${Thing1} swap with ${Thing2}\n"
+	)),
+
+	WEAPONBLOCK("Adds a weapon block.", (
+		"weapon ${WeaponID} \"${WeaponName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	WEAPONBLOCKCOPY("Adds a weapon block copied from another weapon.", (
+		"weapon ${WeaponID} : weapon ${SourceWeapon} \"${WeaponName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	WEAPONFREESTATES("Adds a \"free a weapon's connected states\" clause.", (
+		"weapon ${WeaponID} free states\n"
+	)),
+
+	WEAPONFREESTATES2("Adds a \"free a weapon's specific connected states\" clause.", (
+		"weapon ${WeaponID} free #{StateLabel}\n"
+	)),
+
+	WEAPONSWAP("Adds a weapon's swap clause.", (
+		"weapon ${Weapon1} swap with ${Weapon2}\n"
+	)),
+
 	;
 	
 	private final String inputText;

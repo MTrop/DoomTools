@@ -33,6 +33,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
@@ -273,10 +274,17 @@ public class DoomToolsMainWindow extends JFrame
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.new", (c, e) -> newDoomMakeProject()),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.open", (c, e) -> openDoomMakeProject())
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (c, e) -> newDoomMakeProject()),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (c, e) -> openDoomMakeProject())
 				),
-				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript", (c, e) -> addApplication(new WadScriptEditorApp()))
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute" /* TODO: Add WadScript Executor app. */),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (c, e) -> addApplication(new WadScriptEditorApp()))
+				),
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile" /* TODO: Add DECOHack Compiler app. */),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (c, e) -> addApplication(new DecoHackEditorApp()))
+				)
 			),
 
 			// View
