@@ -233,7 +233,7 @@ public final class WTExportMain
 		/** Base Unit. */
 		private WadUnit baseUnit;
 		/** WAD priority queue. */
-		private Deque<WadUnit> wadPriority;
+		private List<WadUnit> wadPriority;
 
 		/** List of texture names (need this list because order matters). */
 		private List<String> textureList; 
@@ -255,7 +255,12 @@ public final class WTExportMain
 			this.flatList = new ArrayList<>();
 		}
 
-		// Scan WAD file.
+		/**
+		 * Scans a WAD file, building a texture library profile of it.
+		 * @param path the path to the WAD.
+		 * @param isBase if true, does not add to the WAD priority, otherwise, it is set as the base.
+		 * @return true if the WAD was read and accounted for, false on error.
+		 */
 		private boolean scanWAD(File path, boolean isBase)
 		{
 			options.printf("Scanning %s...\n", path);
@@ -310,7 +315,13 @@ public final class WTExportMain
 			return true;
 		}
 
-		// Scan for TEXTUREx and PNAMES.
+		/**
+		 * Scan for TEXTUREx and PNAMES.
+		 * @param unit the WAD unit.
+		 * @param wf the corresponding WadFile.
+		 * @return true if successful, false if not.
+		 * @throws IOException if a read error occurs.
+		 */
 		private boolean scanTexturesAndPNames(WadUnit unit, WadFile wf) throws IOException
 		{
 			options.println("    Scanning TEXTUREx/PNAMES...");
@@ -416,7 +427,13 @@ public final class WTExportMain
 			return true;
 		}
 
-		// Scan for ANIMATED. Add combinations of textures to animated mapping.
+		/**
+		 * Scan for ANIMATED. Add combinations of textures to animated mapping.
+		 * @param unit the WAD unit.
+		 * @param wf the corresponding WadFile.
+		 * @return true if successful, false if not.
+		 * @throws IOException if a read error occurs.
+		 */
 		private boolean scanAnimated(WadUnit unit, WadFile wf) throws IOException
 		{
 			if (!options.noAnimated)
@@ -468,7 +485,13 @@ public final class WTExportMain
 			}
 		}
 
-		// Get animated texture sequence.
+		/**
+		 * Get animated texture sequence.
+		 * @param unit the WAD unit.
+		 * @param firstName the first name of the sequence.
+		 * @param lastName the last name of the sequence.
+		 * @return true if successful, false if not.
+		 */
 		private String[] getTextureSequence(WadUnit unit, String firstName, String lastName)
 		{
 			Deque<String> out = new LinkedList<>();
@@ -494,7 +517,13 @@ public final class WTExportMain
 			return outList;
 		}
 
-		// Get animated flat sequence.
+		/**
+		 * Get animated flat sequence.
+		 * @param unit the WAD unit.
+		 * @param firstName the first name of the sequence.
+		 * @param lastName the last name of the sequence.
+		 * @return the textures between firstName and lastName.
+		 */
 		private String[] getFlatSequence(WadUnit unit, String firstName, String lastName)
 		{
 			Deque<String> out = new LinkedList<String>();
@@ -520,8 +549,18 @@ public final class WTExportMain
 			return outList;
 		}
 
-		// Scans namespace entries.
-		private boolean scanNamespace(String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> map, List<String> list)
+		/**
+		 * Scans namespace entries.
+		 * @param name the actual namespace prefix.
+		 * @param equivName an equivalent namespace prefix.
+		 * @param ignorePattern a RegEx pattern for what entries to ignore on scan.
+		 * @param unit associated the WAD unit.
+		 * @param wf the WadFile to scan.
+		 * @param outputMap the output mapping of entry name to WAD entry index.
+		 * @param outputList the output list of entry names (no duplicates).
+		 * @return true if successful, false if a scan error occurs.
+		 */
+		private boolean scanNamespace(String name, String equivName, Pattern ignorePattern, WadUnit unit, WadFile wf, HashMap<String, Integer> outputMap, List<String> outputList)
 		{
 			// scan patch namespace
 			int start = wf.indexOf(name+"_START");
@@ -541,11 +580,11 @@ public final class WTExportMain
 						String ename = wf.getEntry(i).getName();
 						if (ignorePattern != null && ignorePattern.matcher(ename).matches())
 							continue;
-						if (!map.containsKey(ename))
+						if (!outputMap.containsKey(ename))
 						{
-							map.put(ename, i);
-							if (list != null)
-								list.add(ename);
+							outputMap.put(ename, i);
+							if (outputList != null)
+								outputList.add(ename);
 						}
 					}
 				}
@@ -559,17 +598,26 @@ public final class WTExportMain
 			return true;
 		}
 
-		private boolean addToLists(Set<String> set, List<String> list, String s)
+		/**
+		 * Adds a string (usually some kind of entry) to a list and set, if it does not exist in the set.
+		 * Addition adds it to the provided set and the end of the provided list.
+		 * @param outputSet the output set.
+		 * @param outputList the output list.
+		 * @param entry the entry name.
+		 * @return true if added, false if not (name exists in the set).
+		 */
+		private static boolean addToLists(Set<String> outputSet, List<String> outputList, String entry)
 		{
-			if (!set.contains(s))
+			if (!outputSet.contains(entry))
 			{
-				set.add(s);
-				list.add(s);
+				outputSet.add(entry);
+				outputList.add(entry);
 				return true;
 			}
 			return false;
 		}
 
+		// Adds a texture to the main list (and associated ones, if possible).
 		private void readAndAddTextures(String textureName)
 		{
 			if (!NameUtils.isValidTextureName(textureName))
@@ -578,17 +626,30 @@ public final class WTExportMain
 				return;
 			}
 			
-			if (addToLists(textureSet, textureList, textureName))
+			if (!textureSet.contains(textureName))
 			{
 				for (WadUnit unit : wadPriority)
 				{
-					if (!options.noAnimated)
-						readAndAddAnimatedTextures(unit, textureName);
-				
+					// Check if animated, and if so, do NOT copy that texture over first - just copy over the animation sequence.
+					// Copying the texture first can break animations from the middle.
+					if (unit.animatedTexture.containsKey(textureName))
+					{
+						if (!options.noAnimated)
+							readAndAddAnimatedTextures(unit, textureName);
+					}
+					
 					if (!options.noSwitches)
 						readAndAddSwitchTextures(unit, textureName);
+					
+					// Break early if added.
+					if (textureSet.contains(textureName))
+						break;
 				}
+
+				// attempt to add anyway - if it was already copied from the previous code, nothing happens.
+				addToLists(textureSet, textureList, textureName);
 			}
+			
 		}
 
 		private void readAndAddAnimatedTextures(WadUnit unit, String textureName)
@@ -621,8 +682,8 @@ public final class WTExportMain
 		
 		private void readAndAddFlats(String textureName)
 		{
-			addToLists(flatSet, flatList, textureName);
-		
+			// Check if animated, and if so, do NOT copy that texture over first - just copy over the animation sequence.
+			// Copying the texture first can break animations from the middle.
 			if (!options.noAnimated)
 			{
 				for (WadUnit unit : wadPriority)
@@ -630,14 +691,25 @@ public final class WTExportMain
 					if (unit.animatedFlat.containsKey(textureName))
 						for (String s : unit.animatedFlat.get(textureName))
 							addToLists(flatSet, flatList, s);
+					
+					// Break early if added.
+					if (flatSet.contains(textureName))
+						break;
 				}
 			}
+			
+			addToLists(flatSet, flatList, textureName);
 		}
 
-		/** Searches for the flat to extract. */
-		private WadUnit searchForFlat(Deque<WadUnit> unitQueue, String flatName)
+		/**
+		 * Searches for the flat to extract. 
+		 * @param unitList the list to sequentially search for the desired flat.
+		 * @param flatName the flat name.
+		 * @return the unit that contains it, or null if not found.
+		 */
+		private WadUnit searchForFlat(List<WadUnit> unitList, String flatName)
 		{
-			for (WadUnit unit : unitQueue)
+			for (WadUnit unit : unitList)
 			{
 				if (unit.flatIndices.containsKey(flatName))
 					return unit;
@@ -646,10 +718,15 @@ public final class WTExportMain
 			return null;
 		}
 
-		/** Searches for the texture to extract. */
-		private WadUnit searchForTexture(Deque<WadUnit> unitQueue, String textureName)
+		/** 
+		 * Searches for the texture to extract. 
+		 * @param unitList the list to sequentially search for the desired texture.
+		 * @param textureName the texture name.
+		 * @return the unit that contains it, or null if not found.
+		 */
+		private WadUnit searchForTexture(List<WadUnit> unitList, String textureName)
 		{
-			for (WadUnit unit : unitQueue)
+			for (WadUnit unit : unitList)
 			{
 				if (unit.textureSet.contains(textureName))
 					return unit;
@@ -658,10 +735,15 @@ public final class WTExportMain
 			return null;
 		}
 
-		/** Searches for the texture to extract. */
-		private WadUnit searchForNamespaceTexture(Deque<WadUnit> unitQueue, String textureName)
+		/** 
+		 * Searches for the texture to extract within the "texture" namespace. 
+		 * @param unitList the list to sequentially search for the desired texture.
+		 * @param textureName the texture name.
+		 * @return the unit that contains it, or null if not found.
+		 */
+		private WadUnit searchForNamespaceTexture(List<WadUnit> unitList, String textureName)
 		{
-			for (WadUnit unit : unitQueue)
+			for (WadUnit unit : unitList)
 			{
 				if (unit.texNamespaceIndices.containsKey(textureName))
 					return unit;
@@ -670,6 +752,11 @@ public final class WTExportMain
 			return null;
 		}
 
+		/**
+		 * Extracts flats and adds them to the provided {@link ExportSet}.
+		 * @param exportSet the export set.
+		 * @return true if successful, false on read error.
+		 */
 		private boolean extractFlats(ExportSet exportSet)
 		{
 			options.println("    Extracting flats...");
@@ -686,7 +773,7 @@ public final class WTExportMain
 						if (pidx != null)
 						{
 							try {
-								options.printf("        Extracting flat %s...\n", flat);
+								options.printf("        Extracting flat %s (%s)...\n", flat, unit.wad.getFileName());
 								EntryData data = new EntryData(flat, unit.wad.getData(pidx));
 								exportSet.flatData.add(data);
 								exportSet.flatHash.add(flat);
@@ -701,6 +788,11 @@ public final class WTExportMain
 			return true;
 		}
 
+		/**
+		 * Extracts textures and adds them to the provided {@link ExportSet}.
+		 * @param exportSet the export set.
+		 * @return true if successful, false on read error.
+		 */
 		private boolean extractTextures(ExportSet exportSet)
 		{
 			options.println("    Extracting textures...");
@@ -729,7 +821,7 @@ public final class WTExportMain
 							if (pidx != null && !exportSet.patchHash.contains(pname))
 							{
 								try {
-									options.printf("        Extracting patch %s...\n", pname);
+									options.printf("        Extracting patch %s (%s)...\n", pname, unit.wad.getFileName());
 									EntryData data = new EntryData(pname, unit.wad.getData(pidx));
 									exportSet.patchData.add(data);
 									exportSet.patchHash.add(pname);
@@ -744,7 +836,7 @@ public final class WTExportMain
 					// if we've found patches or the texture is new, better extract the texture.
 					if (foundPatches || !exportSet.textureSet.contains(textureName))
 					{
-						options.printf("        Copying texture %s...\n", textureName);
+						options.printf("        Copying texture %s (%s)...\n", textureName, unit.wad.getFileName());
 						
 						// check if potential overwrite.
 						if (exportSet.textureSet.contains(textureName))
@@ -774,7 +866,7 @@ public final class WTExportMain
 						if (pidx != null)
 						{
 							try {
-								options.printf("        Extracting namespace texture %s...\n", textureName);
+								options.printf("        Extracting namespace texture %s (%s)...\n", textureName, unit.wad.getFileName());
 								EntryData data = new EntryData(textureName, unit.wad.getData(pidx));
 								exportSet.textureData.add(data);
 							} catch (IOException e) {
@@ -789,7 +881,11 @@ public final class WTExportMain
 			return true;
 		}
 
-		// Merges ANIMATED and SWITCHES from inputs.
+		/**
+		 * Merges ANIMATED and SWITCHES from inputs to an ExportSet, adding the entries if it finds the corresponding textures/flats.
+		 * @param exportSet the export set.
+		 * @return true if successful, false on read error.
+		 */
 		private boolean mergeAnimatedAndSwitches(ExportSet exportSet)
 		{
 			if (!options.noAnimated)
@@ -804,14 +900,23 @@ public final class WTExportMain
 						if (entry.isTexture())
 						{
 							if (exportSet.textureSet.contains(entry.getFirstName()))
+							{
 								exportSet.animatedData.addEntry(Animated.texture(entry.getLastName(), entry.getFirstName(), entry.getTicks(), entry.getAllowsDecals()));
+								options.printf("        Texture %s to %s (%d tics)...\n", entry.getFirstName(), entry.getLastName(), entry.getTicks());
+							}
 						}
 						else
 						{
 							if (exportSet.flatHash.contains(entry.getFirstName()))
+							{
 								exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
+								options.printf("        Flat %s to %s (%d tics)...\n", entry.getFirstName(), entry.getLastName(), entry.getTicks());
+							}
 							else if (baseUnit.flatIndices.containsKey(entry.getFirstName()))
+							{
 								exportSet.animatedData.addEntry(Animated.flat(entry.getLastName(), entry.getFirstName(), entry.getTicks()));
+								options.printf("        Flat %s to %s (%d tics)...\n", entry.getFirstName(), entry.getLastName(), entry.getTicks());
+							}
 						}
 					}
 				}
@@ -822,13 +927,19 @@ public final class WTExportMain
 				options.println("    Merging SWITCHES...");
 				for (WadUnit unit : wadPriority)
 				{
-					// did we pull any animated textures? if so, copy the entries.
-					for (Switches.Entry e : unit.switches)
+					// did we pull any switch textures? if so, copy the entries.
+					for (Switches.Entry entry : unit.switches)
 					{
-						if (exportSet.textureSet.contains(e.getOffName()))
-							exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
-						else if (exportSet.textureSet.contains(e.getOnName()))
-							exportSet.switchesData.addEntry(e.getOffName(), e.getOnName(), e.getGame());
+						if (exportSet.textureSet.contains(entry.getOffName()))
+						{
+							exportSet.switchesData.addEntry(entry.getOffName(), entry.getOnName(), entry.getGame());
+							options.printf("        Switch %s / %s (%s)...\n", entry.getOffName(), entry.getOnName(), entry.getGame().name());
+						}
+						else if (exportSet.textureSet.contains(entry.getOnName()))
+						{
+							exportSet.switchesData.addEntry(entry.getOffName(), entry.getOnName(), entry.getGame());
+							options.printf("        Switch %s / %s (%s)...\n", entry.getOffName(), entry.getOnName(), entry.getGame().name());
+						}
 					}
 				}
 			}
@@ -836,13 +947,20 @@ public final class WTExportMain
 			return true;
 		}
 
+		/**
+		 * Dumps the contents of the ExportSet to a WAD file.
+		 * @param exportSet the export set.
+		 * @param wf the output WAD file.
+		 * @return true.
+		 * @throws IOException if a write error occurs.
+		 */
 		private boolean dumpToOutputWad(ExportSet exportSet, WadFile wf) throws IOException
 		{
 			options.println("Sorting entries...");
 			exportSet.textureSet.sort(options.nullComparator);
+			
+			// Some data can be sorted - it's referred to by the stuff that has a specific order.
 			Collections.sort(exportSet.patchData);
-			Collections.sort(exportSet.flatData);
-			Collections.sort(exportSet.textureData);
 			
 			options.println("Dumping entries...");
 		
@@ -894,18 +1012,18 @@ public final class WTExportMain
 			{
 				idx = wf.indexOf("ANIMATED");
 				if (idx >= 0)
-					wf.replaceEntry(idx, exportSet.animatedData.toBytes());
+					wf.replaceEntry(idx, exportSet.animatedData);
 				else
-					wf.addData("ANIMATED", exportSet.animatedData.toBytes());
+					wf.addData("ANIMATED", exportSet.animatedData);
 			}
 		
 			if (!options.noSwitches && exportSet.switchesData.getEntryCount() > 0)
 			{
 				idx = wf.indexOf("SWITCHES");
 				if (idx >= 0)
-					wf.replaceEntry(idx, exportSet.switchesData.toBytes());
+					wf.replaceEntry(idx, exportSet.switchesData);
 				else
-					wf.addData("SWITCHES", exportSet.switchesData.toBytes());
+					wf.addData("SWITCHES", exportSet.switchesData);
 			}
 			
 			dumpListToOutputWad(exportSet.patchData, "PP", wf);
@@ -915,6 +1033,14 @@ public final class WTExportMain
 			return true;
 		}
 
+		/**
+		 * Bulk-writes a list of entries to a WAD file.
+		 * @param entries the list of entry data to write, in order of writing.
+		 * @param namespace the WAD namespace to write (affixes START and END).
+		 * @param wf the output WAD file.
+		 * @return true.
+		 * @throws IOException if a write error occurs.
+		 */
 		private boolean dumpListToOutputWad(List<EntryData> entries, String namespace, WadFile wf) throws IOException
 		{
 			if (entries.size() == 0)
@@ -944,7 +1070,12 @@ public final class WTExportMain
 			return true;
 		}
 
-		/** Extracts the necessary stuff for output. */
+		/**
+		 * Extracts the necessary stuff for output.
+		 * This is the entry point for pulling and extracting.
+		 * @param options the Options object.
+		 * @return true if successful, false if an error occurs.
+		 */
 		private boolean extractToOutputWad(Options options)
 		{
 			File outFile = options.outWad;
@@ -978,7 +1109,11 @@ public final class WTExportMain
 			return true;
 		}
 
-		// Attempts to make a new WAD file.
+		/** 
+		 * Attempts to make a new WAD file.
+		 * @param f the file path.
+		 * @return the created, open WadFile.
+		 */
 		private WadFile newWadFile(File f)
 		{
 			WadFile outWad = null;
@@ -995,7 +1130,12 @@ public final class WTExportMain
 			return outWad;
 		}
 
-		// Attempts to open a WAD file.
+		/** 
+		 * Attempts to open an existing WAD file.
+		 * @param f the file path.
+		 * @param create if true, create it if it does not exist.
+		 * @return the created, open WadFile.
+		 */
 		private WadFile openWadFile(File f, boolean create)
 		{
 			WadFile outWad = null;
@@ -1020,6 +1160,11 @@ public final class WTExportMain
 			return outWad;
 		}
 
+		/**
+		 * Reads the texture/flat list from the STDIN mapping on Options.
+		 * @throws OptionParseException if the list is misordered or malformed.
+		 * @throws IOException if a read error occurs.
+		 */
 		private void readList() throws OptionParseException, IOException
 		{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(options.stdin));
@@ -1219,9 +1364,9 @@ public final class WTExportMain
 
 	private static class ExportSet
 	{
-		private Set<String> textureHash;
 		private Set<String> patchHash;
 		private Set<String> flatHash;
+		private Set<String> textureHash;
 		
 		private TextureSet textureSet;
 		private List<EntryData> patchData;
@@ -1232,9 +1377,10 @@ public final class WTExportMain
 		
 		public ExportSet()
 		{
-			this.textureHash = new HashSet<>();
 			this.flatHash = new HashSet<>();
 			this.patchHash = new HashSet<>();
+			this.textureHash = new HashSet<>();
+			
 			this.textureSet = null;
 			this.patchData = new ArrayList<EntryData>();
 			this.flatData = new ArrayList<EntryData>();

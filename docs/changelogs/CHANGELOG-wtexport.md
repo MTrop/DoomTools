@@ -1,6 +1,13 @@
 WTEXport
 --------
 
+### Changed for 1.5.0
+
+* `Added` More output info during the extraction process.
+* `Fixed` Textures/Flats in ANIMATED were added in an incorrect order if the provided texture/flat was not the start of an animation loop. (Issue #75)
+* `Changed` Removed some potential sorts that could ruin things.
+
+
 ### Changed for 1.4.0
 
 * `Fixed` Textures added via ANIMATED searching did not also check for SWITCHES pairings.
