@@ -52,6 +52,12 @@ public enum DecoHackTemplateCompletion
 		"}\n"
 	)),
 		
+	MISCELLANEOUSBLOCK("Adds a miscellaneous block.", (
+		"misc {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+			
 	SOUNDBLOCK("Adds a sound block.", (
 		"sound \"${SoundName}\" {\n" +
 		"\tpriority ${Priority}\n" +

@@ -1,8 +1,9 @@
 DECOHack
 --------
 
-### Changed for 0.24.2
+### Changed for 0.25.0
 
+* `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
 * `Changed` Added a better error message for bad action pointers.
 
 

@@ -45,6 +45,8 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	
 	public WadScriptExecuteWithArgsPanel(ExecutionSettings executionSettings)
 	{
+		this.language = DoomToolsLanguageManager.get();
+		
 		final File workingDirectory = executionSettings.getWorkingDirectory();
 		final File standardInPath = executionSettings.getStandardInPath();
 		final String entryPoint = executionSettings.getEntryPoint();
@@ -79,7 +81,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, form(104)
+			node(BorderLayout.NORTH, form(language.getInteger("wadscript.run.withargs.label.width"))
 				.addField(language.getText("wadscript.run.withargs.workdir"), workingDirFileField)
 				.addField(language.getText("wadscript.run.withargs.stdin"), standardInPathField)
 				.addField(language.getText("wadscript.run.withargs.entrypoint"), entryPointField)
@@ -167,4 +169,3 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	}
 	
 }
-

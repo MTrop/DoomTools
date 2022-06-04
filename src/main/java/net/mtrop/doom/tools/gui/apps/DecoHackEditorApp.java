@@ -31,6 +31,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
@@ -90,7 +91,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private File fileToOpenFirst;
 	private EditorHandle currentHandle;
-	
+	private Map<EditorHandle, ExportSettings> handleToSettingsMap;
+
 	// ...
 
 	/**
@@ -147,6 +149,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			public void onClose(EditorHandle handle) 
 			{
 				statusPanel.setSuccessMessage(language.getText("decohack.status.message.editor.close", handle.getEditorTabName()));
+				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
@@ -154,6 +157,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
+		this.handleToSettingsMap = new HashMap<>();
 		this.fileToOpenFirst = fileToOpenFirst;
 	}
 	
@@ -379,7 +383,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			language.getText("wadscript.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.getWadScriptFileFilter()
+			utils.getDecoHackFileFilter()
 		);
 		
 		if (file != null)
@@ -440,7 +444,46 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			return;
 		}
 		
-		// TODO: Finish this.
+		// Should be set if saveBeforeExecute() succeeds.
+		final File scriptFile = currentHandle.getContentSourceFile();
+		
+		ExportSettings exportSettings = handleToSettingsMap.get(currentHandle);
+		final ExportSettings processSettings = createExportSettings(scriptFile, exportSettings != null ? exportSettings : new ExportSettings(scriptFile));
+		
+		if (processSettings == null)
+			return;
+		
+		handleToSettingsMap.put(currentHandle, exportSettings);
+
+		utils.createProcessModal(
+			receiver.getApplicationContainer(), 
+			language.getText("decohack.export.message.title"), 
+			language.getText("decohack.export.message.running", scriptFile.getName()), 
+			language.getText("decohack.export.message.success"), 
+			language.getText("decohack.export.message.error"), 
+			(stream, errstream) -> execute(scriptFile, processSettings.getSourceOutputFile(), processSettings.getOutputFile(), processSettings.isOutputBudget(), stream, errstream)
+		).start(tasks);
+
+	}
+
+	private ExportSettings createExportSettings(File sourceFile, final ExportSettings initSettings) 
+	{
+		final DecoHackExportPanel argsPanel = new DecoHackExportPanel(initSettings);
+		ExportSettings settings = utils.createSettingsModal(
+			language.getText("decohack.export.title"),
+			argsPanel,
+			(panel) -> {
+				ExportSettings out = new ExportSettings(sourceFile);
+				out.outputFile = panel.getPatchOutput();
+				out.sourceOutputFile = panel.getSourceOutput();
+				out.outputBudget = panel.getBudget();
+				return out;
+			},
+			utils.createChoiceFromLanguageKey("decohack.export.choice.export", true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel")
+		);
+		
+		return settings;
 	}
 
 	private InstancedFuture<Integer> execute(File scriptFile, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
@@ -537,6 +580,36 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		protected File transformSaveFile(FileFilter selectedFilter, File selectedFile) 
 		{
 			return selectedFilter == getSaveFileTypes()[0] ? FileUtils.addMissingExtension(selectedFile, "dh") : selectedFile;
+		}
+		
+	}
+	
+	public static class ExportSettings
+	{
+		private File outputFile;
+		private File sourceOutputFile;
+		private boolean outputBudget;
+		
+		public ExportSettings(File sourceFile)
+		{
+			this.outputFile = new File(sourceFile.getParent() + File.separator + "dehacked.deh");
+			this.sourceOutputFile = null;
+			this.outputBudget = false;
+		}
+		
+		public File getOutputFile() 
+		{
+			return outputFile;
+		}
+		
+		public File getSourceOutputFile() 
+		{
+			return sourceOutputFile;
+		}
+		
+		public boolean isOutputBudget() 
+		{
+			return outputBudget;
 		}
 		
 	}

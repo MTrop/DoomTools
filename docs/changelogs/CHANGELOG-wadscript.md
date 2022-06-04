@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.5.0
+
+* `Added` The WadScript GUI, plus a switch to start it (`--gui`).
+
+
 ### Changed for 1.4.1
 
 * `Fixed` The `--entry` switch didn't parse the command line properly after its use.

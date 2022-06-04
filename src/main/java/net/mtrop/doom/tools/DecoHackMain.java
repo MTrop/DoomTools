@@ -38,6 +38,8 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
@@ -66,6 +68,7 @@ public final class DecoHackMain
 	private static final int ERROR_MISSING_RESOURCE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
+	private static final String SWITCH_GUI = "--gui";
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
 	private static final String SWITCH_HELPFULL = "--help-full";
@@ -96,6 +99,7 @@ public final class DecoHackMain
 		private PrintStream stderr;
 		private InputStream stdin;
 		
+		private boolean gui;
 		private boolean help;
 		private boolean full;
 		private boolean version;
@@ -117,6 +121,8 @@ public final class DecoHackMain
 			this.stdout = null;
 			this.stderr = null;
 			this.stdin = null;
+			
+			this.gui = false;
 			this.help = false;
 			this.version = false;
 			this.dumpActionPointers = false;
@@ -208,6 +214,17 @@ public final class DecoHackMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DECOHACK);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DECOHack GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -527,11 +544,13 @@ public final class DecoHackMain
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
 						options.help = true;
-					if (arg.equals(SWITCH_HELPFULL))
+					else if (arg.equals(SWITCH_HELPFULL))
 					{
 						options.help = true;
 						options.full = true;
 					}
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
 					else if (arg.equals(SWITCH_DRYRUN))

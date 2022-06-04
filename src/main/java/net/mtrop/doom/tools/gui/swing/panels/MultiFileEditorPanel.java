@@ -46,6 +46,7 @@ import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.HyperlinkEvent;
@@ -285,6 +286,9 @@ public class MultiFileEditorPanel extends JPanel
 	
 	/** All editors. */
 	private Map<Component, EditorHandle> allEditors;
+	/** All open files. */
+	private Set<File> allOpenFiles;
+	
 	/** The currently selected editor. */
 	private EditorHandle currentEditor;
 	/** The panel listener. */
@@ -333,26 +337,15 @@ public class MultiFileEditorPanel extends JPanel
 		this.settings = EditorSettingsManager.get();
 		
 		this.allEditors = new HashMap<>();
+		this.allOpenFiles = new HashSet<>();
+		
 		this.currentEditor = null;
 		this.listener = listener;
 		
 		reloadSettings();
 		
-		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> 
-		{
-			tabs.addChangeListener((event) -> 
-			{
-				int index = tabs.getSelectedIndex();
-				if (index >= 0)
-				{
-					setCurrentEditor(allEditors.get(tabs.getTabComponentAt(tabs.getSelectedIndex())));
-					tabs.getComponentAt(index).requestFocus();
-				}
-				else
-				{
-					setCurrentEditor(null);
-				}
-			});
+		this.mainEditorTabs = apply(tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL), (tabs) -> {
+			tabs.addChangeListener(this::onTabChange);
 		});
 		
 		this.saveAction = utils.createActionFromLanguageKey("texteditor.action.save", (event) -> saveCurrentEditor());
@@ -818,10 +811,15 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param styleName the default style. Can be null to not force a style. 
 	 * @param originalContent the incoming content for the editor.
 	 * @param caretPosition the starting caret position.
-	 * @return the editor handle created.
 	 */
-	protected final synchronized EditorHandle createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent, int caretPosition)
+	protected final synchronized void createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent, int caretPosition)
 	{
+		if (attachedFile != null)
+			attachedFile = attachedFile.getAbsoluteFile();
+		
+		if (focusOnFile(attachedFile))
+			return;
+		
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
 		if (styleName == null)
@@ -869,8 +867,6 @@ public class MultiFileEditorPanel extends JPanel
 		
 		if (listener != null)
 			listener.onOpen(handle);
-		
-		return handle;
 	}
 
 	/**
@@ -922,6 +918,63 @@ public class MultiFileEditorPanel extends JPanel
 		return selectedFile;
 	}
 	
+	// Handles a tab change.
+	private void onTabChange(ChangeEvent event)
+	{
+		int index = mainEditorTabs.getSelectedIndex();
+		if (index >= 0)
+		{
+			setCurrentEditor(allEditors.get(mainEditorTabs.getTabComponentAt(mainEditorTabs.getSelectedIndex())));
+			mainEditorTabs.getComponentAt(index).requestFocus();
+		}
+		else
+		{
+			setCurrentEditor(null);
+		}
+	}
+	
+	private boolean focusOnFile(File file)
+	{
+		if (!allOpenFiles.contains(file))
+			return false;
+
+		// Search sequentially because this seems to be the only reliable way to do this.
+		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
+		{
+			Component component = mainEditorTabs.getTabComponentAt(i);
+			EditorHandle handle = allEditors.get(component);
+			if (handle.contentSourceFile != null && file.getAbsolutePath().equals(handle.contentSourceFile.getAbsolutePath()))
+			{
+				LOG.debugf("FILE FOCUS: %s, %d", file.getPath(), i);
+				mainEditorTabs.setSelectedIndex(i);
+			}
+		}
+		
+		return false;
+	}
+	
+	private void remapFileTabs(File oldFile, File newFile)
+	{
+		if (oldFile != null)
+			allOpenFiles.remove(oldFile);
+		// TODO: Remove new file tab if already open - an overwritten file must be discarded.
+		allOpenFiles.add(newFile);
+	}
+	
+	private void setCurrentEditor(EditorHandle handle)
+	{
+		LOG.debug("SWITCH EDITOR");
+		EditorHandle previous = currentEditor;
+		currentEditor = handle;
+		updateActionStates();
+		updateLabels();
+		updateEditorHooks();
+		if (listener != null)
+			listener.onCurrentEditorChange(previous, handle);
+		if (currentEditor != null)
+			currentEditor.editorPanel.textArea.requestFocus();
+	}
+
 	// Opens the save file dialog for saving a file.
 	private boolean chooseAndSaveFile(EditorHandle handle) 
 	{
@@ -944,19 +997,6 @@ public class MultiFileEditorPanel extends JPanel
 		return saveEditorToFile(handle, editorFile);
 	}
 
-	private void setCurrentEditor(EditorHandle handle)
-	{
-		EditorHandle previous = currentEditor;
-		currentEditor = handle;
-		updateActionStates();
-		updateLabels();
-		updateEditorHooks();
-		if (listener != null)
-			listener.onCurrentEditorChange(previous, handle);
-		if (currentEditor != null)
-			currentEditor.editorPanel.textArea.requestFocus();
-	}
-	
 	private void removeEditorByTab(Component tabComponent)
 	{
 		int index;
@@ -965,7 +1005,11 @@ public class MultiFileEditorPanel extends JPanel
 			mainEditorTabs.remove(index);
 			EditorHandle handle = allEditors.remove(tabComponent);
 			if (handle != null && listener != null)
+			{
+				if (handle.contentSourceFile != null)
+					allOpenFiles.remove(handle.contentSourceFile);
 				listener.onClose(handle);
+			}
 		}
 		
 		updateActionStates();
@@ -1178,6 +1222,8 @@ public class MultiFileEditorPanel extends JPanel
 
 	private boolean saveEditorToFile(EditorHandle handle, File targetFile)
 	{
+		targetFile = targetFile.getAbsoluteFile();
+		
 		Charset targetCharset = handle.contentCharset;
 		String content = handle.editorPanel.textArea.getText();
 		content = handle.currentLineEnding.convertContent(content);
@@ -1575,49 +1621,6 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
-	 * Handle only drag-and-dropped files.
-	 */
-	private class FileTransferHandler extends TransferHandler
-	{
-		private static final long serialVersionUID = 1667964095084519427L;
-
-		@Override
-		public boolean canImport(TransferSupport support) 
-		{
-			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
-		}
-		
-		@Override
-		@SuppressWarnings("unchecked")
-		public boolean importData(TransferSupport support) 
-		{
-			if (!support.isDrop())
-				return false;
-			
-			Transferable transferable = support.getTransferable();
-			List<File> files;
-			try {
-				files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-			} catch (UnsupportedFlavorException | IOException e) {
-				LOG.warn("Could not handle DnD import for file drop.");
-				return false;
-			} 
-			
-			for (final File f : files)
-			{
-				try {
-					openFileEditor(f, defaultViewSettings.getDefaultEncoding());
-				} catch (IOException e) {
-					error(language.getText("texteditor.dnd.droperror", f.getAbsolutePath()));
-				}
-			}
-			
-			return true;
-		}
-		
-	}
-
-	/**
 	 * Editor handle.
 	 */
 	public class EditorHandle
@@ -1642,7 +1645,7 @@ public class MultiFileEditorPanel extends JPanel
 		private Action fileRevealAction;
 		/** Current AutoCompletion engine. */
 		private AutoCompletion currentAutoCompletion;
-
+	
 		/** Tab component panel. */
 		private EditorTab editorTab;
 		/** Editor panel. */
@@ -1652,14 +1655,14 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			this.savedIcon = icons.getImage("script.png");
 			this.unsavedIcon = icons.getImage("script-unsaved.png");
-
+	
 			this.contentSourceFile = null;
 			this.contentCharset = sourceCharset;
 			this.contentLastModified = -1L;
 			this.contentSourceFileLastModified = -1L;
 			this.currentStyle = styleName;
 			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
-
+	
 			this.fileRevealAction = actionItem(language.getText("texteditor.action.reveal"), (e) -> openEditorFileInSystem(this));
 			
 			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
@@ -1702,7 +1705,7 @@ public class MultiFileEditorPanel extends JPanel
 			this.currentLineEnding = OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF;
 			updateActions();
 		}
-
+	
 		/**
 		 * Changes the encoding of the editor.
 		 * @param newCharset the new charset.
@@ -1764,7 +1767,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return editorTab.getTabTitle();
 		}
-
+	
 		/**
 		 * @return the source file. Can be null.
 		 */
@@ -1772,7 +1775,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return contentSourceFile;
 		}
-
+	
 		/**
 		 * @return the editor content.
 		 */
@@ -1780,7 +1783,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			return editorPanel.textArea.getText();
 		}
-
+	
 		/**
 		 * @return true if this editor has unsaved data.
 		 */
@@ -1811,6 +1814,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			editorTab.setTabIcon(savedIcon);
 			editorTab.setTabTitle(path.getName());
+			remapFileTabs(contentSourceFile, path);
 			contentSourceFile = path;
 			contentSourceFileLastModified = path.lastModified();
 			updateActions();
@@ -1822,13 +1826,56 @@ public class MultiFileEditorPanel extends JPanel
 			contentLastModified = System.currentTimeMillis();
 			updateActionsIfCurrent(this);
 		}
+	
+	}
 
+	/**
+	 * Handle only drag-and-dropped files.
+	 */
+	private class FileTransferHandler extends TransferHandler
+	{
+		private static final long serialVersionUID = 1667964095084519427L;
+
+		@Override
+		public boolean canImport(TransferSupport support) 
+		{
+			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean importData(TransferSupport support) 
+		{
+			if (!support.isDrop())
+				return false;
+			
+			Transferable transferable = support.getTransferable();
+			List<File> files;
+			try {
+				files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+			} catch (UnsupportedFlavorException | IOException e) {
+				LOG.warn("Could not handle DnD import for file drop.");
+				return false;
+			} 
+			
+			for (final File f : files)
+			{
+				try {
+					openFileEditor(f, defaultViewSettings.getDefaultEncoding());
+				} catch (IOException e) {
+					error(language.getText("texteditor.dnd.droperror", f.getAbsolutePath()));
+				}
+			}
+			
+			return true;
+		}
+		
 	}
 
 	/**
 	 * A single editor tab.
 	 */
-	protected class EditorTab extends JPanel
+	private class EditorTab extends JPanel
 	{
 		private static final long serialVersionUID = 6056215456163910928L;
 		
@@ -1871,7 +1918,7 @@ public class MultiFileEditorPanel extends JPanel
 	/**
 	 * A single editor panel.
 	 */
-	protected class EditorPanel extends JPanel
+	private class EditorPanel extends JPanel
 	{
 		private static final long serialVersionUID = -1623390677113162251L;
 		
@@ -1901,12 +1948,6 @@ public class MultiFileEditorPanel extends JPanel
 			
 			containerOf(this, node(BorderLayout.CENTER, scrollPane));
 		}
-		
-		public RSyntaxTextArea getTextArea() 
-		{
-			return textArea;
-		}
-		
 	}
 	
 	/**
