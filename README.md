@@ -39,11 +39,11 @@ have a demo copy buildable at all times?
 
 	ant dependencies
 
-To compile this library with Apache Ant, type:
+To compile this program with Apache Ant, type:
 
 	ant compile
 
-To make Maven-compatible JARs of this library (placed in the *build/jar* directory), type:
+To make Maven-compatible JARs of this program (placed in the *build/jar* directory), type:
 
 	ant jar
 
@@ -81,7 +81,7 @@ Note that the `deploy.dir`, `natives.windows.dir`, `inno.setup.dir`, and `embedd
 properties are supplied above - it may be better to add local paths to your `build.properties` file for those.
 
 
-### Other Stuff
+### Installer Building and Native Code
 
 Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
 It is not necessary for building or local deploying, but a package distributable will not be complete without it.
@@ -104,6 +104,14 @@ The JRE added to the installer (or even just for running DoomTools) should be on
 
 That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
 and perhaps future tools that pull resources from Internet addresses.
+
+
+### Other Notes
+
+Even though this project can technically be used as a library, use caution when integrating this package 
+with your own programs - contents and APIs that are not part of other third-party libraries will be in 
+flux as the utilities evolve. This project makes no promises about a consistent API structure within itself,
+despite keeping things documented in a publicly-accessible fashion.
 
 
 ### Utilities
