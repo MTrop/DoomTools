@@ -243,7 +243,7 @@ public final class FileChooserFactory
 	 */
 	public static File chooseFile(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return chooseFile(parent, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+		return chooseFile(parent, title, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
 	}
 
 	/**

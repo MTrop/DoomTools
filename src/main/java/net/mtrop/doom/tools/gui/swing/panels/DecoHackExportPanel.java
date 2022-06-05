@@ -36,7 +36,7 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 		
 		this.patchOutputField = fileField(
 			patchOutputFile, 
-			(current) -> chooseDirectory(
+			(current) -> chooseFile(
 				this,
 				language.getText("decohack.export.patch.browse.title"), 
 				current, 

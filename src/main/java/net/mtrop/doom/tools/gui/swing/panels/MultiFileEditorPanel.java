@@ -447,6 +447,39 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Saves this editor's state to a state map.
+	 * @param prefix the key prefix.
+	 * @param stateMap the output state map.
+	 */
+	public void saveState(String prefix, Map<String, String> stateMap)
+	{
+		stateMap.put(prefix + ".editors", String.valueOf(mainEditorTabs.getTabCount()));
+		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
+		{
+			String keyPrefix = prefix + ".editor." + String.valueOf(i);
+			EditorHandle handle = allEditors.get(mainEditorTabs.getTabComponentAt(i));
+			
+			stateMap.put(keyPrefix + ".contentSourceFile", handle.contentSourceFile.getAbsolutePath());
+			stateMap.put(keyPrefix + ".contentCharset", handle.contentCharset.displayName());
+			stateMap.put(keyPrefix + ".contentLastModified", String.valueOf(handle.contentLastModified));
+			stateMap.put(keyPrefix + ".contentSourceFileLastModified", String.valueOf(handle.contentSourceFileLastModified));
+			stateMap.put(keyPrefix + ".currentStyle", handle.currentStyle);
+			stateMap.put(keyPrefix + ".currentLineEnding", handle.currentLineEnding.name());
+			stateMap.put(keyPrefix + ".caratPosition", String.valueOf(handle.editorPanel.textArea.getCaretPosition()));
+		}
+	}
+
+	/**
+	 * Loads this editor's state from a state map and sets its state.
+	 * @param prefix the key prefix.
+	 * @param stateMap the input state map.
+	 */
+	public void loadState(String prefix, Map<String, String> stateMap)
+	{
+		// TODO: Finish this.
+	}
+	
+	/**
 	 * Creates a new editor tab with a name.
 	 * @param tabName the name of the tab.
 	 * @param content the initial content of the new editor.
@@ -641,6 +674,19 @@ public class MultiFileEditorPanel extends JPanel
 		return true;
 	}
 
+	/**
+	 * Checks if this panel has any unsaved editors.
+	 * @return true if this editor has unsaved data, false if not.
+	 */
+	public boolean hasUnsavedData()
+	{
+		for (Map.Entry<Component, EditorHandle> entry : allEditors.entrySet())
+			if (entry.getValue().needsToSave())
+				return true;
+		
+		return false;
+	}
+	
 	/**
 	 * Calls a consumer function for the current editor, if any.
 	 * @param consumer the consumer to call and pass the current editor handle to.
@@ -853,6 +899,8 @@ public class MultiFileEditorPanel extends JPanel
 		// ==================================================================
 		
 		allEditors.put(handle.editorTab, handle);
+		if (attachedFile != null)
+			allOpenFiles.add(attachedFile);
 
 		mainEditorTabs.addTab(null, handle.editorPanel);
 		
@@ -945,8 +993,8 @@ public class MultiFileEditorPanel extends JPanel
 			EditorHandle handle = allEditors.get(component);
 			if (handle.contentSourceFile != null && file.getAbsolutePath().equals(handle.contentSourceFile.getAbsolutePath()))
 			{
-				LOG.debugf("FILE FOCUS: %s, %d", file.getPath(), i);
 				mainEditorTabs.setSelectedIndex(i);
+				return true;
 			}
 		}
 		
@@ -957,13 +1005,13 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		if (oldFile != null)
 			allOpenFiles.remove(oldFile);
-		// TODO: Remove new file tab if already open - an overwritten file must be discarded.
+		if (allOpenFiles.contains(newFile))
+			removeEditorByFile(newFile);
 		allOpenFiles.add(newFile);
 	}
 	
 	private void setCurrentEditor(EditorHandle handle)
 	{
-		LOG.debug("SWITCH EDITOR");
 		EditorHandle previous = currentEditor;
 		currentEditor = handle;
 		updateActionStates();
@@ -995,6 +1043,18 @@ public class MultiFileEditorPanel extends JPanel
 			return false;
 		
 		return saveEditorToFile(handle, editorFile);
+	}
+
+	private void removeEditorByFile(File file)
+	{
+		for (EditorHandle handle : allEditors.values())
+		{
+			if (handle.contentSourceFile != null && file.getAbsolutePath().equals(handle.contentSourceFile.getAbsolutePath()))
+			{
+				removeEditorByTab(handle.editorTab);
+				break;
+			}
+		}
 	}
 
 	private void removeEditorByTab(Component tabComponent)

@@ -69,8 +69,6 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		.append("#include <{{PATCH_TYPE}}>\n")
 		.append("#include <friendly>\n")
 		.append("\n")
-		.append("// ... your code goes here ... \n")
-		.append("\n")
 	.toString();
 	
     // Singletons
@@ -447,13 +445,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		// Should be set if saveBeforeExecute() succeeds.
 		final File scriptFile = currentHandle.getContentSourceFile();
 		
-		ExportSettings exportSettings = handleToSettingsMap.get(currentHandle);
-		final ExportSettings processSettings = createExportSettings(scriptFile, exportSettings != null ? exportSettings : new ExportSettings(scriptFile));
+		ExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
+		final ExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new ExportSettings(scriptFile));
 		
 		if (processSettings == null)
 			return;
 		
-		handleToSettingsMap.put(currentHandle, exportSettings);
+		handleToSettingsMap.put(currentHandle, processSettings);
 
 		utils.createProcessModal(
 			receiver.getApplicationContainer(), 
