@@ -116,6 +116,7 @@ public class DoomToolsMainWindow extends JFrame
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
+		this.settings = DoomToolsSettingsManager.get();
 		
 		this.shutDownHook = shutDownHook;
 		

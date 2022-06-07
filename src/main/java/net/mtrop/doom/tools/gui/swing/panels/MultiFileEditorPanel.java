@@ -71,9 +71,12 @@ import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
+import net.mtrop.doom.tools.struct.util.EncodingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -97,6 +100,8 @@ public class MultiFileEditorPanel extends JPanel
     private static final FileFilter[] NO_FILTERS = new FileFilter[0];
 
 	private static final Set<WeakReference<MultiFileEditorPanel>> ACTIVE_PANELS = new HashSet<>(8);
+
+	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private static final Options DEFAULT_OPTIONS = new MultiFileEditorPanel.Options()
 	{
@@ -125,82 +130,6 @@ public class MultiFileEditorPanel extends JPanel
 		String ACTION_GOTO = "goto";
 		String ACTION_FIND = "find";
 		String ACTION_REVEAL = "reveal";
-	}
-	
-	/**
-	 * Line ending mode.
-	 */
-	public enum LineEnding
-	{
-		/** Windows */
-		CRLF 
-		{
-			@Override
-			public String convertContent(String content) 
-			{
-				return content.replace("\n", "\r\n");
-			}
-
-			@Override
-			public boolean isTwoCharEnding() 
-			{
-				return true;
-			}
-		},
-		
-		/** Unknown! */
-		LFCR
-		{
-			@Override
-			public String convertContent(String content) 
-			{
-				return content.replace("\n", "\n\r");
-			}
-
-			@Override
-			public boolean isTwoCharEnding() 
-			{
-				return true;
-			}
-		},
-
-		/** Unix */
-		LF 
-		{
-			@Override
-			public String convertContent(String content) 
-			{
-				// Do nothing.
-				return content;
-			}
-
-			@Override
-			public boolean isTwoCharEnding()
-			{
-				return false;
-			}
-		},
-
-		/** Macintosh */
-		CR 
-		{
-			@Override
-			public String convertContent(String content) 
-			{
-				return content.replace("\n", "\r");
-			}
-
-			@Override
-			public boolean isTwoCharEnding() 
-			{
-				return false;
-			}
-		},
-
-		;
-		
-		public abstract String convertContent(String content);
-		public abstract boolean isTwoCharEnding();
 	}
 	
 	// ======================================================================
@@ -352,7 +281,7 @@ public class MultiFileEditorPanel extends JPanel
 		this.saveAsAction = utils.createActionFromLanguageKey("texteditor.action.saveas", (event) -> saveCurrentEditorAs());
 		this.saveAllAction = utils.createActionFromLanguageKey("texteditor.action.saveall", (event) -> saveAllEditors());
 		this.closeAction = utils.createActionFromLanguageKey("texteditor.action.close", (event) -> closeCurrentEditor());
-		this.closeAllAction = utils.createActionFromLanguageKey("texteditor.action.closeall", (event) -> closeAllEditors());
+		this.closeAllAction = utils.createActionFromLanguageKey("texteditor.action.closeall", (event) -> closeAllEditors(false));
 		this.closeAllButCurrentAction = utils.createActionFromLanguageKey("texteditor.action.closeallbutcurrent", (event) -> closeAllButCurrentEditor());
 		
 		this.cutAction = utils.createActionFromLanguageKey("texteditor.action.cut", (event) -> currentEditor.editorPanel.textArea.cut());
@@ -450,8 +379,9 @@ public class MultiFileEditorPanel extends JPanel
 	 * Saves this editor's state to a state map.
 	 * @param prefix the key prefix.
 	 * @param stateMap the output state map.
+	 * @return the amount of editor tabs saved.
 	 */
-	public void saveState(String prefix, Map<String, String> stateMap)
+	public int saveState(String prefix, Map<String, String> stateMap)
 	{
 		stateMap.put(prefix + ".editors", String.valueOf(mainEditorTabs.getTabCount()));
 		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
@@ -459,24 +389,92 @@ public class MultiFileEditorPanel extends JPanel
 			String keyPrefix = prefix + ".editor." + String.valueOf(i);
 			EditorHandle handle = allEditors.get(mainEditorTabs.getTabComponentAt(i));
 			
-			stateMap.put(keyPrefix + ".contentSourceFile", handle.contentSourceFile.getAbsolutePath());
+			stateMap.put(keyPrefix + ".tabTitle", handle.getEditorTabName());
+			if (handle.contentSourceFile != null)
+				stateMap.put(keyPrefix + ".contentSourceFile", handle.contentSourceFile.getAbsolutePath());
 			stateMap.put(keyPrefix + ".contentCharset", handle.contentCharset.displayName());
+			stateMap.put(keyPrefix + ".currentStyle", handle.currentStyle);
+			try {
+				stateMap.put(keyPrefix + ".content", EncodingUtils.asBase64(EncodingUtils.gzipBytes(handle.getContent().getBytes(UTF8))));
+			} catch (IOException e) {
+				stateMap.put(keyPrefix + ".content", "");
+			}
+			stateMap.put(keyPrefix + ".caretPosition", String.valueOf(handle.editorPanel.textArea.getCaretPosition()));
+			
+			stateMap.put(keyPrefix + ".currentLineEnding", handle.currentLineEnding.name());
 			stateMap.put(keyPrefix + ".contentLastModified", String.valueOf(handle.contentLastModified));
 			stateMap.put(keyPrefix + ".contentSourceFileLastModified", String.valueOf(handle.contentSourceFileLastModified));
-			stateMap.put(keyPrefix + ".currentStyle", handle.currentStyle);
-			stateMap.put(keyPrefix + ".currentLineEnding", handle.currentLineEnding.name());
-			stateMap.put(keyPrefix + ".caratPosition", String.valueOf(handle.editorPanel.textArea.getCaretPosition()));
 		}
+		
+		return mainEditorTabs.getTabCount();
 	}
 
 	/**
 	 * Loads this editor's state from a state map and sets its state.
 	 * @param prefix the key prefix.
-	 * @param stateMap the input state map.
+	 * @param stateMap the output state map.
+	 * @return the amount of editor tabs loaded.
 	 */
-	public void loadState(String prefix, Map<String, String> stateMap)
+	public int loadState(String prefix, Map<String, String> stateMap)
 	{
-		// TODO: Finish this.
+		closeAllEditors(true);
+		
+		int editorCount = ValueUtils.parseInt(stateMap.get(prefix + ".editors"), 0);
+		for (int i = 0; i < editorCount; i++)
+		{
+			String keyPrefix = prefix + ".editor." + String.valueOf(i);
+			
+			String title = ValueUtils.parse(stateMap.get(keyPrefix + ".tabTitle"), (input) ->
+				ObjectUtils.isEmpty(input) ? "UNNAMED" : input
+			);
+			
+			File attachedFile = ValueUtils.parse(stateMap.get(keyPrefix + ".contentSourceFile"), (input) -> 
+				ObjectUtils.isEmpty(input) ? null : (new File(input)).getAbsoluteFile()
+			);
+			
+			Charset fileCharset = ValueUtils.parse(stateMap.get(keyPrefix + ".contentCharset"), (input) -> 
+				Charset.forName(input)
+			);
+			
+			String styleName = ValueUtils.parse(stateMap.get(keyPrefix + ".currentStyle"), (input) ->
+				ObjectUtils.isEmpty(input) ? "text/plain" : input
+			);
+			
+			String originalContent = ValueUtils.parse(stateMap.get(keyPrefix + ".content"), (input) -> {
+				if (!ObjectUtils.isEmpty(input))
+				{
+					try {
+						return new String(EncodingUtils.gunzipBytes(EncodingUtils.fromBase64(input)), UTF8);
+					} catch (IOException e) {
+						LOG.error(e, "Could not decode content.");
+						return "";
+					}
+				}
+				else
+				{
+					return "";
+				}
+			});
+			
+			
+			int caretPosition = ValueUtils.parseInt(stateMap.get(keyPrefix + ".caretPosition"), 0);
+			
+			LineEnding ending = ValueUtils.parse(stateMap.get(keyPrefix + ".currentLineEnding"), (input) ->
+				ObjectUtils.isEmpty(input) 
+					? (OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF) 
+					: LineEnding.VALUE_MAP.get(input)
+			);
+			
+			long contentLastModified = ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentLastModified"), -1L);
+
+			long contentSourceFileLastModified = attachedFile != null 
+				? attachedFile.lastModified() 
+				: ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentSourceFileLastModified"), -1L);
+			
+			createNewTab(title, attachedFile, fileCharset, styleName, originalContent, caretPosition, ending, contentLastModified, contentSourceFileLastModified);
+		}
+		
+		return editorCount;
 	}
 	
 	/**
@@ -509,7 +507,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content, int caretPosition)
 	{
-		createNewTab(tabName, null, defaultViewSettings.getDefaultEncoding(), null, content, caretPosition);
+		createNewTab(tabName, null, defaultViewSettings.getDefaultEncoding(), null, content, caretPosition, null, null, null);
 	}
 	
 	/**
@@ -522,7 +520,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void newEditor(String tabName, String content, Charset encoding, String styleName, int caretPosition)
 	{
-		createNewTab(tabName, null, encoding, styleName, content, caretPosition);
+		createNewTab(tabName, null, encoding, styleName, content, caretPosition, null, null, null);
 	}
 	
 	/**
@@ -549,7 +547,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString(), 0);
+		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString(), 0, null, null, null);
 	}
 	
 	/**
@@ -562,7 +560,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public void openEditor(String editorName, File file, Charset encoding, String styleName, String content)
 	{
-		createNewTab(editorName, file, encoding, styleName, content, 0);
+		createNewTab(editorName, file, encoding, styleName, content, 0, null, null, null);
 	}
 	
 	/**
@@ -623,9 +621,10 @@ public class MultiFileEditorPanel extends JPanel
 
 	/**
 	 * Attempts to close all editors.
+	 * @param force if true, force all closed without prompting.
 	 * @return true if it is safe to close all editors, and all editors were closed, false if one editor closing was cancelled.
 	 */
-	public boolean closeAllEditors() 
+	public boolean closeAllEditors(boolean force) 
 	{
 		// Find all editors to close.
 		Set<Component> tabsToClose = new HashSet<>();
@@ -634,7 +633,7 @@ public class MultiFileEditorPanel extends JPanel
 		{
 			EditorHandle handle = editor.getValue();
 			
-			if (!editorCanClose(handle))
+			if (!force && !editorCanClose(handle))
 				return false;
 			
 			tabsToClose.add(editor.getKey());
@@ -805,6 +804,58 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * @return the number of open editors.
+	 */
+	public int getEditorCount()
+	{
+		return mainEditorTabs.getTabCount();
+	}
+
+	/**
+	 * Gets an editor by its tab index.
+	 * @param index the index to fetch.
+	 * @return the corresponding editor, or null if index is out of range.
+	 */
+	public EditorHandle getEditorByIndex(int index)
+	{
+		if (index < 0 || index >= mainEditorTabs.getTabCount())
+			return null;
+		return allEditors.get(mainEditorTabs.getTabComponentAt(index));
+	}
+	
+	/**
+	 * Gets an editor by an open file.
+	 * @param file the file to search for.
+	 * @return the corresponding editor, or null if it doesn't exist.
+	 */
+	public EditorHandle getEditorByFile(File file)
+	{
+		file = file.getAbsoluteFile();
+		
+		if (!allOpenFiles.contains(file))
+			return null;
+
+		// Search sequentially because this seems to be the only reliable way to do this.
+		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
+		{
+			EditorHandle handle = getEditorByIndex(i);
+			if (handle.contentSourceFile != null && file.getAbsolutePath().equals(handle.contentSourceFile.getAbsolutePath()))
+				return handle;
+		}
+
+		return null;
+	}
+	
+	/**
+	 * Switches to an editor by an editor index.
+	 * @param index the index to set.
+	 */
+	public void setEditorByIndex(int index)
+	{
+		mainEditorTabs.setSelectedIndex(index);
+	}
+	
+	/**
 	 * Reloads the theme from settings and applies it to all open editors.
 	 */
 	public void reloadSettings()
@@ -857,9 +908,21 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param styleName the default style. Can be null to not force a style. 
 	 * @param originalContent the incoming content for the editor.
 	 * @param caretPosition the starting caret position.
+	 * @param ending the line ending. Can be null.
+	 * @param contentLastModified the last modified timestamp. Can be null.
+	 * @param contentSourceFileLastModified the file last modified timestamp. Can be null.
 	 */
-	protected final synchronized void createNewTab(String title, File attachedFile, Charset fileCharset, String styleName, final String originalContent, int caretPosition)
-	{
+	protected final synchronized void createNewTab(
+		String title, 
+		File attachedFile, 
+		Charset fileCharset, 
+		String styleName, 
+		final String originalContent, 
+		int caretPosition, 
+		LineEnding ending,
+		Long contentLastModified,
+		Long contentSourceFileLastModified
+	){
 		if (attachedFile != null)
 			attachedFile = attachedFile.getAbsoluteFile();
 		
@@ -883,9 +946,16 @@ public class MultiFileEditorPanel extends JPanel
 
 		EditorHandle handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
-			: new EditorHandle(title, defaultViewSettings.getDefaultEncoding(), styleName, textArea)
+			: new EditorHandle(title, fileCharset, styleName, textArea)
 		;
 
+		if (contentLastModified != null)
+			handle.contentLastModified = contentLastModified;
+		if (contentSourceFileLastModified != null)
+			handle.contentSourceFileLastModified = contentSourceFileLastModified;
+
+		handle.updateIcon();
+		
 		// ==================================================================
 		
 		defaultViewSettings.apply(textArea);
@@ -895,6 +965,9 @@ public class MultiFileEditorPanel extends JPanel
 		setEditorViewSettingsByContent(textArea, originalContent);
 		if (attachedFile != null) // only scan for ending if existing file
 			setEditorHandleSettingsByContent(handle, originalContent);
+		
+		if (ending != null)
+			handle.currentLineEnding = ending;
 		
 		// ==================================================================
 		
@@ -1857,6 +1930,14 @@ public class MultiFileEditorPanel extends JPanel
 			fileRevealAction.setEnabled(contentSourceFile != null);
 		}
 		
+		private void updateIcon()
+		{
+			if (needsToSave())
+				editorTab.setTabIcon(unsavedIcon);
+			else
+				editorTab.setTabIcon(savedIcon);
+		}
+		
 		// Applies the auto-complete.
 		private void applyAutoComplete(String styleName)
 		{
@@ -1872,21 +1953,21 @@ public class MultiFileEditorPanel extends JPanel
 		// Should call to update title on tab and timestamps.
 		private void onSaveChange(File path)
 		{
-			editorTab.setTabIcon(savedIcon);
 			editorTab.setTabTitle(path.getName());
 			remapFileTabs(contentSourceFile, path);
 			contentSourceFile = path;
 			contentSourceFileLastModified = path.lastModified();
+			updateIcon();
 			updateActions();
 		}
 		
 		private void onChange()
 		{
-			editorTab.setTabIcon(unsavedIcon);
 			contentLastModified = System.currentTimeMillis();
+			updateIcon();
 			updateActionsIfCurrent(this);
 		}
-	
+
 	}
 
 	/**
@@ -2453,6 +2534,85 @@ public class MultiFileEditorPanel extends JPanel
 			target.setHyperlinksEnabled(hyperlinksEnabled);
 			target.setLinkScanningMask(linkScanningMask);
 		}
+	}
+	
+	/**
+	 * Line ending mode.
+	 */
+	public enum LineEnding
+	{
+		/** Windows */
+		CRLF 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\r\n");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return true;
+			}
+		},
+		
+		/** Unknown! */
+		LFCR
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\n\r");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return true;
+			}
+		},
+
+		/** Unix */
+		LF 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				// Do nothing.
+				return content;
+			}
+
+			@Override
+			public boolean isTwoCharEnding()
+			{
+				return false;
+			}
+		},
+
+		/** Macintosh */
+		CR 
+		{
+			@Override
+			public String convertContent(String content) 
+			{
+				return content.replace("\n", "\r");
+			}
+
+			@Override
+			public boolean isTwoCharEnding() 
+			{
+				return false;
+			}
+		},
+
+		;
+		
+		public abstract String convertContent(String content);
+		public abstract boolean isTwoCharEnding();
+		
+		public static final Map<String, LineEnding> VALUE_MAP = EnumUtils.createCaseInsensitiveNameMap(LineEnding.class); 
+		
 	}
 	
 	/**

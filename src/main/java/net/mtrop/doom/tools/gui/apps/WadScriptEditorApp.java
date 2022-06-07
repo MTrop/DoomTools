@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -42,6 +43,8 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -295,7 +298,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	public boolean shouldClose() 
 	{
 		if (editorPanel.getUnsavedEditorCount() > 0)
-			return editorPanel.closeAllEditors();
+			return editorPanel.closeAllEditors(false);
 		return true;
 	}
 	
@@ -303,14 +306,65 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState() 
 	{
 		Map<String, String> state = new HashMap<>();
-		// TODO Finish this.
+		editorPanel.saveState("wadscript", state);
+		
+		for (int i = 0; i < editorPanel.getEditorCount(); i++)
+		{
+			EditorHandle handle = editorPanel.getEditorByIndex(i);
+			if (currentHandle == handle)
+				state.put("editor.selected", String.valueOf(i));
+			
+			String settingPrefix = "execution." + i;
+			ExecutionSettings settings = handleToSettingsMap.get(handle);
+			if (settings != null)
+			{
+				state.put(settingPrefix + ".enabled", String.valueOf(true));
+				if (settings.getWorkingDirectory() != null)
+					state.put(settingPrefix + ".workdir", settings.getWorkingDirectory().getAbsolutePath());
+				if (settings.getStandardInPath() != null)
+					state.put(settingPrefix + ".stdin", settings.getStandardInPath().getAbsolutePath());
+				state.put(settingPrefix + ".entryPoint", settings.getEntryPoint());
+				state.put(settingPrefix + ".args", String.valueOf(settings.getArgs().length));
+				for (int a = 0; a < settings.getArgs().length; a++)
+					state.put(settingPrefix + ".args." + a, settings.getArgs()[a]);
+			}
+		}
+		
 		return state;
 	}
 	
 	@Override
 	public void setApplicationState(Map<String, String> state) 
 	{
-		// TODO Finish this.
+		handleToSettingsMap.clear();
+		editorPanel.loadState("wadscript", state);
+		
+		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), 0);
+		editorPanel.setEditorByIndex(selectedIndex);
+
+		for (int i = 0; i < editorPanel.getEditorCount(); i++)
+		{
+			EditorHandle handle = editorPanel.getEditorByIndex(i);
+			String settingPrefix = "execution." + i;
+			
+			boolean enabled = ValueUtils.parseBoolean(state.get(settingPrefix + ".enabled"), false);
+			if (enabled)
+			{
+				ExecutionSettings settings = new ExecutionSettings();
+				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input).getAbsoluteFile();
+				settings.workingDirectory = ValueUtils.parse(state.get(settingPrefix + ".workdir"), parseFile);
+				settings.standardInPath = ValueUtils.parse(state.get(settingPrefix + ".stdin"), parseFile);
+				settings.entryPoint = ValueUtils.parse(state.get(settingPrefix + ".entryPoint"), (input) -> 
+					ObjectUtils.isEmpty(input) ? "" : input
+				);
+				
+				settings.args = new String[ValueUtils.parseInt(state.get(settingPrefix + ".args"))];
+				for (int a = 0; a < settings.getArgs().length; a++)
+					settings.args[a] = state.get(settingPrefix + ".args." + a);
+				
+				handleToSettingsMap.put(handle, settings);
+			}
+		}
 	}
 	
 	// ====================================================================

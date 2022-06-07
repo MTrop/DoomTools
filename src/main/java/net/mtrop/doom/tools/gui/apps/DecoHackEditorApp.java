@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
@@ -45,6 +46,8 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -299,7 +302,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public boolean shouldClose() 
 	{
 		if (editorPanel.getUnsavedEditorCount() > 0)
-			return editorPanel.closeAllEditors();
+			return editorPanel.closeAllEditors(false);
 		return true;
 	}
 	
@@ -307,14 +310,56 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState() 
 	{
 		Map<String, String> state = new HashMap<>();
-		// TODO Finish this.
+		editorPanel.saveState("decohack", state);
+
+		for (int i = 0; i < editorPanel.getEditorCount(); i++)
+		{
+			EditorHandle handle = editorPanel.getEditorByIndex(i);
+			if (currentHandle == handle)
+				state.put("editor.selected", String.valueOf(i));
+			
+			String settingPrefix = "export." + i;
+			ExportSettings settings = handleToSettingsMap.get(handle);
+			if (settings != null)
+			{
+				state.put(settingPrefix + ".enabled", String.valueOf(true));
+				if (settings.getOutputFile() != null)
+					state.put(settingPrefix + ".outfile", settings.getOutputFile().getAbsolutePath());
+				if (settings.getSourceOutputFile() != null)
+					state.put(settingPrefix + ".srcfile", settings.getSourceOutputFile().getAbsolutePath());
+				state.put(settingPrefix + ".budget", String.valueOf(settings.isOutputBudget()));
+			}
+		}
+		
 		return state;
 	}
 	
 	@Override
 	public void setApplicationState(Map<String, String> state) 
 	{
-		// TODO Finish this.
+		handleToSettingsMap.clear();
+		editorPanel.loadState("decohack", state);
+		
+		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), 0);
+		editorPanel.setEditorByIndex(selectedIndex);
+
+		for (int i = 0; i < editorPanel.getEditorCount(); i++)
+		{
+			EditorHandle handle = editorPanel.getEditorByIndex(i);
+			String settingPrefix = "export." + i;
+			
+			boolean enabled = ValueUtils.parseBoolean(state.get(settingPrefix + ".enabled"), false);
+			if (enabled)
+			{
+				ExportSettings settings = new ExportSettings();
+				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input).getAbsoluteFile();
+				settings.outputFile = ValueUtils.parse(state.get(settingPrefix + ".outfile"), parseFile);
+				settings.sourceOutputFile = ValueUtils.parse(state.get(settingPrefix + ".srcfile"), parseFile);
+				settings.outputBudget = ValueUtils.parseBoolean(state.get(settingPrefix + ".budget"), false);
+				handleToSettingsMap.put(handle, settings);
+			}
+		}
+		
 	}
 	
 	// ====================================================================
@@ -587,6 +632,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		private File outputFile;
 		private File sourceOutputFile;
 		private boolean outputBudget;
+		
+		public ExportSettings()
+		{
+			this.outputFile = null;
+			this.sourceOutputFile = null;
+			this.outputBudget = false;
+		}
 		
 		public ExportSettings(File sourceFile)
 		{

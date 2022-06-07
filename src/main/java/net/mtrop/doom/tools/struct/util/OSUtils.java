@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -16,75 +16,77 @@ import java.util.Objects;
  */
 public final class OSUtils
 {
-	private static File NULL_FILE = null;
+	private static final File NULL_FILE;
 	
 	/** Is this running on an x86 architecture? */
-	private static boolean IS_X86 = false;
+	private static final boolean IS_X86;
 	/** Is this running on an x64 architecture? */
-	private static boolean IS_X64 = false;
+	private static final boolean IS_X64;
 	/** Is this running on a Power PC architecture? */
-	private static boolean IS_PPC = false;
+	private static final boolean IS_PPC;
+	/** Is this running on an ARM series architecture? */
+	private static final boolean IS_ARM;
 	/** Are we using Windows? */
-	private static boolean IS_WINDOWS = false;
+	private static final boolean IS_WINDOWS;
 	/** Are we using Windows 95/98? */
-	private static boolean IS_WINDOWS_9X = false;
+	private static final boolean IS_WINDOWS_9X;
 	/** Are we using Windows Me (God forbid)?*/
-	private static boolean IS_WINDOWS_ME = false;
+	private static final boolean IS_WINDOWS_ME;
 	/** Are we using Windows 2000? */
-	private static boolean IS_WINDOWS_2000 = false;
+	private static final boolean IS_WINDOWS_2000;
 	/** Are we using Windows XP? */
-	private static boolean IS_WINDOWS_XP = false;
+	private static final boolean IS_WINDOWS_XP;
 	/** Are we using Windows XP? */
-	private static boolean IS_WINDOWS_VISTA = false;
+	private static final boolean IS_WINDOWS_VISTA;
 	/** Are we using Windows 7? */
-	private static boolean IS_WINDOWS_7 = false;
+	private static final boolean IS_WINDOWS_7;
 	/** Are we using Windows 8? */
-	private static boolean IS_WINDOWS_8 = false;
+	private static final boolean IS_WINDOWS_8;
 	/** Are we using Windows 10? */
-	private static boolean IS_WINDOWS_10 = false;
+	private static final boolean IS_WINDOWS_10;
 	/** Are we using Windows 11? */
-	private static boolean IS_WINDOWS_11 = false;
+	private static final boolean IS_WINDOWS_11;
 	/** Are we using Windows NT? */
-	private static boolean IS_WINDOWS_NT = false;
+	private static final boolean IS_WINDOWS_NT;
 	/** Are we using Windows 2003 (Server)? */
-	private static boolean IS_WINDOWS_2003 = false;
+	private static final boolean IS_WINDOWS_2003;
 	/** Are we using Windows 2008 (Server)? */
-	private static boolean IS_WINDOWS_2008 = false;
+	private static final boolean IS_WINDOWS_2008;
 	/** Are we using Win32 mode? */
-	private static boolean IS_WIN32 = false;
+	private static final boolean IS_WIN32;
 	/** Are we using Win64 mode? */
-	private static boolean IS_WIN64 = false;
+	private static final boolean IS_WIN64;
 	/** Is this Mac OS X? */
-	private static boolean IS_OSX = false;
+	private static final boolean IS_OSX;
 	/** Is this Mac OS X x86 Edition? */
-	private static boolean IS_OSX86 = false;
+	private static final boolean IS_OSX86;
 	/** Is this Mac OS X x64 Edition? */
-	private static boolean IS_OSX64 = false;
+	private static final boolean IS_OSX64;
 	/** Is this Mac OS X Power PC Edition? */
-	private static boolean IS_OSXPPC = false;
+	private static final boolean IS_OSXPPC;
 	/** Is this a Linux distro? */
-	private static boolean IS_LINUX = false;
+	private static final boolean IS_LINUX;
 	/** Is this a Solaris distro? */
-	private static boolean IS_SOLARIS = false;
+	private static final boolean IS_SOLARIS;
 	/** Current working directory. */
-	private static String WORK_DIR = null;
+	private static final String WORK_DIR;
 	/** 
 	 * Current application settings directory.
 	 * In Windows, this is set to whatever the APPDATA environment variable is set to.
 	 * On other operating systems, this is set to whatever the HOME environment variable is set to.
 	 */
-	private static String APP_DIR = null;		// set in static method.
+	private static final String APP_DIR;		// set in static method.
 	/** Current user's home directory. */
-	private static String HOME_DIR = null;
+	private static final String HOME_DIR;
 
 	static
 	{
 		String osName = System.getProperty("os.name");
-		//String osVer = System.getProperty("os.version");
 		String osArch = System.getProperty("os.arch");
 		IS_X86 = osArch.contains("86");
 		IS_X64 = osArch.contains("64");
 		IS_PPC = osArch.contains("ppc") || osArch.contains("Power PC");
+		IS_ARM = osArch.startsWith("arm");
 		IS_WINDOWS = osName.contains("Windows");
 		if (IS_WINDOWS)
 		{
@@ -103,6 +105,24 @@ public final class OSUtils
 			IS_WIN32 = IS_X86;
 			IS_WIN64 = IS_X64;
 		}
+		else
+		{
+			IS_WINDOWS_9X = false;
+			IS_WINDOWS_ME = false;
+			IS_WINDOWS_2000 = false;
+			IS_WINDOWS_XP = false;
+			IS_WINDOWS_NT = false;
+			IS_WINDOWS_2003 = false;
+			IS_WINDOWS_2008 = false;
+			IS_WINDOWS_VISTA = false;
+			IS_WINDOWS_7 = false;
+			IS_WINDOWS_8 = false;
+			IS_WINDOWS_10 = false;
+			IS_WINDOWS_11 = false;
+			IS_WIN32 = false;
+			IS_WIN64 = false;
+		}
+		
 		IS_OSX = osName.contains("OS X") || osName.contains("macOS");
 		if (IS_OSX)
 		{
@@ -110,6 +130,13 @@ public final class OSUtils
 			IS_OSX64 = IS_X64;
 			IS_OSXPPC = IS_PPC;
 		}
+		else
+		{
+			IS_OSX86 = false;
+			IS_OSX64 = false;
+			IS_OSXPPC = false;
+		}
+		
 		IS_LINUX = osName.contains("Linux");
 		if (IS_LINUX)
 		{
@@ -130,6 +157,8 @@ public final class OSUtils
 			APP_DIR = System.getenv("HOME");
 		else if (IS_SOLARIS)
 			APP_DIR = System.getenv("HOME");
+		else
+			APP_DIR = null;
 		
 		WORK_DIR = System.getProperty("user.dir");
 		HOME_DIR = System.getProperty("user.home");
@@ -172,6 +201,12 @@ public final class OSUtils
 	public static boolean isPPC()
 	{
 		return IS_PPC;
+	}
+
+	/** @return true if this is running on an ARM architecture. */
+	public static boolean isARM()
+	{
+		return IS_ARM;
 	}
 
 	/** @return true if we using 32-bit Windows. */
