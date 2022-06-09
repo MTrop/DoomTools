@@ -57,19 +57,19 @@ import net.mtrop.doom.tools.struct.util.StringUtils;
  */
 public final class DoomMakeMain 
 {
+	private static final int ERROR_NONE = 0;
+	private static final int ERROR_BAD_OPTIONS = 1;
+	private static final int ERROR_BAD_PROPERTIES = 2;
+	private static final int ERROR_BAD_SCRIPT = 3;
+	private static final int ERROR_BAD_PROJECT = 4;
+	private static final int ERROR_SECURITY = 5;
+	private static final int ERROR_BAD_TOOL_PATH = 6;
+	private static final int ERROR_IOERROR = 7;
+	private static final int ERROR_AGENT_RUNNING = 8;
+	private static final int ERROR_UNKNOWN = -1;
+
 	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
 	
-	public static final int ERROR_NONE = 0;
-	public static final int ERROR_BAD_OPTIONS = 1;
-	public static final int ERROR_BAD_PROPERTIES = 2;
-	public static final int ERROR_BAD_SCRIPT = 3;
-	public static final int ERROR_BAD_PROJECT = 4;
-	public static final int ERROR_SECURITY = 5;
-	public static final int ERROR_BAD_TOOL_PATH = 6;
-	public static final int ERROR_IOERROR = 7;
-	public static final int ERROR_AGENT_RUNNING = 8;
-	public static final int ERROR_UNKNOWN = -1;
-
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";

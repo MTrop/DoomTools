@@ -833,10 +833,44 @@ public final class ContainerFactory
 	/* ==== Special Modals                                             ==== */
 	/* ==================================================================== */
 
+	private static final Supplier<Boolean> ALWAYS_VALID = () -> true;
+	
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
 	 * or values that a user can change, and gathers those values into an object if the user
 	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = null;
+		Modal<Boolean> modal = modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
+		do {
+			out = modal.openThenDispose();
+			if (out == null || out == Boolean.FALSE)
+				break;
+		} while (!validator.get());
+		
+		if (out == Boolean.TRUE)
+			return settingExtractor.apply(contentPane);
+		else
+			return null;
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
 	 * @param <C> the container pane type.
 	 * @param <T> the return type.
 	 * @param owner the owning component.
@@ -850,11 +884,28 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		Boolean out = modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
-		if (out == null || out == Boolean.FALSE)
-			return null;
-		return settingExtractor.apply(contentPane);
-	}	
+		return settingsModal(owner, icons, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, icons, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
 	
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
@@ -872,8 +923,40 @@ public final class ContainerFactory
 	 */
 	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor)
 	{
-		return settingsModal(owner, icons, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
-	}	
+		return settingsModal(owner, icons, title, contentPane, ALWAYS_VALID, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		Boolean out = null;
+		Modal<Boolean> modal = modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices);
+		do {
+			out = modal.openThenDispose();
+			if (out == null || out == Boolean.FALSE)
+				break;
+		} while (!validator.get());
+		
+		if (out == Boolean.TRUE)
+			return settingExtractor.apply(contentPane);
+		else
+			return null;
+	}
 	
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
@@ -892,12 +975,29 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		Boolean out = modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
-		if (out == null || out == Boolean.FALSE)
-			return null;
-		return settingExtractor.apply(contentPane);
-	}	
+		return settingsModal(owner, icon, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
+	}
 	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, icon, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
+
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
 	 * or values that a user can change, and gathers those values into an object if the user
@@ -914,14 +1014,33 @@ public final class ContainerFactory
 	 */
 	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<C, T> settingExtractor)
 	{
-		return settingsModal(owner, icon, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
-	}	
+		return settingsModal(owner, icon, title, contentPane, ALWAYS_VALID, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
 
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
 	 * or values that a user can change, and gathers those values into an object if the user
 	 * confirms those values or selections. 
-	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(owner, (Image)null, title, contentPane, validator, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
 	 * @param <C> the container pane type.
 	 * @param <T> the return type.
 	 * @param owner the owning component.
@@ -934,7 +1053,26 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		return settingsModal(owner, (Image)null, title, contentPane, settingExtractor, choices);
+		return settingsModal(owner, (Image)null, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param owner the owning component.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(owner, (Image)null, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
 
 	/**
@@ -964,6 +1102,26 @@ public final class ContainerFactory
 	 * @param icons the modal icons.
 	 * @param title the modal title.
 	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(null, icons, title, contentPane, validator, settingExtractor, choices);
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
@@ -971,11 +1129,27 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		Boolean out = modal(null, icons, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
-		if (out == null || out == Boolean.FALSE)
-			return null;
-		return settingExtractor.apply(contentPane);
-	}	
+		return settingsModal(null, icons, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icons the modal icons.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, icons, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
 	
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
@@ -992,7 +1166,27 @@ public final class ContainerFactory
 	 */
 	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<C, T> settingExtractor)
 	{
-		return settingsModal(null, icons, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+		return settingsModal(null, icons, title, contentPane, ALWAYS_VALID, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}
+	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(null, icon, title, contentPane, validator, settingExtractor, choices);
 	}	
 	
 	/**
@@ -1011,12 +1205,28 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		Boolean out = modal(null, icon, title, ModalityType.APPLICATION_MODAL, contentPane, choices).openThenDispose();
-		if (out == null || out == Boolean.FALSE)
-			return null;
-		return settingExtractor.apply(contentPane);
+		return settingsModal(null, icon, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
 	}	
 	
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param icon the modal icon.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, icon, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+	}	
+
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
 	 * or values that a user can change, and gathers those values into an object if the user
@@ -1032,14 +1242,32 @@ public final class ContainerFactory
 	 */
 	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<C, T> settingExtractor)
 	{
-		return settingsModal(null, icon, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+		return settingsModal(null, icon, title, contentPane, ALWAYS_VALID, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}	
 
 	/**
 	 * Creates a modal intended to display a complex pane that contains a set of fields
 	 * or values that a user can change, and gathers those values into an object if the user
 	 * confirms those values or selections. 
-	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	@SafeVarargs
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	{
+		return settingsModal(null, (Image)null, title, contentPane, validator, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
 	 * @param <C> the container pane type.
 	 * @param <T> the return type.
 	 * @param title the modal title.
@@ -1051,7 +1279,25 @@ public final class ContainerFactory
 	@SafeVarargs
 	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
-		return settingsModal(null, (Image)null, title, contentPane, settingExtractor, choices);
+		return settingsModal(null, (Image)null, title, contentPane, ALWAYS_VALID, settingExtractor, choices);
+	}
+
+	/**
+	 * Creates a modal intended to display a complex pane that contains a set of fields
+	 * or values that a user can change, and gathers those values into an object if the user
+	 * confirms those values or selections. 
+	 * Supplies only one choice: OK.
+	 * @param <C> the container pane type.
+	 * @param <T> the return type.
+	 * @param title the modal title.
+	 * @param contentPane the content pane that also contains a way to extract values from it.
+	 * @param validator the validator function for the input.
+	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
+	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
+	 */
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	{
+		return settingsModal(null, (Image)null, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
 
 	/**
@@ -1068,7 +1314,7 @@ public final class ContainerFactory
 	 */
 	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<C, T> settingExtractor)
 	{
-		return settingsModal(null, (Image)null, title, contentPane, settingExtractor, choice("OK", KeyEvent.VK_O, true));
+		return settingsModal(null, (Image)null, title, contentPane, ALWAYS_VALID, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
 
 	

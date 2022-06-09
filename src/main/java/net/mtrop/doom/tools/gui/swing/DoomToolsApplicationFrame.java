@@ -6,7 +6,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
-import net.mtrop.doom.tools.gui.DoomToolsApplicationControlReceiver;
+import net.mtrop.doom.tools.gui.DoomToolsApplicationListener;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
@@ -68,7 +68,7 @@ public class DoomToolsApplicationFrame extends JFrame
 				instance.onRestore();
 			}
 		});
-		instance.setApplicationControlReceiver(new DoomToolsApplicationControlReceiver() 
+		instance.setApplicationListener(new DoomToolsApplicationListener() 
 		{
 			@Override
 			public void attemptClose() 

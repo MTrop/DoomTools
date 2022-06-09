@@ -52,18 +52,18 @@ public final class WTexScanMain
 	private static final int ERROR_BAD_OPTIONS = 2;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_QUIET = "--quiet";
-	private static final String SWITCH_QUIET2 = "-q";
-	private static final String SWITCH_TEXTURES = "--textures";
-	private static final String SWITCH_TEXTURES2 = "-t";
-	private static final String SWITCH_FLATS = "--flats";
-	private static final String SWITCH_FLATS2 = "-f";
-	private static final String SWITCH_NOSKIES = "--no-skies";
-	private static final String SWITCH_MAP = "--map";
-	private static final String SWITCH_MAP2 = "-m";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_QUIET = "--quiet";
+	public static final String SWITCH_QUIET2 = "-q";
+	public static final String SWITCH_TEXTURES = "--textures";
+	public static final String SWITCH_TEXTURES2 = "-t";
+	public static final String SWITCH_FLATS = "--flats";
+	public static final String SWITCH_FLATS2 = "-f";
+	public static final String SWITCH_NOSKIES = "--no-skies";
+	public static final String SWITCH_MAP = "--map";
+	public static final String SWITCH_MAP2 = "-m";
 
 	/** Regex pattern for Episode, Map. */
 	private static final Pattern EPISODE_PATTERN = Pattern.compile("E[1-5]M[1-9]");

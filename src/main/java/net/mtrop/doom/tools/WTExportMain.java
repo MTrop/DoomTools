@@ -60,20 +60,20 @@ public final class WTExportMain
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
 	private static final Pattern FLAT_MARKER = Pattern.compile("F[0-9]*_(START|END)");
 	
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_BASE = "--base-wad";
-	private static final String SWITCH_BASE2 = "-b";
-	private static final String SWITCH_OUTPUT = "--output";
-	private static final String SWITCH_OUTPUT2 = "-o";
-	private static final String SWITCH_CREATE = "--create";
-	private static final String SWITCH_CREATE2 = "-c";
-	private static final String SWITCH_ADDITIVE = "--add";
-	private static final String SWITCH_ADDITIVE2 = "-a";
-	private static final String SWITCH_NULLTEX = "--null-texture";
-	private static final String SWITCH_NOANIMATED = "--no-animated";
-	private static final String SWITCH_NOSWITCH = "--no-switches";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_BASE = "--base-wad";
+	public static final String SWITCH_BASE2 = "-b";
+	public static final String SWITCH_OUTPUT = "--output";
+	public static final String SWITCH_OUTPUT2 = "-o";
+	public static final String SWITCH_CREATE = "--create";
+	public static final String SWITCH_CREATE2 = "-c";
+	public static final String SWITCH_ADDITIVE = "--add";
+	public static final String SWITCH_ADDITIVE2 = "-a";
+	public static final String SWITCH_NULLTEX = "--null-texture";
+	public static final String SWITCH_NOANIMATED = "--no-animated";
+	public static final String SWITCH_NOSWITCH = "--no-switches";
 
 	/**
 	 * Context.

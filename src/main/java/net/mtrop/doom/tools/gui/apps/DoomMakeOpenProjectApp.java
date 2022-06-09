@@ -255,7 +255,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 				),
 				separator(),
 				utils.createItemFromLanguageKey("doommake.menu.file.item.exit",
-					(c, e) -> receiver.attemptClose()
+					(c, e) -> attemptClose()
 				)
 			)
 		);
@@ -379,7 +379,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW);
 		} catch (IOException e) {
 			LOG.error(e, "Couldn't start New Project!");
-			SwingUtils.error(receiver.getApplicationContainer(), language.getText("doommake.error.app.newproject"));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.error.app.newproject"));
 		}
 	}
 
@@ -387,14 +387,14 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	private void openOpenProject()
 	{
 		File dir;
-		if ((dir = openAndGetDirectory(receiver.getApplicationContainer())) == null)
+		if ((dir = openAndGetDirectory(getApplicationContainer())) == null)
 			return;
 		
 		try {
 			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, dir.getAbsolutePath());
 		} catch (IOException e) {
 			LOG.error(e, "Couldn't start Open Project: " + dir.getAbsolutePath());
-			SwingUtils.error(receiver.getApplicationContainer(), language.getText("doommake.error.app.openproject", dir.getAbsolutePath()));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.error.app.openproject", dir.getAbsolutePath()));
 		}
 	}
 
@@ -402,7 +402,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	private void openSettings()
 	{
 		modal(
-			receiver.getApplicationContainer(),
+			getApplicationContainer(),
 			language.getText("doommake.project.settings.title"),
 			new DoomMakeSettingsPanel()
 		).openThenDispose();
@@ -411,16 +411,15 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	// Refresh targets.
 	private void refreshTargets()
 	{
-		Container parent = receiver != null ? receiver.getApplicationContainer() : null;
 		String absolutePath = projectDirectory.getAbsolutePath();
 		try {
 			listPanel.refreshTargets(helper.getProjectTargets(projectDirectory));
 			LOG.infof("Targets refreshed for %s", absolutePath);
 		} catch (FileNotFoundException e) {
-			SwingUtils.error(parent, language.getText("doommake.project.targets.error.nodirectory", absolutePath));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.project.targets.error.nodirectory", absolutePath));
 			LOG.errorf("Project directory does not exist: %s", absolutePath);
 		} catch (ProcessCallException e) {
-			SwingUtils.error(parent, language.getText("doommake.project.targets.error.gettargets", absolutePath));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.project.targets.error.gettargets", absolutePath));
 			LOG.errorf("Could not invoke `doommake --targets` in %s", absolutePath);
 		}
 	}
@@ -449,7 +448,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			return;
 
 		utils.createProcessModal(
-			receiver.getApplicationContainer(), 
+			getApplicationContainer(), 
 			language.getText("doommake.project.logging.title", currentTarget), 
 			language.getText("doommake.project.build.message.running", currentTarget), 
 			language.getText("doommake.project.build.message.success"), 

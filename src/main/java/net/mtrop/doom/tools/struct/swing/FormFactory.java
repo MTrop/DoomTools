@@ -1656,7 +1656,7 @@ public final class FormFactory
 	}
 	
 	/**
-	 * Input field interface used for the Black Rook Swing input components.
+	 * Input field class used for the Black Rook Swing input components.
 	 * @param <V> the type of value stored by this field.
 	 */
 	public static abstract class JFormField<V> extends JPanel
@@ -1668,6 +1668,18 @@ public final class FormFactory
 		{
 			super.setEnabled(enabled);
 			getFormComponent().setEnabled(enabled);
+		}
+		
+		@Override
+		public void requestFocus()
+		{
+			getFormComponent().requestFocus();
+		}
+		
+		@Override
+		public boolean requestFocusInWindow() 
+		{
+			return getFormComponent().requestFocusInWindow();
 		}
 		
 		/**
@@ -1705,7 +1717,7 @@ public final class FormFactory
 			super();
 			setBorder(createEmptyBorder(4, 4, 4, 4));
 			setLayout(new BorderLayout(4, 0));
-			add(this.label = label, BorderLayout.WEST);
+			add(this.label = label, BorderLayout.LINE_START);
 			add(this.formField = field, BorderLayout.CENTER);
 		}
 		
@@ -1715,7 +1727,7 @@ public final class FormFactory
 			setBorder(createEmptyBorder(2, 2, 2, 2));
 			setLayout(new BorderLayout());
 			add(this.formField = field, BorderLayout.CENTER);
-			add(this.label = label, BorderLayout.EAST);
+			add(this.label = label, BorderLayout.LINE_END);
 		}
 		
 		/**

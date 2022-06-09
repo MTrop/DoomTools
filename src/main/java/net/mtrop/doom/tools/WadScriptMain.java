@@ -84,23 +84,23 @@ public final class WadScriptMain
 	private static final int ERROR_SCRIPT_NOT_STARTED = 9;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_VERSION1 = "--version";
-	private static final String SWITCH_HELP1 = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_FUNCHELP1 = "--function-help";
-	private static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
-	private static final String SWITCH_FUNCHELP3 = "--function-help-html";
-	private static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
-	private static final String SWITCH_DISASSEMBLE1 = "--disassemble";
-	private static final String SWITCH_GUI = "--gui";
-	private static final String SWITCH_ENTRY1 = "--entry";
-	private static final String SWITCH_ENTRY2 = "-e";
-	private static final String SWITCH_ENTRYLIST = "--entry-list";
-	private static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
-	private static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
-	private static final String SWITCH_STACKDEPTH1 = "--stack-depth";
-	private static final String SWITCH_SEPARATOR = "--";
-	private static final String SWITCH_SEPARATORBASH = "--X";
+	public static final String SWITCH_VERSION1 = "--version";
+	public static final String SWITCH_HELP1 = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_FUNCHELP1 = "--function-help";
+	public static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
+	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
+	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
+	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
+	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_ENTRY1 = "--entry";
+	public static final String SWITCH_ENTRY2 = "-e";
+	public static final String SWITCH_ENTRYLIST = "--entry-list";
+	public static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
+	public static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
+	public static final String SWITCH_STACKDEPTH1 = "--stack-depth";
+	public static final String SWITCH_SEPARATOR = "--";
+	public static final String SWITCH_SEPARATORBASH = "--X";
 	
 	// RookScript-specific
 	private static final Resolver[] RESOLVERS_BASE =

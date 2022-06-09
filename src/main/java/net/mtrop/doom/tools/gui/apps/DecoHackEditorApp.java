@@ -241,7 +241,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> receiver.attemptClose())
+					utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> attemptClose())
 				)
 			)),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
@@ -362,6 +362,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		
 	}
 	
+	
 	// ====================================================================
 
 	private void onHandleChange()
@@ -418,10 +419,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenEditor()
 	{
-		final Container parent = receiver.getApplicationContainer();
-		
 		File file = utils.chooseFile(
-			parent, 
+			getApplicationContainer(), 
 			language.getText("wadscript.open.title"), 
 			language.getText("wadscript.open.accept"),
 			settings::getLastTouchedFile,
@@ -435,31 +434,30 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenFile(File file)
 	{
-		final Container parent = receiver.getApplicationContainer();
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-			SwingUtils.error(parent, language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
+			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-			SwingUtils.error(parent, language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
+			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
 		} catch (SecurityException e) {
 			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error.security", file.getName()));
-			SwingUtils.error(parent, language.getText("decohack.open.error.security", file.getAbsolutePath()));
+			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.security", file.getAbsolutePath()));
 		}
 	}
 	
 	private boolean saveBeforeExecute()
 	{
-		final Container parent = receiver.getApplicationContainer();
-
 		if (currentHandle.needsToSave() || currentHandle.getContentSourceFile() == null)
 		{
-			Boolean saveChoice = modal(parent, utils.getWindowIcons(), 
+			Boolean saveChoice = modal(
+				getApplicationContainer(), 
+				utils.getWindowIcons(), 
 				language.getText("decohack.save.modal.title"),
 				containerOf(label(language.getText("decohack.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
@@ -483,7 +481,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(receiver.getApplicationContainer(), language.getText("decohack.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), language.getText("decohack.error.mustsave"));
 			return;
 		}
 		
@@ -499,7 +497,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		handleToSettingsMap.put(currentHandle, processSettings);
 
 		utils.createProcessModal(
-			receiver.getApplicationContainer(), 
+			getApplicationContainer(), 
 			language.getText("decohack.export.message.title"), 
 			language.getText("decohack.export.message.running", scriptFile.getName()), 
 			language.getText("decohack.export.message.success"), 
@@ -565,13 +563,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
 		
 		callable.arg(scriptFile.getAbsolutePath());
-		callable.arg("--output").arg(outTargetFile.getAbsolutePath());
+		callable.arg(DecoHackMain.SWITCH_OUTPUT).arg(outTargetFile.getAbsolutePath());
 		
 		if (outSourceFile != null)
-			callable.arg("--source-output").arg(outSourceFile.getAbsolutePath());
+			callable.arg(DecoHackMain.SWITCH_SOURCE_OUTPUT).arg(outSourceFile.getAbsolutePath());
 
 		if (budget)
-			callable.arg("--budget");
+			callable.arg(DecoHackMain.SWITCH_BUDGET);
 		
 		callable
 			.setOut(stdout)

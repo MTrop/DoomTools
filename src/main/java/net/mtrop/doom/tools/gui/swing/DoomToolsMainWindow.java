@@ -37,6 +37,7 @@ import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -275,11 +276,11 @@ public class DoomToolsMainWindow extends JFrame
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (c, e) -> newDoomMakeProject()),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (c, e) -> addApplication(new DoomMakeNewProjectApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (c, e) -> openDoomMakeProject())
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute" /* TODO: Add WadScript Executor app. */),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (c, e) -> addApplication(new WadScriptExecutorApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (c, e) -> addApplication(new WadScriptEditorApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
@@ -672,11 +673,6 @@ public class DoomToolsMainWindow extends JFrame
 			currentWorkspace = null;
 			updateWorkspaceActions();
 		}
-	}
-	
-	private void newDoomMakeProject()
-	{
-		addApplication(new DoomMakeNewProjectApp());
 	}
 	
 	private void openDoomMakeProject()

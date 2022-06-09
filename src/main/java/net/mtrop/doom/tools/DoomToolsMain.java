@@ -72,16 +72,16 @@ public final class DoomToolsMain
 		return FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
 
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_WEBSITE = "--website";
-	private static final String SWITCH_DOCS = "--docs";
-	private static final String SWITCH_WHERE = "--where";
-	private static final String SWITCH_SETTINGS = "--settings";
-	private static final String SWITCH_UPDATE = "--update";
-	private static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
-	private static final String SWITCH_UPDATE_SHELL = "--update-shell";
-	private static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_WEBSITE = "--website";
+	public static final String SWITCH_DOCS = "--docs";
+	public static final String SWITCH_WHERE = "--where";
+	public static final String SWITCH_SETTINGS = "--settings";
+	public static final String SWITCH_UPDATE = "--update";
+	public static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
+	public static final String SWITCH_UPDATE_SHELL = "--update-shell";
+	public static final String SWITCH_GUI = "--gui";
 	
 	/**
 	 * Program options.

@@ -1361,6 +1361,9 @@ public class MultiFileEditorPanel extends JPanel
 		String content = handle.editorPanel.textArea.getText();
 		content = handle.currentLineEnding.convertContent(content);
 	
+		if (!checkEncode(targetFile, content, targetCharset))
+			return false;
+		
 		StringReader reader = new StringReader(content);
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset)) {
 			IOUtils.relay(reader, writer, 8192);
@@ -1374,6 +1377,23 @@ public class MultiFileEditorPanel extends JPanel
 		
 		if (listener != null)
 			listener.onSave(handle);
+		return true;
+	}
+
+	/**
+	 * Check if a file and content can be encoded to the provided charset.
+	 * @param targetFile the file about to be saved.
+	 * @param content the content to encode.
+	 * @param targetCharset the charset to encode to.
+	 * @return true if so, false if not.
+	 */
+	private boolean checkEncode(File targetFile, String content, Charset targetCharset) 
+	{
+		if (!EncodingUtils.canEncodeAs(content, targetCharset))
+		{
+			error(this, language.getText("texteditor.action.save.encoding.error", targetFile.getAbsolutePath(), targetCharset.displayName()));
+			return false;
+		}
 		return true;
 	}
 

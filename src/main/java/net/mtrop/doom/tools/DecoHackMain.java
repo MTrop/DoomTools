@@ -68,27 +68,27 @@ public final class DecoHackMain
 	private static final int ERROR_MISSING_RESOURCE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_GUI = "--gui";
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_HELPFULL = "--help-full";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_DRYRUN = "--dry-run";
+	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_HELPFULL = "--help-full";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_DRYRUN = "--dry-run";
 
-	private static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
-	private static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
-	private static final String SWITCH_DUMPRESOURCE = "--dump-resource";
+	public static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
+	public static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
+	public static final String SWITCH_DUMPRESOURCE = "--dump-resource";
 	
-	private static final String SWITCH_OUTPUT = "--output";
-	private static final String SWITCH_OUTPUT2 = "-o";
-	private static final String SWITCH_OUTPUTCHARSET = "--output-charset";
-	private static final String SWITCH_OUTPUTCHARSET2 = "-oc";
-	private static final String SWITCH_BUDGET = "--budget";
-	private static final String SWITCH_BUDGET2 = "-b";
-	private static final String SWITCH_SOURCE_OUTPUT = "--source-output";
-	private static final String SWITCH_SOURCE_OUTPUT2 = "-s";
+	public static final String SWITCH_OUTPUT = "--output";
+	public static final String SWITCH_OUTPUT2 = "-o";
+	public static final String SWITCH_OUTPUTCHARSET = "--output-charset";
+	public static final String SWITCH_OUTPUTCHARSET2 = "-oc";
+	public static final String SWITCH_BUDGET = "--budget";
+	public static final String SWITCH_BUDGET2 = "-b";
+	public static final String SWITCH_SOURCE_OUTPUT = "--source-output";
+	public static final String SWITCH_SOURCE_OUTPUT2 = "-s";
 
-	private static final String SWITCH_SYSTEMIN = "--";
+	public static final String SWITCH_SYSTEMIN = "--";
 
 	/**
 	 * Program options.

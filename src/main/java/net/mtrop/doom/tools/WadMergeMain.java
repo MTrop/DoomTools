@@ -35,13 +35,13 @@ public final class WadMergeMain
 	private static final int ERROR_BAD_OPTIONS = 3;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERBOSE = "--verbose";
-	private static final String SWITCH_VERBOSE2 = "-v";
-	private static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERBOSE = "--verbose";
+	public static final String SWITCH_VERBOSE2 = "-v";
+	public static final String SWITCH_VERSION = "--version";
 
-	private static final String SWITCH_SYSTEMIN = "--";
+	public static final String SWITCH_SYSTEMIN = "--";
 	
 	/**
 	 * Program options.

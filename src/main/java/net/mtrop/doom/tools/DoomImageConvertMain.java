@@ -49,32 +49,32 @@ public final class DoomImageConvertMain
 	private static final int ERROR_PARSE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_VERBOSE = "--verbose";
-	private static final String SWITCH_VERBOSE2 = "-v";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_VERBOSE = "--verbose";
+	public static final String SWITCH_VERBOSE2 = "-v";
 
-	private static final String SWITCH_RECURSIVE = "--recursive";
-	private static final String SWITCH_RECURSIVE2 = "-r";
+	public static final String SWITCH_RECURSIVE = "--recursive";
+	public static final String SWITCH_RECURSIVE2 = "-r";
 
-	private static final String SWITCH_MODE_PALETTES = "--mode-palettes";
-	private static final String SWITCH_MODE_PALETTES2 = "-mp";
+	public static final String SWITCH_MODE_PALETTES = "--mode-palettes";
+	public static final String SWITCH_MODE_PALETTES2 = "-mp";
 
-	private static final String SWITCH_MODE_COLORMAPS = "--mode-colormaps";
-	private static final String SWITCH_MODE_COLORMAPS2 = "-mc";
+	public static final String SWITCH_MODE_COLORMAPS = "--mode-colormaps";
+	public static final String SWITCH_MODE_COLORMAPS2 = "-mc";
 
-	private static final String SWITCH_MODE_FLATS = "--mode-flats";
-	private static final String SWITCH_MODE_FLATS2 = "-mf";
+	public static final String SWITCH_MODE_FLATS = "--mode-flats";
+	public static final String SWITCH_MODE_FLATS2 = "-mf";
 
-	private static final String SWITCH_OUTPUT = "--output";
-	private static final String SWITCH_OUTPUT2 = "-o";
+	public static final String SWITCH_OUTPUT = "--output";
+	public static final String SWITCH_OUTPUT2 = "-o";
 
-	private static final String SWITCH_METAINFOFILE = "--infofile";
-	private static final String SWITCH_METAINFOFILE2 = "-i";
+	public static final String SWITCH_METAINFOFILE = "--infofile";
+	public static final String SWITCH_METAINFOFILE2 = "-i";
 
-	private static final String SWITCH_PALETTE = "--palette";
-	private static final String SWITCH_PALETTE2 = "-p";
+	public static final String SWITCH_PALETTE = "--palette";
+	public static final String SWITCH_PALETTE2 = "-p";
 
 	public enum Mode
 	{

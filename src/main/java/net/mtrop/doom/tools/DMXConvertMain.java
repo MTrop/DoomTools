@@ -41,16 +41,16 @@ public final class DMXConvertMain
 	private static final int ERROR_NO_FFMPEG = 4;
 	private static final int ERROR_UNKNOWN = -1;
 
-	private static final String SWITCH_HELP = "--help";
-	private static final String SWITCH_HELP2 = "-h";
-	private static final String SWITCH_VERSION = "--version";
-	private static final String SWITCH_TRYFFMPEG = "--try-ffmpeg";
+	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_HELP2 = "-h";
+	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_TRYFFMPEG = "--try-ffmpeg";
 
-	private static final String SWITCH_FFMPEG_ONLY = "--ffmpeg-only";
-	private static final String SWITCH_JSPI_ONLY = "--jspi-only";
-	private static final String SWITCH_FFMPEG_PATH = "--ffmpeg";
-	private static final String SWITCH_OUTPUTDIR = "--output-dir";
-	private static final String SWITCH_OUTPUTDIR2 = "-o";
+	public static final String SWITCH_FFMPEG_ONLY = "--ffmpeg-only";
+	public static final String SWITCH_JSPI_ONLY = "--jspi-only";
+	public static final String SWITCH_FFMPEG_PATH = "--ffmpeg";
+	public static final String SWITCH_OUTPUTDIR = "--output-dir";
+	public static final String SWITCH_OUTPUTDIR2 = "-o";
 
 	/**
 	 * Program options.

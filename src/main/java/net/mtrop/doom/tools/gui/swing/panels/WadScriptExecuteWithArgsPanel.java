@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants;
-import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp.ExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -42,6 +42,11 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	private Container argsFieldPanel;
 	private List<JFormField<String>> argsFieldList;
 	private List<Component> argsComponentList;
+	
+	public WadScriptExecuteWithArgsPanel()
+	{
+		this(new ExecutionSettings());
+	}
 	
 	public WadScriptExecuteWithArgsPanel(ExecutionSettings executionSettings)
 	{

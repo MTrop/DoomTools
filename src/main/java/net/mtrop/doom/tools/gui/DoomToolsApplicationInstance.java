@@ -16,12 +16,12 @@ import javax.swing.JMenuBar;
  */
 public abstract class DoomToolsApplicationInstance
 {
-	/** The control receiver set on all apps. */
-	protected DoomToolsApplicationControlReceiver receiver;
+	/** The listener set on all apps. */
+	private DoomToolsApplicationListener listener;
 	
 	protected DoomToolsApplicationInstance()
 	{
-		this.receiver = null; // set later
+		this.listener = null; // set later
 	}
 	
 	/**
@@ -39,14 +39,14 @@ public abstract class DoomToolsApplicationInstance
 	public abstract Container createContentPane();
 
 	/**
-	 * Sets the application control receiver.
+	 * Sets the application listener.
 	 * Called when the application gets attached to a window, but before it is shown.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param receiver the receiver instance.
 	 */
-	public final void setApplicationControlReceiver(DoomToolsApplicationControlReceiver receiver)
+	public final void setApplicationListener(DoomToolsApplicationListener receiver)
 	{
-		this.receiver = receiver;
+		this.listener = receiver;
 	}
 	
 	/**
@@ -85,13 +85,41 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
-	 * Sets the current state of this application into a state object for persisting workspaces. 
+	 * Attempts to close this application programmatically.
+	 */
+	public void attemptClose()
+	{
+		if (listener != null)
+			listener.attemptClose();
+	}
+	
+	/**
+	 * Starts a new application.
+	 * @param instance the application instance to start.
+	 */
+	public void startApplication(DoomToolsApplicationInstance instance)
+	{
+		if (listener != null)
+			listener.startApplication(instance);
+	}
+	
+	/**
+	 * @return the parent application container component.
+	 */
+	public Container getApplicationContainer()
+	{
+		return listener != null ? listener.getApplicationContainer() : null;
+	}
+	
+	/**
+	 * Puts the current state of this application into a state object for persisting workspaces. 
 	 * It is up to the application to figure out what to store.
+	 * By default, this returns an empty map.
 	 * <p> DO NOT store the content pane bounds - this is stored on the workspace.
-	 * <p> Applications that override this method should call this via <code>super</code> first!
-	 * <p> All values should be JSON serializable!
+	 * <p> Applications that override this method should call the parent method via <code>super</code> first!
 	 * <p> This should NEVER be called by the application itself.
 	 * @return this application's state properties (if any - can be null).
+	 * @see #setApplicationState(Map)
 	 */
 	public Map<String, String> getApplicationState()
 	{
@@ -99,12 +127,12 @@ public abstract class DoomToolsApplicationInstance
 	}
 
 	/**
-	 * Sets this applcation's state. 
+	 * Sets this application's state via a mapping of keys and values, presumably associated with the application. 
 	 * Called before it is started, if restoring from a workspace.
-	 * Applications that override this method should call this via <code>super</code> first!
-	 * <p> All values should be JSON serializable!
+	 * Applications that override this method should call the parent method via <code>super</code> first!
 	 * <p> This should NEVER be called by the application itself.
 	 * @param state the state object.
+	 * @see #getApplicationState()
 	 */
 	public void setApplicationState(Map<String, String> state)
 	{
@@ -113,6 +141,9 @@ public abstract class DoomToolsApplicationInstance
 
 	/**
 	 * Called when the application is created but not made visible yet.
+	 * If any resizing needs to be done to the frame that houses this application or any other
+	 * tasks before it is shown, this would be the place to do it.
+	 * <p> Assume that the application is still headless during this method.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that was "created" - which is usually a window container of some kind.
 	 */
@@ -122,7 +153,8 @@ public abstract class DoomToolsApplicationInstance
 	}
 	
 	/**
-	 * Called when the application is opened.
+	 * Called when the application is opened/made visible.
+	 * The parent frame that houses this application is made visible by the time this is called.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that "opened" - which is usually a window container of some kind.
 	 */
@@ -133,6 +165,7 @@ public abstract class DoomToolsApplicationInstance
 	
 	/**
 	 * Called when the application is closed (after {@link #shouldClose()} is called and returns true).
+	 * The parent frame that houses this application is hidden by the time this is called.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that "closed" - which is usually a window container of some kind.
 	 */
@@ -188,9 +221,4 @@ public abstract class DoomToolsApplicationInstance
 		// Do nothing.
 	}
 
-	public void onOpen() {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

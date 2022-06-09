@@ -339,7 +339,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				String error;
 				if ((error = replacer.getValidator().apply(value)) != null)
 				{
-					SwingUtils.error(receiver.getApplicationContainer(), error);
+					SwingUtils.error(getApplicationContainer(), error);
 				}
 				else if (value.length() == 0)
 				{
@@ -399,7 +399,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		
 		// Returns a trinary.
 		Boolean result = modal(
-			receiver.getApplicationContainer(), 
+			getApplicationContainer(), 
 			utils.getWindowIcons(), 
 			language.getText("doommake.newproject.modal.openproject.title"),
 			containerOf(borderLayout(4, 4),
@@ -419,18 +419,18 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			try {
 				if (!SwingUtils.open(targetDirectory))
 				{
-					SwingUtils.error(receiver.getApplicationContainer(), 
+					SwingUtils.error(getApplicationContainer(), 
 						language.getText("doommake.newproject.modal.openproject.folder.error", targetDirectory.getAbsolutePath())
 					);
 				}
 			} catch (IOException e) {
-				SwingUtils.error(receiver.getApplicationContainer(), e.getLocalizedMessage());
+				SwingUtils.error(getApplicationContainer(), e.getLocalizedMessage());
 			}
 		}
 		else // Open in Doom Tools
 		{
-			receiver.startApplication(new DoomMakeOpenProjectApp(targetDirectory));
-			receiver.attemptClose();
+			startApplication(new DoomMakeOpenProjectApp(targetDirectory));
+			attemptClose();
 		}
 		
 	}
