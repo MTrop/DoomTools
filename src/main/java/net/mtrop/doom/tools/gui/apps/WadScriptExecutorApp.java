@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -14,11 +13,9 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.WadScriptSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
-import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 
 import static javax.swing.BorderFactory.*;
@@ -36,9 +33,6 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 {
-	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptExecutorApp.class); 
-
     // Singletons
 
 	private DoomToolsGUIUtils utils;
@@ -93,7 +87,10 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 				language.getText("wadscript.run.stdin.browse.accept") 
 			),
 			(selected) -> {
-				
+				if (selected != null)
+					executePanel.setWorkingDirectory(selected.getParentFile());
+				else
+					executePanel.setWorkingDirectory(null);
 			}
 		);
 		this.executePanel = new WadScriptExecuteWithArgsPanel(settings);
@@ -172,8 +169,25 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public Map<String, String> getApplicationState() 
 	{
-		Map<String, String> state = new HashMap<>();
-		// TODO: Finish this.
+		Map<String, String> state = super.getApplicationState();
+		
+		File sourceFile = sourceFileField.getValue();
+		File workingDirectory = executePanel.getWorkingDirectory();
+		File standardInPath = executePanel.getStandardInPath();
+		String entryPoint = executePanel.getEntryPoint();
+		String[] args = executePanel.getArgs();
+		
+		if (sourceFile != null)
+			state.put("executor.source", sourceFile.getAbsolutePath());
+		if (workingDirectory != null)
+			state.put("executor.workdir", workingDirectory.getAbsolutePath());
+		if (standardInPath != null)
+			state.put("executor.stdin", standardInPath.getAbsolutePath());
+		state.put("executor.entryPoint", entryPoint);
+		state.put("executor.args", String.valueOf(args.length));
+		for (int a = 0; a < args.length; a++)
+			state.put("executor.args." + a, args[a]);
+		
 		return state;
 	}
 	

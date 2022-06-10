@@ -122,7 +122,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIRECGUN      (52,  true,  "FireCGun", usage(
-		"Fires the chaingun.",
+		"Fires the chaingun from the calling player.",
 		"Plays the sound \"PISTOL\", fires one hitscan attack, and subtracts 1 from the ammo type of this weapon.",
 		"This also sets the calling player's state to S_PLAY_ATK2 (state 155).",
 		"If \"refire\" is 0, the hitscan is dead center.",
@@ -130,16 +130,17 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	GUNFLASH      (60,  true,  "GunFlash", usage(
+		"Performs a gun flash for the calling player.",
 		"Sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD."
 	)),
 	
 	FIREMISSILE   (61,  true,  "FireMissile", usage(
-		"Fires a rocket.",
+		"Fires a rocket from the calling player.",
 		"Subtracts 1 from the ammo type of this weapon and fires thing slot MT_ROCKET (34)."
 	)),
 	
 	SAW           (71,  true,  "Saw", usage(
-		"Performs a single chainsaw scan attack.",
+		"Performs a single chainsaw scan attack from the calling player.",
 		"If it is in range of a shootable actor, it plays the \"SAWHIT\" sound from the calling player, deals 1d10 x2 damage to that actor.",
 		"If the attack deals damage, it will turn the player towards what it punched.",
 		"The range of the attack is 64 map units.",
@@ -147,7 +148,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIREPLASMA    (77,  true,  "FirePlasma", usage(
-		"Fires a plasma rifle projectile.",
+		"Fires a plasma rifle projectile from the calling player.",
 		"Subtracts 1 from the ammo type of this weapon and fires thing slot MT_PLASMA (35).",
 		"Displays the FLASH or FLASH+1 state for the weapon on the HUD at random."
 	)),
@@ -157,7 +158,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	)),
 	
 	FIREBFG       (86,  true,  "FireBFG", usage(
-		"Fires a BFG shot.",
+		"Fires a BFG shot from the calling player.",
 		"Subtracts [BFGCells] from the ammo type of this weapon and fires thing slot MT_BFG (36)."
 	)),
 

@@ -33,8 +33,6 @@ import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
-import net.mtrop.doom.tools.struct.swing.ContainerFactory.Modal;
-import net.mtrop.doom.tools.struct.swing.ContainerFactory.ModalChoice;
 import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 
@@ -43,6 +41,7 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileExtensionFilter;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
 /**
@@ -95,13 +94,13 @@ public final class DoomToolsGUIUtils
 	 * @param <T> the return type.
 	 * @param title the modal title.
 	 * @param contentPane the content pane that also contains a way to extract values from it.
-	 * @param validator the validator function for the input.
+	 * @param validator the validator function for the input. Input parameter is the selected choice; returns true if modal can continue, false if not.
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @param choices the boolean choices on the modal (one must return <code>true</code> for a non-null response).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor, choices);
 	}
@@ -115,11 +114,11 @@ public final class DoomToolsGUIUtils
 	 * @param <T> the return type.
 	 * @param title the modal title.
 	 * @param contentPane the content pane that also contains a way to extract values from it.
-	 * @param validator the validator function for the input.
+	 * @param validator the validator function for the input. Input parameter is the selected choice; returns true if modal can continue, false if not.
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Supplier<Boolean> validator, Function<C, T> settingExtractor)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor);
 	}

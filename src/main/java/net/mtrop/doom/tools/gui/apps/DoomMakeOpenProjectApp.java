@@ -43,6 +43,7 @@ import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
 
 /**

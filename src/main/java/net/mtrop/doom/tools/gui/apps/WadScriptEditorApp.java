@@ -42,6 +42,7 @@ import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
 /**
@@ -296,7 +297,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Map<String, String> getApplicationState() 
 	{
-		Map<String, String> state = new HashMap<>();
+		Map<String, String> state = super.getApplicationState();
 		editorPanel.saveState("wadscript", state);
 		
 		for (int i = 0; i < editorPanel.getEditorCount(); i++)

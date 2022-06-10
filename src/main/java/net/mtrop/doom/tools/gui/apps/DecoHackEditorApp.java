@@ -55,6 +55,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
 /**
@@ -309,7 +310,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Map<String, String> getApplicationState() 
 	{
-		Map<String, String> state = new HashMap<>();
+		Map<String, String> state = super.getApplicationState();
 		editorPanel.saveState("decohack", state);
 
 		for (int i = 0; i < editorPanel.getEditorCount(); i++)
@@ -386,9 +387,9 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		patchField.setValue(DecoHackPatchType.DOOM19);
 		
 		JPanel panel = new JPanel();
-		containerOf(panel, boxLayout(panel, BoxAxis.Y_AXIS),
-			node(label(language.getText("decohack.new.modal.message"))),
-			node(patchField)
+		containerOf(panel, borderLayout(0, 4),
+			node(BorderLayout.NORTH, label(language.getText("decohack.new.modal.message"))),
+			node(BorderLayout.SOUTH, patchField)
 		);
 		
 		Boolean choice = utils.createModal( 
@@ -439,15 +440,15 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error", file.getName()));
-			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
 		} catch (SecurityException e) {
 			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadscript.status.message.editor.error.security", file.getName()));
-			SwingUtils.error(getApplicationContainer(), language.getText("decohack.open.error.security", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("decohack.open.error.security", file.getAbsolutePath()));
 		}
 	}
 	

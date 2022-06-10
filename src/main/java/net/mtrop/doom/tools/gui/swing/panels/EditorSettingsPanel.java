@@ -70,7 +70,7 @@ public class EditorSettingsPanel extends JPanel
 			createLineBorder(Color.GRAY, 1), title, TitledBorder.LEADING, TitledBorder.TOP
 		);
 		return containerOf(border, 
-			node(containerOf(createEmptyBorder(8, 8, 8, 8),
+			node(containerOf(
 				node(BorderLayout.CENTER, container)
 			))
 		);

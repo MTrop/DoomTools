@@ -25,7 +25,12 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 	{
 		super();
 		for (DEHActionPointerDoom19 pointer : DEHActionPointerDoom19.values())
+		{
+			if (pointer == DEHActionPointerDoom19.NULL)
+				continue;
 			addCompletion(new PointerCompletion(this, pointer));
+		}
+		
 		for (DEHActionPointerMBF pointer : DEHActionPointerMBF.values())
 			addCompletion(new PointerCompletion(this, pointer));
 		for (DEHActionPointerMBF21 pointer : DEHActionPointerMBF21.values())
@@ -60,7 +65,7 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 				getInputText(pointer), 
 				getInstructions(pointer.getUsage()), 
 				getFullSignatureTemplate(pointer), 
-				getInstructions(pointer.getUsage()), 
+				getTypeText(pointer) + " " + getInstructions(pointer.getUsage()), 
 				getFunctionDescriptionHTML(pointer)
 			);
 		}
@@ -74,6 +79,11 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 		private static String getInputText(DEHActionPointer pointer)
 		{
 			return "A_" + pointer.getMnemonic();
+		}
+
+		private static String getTypeText(DEHActionPointer pointer)
+		{
+			return "(" + pointer.getType().name() + ", " + (pointer.isWeapon() ? "Weapon" : "Thing") + ")";
 		}
 
 		private static String getInstructions(DEHActionPointer.Usage usage)
@@ -163,16 +173,28 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 			html.text(")");
 			html.pop();
 			html.pop();
-		
-			// Full instructions.
+
+			// Type
+			html.push("div")
+				.tag("strong", pointer.getType().name())
+				.text(" ")
+				.tag("em", (pointer.isWeapon() ? "Weapon" : "Thing") + " Pointer")
+			.pop();
+
+			html.push("div").html("&nbsp;").pop();
 			
+			// Full instructions.
+
 			String instructions = getInstructions(usage);
 			String summaryInstructions = getInstructions(usage);
 			
 			if (instructions.trim().length() > 0)
 				html.tag("div", getInstructions(usage));
 			if (summaryInstructions.trim().length() > 0)
+			{
+				html.push("div").html("&nbsp;").pop();
 				html.tag("div", getSummaryInstructions(usage));
+			}
 		
 			if (usage.hasParameters())
 			{
@@ -189,7 +211,8 @@ public class DecoHackCompletionProvider extends DefaultCompletionProvider
 				html.push("li")
 					.push("span")
 						.tag("strong", tusage.getType().name().toLowerCase())
-						.html(" &mdash; ").text(getFullInstructions(tusage.getInstructions(), false))
+						.html(" &mdash; ")
+						.text(getFullInstructions(tusage.getInstructions(), false))
 					.pop()
 				.pop();
 			}

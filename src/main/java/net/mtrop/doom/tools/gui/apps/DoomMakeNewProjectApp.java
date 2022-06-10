@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -42,6 +43,7 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 
 /**
@@ -275,9 +277,13 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		templateNameSet.remove(templateToRemove);
 	}
 
-	private Modal<String> createOptionModal(String title, String prompt, String defaultValue, GUIHint guiHint)
+	private Modal<String> createOptionModal(String title, String prompt, final ProjectTokenReplacer replacer)
 	{
 		final AtomicReference<String> stringValue = new AtomicReference<>();
+
+		String defaultValue = replacer.getDefaultValue(); 
+		Function<String, String> validator = replacer.getValidator(); 
+		GUIHint guiHint = replacer.getGUIHint();
 		
 		Component field;
 		switch (guiHint)
@@ -301,8 +307,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		
 		final Container contentPane = containerOf(
-			createEmptyBorder(8, 8, 8, 8), 
-			borderLayout(8, 8),
+			borderLayout(0, 8),
 			node(BorderLayout.CENTER, label(prompt)),
 			node(BorderLayout.SOUTH, field)
 		);
@@ -310,7 +315,17 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			utils.getWindowIcons(),
 			title,
 			contentPane,
-			choice(language.getText("doomtools.ok"), KeyEvent.VK_ENTER, () -> stringValue.get())
+			(value) -> {
+				String error;
+				value = replacer.getSanitizer().apply(value.trim());
+				if ((error = validator.apply(value)) != null)
+				{
+					SwingUtils.error(error);
+					return false;
+				}
+				return true;
+			},
+			choice(language.getText("doomtools.ok"), KeyEvent.VK_ENTER, true, () -> stringValue.get())
 		);
 	}
 	
@@ -327,8 +342,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				String value = createOptionModal(
 					language.getText("doommake.newproject.modal.option.title"),
 					prompt,
-					replacer.getDefaultValue(),
-					replacer.getGUIHint()
+					replacer
 				).openThenDispose();
 				
 				if (value == null)
@@ -336,12 +350,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				
 				value = replacer.getSanitizer().apply(value.trim());
 				
-				String error;
-				if ((error = replacer.getValidator().apply(value)) != null)
-				{
-					SwingUtils.error(getApplicationContainer(), error);
-				}
-				else if (value.length() == 0)
+				if (value.length() == 0)
 				{
 					outputMap.put(key, replacer.getDefaultValue());
 					break; 
@@ -419,7 +428,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			try {
 				if (!SwingUtils.open(targetDirectory))
 				{
-					SwingUtils.error(getApplicationContainer(), 
+					SwingUtils.error(
 						language.getText("doommake.newproject.modal.openproject.folder.error", targetDirectory.getAbsolutePath())
 					);
 				}

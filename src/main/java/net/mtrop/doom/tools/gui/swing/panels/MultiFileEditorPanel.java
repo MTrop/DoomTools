@@ -83,6 +83,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 
 
@@ -984,7 +985,7 @@ public class MultiFileEditorPanel extends JPanel
 		mainEditorTabs.setSelectedIndex(tabIndex);
 		if (mainEditorTabs.getTabCount() == 1) // workaround for weird implementation.
 			setCurrentEditor(handle);
-		textArea.requestFocus();
+		SwingUtils.invoke(() -> textArea.requestFocus());
 		
 		if (listener != null)
 			listener.onOpen(handle);
@@ -1063,10 +1064,11 @@ public class MultiFileEditorPanel extends JPanel
 		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
 		{
 			Component component = mainEditorTabs.getTabComponentAt(i);
-			EditorHandle handle = allEditors.get(component);
+			final EditorHandle handle = allEditors.get(component);
 			if (handle.contentSourceFile != null && file.getAbsolutePath().equals(handle.contentSourceFile.getAbsolutePath()))
 			{
 				mainEditorTabs.setSelectedIndex(i);
+				SwingUtils.invoke(() -> handle.editorPanel.textArea.requestFocus());
 				return true;
 			}
 		}
@@ -1578,7 +1580,7 @@ public class MultiFileEditorPanel extends JPanel
 		findModal = utils.createModal(
 			language.getText("texteditor.modal.find.title"),
 			ModalityType.MODELESS,
-			containerOf(createEmptyBorder(8, 8, 8, 8), node(findReplacePanel))
+			containerOf(node(findReplacePanel))
 		);
 		findModal.addWindowListener(new WindowAdapter() 
 		{
@@ -1601,7 +1603,7 @@ public class MultiFileEditorPanel extends JPanel
 		EditorSettingsPanel settingsPanel = new EditorSettingsPanel();
 		utils.createModal(
 			language.getText("texteditor.settings"),
-			containerOf(createEmptyBorder(8, 8, 8, 8), node(dimension(500, 600), settingsPanel))
+			containerOf(node(dimension(500, 600), settingsPanel))
 		).openThenDispose();
 		settingsPanel.commitSettings();
 		reloadAllSettings();

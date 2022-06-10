@@ -80,7 +80,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 		
 		this.entryPointField = stringField(entryPoint);
 
-		this.numArgsField = integerField(initArgs.length, (v) -> adjustFields(v));
+		this.numArgsField = integerField(initArgs.length, this::adjustFields);
 		this.argsFieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
 		this.argsFieldList = new ArrayList<>(Math.max(initArgs.length, 4));
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
@@ -98,11 +98,13 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 			)))
 		);
 		adjustFields(initArgs.length);
-		for (int i = 0; i < initArgs.length; i++)
-			this.argsFieldList.get(i).setValue(initArgs[i]);
+		SwingUtils.invoke(() -> {
+			for (int i = 0; i < initArgs.length; i++)
+				this.argsFieldList.get(i).setValue(initArgs[i]);
+		});
 	}
 	
-	private void adjustFields(int newLen)
+	private void adjustFields(Integer newLen)
 	{
 		final int start = argsFieldList.size();
 		newLen = Math.max(newLen, 0);
@@ -138,11 +140,27 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	}
 	
 	/**
+	 * @param workDir the working directory. 
+	 */
+	public void setWorkingDirectory(File workDir)
+	{
+		workingDirFileField.setValue(workDir);
+	}
+
+	/**
 	 * @return the selected working directory.
 	 */
 	public File getWorkingDirectory()
 	{
 		return workingDirFileField.getValue();
+	}
+
+	/**
+	 * @param stdIn the path to standard in input, or null if no input.
+	 */
+	public void setStandardInPath(File stdIn)
+	{
+		standardInPathField.setValue(stdIn);
 	}
 
 	/**
@@ -154,11 +172,32 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	}
 
 	/**
+	 * @param entry the entry point to use.
+	 */
+	public void setEntryPoint(String entry)
+	{
+		entryPointField.setValue(entry);
+	}
+	
+	/**
 	 * @return the entry point to use.
 	 */
 	public String getEntryPoint()
 	{
 		return entryPointField.getValue();
+	}
+	
+	/**
+	 * @param args an array of the entered arguments.
+	 */
+	public void setArgs(final String ... args)
+	{
+		numArgsField.setValue(args.length);
+		SwingUtils.invoke(() -> {
+			int size = argsFieldList.size();
+			for (int i = 0; i < size; i++) 
+				argsFieldList.get(i).setValue(args[i]);
+		});
 	}
 	
 	/**
