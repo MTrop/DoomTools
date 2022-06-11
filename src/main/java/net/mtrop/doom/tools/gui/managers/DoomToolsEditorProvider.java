@@ -28,6 +28,7 @@ import net.mtrop.doom.tools.gui.managers.parsing.WadMergeTokenMaker;
 import net.mtrop.doom.tools.gui.managers.parsing.WadScriptCompletionProvider;
 import net.mtrop.doom.tools.struct.FactoryMap;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -40,13 +41,14 @@ import static org.fife.ui.rsyntaxtextarea.SyntaxConstants.*;
  */
 public final class DoomToolsEditorProvider 
 {
-	// TODO: Maybe pre-warm the completion providers - they can get expensive.
+    /** Logger. */
+    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsEditorProvider.class); 
 	
 	public static final String SYNTAX_STYLE_DECOHACK =   "text/decohack";
+	public static final String SYNTAX_STYLE_DOOMMAKE =   "text/doommake";
 	public static final String SYNTAX_STYLE_ROOKSCRIPT = "text/rookscript";
 	public static final String SYNTAX_STYLE_WADMERGE =   "text/wadmerge";
 	public static final String SYNTAX_STYLE_WADSCRIPT =  "text/wadscript";
-	public static final String SYNTAX_STYLE_DOOMMAKE =   "text/doommake";
 	
     /** The instance encapsulator. */
     private static final SingletonProvider<DoomToolsEditorProvider> INSTANCE = new SingletonProvider<>(() -> new DoomToolsEditorProvider());
@@ -345,10 +347,17 @@ public final class DoomToolsEditorProvider
 		return new AutoCompletion(getProviderByStyle(styleName));
 	}
 
-	// Style name.
-	private CompletionProvider getProviderByStyle(String styleName)
+	/**
+	 * Fetches/creates a completion provider by a style name.
+	 * @param styleName the style name.
+	 * @return the corresponding completion provider, or the default one if no such provider.
+	 */
+	public CompletionProvider getProviderByStyle(String styleName)
 	{
-		return FACTORY.get(styleName);
+		LOG.info("Fetch completion provider: " + styleName);
+		CompletionProvider out = FACTORY.get(styleName);
+		LOG.info("Done fetching completion provider: " + styleName);
+		return out;
 	}
 
 }

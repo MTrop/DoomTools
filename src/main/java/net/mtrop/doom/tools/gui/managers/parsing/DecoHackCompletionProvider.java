@@ -265,7 +265,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 				sb.append("${").append(pusage.getName()).append("}");
 				first = false;
 			}
-			sb.append(")");
+			sb.append(")${cursor}");
 			return sb.toString();
 		}
 
