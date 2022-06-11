@@ -5,6 +5,7 @@ import java.awt.Color;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
@@ -14,7 +15,7 @@ public final class ColorFieldTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		SwingUtils.apply(frame("Test", containerOf(
+		ObjectUtils.apply(frame("Test", containerOf(
 			node(form(48).addField("Color", colorField(Color.WHITE, "...", "Pick a Color", System.out::println))
 		))), 
 		(frame) -> {

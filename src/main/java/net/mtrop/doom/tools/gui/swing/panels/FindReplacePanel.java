@@ -8,7 +8,6 @@ import org.fife.ui.rtextarea.SearchResult;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
@@ -102,7 +101,7 @@ public class FindReplacePanel extends JPanel
 				updateSearchContext();
 			}
 		});
-		JRadioButton selectedButton = SwingUtils.apply(radio(false, (v) -> {
+		JRadioButton selectedButton = ObjectUtils.apply(radio(false, (v) -> {
 			if (v)
 			{
 				selectionOnly = true;

@@ -7,7 +7,7 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 public final class ProgressPanelTest 
 {
@@ -17,7 +17,7 @@ public final class ProgressPanelTest
 		DoomToolsProgressPanel panel = new DoomToolsProgressPanel(48);
 		panel.setBorder(createEmptyBorder(8,8,8,8));
 
-		SwingUtils.apply(frame("Test", panel), 
+		ObjectUtils.apply(frame("Test", panel), 
 		(frame) -> {
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

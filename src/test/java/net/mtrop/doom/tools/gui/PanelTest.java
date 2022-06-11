@@ -7,7 +7,6 @@ import java.awt.Container;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 public final class PanelTest 
@@ -38,7 +37,7 @@ public final class PanelTest
 		
 		Container container = (Container)obj;
 		
-		SwingUtils.apply(frame("Test", container), 
+		ObjectUtils.apply(frame("Test", container), 
 		(frame) -> {
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

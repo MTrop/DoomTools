@@ -28,6 +28,7 @@ public abstract class FactoryMap<K, V>
 	
 	/** Key map, for locking. */
 	private Map<K, WeakReference<K>> keyMap;
+	
 	/** Reference map. */
 	private Map<K, V> refMap;
 	
@@ -72,7 +73,7 @@ public abstract class FactoryMap<K, V>
 			return out;
 
 		try {
-			synchronized (uniqueRef(key))
+			synchronized (uniqueKey(key))
 			{
 				// Early out.
 				if ((out = refMap.get(key)) != null)
@@ -86,7 +87,7 @@ public abstract class FactoryMap<K, V>
 				return out;
 			}
 		} finally {
-			releaseRef(key);
+			releaseKey(key);
 		}
 	}
 	
@@ -119,7 +120,7 @@ public abstract class FactoryMap<K, V>
 	 * @see #equals(Object)
 	 * @see #hashCode()
 	 */
-	private K uniqueRef(K value)
+	private K uniqueKey(K value)
 	{
 		WeakReference<K> out;
 		synchronized (keyMap)
@@ -136,14 +137,14 @@ public abstract class FactoryMap<K, V>
 	 * This method is thread-safe.
 	 * @param value the value to use.
 	 */
-	private void releaseRef(K value)
+	private void releaseKey(K value)
 	{
-		if (!refMap.containsKey(value))
+		if (!keyMap.containsKey(value))
 			return;
 		
-		synchronized (refMap) 
+		synchronized (keyMap) 
 		{
-			refMap.remove(value);
+			keyMap.remove(value);
 		}
 	}
 	

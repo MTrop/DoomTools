@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -33,7 +34,7 @@ public class DoomToolsProgressPanel extends JPanel
 	{
 		this.statusPanel = new DoomToolsStatusPanel();
 		this.progressBar = progressBar();
-		this.progressLabel = SwingUtils.apply(label(JLabel.TRAILING, ""), 
+		this.progressLabel = ObjectUtils.apply(label(JLabel.TRAILING, ""), 
 			(label) -> label.setPreferredSize(dimension(progressLabelWidth, 32))
 		);
 		containerOf(this, borderLayout(8, 4),

@@ -11,14 +11,14 @@ import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 public final class MultiFileEditorPanelTest 
 {
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		SwingUtils.apply(frame("Test", SwingUtils.apply(new MultiFileEditorPanel(), (ep) -> {
+		ObjectUtils.apply(frame("Test", ObjectUtils.apply(new MultiFileEditorPanel(), (ep) -> {
 			ep.newEditor("Stuff", "Hello, content!");
 			ep.newEditor("Stuff 2", "Hello, more content!");
 			try {

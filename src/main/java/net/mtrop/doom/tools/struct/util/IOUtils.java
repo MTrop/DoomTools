@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 /**
  * Simple IO utility functions.
@@ -68,7 +69,7 @@ public final class IOUtils
 	
 	/**
 	 * Convenience method for
-	 * <code>new BufferedReader(new InputStreamReader(in))</code>
+	 * <code>new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))</code>
 	 * @param in the stream to read.
 	 * @return an open buffered reader for the provided stream.
 	 * @throws IOException if an error occurred opening the stream for reading.
@@ -76,12 +77,26 @@ public final class IOUtils
 	 */
 	public static BufferedReader openTextStream(InputStream in) throws IOException
 	{
-		return new BufferedReader(new InputStreamReader(in));
+		return new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()));
 	}
 
 	/**
 	 * Convenience method for
-	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(file)))</code>
+	 * <code>new BufferedReader(new InputStreamReader(in, encoding))</code>
+	 * @param in the stream to read.
+	 * @param encoding the text encoding to use.
+	 * @return an open buffered reader for the provided stream.
+	 * @throws IOException if an error occurred opening the stream for reading.
+	 * @throws SecurityException if you do not have permission for opening the stream.
+	 */
+	public static BufferedReader openTextStream(InputStream in, Charset encoding) throws IOException
+	{
+		return new BufferedReader(new InputStreamReader(in, encoding));
+	}
+
+	/**
+	 * Convenience method for
+	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.defaultCharset()))</code>
 	 * @param file the file to open.
 	 * @return an open buffered reader for the provided file.
 	 * @throws IOException if an error occurred opening the file for reading.
@@ -89,12 +104,26 @@ public final class IOUtils
 	 */
 	public static BufferedReader openTextFile(File file) throws IOException
 	{
-		return openTextStream(new FileInputStream(file));
+		return openTextStream(new FileInputStream(file), Charset.defaultCharset());
 	}
 
 	/**
 	 * Convenience method for
-	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))))</code>
+	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(file), encoding))</code>
+	 * @param file the file to open.
+	 * @param encoding the text encoding to use.
+	 * @return an open buffered reader for the provided file.
+	 * @throws IOException if an error occurred opening the file for reading.
+	 * @throws SecurityException if you do not have permission for opening the file.
+	 */
+	public static BufferedReader openTextFile(File file, Charset encoding) throws IOException
+	{
+		return openTextStream(new FileInputStream(file), encoding);
+	}
+
+	/**
+	 * Convenience method for
+	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), Charset.defaultCharset()))</code>
 	 * @param filePath the path of the file to open.
 	 * @return an open buffered reader for the provided path.
 	 * @throws IOException if an error occurred opening the file for reading.
@@ -102,7 +131,21 @@ public final class IOUtils
 	 */
 	public static BufferedReader openTextFile(String filePath) throws IOException
 	{
-		return openTextFile(new File(filePath));
+		return openTextFile(new File(filePath), Charset.defaultCharset());
+	}
+
+	/**
+	 * Convenience method for
+	 * <code>new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), encoding))</code>
+	 * @param filePath the path of the file to open.
+	 * @param encoding the text encoding to use.
+	 * @return an open buffered reader for the provided path.
+	 * @throws IOException if an error occurred opening the file for reading.
+	 * @throws SecurityException if you do not have permission for opening the file.
+	 */
+	public static BufferedReader openTextFile(String filePath, Charset encoding) throws IOException
+	{
+		return openTextFile(new File(filePath), encoding);
 	}
 
 	/**

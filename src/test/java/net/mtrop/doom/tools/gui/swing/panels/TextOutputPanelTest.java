@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 public final class TextOutputPanelTest 
 {
@@ -17,7 +17,7 @@ public final class TextOutputPanelTest
 		DoomToolsTextOutputPanel panel = new DoomToolsTextOutputPanel();
 		PrintStream out = panel.getPrintStream();
 		
-		SwingUtils.apply(frame("Test",
+		ObjectUtils.apply(frame("Test",
 			scroll(ScrollPolicy.AS_NEEDED, panel)
 		), 
 		(frame) -> {

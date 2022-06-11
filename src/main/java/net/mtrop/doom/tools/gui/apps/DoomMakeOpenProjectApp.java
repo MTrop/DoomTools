@@ -44,7 +44,8 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
-import static net.mtrop.doom.tools.struct.swing.SwingUtils.apply;
+import static net.mtrop.doom.tools.struct.util.ObjectUtils.apply;
+
 
 /**
  * The DoomMake New Project application.

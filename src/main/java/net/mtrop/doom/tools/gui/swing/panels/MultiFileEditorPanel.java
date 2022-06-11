@@ -85,6 +85,7 @@ import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
+import static net.mtrop.doom.tools.struct.util.ObjectUtils.apply;
 
 
 /**

@@ -11,10 +11,10 @@ import javax.swing.border.TitledBorder;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 
 import static javax.swing.BorderFactory.*;
-import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.util.ObjectUtils.apply;
 
 
 /**

@@ -1,0 +1,12 @@
+/*****************************************************************************
+ * DECOHack Thing Slot "Friendly" Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_BOOM_FRIENDLY_THINGS__
+#define __DECOHACK_CONSTANTS_BOOM_FRIENDLY_THINGS__
+
+#define MTF_PUSHER                138
+#define MTF_PULLER                139
+
+#endif

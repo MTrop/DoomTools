@@ -40,6 +40,8 @@ import static org.fife.ui.rsyntaxtextarea.SyntaxConstants.*;
  */
 public final class DoomToolsEditorProvider 
 {
+	// TODO: Maybe pre-warm the completion providers - they can get expensive.
+	
 	public static final String SYNTAX_STYLE_DECOHACK =   "text/decohack";
 	public static final String SYNTAX_STYLE_ROOKSCRIPT = "text/rookscript";
 	public static final String SYNTAX_STYLE_WADMERGE =   "text/wadmerge";

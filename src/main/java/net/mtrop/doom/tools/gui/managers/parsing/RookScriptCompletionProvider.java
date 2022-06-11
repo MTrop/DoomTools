@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.util.List;
 
 import org.fife.ui.autocomplete.CompletionProvider;
-import org.fife.ui.autocomplete.DefaultCompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
 
 import com.blackrook.rookscript.lang.ScriptFunctionType;
@@ -21,7 +20,7 @@ import net.mtrop.doom.tools.struct.HTMLWriter.Options;
  * RookScript completion provider.
  * @author Matthew Tropiano
  */
-public class RookScriptCompletionProvider extends DefaultCompletionProvider
+public class RookScriptCompletionProvider extends CommonCompletionProvider
 {
 	public RookScriptCompletionProvider()
 	{

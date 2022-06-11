@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.struct.swing;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -13,7 +14,7 @@ public final class BlankFieldTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		SwingUtils.apply(frame("Test", containerOf(
+		ObjectUtils.apply(frame("Test", containerOf(
 			node(form(96)
 				.addField("Stuff", integerField(123))
 				.addField("", separatorField())

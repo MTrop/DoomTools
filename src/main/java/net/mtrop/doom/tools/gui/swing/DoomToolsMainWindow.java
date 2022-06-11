@@ -72,7 +72,7 @@ public class DoomToolsMainWindow extends JFrame
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
 
-    private static final Options JSON_OPTIONS = SwingUtils.apply(new Options(), (options) -> {
+    private static final Options JSON_OPTIONS = ObjectUtils.apply(new Options(), (options) -> {
     	options.setIndentation("\t");
     });
     

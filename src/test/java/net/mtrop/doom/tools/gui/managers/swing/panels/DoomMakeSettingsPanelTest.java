@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 
@@ -13,7 +13,7 @@ public final class DoomMakeSettingsPanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		SwingUtils.apply(frame("Test", new DoomMakeSettingsPanel()), 
+		ObjectUtils.apply(frame("Test", new DoomMakeSettingsPanel()), 
 		(frame) -> {
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

@@ -1,0 +1,15 @@
+/*****************************************************************************
+ * DECOHack Thing Slot "Friendly" Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_MBF_FRIENDLY_THINGS__
+#define __DECOHACK_CONSTANTS_MBF_FRIENDLY_THINGS__
+
+#define MTF_HELPER_DOG            140
+#define MTF_BFG_PLASMA1           141
+#define MTF_BFG_PLASMA2           142
+#define MTF_SCEPTRE               143
+#define MTF_BIBLE                 144
+
+#endif

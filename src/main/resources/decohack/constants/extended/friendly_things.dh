@@ -1,0 +1,117 @@
+/*****************************************************************************
+ * DECOHack Thing Slot "Friendly" Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_EXTENDED_FRIENDLY_THINGS__
+#define __DECOHACK_CONSTANTS_EXTENDED_FRIENDLY_THINGS__
+
+#define MTF_MUSICSOURCE           145
+#define MTF_GIBDTH                146
+#define MTF_BLUEBLOOD             147
+#define MTF_GREENBLOOD            148
+#define MTF_FUZZYBLOOD            149
+#define MTF_TRAIL                 150
+
+#define MTF_EXTRA00               151
+#define MTF_EXTRA01               152
+#define MTF_EXTRA02               153
+#define MTF_EXTRA03               154
+#define MTF_EXTRA04               155
+#define MTF_EXTRA05               156
+#define MTF_EXTRA06               157
+#define MTF_EXTRA07               158
+#define MTF_EXTRA08               159
+#define MTF_EXTRA09               160
+#define MTF_EXTRA10               161
+#define MTF_EXTRA11               162
+#define MTF_EXTRA12               163
+#define MTF_EXTRA13               164
+#define MTF_EXTRA14               165
+#define MTF_EXTRA15               166
+#define MTF_EXTRA16               167
+#define MTF_EXTRA17               168
+#define MTF_EXTRA18               169
+#define MTF_EXTRA19               170
+#define MTF_EXTRA20               171
+#define MTF_EXTRA21               172
+#define MTF_EXTRA22               173
+#define MTF_EXTRA23               174
+#define MTF_EXTRA24               175
+#define MTF_EXTRA25               176
+#define MTF_EXTRA26               177
+#define MTF_EXTRA27               178
+#define MTF_EXTRA28               179
+#define MTF_EXTRA29               180
+#define MTF_EXTRA30               181
+#define MTF_EXTRA31               182
+#define MTF_EXTRA32               183
+#define MTF_EXTRA33               184
+#define MTF_EXTRA34               185
+#define MTF_EXTRA35               186
+#define MTF_EXTRA36               187
+#define MTF_EXTRA37               188
+#define MTF_EXTRA38               189
+#define MTF_EXTRA39               190
+#define MTF_EXTRA40               191
+#define MTF_EXTRA41               192
+#define MTF_EXTRA42               193
+#define MTF_EXTRA43               194
+#define MTF_EXTRA44               195
+#define MTF_EXTRA45               196
+#define MTF_EXTRA46               197
+#define MTF_EXTRA47               198
+#define MTF_EXTRA48               199
+#define MTF_EXTRA49               200
+#define MTF_EXTRA50               201
+#define MTF_EXTRA51               202
+#define MTF_EXTRA52               203
+#define MTF_EXTRA53               204
+#define MTF_EXTRA54               205
+#define MTF_EXTRA55               206
+#define MTF_EXTRA56               207
+#define MTF_EXTRA57               208
+#define MTF_EXTRA58               209
+#define MTF_EXTRA59               210
+#define MTF_EXTRA60               211
+#define MTF_EXTRA61               212
+#define MTF_EXTRA62               213
+#define MTF_EXTRA63               214
+#define MTF_EXTRA64               215
+#define MTF_EXTRA65               216
+#define MTF_EXTRA66               217
+#define MTF_EXTRA67               218
+#define MTF_EXTRA68               219
+#define MTF_EXTRA69               220
+#define MTF_EXTRA70               221
+#define MTF_EXTRA71               222
+#define MTF_EXTRA72               223
+#define MTF_EXTRA73               224
+#define MTF_EXTRA74               225
+#define MTF_EXTRA75               226
+#define MTF_EXTRA76               227
+#define MTF_EXTRA77               228
+#define MTF_EXTRA78               229
+#define MTF_EXTRA79               230
+#define MTF_EXTRA80               231
+#define MTF_EXTRA81               232
+#define MTF_EXTRA82               233
+#define MTF_EXTRA83               234
+#define MTF_EXTRA84               235
+#define MTF_EXTRA85               236
+#define MTF_EXTRA86               237
+#define MTF_EXTRA87               238
+#define MTF_EXTRA88               239
+#define MTF_EXTRA89               240
+#define MTF_EXTRA90               241
+#define MTF_EXTRA91               242
+#define MTF_EXTRA92               243
+#define MTF_EXTRA93               244
+#define MTF_EXTRA94               245
+#define MTF_EXTRA95               246
+#define MTF_EXTRA96               247
+#define MTF_EXTRA97               248
+#define MTF_EXTRA98               249
+#define MTF_EXTRA99               250
+
+#endif

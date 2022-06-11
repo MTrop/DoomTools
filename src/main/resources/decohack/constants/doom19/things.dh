@@ -6,8 +6,6 @@
 #ifndef __DECOHACK_CONSTANTS_DOOM19_THINGS__
 #define __DECOHACK_CONSTANTS_DOOM19_THINGS__
 
-// Offset by 1 by DEH convention.
-
 #define MT_NULL         0
 #define MT_PLAYER       1
 #define MT_POSSESSED    2

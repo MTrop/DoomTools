@@ -5,7 +5,6 @@ import java.io.PrintStream;
 
 import org.fife.ui.autocomplete.AbstractCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
-import org.fife.ui.autocomplete.DefaultCompletionProvider;
 
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 
@@ -13,7 +12,7 @@ import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
  * WadMerge Completion Provider.
  * @author Matthew Tropiano
  */
-public class WadMergeCompletionProvider extends DefaultCompletionProvider
+public class WadMergeCompletionProvider extends CommonCompletionProvider
 {
 	public WadMergeCompletionProvider()
 	{
@@ -37,12 +36,12 @@ public class WadMergeCompletionProvider extends DefaultCompletionProvider
 			this.name = command.name().toLowerCase();
 			this.usage = command.usage().toLowerCase();
 
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+			final ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 			try (PrintStream textOut = new PrintStream(bos, true))
 			{
 				command.help(textOut);
 			}
-			this.summaryText = "<html><body><pre>" + (new String(bos.toByteArray())) + "</pre></body></html>";
+			this.summaryText = writeHTML((html) -> html.tag("pre", (new String(bos.toByteArray()))));
 		}
 		
 		@Override

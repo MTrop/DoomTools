@@ -1,6 +1,6 @@
 package net.mtrop.doom.tools.gui.managers.swing;
 
-import static net.mtrop.doom.tools.struct.swing.SwingUtils.*;
+import static net.mtrop.doom.tools.struct.util.ObjectUtils.*;
 
 import javax.swing.JFrame;
 
