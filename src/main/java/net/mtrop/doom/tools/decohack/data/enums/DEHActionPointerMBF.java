@@ -8,6 +8,8 @@ package net.mtrop.doom.tools.decohack.data.enums;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.params;
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.usage;
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.*;
 
 import java.util.Map;
@@ -23,33 +25,81 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 	// TODO: Finish docs!!
 
 	// MBF Thing Action Pointers
-	DETONATE        ("Detonate"),
-	MUSHROOM        ("Mushroom",   ANGLEFIXED, FIXED),
-	SPAWN           ("Spawn",      THING, FIXED),
-	TURN            ("Turn",       ANGLEINT),
-	FACE            ("Face",       ANGLEUINT),
-	SCRATCH         ("Scratch",    SHORT, SOUND),
-	PLAYSOUND       ("PlaySound",  SOUND, BOOL),
-	RANDOMJUMP      ("RandomJump", STATE, UINT),
-	LINEEFFECT      ("LineEffect", SHORT, SHORT),
-	DIE             ("Die"),
-	FIREOLDBFG      ("FireOldBFG"),
-	BETASKULLATTACK ("BetaSkullAttack"),
-	STOP            ("Stop");
+	DETONATE        ("Detonate", usage(
+		"[TODO] ADD ME."
+	)),
 	
+	MUSHROOM        ("Mushroom",   params(ANGLEFIXED, FIXED), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	SPAWN           ("Spawn",      params(THING, FIXED), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	TURN            ("Turn",       params(ANGLEINT), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	FACE            ("Face",       params(ANGLEUINT), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	SCRATCH         ("Scratch",    params(SHORT, SOUND), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	PLAYSOUND       ("PlaySound",  params(SOUND, BOOL), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	RANDOMJUMP      ("RandomJump", params(STATE, UINT), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	LINEEFFECT      ("LineEffect", params(SHORT, SHORT), usage(
+		"[TODO] ADD ME."
+	)),
+	
+	DIE             ("Die", usage(
+		"[TODO] ADD ME."
+	)),
+	
+	FIREOLDBFG      ("FireOldBFG", usage(
+		"[TODO] ADD ME."
+	)),
+	
+	BETASKULLATTACK ("BetaSkullAttack", usage(
+		"[TODO] ADD ME."
+	)),
+	
+	STOP            ("Stop", usage(
+		"[TODO] ADD ME."
+	));
+	
+	private static final Map<String, DEHActionPointerMBF> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerMBF.class);
+
+	/** Function usage. */
+	private Usage usage;
 	/** Mnemonic name for BEX/DECORATE. */
 	private String mnemonic;
 	/** Action pointer parameters. */
 	private DEHActionPointerParamType[] params;
 
-	private DEHActionPointerMBF(String mnemonic, DEHActionPointerParamType ... params)
+	private DEHActionPointerMBF(String mnemonic, Usage usage)
 	{
+		this.usage = usage;
+		this.mnemonic = mnemonic;
+		this.params = params();
+	}
+
+	private DEHActionPointerMBF(String mnemonic, DEHActionPointerParamType[] params, Usage usage)
+	{
+		this.usage = usage;
 		this.mnemonic = mnemonic;
 		this.params = params;
 	}
 
-	private static final Map<String, DEHActionPointerMBF> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerMBF.class);
-	
 	public static DEHActionPointer getActionPointerByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);
@@ -91,4 +141,10 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		return index < 0 || index >= params.length ? null : params[index];
 	}
 
+	@Override
+	public Usage getUsage() 
+	{
+		return usage;
+	}
+	
 }

@@ -20,9 +20,7 @@ import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.*;
  */
 public enum DEHActionPointerDoom19 implements DEHActionPointer
 {
-	// TODO: Finish docs!!
-	
-	NULL          (0,   "NULL"),
+	NULL          (0,   "NULL", usage()),
 	
 	// ========== Doom Weapon Action Pointers ==========
 	
@@ -203,22 +201,22 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	CHASE         (176, false, "Chase", usage(
 		"Pursues the calling actor's current target.",
-		"If the target is in melee range, the calling actor jumps to its MELEE state, if defined.",
+		"If the target is in melee range, the calling actor jumps to its MELEE state, if defined, and also plays its ATTACK sound, if defined.",
 		"If the target is in missile range, the calling actor jumps to its MISSILE state, if defined.",
-		"The actor will randomly play its ACTIVE sound, if defined.",
+		"If neither happen, the actor will randomly play its ACTIVE sound, if defined.",
 		"If the calling actor loses its target or its target is not flagged as SHOOTABLE, it jumps to its SPAWN state.",
 		"This pointer, along with A_Look, comprises the \"AI\" of Doom monsters."
 	)),
 	
 	FACETARGET    (184, false, "FaceTarget", usage(
 		"Faces the calling actor towards its current target.",
-		"Note that this does not affect the aiming of attacks, just actor facing angle.",
 		"See also: A_Chase, A_Look."
 	)),
 	
 	POSATTACK     (185, false, "PosAttack", usage(
-		"Calls A_FaceTarget and performs a single hitscan attack.",
-		"This also plays the sound \"PISTOL\" from the calling actor.",
+		"Performs a zombieman attack from the calling actor.",
+		"Calls A_FaceTarget, plays sound \"PISTOL\" from the calling actor, and performs a single hitscan attack.",
+		"The hitscan attack does 5 x 1d3 damage.",
 		"If the calling actor does not have a target, this does nothing."
 	)),
 	
@@ -284,43 +282,202 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	SKELFIST      (338, false, "SkelFist", usage(
 		"Calls A_FaceTarget and attempts a melee attack from the calling actor.",
-		"If the attack connects, this does 1d10 x 6 damage ",
+		"If the attack connects, this does 1d10 x 6 damage.",
 		"If the calling actor has no target, this does nothing."
 	)),
 
-	SKELMISSILE   (341, false, "SkelMissile"),
-	FATRAISE      (376, false, "FatRaise"),
-	FATATTACK1    (377, false, "FatAttack1"),
-	FATATTACK2    (380, false, "FatAttack2"),
-	FATATTACK3    (383, false, "FatAttack3"),
-	BOSSDEATH     (397, false, "BossDeath"),
-	CPOSATTACK    (417, false, "CPosAttack"),
-	CPOSREFIRE    (419, false, "CPosRefire"),
-	TROOPATTACK   (454, false, "TroopAttack"),
-	SARGATTACK    (487, false, "SargAttack"),
-	HEADATTACK    (506, false, "HeadAttack"),
-	BRUISATTACK   (539, false, "BruisAttack"),
-	SKULLATTACK   (590, false, "SkullAttack"),
-	METAL         (603, false, "Metal"),
-	SPOSATTACK    (616, false, "SPosAttack"),
-	SPIDREFIRE    (618, false, "SpidRefire"),
-	BABYMETAL     (635, false, "BabyMetal"),
-	BSPIATTACK    (648, false, "BspiAttack"),
-	HOOF          (676, false, "Hoof"),
-	CYBERATTACK   (685, false, "CyberAttack"),
-	PAINATTACK    (711, false, "PainAttack"),
-	PAINDIE       (718, false, "PainDie"),
-	KEENDIE       (774, false, "KeenDie"),
-	BRAINPAIN     (779, false, "BrainPain"),
-	BRAINSCREAM   (780, false, "BrainScream"),
-	BRAINDIE      (783, false, "BrainDie"),
-	BRAINAWAKE    (785, false, "BrainAwake"),
-	BRAINSPIT     (786, false, "BrainSpit"),
-	SPAWNSOUND    (787, false, "SpawnSound"),
-	SPAWNFLY      (788, false, "SpawnFly"),
-	BRAINEXPLODE  (801, false, "BrainExplode");
+	SKELMISSILE   (341, false, "SkelMissile", usage(
+		"Fires a tracer missile from the calling actor.",
+		"Calls A_FaceTarget, spawns a Revenant Rocket actor (MT_TRACER, slot 7) 16 map units higher than normal, and sets its \"tracer\" pointer to the caller's target.",
+		"If the calling actor has no target, this does nothing."
+	)),
 	
-	/** Originating frame (for DEH 3.0 format 19). */
+	FATRAISE      (376, false, "FatRaise", usage(
+		"Calls A_FaceTarget and plays sound \"MANATK\" from the calling actor."
+	)),
+	
+	FATATTACK1    (377, false, "FatAttack1", usage(
+		"Fires two mancubus fireballs - one forward, one to the calling actor's left.",
+		"Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10), one centered, one to the caller's left."
+	)),
+	
+	FATATTACK2    (380, false, "FatAttack2", usage(
+		"Fires two mancubus fireballs - one forward, one to the calling actor's right.",
+		"Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10), one centered, one to the caller's right."
+	)),
+	
+	FATATTACK3    (383, false, "FatAttack3", usage(
+		"Fires two mancubus fireballs - one each side of calling actor, not centered.",
+		"Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10) on each side of calling actor, not centered."
+	)),
+	
+	BOSSDEATH     (397, false, "BossDeath", usage(
+		"Triggers special behavior, depending on the map it is called on and the actor that calls it.",
+		"If E1M8, checks if this is an MT_BRUISER (slot 16), then checks if all MT_BRUISER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.",
+		"If E2M8, checks if this is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, exits the map.",
+		"If E3M8, checks if this is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, exits the map.",
+		"If E4M6, checks if this is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, opens the sector tagged 666 like a fast door.",
+		"If E4M8, checks if this is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.",
+		"If MAP07, checks if this is an MT_FATSO (slot 9), then checks if all MT_FATSO things are dead, and if so, lowers the sector tagged 666 to the lowest floor.",
+		"If MAP07, checks if this is an MT_BABY (slot 9), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.",
+		"This does nothing if no players are alive by the time this triggers.",
+		"Some engines allow you to change this function's behavior."
+	)),
+	
+	CPOSATTACK    (417, false, "CPosAttack", usage(
+		"Performs a single chaingunner attack from the calling actor.",
+		"Calls A_FaceTarget, plays sound \"SHOTGN\" from the calling actor, and performs a single hitscan attack.",
+		"The hitscan attack does 5 x 1d3 damage.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	CPOSREFIRE    (419, false, "CPosRefire", usage(
+		"Checks if the calling actor has line of sight to its target, and if not, enters its SEE state.",
+		"The calling actor also enters its SEE state if its target is dead, or it doesn't have a target.",
+		"There is also a 15% chance that this does not happen."
+	)),
+	
+	TROOPATTACK   (454, false, "TroopAttack", usage(
+		"Calls A_FaceTarget and performs an Imp attack from the calling actor.",
+		"If the calling actor's target is in melee range, the sound \"CLAW\" is played from the caller, and deals 1d8 x 3 damage to the target.",
+		"If the target is not in melee range, it fires an Imp Fireball (MT_TROOPSHOT, slot 32), instead.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	SARGATTACK    (487, false, "SargAttack", usage(
+		"Calls A_FaceTarget and performs a Pinky demon attack from the calling actor.",
+		"If the calling actor's target is in melee range, it deals 1d10 x 4 damage to the target.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	HEADATTACK    (506, false, "HeadAttack", usage(
+		"Calls A_FaceTarget and performs a Cacodemon attack from the calling actor.",
+		"If the calling actor's target is in melee range, it deals 1d6 x 10 damage to the target.",
+		"If the target is not in melee range, it fires a Cacodemon Fireball (MT_HEADSHOT, slot 33), instead.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	BRUISATTACK   (539, false, "BruisAttack", usage(
+		"Calls A_FaceTarget and performs a Baron/Hell Knight attack from the calling actor.",
+		"If the calling actor's target is in melee range, the sound \"CLAW\" is played from the caller, and deals 1d8 x 10 damage to the target.",
+		"If the target is not in melee range, it fires a Baron Fireball (MT_BRUISERSHOT, slot 17), instead.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	SKULLATTACK   (590, false, "SkullAttack", usage(
+		"Performs a Lost Soul attack.",
+		"The calling actor sets the \"SKULLFLY\" flag, plays its ATTACK sound, calls A_FaceTarget, and sets its forward momentum to SKULLSPEED.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	METAL         (603, false, "Metal", usage(
+		"Plays sound \"METAL\" from the calling actor and calls A_Chase."
+	)),
+	
+	SPOSATTACK    (616, false, "SPosAttack", usage(
+		"Performs a shotgunner attack from the calling actor.",
+		"Calls A_FaceTarget, plays sound \"SHOTGN\" from the calling actor, and performs three hitscan attacks at once.",
+		"Each hitscan attack does 5 x 1d3 damage.",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	SPIDREFIRE    (618, false, "SpidRefire", usage(
+		"Checks if the calling actor has line of sight to its target, and if not, enters its SEE state.",
+		"The calling actor also enters its SEE state if its target is dead, or it doesn't have a target.",
+		"There is also a 4% chance that this does not happen."
+	)),
+	
+	BABYMETAL     (635, false, "BabyMetal", usage(
+		"Plays sound \"BSPWLK\" from the calling actor and calls A_Chase."
+	)),
+	
+	BSPIATTACK    (648, false, "BspiAttack", usage(
+		"Calls A_FaceTarget and performs an Arachnotron attack from the calling actor.",
+		"The calling actor fires an Arachnotron Bullet (MT_ARACHPLAZ, slot 37).",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	HOOF          (676, false, "Hoof", usage(
+		"Plays sound \"HOOF\" from the calling actor and calls A_Chase."
+	)),
+	
+	CYBERATTACK   (685, false, "CyberAttack", usage(
+		"Calls A_FaceTarget and performs a Cyberdemon attack from the calling actor.",
+		"The calling actor fires a rocket (MT_ROCKET, slot 34).",
+		"If the calling actor does not have a target, this does nothing."
+	)),
+	
+	PAINATTACK    (711, false, "PainAttack", usage(
+		"Calls A_FaceTarget and fires a Lost Soul (MT_SKULL, slot 19) from the calling actor at its target.",
+		"The spawned actor has A_SkullAttack immediately called on it, if it had room to move on spawn.",
+		"If it didn't have room to move, 10000 damage is dealt to it.",
+		"In the original Doom (and some ports that enable this behavior), this first checks to see if there are 20 instances of MT_SKULL in the map, and if so, this does nothing."
+	)),
+	
+	PAINDIE       (718, false, "PainDie", usage(
+		"Calls A_Fall and spawns 3 Lost Souls (MT_SKULL, slot 19)."
+	)),
+	
+	KEENDIE       (774, false, "KeenDie", usage(
+		"The \"Commander Keen\" death special.",
+		"Calls A_Fall, and then checks to see if all actors of the calling actor's type are dead. If so, opens the sector tagged 666 like a door.",
+		"Despite its name, this can be called from ANY actor, on ANY map, and this will still function."
+	)),
+	
+	BRAINPAIN     (779, false, "BrainPain", usage(
+		"Plays sound \"BOSPN\" from the calling actor at full volume."
+	)),
+	
+	BRAINSCREAM   (780, false, "BrainScream", usage(
+		"Plays sound \"BOSDTH\" from the calling actor at full volume and starts the Brain Death explosions.",
+		"The calling actor spawns 65 MT_ROCKET (slot 34) objects immediately set to state S_BRAINEXPLODE1 (799) with their duration tics each randomized from 0 to 7.",
+		"Each object is placed 320 units south of the calling actor and anywhere from 196 units west to 320 units east of it, and an absolute height of 128 to 640, with a slight upward thrust."
+	)),
+	
+	BRAINDIE      (783, false, "BrainDie", usage(
+		"Exits the level."
+	)),
+	
+	BRAINAWAKE    (785, false, "BrainAwake", usage(
+		"Starts the \"Boss Brain\" routine.",
+		"The calling actor searches for all MT_BOSSTARGET (slot 28) things, filling the target list for A_BrainSpit and plays sound \"BOSSIT\" at full volume.",
+		"If this is called more than once, it can affect the ordering in a call to A_BrainSpit since there is only one list maintained in memory.",
+		"If there are more than 32 MT_BOSSTARGET things or 0 MT_BOSSTARGET things in the map when this is called, this can crash Doom."
+	)),
+	
+	BRAINSPIT     (786, false, "BrainSpit", usage(
+		"Performs the boss brain cube spit from the calling actor.",
+		"The calling actor fires a spawn cube (MT_SPAWNSHOT, slot 29) at the next MT_BOSSTARGET thing in the list prepared in a call to A_BrainAwake.",
+		"The calling actor also plays sound \"BOSPIT\" at full volume.",
+		"The spawned cube has its target set to the target spawn spot and its reaction time set to a value proportional to its distance from the target.",
+		"If the skill level is \"EASY\" (ITYTD or HNTR), this will do nothing every other call."
+	)),
+	
+	SPAWNSOUND    (787, false, "SpawnSound", usage(
+		"Plays sound \"BOSCUB\" from the calling actor and calls A_SpawnFly."
+	)),
+	
+	SPAWNFLY      (788, false, "SpawnFly", usage(
+		"Performs the Spawn Cube Fly function.",
+		"The calling actor decrements its reaction time by one, and when it reaches zero, removes itself, " + 
+			"and spawns MT_SPAWNFIRE (slot 30), plays sound \"TELEPT\" from it, and spawns one of the following actors at its target's position (at some probablility):",
+		"MT_TROOP (slot 12) at 19.53%.",
+		"MT_SERGEANT (slot 13) at 15.63%.",
+		"MT_SHADOWS (slot 14), MT_HEAD (slot 15), and MT_FATSO (slot 9) at 11.72%.",
+		"MT_KNIGHT (slot 18) at 9.38%.",
+		"MT_BABY (slot 21) at 7.81%.",
+		"MT_BRUISER (slot 16), MT_UNDEAD (slot 6), and MT_PAIN (slot 23) at 3.91%.",
+		"MT_VILE (slot 4) at 0.78%.",
+		"The spawned actor gets a teleport check that will telefrag the target position on MAP30."
+	)),
+	
+	BRAINEXPLODE  (801, false, "BrainExplode", usage(
+		"Performs a re-explosion similar to what A_BrainScream starts.",
+		"The calling actor spawns an MT_ROCKET (slot 34) object immediately set to state S_BRAINEXPLODE1 (799) with their duration tics each randomized from 0 to 7.",
+		"The object preserves the calling actor's Y-position and its X-position slightly adjusted, and at a random absolute height of 128 to 640, with a slight upward thrust."
+	));
+	
+	/** Function usage. */
 	private Usage usage;
 	/** Originating frame (for DEH 3.0 format 19). */
 	private int frame;
@@ -331,19 +488,9 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 
 	private static final DEHActionPointerParamType[] NO_PARAMS = new DEHActionPointerParamType[0];
 	
-	private DEHActionPointerDoom19(int frame, String mnemonic)
-	{
-		this(frame, false, mnemonic, BLANK_USAGE);
-	}
-
 	private DEHActionPointerDoom19(int frame, String mnemonic, Usage usage)
 	{
 		this(frame, false, mnemonic, usage);
-	}
-
-	private DEHActionPointerDoom19(int frame, boolean weapon, String mnemonic)
-	{
-		this(frame, weapon, mnemonic, BLANK_USAGE);
 	}
 
 	private DEHActionPointerDoom19(int frame, boolean weapon, String mnemonic, Usage usage)

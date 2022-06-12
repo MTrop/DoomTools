@@ -10,6 +10,7 @@ import java.util.List;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
 /**
  * Enumeration of action pointers for frames.
@@ -129,6 +130,17 @@ public interface DEHActionPointer
 		return out;
 	}
 	
+	/**
+	 * Encapsulates a set of parameters.
+	 * Just for code aesthetics.
+	 * @param types the parameter types.
+	 * @return the array of types.
+	 */
+	static DEHActionPointerParamType[] params(DEHActionPointerParamType ... types)
+	{
+		return ArrayUtils.arrayOf(types);
+	}
+
 	/**
 	 * Usage info for an action pointer.
 	 */

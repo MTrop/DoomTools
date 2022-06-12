@@ -114,7 +114,7 @@ public enum DecoHackTemplateCompletion
 	)),
 
 	THINGFREESTATES2("Adds a \"free a thing's specific connected states\" clause.", (
-		"thing ${ThingID} free #{StateLabel}\n"
+		"thing ${ThingID} free ${StateLabel}\n"
 	)),
 
 	THINGSWAP("Adds a thing swap clause.", (
@@ -138,7 +138,7 @@ public enum DecoHackTemplateCompletion
 	)),
 
 	WEAPONFREESTATES2("Adds a \"free a weapon's specific connected states\" clause.", (
-		"weapon ${WeaponID} free #{StateLabel}\n"
+		"weapon ${WeaponID} free ${StateLabel}\n"
 	)),
 
 	WEAPONSWAP("Adds a weapon's swap clause.", (

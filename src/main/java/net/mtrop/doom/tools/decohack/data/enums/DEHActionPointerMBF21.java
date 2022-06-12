@@ -5,12 +5,16 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.Map;
+
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.params;
+import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.usage;
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.*;
 
-import java.util.Map;
 
 /**
  * Enumeration of action pointers for frames.
@@ -54,6 +58,8 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 	REFIRETO            (true,  "RefireTo",            STATE, BOOL),
 	GUNFLASHTO          (true,  "GunFlashTo",          STATE, BOOL);
 	
+	/** Function usage. */
+	private Usage usage;
 	/** Is weapon pointer. */
 	private boolean weapon;
 	/** Mnemonic name for BEX/DECORATE. */
@@ -61,8 +67,9 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 	/** Action pointer parameters. */
 	private DEHActionPointerParamType[] params;
 
-	private DEHActionPointerMBF21(boolean weapon, String mnemonic, DEHActionPointerParamType ... params)
+	private DEHActionPointerMBF21(boolean weapon, String mnemonic, DEHActionPointerParamType... params)
 	{
+		this.usage = BLANK_USAGE;
 		this.weapon = weapon;
 		this.mnemonic = mnemonic;
 		this.params = params;
@@ -111,4 +118,10 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 		return index < 0 || index >= params.length ? null : params[index];
 	}
 
+	@Override
+	public Usage getUsage() 
+	{
+		return usage;
+	}
+	
 }
