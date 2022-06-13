@@ -273,15 +273,18 @@ public final class DecoHackMain
 						options.stdout.print("A_");
 						options.stdout.print(pointer.getMnemonic());
 						options.stdout.print("(");
-						for (int i = 0; i < pointer.getParams().length; i++)
+
+						Usage usage = pointer.getUsage();
+						boolean first = true;
+						for (PointerParameter parameter : usage.getParameters())
 						{
-							options.stdout.print(pointer.getParam(i).name());
-							if (i < pointer.getParams().length - 1)
+							if (!first)
 								options.stdout.print(", ");
+							options.stdout.print(parameter.getName());
+							first = false;
 						}
 						options.stdout.println(")");
 						
-						Usage usage = pointer.getUsage();
 						for (String instruction : usage.getInstructions())
 						{
 							options.stdout.print("    ");
@@ -289,15 +292,14 @@ public final class DecoHackMain
 						}
 						for (PointerParameter parameter : usage.getParameters())
 						{
-							options.stdout.print("    ");
+							options.stdout.print("    - ");
 							options.stdout.print(parameter.getName());
-							options.stdout.println(" (" + parameter.getType().name().toLowerCase() + ")");
+							options.stdout.println(" (" + parameter.getType().name() + ")");
 							for (String instruction : parameter.getInstructions())
 							{
 								options.stdout.print("        ");
 								options.stdout.println(instruction);
 							}
-							options.stdout.println();
 						}
 						options.stdout.println();
 					}

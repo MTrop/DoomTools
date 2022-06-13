@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
@@ -25,6 +27,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
+import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
@@ -229,12 +232,32 @@ public final class DoomToolsGUIMain
 			imageManager.getImage("doomtools-logo-64.png"); 
 			imageManager.getImage("doomtools-logo-96.png"); 
 			imageManager.getImage("doomtools-logo-128.png"); 
+			imageManager.getImage("script.png");
+			imageManager.getImage("script-unsaved.png");
+			imageManager.getImage("close-icon.png");
 			imageManager.getImage("success.png");
 			imageManager.getImage("error.png");
 			LOG.info("Image pre-warm finished.");
 		});
 	}
 
+	/**
+	 * Pre-loads common components.
+	 */
+	private static void preWarmCommonComponents()
+	{
+		DoomToolsTaskManager tasks = DoomToolsTaskManager.get();
+		LOG.info("Pre-warming common components...");
+		tasks.spawn(() -> {
+			DoomToolsEditorProvider editorProvider = DoomToolsEditorProvider.get();
+			editorProvider.initCustomLanguages();
+			new MultiFileEditorPanel();
+			new RSyntaxTextArea();
+			LOG.info("Component pre-warm finished.");
+		});
+	}
+
+	
 	/**
 	 * Pre-warms a bunch of elements for DoomTools to avoid weird UX-related hitches.
 	 * Only useful for loading the full application.
@@ -244,6 +267,7 @@ public final class DoomToolsGUIMain
     	preWarmCompletionProviders();
     	preWarmCommonImages();
     	preWarmCommonIcons();
+    	preWarmCommonComponents();
 	}
 
     /* ==================================================================== */

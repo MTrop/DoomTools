@@ -259,8 +259,17 @@ public final class DoomToolsEditorProvider
 	
 	private static volatile boolean initLanguages = false;
 	
-	// Adds all the custom stuff.
-	private static void initCustomLanguages()
+	/* ==================================================================== */
+	
+	public DoomToolsEditorProvider()
+	{
+		initCustomLanguages();
+	}
+
+	/**
+	 * Initializes all additional languages.
+	 */
+	public void initCustomLanguages()
 	{
 		if (initLanguages)
 			return;
@@ -280,13 +289,6 @@ public final class DoomToolsEditorProvider
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_DECOHACK,   new CurlyFoldParser());
 		
 		initLanguages = true;
-	}
-
-	/* ==================================================================== */
-	
-	public DoomToolsEditorProvider()
-	{
-		initCustomLanguages();
 	}
 
 	/**

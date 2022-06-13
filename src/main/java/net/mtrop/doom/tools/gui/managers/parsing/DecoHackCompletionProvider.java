@@ -282,7 +282,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			html.push("div");
 			html.push("strong");
 			html.text("A_" + pointer.getMnemonic());
-			html.text("(");
+			html.text(" (");
 			boolean first = true;
 			for (PointerParameter pusage : pointer.getUsage().getParameters())
 			{
@@ -311,6 +311,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			
 			if (instructions.trim().length() > 0)
 				html.tag("div", getInstructions(usage));
+			
 			if (summaryInstructions.trim().length() > 0)
 			{
 				html.push("div").html("&nbsp;").pop();
@@ -319,6 +320,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		
 			if (usage.hasParameters())
 			{
+				html.push("div").html("&nbsp;").pop();
 				html.push("div").tag("strong", "Parameters:").pop();
 				writeFunctionTypeUsageHTML(html, usage.getParameters());			
 			}
@@ -331,7 +333,9 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			{
 				html.push("li")
 					.push("span")
-						.tag("strong", tusage.getType().name().toLowerCase())
+						.tag("strong", tusage.getName())
+						.text(" ")
+						.tag("span", "(" + tusage.getType().name() + ")")
 						.html(" &mdash; ")
 						.text(getFullInstructions(tusage.getInstructions(), false))
 					.pop()

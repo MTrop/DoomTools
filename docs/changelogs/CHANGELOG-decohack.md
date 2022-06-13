@@ -4,6 +4,9 @@ DECOHack
 ### Changed for 0.25.0
 
 * `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
+* `Added` Documentation for all pointers when dumped with `--dump-pointers`.
+* `Changed` Fixed the z-position parameter type for MBF's A_Spawn pointer.
+* `Changed` MBF's A_FireOldBFG pointer should have been a weapon pointer instead of a thing pointer.
 * `Changed` Added a better error message for bad action pointers.
 
 
