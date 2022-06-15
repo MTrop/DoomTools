@@ -28,6 +28,14 @@ public enum DecoHackTemplateCompletion
 		"}\n"
 	)),
 		
+	CUSTOMTHINGPOINTER("Custom thing pointer clause.", (
+		"custom thing pointer ${PatchType} A_${PointerName}(${Types})\n"
+	)),
+		
+	CUSTOMWEAPONPOINTER("Custom weapon pointer clause.", (
+		"custom weapon pointer ${PatchType} A_${PointerName}(${Types})\n"
+	)),
+		
 	EACHTHINGFROM("Adds an \"each thing\" range block.", (
 		"each thing from ${ThingIDStart} to ${ThingIDEnd} {\n" +
 		"\t${cursor}\n" +

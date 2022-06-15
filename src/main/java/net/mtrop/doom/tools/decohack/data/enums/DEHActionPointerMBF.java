@@ -23,52 +23,52 @@ import java.util.Map;
 public enum DEHActionPointerMBF implements DEHActionPointer
 {
 	// MBF Thing Action Pointers
-	DETONATE        (false, "Detonate",   params(), usage(
+	DETONATE        (false, "Detonate", params(), usage(
 		"Performs a radius damage attack according to the actor's damage property.",
 		"Like A_Explode, except both the radius and potential damage are taken from the calling actor's damage property.",
 		"For example, if the actor's Damage is 100, this has a radius of 100 and a max damage of 100 at the center."
 	)),
 	
-	MUSHROOM        (false, "Mushroom",   params(ANGLEFIXED, FIXED), usage(
+	MUSHROOM        (false, "Mushroom", params(ANGLEFIXED, FIXED), usage(
 		"Calls A_Explode and then creates a mushroom-like explosion of Mancubus fireballs (MT_FATSHOT, slot 10) from the calling actor.",
 		"The Damage property of the calling actor controls how many fireballs are created.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("vangle", ANGLEFIXED, "The vertical angle of the launch."
-		).parameter("speed", FIXED, "The projectile speed."
+		).parameter("vangle", ANGLEFIXED, "The vertical angle of the launch (default 0.0)."
+		).parameter("speed", FIXED, "The projectile speed (default 0.0)."
 	)),
 	
-	SPAWN           (false, "Spawn",      params(THING, SHORT), usage(
+	SPAWN           (false, "Spawn", params(THING, SHORT), usage(
 		"Spawns an object in the same position as the calling actor.",
 		"Note that if both the caller and the spawned are SOLID, they can get stuck on each other.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("thingId", THING, "The slot id/alias of the Thing to spawn (thing slot)."
-		).parameter("zpos", SHORT, "The Z-position of the spawned object relative to the caller."
+		).parameter("thingId", THING, "The slot id/alias of the Thing to spawn (thing slot) (default 0)."
+		).parameter("zpos", SHORT, "The Z-position of the spawned object relative to the caller (default 0)."
 	)),
 	
-	TURN            (false, "Turn",       params(ANGLEINT), usage(
+	TURN            (false, "Turn", params(ANGLEINT), usage(
 		"Adjusts the calling actor's angle by the desired angle.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("angle", ANGLEINT, "The angle amount in degrees."
+		).parameter("angle", ANGLEINT, "The angle amount in degrees (default 0)."
 	)),
 	
-	FACE            (false, "Face",       params(ANGLEUINT), usage(
+	FACE            (false, "Face", params(ANGLEUINT), usage(
 		"Sets the calling actor's angle to an absolute value.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("angle", ANGLEUINT, "The absolute angle in degrees."
+		).parameter("angle", ANGLEUINT, "The absolute angle in degrees (default 0)."
 	)),
 	
-	SCRATCH         (false, "Scratch",    params(SHORT, SOUND), usage(
+	SCRATCH         (false, "Scratch", params(SHORT, SOUND), usage(
 		"Performs a melee attack from the calling actor, dealing a set amount of damage if it connects.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("damage", SHORT, "The amount of damage on hit."
-		).parameter("sound", SOUND, "The sound to play if the damage occurs.", "The sound is played from the calling actor."
+		).parameter("damage", SHORT, "The amount of damage on hit (default 0)."
+		).parameter("sound", SOUND, "The sound to play if the damage occurs (default \"\").", "The sound is played from the calling actor."
 	)),
 	
-	PLAYSOUND       (false, "PlaySound",  params(SOUND, BOOL), usage(
+	PLAYSOUND       (false, "PlaySound", params(SOUND, BOOL), usage(
 		"Plays the desired sound from the calling actor.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("sound", SOUND, "The sound to play."
-		).parameter("fullvolume", BOOL, "If true (non-zero), the sound is played at full volume, otherwise (zero), it is played from the caller."
+		).parameter("sound", SOUND, "The sound to play (default \"\")."
+		).parameter("fullvolume", BOOL, "If true (non-zero), the sound is played at full volume, otherwise (zero), it is played from the caller (default 0)."
 	)),
 	
 	RANDOMJUMP      (false, "RandomJump", params(STATE, UINT), usage(
@@ -77,7 +77,7 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		"It is recommended to NOT use this on a state with a duration less than 0 for it to work properly.",
 		"The RandomJump call may use a separate random seed, depending on implementation.",
 		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
-		).parameter("state", STATE, "The state or state label to jump to. It is recommended to use a state label."
+		).parameter("state", STATE, "The state or state label to jump to.", "It is recommended to use a state label."
 		).parameter("chance", UINT, "A probability value from 0 to 255, 0 being \"never\" while 255 is \"always.\""
 	)),
 	
@@ -88,7 +88,7 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		).parameter("tag", SHORT, "The tag of the sector to affect."
 	)),
 	
-	DIE             (false, "Die",        params(), usage(
+	DIE             (false, "Die", params(), usage(
 		"Kills the calling actor, as though it were dealt lethal damage.",
 		"Specifically, this damages the caller by its current health, with no source to the damage.",
 		"Since it is damaged by its remaining health, this will not put the caller in its \"extreme\" death state."
@@ -100,7 +100,7 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 		"This does not cause monster infighting, and does not damage the same \"species\" of the calling actor."
 	)),
 	
-	STOP            (false, "Stop",       params(), usage(
+	STOP            (false, "Stop", params(), usage(
 		"Arrests the momentum of the calling actor.",
 		"Sets the X, Y, and Z momentum of the calling actor to 0."
 	)),

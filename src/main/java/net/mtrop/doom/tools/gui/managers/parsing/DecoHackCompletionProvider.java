@@ -83,6 +83,10 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		// TODO: Add thing aliases (with associated hardcode info for certain slots).
 		// TODO: Add weapon aliases (with associated hardcode info for certain slots).
 		
+		// TODO: Add thing flags.
+		// TODO: Add MBF21 thing flags.
+		// TODO: Add MBF21 weapon flags.
+		
 		// TODO: Add ammo defines.
 		// TODO: Add string defines.
 	}
@@ -307,20 +311,22 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			// Full instructions.
 
 			String instructions = getInstructions(usage);
-			String summaryInstructions = getInstructions(usage);
+			String summaryInstructions = getSummaryInstructions(usage);
 			
 			if (instructions.trim().length() > 0)
+			{
 				html.tag("div", getInstructions(usage));
+				html.push("div").html("&nbsp;").pop();
+			}
 			
 			if (summaryInstructions.trim().length() > 0)
 			{
-				html.push("div").html("&nbsp;").pop();
 				html.tag("div", getSummaryInstructions(usage));
+				html.push("div").html("&nbsp;").pop();
 			}
 		
 			if (usage.hasParameters())
 			{
-				html.push("div").html("&nbsp;").pop();
 				html.push("div").tag("strong", "Parameters:").pop();
 				writeFunctionTypeUsageHTML(html, usage.getParameters());			
 			}

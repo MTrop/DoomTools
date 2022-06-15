@@ -230,9 +230,10 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	VILECHASE     (243, false, "VileChase", usage(
 		"Does exactly what A_Chase does, with a few differences.",
-		"If a dead actor (CORPSE flag is set) with a defined RAISE state is in range, the calling actor will enter state S_VILE_HEAL1 (266) and play sound \"SLOP\".",
+		"If a dead actor (CORPSE flag is set) with a defined RAISE state is in range, the dead actor is revived, and the calling actor will jump to state S_VILE_HEAL1 (266) and play sound \"SLOP\".",
 		"The revived actor has its health reset, its flags restored, and its target cleared, and it enters its RAISE state.",
-		"Note that this calling actor enters a hardcoded state (266) on \"heal\". This behavior cannot be changed via this pointer."
+		"Note that this calling actor enters a hardcoded state (266) on \"heal\". This behavior cannot be changed via this pointer.",
+		"If you are making an MBF21 patch (or later), see A_HealChase for the non-hardcoded version."
 	)),
 	
 	VILESTART     (255, false, "VileStart", usage(
