@@ -288,7 +288,7 @@ public final class DecoHackMain
 						for (String instruction : usage.getInstructions())
 						{
 							options.stdout.print("    ");
-							options.stdout.println(instruction);
+							options.stdout.println(instruction.trim());
 						}
 						for (PointerParameter parameter : usage.getParameters())
 						{
@@ -298,7 +298,7 @@ public final class DecoHackMain
 							for (String instruction : parameter.getInstructions())
 							{
 								options.stdout.print("        ");
-								options.stdout.println(instruction);
+								options.stdout.println(instruction.trim());
 							}
 						}
 						options.stdout.println();

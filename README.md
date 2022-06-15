@@ -63,11 +63,11 @@ To create a Windows Installer in the `dist` folder:
 
 	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
-To create a distribution (Bash and CMD):
+To create all distributions (Bash, CMD, Installer):
 
 	ant dist -Dnatives.windows.dir=[PathTo-DoomTools-GUI-Native-Project] -Dinno.setup.dir=[Path-To-Inno-Setup] -Dembedded.jre.source.dir=[Path-To-Embedded-JRE]
 
-To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):
+To create a distribution and deploy it **(THIS WILL DELETE AND REBUILD THE TARGET DIRECTORY, `TARGETPATH`):**
 
 	ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
 	ant deploy.bash -Ddeploy.dir=[TARGETPATH]
@@ -179,3 +179,7 @@ If it was not, please contact us for a copy, or to notify us of a distribution
 that has not included it. 
 
 This contains code copied from Black Rook Base, under the terms of the MIT License (docs/LICENSE-BlackRookBase.txt).
+
+This also makes use of the [FamFamFam "Silk" icon set](http://famfamfam.com/lab/icons/silk/) by Mark James, under 
+the terms of the Creative Commons 3.0 License with Attribution, Unported (docs/LICENSE-Silk Icons.txt).
+

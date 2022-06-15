@@ -246,7 +246,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			{
 				if (!first)
 					sb.append(" ");
-				sb.append(str.trim());
+				sb.append(str);
 				first = false;
 				if (stopAtPeriod && str.indexOf('.') >= 0)
 					break;
@@ -316,17 +316,37 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			if (instructions.trim().length() > 0)
 			{
 				html.tag("div", getInstructions(usage));
-				html.push("div").html("&nbsp;").pop();
 			}
 			
 			if (summaryInstructions.trim().length() > 0)
 			{
-				html.tag("div", getSummaryInstructions(usage));
-				html.push("div").html("&nbsp;").pop();
+				boolean inList = false;
+				for (String divText : getSummaryInstructions(usage).split("\\n+"))
+				{
+					if (divText.startsWith("* "))
+					{
+						if (!inList)
+							html.push("ul");
+						html.tag("li", divText.substring(2));
+						inList = true;
+					}
+					else if (inList)
+					{
+						html.pop(); // pop <ul>
+						inList = false;
+					}
+					
+					if (!inList)
+					{
+						html.push("div").html("&nbsp;").pop();
+						html.tag("div", divText);
+					}
+				}
 			}
 		
 			if (usage.hasParameters())
 			{
+				html.push("div").html("&nbsp;").pop();
 				html.push("div").tag("strong", "Parameters:").pop();
 				writeFunctionTypeUsageHTML(html, usage.getParameters());			
 			}
