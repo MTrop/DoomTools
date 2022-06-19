@@ -91,7 +91,7 @@ Arch-Vile Fire (Slot 5)
 
 Revenant (Slot 6) 
 	Has a longer melee range check.
-	Has an increased chance to do a missile attack at longer ranges.
+	Has an increased chance to do a missile attack at shorter ranges.
 	Spawnable by A_SpawnFly (Probability: 3.9%).
 
 Revenant Rocket (Slot 7) 
@@ -150,7 +150,7 @@ Lost Soul (Slot 19)
 Spider Mastermind (Slot 20)
 	Sight and Death sounds are played at full volume always.
 	Immune to radius damage.
-	Has an increased chance to do a missile attack at longer ranges.
+	Has an increased chance to do a missile attack at shorter ranges.
 	When this calls A_BossDeath:
 		On E3M8, end the map.
 		On E4M8, Floor_LowerToLowest all sectors tagged 666. 

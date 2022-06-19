@@ -101,7 +101,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	CHECKRELOAD   (38,  true,  "CheckReload", usage(
 		"Checks if the calling player has sufficient ammo to fire for this weapon.",
-		"\n* If the player does not have sufficient ammo, this starts a switch to the next preferred weapon.",
+		"* If the player does not have sufficient ammo, this starts a switch to the next preferred weapon.",
 		"\n* If the weapon is in slot 8 (Super Shotgun), it checks for 2 for the current weapon.",
 		"\n* If the weapon is in slot 6 (BFG), it checks for [BFGCells] for the current weapon.",
 		"\n* All other slots, it checks for 1 ammo."
@@ -210,7 +210,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	FACETARGET    (184, false, "FaceTarget", usage(
 		"Faces the calling actor towards its current target.",
-		"\nSee also: A_Chase, A_Look."
+		"See also: A_Chase, A_Look."
 	)),
 	
 	POSATTACK     (185, false, "PosAttack", usage(
@@ -278,7 +278,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	SKELWHOOSH    (336, false, "SkelWhoosh", usage(
 		"Calls A_FaceTarget and plays sound \"SKESWG\" from the calling actor.",
-		"\nIf the calling actor has no target, this does nothing."
+		"If the calling actor has no target, this does nothing."
 	)),
 	
 	SKELFIST      (338, false, "SkelFist", usage(

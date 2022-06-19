@@ -206,7 +206,7 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 	
 	WEAPONSOUND         (true,  "WeaponSound", params(SOUND, BOOL), usage(
 		"Plays the desired sound from the calling player.",
-		"\nNOTE: This does not affect alerting enemies!"
+		"NOTE: This does not affect alerting enemies!"
 		).parameter("sound", SOUND, "The sound to play (default \"\")."
 		).parameter("fullvolume", BOOL, "If true (non-zero), the sound is played at full volume across the map, otherwise (zero), it is played from the caller (default 0)."
 	)),

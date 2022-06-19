@@ -47,26 +47,26 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 	
 	TURN            (false, "Turn", params(ANGLEINT), usage(
 		"Adjusts the calling actor's angle by the desired angle.",
-		"\nNOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
+		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
 		).parameter("angle", ANGLEINT, "The angle amount in degrees (default 0)."
 	)),
 	
 	FACE            (false, "Face", params(ANGLEUINT), usage(
 		"Sets the calling actor's angle to an absolute value.",
-		"\nNOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
+		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
 		).parameter("angle", ANGLEUINT, "The absolute angle in degrees (default 0)."
 	)),
 	
 	SCRATCH         (false, "Scratch", params(SHORT, SOUND), usage(
 		"Performs a melee attack from the calling actor, dealing a set amount of damage if it connects.",
-		"\nNOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
+		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
 		).parameter("damage", SHORT, "The amount of damage on hit (default 0)."
 		).parameter("sound", SOUND, "The sound to play if the damage occurs (default \"\").", "The sound is played from the calling actor."
 	)),
 	
 	PLAYSOUND       (false, "PlaySound", params(SOUND, BOOL), usage(
 		"Plays the desired sound from the calling actor.",
-		"\nNOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
+		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
 		).parameter("sound", SOUND, "The sound to play (default \"\")."
 		).parameter("fullvolume", BOOL, "If true (non-zero), the sound is played at full volume, otherwise (zero), it is played from the caller (default 0)."
 	)),
@@ -83,7 +83,7 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 	
 	LINEEFFECT      (false, "LineEffect", params(SHORT, SHORT), usage(
 		"Performs a specific line special event as though the calling actor activated one.",
-		"\nNOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
+		"NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used."
 		).parameter("special", SHORT, "The line special to activate.", "This value is the same as the line special numbers in map editors."
 		).parameter("tag", SHORT, "The tag of the sector to affect."
 	)),

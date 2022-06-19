@@ -60,8 +60,34 @@ public enum DecoHackTemplateCompletion
 		"}\n"
 	)),
 		
-	MISCELLANEOUSBLOCK("Adds a miscellaneous block.", (
+	MISCBLOCK("Adds a miscellaneous block.", (
 		"misc {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+			
+	MISCPROPERTIES("Adds the miscellaneous block properties and their defaults.", (
+        "monsterInfighting false\n" +
+        "initialBullets 50\n" +
+        "initialHealth 100\n" +
+        "greenArmorClass 1\n" +
+        "blueArmorClass 2\n" +
+        "soulsphereHealth 100\n" +
+        "maxSoulsphereHealth 200\n" +
+        "megasphereHealth 200\n" +
+        "godModeHealth 100\n" +
+        "idfaArmor 200\n" +
+        "idfaArmorClass 2\n" +
+        "idkfaArmor 200\n" +
+        "idkfaArmorClass 2\n" +
+        "bfgCellsPerShot 40\n" +
+        "maxHealth 200\n" +
+        "maxArmor 200\n" +
+		"${cursor}"
+	)),
+			
+	PARBLOCK("Adds a Pars block.", (
+		"pars {\n" +
 		"\t${cursor}\n" +
 		"}\n"
 	)),
