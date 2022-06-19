@@ -16,6 +16,14 @@ public interface DEHFlag
 	 */
 	int getValue();
 	
+	/**
+	 * @return the usage info for this flag.
+	 */
+	default String getUsage()
+	{
+		return "";
+	}
+	
 	static int flags(DEHFlag ... flags)
 	{
 		int out = 0;

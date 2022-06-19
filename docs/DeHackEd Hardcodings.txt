@@ -175,7 +175,7 @@ SS Nazi (Slot 24)
 	On Death, creates an Ammo Clip (Slot 64) with a DROPPED flag.
 
 Spawner Spot (Slot 28)
-	Must be present for A_BrainSpit or CRASH!
+	Must be present for A_BrainSpit or A_BrainAwake or CRASH!
 
 Spawner Cube (Slot 29)
 	Spawned by A_BrainSpit.
@@ -209,6 +209,8 @@ Bullet Puff (Slot 38)
 	
 Blood (Slot 39) 
 	Spawned on hitscan attacks and other damaging things.
+	Depending on the amount of hitscan damage, this actor's spawn frame may 
+	be set to its SPAWN frame, or S_BLOOD2 (state slot 91), or S_BLOOD3 (state slot 92).
 
 Teleport Fog (Slot 40)
 	Spawned by object teleporting.
@@ -221,9 +223,6 @@ Teleport Destination (Slot 42)
 
 BFG Tracer (Slot 43) 
 	Spawned by tracer hitscans from A_BFGSpray.
-
-Teleport Exit (Slot 44) 
-	Teleporter exit special spot.
 
 Ammo Clip (Slot 64)
 	Created on Trooper's (Slot 2) death with a DROPPED flag. 

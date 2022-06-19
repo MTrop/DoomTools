@@ -17,6 +17,10 @@ import net.mtrop.doom.tools.decohack.data.DEHActionPointer.Usage.PointerParamete
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.HTMLWriter;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -81,7 +85,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			html.tag("div", "Spawned by A_FatAttack1, A_FatAttack2, and A_FatAttack3, in different angles.");
 		});
 		map.put("11", (html) -> {
-			html.tag("div", "On death, this spawns MT_CLIP (slot 64) with a DROPPED flag.");
+			html.tag("div", "On death, this spawns MT_CHAINGUN (slot 74) with a DROPPED flag.");
 		});
 		map.put("12", (html) -> {
 			html.tag("div", "Spawnable by A_SpawnFly (19.53% chance).");
@@ -134,7 +138,95 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			.pop();
 			html.tag("div", "This can be changed in MBF21 (or later) patches via the E3M8BOSS and E4M8BOSS flags, respectively.");
 		});
-		// TODO: Finish this.
+		map.put("21", (html) -> {
+			html.tag("div", "Spawnable by A_SpawnFly (7.81% chance).");
+			html.push("div").html("&nbsp").pop();
+			html.push("div")
+				.text("When this calls A_BossDeath and all MT_BABYs (slot 21) are dead:")
+				.push("ul")
+					.tag("li", "On MAP07, raise all sectors tagged 667 by the height of their linedefs' highest lower texture.")
+				.pop()
+			.pop();
+			html.tag("div", "This can be changed in MBF21 (or later) patches via the MAP07BOSS2 flag.");
+		});
+		map.put("22", (html) -> {
+			html.tag("div", "Sight and Death sounds are played at full volume always. This can be changed in MBF21 (or later) patches via the FULLVOLSOUNDS flag.");
+			html.tag("div", "Immune to radius damage. This too can be changed in MBF21 (or later) patches via the NORADIUSDMG flag.");
+			html.tag("div", "Has an increased chance to do a missile attack at all ranges. This too can be changed in MBF21 (or later) patches via the RANGEHALF and HIGHERMPROB flags.");
+			html.push("div").html("&nbsp").pop();
+			html.push("div")
+				.text("When this calls A_BossDeath and all MT_CYBORGs (slot 22) are dead:")
+				.push("ul")
+					.tag("li", "On E2M8, exit the map.")
+					.tag("li", "On E4M6, Door_OpenBlaze all sectors tagged 666.")
+				.pop()
+			.pop();
+			html.tag("div", "This can be changed in MBF21 (or later) patches via the E3M8BOSS and E4M8BOSS flags, respectively.");
+		});
+		map.put("23", (html) -> {
+			html.tag("div", "Spawnable by A_SpawnFly (3.91% chance).");
+		});
+		map.put("24", (html) -> {
+			html.tag("div", "On death, this spawns MT_CLIP (slot 64) with a DROPPED flag.");
+		});
+		map.put("28", (html) -> {
+			html.tag("div", "This must be present on a map with when a monster calls A_BrainSpit or A_BrainAwake or Doom will CRASH!");
+		});
+		map.put("29", (html) -> {
+			html.tag("div", "Spawned by A_BrainSpit.");
+		});
+		map.put("30", (html) -> {
+			html.tag("div", "Spawned by A_SpawnFly when a monster is spawned.");
+		});
+		map.put("32", (html) -> {
+			html.tag("div", "Spawned by A_TroopAttack if target is not in melee range.");
+		});
+		map.put("33", (html) -> {
+			html.tag("div", "Spawned by A_HeadAttack if target is not in melee range.");
+		});
+		map.put("34", (html) -> {
+			html.tag("div", "Spawned by A_FireMissile and A_CyberAttack.");
+			html.tag("div", "Also spawned by A_BrainScream and A_BrainExplode, but its spawn frame is set to S_BRAINEXPLODE1 (799).");
+		});
+		map.put("35", (html) -> {
+			html.tag("div", "Spawned by A_FirePlasma.");
+		});
+		map.put("36", (html) -> {
+			html.tag("div", "Spawned by A_FireBFG.");
+		});
+		map.put("37", (html) -> {
+			html.tag("div", "Spawned by A_BspiAttack.");
+		});
+		map.put("38", (html) -> {
+			html.tag("div", "Spawned by hitscan attacks that don't spawn blood (MT_BLOOD, slot 39).");
+			html.tag("div", "Also spawned by A_Tracer (in ports/engines that did not fix or change this behavior; see A_Tracer).");
+		});
+		map.put("39", (html) -> {
+			html.tag("div", "Spawned on hitscan attacks and potentially other damage.");
+			html.tag("div", "Depending on the amount of hitscan damage, this actor's spawn frame may be set to its SPAWN frame, or S_BLOOD2 (state slot 91), or S_BLOOD3 (state slot 92).");
+		});
+		map.put("40", (html) -> {
+			html.tag("div", "Spawned in front of any actor that successfully teleports.");
+		});
+		map.put("41", (html) -> {
+			html.tag("div", "Spawned in the location of any item that respawns in multiplayer modes.");
+		});
+		map.put("42", (html) -> {
+			html.tag("div", "Used to mark the destination spot to teleport to in Teleport specials.");
+		});
+		map.put("43", (html) -> {
+			html.tag("div", "Spawned by BFG hitscans via A_BFGSpray, if they hit a shootbale enemy.");
+		});
+		map.put("64", (html) -> {
+			html.tag("div", "Spawned on Trooper/Zombieman's (MT_POSSESSED, slot 2) death with a DROPPED flag.");
+			html.tag("div", "Spawned on SS Nazi's (MT_WOLFSS, slot 24) death with a DROPPED flag.");
+		});
+		map.put("74", (html) -> {
+			html.tag("div", "Spawned on Chaingun Sergeant's (MT_CHAINGUY, slot 11) death with a DROPPED flag.");
+		});
+		map.put("78", (html) -> {
+			html.tag("div", "Spawned on Sergeant/Shotgun Guy's (MT_SHOTGUY, slot 3) death with a DROPPED flag.");
+		});
 	});
 
 	private static final Map<String, IOConsumer<HTMLWriter>> WEAPON_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
@@ -273,13 +365,16 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addDefineCompletions(DecoHackPatchType.MBF,      "State Slot", "decohack/constants/mbf/states.dh",      STATE_HARDCODE_DOCS);
 		addDefineCompletions(DecoHackPatchType.EXTENDED, "State Slot", "decohack/constants/extended/states.dh", STATE_HARDCODE_DOCS);
 
-		// TODO: Add thing aliases (with associated hardcode info for certain slots).
-		// TODO: Add weapon aliases (with associated hardcode info for certain slots).
-		
-		// TODO: Add thing flags.
-		// TODO: Add MBF21 thing flags.
-		// TODO: Add MBF21 weapon flags.
-		
+		addAliasCompletions("thing", DecoHackPatchType.DOOM19, "Thing Slot Alias", "decohack/constants/doom19/things_aliases.dh", THING_HARDCODE_DOCS);
+		addAliasCompletions("thing", DecoHackPatchType.BOOM,   "Thing Slot Alias", "decohack/constants/boom/things_aliases.dh",   THING_HARDCODE_DOCS);
+		addAliasCompletions("thing", DecoHackPatchType.MBF,    "Thing Slot Alias", "decohack/constants/mbf/things_aliases.dh",    THING_HARDCODE_DOCS);
+
+		addAliasCompletions("weapon", DecoHackPatchType.DOOM19, "Weapon Slot Alias", "decohack/constants/doom19/weapons_aliases.dh", WEAPON_HARDCODE_DOCS);
+
+		addFlagCompletions(DecoHackPatchType.DOOM19, DEHThingFlag.values()); // TODO: Maybe split?
+		addFlagCompletions(DecoHackPatchType.MBF21,  DEHThingMBF21Flag.values());
+		addFlagCompletions(DecoHackPatchType.MBF21,  DEHWeaponMBF21Flag.values());
+
 		// TODO: Add ammo defines.
 		// TODO: Add string defines.
 	}
@@ -308,7 +403,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 				StringTokenizer tokenizer = new StringTokenizer(line);
 				tokenizer.nextToken();
 				
-				String token, value, summary;
+				String token, value;
 				
 				if (!tokenizer.hasMoreTokens())
 					continue;
@@ -320,36 +415,102 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 
 				value = tokenizer.nextToken();
 				
-				final IOConsumer<HTMLWriter> addendum = valueToNotesLookup.get(value);
-				
-				summary = writeHTML((html) -> {
-					html.push("div")
-						.tag("strong", token)
-						.text(" = ")
-						.tag("span", value)
-					.pop();
-					html.push("div")
-						.tag("em", category)
-						.text(", ")
-						.tag("span", type.name())
-					.pop();
-					
-					if (addendum != null)
-					{
-						html.push("div").html("&nbsp").pop();
-						html.push("div").tag("strong", "Hardcode Notes:").pop();
-						html.push("div").html("&nbsp").pop();
-						html.push("div").html(writeHTML(addendum)).pop();
-					}
-				});
-				
-				addCompletion(new DefineCompletion(this, type, token, value, addendum != null, summary));
+				createCompletion(type, category, token, value, valueToNotesLookup);
 			}
 		} 
 		catch (IOException e) 
 		{
 			LOG.error(e, "An error occurred trying to parse define completions!");
 		}
+	}
+	
+	/**
+	 * Adds alias completions from parsing a resource.
+	 * @param aliasType the type of alias ("thing" or "weapon").
+	 * @param type the patch type.
+	 * @param category the category.
+	 * @param resourcePath the resource path.
+	 * @param valueToNotesLookup lookup for summaries for specific defines.
+	 */
+	private void addAliasCompletions(String aliasType, DecoHackPatchType type, final String category, String resourcePath, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
+	{
+		final String ALIAS_CLAUSE = "alias " + aliasType;
+
+		try (BufferedReader reader = IOUtils.openTextStream(IOUtils.openResource(resourcePath), StandardCharsets.UTF_8))
+		{
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				line = line.trim();
+				if (line.length() < ALIAS_CLAUSE.length())
+					continue;
+				if (!line.substring(0, ALIAS_CLAUSE.length()).equalsIgnoreCase(ALIAS_CLAUSE))
+					continue;
+				StringTokenizer tokenizer = new StringTokenizer(line);
+
+				// assume the alias start clause has two tokens.
+				tokenizer.nextToken();
+				tokenizer.nextToken();
+				
+				String token, value;
+				
+				if (!tokenizer.hasMoreTokens())
+					continue;
+				
+				token = tokenizer.nextToken();
+
+				if (!tokenizer.hasMoreTokens())
+					continue;
+
+				value = tokenizer.nextToken();
+				
+				createCompletion(type, category, token, value, valueToNotesLookup);
+			}
+		} 
+		catch (IOException e) 
+		{
+			LOG.error(e, "An error occurred trying to parse define completions!");
+		}
+	}
+	
+	/**
+	 * Adds flag completions from a flag enum.
+	 * @param type the patch type.
+	 * @param category the category.
+	 * @param resourcePath the resource path.
+	 * @param valueToNotesLookup lookup for summaries for specific defines.
+	 */
+	private void addFlagCompletions(DecoHackPatchType type, DEHFlag[] flags)
+	{
+		// TODO: Finish this.
+	}
+	
+	private void createCompletion(DecoHackPatchType type, final String category, final String token, final String value, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
+	{
+		final IOConsumer<HTMLWriter> addendum = valueToNotesLookup.get(value);
+		
+		String summary = writeHTML((html) -> {
+			html.push("div")
+				.tag("strong", token)
+				.text(" = ")
+				.tag("span", value)
+			.pop();
+			html.push("div")
+				.tag("em", category)
+				.text(", ")
+				.tag("span", type.name())
+			.pop();
+			
+			if (addendum != null)
+			{
+				html.push("div").html("&nbsp").pop();
+				html.push("div").tag("strong", "Hardcode Notes:").pop();
+				html.push("div").html("&nbsp").pop();
+				html.push("div").html(writeHTML(addendum)).pop();
+			}
+		});
+		
+		addCompletion(new DefineCompletion(this, type, token, value, addendum != null, summary));
 	}
 	
 	/**
