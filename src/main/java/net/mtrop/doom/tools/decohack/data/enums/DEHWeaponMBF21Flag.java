@@ -16,12 +16,12 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
  */
 public enum DEHWeaponMBF21Flag implements DEHFlag
 {
-	NOTHRUST       (0x00000001),
-	SILENT         (0x00000002),
-	NOAUTOFIRE     (0x00000004),
-	FLEEMELEE      (0x00000008),
-	AUTOSWITCHFROM (0x00000010),
-	NOAUTOSWITCHTO (0x00000020),
+	NOTHRUST       (0x00000001, "Weapon's shots do not thrust things around."),
+	SILENT         (0x00000002, "Weapon does not alert monsters on shot (must use A_WeaponAlert to alert)."),
+	NOAUTOFIRE     (0x00000004, "Weapon will not autofire if FIRE is held on switch to it."),
+	FLEEMELEE      (0x00000008, "Weapon is considered \"melee\" and enemies know it."),
+	AUTOSWITCHFROM (0x00000010, "Weapon is auto-switched away if a different weapon's ammo is picked up."),
+	NOAUTOSWITCHTO (0x00000020, "Weapon is never auto-switched to."),
 	;
 
 	private static final Map<String, DEHWeaponMBF21Flag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHWeaponMBF21Flag.class);
@@ -32,14 +32,22 @@ public enum DEHWeaponMBF21Flag implements DEHFlag
 	}
 	
 	private int value;
+	private String usage;
 
-	private DEHWeaponMBF21Flag(int value)
+	private DEHWeaponMBF21Flag(int value, String usage)
 	{
 		this.value = value;
+		this.usage = usage;
 	}
 
 	public int getValue()
 	{
 		return value;
+	}
+	
+	@Override
+	public String getUsage() 
+	{
+		return usage;
 	}
 }

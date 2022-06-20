@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.decohack.patches;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHStateMBF21Flag;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
 
@@ -497,19 +497,19 @@ interface ConstantsDoom19
 		PatchDoom19.State.create(DEHState.create(0, 8, false, 444, 6), null),
 		PatchDoom19.State.create(DEHState.create(39, 0, false, 476, 10), 260),
 		PatchDoom19.State.create(DEHState.create(39, 1, false, 475, 10), 261),
-		PatchDoom19.State.create(DEHState.create(39, 0, false, 478, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 262),
-		PatchDoom19.State.create(DEHState.create(39, 0, false, 479, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 263),
-		PatchDoom19.State.create(DEHState.create(39, 1, false, 480, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 264),
-		PatchDoom19.State.create(DEHState.create(39, 1, false, 481, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 265),
-		PatchDoom19.State.create(DEHState.create(39, 2, false, 482, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 266),
-		PatchDoom19.State.create(DEHState.create(39, 2, false, 483, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 267),
-		PatchDoom19.State.create(DEHState.create(39, 3, false, 484, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 268),
-		PatchDoom19.State.create(DEHState.create(39, 3, false, 477, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 269),
-		PatchDoom19.State.create(DEHState.create(39, 4, false, 486, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 270),
-		PatchDoom19.State.create(DEHState.create(39, 5, false, 487, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 271),
-		PatchDoom19.State.create(DEHState.create(39, 6, false, 477, 8, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 272),
-		PatchDoom19.State.create(DEHState.create(39, 7, false, 489, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), null),
-		PatchDoom19.State.create(DEHState.create(39, 7, false, 477, 2, DEHFlag.flags(DEHStateFlag.SKILL5FAST)), 273),
+		PatchDoom19.State.create(DEHState.create(39, 0, false, 478, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 262),
+		PatchDoom19.State.create(DEHState.create(39, 0, false, 479, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 263),
+		PatchDoom19.State.create(DEHState.create(39, 1, false, 480, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 264),
+		PatchDoom19.State.create(DEHState.create(39, 1, false, 481, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 265),
+		PatchDoom19.State.create(DEHState.create(39, 2, false, 482, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 266),
+		PatchDoom19.State.create(DEHState.create(39, 2, false, 483, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 267),
+		PatchDoom19.State.create(DEHState.create(39, 3, false, 484, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 268),
+		PatchDoom19.State.create(DEHState.create(39, 3, false, 477, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 269),
+		PatchDoom19.State.create(DEHState.create(39, 4, false, 486, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 270),
+		PatchDoom19.State.create(DEHState.create(39, 5, false, 487, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 271),
+		PatchDoom19.State.create(DEHState.create(39, 6, false, 477, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 272),
+		PatchDoom19.State.create(DEHState.create(39, 7, false, 489, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), null),
+		PatchDoom19.State.create(DEHState.create(39, 7, false, 477, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), 273),
 		PatchDoom19.State.create(DEHState.create(39, 8, false, 491, 8), null),
 		PatchDoom19.State.create(DEHState.create(39, 9, false, 492, 8), 274),
 		PatchDoom19.State.create(DEHState.create(39, 10, false, 493, 4), null),

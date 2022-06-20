@@ -14,21 +14,21 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
  * This is supported for MBF21 and higher.
  * @author Matthew Tropiano
  */
-public enum DEHStateFlag implements DEHFlag
+public enum DEHStateMBF21Flag implements DEHFlag
 {
 	SKILL5FAST (0x00000001),
 	;
 
-	private static final Map<String, DEHStateFlag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHStateFlag.class);
+	private static final Map<String, DEHStateMBF21Flag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHStateMBF21Flag.class);
 
-	public static DEHStateFlag getByMnemonic(String mnemonic)
+	public static DEHStateMBF21Flag getByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
 
 	private int value;
 
-	private DEHStateFlag(int value)
+	private DEHStateMBF21Flag(int value)
 	{
 		this.value = value;
 	}
@@ -37,4 +37,5 @@ public enum DEHStateFlag implements DEHFlag
 	{
 		return value;
 	}
+	
 }

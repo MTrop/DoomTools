@@ -12,6 +12,11 @@ package net.mtrop.doom.tools.decohack.data.enums;
 public interface DEHFlag
 {
 	/**
+	 * @return this flag's name/mnemonic.
+	 */
+	String name();
+	
+	/**
 	 * @return the bit value of this flag.
 	 */
 	int getValue();

@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.fife.ui.autocomplete.BasicCompletion;
@@ -18,8 +20,10 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingBoomFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingDoom19Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBFFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.HTMLWriter;
@@ -365,18 +369,22 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addDefineCompletions(DecoHackPatchType.MBF,      "State Slot", "decohack/constants/mbf/states.dh",      STATE_HARDCODE_DOCS);
 		addDefineCompletions(DecoHackPatchType.EXTENDED, "State Slot", "decohack/constants/extended/states.dh", STATE_HARDCODE_DOCS);
 
+		addDefineCompletions(DecoHackPatchType.DOOM19,   "Ammo Type", "decohack/constants/doom19/ammo.dh", null);
+
+		addStringDefineCompletions("decohack/constants/doom19/strings.dh", "decohack/constants/boom/strings.dh");
+
 		addAliasCompletions("thing", DecoHackPatchType.DOOM19, "Thing Slot Alias", "decohack/constants/doom19/things_aliases.dh", THING_HARDCODE_DOCS);
 		addAliasCompletions("thing", DecoHackPatchType.BOOM,   "Thing Slot Alias", "decohack/constants/boom/things_aliases.dh",   THING_HARDCODE_DOCS);
 		addAliasCompletions("thing", DecoHackPatchType.MBF,    "Thing Slot Alias", "decohack/constants/mbf/things_aliases.dh",    THING_HARDCODE_DOCS);
 
 		addAliasCompletions("weapon", DecoHackPatchType.DOOM19, "Weapon Slot Alias", "decohack/constants/doom19/weapons_aliases.dh", WEAPON_HARDCODE_DOCS);
 
-		addFlagCompletions(DecoHackPatchType.DOOM19, DEHThingFlag.values()); // TODO: Maybe split?
-		addFlagCompletions(DecoHackPatchType.MBF21,  DEHThingMBF21Flag.values());
-		addFlagCompletions(DecoHackPatchType.MBF21,  DEHWeaponMBF21Flag.values());
+		addFlagCompletions(DecoHackPatchType.DOOM19, "Thing",  DEHThingDoom19Flag.values());
+		addFlagCompletions(DecoHackPatchType.BOOM,   "Thing",  DEHThingBoomFlag.values());
+		addFlagCompletions(DecoHackPatchType.MBF,    "Thing",  DEHThingMBFFlag.values());
+		addFlagCompletions(DecoHackPatchType.MBF21,  "Thing",  DEHThingMBF21Flag.values());
+		addFlagCompletions(DecoHackPatchType.MBF21,  "Weapon", DEHWeaponMBF21Flag.values());
 
-		// TODO: Add ammo defines.
-		// TODO: Add string defines.
 	}
 
 	/**
@@ -388,40 +396,24 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	 */
 	private void addDefineCompletions(DecoHackPatchType type, final String category, String resourcePath, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
 	{
-		final String DEFINE = "#define";
-		
-		try (BufferedReader reader = IOUtils.openTextStream(IOUtils.openResource(resourcePath), StandardCharsets.UTF_8))
-		{
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				line = line.trim();
-				if (line.length() < DEFINE.length())
-					continue;
-				if (!line.substring(0, DEFINE.length()).equalsIgnoreCase(DEFINE))
-					continue;
-				StringTokenizer tokenizer = new StringTokenizer(line);
-				tokenizer.nextToken();
-				
-				String token, value;
-				
-				if (!tokenizer.hasMoreTokens())
-					continue;
-				
-				token = tokenizer.nextToken();
+		for (Map.Entry<String, String> entry : readDefines(resourcePath).entrySet())
+			createCompletion(type, category, entry.getKey(), entry.getValue(), valueToNotesLookup);
+	}
 
-				if (!tokenizer.hasMoreTokens())
-					continue;
-
-				value = tokenizer.nextToken();
-				
-				createCompletion(type, category, token, value, valueToNotesLookup);
-			}
-		} 
-		catch (IOException e) 
-		{
-			LOG.error(e, "An error occurred trying to parse define completions!");
-		}
+	/**
+	 * Adds define completions for strings.
+	 * @param resourceDoom19Path the path to the Doom 1.9 defines.
+	 * @param resourceBoomPath the path to the Boom defines.
+	 */
+	private void addStringDefineCompletions(String resourceDoom19Path, String resourceBoomPath)
+	{
+		Map<String, String> doom19Defines = readDefines(resourceDoom19Path);
+		Map<String, String> boomDefines = readDefines(resourceBoomPath);
+		Set<String> stringKeys = new HashSet<>();
+		stringKeys.addAll(doom19Defines.keySet());
+		stringKeys.addAll(boomDefines.keySet());
+		for (String key : stringKeys)
+			addCompletion(new StringDefineCompletion(this, key, doom19Defines.get(key), boomDefines.get(key)));
 	}
 	
 	/**
@@ -477,17 +469,85 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	 * Adds flag completions from a flag enum.
 	 * @param type the patch type.
 	 * @param category the category.
-	 * @param resourcePath the resource path.
-	 * @param valueToNotesLookup lookup for summaries for specific defines.
+	 * @param flags the flags.
 	 */
-	private void addFlagCompletions(DecoHackPatchType type, DEHFlag[] flags)
+	private void addFlagCompletions(DecoHackPatchType type, String category, DEHFlag[] flags)
 	{
-		// TODO: Finish this.
+		for (int i = 0; i < flags.length; i++)
+		{
+			final DEHFlag flag = flags[i];
+			
+			final String token = flag.name();
+			final String value = Integer.toHexString(flag.getValue()).toUpperCase();
+			StringBuilder sb = new StringBuilder();
+			for (int x = 0; x < 8 - value.length(); x++)
+				sb.append('0');
+			final String prefix = sb.toString();
+			final String hexValue = "0x" + prefix + value;
+			
+			String summary = writeHTML((html) -> {
+				html.push("div")
+					.tag("strong", token)
+					.text(" = ")
+					.tag("span", hexValue)
+				.pop();
+				html.push("div")
+					.tag("em", category + " Flag")
+					.text(", ")
+					.tag("span", type.name())
+				.pop();
+				
+				html.push("div").html("&nbsp").pop();
+				html.tag("div", flag.getUsage());
+			});
+			
+			addCompletion(new BasicCompletion(this, token, type.name() + " " + category + " Flag (" + hexValue + ")", summary));
+		}
+	}
+	
+	private Map<String, String> readDefines(String resourcePath) 
+	{
+		final String DEFINE = "#define";
+		Map<String, String> defineMap = new HashMap<>();
+		try (BufferedReader reader = IOUtils.openTextStream(IOUtils.openResource(resourcePath), StandardCharsets.UTF_8))
+		{
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				line = line.trim();
+				if (line.length() < DEFINE.length())
+					continue;
+				if (!line.substring(0, DEFINE.length()).equalsIgnoreCase(DEFINE))
+					continue;
+				StringTokenizer tokenizer = new StringTokenizer(line);
+				tokenizer.nextToken();
+				
+				String token, value;
+				
+				if (!tokenizer.hasMoreTokens())
+					continue;
+				
+				token = tokenizer.nextToken();
+
+				if (!tokenizer.hasMoreTokens())
+					continue;
+
+				value = tokenizer.nextToken();
+				
+				defineMap.put(token, value);
+			}
+		} 
+		catch (IOException e) 
+		{
+			LOG.error(e, "An error occurred trying to parse define completions!");
+		}
+		
+		return defineMap;
 	}
 	
 	private void createCompletion(DecoHackPatchType type, final String category, final String token, final String value, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
 	{
-		final IOConsumer<HTMLWriter> addendum = valueToNotesLookup.get(value);
+		final IOConsumer<HTMLWriter> addendum = valueToNotesLookup != null ? valueToNotesLookup.get(value) : null;
 		
 		String summary = writeHTML((html) -> {
 			html.push("div")
@@ -532,6 +592,56 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			super(parent, token);
 			setShortDescription("(" + type.name() + ") " + value + (hardcode ? " [Hardcode Warning]" : ""));
 			setSummary(summary);
+		}
+		
+		@Override
+		public String toString() 
+		{
+			return getReplacementText() + " - " + getShortDescription();
+		}
+
+	}
+	
+	/**
+	 * A completion object for string defines.
+	 */
+	protected static class StringDefineCompletion extends BasicCompletion
+	{
+		/**
+		 * Creates a string define completion.
+		 * @param parent the completion provider.
+		 * @param token the define token.
+		 * @param doom19Value the define value for Doom 1.9.
+		 * @param boomValue the define value for Boom.
+		 */
+		public StringDefineCompletion(CompletionProvider parent, final String token, final String doom19Value, final String boomValue) 
+		{
+			super(parent, token);
+			setShortDescription("(String Macro)");
+			setSummary(writeHTML((html) -> {
+				html.push("div")
+					.tag("strong", token)
+				.pop();
+				html.push("div").html("&nbsp;").pop();
+				
+				if (doom19Value != null)
+				{
+					html.push("div")
+						.tag("em", "DOOM19")
+						.text(" = ")
+						.tag("span", doom19Value)
+					.pop();
+				}
+
+				if (boomValue != null)
+				{
+					html.push("div")
+						.tag("em", "BOOM")
+						.text(" = ")
+						.tag("span", boomValue)
+					.pop();
+				}
+			}));
 		}
 		
 		@Override

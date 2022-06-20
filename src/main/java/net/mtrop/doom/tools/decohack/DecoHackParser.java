@@ -42,7 +42,8 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
-import net.mtrop.doom.tools.decohack.data.enums.DEHStateFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHStateMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
@@ -2935,7 +2936,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				
-				state.setMBF21Flags(state.getMBF21Flags() | DEHStateFlag.SKILL5FAST.getValue());
+				state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
 				notModified = false;
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
@@ -2946,7 +2947,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 	
-				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateFlag.SKILL5FAST.getValue());
+				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
 				notModified = false;
 			}
 			else
@@ -3955,7 +3956,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
-				state.mbf21Flags |= DEHStateFlag.SKILL5FAST.getValue();
+				state.mbf21Flags |= DEHStateMBF21Flag.SKILL5FAST.getValue();
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_STATE_NOTFAST))
 			{
@@ -3965,7 +3966,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
-				state.mbf21Flags &= ~DEHStateFlag.SKILL5FAST.getValue();
+				state.mbf21Flags &= ~DEHStateMBF21Flag.SKILL5FAST.getValue();
 			}
 			else
 			{
@@ -3985,7 +3986,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 
 		Integer out = null;
-		DEHThingFlag flag;
+		DEHFlag flag;
 		if ((flag = DEHThingFlag.getByMnemonic(currentLexeme())) != null)
 		{
 			out = flag.getValue();
