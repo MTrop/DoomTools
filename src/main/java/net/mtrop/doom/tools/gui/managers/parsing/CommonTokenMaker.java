@@ -15,6 +15,7 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
  */
 public abstract class CommonTokenMaker extends AbstractTokenMaker implements TokenTypes
 {
+	private static final Pattern QUOTED_PATH_PATTERN = Pattern.compile("\".+\"");
 	private static final Pattern URL_PATTERN = Pattern.compile("(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
 	
 	protected static final int TYPE_START =                           DEFAULT_NUM_TOKEN_TYPES;
@@ -77,6 +78,7 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 		{
 			default:
 				return false;
+			case PREPROCESSOR:
 			case COMMENT_EOL:
 			case COMMENT_MULTILINE:
 			case COMMENT_DOCUMENTATION:
@@ -97,7 +99,9 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 	protected void addPossibleHyperlinkTokens(char[] segmentChars, int start, int end, int tokenType, int documentSegmentStartOffset)
 	{
 		String input = new String(segmentChars, start, end + 1 - start);
-		Matcher matcher = URL_PATTERN.matcher(input);
+		Matcher matcher = tokenType == PREPROCESSOR ? QUOTED_PATH_PATTERN.matcher(input) : URL_PATTERN.matcher(input);
+		int startOffset = tokenType == PREPROCESSOR ? 1 : 0;
+		int endOffset = tokenType == PREPROCESSOR ? -1 : 0;
 		
 		int prevScanEnd = start;
 		int currentScan = start;
@@ -112,13 +116,13 @@ public abstract class CommonTokenMaker extends AbstractTokenMaker implements Tok
 			
 			if (prevScanEnd < linkMatchStart)
 			{
-				super.addToken(segmentChars, currentScan, linkMatchStart - 1, tokenType, newDocumentStartOffset + currentScan, false);
-				currentScan = linkMatchStart;
+				super.addToken(segmentChars, currentScan, linkMatchStart - 1 + startOffset, tokenType, newDocumentStartOffset + currentScan, false);
+				currentScan = linkMatchStart + startOffset;
 			}
 
-			super.addToken(segmentChars, linkMatchStart, linkMatchEnd, tokenType, newDocumentStartOffset + currentScan, true);
-			currentScan = linkMatchEnd + 1;
-			prevScanEnd = linkMatchEnd + 1;
+			super.addToken(segmentChars, linkMatchStart + startOffset, linkMatchEnd + endOffset, tokenType, newDocumentStartOffset + currentScan, true);
+			currentScan = linkMatchEnd + 1 + endOffset;
+			prevScanEnd = linkMatchEnd + 1 + endOffset;
 		}
 		
 		if (matchedAtLeastOnce)

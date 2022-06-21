@@ -611,6 +611,15 @@ public class MultiFileEditorPanel extends JPanel
 	}
 
 	/**
+	 * Opens a file relative to the parent of the current editor's file.
+	 * @param filePath the path to open.
+	 */
+	public void openFilePathRelativeToCurrentEditor(String filePath) 
+	{
+		// TODO: Finish this!
+	}
+
+	/**
 	 * Closes the current selected editor.
 	 */
 	public void closeCurrentEditor() 
@@ -2103,15 +2112,28 @@ public class MultiFileEditorPanel extends JPanel
 				if (hevent.getEventType() != HyperlinkEvent.EventType.ACTIVATED)
 					return;
 
-				try {
-					SwingUtils.browse(hevent.getURL().toURI());
-				} catch (IOException | URISyntaxException e1) {
-					// Do nothing.
+				if (hevent.getURL() != null)
+				{
+					try {
+						SwingUtils.browse(hevent.getURL().toURI());
+					} catch (IOException | URISyntaxException e1) {
+						// Do nothing.
+					}
 				}
+				else
+				{
+					String path = hevent.getDescription();
+					// description is something like "no protocol: whatever".
+					int pathIdx = path.indexOf(": ");
+					int strIdx = pathIdx >= 0 ? pathIdx + 2 : 0;
+					openFilePathRelativeToCurrentEditor(path.substring(strIdx));
+				}
+				
 			});
 			
 			containerOf(this, node(BorderLayout.CENTER, scrollPane));
 		}
+
 	}
 	
 	/**
