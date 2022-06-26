@@ -1664,11 +1664,13 @@ public class MultiFileEditorPanel extends JPanel
 				if (line.startsWith(" ")) // spaces?
 				{
 					int i = 1;
-					textArea.setTabsEmulated(true);
 					while (line.startsWith(" ", i))
 						i++;
 					if (i > 1)
+					{
+						textArea.setTabsEmulated(true);
 						textArea.setTabSize(Math.min(i, 8));
+					}
 					break;
 				}
 				else if (line.startsWith("\t"))
