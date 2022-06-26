@@ -566,6 +566,39 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Opens a file relative to the parent of the current editor's file.
+	 * @param filePath the path to open.
+	 */
+	public void openFilePathRelativeToCurrentEditor(String filePath) 
+	{
+		if (currentEditor == null)
+			return;
+		
+		if (currentEditor.contentSourceFile == null)
+			return;
+
+		File editorParentFile = currentEditor.contentSourceFile.getParentFile();
+		File lookupFile = new File(editorParentFile + File.separator + filePath);
+		if (lookupFile.exists())
+		{
+			try {
+				openFileEditor(lookupFile, currentEditor.contentCharset);
+				LOG.infof("Opened \"include\" path: %s", lookupFile.getAbsolutePath());
+			} catch (FileNotFoundException e) {
+				SwingUtils.error(language.getText("texteditor.action.include.error.notfound", lookupFile.getAbsolutePath()));
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("texteditor.action.include.error.ioerror", lookupFile.getAbsolutePath()));
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("texteditor.action.include.error.security", lookupFile.getAbsolutePath()));
+			}
+		}
+		else
+		{
+			SwingUtils.error(language.getText("texteditor.action.include.error.notfound", lookupFile.getAbsolutePath()));
+		}
+	}
+
+	/**
 	 * Saves the current editor to its current file, or a new file if no current file.
 	 * If no current editor, this does nothing.
 	 * @return true if a successful save occurred, false otherwise.
@@ -608,15 +641,6 @@ public class MultiFileEditorPanel extends JPanel
 			else
 				saveEditorToFile(handle, editorFile);
 		}
-	}
-
-	/**
-	 * Opens a file relative to the parent of the current editor's file.
-	 * @param filePath the path to open.
-	 */
-	public void openFilePathRelativeToCurrentEditor(String filePath) 
-	{
-		// TODO: Finish this!
 	}
 
 	/**

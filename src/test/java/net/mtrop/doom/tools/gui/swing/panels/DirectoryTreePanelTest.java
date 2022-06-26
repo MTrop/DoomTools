@@ -18,12 +18,49 @@ public final class DirectoryTreePanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		final DirectoryTreePanel panel = new DirectoryTreePanel(new File("."), false);
+		final DirectoryTreePanel panel = new DirectoryTreePanel(new File("."), new DirectoryTreePanel.DirectoryTreeListener() 
+		{
+			@Override
+			public void onFileConfirmed(File confirmedFile) 
+			{
+				System.out.println("CONFIRM: " + confirmedFile);
+			}
+
+			@Override
+			public void onFilesCopied(File[] copiedFiles)
+			{
+			}
+
+			@Override
+			public void onFilesDeleted(File[] deletedFiles) 
+			{
+			}
+
+			@Override
+			public boolean onFilesDropped(File parentFile, File[] droppedSourceFiles) 
+			{
+				return false;
+			}
+			
+			@Override
+			public boolean onFileInsert(String fileName, File parentFile, boolean directory) 
+			{
+				return false;
+			}
+
+			@Override
+			public boolean onFileRename(File changedFile, String newName) 
+			{
+				System.out.println("RENAME: " + changedFile + " -> " + newName);
+				return false;
+			}
+		});
+		
 		panel.setBorder(createEmptyBorder(8,8,8,8));
 
 		ObjectUtils.apply(frame("Test",
 			containerOf(
-				node(BorderLayout.NORTH, button("Refresh", (c,e) -> panel.refresh())),
+				node(BorderLayout.NORTH, button("Refresh", (c,e) -> panel.setSelectedFile(new File("src/test/java/net")))),
 				node(BorderLayout.CENTER, panel)
 			)
 		), 
