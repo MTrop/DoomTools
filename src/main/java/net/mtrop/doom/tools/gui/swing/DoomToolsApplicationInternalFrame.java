@@ -1,5 +1,9 @@
 package net.mtrop.doom.tools.gui.swing;
 
+import static javax.swing.BorderFactory.createEmptyBorder;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.containerOf;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.node;
+
 import java.awt.Container;
 
 import javax.swing.Icon;
@@ -40,7 +44,9 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 		setTitle(instance.getTitle());
 		setFrameIcon(appIcon != null ? appIcon : utils.getWindowIcon());
 		setJMenuBar(instance.createInternalMenuBar());
-		setContentPane(instance.createContentPane());
+		setContentPane(containerOf(createEmptyBorder(4, 4, 4, 4),
+			node(instance.createContentPane())
+		));
 		setResizable(true);
 		setIconifiable(true);
 		setClosable(true);

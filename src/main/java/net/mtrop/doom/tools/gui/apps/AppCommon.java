@@ -7,9 +7,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.concurrent.ExecutionException;
 
+import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -131,6 +133,91 @@ public final class AppCommon
 			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDIN."));
 		
 		LOG.infof("Calling WadScript (%s:%s).", scriptFile, entryPoint);
+		return InstancedFuture.instance(callable).spawn();
+	}
+	
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param sourceFile the script file to run.
+	 * @param processSettings
+	 */
+	public void onExecuteDecoHack(Container parent, final DoomToolsStatusPanel statusPanel, File sourceFile, ExportSettings processSettings)
+	{
+		File sourceOutputFile = processSettings.getSourceOutputFile();
+		File outputFile = processSettings.getOutputFile(); 
+		boolean budget = processSettings.isOutputBudget();
+		
+		utils.createProcessModal(
+			parent, 
+			language.getText("decohack.export.message.title"), 
+			language.getText("decohack.export.message.running", sourceFile.getName()), 
+			language.getText("decohack.export.message.success"), 
+			language.getText("decohack.export.message.error"), 
+			(stream, errstream) -> executeDecoHack(statusPanel, sourceFile, sourceOutputFile, outputFile, budget, stream, errstream)
+		).start(tasks);
+	}
+	
+	private InstancedFuture<Integer> executeDecoHack(
+		final DoomToolsStatusPanel statusPanel, 
+		File scriptFile, 
+		File outSourceFile, 
+		File outTargetFile, 
+		boolean budget, 
+		PrintStream stdout, 
+		PrintStream stderr
+	){
+		return tasks.spawn(() -> {
+			Integer result = null;
+			InputStream stdin = null;
+			try
+			{
+				statusPanel.setActivityMessage(language.getText("decohack.export.message.running", scriptFile.getName()));
+				result = callDecoHack(scriptFile, outSourceFile, outTargetFile, budget, stdout, stderr).get();
+				if (result == 0)
+				{
+					statusPanel.setSuccessMessage(language.getText("decohack.export.message.success"));
+				}
+				else
+				{
+					LOG.errorf("Error on DECOHack invoke. Result was %d: %s", result, scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
+					statusPanel.setErrorMessage(language.getText("decohack.export.message.error.result", result));
+				}
+			} catch (InterruptedException e) {
+				LOG.warnf("Call to DECOHack invoke interrupted: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
+				statusPanel.setErrorMessage(language.getText("decohack.export.message.interrupt"));
+			} catch (ExecutionException e) {
+				LOG.errorf(e, "Error on DECOHack invoke: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
+				statusPanel.setErrorMessage(language.getText("decohack.export.message.error"));
+			} finally {
+				IOUtils.close(stdin);
+			}
+			return result;
+		});
+	}
+	
+	private static InstancedFuture<Integer> callDecoHack(File scriptFile, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
+		
+		callable.arg(scriptFile.getAbsolutePath());
+		callable.arg(DecoHackMain.SWITCH_OUTPUT).arg(outTargetFile.getAbsolutePath());
+		
+		if (outSourceFile != null)
+			callable.arg(DecoHackMain.SWITCH_SOURCE_OUTPUT).arg(outSourceFile.getAbsolutePath());
+
+		if (budget)
+			callable.arg(DecoHackMain.SWITCH_BUDGET);
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(IOUtils.getNullInputStream())
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDERR."));
+		
+		LOG.infof("Calling DECOHack (%s).", scriptFile);
 		return InstancedFuture.instance(callable).spawn();
 	}
 	

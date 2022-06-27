@@ -11,6 +11,10 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 
+import static javax.swing.BorderFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+
+
 /**
  * A single application frame for a DoomTools application.
  * @author Matthew Tropiano
@@ -33,7 +37,9 @@ public class DoomToolsApplicationFrame extends JFrame
 		setIconImages(DoomToolsGUIUtils.get().getWindowIcons());
 		setTitle(instance.getTitle());
 		setJMenuBar(instance.createDesktopMenuBar());
-		setContentPane(instance.createContentPane());
+		setContentPane(containerOf(createEmptyBorder(8, 8, 8, 8),
+			node(instance.createContentPane())
+		));
 		setLocationByPlatform(true);
 		setResizable(true);
 		addWindowListener(new WindowAdapter()

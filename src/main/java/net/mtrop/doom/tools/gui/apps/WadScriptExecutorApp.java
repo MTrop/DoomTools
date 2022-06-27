@@ -5,20 +5,22 @@ import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
+import net.mtrop.doom.tools.gui.managers.DecoHackCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.WadScriptSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
-
-import static javax.swing.BorderFactory.*;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.chooseFile;
@@ -37,7 +39,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 
 	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
-	private WadScriptSettingsManager settings;
+	private DecoHackCompilerSettingsManager settings;
 	private AppCommon appCommon;
 	
 	// Referenced Components
@@ -62,14 +64,14 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = WadScriptSettingsManager.get();
+		this.settings = DecoHackCompilerSettingsManager.get();
 		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
 		ExecutionSettings settings;
 		if (scriptPath != null)
 		{
-			scriptFile = new File(scriptPath).getAbsoluteFile();
+			scriptFile = FileUtils.canonizeFile(new File(scriptPath));
 			settings = new ExecutionSettings(scriptFile.getParentFile());
 		}
 		else
@@ -82,9 +84,9 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				language.getText("wadscript.run.stdin.browse.title"), 
+				language.getText("wadscript.run.source.browse.title"), 
 				current, 
-				language.getText("wadscript.run.stdin.browse.accept") 
+				language.getText("wadscript.run.source.browse.accept") 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -106,7 +108,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(400, 300), createEmptyBorder(8, 8, 8, 8), borderLayout(0, 4), 
+		return containerOf(dimension(400, 400), borderLayout(0, 4), 
 			node(BorderLayout.NORTH, form(language.getInteger("wadscript.run.withargs.label.width"))
 				.addField(language.getText("wadscript.run.withargs.source"), sourceFileField)
 			),
@@ -172,6 +174,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 		
 		File sourceFile = sourceFileField.getValue();
+		
 		File workingDirectory = executePanel.getWorkingDirectory();
 		File standardInPath = executePanel.getStandardInPath();
 		String entryPoint = executePanel.getEntryPoint();
@@ -194,8 +197,20 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public void setApplicationState(Map<String, String> state) 
 	{
-		// TODO: Finish this.
+		String[] args = new String[ValueUtils.parseInt(state.get("executor.args"), 0)];
+		for (int a = 0; a < args.length; a++)
+			args[a] = state.getOrDefault("executor.args." + a, "");
+		
+		final Function<String, File> parseFile = (value) -> ObjectUtils.isEmpty(value) ? null : FileUtils.canonizeFile(new File(value));
+
+		sourceFileField.setValue(ValueUtils.parse(state.get("executor.source"), parseFile));
+		
+		executePanel.setWorkingDirectory(ValueUtils.parse(state.get("executor.workdir"), parseFile));
+		executePanel.setStandardInPath(ValueUtils.parse(state.get("executor.stdin"), parseFile));
+		executePanel.setEntryPoint(state.get("executor.entryPoint"));
+		executePanel.setArgs(args);
 	}
+	
 	
 	// ====================================================================
 

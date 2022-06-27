@@ -37,8 +37,6 @@ import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
-import static javax.swing.BorderFactory.*;
-
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -161,7 +159,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(650, 500), createEmptyBorder(8, 8, 8, 8), borderLayout(0, 8), 
+		return containerOf(dimension(650, 500), borderLayout(0, 8), 
 			node(BorderLayout.CENTER, editorPanel),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
@@ -343,7 +341,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			if (enabled)
 			{
 				ExecutionSettings settings = new ExecutionSettings();
-				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input).getAbsoluteFile();
+				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
 				settings.setWorkingDirectory(ValueUtils.parse(state.get(settingPrefix + ".workdir"), parseFile));
 				settings.setStandardInPath(ValueUtils.parse(state.get(settingPrefix + ".stdin"), parseFile));
 				settings.setEntryPoint(ValueUtils.parse(state.get(settingPrefix + ".entryPoint"), (input) -> 

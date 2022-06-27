@@ -13,8 +13,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -47,6 +45,8 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
  */
 public class DirectoryTreePanel extends JPanel
 {
+	// TODO: NOT DONE. Finish this!
+	
 	private static final long serialVersionUID = 5496698746549135647L;
 	
     /** Logger. */
@@ -173,7 +173,7 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public void setSelectedFile(File filePath) 
 	{
-		filePath = canonize(filePath);
+		filePath = FileUtils.canonizeFile(filePath);
 		String rootPath = fileTree.model().getRoot().toString();
 		String filePathString = filePath.getAbsolutePath();
 		// TODO: Finish this.
@@ -473,7 +473,7 @@ public class DirectoryTreePanel extends JPanel
 		private FileNode(FileNode parent, File file)
 		{
 			this.parent = parent;
-			this.file = canonize(file);
+			this.file = FileUtils.canonizeFile(file);
 			this.children = null;
 		}
 		
@@ -651,16 +651,6 @@ public class DirectoryTreePanel extends JPanel
 		};
 	}
 
-	// Turns a file into a canonical path, if possible.
-	private static File canonize(File source)
-	{
-		try {
-			return source.getCanonicalFile();
-		} catch (IOException e) {
-			return source.getAbsoluteFile();
-		}
-	}
-	
 	// Tests if a keystroke was performed in an event.
 	private static boolean isKeyStroke(KeyStroke keyStroke, KeyEvent event)
 	{

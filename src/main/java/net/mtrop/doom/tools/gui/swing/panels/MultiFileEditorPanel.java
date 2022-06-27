@@ -73,6 +73,7 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EncodingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -431,7 +432,7 @@ public class MultiFileEditorPanel extends JPanel
 			);
 			
 			File attachedFile = ValueUtils.parse(stateMap.get(keyPrefix + ".contentSourceFile"), (input) -> 
-				ObjectUtils.isEmpty(input) ? null : canonize(new File(input))
+				ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input))
 			);
 			
 			Charset fileCharset = ValueUtils.parse(stateMap.get(keyPrefix + ".contentCharset"), (input) -> 
@@ -865,7 +866,7 @@ public class MultiFileEditorPanel extends JPanel
 	 */
 	public EditorHandle getEditorByFile(File file)
 	{
-		file = canonize(file);
+		file = FileUtils.canonizeFile(file);
 		
 		if (!allOpenFiles.contains(file))
 			return null;
@@ -959,7 +960,7 @@ public class MultiFileEditorPanel extends JPanel
 		Long contentSourceFileLastModified
 	){
 		if (attachedFile != null)
-			attachedFile = canonize(attachedFile);
+			attachedFile = FileUtils.canonizeFile(attachedFile);
 		
 		if (focusOnFile(attachedFile))
 			return;
@@ -1391,7 +1392,7 @@ public class MultiFileEditorPanel extends JPanel
 
 	private boolean saveEditorToFile(EditorHandle handle, File targetFile)
 	{
-		targetFile = canonize(targetFile);
+		targetFile = FileUtils.canonizeFile(targetFile);
 		
 		Charset targetCharset = handle.contentCharset;
 		String content = handle.editorPanel.textArea.getText();
@@ -1763,17 +1764,6 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	}
 
-	// Turns a file into a canonical path, if possible.
-	private static File canonize(File source)
-	{
-		try {
-			return source.getCanonicalFile();
-		} catch (IOException e) {
-			return source.getAbsoluteFile();
-		}
-	}
-	
-	
 	/**
 	 * The listener.
 	 */

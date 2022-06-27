@@ -14,10 +14,12 @@ import javax.swing.JFrame;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
@@ -52,8 +54,12 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_OPEN = "doommake-open";
 		/** WadScript. */
 		String WADSCRIPT = "wadscript";
+		/** WadScript Executor. */
+		String WADSCRIPT_EXECUTOR = "wadscript-executor";
 		/** DECOHack. */
 		String DECOHACK = "decohack";
+		/** DECOHack Compiler. */
+		String DECOHACK_COMPILER = "decohack-compiler";
 	}
 	
 	/**
@@ -337,7 +343,15 @@ public final class DoomToolsGUIMain
 
 					case ApplicationNames.WADSCRIPT:
 					{
-						startApplication(new WadScriptEditorApp());
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new WadScriptEditorApp(new File(path)));
+						break;
+					}
+
+					case ApplicationNames.WADSCRIPT_EXECUTOR:
+					{
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new WadScriptExecutorApp(path));
 						break;
 					}
 
@@ -347,6 +361,11 @@ public final class DoomToolsGUIMain
 						break;
 					}
 					
+					case ApplicationNames.DECOHACK_COMPILER:
+					{
+						startApplication(new DecoHackCompilerApp());
+						break;
+					}
 				}
 			}
 			catch (ArrayIndexOutOfBoundsException e)

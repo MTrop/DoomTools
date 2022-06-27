@@ -6,13 +6,10 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
@@ -22,34 +19,27 @@ import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
-import net.mtrop.doom.tools.DecoHackMain;
-import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.DecoHackPatchType;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
 import net.mtrop.doom.tools.gui.managers.DecoHackSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
-import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
-import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
-
-import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -78,10 +68,10 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
     // Singletons
 
 	private DoomToolsGUIUtils utils;
-	private DoomToolsTaskManager tasks;
 	private DoomToolsLanguageManager language;
 	private DecoHackSettingsManager settings;
-	
+	private AppCommon appCommon;
+
 	// Referenced Components
 	
 	private DecoHackEditorPanel editorPanel;
@@ -112,9 +102,9 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public DecoHackEditorApp(File fileToOpenFirst) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
-		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DecoHackSettingsManager.get();
+		this.appCommon = AppCommon.get();
 		
 		this.editorPanel = new DecoHackEditorPanel(new MultiFileEditorPanel.Options() 
 		{
@@ -172,7 +162,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		return containerOf(dimension(650, 500), createEmptyBorder(8, 8, 8, 8), borderLayout(0, 8), 
+		return containerOf(dimension(650, 500), borderLayout(0, 8), 
 			node(BorderLayout.CENTER, editorPanel),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
@@ -353,10 +343,10 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			if (enabled)
 			{
 				ExportSettings settings = new ExportSettings();
-				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input).getAbsoluteFile();
-				settings.outputFile = ValueUtils.parse(state.get(settingPrefix + ".outfile"), parseFile);
-				settings.sourceOutputFile = ValueUtils.parse(state.get(settingPrefix + ".srcfile"), parseFile);
-				settings.outputBudget = ValueUtils.parseBoolean(state.get(settingPrefix + ".budget"), false);
+				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
+				settings.setOutputFile(ValueUtils.parse(state.get(settingPrefix + ".outfile"), parseFile));
+				settings.setSourceOutputFile(ValueUtils.parse(state.get(settingPrefix + ".srcfile"), parseFile));
+				settings.setOutputBudget(ValueUtils.parseBoolean(state.get(settingPrefix + ".budget"), false));
 				handleToSettingsMap.put(handle, settings);
 			}
 		}
@@ -497,15 +487,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
 
-		utils.createProcessModal(
-			getApplicationContainer(), 
-			language.getText("decohack.export.message.title"), 
-			language.getText("decohack.export.message.running", scriptFile.getName()), 
-			language.getText("decohack.export.message.success"), 
-			language.getText("decohack.export.message.error"), 
-			(stream, errstream) -> execute(scriptFile, processSettings.getSourceOutputFile(), processSettings.getOutputFile(), processSettings.isOutputBudget(), stream, errstream)
-		).start(tasks);
-
+		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, processSettings);
 	}
 
 	private ExportSettings createExportSettings(File sourceFile, final ExportSettings initSettings) 
@@ -516,9 +498,9 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			argsPanel,
 			(panel) -> {
 				ExportSettings out = new ExportSettings(sourceFile);
-				out.outputFile = panel.getPatchOutput();
-				out.sourceOutputFile = panel.getSourceOutput();
-				out.outputBudget = panel.getBudget();
+				out.setOutputFile(panel.getPatchOutput());
+				out.setSourceOutputFile(panel.getSourceOutput());
+				out.setOutputBudget(panel.getBudget());
 				return out;
 			},
 			utils.createChoiceFromLanguageKey("decohack.export.choice.export", true),
@@ -528,61 +510,6 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		return settings;
 	}
 
-	private InstancedFuture<Integer> execute(File scriptFile, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
-	{
-		return tasks.spawn(() -> {
-			Integer result = null;
-			InputStream stdin = null;
-			try
-			{
-				statusPanel.setActivityMessage(language.getText("decohack.export.message.running", scriptFile.getName()));
-				result = callDecoHack(scriptFile, outSourceFile, outTargetFile, budget, stdout, stderr).get();
-				if (result == 0)
-				{
-					statusPanel.setSuccessMessage(language.getText("decohack.export.message.success"));
-				}
-				else
-				{
-					LOG.errorf("Error on DECOHack invoke. Result was %d: %s", result, scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-					statusPanel.setErrorMessage(language.getText("decohack.export.message.error.result", result));
-				}
-			} catch (InterruptedException e) {
-				LOG.warnf("Call to DECOHack invoke interrupted: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-				statusPanel.setErrorMessage(language.getText("decohack.export.message.interrupt"));
-			} catch (ExecutionException e) {
-				LOG.errorf(e, "Error on DECOHack invoke: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-				statusPanel.setErrorMessage(language.getText("decohack.export.message.error"));
-			} finally {
-				IOUtils.close(stdin);
-			}
-			return result;
-		});
-	}
-	
-	private static InstancedFuture<Integer> callDecoHack(File scriptFile, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
-	{
-		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
-		
-		callable.arg(scriptFile.getAbsolutePath());
-		callable.arg(DecoHackMain.SWITCH_OUTPUT).arg(outTargetFile.getAbsolutePath());
-		
-		if (outSourceFile != null)
-			callable.arg(DecoHackMain.SWITCH_SOURCE_OUTPUT).arg(outSourceFile.getAbsolutePath());
-
-		if (budget)
-			callable.arg(DecoHackMain.SWITCH_BUDGET);
-		
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDERR."));
-		
-		LOG.infof("Calling DECOHack (%s).", scriptFile);
-		return InstancedFuture.instance(callable).spawn();
-	}
-	
 	private class DecoHackEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = -9024669807749249148L;
@@ -622,43 +549,6 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		protected File transformSaveFile(FileFilter selectedFilter, File selectedFile) 
 		{
 			return selectedFilter == getSaveFileTypes()[0] ? FileUtils.addMissingExtension(selectedFile, "dh") : selectedFile;
-		}
-		
-	}
-	
-	public static class ExportSettings
-	{
-		private File outputFile;
-		private File sourceOutputFile;
-		private boolean outputBudget;
-		
-		public ExportSettings()
-		{
-			this.outputFile = null;
-			this.sourceOutputFile = null;
-			this.outputBudget = false;
-		}
-		
-		public ExportSettings(File sourceFile)
-		{
-			this.outputFile = new File(sourceFile.getParent() + File.separator + "dehacked.deh");
-			this.sourceOutputFile = null;
-			this.outputBudget = false;
-		}
-		
-		public File getOutputFile() 
-		{
-			return outputFile;
-		}
-		
-		public File getSourceOutputFile() 
-		{
-			return sourceOutputFile;
-		}
-		
-		public boolean isOutputBudget() 
-		{
-			return outputBudget;
 		}
 		
 	}

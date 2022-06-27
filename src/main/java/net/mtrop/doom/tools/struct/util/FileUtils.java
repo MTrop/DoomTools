@@ -280,6 +280,21 @@ public final class FileUtils
 	}
 
 	/**
+	 * Returns the provided file path into a canonical File path.
+	 * If a call to {@link File#getCanonicalFile()} fails, it will call {@link File#getAbsoluteFile()} instead.
+	 * @param source the source file.
+	 * @return the resultant File with a full path.
+	 */
+	public static File canonizeFile(File source)
+	{
+		try {
+			return source.getCanonicalFile();
+		} catch (IOException e) {
+			return source.getAbsoluteFile();
+		}
+	}
+
+	/**
 	 * Returns the file's name, no extension.
 	 * @param file the file.
 	 * @param extensionSeparator the text or characters that separates file name from extension.

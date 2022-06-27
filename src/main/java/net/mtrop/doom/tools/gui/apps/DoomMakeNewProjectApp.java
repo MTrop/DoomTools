@@ -115,8 +115,6 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		JPanel out = new JPanel();
-		
 		// Hardcode only WAD Project for now.
 		Container projectTypePanel = titlePanel(language.getText("doommake.newproject.type"),
 			containerOf(node(comboBox(comboBoxModel(Arrays.asList(language.getText("doommake.newproject.type.wad"))), (c, i) -> {
@@ -127,7 +125,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
 			containerOf(node(fileField(targetDirectory,
 				(current) -> chooseDirectory(
-					out, 
+					getApplicationContainer(), 
 					language.getText("doommake.newproject.directory.browse.title"), 
 					current, 
 					language.getText("doommake.newproject.directory.browse.accept"), 
@@ -136,7 +134,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				(selected) -> { 
 					targetDirectory = selected;
 					if (targetDirectory != null && targetDirectory.isDirectory() && targetDirectory.listFiles().length > 0)
-						SwingUtils.warning(out, language.getText("doommake.newproject.directory.browse.notempty"));
+						SwingUtils.warning(getApplicationContainer(), language.getText("doommake.newproject.directory.browse.notempty"));
 				}
 			)))
 		);
@@ -153,18 +151,15 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		containerOf(projectPanel, boxLayout(projectPanel, BoxAxis.Y_AXIS), getWADGeneratorOptionNodes());
 		
 		return containerOf(
-			createEmptyBorder(4, 4, 4, 4),
-			node(BorderLayout.CENTER, containerOf(out, createEmptyBorder(4, 4, 4, 4),
-				node(BorderLayout.NORTH, containerOf(
-					node(BorderLayout.NORTH, projectTypePanel),
-					node(BorderLayout.SOUTH, projectDirectoryPanel)
-				)),
-				node(BorderLayout.CENTER, containerOf(
-					node(BorderLayout.NORTH, scrollPane),
-					node(BorderLayout.CENTER, containerOf())
-				)),
-				node(BorderLayout.SOUTH, controlPane)
-			))
+			node(BorderLayout.NORTH, containerOf(
+				node(BorderLayout.NORTH, projectTypePanel),
+				node(BorderLayout.SOUTH, projectDirectoryPanel)
+			)),
+			node(BorderLayout.CENTER, containerOf(
+				node(BorderLayout.NORTH, scrollPane),
+				node(BorderLayout.CENTER, containerOf())
+			)),
+			node(BorderLayout.SOUTH, controlPane)
 		);
 	}
 

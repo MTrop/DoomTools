@@ -3,7 +3,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 import java.io.File;
 
-import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp.ExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -48,9 +48,9 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 			sourceOutputFile, 
 			(current) -> chooseFile(
 				this,
-				language.getText("decohack.export.source.browse.title"), 
+				language.getText("decohack.export.outsource.browse.title"), 
 				current, 
-				language.getText("decohack.export.source.browse.accept") 
+				language.getText("decohack.export.outsource.browse.accept") 
 			)
 		);
 		
@@ -59,7 +59,7 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 		containerOf(this,
 			node(BorderLayout.NORTH, form(language.getInteger("decohack.export.label.width"))
 				.addField(language.getText("decohack.export.patch"), patchOutputField)
-				.addField(language.getText("decohack.export.source"), sourceOutputField)
+				.addField(language.getText("decohack.export.outsource"), sourceOutputField)
 				.addField(language.getText("decohack.export.budget"), budgetField)
 			)
 		);
@@ -70,14 +70,29 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 		return patchOutputField.getValue();
 	}
 	
+	public void setPatchOutput(File value) 
+	{
+		patchOutputField.setValue(value);
+	}
+		
 	public File getSourceOutput() 
 	{
 		return sourceOutputField.getValue();
 	}
 	
+	public void setSourceOutput(File value) 
+	{
+		sourceOutputField.setValue(value);
+	}
+	
 	public boolean getBudget() 
 	{
 		return budgetField.getValue();
+	}
+	
+	public void setBudget(boolean value) 
+	{
+		budgetField.setValue(value);
 	}
 	
 }

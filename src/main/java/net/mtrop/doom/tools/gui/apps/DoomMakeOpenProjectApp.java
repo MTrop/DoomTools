@@ -218,7 +218,6 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		
 		return containerOf(
 			dimension(400, 300),
-			createEmptyBorder(4, 4, 4, 4),
 			node(containerOf(
 				node(BorderLayout.NORTH, containerOf(
 					node(BorderLayout.EAST, control)
