@@ -588,6 +588,7 @@ public class DirectoryTreePanel extends JPanel
 		// Delete file.
 		private void deleteFile(File file)
 		{
+			// TODO: Maybe remove from Node. Model should drive.
 			if (file.delete())
 				LOG.infof("Deleted file: %s", file.getAbsolutePath());
 			else
