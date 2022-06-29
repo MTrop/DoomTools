@@ -86,10 +86,10 @@ properties are supplied above - it may be better to add local paths to your `bui
 Creating a bootstrap EXE for Windows GUIs requires another project, [DoomTools-GUI-Native](https://github.com/MTrop/DoomTools-GUI-Native).
 It is not necessary for building or local deploying, but a package distributable will not be complete without it.
 
-The EXE build and copy to `src/maim/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set. You
-are better off not setting it for every build as the EXE will more than likely be built differently every time.
+The EXE build and copy to `src/main/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set. You
+are better off **NOT** setting it for every build as the EXE will more than likely be built differently every time.
 
-Building a Windows Installer requires [Inno Setup 6.2.0+](https://jrsoftware.org/isdl.php), and requires that the property `inno.setup.dir`
+Building a Windows Installer requires [Inno Setup 6.2.0](https://jrsoftware.org/isdl.php) or better, and requires that the property `inno.setup.dir`
 is set to Inno Setup's directory to make use of `iscc`.
 
 The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
@@ -103,14 +103,36 @@ The JRE added to the installer (or even just for running DoomTools) should be on
 	jlink --add-modules java.desktop,jdk.crypto.ec --compress=2 --output [jredir]
 
 That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
-and perhaps future tools that pull resources from Internet addresses.
+and perhaps future tools that pull resources from secure TLS Internet addresses.
+
+
+### Manually Updating Your Own Installed Version via Source
+
+If you have your own installed version of DoomTools but want to keep that install intact AND also develop for it,
+you do not need to go the route of direct-deploying to your install via `ant deploy.cmd` or `ant deploy.bash`
+and risk obliterating everything in its target directory. For a *safer* approach, you can try the following (assuming
+that you can already successfully build DoomTools from source; see "[Compiling with Ant](#compiling-with-ant)" above).
+
+DoomTools is contained in one complete JAR. To build just this JAR file, type the following in the project directory:
+
+    ant jar.one
+
+...and that will create a JAR file of the build in the `build/jar` directory (assuming project path defaults) 
+called `doomtools-YYYY.MM.DD.HHmmssSSS.jar`, where `YYYY.MM.DD.HHmmssSSS` is the current formatted 
+UTC date.
+
+Then, you can copy or move that JAR file into the `jar` directory under the DoomTools install directory, and if
+that JAR is the latest date, then all of the DoomTools CMD/Bash/EXEs will use that JAR automatically instead of 
+the others that are also in that directory. 
+
+This is similar to how DoomTools updates itself - it just downloads the latest stand-alone JAR from its main releases.
 
 
 ### Other Notes
 
 Even though this project can technically be used as a library, use caution when integrating this package 
 with your own programs - contents and APIs that are not part of other third-party libraries will be in 
-flux as the utilities evolve. This project makes no promises about a consistent API structure within itself,
+flux as the utilities evolve. This project makes **no promises about a consistent API structure** within itself,
 despite keeping things documented in a publicly-accessible fashion.
 
 
@@ -165,7 +187,7 @@ A scripting system for doing practically anything with Doom stuff. Also includes
 
 ### Special Thanks
 
-Special thanks to, in no particular order, **Aurelius**, **Antares031**, **floatRand**, **Xaser**, **kraflab**, 
+Special thanks to, in no particular order, **Aurelius**, **Antares031**, **floatRand**, **Xaser**, **kraflab**, **skillsaw**,
 and **punchyouinthefaceman** for their incidental QA testing. Lots of bugs were fixed because of all of you!
 
 

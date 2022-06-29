@@ -6,7 +6,7 @@
      ====================================================================== -->
 <project name="build" default="compile">
 
-	<description>Doom Struct</description>
+	<description>Doom Tools</description>
 
 	<property file="build.properties" />
 	<property file="versions.properties" />
