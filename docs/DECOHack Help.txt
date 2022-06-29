@@ -272,7 +272,7 @@ argument is nonzero).
 
 
 Action pointers understand what is expected in each parameter - you can just
-refer to thing aliases, labels, and sounds or what-have-you as is and it
+refer to thing aliases, labels, and sounds or what-have-you as-is and it
 will attempt to figure it out:
 
     A_Spawn(Demon, 0.0)                           // Thing alias
@@ -288,8 +288,8 @@ will attempt to figure it out:
       IMPORTANT: Some MBF pointers use the miscellaneous offset fields
       as function parameters, so attempting to use Offset on those
       weapon states that use them will cause an error! You can still 
-      use Offset with Doom/Ultimate Doom 1.9 pointers - those do not 
-      use those fields at all.
+      use Offset with Doom/Ultimate Doom 1.9 and MBF21 pointers - those 
+      do not use those fields at all.
       
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
@@ -517,10 +517,10 @@ protected. You can turn off the protection on states by doing the following:
 
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
-      IMPORTANT: DECOHack is not very smart about figuring out user
-      intent, especially around states with hardcoded purpose, in
-      order to keep patch crafting as flexible as possible. For 
-      example, one such state, State 266 (S_VILE_HEAL1), is the 
+      IMPORTANT: DECOHack is intentionally not very smart about 
+      figuring out user intent, especially around states with hardcoded 
+      purpose, in order to keep patch crafting as flexible as possible. 
+      For example, one such state, State 266 (S_VILE_HEAL1), is the 
       state that the action pointer "A_VileChase" can make an actor
       jump to when it resurrects a dead monster, despite the fact
       that it is not referenced ANYWHERE on a thing definition's
@@ -553,16 +553,17 @@ associated Thing for pickups.
         
         //MBF21 fields
         ammopershot <INTEGER>
+        flags mbf21 <INTEGER-EXPRESSION>
         
         clear properties // If present, clear all properties.
+
         clear flags // If present, clear all flags (both sets, if available)
 
         // MBF21 Flags (MBF21 feature set only)
-        flags mbf21 <INTEGER>
-        + mbf21 <INTEGER> // set flag(s)
-        - mbf21 <INTEGER> // unset flag(s)
-        + <MBF21WeaponFlagName> // set flag
-        - <MBF21WeaponFlagName> // unset flag
+        + mbf21 <INTEGER>           // set flag(s)
+        - mbf21 <INTEGER>           // unset flag(s)
+        + <MBF21WeaponFlagName>     // set flag
+        - <MBF21WeaponFlagName>     // unset flag
         
         // specific state assignment.
         state <WeaponStateName> <INTEGER>
