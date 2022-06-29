@@ -772,20 +772,22 @@ the thing state indices. Other labels are used for arbitrary jump points.
         painchance <INTEGER>
         mass <INTEGER>
 
+        flags <INTEGER-EXPRESSION>
+
+        flags mbf21 <INTEGER-EXPRESSION> // MBF21 Only
+
         clear flags // If present, clear all flags (both sets, if available)
 
-        flags <INTEGER>
-        + <INTEGER> // set flag(s)
-        - <INTEGER> // unset flag(s)
-        + <ThingFlagName> // set flag
-        - <ThingFlagName> // unset flag
+        + <INTEGER>                  // set flag(s)
+        - <INTEGER>                  // unset flag(s)
+        + <ThingFlagName>            // set flag
+        - <ThingFlagName>            // unset flag
 
         // MBF21 Flags (MBF21 feature set only)
-        flags mbf21 <INTEGER>
-        + mbf21 <INTEGER> // set flag(s)
-        - mbf21 <INTEGER> // unset flag(s)
-        + <MBF21ThingFlagName> // set flag
-        - <MBF21ThingFlagName> // unset flag
+        + mbf21 <INTEGER>            // set flag(s)
+        - mbf21 <INTEGER>            // unset flag(s)
+        + <MBF21ThingFlagName>       // set MBF21 flag
+        - <MBF21ThingFlagName>       // unset MBF21 flag
 
         clear sounds // if present, clear all sounds.
             

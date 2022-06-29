@@ -3,7 +3,9 @@ DECOHack
 
 ### Changed for 0.24.2
 
+* `Fixed` Some inconsistent error messages around flag setting/removal.
 * `Changed` Added a better error message for bad action pointers.
+* `Changed` Added an error message if the user does "flag mixing" on the same expression (see Issue #76).
 
 
 ### Changed for 0.24.1

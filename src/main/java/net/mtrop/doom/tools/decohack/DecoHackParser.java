@@ -1608,7 +1608,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else
 					{
-						addErrorMessage("Expected integer after \"+ mbf21\".");
+						addErrorMessage("Expected integer after \"- mbf21\".");
 						return false;
 					}
 				}
@@ -1618,7 +1618,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					addErrorMessage("Expected integer after \"+\".");
+					addErrorMessage("Expected integer after \"-\".");
 					return false;
 				}
 			}
@@ -4176,6 +4176,13 @@ public final class DecoHackParser extends Lexer.Parser
 			case FLAGS:
 			{
 				Integer value;
+				
+				// Check for accidental flag mixing.
+				int flagInclusionMask = 0;
+				final int FIM_THING_DOOM19 = 0x01;
+				final int FIM_THING_MBF21 = 0x02;
+				final int FIM_WEAPON_MBF21 = 0x04;
+				
 				while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 				{
 					if (out == null)
@@ -4193,14 +4200,35 @@ public final class DecoHackParser extends Lexer.Parser
 					else if ((value = matchThingFlagMnemonic()) != null)
 					{
 						out |= value;
+						
+						flagInclusionMask |= FIM_THING_DOOM19;
+						if ((flagInclusionMask & ~FIM_THING_DOOM19) != 0)
+						{
+							addErrorMessage("Attempted to mix different flag mnemonic types!");
+							return null;
+						}
 					}
 					else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
 					{
 						out |= value;
+
+						flagInclusionMask |= FIM_THING_MBF21;
+						if ((flagInclusionMask & ~FIM_THING_MBF21) != 0)
+						{
+							addErrorMessage("Attempted to mix different flag mnemonic types!");
+							return null;
+						}
 					}
 					else if ((value = matchWeaponMBF21FlagMnemonic(context)) != null)
 					{
 						out |= value;
+						
+						flagInclusionMask |= FIM_WEAPON_MBF21;
+						if ((flagInclusionMask & ~FIM_WEAPON_MBF21) != 0)
+						{
+							addErrorMessage("Attempted to mix different flag mnemonic types!");
+							return null;
+						}
 					}
 					else // expression not started. Maybe label.
 					{
