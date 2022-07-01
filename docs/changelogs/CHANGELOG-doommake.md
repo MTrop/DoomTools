@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.17.0
+
+* `Added` The `TOOL::WADSCRIPT(...)` function was changed to support alternate input charset encoding.
+* `Added` The `TOOL::DECOHACK(...)` function was changed to support alternate input charset encoding.
+
+
 ### Changed for 0.16.0
 
 * `Fixed` (GUI) GUI still checked for DoomMake on PATH in order to run. This was unnecessary. (Issue #69)

@@ -13,6 +13,9 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -24,6 +27,7 @@ import com.blackrook.rookscript.ScriptInstance;
 import com.blackrook.rookscript.ScriptInstanceBuilder;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.ErrorType;
+import com.blackrook.rookscript.compiler.ScriptReaderIncluder;
 import com.blackrook.rookscript.desktop.functions.DesktopFunctions;
 import com.blackrook.rookscript.desktop.functions.ImageFunctions;
 import com.blackrook.rookscript.exception.ScriptExecutionException;
@@ -54,6 +58,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.PreprocessorLexer;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
@@ -95,6 +100,8 @@ public final class WadScriptMain
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_ENTRY1 = "--entry";
 	public static final String SWITCH_ENTRY2 = "-e";
+	public static final String SWITCH_CHARSET1 = "--charset";
+	public static final String SWITCH_CHARSET2 = "-c";
 	public static final String SWITCH_ENTRYLIST = "--entry-list";
 	public static final String SWITCH_RUNAWAYLIMIT1 = "--runaway-limit";
 	public static final String SWITCH_ACTIVATIONDEPTH1 = "--activation-depth";
@@ -752,6 +759,7 @@ public final class WadScriptMain
 		private Mode mode;
 		private String docsTitle;
 		private File scriptFile;
+		private Charset scriptCharset;
 		private String entryPointName;
 		private Integer runawayLimit;
 		private Integer activationDepth;
@@ -770,6 +778,7 @@ public final class WadScriptMain
 			this.mode = Mode.EXECUTE;
 			this.docsTitle = "WadScript Functions";
 			this.scriptFile = null;
+			this.scriptCharset = Charset.defaultCharset();
 			this.entryPointName = "main";
 			this.runawayLimit = 0;
 			this.activationDepth = 256;
@@ -801,6 +810,16 @@ public final class WadScriptMain
 		public Options setScriptFile(File scriptFile) 
 		{
 			this.scriptFile = scriptFile;
+			return this;
+		}
+		
+		public Options setScriptCharsetName(String scriptCharsetName) 
+		{
+			try {
+				this.scriptCharset = scriptCharsetName != null ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
+			} catch (Exception e) {
+				this.scriptCharset = Charset.defaultCharset();
+			}
 			return this;
 		}
 		
@@ -990,12 +1009,32 @@ public final class WadScriptMain
 			
 			try 
 			{
+				final Charset INCLUDER_CHARSET = options.scriptCharset;
 				ScriptInstanceBuilder builder = ScriptInstance.createBuilder()
 					.withSource(options.scriptFile)
 					.withEnvironment(ScriptEnvironment.create(options.stdout, options.stderr, options.stdin))
 					.withScriptStack(options.activationDepth, options.stackDepth)
 					.withRunawayLimit(options.runawayLimit)
-					//.usingReaderIncluder(null) // TODO: Add includer that reads an assumed charset.
+					.usingReaderIncluder(new ScriptReaderIncluder()
+					{
+						@Override
+						public String getIncludeResourcePath(String streamName, String path) throws IOException
+						{
+							return PreprocessorLexer.DEFAULT_INCLUDER.getIncludeResourcePath(streamName, path);
+						}
+						
+						@Override
+						public InputStream getIncludeResource(String path) throws IOException 
+						{
+							return PreprocessorLexer.DEFAULT_INCLUDER.getIncludeResource(path);
+						}
+						
+						@Override
+						public Charset getEncodingForIncludedResource(String path) 
+						{
+							return INCLUDER_CHARSET;
+						}
+					})
 				;
 
 				// ============ Add Functions =============
@@ -1182,8 +1221,13 @@ public final class WadScriptMain
 			out.println("                                     and exits.");
 			out.println("    --entry-list                 Prints the list of entry point names for this");
 			out.println("                                     script and exits.");
-			out.println("    --entry [name]               Use a different entry point named [name].");
+			out.println("    --entry [name], -e [name]    Use a different entry point named [name].");
 			out.println("                                     Default: \"main\"");
+			out.println("    --charset [name], -c [name]  Use a specific charset encoding, [name],");
+			out.println("                                     instead of the system default. It is");
+			out.println("                                     assumed that the rest of the included");
+			out.println("                                     files are encoded this way, as well.");
+			out.println("                                     Default: " + Charset.defaultCharset().displayName());
 			out.println("    --runaway-limit [num]        Sets the runaway limit (in operations)");
 			out.println("                                     before the soft protection on infinite");
 			out.println("                                     loops triggers. 0 is no limit.");
@@ -1317,6 +1361,7 @@ public final class WadScriptMain
 		final int STATE_SWITCHES_ACTIVATION = SWITCHES + 1;
 		final int STATE_SWITCHES_STACK = SWITCHES + 2;
 		final int STATE_SWITCHES_RUNAWAY = SWITCHES + 3;
+		final int STATE_SWITCHES_CHARSET = SWITCHES + 4;
 		int state = STATE_START;
 		
 		for (int i = 0; i < args.length; i++)
@@ -1349,6 +1394,8 @@ public final class WadScriptMain
 						options.mode = Mode.FUNCTIONHELP_HTML_DIV;
 					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg) || SWITCH_ENTRY2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_ENTRY;
+					else if (SWITCH_CHARSET1.equalsIgnoreCase(arg) || SWITCH_CHARSET2.equalsIgnoreCase(arg))
+						state = STATE_SWITCHES_CHARSET;
 					else if (SWITCH_RUNAWAYLIMIT1.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_RUNAWAY;
 					else if (SWITCH_ACTIVATIONDEPTH1.equalsIgnoreCase(arg))
@@ -1416,6 +1463,19 @@ public final class WadScriptMain
 				}
 				break;
 				
+				case STATE_SWITCHES_CHARSET:
+				{
+					try {
+						options.scriptCharset = Charset.forName(arg);
+					} catch (IllegalCharsetNameException e) {
+						throw new OptionParseException("ERROR: Unknown charset name: " + arg);
+					} catch (UnsupportedCharsetException e) {
+						throw new OptionParseException("ERROR: Unsupported charset name: " + arg);
+					}
+					state = STATE_START;
+				}
+				break;
+				
 				case STATE_ARGS:
 				{
 					options.argList.add(arg);
@@ -1439,6 +1499,8 @@ public final class WadScriptMain
 			throw new OptionParseException("ERROR: Expected number after stack depth switch.");
 		if (state == STATE_SWITCHES_RUNAWAY)
 			throw new OptionParseException("ERROR: Expected number after runaway limit switch.");
+		if (state == STATE_SWITCHES_CHARSET)
+			throw new OptionParseException("ERROR: Expected charset name after charset switch.");
 		
 		return options;
 	}

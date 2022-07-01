@@ -120,10 +120,10 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"targetName:STRING",
 							"propertiesFile:OBJECTREF(File)",
 							"scriptFile:OBJECTREF(File)",
-							"args:LIST[STRING, ...]",
 							"runawayLimit:INTEGER",
 							"activationDepth:INTEGER",
-							"stackDepth:INTEGER"
+							"stackDepth:INTEGER",
+							"args:LIST[STRING, ...]"
 						) + "}",
 						"Map of options."
 					)
@@ -193,12 +193,13 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
 							"useStdin:BOOLEAN",
-							"infile:OBJECTREF(File)",
-							"infiles:LIST[OBJECTREF(File), ...]",
-							"outfile:OBJECTREF(File)",
-							"outsourcefile:OBJECTREF(File)",
-							"outcharsetname:STRING",
-							"outputbudget:BOOLEAN"
+							"inFile:OBJECTREF(File)",
+							"inFiles:LIST[OBJECTREF(File), ...]",
+							"inCharsetName:STRING",
+							"outFile:OBJECTREF(File)",
+							"outSourceFile:OBJECTREF(File)",
+							"outCharsetName:STRING",
+							"outputBudget:BOOLEAN"
 						) + "}",
 						"Map of options."
 					)
@@ -507,6 +508,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
 							"scriptFile:OBJECTREF(File)",
+							"scriptCharsetName:STRING",
 							"entryPointName:STRING",
 							"runawayLimit:INTEGER",
 							"activationDepth:INTEGER",

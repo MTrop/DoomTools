@@ -3,11 +3,12 @@ DECOHack
 
 ### Changed for 0.25.0
 
-* `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
-* `Added` Documentation for all pointers when dumped with `--dump-pointers`.
 * `Fixed` Changed the z-position parameter type for MBF's A_Spawn pointer to "fixed".
 * `Fixed` Changed the range parameter type for MBF21's A_MonsterMeleeAttack pointer to "fixed".
 * `Fixed` Some inconsistent error messages around flag setting/removal.
+* `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
+* `Added` Documentation for all pointers when dumped with `--dump-pointers`.
+* `Added` A `--charset` switch for specifying the encoding of the input source files (if not system default).
 * `Changed` MBF's A_FireOldBFG pointer should have been a weapon pointer instead of a thing pointer.
 * `Changed` Added a better error message for bad action pointers.
 * `Changed` Added an error message if the user does "flag mixing" on the same expression (see Issue #76).

@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
@@ -211,56 +211,18 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	/**
-	 * Reads a DECOHack script from a String of text.
-	 * @param text the String to read from.
-	 * @return the result of the parse.
-	 * @throws IOException if the stream can't be read.
-	 * @throws NullPointerException if text is null. 
-	 */
-	public static Result read(String text) throws IOException
-	{
-		return read(STREAMNAME_TEXT, new StringReader(text));
-	}
-
-	/**
-	 * Reads a DECOHack script from a String of text.
-	 * @param streamName a name to assign to the stream.
-	 * @param text the String to read from.
-	 * @return the result of the parse.
-	 * @throws IOException if the stream can't be read.
-	 * @throws NullPointerException if text is null. 
-	 */
-	public static Result read(String streamName, String text) throws IOException
-	{
-		return read(streamName, new StringReader(text));
-	}
-
-	/**
 	 * Reads a DECOHack script.
 	 * @param streamName the name of the stream.
 	 * @param in the stream to read from.
+	 * @param inputCharset the input charset encoding for the stream.
 	 * @return the result of the parse.
 	 * @throws IOException if the stream can't be read.
 	 * @throws SecurityException if a read error happens due to OS permissioning.
 	 * @throws NullPointerException if in is null. 
 	 */
-	public static Result read(String streamName, InputStream in) throws IOException
+	public static Result read(String streamName, InputStream in, Charset inputCharset) throws IOException
 	{
-		return read(streamName, new InputStreamReader(in));
-	}
-
-	/**
-	 * Reads a DECOHack script from a reader stream.
-	 * @param streamName the name of the stream.
-	 * @param reader the reader to read from.
-	 * @return the result of the parse.
-	 * @throws IOException if the stream can't be read.
-	 * @throws SecurityException if a read error happens due to OS permissioning.
-	 * @throws NullPointerException if reader is null. 
-	 */
-	public static Result read(String streamName, Reader reader) throws IOException
-	{
-		DecoHackParser parser = new DecoHackParser(streamName, reader);
+		DecoHackParser parser = new DecoHackParser(streamName, in, inputCharset);
 		Result out = new Result();
 		out.context = parser.parse();
 		out.warnings = parser.getWarningMessages();
@@ -271,14 +233,15 @@ public final class DecoHackParser extends Lexer.Parser
 	/**
 	 * Reads a DECOHack script from a starting text file.
 	 * @param files the files to read from (as though each file is included, in order).
+	 * @param inputCharset the input charset for all files.
 	 * @return the result of the parse.
 	 * @throws IOException if the stream can't be read.
 	 * @throws SecurityException if a read error happens due to OS permissioning.
 	 * @throws NullPointerException if file is null. 
 	 */
-	public static Result read(Iterable<File> files) throws IOException
+	public static Result read(Iterable<File> files, Charset inputCharset) throws IOException
 	{
-		DecoHackParser parser = new DecoHackParser(null, null);
+		DecoHackParser parser = new DecoHackParser(null, null, inputCharset);
 		Lexer lexer = parser.getLexer();
 		
 		// Lexer streams are a stack, so add files backwards for the correct order.
@@ -288,7 +251,7 @@ public final class DecoHackParser extends Lexer.Parser
 		while (!backwards.isEmpty())
 		{
 			File file = backwards.pollFirst();
-			lexer.pushStream(file.getPath(), new InputStreamReader(new FileInputStream(file)));
+			lexer.pushStream(file.getPath(), new InputStreamReader(new FileInputStream(file), inputCharset));
 		}
 
 		Result out = new Result();
@@ -4452,9 +4415,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private int lastAutoThingIndex;
 
 	// Return the exporter for the patch.
-	private DecoHackParser(String streamName, Reader in)
+	private DecoHackParser(String streamName, InputStream in, Charset inputCharset)
 	{
-		super(new DecoHackLexer(streamName, in));
+		super(new DecoHackLexer(streamName, new InputStreamReader(in, inputCharset), inputCharset));
 		this.warnings = new LinkedList<>();
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -4834,9 +4797,9 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		private static final Kernel KERNEL = new DecoHackKernel();
 
-		private DecoHackLexer(String streamName, Reader in)
+		private DecoHackLexer(String streamName, Reader reader, final Charset encoding)
 		{
-			super(KERNEL, streamName, in);
+			super(KERNEL, streamName, reader);
 			setIncluder(new PreprocessorLexer.Includer() 
 			{
 				private final Map<String, String> SPECIAL_INCLUDES = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
@@ -4873,6 +4836,12 @@ public final class DecoHackParser extends Lexer.Parser
 				public InputStream getIncludeResource(String path) throws IOException 
 				{
 					return DEFAULT_INCLUDER.getIncludeResource(path);
+				}
+				
+				@Override
+				public Charset getEncodingForIncludedResource(String path) 
+				{
+					return encoding;
 				}
 			});
 		}

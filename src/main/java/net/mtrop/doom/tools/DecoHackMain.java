@@ -75,6 +75,9 @@ public final class DecoHackMain
 	public static final String SWITCH_VERSION = "--version";
 	public static final String SWITCH_DRYRUN = "--dry-run";
 
+	public static final String SWITCH_CHARSET1 = "--charset";
+	public static final String SWITCH_CHARSET2 = "-c";
+
 	public static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
 	public static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
 	public static final String SWITCH_DUMPRESOURCE = "--dump-resource";
@@ -109,6 +112,7 @@ public final class DecoHackMain
 
 		private boolean useStdin;
 		private List<File> inFiles;
+		private Charset inCharset;
 		
 		private Charset outCharset;
 		private File outFile;
@@ -131,6 +135,7 @@ public final class DecoHackMain
 
 			this.useStdin = false;
 			this.inFiles = new LinkedList<>();
+			this.inCharset = Charset.defaultCharset();
 			
 			this.outCharset = ASCII;
 			this.outFile = null;
@@ -165,6 +170,16 @@ public final class DecoHackMain
 		public Options setInFiles(File[] inFiles) 
 		{
 			this.inFiles = Arrays.asList(inFiles);
+			return this;
+		}
+
+		public Options setInCharsetName(String scriptCharsetName) 
+		{
+			try {
+				this.inCharset = scriptCharsetName != null ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
+			} catch (Exception e) {
+				this.inCharset = Charset.defaultCharset();
+			}
 			return this;
 		}
 		
@@ -347,10 +362,10 @@ public final class DecoHackMain
 					options.outFile = new File(DEFAULT_OUTFILENAME);
 				}
 
-				try (Reader reader = new BufferedReader(new InputStreamReader(options.stdin))) 
+				try (Reader reader = new BufferedReader(new InputStreamReader(options.stdin, options.inCharset))) 
 				{
 					DecoHackParser.Result result;
-					result = DecoHackParser.read("STDIN", reader);
+					result = DecoHackParser.read("STDIN", options.stdin, options.inCharset);
 					context = result.getContext();
 					for (String message : result.getWarnings())
 						options.stderr.println("WARNING: " + message);
@@ -404,7 +419,7 @@ public final class DecoHackMain
 				try 
 				{
 					DecoHackParser.Result result;
-					result = DecoHackParser.read(options.inFiles);
+					result = DecoHackParser.read(options.inFiles, options.inCharset);
 					context = result.getContext();
 					for (String message : result.getWarnings())
 						options.stderr.println("WARNING: " + message);
@@ -534,6 +549,7 @@ public final class DecoHackMain
 		final int STATE_OUTCHARSET = 2;
 		final int STATE_DUMPRES = 3;
 		final int STATE_SOURCEOUTFILE = 4;
+		final int STATE_CHARSET = 5;
 		int state = STATE_START;
 
 		for (int i = 0; i < args.length; i++)
@@ -563,6 +579,8 @@ public final class DecoHackMain
 						options.dumpResource = RESOURCE_HELP_CONSTANTS;
 					else if (arg.equals(SWITCH_DUMPRESOURCE))
 						state = STATE_DUMPRES;
+					else if (arg.equals(SWITCH_CHARSET1) || arg.equals(SWITCH_CHARSET2))
+						state = STATE_CHARSET;
 					else if (arg.equals(SWITCH_BUDGET) || arg.equals(SWITCH_BUDGET2))
 						options.outputBudget = true;
 					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
@@ -597,7 +615,7 @@ public final class DecoHackMain
 					try {
 						options.outCharset = Charset.forName(arg);
 					} catch (IllegalCharsetNameException e) {
-						throw new OptionParseException("ERROR: Bad charset name: " + arg);
+						throw new OptionParseException("ERROR: Unknown charset name: " + arg);
 					} catch (UnsupportedCharsetException e) {
 						throw new OptionParseException("ERROR: Unsupported charset name: " + arg);
 					}
@@ -611,6 +629,19 @@ public final class DecoHackMain
 					state = STATE_START;
 				}
 				break;
+
+				case STATE_CHARSET:
+				{
+					try {
+						options.inCharset = Charset.forName(arg);
+					} catch (IllegalCharsetNameException e) {
+						throw new OptionParseException("ERROR: Unknown charset name: " + arg);
+					} catch (UnsupportedCharsetException e) {
+						throw new OptionParseException("ERROR: Unsupported charset name: " + arg);
+					}
+					state = STATE_START;
+				}
+				break;
 			}
 		}
 		
@@ -618,6 +649,8 @@ public final class DecoHackMain
 			throw new OptionParseException("ERROR: Expected output file.");
 		if (state == STATE_OUTCHARSET)
 			throw new OptionParseException("ERROR: Expected output charset name.");
+		if (state == STATE_CHARSET)
+			throw new OptionParseException("ERROR: Expected input charset name.");
 		
 		return options;
 	}
@@ -715,11 +748,14 @@ public final class DecoHackMain
 		out.println("    <filename> ...           The input filenames. One or more can be added,");
 		out.println("                             parsed in the order specified.");
 		out.println();
-		out.println("    --                       Script input is from Standard In, not a file.");
+		out.println("    --                       Source input is from Standard In, not a file.");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output [file]          Outputs the resultant patch to [file].");
 		out.println("    -o [file]");
+		out.println();
+		out.println("    --charset [name]         Sets the input charset to [name]. The default");
+		out.println("    -c [name]                charset is " + Charset.defaultCharset().displayName() + " (system default).");
 		out.println();
 		out.println("    --source-output [file]   Outputs the combined source to a single file.");
 		out.println("    -s [file]");
