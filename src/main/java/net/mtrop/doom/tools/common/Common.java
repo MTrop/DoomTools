@@ -56,6 +56,7 @@ public final class Common
 	
 	/**
 	 * Opens an {@link InputStream} to a resource using the current thread's {@link ClassLoader}.
+	 * Assumes platform default encoding.
 	 * @param pathString the resource pathname.
 	 * @return an open {@link InputStream} for reading the resource or null if not found.
 	 * @see ClassLoader#getResourceAsStream(String)

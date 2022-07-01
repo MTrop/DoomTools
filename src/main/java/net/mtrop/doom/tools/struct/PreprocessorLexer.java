@@ -1,9 +1,7 @@
 /*******************************************************************************
- * Copyright (c) 2017-2020 Black Rook Software
- * This program and the accompanying materials are made available under the 
- * terms of the GNU Lesser Public License v2.1 which accompanies this 
- * distribution, and is available at 
- * http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * Copyright (c) 2019-2022 Black Rook Software
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doom.tools.struct;
 
@@ -14,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -81,7 +80,8 @@ public class PreprocessorLexer extends Lexer
 			IS_WINDOWS = System.getProperty("os.name").contains("Windows");
 		}
 		
-		protected DefaultIncluder(){}
+		// cannot be instantiated outside of this class.
+		private DefaultIncluder(){}
 
 		@Override
 		public String getIncludeResourcePath(String streamName, String path) throws IOException
@@ -168,6 +168,17 @@ public class PreprocessorLexer extends Lexer
 		 */
 		InputStream getIncludeResource(String path) throws IOException;
 	
+		/**
+		 * Gets the charset encoding to use when a path is fetched successfully with {@link #getIncludeResource(String)}.
+		 * By default, this returns {@link Charset#defaultCharset()} for all paths.
+		 * @param path the input path (passed to {@link #getIncludeResource(String)} originally).
+		 * @return the encoding to use when reading from a resource.
+		 */
+		default Charset getEncodingForIncludedResource(String path)
+		{
+			return Charset.defaultCharset();
+		}
+		
 	}
 
 	/** Is this at the beginning of a line? */
@@ -182,16 +193,6 @@ public class PreprocessorLexer extends Lexer
 	/** List of errors. */
 	private List<String> errors;
 
-	/**
-	 * Creates a new preprocessor lexer around a String, that will be wrapped into a StringReader.
-	 * This will also assign this lexer a default name.
-	 * @param kernel the lexer kernel to use for defining how to parse the input text.
-	 */
-	public PreprocessorLexer(Kernel kernel)
-	{
-		this(kernel, null, (Reader)null);
-	}
-	
 	/**
 	 * Creates a new preprocessor lexer around a String, that will be wrapped into a StringReader.
 	 * This will also assign this lexer a default name.
@@ -490,7 +491,7 @@ public class PreprocessorLexer extends Lexer
 				if (includeIn == null)
 					errors.add(getInfoLine(streamName, lineNumber, null, "Could not resolve path: \"" + includePath + "\""));
 				else
-					pushStream(includePath, new InputStreamReader(includeIn));
+					pushStream(includePath, new InputStreamReader(includeIn, includer.getEncodingForIncludedResource(includePath)));
 				
 			} catch (IOException e) {
 				errors.add(getInfoLine(streamName, lineNumber, null, "Could not resolve path. "+ e.getMessage()));

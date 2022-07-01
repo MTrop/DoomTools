@@ -994,7 +994,9 @@ public final class WadScriptMain
 					.withSource(options.scriptFile)
 					.withEnvironment(ScriptEnvironment.create(options.stdout, options.stderr, options.stdin))
 					.withScriptStack(options.activationDepth, options.stackDepth)
-					.withRunawayLimit(options.runawayLimit);
+					.withRunawayLimit(options.runawayLimit)
+					//.usingReaderIncluder(null) // TODO: Add includer that reads an assumed charset.
+				;
 
 				// ============ Add Functions =============
 				

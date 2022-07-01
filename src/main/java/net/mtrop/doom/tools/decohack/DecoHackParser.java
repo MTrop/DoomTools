@@ -4837,7 +4837,7 @@ public final class DecoHackParser extends Lexer.Parser
 		private DecoHackLexer(String streamName, Reader in)
 		{
 			super(KERNEL, streamName, in);
-			setIncluder(new PreprocessorLexer.DefaultIncluder() 
+			setIncluder(new PreprocessorLexer.Includer() 
 			{
 				private final Map<String, String> SPECIAL_INCLUDES = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER)
 				{
@@ -4861,12 +4861,18 @@ public final class DecoHackParser extends Lexer.Parser
 					String foundPath;
 					if ((foundPath = SPECIAL_INCLUDES.get(path)) != null)
 					{
-						return super.getIncludeResourcePath(streamName, foundPath);
+						return DEFAULT_INCLUDER.getIncludeResourcePath(streamName, foundPath);
 					}
 					else
 					{
-						return super.getIncludeResourcePath(streamName, path);
+						return DEFAULT_INCLUDER.getIncludeResourcePath(streamName, path);
 					}
+				}
+
+				@Override
+				public InputStream getIncludeResource(String path) throws IOException 
+				{
+					return DEFAULT_INCLUDER.getIncludeResource(path);
 				}
 			});
 		}

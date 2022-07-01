@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-06-30** Updated RookScript to `1.15.0`. (Includer encoding).
+
 - **2022-04-15** Changed DoomTools's update system to pull the JAR ZIP for the update.
 - **2022-04-05** Updated DoomStruct to `2.14.2`. (Entry/Texture name fixes).
 

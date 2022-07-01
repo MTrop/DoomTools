@@ -1,12 +1,12 @@
 package net.mtrop.doom.tools.common;
 
-import java.io.File;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 
 public final class CommonTest 
 {
 	public static void main(String[] args) 
 	{
-		Common.openInSystemBrowser(new File("H:\\DoomDev"));
+		System.out.println(FileUtils.createTempFile());
 	}
 
 }

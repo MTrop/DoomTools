@@ -35,6 +35,10 @@ public final class FileUtils
 	 */
 	public static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
 	
+	private static final String TEMP_FILE_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+	private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
+	
 	/**
 	 * Creates a blank file or updates its last modified date.
 	 * @param filePath	the abstract path to use.
@@ -158,6 +162,21 @@ public final class FileUtils
 			n += len;
 		}
 		fos.close();
+	}
+
+	/**
+	 * Creates a temporary file for whatever purpose.
+	 * The returned object can be autoclosed via try-with-resources or some other method, which will
+	 * attempt to delete it from storage.
+	 * @return the file created.
+	 */
+	public static TempFile createTempFile()
+	{
+		Random random = new Random();
+		char[] out = new char[32];
+		for (int i = 0; i < out.length; i++)
+			out[i] = TEMP_FILE_ALPHABET.charAt(random.nextInt(TEMP_FILE_ALPHABET.length()));
+		return new TempFile(canonizeFile(TEMP_DIR) + File.separator + (new String(out)) + ".tmp");
 	}
 
 	/**
@@ -804,6 +823,27 @@ public final class FileUtils
 			return a.getAbsolutePath().equalsIgnoreCase(b.getAbsolutePath());
 		else
 			return a.getAbsolutePath().equals(b.getAbsolutePath());
+	}
+	
+	
+	/**
+	 * A path to a temporary file that is deleted on close.
+	 */
+	public static final class TempFile extends File implements AutoCloseable
+	{
+		private static final long serialVersionUID = -4447892228054673063L;
+
+		private TempFile(String path) 
+		{
+			super(path);
+		}
+		
+		@Override
+		public void close() throws Exception 
+		{
+			if (exists())
+				delete();
+		}
 	}
 	
 }
