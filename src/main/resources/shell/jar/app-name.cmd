@@ -50,6 +50,7 @@ echo.
 echo Java can be downloaded from the following places:
 echo.
 echo Azul:      https://www.azul.com/downloads/
+echo Adoptium:  https://adoptium.net/temurin/releases/
 echo Microsoft: https://www.microsoft.com/openjdk
 echo Oracle:    https://java.com/en/download/
 echo.
