@@ -2001,11 +2001,19 @@ public class MultiFileEditorPanel extends JPanel
 		private void applyAutoComplete(String styleName)
 		{
 			AutoCompletion autoCompletion = editorProvider.createAutoCompletionByStyle(styleName);
-			autoCompleteSettings.apply(autoCompletion);
-			autoCompletion.setParameterAssistanceEnabled(true);
+			if (autoCompletion != null)
+			{
+				autoCompleteSettings.apply(autoCompletion);
+				autoCompletion.setParameterAssistanceEnabled(true);
+			}
+			
 			if (currentAutoCompletion != null)
 				currentAutoCompletion.uninstall();
-			autoCompletion.install(editorPanel.textArea);
+
+			if (autoCompletion != null)
+			{
+				autoCompletion.install(editorPanel.textArea);
+			}
 			currentAutoCompletion = autoCompletion;
 		}
 		

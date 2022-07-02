@@ -12,7 +12,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
- * DoomMake GUI icon loader singleton.
+ * DoomTools GUI icon loader singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsIconManager 

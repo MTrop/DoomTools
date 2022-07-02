@@ -17,6 +17,7 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
+import org.fife.ui.rsyntaxtextarea.modes.PlainTextTokenMaker;
 
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackCompletionProvider;
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackTokenMaker;
@@ -46,6 +47,8 @@ public final class DoomToolsEditorProvider
 	
 	public static final String SYNTAX_STYLE_DECOHACK =   "text/decohack";
 	public static final String SYNTAX_STYLE_DOOMMAKE =   "text/doommake";
+	public static final String SYNTAX_STYLE_DEUTEX =     "text/deutex";
+	public static final String SYNTAX_STYLE_DEFSWANI =   "text/defswani";
 	public static final String SYNTAX_STYLE_ROOKSCRIPT = "text/rookscript";
 	public static final String SYNTAX_STYLE_WADMERGE =   "text/wadmerge";
 	public static final String SYNTAX_STYLE_WADSCRIPT =  "text/wadscript";
@@ -58,12 +61,15 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = -2713345708437194651L;
 		{
+			put("defswani.txt",         SYNTAX_STYLE_DEFSWANI);
 			put("doommake.script",      SYNTAX_STYLE_DOOMMAKE);
 			put("doommake-lib.script",  SYNTAX_STYLE_DOOMMAKE);
 			put("doommake-init.script", SYNTAX_STYLE_DOOMMAKE);
 			put("dockerfile",           SYNTAX_STYLE_DOCKERFILE);
 			put("makefile",             SYNTAX_STYLE_MAKEFILE);
 			put("hosts",                SYNTAX_STYLE_HOSTS);
+			put("texture1.txt",         SYNTAX_STYLE_DEUTEX);
+			put("texture2.txt",         SYNTAX_STYLE_DEUTEX);
 		}
     };
     
@@ -141,12 +147,14 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = -2069191041359249343L;
 		{
-			put("Plain Text",         SYNTAX_STYLE_NONE);
-			put("DECOHack",           SYNTAX_STYLE_DECOHACK);
-			put("DoomMake",           SYNTAX_STYLE_DOOMMAKE);
-			put("RookScript",         SYNTAX_STYLE_ROOKSCRIPT);
-			put("WadMerge",           SYNTAX_STYLE_WADMERGE);
-			put("WadScript",          SYNTAX_STYLE_WADSCRIPT);
+			put("Plain Text",          SYNTAX_STYLE_NONE);
+			put("DECOHack",            SYNTAX_STYLE_DECOHACK);
+			put("DEFSWANI",            SYNTAX_STYLE_DEFSWANI);
+			put("DEUTex Texture File", SYNTAX_STYLE_DEUTEX);
+			put("DoomMake",            SYNTAX_STYLE_DOOMMAKE);
+			put("RookScript",          SYNTAX_STYLE_ROOKSCRIPT);
+			put("WadMerge",            SYNTAX_STYLE_WADMERGE);
+			put("WadScript",           SYNTAX_STYLE_WADSCRIPT);
 		}
     });
     
@@ -282,6 +290,8 @@ public final class DoomToolsEditorProvider
 		tokenMakers.putMapping(SYNTAX_STYLE_ROOKSCRIPT, RookScriptTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE,   WadMergeTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK,   DecoHackTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DEFSWANI,   PlainTextTokenMaker.class.getName()); // TODO: Change to actual token makers
+		tokenMakers.putMapping(SYNTAX_STYLE_DEUTEX,     PlainTextTokenMaker.class.getName()); // TODO: Change to actual token makers
 		
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE,   new CurlyFoldParser());
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT,  new CurlyFoldParser());
@@ -346,7 +356,8 @@ public final class DoomToolsEditorProvider
 	 */
 	public AutoCompletion createAutoCompletionByStyle(String styleName)
 	{
-		return new AutoCompletion(getProviderByStyle(styleName));
+		CompletionProvider provider = getProviderByStyle(styleName);
+		return provider != null ? new AutoCompletion(provider) : null;
 	}
 
 	/**

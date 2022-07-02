@@ -19,7 +19,7 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
- * Language Manager.
+ * DoomTools Language Manager.
  * @author Matthew Tropiano
  */
 public final class DoomToolsLanguageManager

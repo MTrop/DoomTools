@@ -10,7 +10,7 @@ import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
 /**
- * DoomMake GUI logger singleton.
+ * DoomTools GUI logger singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsLogger 

@@ -11,7 +11,7 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
- * DoomMake GUI image loader singleton.
+ * DoomTools GUI image loader singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsImageManager 

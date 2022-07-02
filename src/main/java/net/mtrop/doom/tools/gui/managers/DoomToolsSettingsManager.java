@@ -9,7 +9,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 
 
 /**
- * Doom Tools GUI settings singleton.
+ * DoomTools GUI settings singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsSettingsManager extends DoomToolsSettings

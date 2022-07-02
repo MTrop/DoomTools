@@ -11,7 +11,7 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
- * DoomMake GUI pub-sub layer.
+ * DoomTools GUI pub-sub layer.
  * @author Matthew Tropiano
  */
 public final class DoomToolsMessenger 
