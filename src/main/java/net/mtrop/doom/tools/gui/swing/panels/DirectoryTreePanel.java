@@ -569,9 +569,7 @@ public class DirectoryTreePanel extends JPanel
 		@Override
 		public void remove(int index) 
 		{
-			FileNode node = children.remove(index);
-			if (node != null)
-				deleteFile(node.file);
+			children.remove(index);
 		}
 
 		@Override
@@ -580,21 +578,10 @@ public class DirectoryTreePanel extends JPanel
 			if (node instanceof FileNode)
 			{
 				FileNode fileNode = (FileNode)node;
-				if (children.remove(fileNode))
-					deleteFile(fileNode.file);
+				children.remove(fileNode);
 			}
 		}
 
-		// Delete file.
-		private void deleteFile(File file)
-		{
-			// TODO: Maybe remove from Node. Model should drive.
-			if (file.delete())
-				LOG.infof("Deleted file: %s", file.getAbsolutePath());
-			else
-				LOG.errorf("Could not delete file: %s", file.getAbsolutePath());
-		}
-		
 		@Override
 		public void setUserObject(Object object) 
 		{

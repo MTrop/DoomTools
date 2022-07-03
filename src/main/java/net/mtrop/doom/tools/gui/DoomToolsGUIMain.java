@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
@@ -18,12 +20,16 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
+import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsImageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.DoomToolsApplicationFrame;
 import net.mtrop.doom.tools.gui.swing.DoomToolsMainWindow;
+import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
@@ -180,6 +186,96 @@ public final class DoomToolsGUIMain
 		SwingUtils.setLAF(theme != null ? theme.className : GUIThemeType.LIGHT.className);
 	}
 
+	/**
+	 * Pre-loads all of the completion providers into memory in a separate thread.
+	 * <p>
+	 * The completion providers are not instantiated until they are needed for a
+	 * particular style, but depending on how complex they are, this will cause a very noticeable
+	 * hitch on first use. Calling this function will start pre-loading them in a separate thread
+	 * so that they are ready to be used instantly.
+	 */
+	private static void preWarmCompletionProviders()
+	{
+		DoomToolsTaskManager tasks = DoomToolsTaskManager.get();
+		LOG.info("Pre-warming completion providers...");
+		tasks.spawn(() -> {
+			DoomToolsEditorProvider editorProvider = DoomToolsEditorProvider.get();
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DECOHACK);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DOOMMAKE);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_ROOKSCRIPT);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_WADMERGE);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
+			LOG.info("Completion providers pre-warm finished.");
+		});
+	}
+	
+	/**
+	 * Pre-loads common icons.
+	 */
+	private static void preWarmCommonIcons() 
+	{
+		DoomToolsTaskManager tasks = DoomToolsTaskManager.get();
+		LOG.info("Pre-warming common icons...");
+		tasks.spawn(() -> {
+			DoomToolsIconManager iconManager = DoomToolsIconManager.get();
+			iconManager.getImage("activity.gif");
+			LOG.info("Icon pre-warm finished.");
+		});
+	}
+
+	/**
+	 * Pre-loads common non-animated images.
+	 */
+	private static void preWarmCommonImages() 
+	{
+		DoomToolsTaskManager tasks = DoomToolsTaskManager.get();
+		LOG.info("Pre-warming common images...");
+		tasks.spawn(() -> {
+			DoomToolsImageManager imageManager = DoomToolsImageManager.get();
+			imageManager.getImage("doomtools-logo-16.png"); 
+			imageManager.getImage("doomtools-logo-32.png"); 
+			imageManager.getImage("doomtools-logo-48.png"); 
+			imageManager.getImage("doomtools-logo-64.png"); 
+			imageManager.getImage("doomtools-logo-96.png"); 
+			imageManager.getImage("doomtools-logo-128.png"); 
+			imageManager.getImage("script.png");
+			imageManager.getImage("script-unsaved.png");
+			imageManager.getImage("close-icon.png");
+			imageManager.getImage("success.png");
+			imageManager.getImage("error.png");
+			LOG.info("Image pre-warm finished.");
+		});
+	}
+
+	/**
+	 * Pre-loads common components.
+	 */
+	private static void preWarmCommonComponents()
+	{
+		DoomToolsTaskManager tasks = DoomToolsTaskManager.get();
+		LOG.info("Pre-warming common components...");
+		tasks.spawn(() -> {
+			DoomToolsEditorProvider editorProvider = DoomToolsEditorProvider.get();
+			editorProvider.initCustomLanguages();
+			new MultiFileEditorPanel();
+			new RSyntaxTextArea();
+			LOG.info("Component pre-warm finished.");
+		});
+	}
+
+	
+	/**
+	 * Pre-warms a bunch of elements for DoomTools to avoid weird UX-related hitches.
+	 * Only useful for loading the full application.
+	 */
+    private static void preWarmCommonElements() 
+    {
+    	preWarmCompletionProviders();
+    	preWarmCommonImages();
+    	preWarmCommonIcons();
+    	preWarmCommonComponents();
+	}
+
     /* ==================================================================== */
 
 	/**
@@ -199,7 +295,7 @@ public final class DoomToolsGUIMain
 	    		System.exit(1);
 	    		return;
 	    	}
-	    	DoomToolsGUIPreWarmer.get();
+	    	preWarmCommonElements();
 			get().createAndDisplayMainWindow();
 		}
 		// run standalone application.
@@ -248,7 +344,7 @@ public final class DoomToolsGUIMain
 					case ApplicationNames.WADSCRIPT:
 					{
 						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new WadScriptEditorApp(new File(path)));
+						startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
 						break;
 					}
 
@@ -261,13 +357,15 @@ public final class DoomToolsGUIMain
 
 					case ApplicationNames.DECOHACK:
 					{
-						startApplication(new DecoHackEditorApp());
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
 						break;
 					}
 					
 					case ApplicationNames.DECOHACK_COMPILER:
 					{
-						startApplication(new DecoHackCompilerApp());
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new DecoHackCompilerApp(path));
 						break;
 					}
 				}
