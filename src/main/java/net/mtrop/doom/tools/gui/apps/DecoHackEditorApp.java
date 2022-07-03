@@ -28,6 +28,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DirectoryTreePanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;

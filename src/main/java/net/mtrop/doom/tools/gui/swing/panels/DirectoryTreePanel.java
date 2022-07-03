@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -33,6 +35,7 @@ import javax.swing.tree.TreePath;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 
@@ -59,8 +62,8 @@ public class DirectoryTreePanel extends JPanel
 	{
 		final Comparator<File> fileNameComparator = (a, b) -> (
 			OSUtils.isWindows()
-				? String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())
-			    : a.getName().compareTo(b.getName())
+				? String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
+			    : a.getPath().compareTo(b.getPath())
 		);
 		
 		CHILD_FILE_COMPARATOR = (a, b) -> (
@@ -147,7 +150,7 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public void refresh()
 	{
-		fileTree.refresh();
+		fileTree.setRootDirectory(rootDirectory);
 	}
 	
 	/**
@@ -164,19 +167,91 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public void setRootDirectoryParent() 
 	{
-		fileTree.setRootDirectory(rootDirectory);
+		File parent = rootDirectory.getParentFile();
+		if (parent != null)
+			fileTree.setRootDirectory(parent);
 	}
 	
 	/**
-	 * Selects a file in the tree.
+	 * Selects a file in the tree, if it is in the tree.
 	 * @param filePath the file path.
 	 */
-	public void setSelectedFile(File filePath) 
+	public void setSelectedFile(File filePath)
+	{
+		TreePath path = getTreePathForFile(filePath);
+		if (path != null)
+			fileTree.setSelectionPath(path);
+	}
+	
+	/**
+	 * Selects a set of file paths in the tree, if they are in the tree.
+	 * @param filePaths the file paths.
+	 */
+	public void setSelectedFiles(File ... filePaths)
+	{
+		List<TreePath> treePathList = new LinkedList<TreePath>();
+		for (int i = 0; i < filePaths.length; i++)
+		{
+			TreePath path = getTreePathForFile(filePaths[i]); 
+			if (path != null)
+				treePathList.add(path);
+		}
+		
+		fileTree.setSelectionPaths(treePathList.toArray(new TreePath[treePathList.size()]));
+	}
+	
+	// Gets the tree path for a file path.
+	// This may need neatening up at some point 
+	private TreePath getTreePathForFile(File filePath)
 	{
 		filePath = FileUtils.canonizeFile(filePath);
-		String rootPath = fileTree.model().getRoot().toString();
-		String filePathString = filePath.getAbsolutePath();
-		// TODO: Finish this.
+
+		FileNode currentNode = (FileNode)fileTree.model().getRoot();
+		
+		String rootPath = currentNode.toString();
+		String filePathString = filePath.getPath();
+
+		String testPath;
+		int separatorIndex = 0;
+		do {
+			separatorIndex = filePathString.indexOf(File.separator, separatorIndex);
+			if (separatorIndex < 0)
+				return null;
+			testPath = filePathString.substring(0, separatorIndex);
+			separatorIndex += File.separator.length();
+		} while (!rootPath.equalsIgnoreCase(testPath));
+		
+		List<FileNode> treeNodes = new LinkedList<>();
+		treeNodes.add(currentNode);
+		
+		do {
+			separatorIndex = filePathString.indexOf(File.separator, separatorIndex);
+			File nextFile;
+			if (separatorIndex > 0)
+			{
+				nextFile = new File(filePathString.substring(0, separatorIndex));
+				separatorIndex += File.separator.length();
+			}
+			else
+			{
+				nextFile = new File(filePathString);
+			}
+
+			int index = currentNode.getIndex(new FileNode(currentNode, nextFile));
+			if (index >= 0)
+			{
+				FileNode nextNode = (FileNode)currentNode.getChildAt(index);
+				treeNodes.add(nextNode);
+				currentNode = nextNode;
+			}
+			else
+			{
+				return null;
+			}
+
+		} while (separatorIndex > 0);
+		
+		return new TreePath(treeNodes.toArray(new Object[treeNodes.size()]));
 	}
 	
 	/**
@@ -185,22 +260,22 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public void addNewFile(File targetDirectory)
 	{
+		targetDirectory = FileUtils.canonizeFile(targetDirectory);
+
 		int i = 1;
 		File newFile;
 		do {
-			newFile = new File(targetDirectory + File.separator + (i++));
+			newFile = new File(targetDirectory + File.separator + "New File " + (i++));
 		} while (newFile.exists());
 		
-		boolean made = false; 
 		try {
-			FileUtils.touch(newFile);
+			if (FileUtils.touch(newFile))
+				fileTree.startEditingAtPath(getTreePathForFile(FileUtils.canonizeFile(newFile)));
 		} catch (IOException e) {
-			
+			SwingUtils.error(this, language.getText("dirtree.newfile.error.ioerror", e.getLocalizedMessage()));
 		} catch (SecurityException e) {
-			
+			SwingUtils.error(this, language.getText("dirtree.newfile.error.security", e.getLocalizedMessage()));
 		}
-		
-		// TODO: Finish this.
 	}
 	
 	/**
@@ -209,7 +284,22 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public void addNewDirectory(File targetDirectory)
 	{
-		// TODO: Finish this.
+		targetDirectory = FileUtils.canonizeFile(targetDirectory);
+		
+		int i = 1;
+		File newFile;
+		do {
+			newFile = new File(targetDirectory + File.separator + "New Folder " + (i++));
+		} while (newFile.exists());
+		
+		try {
+			if (newFile.mkdir())
+				fileTree.startEditingAtPath(getTreePathForFile(FileUtils.canonizeFile(newFile)));
+			else
+				SwingUtils.error(this, language.getText("dirtree.newdir.error"));
+		} catch (SecurityException e) {
+			SwingUtils.error(this, language.getText("dirtree.newdir.error.security", e.getLocalizedMessage()));
+		}
 	}
 
 
@@ -225,7 +315,7 @@ public class DirectoryTreePanel extends JPanel
 		void onFileConfirmed(File confirmedFile);
 		
 		/**
-		 * Called when a new file is about to be renamed.
+		 * Called when a new file is renamed.
 		 * @param changedFile the file about to be renamed.
 		 * @param newName the new name for the file.
 		 * @return true if the rename was successful.
@@ -281,14 +371,6 @@ public class DirectoryTreePanel extends JPanel
 		}
 		
 		/**
-		 * Refresh the tree.
-		 */
-		public void refresh()
-		{
-			model().reload();
-		}
-		
-		/**
 		 * Sets the new root directory.
 		 * @param rootDirectory the new root directory.
 		 */
@@ -313,12 +395,32 @@ public class DirectoryTreePanel extends JPanel
 		@Override
 		public void mouseClicked(MouseEvent e) 
 		{
-			// Double left-click.
-			if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
+			// Left click.
+			if (e.getButton() == MouseEvent.BUTTON1)
 			{
-				if (directoryTreeListener != null)
-					for (File file : currentlySelectedFiles)
-						directoryTreeListener.onFileConfirmed(file);
+				// Double click.
+				if (e.getClickCount() == 2)
+				{
+					if (directoryTreeListener != null)
+					{
+						TreePath path = fileTree.getClosestPathForLocation(e.getX(), e.getY());
+						if (path != null)
+						{
+							fileTree.setSelectionPath(path);
+							directoryTreeListener.onFileConfirmed(((FileNode)path.getLastPathComponent()).file);
+						}
+					}
+				}
+			}
+			// Right click.
+			else if (e.getButton() == MouseEvent.BUTTON3)
+			{
+				TreePath path = fileTree.getClosestPathForLocation(e.getX(), e.getY());
+				if (path != null)
+				{
+					fileTree.setSelectionPath(path);
+					// TODO: Popup menu.
+				}
 			}
 		}
 
@@ -361,7 +463,7 @@ public class DirectoryTreePanel extends JPanel
 				{
 					File[] files = currentlySelectedFiles.toArray(new File[currentlySelectedFiles.size()]);
 					directoryTreeListener.onFilesDeleted(files);
-					fileTree.refresh();
+					refresh();
 				}
 			}
 			else if (isKeyStroke(copyKeyStroke, e))
@@ -370,7 +472,7 @@ public class DirectoryTreePanel extends JPanel
 				{
 					File[] files = currentlySelectedFiles.toArray(new File[currentlySelectedFiles.size()]);
 					directoryTreeListener.onFilesCopied(files);
-					fileTree.refresh();
+					refresh();
 				}
 			}
 			else if (isKeyStroke(pasteKeyStroke, e))
@@ -402,7 +504,6 @@ public class DirectoryTreePanel extends JPanel
 			{
 				if (event.isAddedPath(i))
 				{
-					System.out.println(paths[i]);
 					File file = ((FileNode)paths[i].getLastPathComponent()).file;
 					currentlySelectedFiles.add(file);
 				}
@@ -500,6 +601,8 @@ public class DirectoryTreePanel extends JPanel
 		public synchronized void refresh()
 		{
 			File[] files = file.listFiles();
+			if (files == null)
+				return;
 			
 			Arrays.sort(files, CHILD_FILE_COMPARATOR);
 			
@@ -588,8 +691,14 @@ public class DirectoryTreePanel extends JPanel
 			// Rename occurred.
 			if (object instanceof String)
 			{
-				if (directoryTreeListener != null)
-					directoryTreeListener.onFileRename(file, String.valueOf(object));
+				File oldFile = new File(file.getPath());
+				File newFile = new File(oldFile.getParent() + File.separator + String.valueOf(object));
+				if (oldFile.renameTo(new File(oldFile.getParent() + File.separator + String.valueOf(object))))
+				{
+					file = newFile;
+					if (directoryTreeListener != null)
+						directoryTreeListener.onFileRename(oldFile, String.valueOf(object));
+				}
 			}
 		}
 
@@ -607,6 +716,20 @@ public class DirectoryTreePanel extends JPanel
 				parent = (FileNode)newParent;
 		}
 
+		@Override
+		public boolean equals(Object obj) 
+		{
+			if (obj instanceof FileNode)
+			{
+				FileNode node = (FileNode)obj;
+				return CHILD_COMPARATOR.compare(this, node) == 0;
+			}
+			else
+			{
+				return super.equals(obj);
+			}
+		}
+		
 		@Override
 		public String toString() 
 		{

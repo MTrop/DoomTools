@@ -65,9 +65,12 @@ public final class DirectoryTreePanelTest
 			)
 		), 
 		(frame) -> {
+			frame.pack();
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			frame.pack();
 		});
+		
+		panel.addNewDirectory(new File("./src"));
+		
 	}
 }
