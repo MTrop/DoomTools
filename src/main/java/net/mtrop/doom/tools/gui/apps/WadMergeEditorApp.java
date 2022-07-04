@@ -49,10 +49,10 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  * The WadScript editor application.
  * @author Matthew Tropiano
  */
-public class WadScriptEditorApp extends DoomToolsApplicationInstance
+public class WadMergeEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptEditorApp.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(WadMergeEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -71,7 +71,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
 	// Referenced Components
 	
-	private WadScriptEditorPanel editorPanel;
+	private WadMergeEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
 
 	private Action runAction;
@@ -88,7 +88,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	/**
 	 * Create a new WadScript application.
 	 */
-	public WadScriptEditorApp() 
+	public WadMergeEditorApp() 
 	{
 		this(null);
 	}
@@ -97,14 +97,14 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	 * Create a new WadScript application.
 	 * @param fileToOpenFirst if not null, open this file on create.
 	 */
-	public WadScriptEditorApp(File fileToOpenFirst) 
+	public WadMergeEditorApp(File fileToOpenFirst) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadScriptSettingsManager.get();
 		this.appCommon = AppCommon.get();
 		
-		this.editorPanel = new WadScriptEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new WadMergeEditorPanel(new MultiFileEditorPanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
@@ -112,7 +112,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 				return true;
 			}
 		}, 
-		new WadScriptEditorPanel.Listener()
+		new WadMergeEditorPanel.Listener()
 		{
 			@Override
 			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next) 
@@ -155,7 +155,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("wadscript.editor.title");
+		return language.getText("wadmerge.editor.title");
 	}
 
 	@Override
@@ -456,18 +456,18 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		if (currentHandle.getContentSourceFile() != null)
 		{
 			File scriptFile = currentHandle.getContentSourceFile();
-			executeWithArgs(scriptFile, currentHandle.getContentCharset(), scriptFile.getParentFile());
+			executeWithArgs(scriptFile, scriptFile.getParentFile());
 		}
 		else
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWithArgs(scriptFile, currentHandle.getContentCharset(), new File(OSUtils.getWorkingDirectoryPath()));
+				executeWithArgs(scriptFile, new File(OSUtils.getWorkingDirectoryPath()));
 			}
 		}
 	}
 
-	private void executeWithArgs(File scriptFile, Charset encoding, File workDir) 
+	private void executeWithArgs(File scriptFile, File workDir) 
 	{
 		ExecutionSettings executionSettings;
 		executionSettings = handleToSettingsMap.get(currentHandle);
@@ -477,7 +477,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, executionSettings);
-		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), executionSettings);
 	}
 	
 	private void onRunAgain()
@@ -529,20 +529,20 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 				out.setArgs(panel.getArgs());
 				return out;
 			},
-			utils.createChoiceFromLanguageKey("wadscript.run.withargs.choice.run", true),
+			utils.createChoiceFromLanguageKey("wadmerge.run.withargs.choice.run", true),
 			utils.createChoiceFromLanguageKey("doomtools.cancel")
 		);
 		
 		return settings;
 	}
 
-	private class WadScriptEditorPanel extends MultiFileEditorPanel
+	private class WadMergeEditorPanel extends MultiFileEditorPanel
 	{
-		private static final long serialVersionUID = -2590465129796097892L;
-
+		private static final long serialVersionUID = 5845859384586630726L;
+		
 		private FileFilter[] TYPES = null;
 		
-		public WadScriptEditorPanel(Options options, Listener listener)
+		public WadMergeEditorPanel(Options options, Listener listener)
 		{
 			super(options, listener);
 		}
@@ -550,7 +550,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected String getDefaultStyleName() 
 		{
-			return DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT;
+			return DoomToolsEditorProvider.SYNTAX_STYLE_WADMERGE;
 		}
 		
 		@Override
@@ -574,7 +574,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected File transformSaveFile(FileFilter selectedFilter, File selectedFile) 
 		{
-			return selectedFilter == getSaveFileTypes()[0] ? FileUtils.addMissingExtension(selectedFile, "wscript") : selectedFile;
+			return selectedFilter == getSaveFileTypes()[0] ? FileUtils.addMissingExtension(selectedFile, "wadm") : selectedFile;
 		}
 		
 	}

@@ -522,6 +522,14 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
+	 * @return the WadMerge file filter.
+	 */
+	public FileFilter getWadMergeFileFilter()
+	{
+		return fileExtensionFilter("WadMerge (*.wadm/*.wadmerge)", "wadm", "wadmerge");
+	}
+	
+	/**
 	 * @return the DECOHack file filter.
 	 */
 	public FileFilter getDecoHackFileFilter()

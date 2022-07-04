@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -13,6 +14,7 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DecoHackCompilerSettingsManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -40,11 +42,13 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 	private DecoHackCompilerSettingsManager settings;
+	private DoomToolsEditorProvider editorProvider;
 	private AppCommon appCommon;
 	
 	// Referenced Components
 	
 	private JFormField<File> sourceFileField;
+	private JFormField<Charset> charsetField;
 	private WadScriptExecuteWithArgsPanel executePanel;
 	private DoomToolsStatusPanel statusPanel;
 
@@ -65,6 +69,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DecoHackCompilerSettingsManager.get();
+		this.editorProvider = DoomToolsEditorProvider.get();
 		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
@@ -95,6 +100,10 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 					executePanel.setWorkingDirectory(null);
 			}
 		);
+		
+		this.charsetField = comboField(comboBox(editorProvider.getAvailableCommonCharsets()));
+		this.charsetField.setValue(Charset.defaultCharset());
+		
 		this.executePanel = new WadScriptExecuteWithArgsPanel(settings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
@@ -111,6 +120,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
 			node(BorderLayout.NORTH, form(language.getInteger("wadscript.run.withargs.label.width"))
 				.addField(language.getText("wadscript.run.withargs.source"), sourceFileField)
+				.addField(language.getText("wadscript.run.withargs.charset"), charsetField)
 			),
 			node(BorderLayout.CENTER, executePanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
@@ -174,6 +184,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 		
 		File sourceFile = sourceFileField.getValue();
+		Charset encoding = charsetField.getValue(); 
 		
 		File workingDirectory = executePanel.getWorkingDirectory();
 		File standardInPath = executePanel.getStandardInPath();
@@ -182,6 +193,8 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		
 		if (sourceFile != null)
 			state.put("executor.source", sourceFile.getAbsolutePath());
+		if (encoding != null)
+			state.put("executor.charset", encoding.displayName());
 		if (workingDirectory != null)
 			state.put("executor.workdir", workingDirectory.getAbsolutePath());
 		if (standardInPath != null)
@@ -204,6 +217,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		final Function<String, File> parseFile = (value) -> ObjectUtils.isEmpty(value) ? null : FileUtils.canonizeFile(new File(value));
 
 		sourceFileField.setValue(ValueUtils.parse(state.get("executor.source"), parseFile));
+		charsetField.setValue(ValueUtils.parse(state.get("executor.charset"), (value) -> Charset.forName(value)));
 		
 		executePanel.setWorkingDirectory(ValueUtils.parse(state.get("executor.workdir"), parseFile));
 		executePanel.setStandardInPath(ValueUtils.parse(state.get("executor.stdin"), parseFile));
@@ -217,12 +231,13 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	private void onRun()
 	{
 		File scriptFile = sourceFileField.getValue();
+		Charset encoding = charsetField.getValue();
 		ExecutionSettings executionSettings = new ExecutionSettings();
 		executionSettings.setWorkingDirectory(executePanel.getWorkingDirectory());
 		executionSettings.setStandardInPath(executePanel.getStandardInPath());
 		executionSettings.setEntryPoint(executePanel.getEntryPoint());
 		executionSettings.setArgs(executePanel.getArgs());
-		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, executionSettings);
+		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 }

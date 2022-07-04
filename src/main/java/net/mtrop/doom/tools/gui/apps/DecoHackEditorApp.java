@@ -486,8 +486,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
-
-		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, processSettings);
+		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), processSettings);
 	}
 
 	private ExportSettings createExportSettings(File sourceFile, final ExportSettings initSettings) 

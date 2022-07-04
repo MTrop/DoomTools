@@ -424,6 +424,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stderr:OBJECTREF(OutputStream)",
 							"stdin:OBJECTREF(InputStream)",
 							"inputfile:OBJECTREF(File)",
+							"inputCharsetName:STRING",
 							"args:LIST[STRING, ...]",
 							"usestdin:BOOLEAN",
 							"verbose:BOOLEAN"

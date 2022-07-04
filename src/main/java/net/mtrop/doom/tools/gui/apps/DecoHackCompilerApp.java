@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -12,6 +13,7 @@ import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.WadScriptExecutorSettingsManager;
@@ -40,11 +42,13 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 	private WadScriptExecutorSettingsManager settings;
+	private DoomToolsEditorProvider editorProvider;
 	private AppCommon appCommon;
 	
 	// Referenced Components
 	
 	private JFormField<File> sourceFileField;
+	private JFormField<Charset> charsetField;
 	private DecoHackExportPanel exportPanel;
 	private DoomToolsStatusPanel statusPanel;
 
@@ -65,6 +69,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadScriptExecutorSettingsManager.get();
+		this.editorProvider = DoomToolsEditorProvider.get();
 		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
@@ -95,6 +100,10 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 					exportPanel.setPatchOutput(null);
 			}
 		);
+
+		this.charsetField = comboField(comboBox(editorProvider.getAvailableCommonCharsets()));
+		this.charsetField.setValue(Charset.defaultCharset());
+		
 		this.exportPanel = new DecoHackExportPanel(settings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
@@ -111,6 +120,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		return containerOf(dimension(400, 200), borderLayout(0, 4), 
 			node(BorderLayout.NORTH, form(language.getInteger("decohack.export.label.width"))
 				.addField(language.getText("decohack.export.source"), sourceFileField)
+				.addField(language.getText("decohack.export.charset"), charsetField)
 			),
 			node(BorderLayout.CENTER, exportPanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
@@ -174,12 +184,15 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 		
 		File sourceFile = sourceFileField.getValue();
+		Charset encoding = charsetField.getValue(); 
 		File patchOut = exportPanel.getPatchOutput();
 		File sourceOut = exportPanel.getSourceOutput();
 		boolean budget = exportPanel.getBudget();
 		
 		if (sourceFile != null)
 			state.put("export.source", sourceFile.getAbsolutePath());
+		if (encoding != null)
+			state.put("export.charset", encoding.displayName());
 		if (patchOut != null)
 			state.put("export.patch", patchOut.getAbsolutePath());
 		if (sourceOut != null)
@@ -195,6 +208,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	{
 		Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
 		sourceFileField.setValue(ValueUtils.parse(state.get("export.source"), parseFile));
+		charsetField.setValue(ValueUtils.parse(state.get("export.charset"), (value) -> Charset.forName(value)));
 		exportPanel.setPatchOutput(ValueUtils.parse(state.get("export.patch"), parseFile));
 		exportPanel.setSourceOutput(ValueUtils.parse(state.get("export.outsource"), parseFile));
 		exportPanel.setBudget(ValueUtils.parseBoolean(state.get("export.budget"), false));
@@ -205,11 +219,12 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	private void onRun()
 	{
 		File scriptFile = sourceFileField.getValue();
+		Charset encoding = charsetField.getValue();
 		ExportSettings exportSettings = new ExportSettings();
 		exportSettings.setOutputFile(exportPanel.getPatchOutput());
 		exportSettings.setSourceOutputFile(exportPanel.getSourceOutput());
 		exportSettings.setOutputBudget(exportPanel.getBudget());
-		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
+		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, encoding, exportSettings);
 	}
 
 }

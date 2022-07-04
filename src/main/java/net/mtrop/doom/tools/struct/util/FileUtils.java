@@ -839,7 +839,7 @@ public final class FileUtils
 		}
 		
 		@Override
-		public void close() throws Exception 
+		public void close()
 		{
 			if (exists())
 				delete();

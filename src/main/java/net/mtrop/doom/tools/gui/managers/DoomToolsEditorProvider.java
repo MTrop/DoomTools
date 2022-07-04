@@ -343,6 +343,11 @@ public final class DoomToolsEditorProvider
 			return styleName;
 		
 		String ext = FileUtils.getFileExtension(fileName);
+		
+		// special case - DoomMake files that start with "merge-" and end in ".txt" are WadMerge files.
+		if ("txt".equalsIgnoreCase(ext) && fileName.substring(0, 6).equalsIgnoreCase("merge-"))
+			return SYNTAX_STYLE_WADMERGE;
+		
 		if ((styleName = EXTENSION_TO_STYLE_MAP.get(ext)) != null)
 			return styleName;
 

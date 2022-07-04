@@ -57,6 +57,8 @@ import net.mtrop.doom.tools.struct.util.StringUtils;
  */
 public final class DoomMakeMain 
 {
+	// TODO: Add charset to project properties file, use for script execution
+	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;

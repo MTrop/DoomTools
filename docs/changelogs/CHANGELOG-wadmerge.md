@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.8.0
+
+* `Added` A `--charset` switch for specifying the encoding of the script files (if not system default).
+
+
 ### Changed for 1.7.0
 
 * `Added` `FILECHARSUB` command for declaring filename character substitutions on import.

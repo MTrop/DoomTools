@@ -14,6 +14,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,6 +44,9 @@ public final class WadMergeMain
 	public static final String SWITCH_VERBOSE2 = "-v";
 	public static final String SWITCH_VERSION = "--version";
 
+	public static final String SWITCH_CHARSET1 = "--charset";
+	public static final String SWITCH_CHARSET2 = "-c";
+
 	public static final String SWITCH_SYSTEMIN = "--";
 	
 	/**
@@ -57,6 +63,7 @@ public final class WadMergeMain
 		private boolean verbose;
 		private boolean useStdin;
 		private File inputFile;
+		private Charset inputCharset;
 		private List<String> args;
 		
 		private Options()
@@ -69,6 +76,7 @@ public final class WadMergeMain
 			this.verbose = false;
 			this.useStdin = false;
 			this.inputFile = new File("wadmerge.txt");
+			this.inputCharset = Charset.defaultCharset();
 			this.args = new LinkedList<>();
 		}
 
@@ -105,6 +113,16 @@ public final class WadMergeMain
 		public Options setInputFile(File inputFile) 
 		{
 			this.inputFile = inputFile;
+			return this;
+		}
+		
+		public Options setInputCharsetName(String inputCharsetName) 
+		{
+			try {
+				this.inputCharset = inputCharsetName != null ? Charset.forName(inputCharsetName) : Charset.defaultCharset();
+			} catch (Exception e) {
+				this.inputCharset = Charset.defaultCharset();
+			}
 			return this;
 		}
 		
@@ -151,13 +169,13 @@ public final class WadMergeMain
 			if (options.useStdin)
 			{
 				streamName = "STDIN";
-				reader = new BufferedReader(new InputStreamReader(options.stdin));
+				reader = new BufferedReader(new InputStreamReader(options.stdin, options.inputCharset));
 			}
 			else
 			{
 				try
 				{
-					reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.inputFile)));
+					reader = new BufferedReader(new InputStreamReader(new FileInputStream(options.inputFile), options.inputCharset));
 					streamName = options.inputFile.getPath();
 				}
 				catch (FileNotFoundException e)
@@ -208,29 +226,55 @@ public final class WadMergeMain
 		options.stderr = err;
 		options.stdin = in;
 		
+		final int STATE_START = 0;
+		final int STATE_SWITCHES_CHARSET = 1;
+		int state = STATE_START;
+
 		boolean sawInput = false;
-		int i = 0;
-		while (i < args.length)
+		for (int i = 0; i < args.length; i++)
 		{
 			String arg = args[i];
-			
-			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.help = true;
-			else if (arg.equals(SWITCH_VERBOSE) || arg.equals(SWITCH_VERBOSE2))
-				options.verbose = true;
-			else if (arg.equals(SWITCH_VERSION))
-				options.version = true;
-			else if (arg.equals(SWITCH_SYSTEMIN))
-				options.useStdin = true;
-			else if (!sawInput)
+			switch (state)
 			{
-				options.inputFile = new File(arg);
-				sawInput = true;
+				case STATE_START:
+				{
+					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+						options.help = true;
+					else if (arg.equals(SWITCH_VERBOSE) || arg.equals(SWITCH_VERBOSE2))
+						options.verbose = true;
+					else if (arg.equals(SWITCH_VERSION))
+						options.version = true;
+					else if (arg.equals(SWITCH_SYSTEMIN))
+						options.useStdin = true;
+					else if (SWITCH_CHARSET1.equalsIgnoreCase(arg) || SWITCH_CHARSET2.equalsIgnoreCase(arg))
+						state = STATE_SWITCHES_CHARSET;
+					else if (!sawInput)
+					{
+						options.inputFile = new File(arg);
+						sawInput = true;
+					}
+					else
+						options.args.add(arg);
+				}
+				break;
+
+				case STATE_SWITCHES_CHARSET:
+				{
+					try {
+						options.inputCharset = Charset.forName(arg);
+					} catch (IllegalCharsetNameException e) {
+						throw new OptionParseException("ERROR: Unknown charset name: " + arg);
+					} catch (UnsupportedCharsetException e) {
+						throw new OptionParseException("ERROR: Unsupported charset name: " + arg);
+					}
+					state = STATE_START;
+				}
+				break;
 			}
-			else
-				options.args.add(arg);
-			i++;
 		}
+		
+		if (state == STATE_SWITCHES_CHARSET)
+			throw new OptionParseException("ERROR: Expected charset name after charset switch.");
 		
 		return options;
 	}

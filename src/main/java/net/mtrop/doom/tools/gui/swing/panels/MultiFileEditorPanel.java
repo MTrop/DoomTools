@@ -74,6 +74,7 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EncodingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -640,7 +641,7 @@ public class MultiFileEditorPanel extends JPanel
 			if ((editorFile = handle.contentSourceFile) == null)
 				chooseAndSaveFile(handle);
 			else
-				saveEditorToFile(handle, editorFile);
+				saveEditorToFile(handle, editorFile, false);
 		}
 	}
 
@@ -995,7 +996,6 @@ public class MultiFileEditorPanel extends JPanel
 		// ==================================================================
 		
 		defaultViewSettings.apply(textArea);
-		codeSettings.apply(textArea);
 		currentTheme.apply(textArea);
 		
 		setEditorViewSettingsByContent(textArea, originalContent);
@@ -1012,7 +1012,10 @@ public class MultiFileEditorPanel extends JPanel
 			allOpenFiles.add(attachedFile);
 
 		mainEditorTabs.addTab(null, handle.editorPanel);
-		
+
+		// some settings do not apply properly until the text area is added to the layout
+		codeSettings.apply(textArea);
+
 		// The tab just added will be at the end.
 		int tabIndex = mainEditorTabs.getTabCount() - 1;
 		mainEditorTabs.setTabComponentAt(tabIndex, handle.editorTab);
@@ -1152,7 +1155,7 @@ public class MultiFileEditorPanel extends JPanel
 		if (editorFile.exists() && SwingUtils.noTo(this, language.getText("texteditor.action.save.overwrite", editorFile)))
 			return false;
 		
-		return saveEditorToFile(handle, editorFile);
+		return saveEditorToFile(handle, editorFile, false);
 	}
 
 	private void removeEditorByFile(File file)
@@ -1382,7 +1385,7 @@ public class MultiFileEditorPanel extends JPanel
 		}
 		else if (currentEditor.needsToSave())
 		{
-			return saveEditorToFile(handle, editorFile);
+			return saveEditorToFile(handle, editorFile, false);
 		}
 		else
 		{
@@ -1390,7 +1393,7 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	}
 
-	private boolean saveEditorToFile(EditorHandle handle, File targetFile)
+	private boolean saveEditorToFile(EditorHandle handle, File targetFile, boolean skipEvent)
 	{
 		targetFile = FileUtils.canonizeFile(targetFile);
 		
@@ -1409,11 +1412,15 @@ public class MultiFileEditorPanel extends JPanel
 			return false;
 		}
 		
-		handle.onSaveChange(targetFile);
-		updateActionStates();
+		if (!skipEvent)
+		{
+			handle.onSaveChange(targetFile);
+			updateActionStates();
+			
+			if (listener != null)
+				listener.onSave(handle);
+		}
 		
-		if (listener != null)
-			listener.onSave(handle);
 		return true;
 	}
 
@@ -1977,11 +1984,29 @@ public class MultiFileEditorPanel extends JPanel
 		}
 	
 		/**
+		 * @return the editor charset encoding.
+		 */
+		public Charset getContentCharset() 
+		{
+			return contentCharset;
+		}
+		
+		/**
 		 * @return true if this editor has unsaved data.
 		 */
 		public boolean needsToSave()
 		{
 			return contentLastModified > contentSourceFileLastModified;
+		}
+		
+		/**
+		 * Creates a temp file with the editor contents and returns it.
+		 * @return the TempFile with the editor data.
+		 */
+		public TempFile createTempCopy()
+		{
+			TempFile out = FileUtils.createTempFile();
+			return saveEditorToFile(this, out, true) ? out : null;
 		}
 		
 		private void updateActions()
@@ -2024,6 +2049,7 @@ public class MultiFileEditorPanel extends JPanel
 			remapFileTabs(contentSourceFile, path);
 			contentSourceFile = path;
 			contentSourceFileLastModified = path.lastModified();
+			updateFilePathLabel();
 			updateIcon();
 			updateActions();
 		}

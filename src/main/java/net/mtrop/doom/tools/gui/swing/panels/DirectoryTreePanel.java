@@ -6,7 +6,6 @@ import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -25,7 +24,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.DropMode;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
@@ -1003,6 +1001,7 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private class FileTransferTreeHandler extends TransferHandler
 	{
+		private static final long serialVersionUID = -2253220534002536924L;
 
 		@Override
 		public boolean canImport(TransferSupport support) 
