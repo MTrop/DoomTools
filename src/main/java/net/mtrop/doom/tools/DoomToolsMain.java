@@ -312,7 +312,7 @@ public final class DoomToolsMain
 				@Override
 				public void onDownloadFinish() 
 				{
-					// Do nothing.
+					options.stdout.println();
 				}
 
 				@Override

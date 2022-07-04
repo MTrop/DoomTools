@@ -520,6 +520,8 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onDeleteSelectedFiles()
 	{
+		
+		
 		// TODO: Ask to confirm.
 		// TODO: Delete files / directories.
 		// TODO: For each deleted, remove node from tree.
