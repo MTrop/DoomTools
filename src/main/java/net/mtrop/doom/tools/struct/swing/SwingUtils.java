@@ -28,12 +28,12 @@ public final class SwingUtils
 	private SwingUtils() {}
 	
 	/** Desktop instance. */
-	private static Desktop desktopInstance;
+	private static final Desktop DESKTOP;
 
 	static
 	{
 		if (Desktop.isDesktopSupported());
-			desktopInstance = Desktop.getDesktop();
+			DESKTOP = Desktop.getDesktop();
 	}
 
 	/**
@@ -249,9 +249,9 @@ public final class SwingUtils
 	 */
 	public static boolean open(File file) throws IOException
 	{
-		if (desktopInstance != null && desktopInstance.isSupported(Desktop.Action.OPEN))
+		if (DESKTOP != null && DESKTOP.isSupported(Desktop.Action.OPEN))
 		{
-			desktopInstance.open(file);
+			DESKTOP.open(file);
 			return true;
 		}
 		return false;
@@ -266,9 +266,9 @@ public final class SwingUtils
 	 */
 	public static boolean browse(URI uri) throws IOException
 	{
-		if (desktopInstance != null && desktopInstance.isSupported(Desktop.Action.BROWSE))
+		if (DESKTOP != null && DESKTOP.isSupported(Desktop.Action.BROWSE))
 		{
-			desktopInstance.browse(uri);
+			DESKTOP.browse(uri);
 			return true;
 		}
 		return false;
@@ -283,9 +283,9 @@ public final class SwingUtils
 	 */
 	public static boolean mail(URI uri) throws IOException
 	{
-		if (desktopInstance != null && desktopInstance.isSupported(Desktop.Action.MAIL))
+		if (DESKTOP != null && DESKTOP.isSupported(Desktop.Action.MAIL))
 		{
-			desktopInstance.mail(uri);
+			DESKTOP.mail(uri);
 			return true;
 		}
 		return false;

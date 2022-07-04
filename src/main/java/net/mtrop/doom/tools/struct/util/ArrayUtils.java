@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.struct.util;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Consumer;
 
@@ -146,6 +147,20 @@ public final class ArrayUtils
 		return -1;
 	}
 
+	/**
+	 * Fetches all items in a collection an an array of items.
+	 * @param <T> the item type.
+	 * @param <C> the collection type.
+	 * @param collection the collection to use.
+	 * @param type the the encapsulated type.
+	 * @return a new array of items from the collection.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, C extends Collection<T>> T[] items(C collection, Class<T> type)
+	{
+		return collection.toArray((T[])Array.newInstance(type, collection.size()));
+	}
+	
 	/**
 	 * Returns a new (safe) array reference that contains all of the passed-in elements in order.
 	 * @param <T> the object type in the array.

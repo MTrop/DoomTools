@@ -49,10 +49,9 @@ public final class DirectoryTreePanelTest
 			}
 
 			@Override
-			public boolean onFileRename(File changedFile, String newName) 
+			public void onFileRename(File changedFile, String newName) 
 			{
 				System.out.println("RENAME: " + changedFile + " -> " + newName);
-				return false;
 			}
 		});
 		
@@ -60,7 +59,7 @@ public final class DirectoryTreePanelTest
 
 		ObjectUtils.apply(frame("Test",
 			containerOf(
-				node(BorderLayout.NORTH, button("Refresh", (c,e) -> panel.setSelectedFile(new File("src/test/java/net")))),
+				node(BorderLayout.NORTH, button("Refresh", (c,e) -> panel.refresh())),
 				node(BorderLayout.CENTER, panel)
 			)
 		), 

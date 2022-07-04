@@ -2066,7 +2066,7 @@ public class MultiFileEditorPanel extends JPanel
 				return false;
 			} 
 			
-			for (final File f : files)
+			for (File f : files)
 			{
 				try {
 					openFileEditor(f, defaultViewSettings.getDefaultEncoding());
