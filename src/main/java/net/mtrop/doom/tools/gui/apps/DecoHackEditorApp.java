@@ -364,13 +364,11 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	{
 		if (currentHandle != null)
 		{
-			@SuppressWarnings("unused")
-			boolean hasFile = currentHandle.getContentSourceFile() != null;
-			// Do nothing?
+			// Do nothing.
 		}
 		else
 		{
-			// Do nothing?
+			// Do nothing.
 		}
 
 	}

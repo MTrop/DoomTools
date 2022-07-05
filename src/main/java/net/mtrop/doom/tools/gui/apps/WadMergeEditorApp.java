@@ -430,11 +430,11 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	
 	private boolean saveBeforeExecute()
 	{
-		final Container parent = getApplicationContainer();
-
 		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
-			Boolean saveChoice = modal(parent, utils.getWindowIcons(), 
+			Boolean saveChoice = modal(
+				getApplicationContainer(), 
+				utils.getWindowIcons(), 
 				language.getText("wadmerge.run.save.modal.title"),
 				containerOf(label(language.getText("wadmerge.run.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
