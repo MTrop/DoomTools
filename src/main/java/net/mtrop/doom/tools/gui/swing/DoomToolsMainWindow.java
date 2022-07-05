@@ -37,13 +37,15 @@ import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsSettingsPanel;
@@ -278,17 +280,21 @@ public class DoomToolsMainWindow extends JFrame
 
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (c, e) -> addApplication(new DecoHackCompilerApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (c, e) -> addApplication(new DecoHackEditorApp()))
+				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (c, e) -> addApplication(new DoomMakeNewProjectApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (c, e) -> openDoomMakeProject())
 				),
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.execute", (c, e) -> addApplication(new WadMergeExecutorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.editor", (c, e) -> addApplication(new WadMergeEditorApp()))
+				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (c, e) -> addApplication(new WadScriptExecutorApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (c, e) -> addApplication(new WadScriptEditorApp()))
-				),
-				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (c, e) -> addApplication(new DecoHackCompilerApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (c, e) -> addApplication(new DecoHackEditorApp()))
 				)
 			),
 

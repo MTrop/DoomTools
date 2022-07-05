@@ -62,7 +62,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 		ComponentActionHandler<JButton> vsCodeAction = (component, event) -> 
 		{
 			try {
-				helper.openVSCode(projectDirectory);
+				helper.openIDE(projectDirectory);
 			} catch (ProcessCallException e) {
 				SwingUtils.error(component, e.getMessage());
 			} catch (RequiredSettingException e) {

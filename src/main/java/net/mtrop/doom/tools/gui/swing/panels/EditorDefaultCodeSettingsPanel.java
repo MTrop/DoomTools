@@ -3,7 +3,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.EditorSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;

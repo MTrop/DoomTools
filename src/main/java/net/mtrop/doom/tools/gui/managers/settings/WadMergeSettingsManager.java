@@ -1,10 +1,11 @@
-package net.mtrop.doom.tools.gui.managers;
+package net.mtrop.doom.tools.gui.managers.settings;
 
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.io.File;
 
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 
@@ -12,18 +13,18 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  * WadScript GUI settings singleton.
  * @author Matthew Tropiano
  */
-public final class WadScriptSettingsManager extends DoomToolsSettings
+public final class WadMergeSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wadscript.properties";
+    private static final String SETTINGS_FILENAME = "wadmerge.properties";
 
     /** The instance encapsulator. */
-    private static final SingletonProvider<WadScriptSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadScriptSettingsManager());
+    private static final SingletonProvider<WadMergeSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadMergeSettingsManager());
     
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static WadScriptSettingsManager get()
+	public static WadMergeSettingsManager get()
 	{
 		return INSTANCE.get();
 	}
@@ -34,9 +35,9 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 
 	/* ==================================================================== */
 
-	private WadScriptSettingsManager()
+	private WadMergeSettingsManager()
 	{
-		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WadScriptSettingsManager.class));
+		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WadMergeSettingsManager.class));
 	}
 	
 	/**

@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -16,6 +19,7 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
@@ -40,7 +44,10 @@ public final class DoomMakeProjectHelper
 	}
 	
 	/* ==================================================================== */
-	
+
+    private static final String PROPERTY_ENCODING = "doommake.project.encoding"; 
+
+	private DoomToolsLanguageManager language;
 	private DoomMakeSettingsManager settings;
 	
 	private DoomMakeProjectHelper()
@@ -90,35 +97,51 @@ public final class DoomMakeProjectHelper
 	}
 	
 	/**
-	 * Opens VSCode for the project folder.
+	 * Opens an IDE for the project folder.
 	 * @param projectDirectory the project directory.
 	 * @return true.
 	 * @throws FileNotFoundException if the provided file does not exist or is not a directory.
 	 * @throws ProcessCallException if the process could not be started.
 	 * @throws RequiredSettingException if a missing or bad setting is preventing the call from succeeding.
 	 */
-	public boolean openVSCode(File projectDirectory) throws ProcessCallException, RequiredSettingException, FileNotFoundException
+	public boolean openIDE(File projectDirectory) throws ProcessCallException, RequiredSettingException, FileNotFoundException
 	{
 		checkProjectDirectory(projectDirectory);
 		
-		File vsCodePath = settings.getPathToVSCode();
-		if (vsCodePath == null)
-			throw new RequiredSettingException("The path to VSCode is not configured. Cannot open VSCode.");
-		if (!vsCodePath.exists())
-			throw new RequiredSettingException("The path to VSCode could not be found. Cannot open VSCode.");
-		if (vsCodePath.isDirectory())
-			throw new RequiredSettingException("The path to VSCode is not a file. Cannot open VSCode.");
+		File idePath = settings.getPathToVSCode();
+		if (idePath == null)
+			throw new RequiredSettingException("The path to IDE is not configured. Cannot open IDE.");
+		if (!idePath.exists())
+			throw new RequiredSettingException("The path to IDE could not be found. Cannot open IDE.");
+		if (idePath.isDirectory())
+			throw new RequiredSettingException("The path to IDE is not a file. Cannot open IDE.");
 		
 		try {
-			ProcessCallable.create(vsCodePath.getAbsolutePath(), projectDirectory.getAbsolutePath()).exec();
+			ProcessCallable.create(idePath.getAbsolutePath(), projectDirectory.getAbsolutePath()).exec();
 			return true;
 		} catch (SecurityException e) {
-			throw new ProcessCallException("VSCode could not be started. Operating system prevented the call.", e);
+			throw new ProcessCallException("IDE could not be started. Operating system prevented the call.", e);
 		} catch (IOException e) {
-			throw new ProcessCallException("VSCode could not be started.", e);
+			throw new ProcessCallException("IDE could not be started.", e);
 		}
 	}
 	
+	/**
+	 * Gets the project encoding.
+	 * @param projectDirectory the project directory.
+	 * @return the encoding charset.
+	 */
+	public Charset getProjectEncoding(File projectDirectory)
+	{
+		Properties props = getProjectProperties(projectDirectory);
+		String encodingName = props.getProperty(PROPERTY_ENCODING);
+		try {
+			return ObjectUtils.isEmpty(encodingName) ? Charset.defaultCharset() : Charset.forName(encodingName);
+		} catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
+			return Charset.defaultCharset();
+		}
+	}
+
 	/**
 	 * Gets a file path for a project's path that is in 
 	 * @param projectDirectory the project directory.

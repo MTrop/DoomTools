@@ -23,7 +23,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.WadScriptSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.WadScriptSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
@@ -57,6 +57,13 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
 	private static final String EMPTY_SCRIPT = (new StringBuilder())
+		.append("/*****************************************************************************\n")
+		.append(" * WadScript Script File\n")
+		.append(" *****************************************************************************/\n")
+		.append("\n")
+		.append("/**\n")
+		.append(" * Main entry point.\n")
+		.append(" */\n")
 		.append("entry main(args) {\n")
 		.append("\n")
 		.append("}\n")
@@ -170,7 +177,10 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonFileMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("wadscript.menu.file.item.new", (c, e) -> onNewEditor()),
+			utils.createItemFromLanguageKey("wadscript.menu.file.item.new",
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
+			),
 			utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> onOpenEditor()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
@@ -379,6 +389,12 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	{
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
 		editorPanel.newEditor(editorName, EMPTY_SCRIPT, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
+	}
+	
+	private void onNewBlankEditor()
+	{
+		String editorName = "New " + NEW_COUNTER.getAndIncrement();
+		editorPanel.newEditor(editorName, "", Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT, 0);
 	}
 	
 	private void onOpenEditor()

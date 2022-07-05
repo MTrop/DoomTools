@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.GUIThemeType;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;

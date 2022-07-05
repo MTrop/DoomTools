@@ -1,10 +1,11 @@
-package net.mtrop.doom.tools.gui.managers;
+package net.mtrop.doom.tools.gui.managers.settings;
 
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.io.File;
 
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 

@@ -1,6 +1,7 @@
-package net.mtrop.doom.tools.gui.managers;
+package net.mtrop.doom.tools.gui.managers.settings;
 
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;

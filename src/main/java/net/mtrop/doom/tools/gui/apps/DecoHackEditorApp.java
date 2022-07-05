@@ -22,11 +22,11 @@ import javax.swing.filechooser.FileFilter;
 import net.mtrop.doom.tools.decohack.DecoHackPatchType;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
-import net.mtrop.doom.tools.gui.managers.DecoHackSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.settings.DecoHackSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
@@ -60,6 +60,10 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
 	private static final String EMPTY_PATCH = (new StringBuilder())
+		.append("/*****************************************************************************\n")
+		.append(" * DECOHack Main Patch\n")
+		.append(" *****************************************************************************/\n")
+		.append("\n")
 		.append("#include <{{PATCH_TYPE}}>\n")
 		.append("#include <friendly>\n")
 		.append("\n")

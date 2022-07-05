@@ -4417,7 +4417,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Return the exporter for the patch.
 	private DecoHackParser(String streamName, InputStream in, Charset inputCharset)
 	{
-		super(new DecoHackLexer(streamName, new InputStreamReader(in, inputCharset), inputCharset));
+		super(new DecoHackLexer(streamName, in != null ? new InputStreamReader(in, inputCharset) : null, inputCharset));
 		this.warnings = new LinkedList<>();
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);

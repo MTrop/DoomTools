@@ -5,8 +5,8 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
-import net.mtrop.doom.tools.gui.managers.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 
 import static javax.swing.BorderFactory.createEmptyBorder;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;

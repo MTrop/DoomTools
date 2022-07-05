@@ -7,7 +7,7 @@ import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
- * DoomTools GUI pre-warming .
+ * DoomTools GUI pre-warming singleton.
  * @author Matthew Tropiano
  */
 public final class DoomToolsGUIPreWarmer 
@@ -50,6 +50,8 @@ public final class DoomToolsGUIPreWarmer
 		tasks.spawn(() -> {
 			DoomToolsEditorProvider editorProvider = DoomToolsEditorProvider.get();
 			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DECOHACK);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI);
+			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX);
 			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_DOOMMAKE);
 			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_ROOKSCRIPT);
 			editorProvider.getProviderByStyle(DoomToolsEditorProvider.SYNTAX_STYLE_WADMERGE);

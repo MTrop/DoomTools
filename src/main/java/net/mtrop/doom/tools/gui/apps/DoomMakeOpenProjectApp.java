@@ -29,7 +29,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.gui.managers.DoomMakeSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectControlPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectTargetListPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
