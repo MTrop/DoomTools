@@ -16,6 +16,8 @@ import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
@@ -249,6 +251,20 @@ public final class DoomToolsGUIMain
 							else
 								SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 						}
+						break;
+					}
+
+					case ApplicationNames.WADMERGE:
+					{
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+						break;
+					}
+
+					case ApplicationNames.WADMERGE_EXECUTOR:
+					{
+						String path = ArrayUtils.arrayElement(args, 1);
+						startApplication(new WadMergeExecutorApp(path));
 						break;
 					}
 

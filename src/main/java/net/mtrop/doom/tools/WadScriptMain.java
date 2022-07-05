@@ -61,6 +61,7 @@ import net.mtrop.doom.tools.struct.HTMLWriter;
 import net.mtrop.doom.tools.struct.PreprocessorLexer;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
 import net.mtrop.doom.tools.wadscript.UtilityFunctions;
@@ -816,7 +817,7 @@ public final class WadScriptMain
 		public Options setScriptCharsetName(String scriptCharsetName) 
 		{
 			try {
-				this.scriptCharset = scriptCharsetName != null ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
+				this.scriptCharset = ObjectUtils.isEmpty(scriptCharsetName) ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
 			} catch (Exception e) {
 				this.scriptCharset = Charset.defaultCharset();
 			}
@@ -1210,6 +1211,8 @@ public final class WadScriptMain
 			out.println("[switches]:");
 			out.println("    --help, -h                   Prints this help.");
 			out.println("    --version                    Prints the version of this utility.");
+			out.println("    --gui                        Starts the GUI version of this program.");
+			out.println();
 			out.println("    --function-help              Prints all available function usages.");
 			out.println("    --function-help-markdown     Prints all available function usages in");
 			out.println("                                     Markdown format.");

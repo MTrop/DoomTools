@@ -7,9 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -45,13 +42,12 @@ public final class DoomMakeProjectHelper
 	
 	/* ==================================================================== */
 
-    private static final String PROPERTY_ENCODING = "doommake.project.encoding"; 
-
-	private DoomToolsLanguageManager language;
+	//private DoomToolsLanguageManager language;
 	private DoomMakeSettingsManager settings;
 	
 	private DoomMakeProjectHelper()
 	{
+		//this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomMakeSettingsManager.get();
 	}
 
@@ -126,22 +122,6 @@ public final class DoomMakeProjectHelper
 		}
 	}
 	
-	/**
-	 * Gets the project encoding.
-	 * @param projectDirectory the project directory.
-	 * @return the encoding charset.
-	 */
-	public Charset getProjectEncoding(File projectDirectory)
-	{
-		Properties props = getProjectProperties(projectDirectory);
-		String encodingName = props.getProperty(PROPERTY_ENCODING);
-		try {
-			return ObjectUtils.isEmpty(encodingName) ? Charset.defaultCharset() : Charset.forName(encodingName);
-		} catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
-			return Charset.defaultCharset();
-		}
-	}
-
 	/**
 	 * Gets a file path for a project's path that is in 
 	 * @param projectDirectory the project directory.

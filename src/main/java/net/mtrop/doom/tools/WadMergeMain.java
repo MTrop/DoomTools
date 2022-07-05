@@ -23,6 +23,9 @@ import java.util.concurrent.Callable;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
 
@@ -36,6 +39,7 @@ public final class WadMergeMain
 	private static final int ERROR_BAD_INPUT_FILE = 1;
 	private static final int ERROR_BAD_SCRIPT = 2;
 	private static final int ERROR_BAD_OPTIONS = 3;
+	private static final int ERROR_IOERROR = 4;
 	private static final int ERROR_UNKNOWN = -1;
 
 	public static final String SWITCH_HELP = "--help";
@@ -43,6 +47,7 @@ public final class WadMergeMain
 	public static final String SWITCH_VERBOSE = "--verbose";
 	public static final String SWITCH_VERBOSE2 = "-v";
 	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_GUI = "--gui";
 
 	public static final String SWITCH_CHARSET1 = "--charset";
 	public static final String SWITCH_CHARSET2 = "-c";
@@ -61,6 +66,8 @@ public final class WadMergeMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean gui;
+		
 		private boolean useStdin;
 		private File inputFile;
 		private Charset inputCharset;
@@ -74,6 +81,7 @@ public final class WadMergeMain
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
+			this.gui = false;
 			this.useStdin = false;
 			this.inputFile = new File("wadmerge.txt");
 			this.inputCharset = Charset.defaultCharset();
@@ -119,7 +127,7 @@ public final class WadMergeMain
 		public Options setInputCharsetName(String inputCharsetName) 
 		{
 			try {
-				this.inputCharset = inputCharsetName != null ? Charset.forName(inputCharsetName) : Charset.defaultCharset();
+				this.inputCharset = ObjectUtils.isEmpty(inputCharsetName) ? Charset.forName(inputCharsetName) : Charset.defaultCharset();
 			} catch (Exception e) {
 				this.inputCharset = Charset.defaultCharset();
 			}
@@ -149,6 +157,17 @@ public final class WadMergeMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADMERGE);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WadMerge GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -246,6 +265,8 @@ public final class WadMergeMain
 						options.version = true;
 					else if (arg.equals(SWITCH_SYSTEMIN))
 						options.useStdin = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (SWITCH_CHARSET1.equalsIgnoreCase(arg) || SWITCH_CHARSET2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_CHARSET;
 					else if (!sawInput)
@@ -352,6 +373,8 @@ public final class WadMergeMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version     Prints version, and exits.");
+		out.println();
+		out.println("    --gui         Starts the GUI version of this program.");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --verbose     Prints verbose output.");

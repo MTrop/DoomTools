@@ -19,14 +19,22 @@ function prop(key, def) {
 /* ------------------------------------------------------------------------ */
 // Project-specific.
 
-#define PROP_PROJECTNAME    "doommake.project.name"
-#define DEFAULT_PROJECTNAME "project"
+#define PROP_PROJECTNAME        "doommake.project.name"
+#define DEFAULT_PROJECTNAME     "project"
+#define PROP_PROJECTENCODING    "doommake.project.encoding"
 
 /**
  * Returns the project name.
  */
 function getProjectName() {
 	return prop(PROP_PROJECTNAME, DEFAULT_PROJECTNAME);
+}
+
+/**
+ * Returns the project encoding.
+ */
+function getProjectEncoding() {
+	return prop(PROP_PROJECTENCODING, null);
 }
 
 /**
@@ -453,8 +461,34 @@ function wadmerge(scriptFilePath, args) {
 	if (empty(scriptFilePath))
 		return error("ToolError", "Script file not specified.");
 		
-	if (tool::wadmerge({inputFile: file(scriptFilePath), args: args})) 
-		return error("ToolError", "WadMerge threw an error.");
+	if (tool::wadmerge({
+		inputFile: file(scriptFilePath),
+		inputCharsetName: getProjectEncoding(), 
+		args: args
+	})) return error("ToolError", "WadMerge threw an error.");
+}
+
+/****************************************************************************
+ * Calls WadScript and throws an error if something bad happens.
+ * 
+ * scriptFilePath: Path to script file to execute.
+ * entryPoint: the entry point name.
+ * args: Script arguments.
+ ****************************************************************************/
+function wadscript(scriptFilePath, entryPoint, args) {
+	if (args === null)
+		args = [];
+	if (entryPoint === null)
+		entryPoint = "main";
+	if (empty(scriptFilePath))
+		return error("ToolError", "Script file not specified.");
+		
+	if (tool::wadscript({
+		scriptFile: file(scriptFilePath),
+		scriptCharsetName: getProjectEncoding(),
+		entryPointName: entryPoint,
+		args: args
+	})) return error("ToolError", "WadMerge threw an error.");
 }
 
 /****************************************************************************
@@ -474,10 +508,11 @@ function decohack(rootFilePath, outFilePath, budget, outSourceFilePath) {
 		return error("ToolError", "Budget flag is null.");
 		
 	if (tool::decohack({
-		infile: rootFilePath,
-		outfile: outFilePath,
-		outputbudget: budget,
-		outsourcefile: outSourceFilePath
+		inFile: rootFilePath,
+		inCharsetName: getProjectEncoding(),
+		outFile: outFilePath,
+		outputBudget: budget,
+		outSourceFile: outSourceFilePath
 	})) return error("ToolError", "DECOHack threw an error.");
 }
 

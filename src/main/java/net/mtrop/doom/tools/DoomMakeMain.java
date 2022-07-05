@@ -12,6 +12,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,8 +60,6 @@ import net.mtrop.doom.tools.struct.util.StringUtils;
  */
 public final class DoomMakeMain 
 {
-	// TODO: Add charset to project properties file, use for script execution
-	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
 	private static final int ERROR_BAD_PROPERTIES = 2;
@@ -103,6 +104,8 @@ public final class DoomMakeMain
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
+	
+	private static final String PROPERTY_DOOMMAKE_PROJECT_ENCODING = "doommake.project.encoding";
 	
 	// WadScript-specific
 	private static final Resolver[] RESOLVERS_DOOMMAKE = 
@@ -538,6 +541,13 @@ public final class DoomMakeMain
 		
 		private int executeTarget() 
 		{
+			String encodingName = System.getProperty(PROPERTY_DOOMMAKE_PROJECT_ENCODING);
+			try {
+				encodingName = (ObjectUtils.isEmpty(encodingName) ? Charset.defaultCharset() : Charset.forName(encodingName)).displayName();
+			} catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
+				encodingName = Charset.defaultCharset().displayName();
+			}
+			
 			try {
 				WadScriptMain.Options wsOptions = WadScriptMain.options(options.stdout, options.stderr, options.stdin)
 					.setMode(options.mode)
@@ -547,6 +557,7 @@ public final class DoomMakeMain
 					.setActivationDepth(options.activationDepth)
 					.setRunawayLimit(options.runawayLimit)
 					.setScriptFile(options.scriptFile)
+					.setScriptCharsetName(encodingName)
 					.addResolver("DoomMake Functions", DoomMakeFunctions.createResolver())
 					.addResolver("Tool Invocation", "TOOL", ToolInvocationFunctions.createResolver())
 				;

@@ -42,6 +42,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Main class for DECOHack.
@@ -176,7 +177,7 @@ public final class DecoHackMain
 		public Options setInCharsetName(String scriptCharsetName) 
 		{
 			try {
-				this.inCharset = scriptCharsetName != null ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
+				this.inCharset = ObjectUtils.isEmpty(scriptCharsetName) ? Charset.forName(scriptCharsetName) : Charset.defaultCharset();
 			} catch (Exception e) {
 				this.inCharset = Charset.defaultCharset();
 			}
@@ -734,6 +735,8 @@ public final class DecoHackMain
 		out.println("    --help-full              Prints full help (not just usage) and exits.");
 		out.println();
 		out.println("    --version                Prints version, and exits.");
+		out.println();
+		out.println("    --gui                    Starts the GUI version of this program.");
 		out.println();
 		out.println("    --dump-constants         Dumps the list of available defined constants");
 		out.println("                             to STDOUT.");

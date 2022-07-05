@@ -4,6 +4,7 @@ WadMerge
 ### Changed for 1.8.0
 
 * `Added` A `--charset` switch for specifying the encoding of the script files (if not system default).
+* `Added` The WadMerge GUI, plus a switch to start it (`--gui`).
 
 
 ### Changed for 1.7.0
