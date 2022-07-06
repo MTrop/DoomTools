@@ -55,7 +55,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 #ifdef SrcJREDirectory
-Name: "embedJRE"; Description: "Embed a minified Java Runtime (REQUIRED if not already installed, 46.5 MB)"; GroupDescription: "May Be Required:"
+Name: "embedJRE"; Description: "Embed a minified Java Runtime (REQUIRED if not already installed, 47.7 MB)"; GroupDescription: "May Be Required:"
 #endif
 Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"; GroupDescription: "More Actions:"
 Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; GroupDescription: "More Actions:"; Flags: unchecked

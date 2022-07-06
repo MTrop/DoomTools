@@ -376,7 +376,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 		{
 			// Do nothing, for now.
 		}
-
 	}
 	
 	private void onNewEditor()

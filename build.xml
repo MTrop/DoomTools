@@ -391,5 +391,11 @@
 			<arg line="-C ${deploy.dir}" />
 		</exec>
 	</target>
-	
+
+	<target name="deploy.jar" if="deploy.dir" depends="jar.one" description="Deploys the JAR distribution to a directory.">
+		<copy todir="${deploy.dir}/jar">
+			<fileset file="${jar.dir}/${jar.filename}" />
+		</copy>
+	</target>
+
 </project>

@@ -214,97 +214,68 @@ public final class DoomToolsGUIMain
 		// run standalone application.
 		else 
 		{
-			try 
+			if (ApplicationNames.WADMERGE.equals(args[0]))
 			{
-				switch (args[0])
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+			}
+			else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
+			{
+				startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
+			}
+			else if (ApplicationNames.DOOMMAKE_OPEN.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				
+				// No path. Open file.
+				if (ObjectUtils.isEmpty(path))
 				{
-					default:
-					{
-		        		SwingUtils.error("Expected valid application name.");
-			    		System.err.println("ERROR: Expected valid application name.");
-		        		System.exit(-1);
-			        	return;
-					}
-		        	
-					case ApplicationNames.DOOMMAKE_NEW:
-					{
-						startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
-						break;
-					}
-					
-					case ApplicationNames.DOOMMAKE_OPEN:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						
-						// No path. Open file.
-						if (ObjectUtils.isEmpty(path))
-						{
-							DoomMakeOpenProjectApp app;
-							if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
-								startApplication(app);
-						}
-						else
-						{
-							File projectDirectory = new File(args[1]);
-							if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
-								startApplication(new DoomMakeOpenProjectApp(projectDirectory));
-							else
-								SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
-						}
-						break;
-					}
-
-					case ApplicationNames.WADMERGE:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
-						break;
-					}
-
-					case ApplicationNames.WADMERGE_EXECUTOR:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new WadMergeExecutorApp(path));
-						break;
-					}
-
-					case ApplicationNames.WADSCRIPT:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
-						break;
-					}
-
-					case ApplicationNames.WADSCRIPT_EXECUTOR:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new WadScriptExecutorApp(path));
-						break;
-					}
-
-					case ApplicationNames.DECOHACK:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
-						break;
-					}
-					
-					case ApplicationNames.DECOHACK_COMPILER:
-					{
-						String path = ArrayUtils.arrayElement(args, 1);
-						startApplication(new DecoHackCompilerApp(path));
-						break;
-					}
+					DoomMakeOpenProjectApp app;
+					if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
+						startApplication(app);
+				}
+				else
+				{
+					File projectDirectory = new File(args[1]);
+					if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
+						startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+					else
+						SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 				}
 			}
-			catch (ArrayIndexOutOfBoundsException e)
+			else if (ApplicationNames.WADMERGE_EXECUTOR.equals(args[0]))
 			{
-	    		SwingUtils.error("Missing argument for application: " + e.getLocalizedMessage());
-	    		System.err.println("ERROR: Missing argument for application.");
-        		System.exit(-1);
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadMergeExecutorApp(path));
 			}
-		}
-		
+			else if (ApplicationNames.WADSCRIPT.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
+			}
+			else if (ApplicationNames.WADSCRIPT_EXECUTOR.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadScriptExecutorApp(path));
+			}
+			else if (ApplicationNames.DECOHACK.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
+			}
+			else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new DecoHackCompilerApp(path));
+			}
+			else
+			{
+        		SwingUtils.error("Expected valid application name.");
+	    		System.err.println("ERROR: Expected valid application name.");
+        		System.exit(-1);
+	        	return;
+			}
+		}		
 	}
 
 	/** Settings singleton. */

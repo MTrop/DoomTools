@@ -16,6 +16,8 @@ Copyright (c) 2019-2022 Matt Tropiano
 
 ### Required Modules
 
+[jdk.charsets](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.charsets/module-summary.html)  
+[jdk.charsets](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.charsets/module-summary.html)  
 [java.desktop](https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html)  
 * [java.xml](https://docs.oracle.com/en/java/javase/11/docs/api/java.xml/module-summary.html)  
 * [java.datatransfer](https://docs.oracle.com/en/java/javase/11/docs/api/java.datatransfer/module-summary.html)  
@@ -74,6 +76,10 @@ To create a distribution and deploy it **(THIS WILL DELETE AND REBUILD THE TARGE
 	ant deploy.cmd -Ddeploy.dir=[TARGETPATH]
 	ant deploy.bash -Ddeploy.dir=[TARGETPATH]
 
+To create the distributable JAR and deploy it to the target directory's `/jar` directory.
+
+	ant deploy.jar -Ddeploy.dir=[TARGETPATH]
+
 To clean up everything:
 
 	ant clean
@@ -102,10 +108,10 @@ JRE version of the installer will not be built if `embedded.jre.source.dir` is n
 
 The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
 
-	jlink --add-modules java.desktop,jdk.crypto.ec --compress=2 --output [jredir]
+	jlink --add-modules java.desktop,jdk.crypto.ec,jdk.charsets --compress=2 --output [jredir]
 
 That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
-and perhaps future tools that pull resources from secure TLS Internet addresses.
+and perhaps future tools that pull resources from secure TLS Internet addresses, and `jdk.charsets` for the extended charsets.
 
 
 ### Manually Updating Your Own Installed Version via Source
@@ -125,7 +131,10 @@ UTC date.
 
 Then, you can copy or move that JAR file into the `jar` directory under the DoomTools install directory, and if
 that JAR is the latest date, then all of the DoomTools CMD/Bash/EXEs will use that JAR automatically instead of 
-the others that are also in that directory. 
+the others that are also in that directory.
+
+The `deploy.jar` target will copy the JAR to the `/jar` directory off of the deployment, if you set the `deploy.dir`
+the deployment root.
 
 This is similar to how DoomTools updates itself - it just downloads the latest stand-alone JAR from its main releases.
 

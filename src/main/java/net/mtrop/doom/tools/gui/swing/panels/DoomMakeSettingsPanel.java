@@ -64,7 +64,7 @@ public class DoomMakeSettingsPanel extends JPanel
 					(value) -> settings.setPathToSlade(value)
 				)),
 				utils.formField("doommake.settings.maps.label", fileField(
-					settings.getPathToSlade(), 
+					settings.getPathToMapEditor(), 
 					(currentFile) -> chooseFile(
 						this, 
 						language.getText("doommake.settings.maps.title"),
