@@ -1018,7 +1018,7 @@ public final class ModalFactory
 		if (buttons.length > 0)
 		{
 			southContent = new JPanel();
-			southContent.setBorder(createEmptyBorder(4, 4, 4, 4));
+			southContent.setBorder(createEmptyBorder(8, 8, 8, 8));
 			southContent.setLayout(new FlowLayout(FlowLayout.TRAILING, 4, 0));
 			for (int i = 0; i < buttons.length; i++) 
 				southContent.add(buttons[i]);
@@ -1026,7 +1026,6 @@ public final class ModalFactory
 		
 		JPanel modalPanel = new JPanel();
 		modalPanel.setLayout(new BorderLayout());
-		modalPanel.setBorder(createEmptyBorder(4, 4, 4, 4));
 		modalPanel.add(BorderLayout.CENTER, centerContent);
 		if (southContent != null)
 			modalPanel.add(BorderLayout.SOUTH, southContent);

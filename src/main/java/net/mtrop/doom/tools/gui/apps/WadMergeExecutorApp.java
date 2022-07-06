@@ -118,15 +118,15 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	public Container createContentPane() 
 	{
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, form(language.getInteger("wadmerge.run.withargs.label.width"))
-				.addField(language.getText("wadmerge.run.withargs.source"), sourceFileField)
-				.addField(language.getText("wadmerge.run.withargs.charset"), charsetField)
-			),
+			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadmerge.run.withargs.label.width")),
+				utils.formField("wadmerge.run.withargs.source", sourceFileField),
+				utils.formField("wadmerge.run.withargs.charset", charsetField)
+			)),
 			node(BorderLayout.CENTER, executePanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(button(language.getText("wadmerge.run.withargs.choice.run"), (c, e) -> onRun())
-				))),
+					node(utils.createButtonFromLanguageKey("wadmerge.run.withargs.choice.run", (c, e) -> onRun()))
+				)),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
 		);

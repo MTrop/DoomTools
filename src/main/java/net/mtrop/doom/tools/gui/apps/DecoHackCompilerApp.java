@@ -118,14 +118,14 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	public Container createContentPane() 
 	{
 		return containerOf(dimension(400, 200), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, form(language.getInteger("decohack.export.label.width"))
-				.addField(language.getText("decohack.export.source"), sourceFileField)
-				.addField(language.getText("decohack.export.charset"), charsetField)
-			),
+			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("decohack.export.label.width")),
+				utils.formField("decohack.export.source", sourceFileField),
+				utils.formField("decohack.export.charset", charsetField)
+			)),
 			node(BorderLayout.CENTER, exportPanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(button(language.getText("decohack.export.choice.export"), (c, e) -> onRun())
+					node(utils.createButtonFromLanguageKey("decohack.export.choice.export", (c, e) -> onRun())
 				))),
 				node(BorderLayout.SOUTH, statusPanel)
 			))

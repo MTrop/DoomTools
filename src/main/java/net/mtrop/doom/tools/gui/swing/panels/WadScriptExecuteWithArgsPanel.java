@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants;
 import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -32,6 +33,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 {
 	private static final long serialVersionUID = 3311704543488697542L;
 	
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 
 	private JFormField<File> workingDirFileField;
@@ -50,6 +52,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 	
 	public WadScriptExecuteWithArgsPanel(ExecutionSettings executionSettings)
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
 		final File workingDirectory = executionSettings.getWorkingDirectory();
@@ -86,12 +89,12 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, form(language.getInteger("wadscript.run.withargs.label.width"))
-				.addField(language.getText("wadscript.run.withargs.workdir"), workingDirFileField)
-				.addField(language.getText("wadscript.run.withargs.stdin"), standardInPathField)
-				.addField(language.getText("wadscript.run.withargs.entrypoint"), entryPointField)
-				.addField(language.getText("wadscript.run.withargs.argfield"), numArgsField)
-			),
+			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadscript.run.withargs.label.width")),
+				utils.formField("wadscript.run.withargs.workdir", workingDirFileField),
+				utils.formField("wadscript.run.withargs.stdin", standardInPathField),
+				utils.formField("wadscript.run.withargs.entrypoint", entryPointField),
+				utils.formField("wadscript.run.withargs.argfield", numArgsField)
+			)),
 			node(BorderLayout.CENTER, dimension(320, 128), scroll(containerOf(
 				node(BorderLayout.NORTH, argsFieldPanel),
 				node(BorderLayout.CENTER, containerOf())

@@ -44,7 +44,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 		setTitle(instance.getTitle());
 		setFrameIcon(appIcon != null ? appIcon : utils.getWindowIcon());
 		setJMenuBar(instance.createInternalMenuBar());
-		setContentPane(containerOf(createEmptyBorder(4, 4, 4, 4),
+		setContentPane(containerOf(createEmptyBorder(8, 8, 8, 8),
 			node(instance.createContentPane())
 		));
 		setResizable(true);

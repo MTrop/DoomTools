@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 
 import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -20,6 +21,7 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 {
 	private static final long serialVersionUID = -6601542918464394270L;
 
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 
 	private JFormField<File> patchOutputField;
@@ -28,6 +30,7 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 	
 	public DecoHackExportPanel(ExportSettings settings)
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
 		final File patchOutputFile = settings.getOutputFile();
@@ -57,11 +60,11 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 		this.budgetField = checkBoxField(checkBox(budget));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, form(language.getInteger("decohack.export.label.width"))
-				.addField(language.getText("decohack.export.patch"), patchOutputField)
-				.addField(language.getText("decohack.export.outsource"), sourceOutputField)
-				.addField(language.getText("decohack.export.budget"), budgetField)
-			)
+			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("decohack.export.label.width")),
+				utils.formField("decohack.export.patch", patchOutputField),
+				utils.formField("decohack.export.outsource", sourceOutputField),
+				utils.formField("decohack.export.budget", budgetField)
+			))
 		);
 	}
 	

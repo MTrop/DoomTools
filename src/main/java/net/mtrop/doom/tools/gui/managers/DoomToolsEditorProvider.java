@@ -17,10 +17,11 @@ import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
-import org.fife.ui.rsyntaxtextarea.modes.PlainTextTokenMaker;
 
+import net.mtrop.doom.tools.gui.managers.parsing.DEUTEXTokenMaker;
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackCompletionProvider;
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackTokenMaker;
+import net.mtrop.doom.tools.gui.managers.parsing.DefSwAniTokenMaker;
 import net.mtrop.doom.tools.gui.managers.parsing.DoomMakeCompletionProvider;
 import net.mtrop.doom.tools.gui.managers.parsing.RookScriptCompletionProvider;
 import net.mtrop.doom.tools.gui.managers.parsing.RookScriptTokenMaker;
@@ -240,11 +241,11 @@ public final class DoomToolsEditorProvider
     {
 		private static final long serialVersionUID = 1638202185490860804L;
 		{
-			put(SYNTAX_STYLE_WADMERGE,   () -> new WadMergeCompletionProvider());
-			put(SYNTAX_STYLE_ROOKSCRIPT, () -> new RookScriptCompletionProvider());
-			put(SYNTAX_STYLE_WADSCRIPT,  () -> new WadScriptCompletionProvider());
-			put(SYNTAX_STYLE_DOOMMAKE,   () -> new DoomMakeCompletionProvider());
 			put(SYNTAX_STYLE_DECOHACK,   () -> new DecoHackCompletionProvider());
+			put(SYNTAX_STYLE_DOOMMAKE,   () -> new DoomMakeCompletionProvider());
+			put(SYNTAX_STYLE_ROOKSCRIPT, () -> new RookScriptCompletionProvider());
+			put(SYNTAX_STYLE_WADMERGE,   () -> new WadMergeCompletionProvider());
+			put(SYNTAX_STYLE_WADSCRIPT,  () -> new WadScriptCompletionProvider());
 		}
     });
     
@@ -285,18 +286,18 @@ public final class DoomToolsEditorProvider
 		AbstractTokenMakerFactory tokenMakers = (AbstractTokenMakerFactory)TokenMakerFactory.getDefaultInstance();
 		FoldParserManager foldManager = FoldParserManager.get();
 		
+		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK,   DecoHackTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DEFSWANI,   DefSwAniTokenMaker.class.getName());
+		tokenMakers.putMapping(SYNTAX_STYLE_DEUTEX,     DEUTEXTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_DOOMMAKE,   RookScriptTokenMaker.class.getName());
-		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT,  RookScriptTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_ROOKSCRIPT, RookScriptTokenMaker.class.getName());
 		tokenMakers.putMapping(SYNTAX_STYLE_WADMERGE,   WadMergeTokenMaker.class.getName());
-		tokenMakers.putMapping(SYNTAX_STYLE_DECOHACK,   DecoHackTokenMaker.class.getName());
-		tokenMakers.putMapping(SYNTAX_STYLE_DEFSWANI,   PlainTextTokenMaker.class.getName()); // TODO: Change to actual token makers
-		tokenMakers.putMapping(SYNTAX_STYLE_DEUTEX,     PlainTextTokenMaker.class.getName()); // TODO: Change to actual token makers
+		tokenMakers.putMapping(SYNTAX_STYLE_WADSCRIPT,  RookScriptTokenMaker.class.getName());
 		
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE,   new CurlyFoldParser());
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT,  new CurlyFoldParser());
-		foldManager.addFoldParserMapping(SYNTAX_STYLE_ROOKSCRIPT, new CurlyFoldParser());
 		foldManager.addFoldParserMapping(SYNTAX_STYLE_DECOHACK,   new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_DOOMMAKE,   new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_ROOKSCRIPT, new CurlyFoldParser());
+		foldManager.addFoldParserMapping(SYNTAX_STYLE_WADSCRIPT,  new CurlyFoldParser());
 		
 		initLanguages = true;
 	}

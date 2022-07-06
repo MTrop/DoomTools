@@ -31,7 +31,8 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 	
     private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
     private static final String DOOMMAKE_PATH_SLADE = "path.slade";
-    private static final String DOOMMAKE_PATH_VSCODE = "path.vscode";
+    private static final String DOOMMAKE_PATH_IDE = "path.vscode";
+    private static final String DOOMMAKE_PATH_MAPEDITOR = "path.map.editor";
 
 	/* ==================================================================== */
 
@@ -77,21 +78,39 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 	}
 
 	/**
-	 * Sets the path to VSCode.
+	 * Sets the path to IDE.
 	 * @param path the executable path.
 	 */
-	public void setPathToVSCode(File path) 
+	public void setPathToIDE(File path) 
 	{
-		setFile(DOOMMAKE_PATH_VSCODE, path);
+		setFile(DOOMMAKE_PATH_IDE, path);
 		commit();
 	}
 
 	/**
-	 * @return the executable path to VSCode.
+	 * @return the executable path to IDE.
 	 */
-	public File getPathToVSCode() 
+	public File getPathToIDE() 
 	{
-		return getFile(DOOMMAKE_PATH_VSCODE);
+		return getFile(DOOMMAKE_PATH_IDE);
+	}
+	
+	/**
+	 * Sets the path to the map editor.
+	 * @param path the executable path.
+	 */
+	public void setPathToMapEditor(File path) 
+	{
+		setFile(DOOMMAKE_PATH_MAPEDITOR, path);
+		commit();
+	}
+
+	/**
+	 * @return the executable path to the map editor.
+	 */
+	public File getPathToMapEditor() 
+	{
+		return getFile(DOOMMAKE_PATH_MAPEDITOR);
 	}
 	
 }

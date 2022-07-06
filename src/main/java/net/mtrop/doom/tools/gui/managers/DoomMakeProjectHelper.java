@@ -104,7 +104,7 @@ public final class DoomMakeProjectHelper
 	{
 		checkProjectDirectory(projectDirectory);
 		
-		File idePath = settings.getPathToVSCode();
+		File idePath = settings.getPathToIDE();
 		if (idePath == null)
 			throw new RequiredSettingException("The path to IDE is not configured. Cannot open IDE.");
 		if (!idePath.exists())

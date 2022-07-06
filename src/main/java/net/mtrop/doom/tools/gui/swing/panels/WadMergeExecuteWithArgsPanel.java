@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsConstants;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -32,6 +33,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 {
 	private static final long serialVersionUID = -5380481388722995023L;
 
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 
 	private JFormField<File> workingDirFileField;
@@ -48,6 +50,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 	
 	public WadMergeExecuteWithArgsPanel(MergeSettings mergeSettings)
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
 		final File workingDirectory = mergeSettings.getWorkingDirectory();
@@ -70,10 +73,10 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, form(language.getInteger("wadmerge.run.withargs.label.width"))
-				.addField(language.getText("wadmerge.run.withargs.workdir"), workingDirFileField)
-				.addField(language.getText("wadmerge.run.withargs.argfield"), numArgsField)
-			),
+			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadmerge.run.withargs.label.width")),
+				utils.formField("wadmerge.run.withargs.workdir", workingDirFileField),
+				utils.formField("wadmerge.run.withargs.argfield", numArgsField)
+			)),
 			node(BorderLayout.CENTER, dimension(320, 128), scroll(containerOf(
 				node(BorderLayout.NORTH, argsFieldPanel),
 				node(BorderLayout.CENTER, containerOf())

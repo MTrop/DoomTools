@@ -46,10 +46,10 @@ public class DoomToolsSettingsPanel extends JPanel
 		
 		containerOf(this,
 			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
-				tab("DoomTools", containerOf(createEmptyBorder(4, 4, 4, 4),
+				tab("DoomTools", containerOf(createEmptyBorder(8, 8, 8, 8),
 					node(createMainPanel())
 				)),
-				tab("DoomMake", containerOf(createEmptyBorder(4, 4, 4, 4),
+				tab("DoomMake", containerOf(createEmptyBorder(8, 8, 8, 8),
 					node(doomMakeSettingsPanel)
 				))
 			))

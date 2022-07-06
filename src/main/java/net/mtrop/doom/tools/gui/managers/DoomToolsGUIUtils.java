@@ -35,6 +35,9 @@ import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
+import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -319,12 +322,14 @@ public final class DoomToolsGUIUtils
 	 */
 	public JButton createButtonFromLanguageKey(Icon icon, String keyPrefix, ComponentActionHandler<JButton> handler)
 	{
-		return button(
+		String tipKey = keyPrefix + ".tip";
+		final String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
+		return ObjectUtils.apply(button(
 			icon,
 			language.getText(keyPrefix),
 			language.getMnemonicValue(keyPrefix + ".mnemonic"),
 			handler
-		);
+		), (button) -> button.setToolTipText(tip));
 	}
 
 	/**
@@ -394,6 +399,25 @@ public final class DoomToolsGUIUtils
 				node(BorderLayout.CENTER, container)
 			))
 		);
+	}
+
+	/**
+	 * Adds a form field to a form, attaching a tool tip, if any.
+	 * @param formPanel the form panel.
+	 * @param formFields the list of fields to add.
+	 * @return the form panel passed in.
+	 */
+	public JFormPanel createFormField(JFormPanel formPanel, FormFieldInfo ... formFields)
+	{
+		for (int i = 0; i < formFields.length; i++) 
+		{
+			FormFieldInfo formFieldInfo = formFields[i];
+			String label = language.getText(formFieldInfo.languageKey);
+			String tipKey = formFieldInfo.languageKey + ".tip";
+			String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
+			formPanel.addTipField(label, tip, formFieldInfo.field);
+		}
+		return formPanel;
 	}
 	
 	/**
@@ -535,6 +559,32 @@ public final class DoomToolsGUIUtils
 	public FileFilter getDecoHackFileFilter()
 	{
 		return fileExtensionFilter("DECOHack Source (*.dh)", "dh");
+	}
+	
+	/**
+	 * Creates a {@link FormFieldInfo} object for use with {@link #createFormField(JFormPanel, FormFieldInfo...)}.
+	 * @param languageKey the language key prefix for the label and tooltip.
+	 * @param field the field to add.
+	 * @return new info.
+	 */
+	public FormFieldInfo formField(String languageKey, JFormField<?> field)
+	{
+		return new FormFieldInfo(languageKey, field);
+	}
+	
+	/**
+	 * Form field info.
+	 */
+	public static class FormFieldInfo
+	{
+		private String languageKey;
+		private JFormField<?> field;
+		
+		private FormFieldInfo(String languageKey, JFormField<?> field)
+		{
+			this.languageKey = languageKey;
+			this.field = field;
+		}
 	}
 	
 	/**

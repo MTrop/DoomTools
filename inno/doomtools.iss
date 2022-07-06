@@ -72,10 +72,11 @@ Name: "{group}\{#DTAppName}";                       Filename: "{app}\{#DTAppExeN
 Name: "{group}\{#DTAppName} CMD";                   Filename: "{cmd}"; Parameters: "/k ""{app}\doomtools-shell.cmd"""; WorkingDir: "%USERPROFILE%"
 Name: "{group}\{#DTAppName} Documentation";         Filename: "{app}\docs"; Flags: foldershortcut
 Name: "{group}\{#DTAppName} Website";               Filename: "https://mtrop.github.io/DoomTools/"
+Name: "{group}\Utilities\DECOHack Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "decohack"
 Name: "{group}\Utilities\DoomMake";                 Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-open"
 Name: "{group}\Utilities\DoomMake (New Project)";   Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-new"
-Name: "{group}\Utilities\WadScript";                Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
-Name: "{group}\Utilities\DECOHack";                 Filename: "{app}\{#DTAppExeName}"; Parameters: "decohack"
+Name: "{group}\Utilities\WadMerge Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wadmerge"
+Name: "{group}\Utilities\WadScript Editor";         Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
 Name: "{group}\{cm:UninstallProgram,{#DTAppName}}"; Filename: {uninstallexe}
 Name: "{autodesktop}\{#DTAppName}";                 Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon
 
