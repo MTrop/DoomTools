@@ -234,7 +234,7 @@ function checkFileExistenceAndBuildStatuses(filePaths, builtTargetList) {
 #define PROP_PATCHFILE        "doommake.file.patch"
 #define DEFAULT_PATCHFILE     "dehacked.deh"
 #define PROP_PATCHFILE_SRC    "doommake.file.patch.src"
-#define DEFAULT_PATCHFILE_SRC "dehsrc.dh"
+#define DEFAULT_PATCHFILE_SRC "decohack.dh"
 
 /**
  * Return the output asset wad.

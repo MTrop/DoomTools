@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
@@ -23,6 +24,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = -6173939721307568911L;
 	
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 	private EditorSettingsManager settings;
 	
@@ -32,6 +34,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 	private JFormField<Boolean> autoCompleteEnabledField;
 	private JFormField<Boolean> autoCompleteSingleChoicesField;
 	private JFormField<Boolean> autoActivationEnabledField;
+	private JFormField<Integer> autoActivationDelayField;
 	private JFormField<Integer> choicesWindowSizeWidthField;
 	private JFormField<Integer> choicesWindowSizeHeightField;
 	private JFormField<Boolean> showDescWindowField;
@@ -46,6 +49,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 	 */
 	public EditorDefaultAutoCompleteSettingsPanel()
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = EditorSettingsManager.get();
 		
@@ -61,6 +65,9 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 		this.autoActivationEnabledField = checkBoxField(checkBox(autoCompleteSettings.isAutoActivationEnabled(),
 			(v) -> autoCompleteSettings.setAutoActivationEnabled(v)
 		));
+		this.autoActivationDelayField = integerField(autoCompleteSettings.getAutoActivationDelay(),
+			(v) -> autoCompleteSettings.setAutoActivationDelay(v)
+		);
 		this.choicesWindowSizeWidthField = integerField(autoCompleteSettings.getChoicesWindowSizeWidth(), 
 			(v) -> autoCompleteSettings.setChoicesWindowSizeWidth(v)
 		);
@@ -84,19 +91,20 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 		);
 		
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, form(language.getInteger("texteditor.settings.label.width", 180))
-				.addField(language.getText("texteditor.settings.autocomp.enable"), autoCompleteEnabledField)
-				.addField(language.getText("texteditor.settings.autocomp.autoinsertsingle"), autoCompleteSingleChoicesField)
-				.addField(language.getText("texteditor.settings.autocomp.autoactivate"), autoActivationEnabledField)
-				.addField(language.getText("texteditor.settings.autocomp.choices.width"), choicesWindowSizeWidthField)
-				.addField(language.getText("texteditor.settings.autocomp.choices.height"), choicesWindowSizeHeightField)
-				.addField(language.getText("texteditor.settings.autocomp.showdesc"), showDescWindowField)
-				.addField(language.getText("texteditor.settings.autocomp.description.width"), descriptionWindowSizeWidthField)
-				.addField(language.getText("texteditor.settings.autocomp.description.height"), descriptionWindowSizeHeightField)
-				.addField(language.getText("texteditor.settings.autocomp.triggerkey"), triggerKeyField)
-				.addField(language.getText("texteditor.settings.autocomp.paramtruncate"), parameterDescriptionTruncateThresholdField)
-				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
-			)
+			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)),
+				utils.formField("texteditor.settings.autocomp.enable", autoCompleteEnabledField),
+				utils.formField("texteditor.settings.autocomp.autoinsertsingle", autoCompleteSingleChoicesField),
+				utils.formField("texteditor.settings.autocomp.autoactivate", autoActivationEnabledField),
+				utils.formField("texteditor.settings.autocomp.autoactivatedelay", autoActivationDelayField),
+				utils.formField("texteditor.settings.autocomp.choices.width", choicesWindowSizeWidthField),
+				utils.formField("texteditor.settings.autocomp.choices.height", choicesWindowSizeHeightField),
+				utils.formField("texteditor.settings.autocomp.showdesc", showDescWindowField),
+				utils.formField("texteditor.settings.autocomp.description.width", descriptionWindowSizeWidthField),
+				utils.formField("texteditor.settings.autocomp.description.height", descriptionWindowSizeHeightField),
+				utils.formField("texteditor.settings.autocomp.triggerkey", triggerKeyField),
+				utils.formField("texteditor.settings.autocomp.paramtruncate", parameterDescriptionTruncateThresholdField)
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings()))
+			))
 		);
 	}
 
@@ -108,6 +116,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 		autoCompleteEnabledField.setValue(defaultSettings.isAutoCompleteEnabled());
 		autoCompleteSingleChoicesField.setValue(defaultSettings.isAutoCompleteSingleChoices());
 		autoActivationEnabledField.setValue(defaultSettings.isAutoActivationEnabled());
+		autoActivationDelayField.setValue(defaultSettings.getAutoActivationDelay());
 		choicesWindowSizeWidthField.setValue(defaultSettings.getChoicesWindowSizeWidth());
 		choicesWindowSizeHeightField.setValue(defaultSettings.getChoicesWindowSizeHeight());
 		showDescWindowField.setValue(defaultSettings.isShowDescWindow());

@@ -9,6 +9,7 @@ DECOHack
 * `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
 * `Added` Documentation for all pointers when dumped with `--dump-pointers`.
 * `Added` A `--charset` switch for specifying the encoding of the input source files (if not system default).
+* `Added` The ability to write the patch and the source directly into a WAD.
 * `Changed` MBF's A_FireOldBFG pointer should have been a weapon pointer instead of a thing pointer.
 * `Changed` Added a better error message for bad action pointers.
 * `Changed` Added an error message if the user does "flag mixing" on the same expression (see Issue #76).

@@ -72,7 +72,7 @@ public class DoomToolsSettingsPanel extends JPanel
 		themeField.setValue(settings.getThemeName());
 		
 		return containerOf(
-			node(BorderLayout.NORTH, form(96)
+			node(BorderLayout.NORTH, form(language.getInteger("doomtools.settings.label.width"))
 				.addField(language.getText("doomtools.settings.theme"), themeField)
 			),
 			node(BorderLayout.CENTER, containerOf()),

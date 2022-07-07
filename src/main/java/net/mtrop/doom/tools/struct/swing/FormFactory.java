@@ -1337,7 +1337,7 @@ public final class FormFactory
 			{
 				setLayout(new BorderLayout());
 				JPanel panel = new JPanel();
-				panel.setLayout(new FlowLayout(FlowLayout.LEADING));
+				panel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 2));
 				for (int i = 0; i < buttons.length; i++)
 					panel.add(buttons[i]);
 				this.buttonList = Collections.unmodifiableList(Arrays.asList(buttons));
@@ -1388,6 +1388,45 @@ public final class FormFactory
 			{
 				setLayout(new BorderLayout());
 				add(BorderLayout.CENTER, this.field = new JPanel());
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form panel space that is aligned to the form section.
+	 * No value is held, nor set.
+	 * @param panel the panel to set.
+	 * @return a new form field.
+	 */
+	public static JFormField<Void> panelField(final JPanel panel)
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -4652707139878678731L;
+			
+			private JPanel field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = panel);
 			}
 			
 			@Override

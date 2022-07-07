@@ -7,7 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
-- **2022-07-04** Fixed a small updater display bug.
+- **2022-07-05** Imported the `jdk.charsets` module for the embedded JRE.
+- **2022-07-04** Fixed a small updater display bug on command prompt.
 - **2022-06-30** Updated RookScript to `1.15.0`. (Includer encoding).
 
 - **2022-04-15** Changed DoomTools's update system to pull the JAR ZIP for the update.

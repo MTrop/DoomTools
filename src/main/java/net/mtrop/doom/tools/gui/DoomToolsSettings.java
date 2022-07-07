@@ -76,6 +76,7 @@ public class DoomToolsSettings
 	private static final String AUTOCOMPLETE_AUTO_COMPLETE_ENABLED = ".autoCompleteEnabled";
 	private static final String AUTOCOMPLETE_AUTO_COMPLETE_SINGLE_CHOICES = ".autoCompleteSingleChoices";
 	private static final String AUTOCOMPLETE_AUTO_ACTIVATION_ENABLED = ".autoActivationEnabled";
+	private static final String AUTOCOMPLETE_AUTO_ACTIVATION_DELAY = ".autoActivationDelay";
 	private static final String AUTOCOMPLETE_SHOW_DESC_WINDOW = ".showDescWindow";
 	private static final String AUTOCOMPLETE_DESCRIPTION_WINDOW_SIZE_WIDTH = ".descriptionWindowSizeWidth";
 	private static final String AUTOCOMPLETE_PARAMETER_DESCRIPTION_TRUNCATE_THRESHOLD = ".parameterDescriptionTruncateThreshold";
@@ -631,6 +632,7 @@ public class DoomToolsSettings
 		setBoolean(prefix + AUTOCOMPLETE_AUTO_COMPLETE_ENABLED, codeSettings.isAutoCompleteEnabled());
 		setBoolean(prefix + AUTOCOMPLETE_AUTO_COMPLETE_SINGLE_CHOICES, codeSettings.isAutoCompleteSingleChoices());
 		setBoolean(prefix + AUTOCOMPLETE_AUTO_ACTIVATION_ENABLED, codeSettings.isAutoActivationEnabled());
+		setInteger(prefix + AUTOCOMPLETE_AUTO_ACTIVATION_DELAY, codeSettings.getAutoActivationDelay());
 		setBoolean(prefix + AUTOCOMPLETE_SHOW_DESC_WINDOW, codeSettings.isShowDescWindow());
 		setInteger(prefix + AUTOCOMPLETE_PARAMETER_DESCRIPTION_TRUNCATE_THRESHOLD, codeSettings.getParameterDescriptionTruncateThreshold());
 	}
@@ -652,6 +654,7 @@ public class DoomToolsSettings
 		out.setAutoCompleteEnabled(getBoolean(prefix + AUTOCOMPLETE_AUTO_COMPLETE_ENABLED, out.isAutoCompleteEnabled()));
 		out.setAutoCompleteSingleChoices(getBoolean(prefix + AUTOCOMPLETE_AUTO_COMPLETE_SINGLE_CHOICES, out.isAutoCompleteSingleChoices()));
 		out.setAutoActivationEnabled(getBoolean(prefix + AUTOCOMPLETE_AUTO_ACTIVATION_ENABLED, out.isAutoActivationEnabled()));
+		out.setAutoActivationDelay(getInteger(prefix + AUTOCOMPLETE_AUTO_ACTIVATION_DELAY, out.getAutoActivationDelay()));
 		out.setShowDescWindow(getBoolean(prefix + AUTOCOMPLETE_SHOW_DESC_WINDOW, out.isShowDescWindow()));
 		out.setParameterDescriptionTruncateThreshold(getInteger(prefix + AUTOCOMPLETE_PARAMETER_DESCRIPTION_TRUNCATE_THRESHOLD, out.getParameterDescriptionTruncateThreshold()));
 		return out;

@@ -6,6 +6,7 @@ DoomMake
 * `Added` The `TOOL::WADMERGE(...)` function was changed to support alternate input charset encoding.
 * `Added` The `TOOL::WADSCRIPT(...)` function was changed to support alternate input charset encoding.
 * `Added` The `TOOL::DECOHACK(...)` function was changed to support alternate input charset encoding.
+* `Changed` Default DECOHack source code output file was changed from `dehsrc.dh` to `decohack.dh`. More to the point.
 
 
 ### Changed for 0.16.0

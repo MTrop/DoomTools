@@ -382,7 +382,10 @@ public class DirectoryTreePanel extends JPanel
 		
 		try {
 			if (FileUtils.touch(newFile))
+			{
+				revalidate();
 				onRenameFile(newFile);
+			}
 		} catch (IOException e) {
 			SwingUtils.error(this, language.getText("dirtree.newfile.error.ioerror", e.getLocalizedMessage()));
 		} catch (SecurityException e) {
@@ -404,9 +407,13 @@ public class DirectoryTreePanel extends JPanel
 			newFile = new File(targetDirectory + File.separator + "New Folder " + (i++));
 		} while (newFile.exists());
 		
+		
 		try {
 			if (newFile.mkdir())
+			{
+				revalidate();
 				onRenameFile(newFile);
+			}
 			else
 				SwingUtils.error(this, language.getText("dirtree.newdir.error"));
 		} catch (SecurityException e) {

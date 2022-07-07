@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,6 +21,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.BiPredicate;
 
+import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadFile;
 import net.mtrop.doom.tools.decohack.DecoHackJoiner;
 import net.mtrop.doom.tools.decohack.DecoHackParser;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
@@ -54,8 +58,6 @@ public final class DecoHackMain
 	private static final String VERSION_LINE = "DECOHack v" + Version.DECOHACK + " by Matt Tropiano";
 	private static final String SPLASH_VERSION = VERSION_LINE + " (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
-	private static final Charset ASCII = Charset.forName("ASCII");
-	
 	private static final String DEFAULT_OUTFILENAME = "dehacked.deh";
 	private static final String RESOURCE_HELP_CONSTANTS = "decohack/help-constants.txt";
 	
@@ -138,7 +140,7 @@ public final class DecoHackMain
 			this.inFiles = new LinkedList<>();
 			this.inCharset = Charset.defaultCharset();
 			
-			this.outCharset = ASCII;
+			this.outCharset = StandardCharsets.US_ASCII;
 			this.outFile = null;
 			this.outputBudget = false;
 			
@@ -487,41 +489,121 @@ public final class DecoHackMain
 				// Combine source.
 				if (options.outSourceFile != null)
 				{
-					try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile)), true))
+					boolean isWad;
+					try {
+						isWad = Wad.isWAD(options.outSourceFile);
+					} catch (IOException e) {
+						options.stderr.println("ERROR: Source output file " + options.outSourceFile.getPath() + " could not be read!");
+						return ERROR_IOERROR;
+					} catch (SecurityException e) {
+						options.stderr.println("ERROR: Source output file " + options.outSourceFile.getPath() + " could not be read! Access denied.");
+						return ERROR_IOERROR;
+					}
+
+					if (isWad)
 					{
-						for (File file : options.inFiles)
+						try (WadFile wad = new WadFile(options.outSourceFile)) 
 						{
-							DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+							ByteArrayOutputStream bos = new ByteArrayOutputStream();
+							try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(bos, options.inCharset), true))
+							{
+								for (File file : options.inFiles)
+								{
+									DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+								}
+							}
+							
+							int index;
+							if ((index = wad.indexOf("DECOHACK")) >= 0)
+								wad.replaceEntry(index, bos.toByteArray());
+							else
+								wad.addData("DECOHACK", bos.toByteArray());
+							
+							options.stdout.printf("Wrote source into %s as `DECOHACK`.\n", options.outSourceFile.getPath());
+						} 
+						catch (IOException e) 
+						{
+							options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+							return ERROR_IOERROR;
 						}
-						options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
-					} 
-					catch (FileNotFoundException e) 
-					{
-						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
-						return ERROR_IOERROR;
 					}
-					catch (IOException e)
+					else
 					{
-						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
-						return ERROR_IOERROR;
+						try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(options.outSourceFile), options.inCharset), true))
+						{
+							for (File file : options.inFiles)
+							{
+								DecoHackJoiner.joinSourceFrom(file, Charset.defaultCharset(), writer);
+							}
+							options.stdout.printf("Wrote source to %s.\n", options.outSourceFile.getPath());
+						} 
+						catch (FileNotFoundException e) 
+						{
+							options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+							return ERROR_IOERROR;
+						}
+						catch (IOException e)
+						{
+							options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+							return ERROR_IOERROR;
+						}
 					}
+					
 				}
 				
-				// Write Patch.
-				try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
-				{
-					context.writePatch(writer, "Created with " + VERSION_LINE);
-					options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
-				} 
-				catch (IOException e) 
-				{
-					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+				boolean isWad;
+				try {
+					isWad = Wad.isWAD(options.outFile);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Source output file " + options.outSourceFile.getPath() + " could not be read!");
+					return ERROR_IOERROR;
+				} catch (SecurityException e) {
+					options.stderr.println("ERROR: Source output file " + options.outSourceFile.getPath() + " could not be read! Access denied.");
 					return ERROR_IOERROR;
 				}
-				catch (SecurityException e) 
+				
+				if (isWad)
 				{
-					options.stderr.println("ERROR: Could not open input file (access denied).");
-					return ERROR_SECURITY;
+					try (WadFile wad = new WadFile(options.outSourceFile)) 
+					{
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						try (Writer writer = new OutputStreamWriter(bos, options.outCharset)) 
+						{
+							context.writePatch(writer, "Created with " + VERSION_LINE);
+						} 
+						
+						int index;
+						if ((index = wad.indexOf("DEHACKED")) >= 0)
+							wad.replaceEntry(index, bos.toByteArray());
+						else
+							wad.addData("DEHACKED", bos.toByteArray());
+						
+						options.stdout.printf("Wrote patch into %s as `DEHACKED`.\n", options.outSourceFile.getPath());
+					} 
+					catch (IOException e) 
+					{
+						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+						return ERROR_IOERROR;
+					}
+				}
+				else
+				{
+					// Write Patch.
+					try (Writer writer = new OutputStreamWriter(new FileOutputStream(options.outFile), options.outCharset)) 
+					{
+						context.writePatch(writer, "Created with " + VERSION_LINE);
+						options.stdout.printf("Wrote %s.\n", options.outFile.getPath());
+					} 
+					catch (IOException e) 
+					{
+						options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+						return ERROR_IOERROR;
+					}
+					catch (SecurityException e) 
+					{
+						options.stderr.println("ERROR: Could not open input file (access denied).");
+						return ERROR_SECURITY;
+					}
 				}
 			}
 			
@@ -755,13 +837,15 @@ public final class DecoHackMain
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output [file]          Outputs the resultant patch to [file].");
-		out.println("    -o [file]");
+		out.println("    -o [file]                If [file] is a WAD file, the output patch is added");
+		out.println("                             or replaced in the WAD file as \"DEHACKED\".");
 		out.println();
 		out.println("    --charset [name]         Sets the input charset to [name]. The default");
 		out.println("    -c [name]                charset is " + Charset.defaultCharset().displayName() + " (system default).");
 		out.println();
 		out.println("    --source-output [file]   Outputs the combined source to a single file.");
-		out.println("    -s [file]");
+		out.println("    -s [file]                If [file] is a WAD file, the source is added");
+		out.println("                             or replaced in the WAD file as \"DECOHACK\".");
 		out.println();
 		out.println("    --output-charset [name]  Sets the output charset to [name]. The default");
 		out.println("    -oc [name]               charset is ASCII, and there are not many reasons");

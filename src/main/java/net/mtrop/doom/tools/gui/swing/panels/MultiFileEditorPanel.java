@@ -2736,6 +2736,7 @@ public class MultiFileEditorPanel extends JPanel
 		private boolean autoCompleteEnabled;
 		private boolean autoCompleteSingleChoices;
 		private boolean autoActivationEnabled;
+		private int autoActivationDelay;
 
 		private boolean showDescWindow;
 		private int parameterDescriptionTruncateThreshold;
@@ -2750,6 +2751,7 @@ public class MultiFileEditorPanel extends JPanel
 			setTriggerKey(AutoCompletion.getDefaultTriggerKey());
 			setAutoCompleteSingleChoices(false);
 			setAutoActivationEnabled(false);
+			setAutoActivationDelay(400);
 			setShowDescWindow(true);
 			setParameterDescriptionTruncateThreshold(300);
 		}
@@ -2792,6 +2794,11 @@ public class MultiFileEditorPanel extends JPanel
 		public boolean isAutoActivationEnabled() 
 		{
 			return autoActivationEnabled;
+		}
+		
+		public int getAutoActivationDelay() 
+		{
+			return autoActivationDelay;
 		}
 
 		public boolean isShowDescWindow()
@@ -2844,6 +2851,11 @@ public class MultiFileEditorPanel extends JPanel
 			this.autoActivationEnabled = autoActivationEnabled;
 		}
 
+		public void setAutoActivationDelay(int autoActivationDelay) 
+		{
+			this.autoActivationDelay = autoActivationDelay;
+		}
+		
 		public void setShowDescWindow(boolean showDescWindow) 
 		{
 			this.showDescWindow = showDescWindow;
@@ -2862,6 +2874,7 @@ public class MultiFileEditorPanel extends JPanel
 			target.setAutoCompleteEnabled(autoCompleteEnabled);
 			target.setAutoCompleteSingleChoices(autoCompleteSingleChoices);
 			target.setAutoActivationEnabled(autoActivationEnabled);
+			target.setAutoActivationDelay(autoActivationDelay);
 			target.setShowDescWindow(showDescWindow);
 			target.setParameterDescriptionTruncateThreshold(parameterDescriptionTruncateThreshold);
 		}

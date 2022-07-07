@@ -17,25 +17,39 @@ Copyright (c) 2019-2022 Matt Tropiano
 ### Required Modules
 
 [jdk.charsets](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.charsets/module-summary.html)  
-[jdk.charsets](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.charsets/module-summary.html)  
+[jdk.crypto.ec](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.crypto.ec/module-summary.html)  
 [java.desktop](https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html)  
 * [java.xml](https://docs.oracle.com/en/java/javase/11/docs/api/java.xml/module-summary.html)  
 * [java.datatransfer](https://docs.oracle.com/en/java/javase/11/docs/api/java.datatransfer/module-summary.html)  
 * [java.base](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/module-summary.html)  
 
+
+### Recommended Minified JRE Setup
+
+The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
+
+	jlink --add-modules java.desktop,jdk.crypto.ec,jdk.charsets --compress=2 --output [jredir]
+
+That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
+and perhaps future tools that pull resources from secure TLS Internet addresses, and `jdk.charsets` for the extended charsets.
+
+
 ### Source
 
-The `master` branch contains stable code. Until a release is cut, the `master` branch will be shifting. 
+The `master` branch contains stable code (hopefully). Until a release is cut, the `master` branch will be shifting. 
+
 
 ### Introduction
 
 A bunch of command-line utilities for Doom stuff. This time, they're useful.
+
 
 ### Why?
 
 Because they are all super useful, and can run anywhere (that runs Java). This also enables authors to
 create a Continuous Integration path for building ongoing WAD projects. How cool would it be to always 
 have a demo copy buildable at all times?
+
 
 ### Compiling with Ant
 
@@ -97,21 +111,10 @@ It is not necessary for building or local deploying, but a package distributable
 The EXE build and copy to `src/main/resources/shell/exe` will be skipped if the `natives.windows.dir` property is not set. You
 are better off **NOT** setting it for every build as the EXE will more than likely be built differently every time.
 
-Building a Windows Installer requires [Inno Setup 6.2.0](https://jrsoftware.org/isdl.php) or better, and requires that the property `inno.setup.dir`
-is set to Inno Setup's directory to make use of `iscc`.
+Building a Windows Installer requires [Inno Setup 6.2.0](https://jrsoftware.org/isdl.php) or better, and requires that the property `inno.setup.dir` is set to Inno Setup's directory to make use of `iscc`.
 
 The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
 JRE version of the installer will not be built if `embedded.jre.source.dir` is not set.
-
-
-### Recommended Minified JRE Setup
-
-The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
-
-	jlink --add-modules java.desktop,jdk.crypto.ec,jdk.charsets --compress=2 --output [jredir]
-
-That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
-and perhaps future tools that pull resources from secure TLS Internet addresses, and `jdk.charsets` for the extended charsets.
 
 
 ### Manually Updating Your Own Installed Version via Source

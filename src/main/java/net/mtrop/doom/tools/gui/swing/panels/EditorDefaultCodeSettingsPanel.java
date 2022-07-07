@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 
 import javax.swing.JPanel;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
@@ -21,6 +22,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = -1887947424844741478L;
 	
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 	private EditorSettingsManager settings;
 	
@@ -59,6 +61,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 	 */
 	public EditorDefaultCodeSettingsPanel()
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = EditorSettingsManager.get();
 		
@@ -142,33 +145,33 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 		));
 
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, form(language.getInteger("texteditor.settings.label.width", 180))
-				.addField(language.getText("texteditor.settings.code.marginline"), marginLineField)
-				.addField(language.getText("texteditor.settings.code.marginlinepos"), marginLinePositionField)
-				.addField(language.getText("texteditor.settings.code.roundedselection"), roundedSelectionEdgesField)
-				.addField(language.getText("texteditor.settings.code.hilitecurline"), highlightCurrentLineField)
-				.addField(language.getText("texteditor.settings.code.autoindent"), autoIndentEnabledField)
-				.addField(language.getText("texteditor.settings.code.bracketmatch"), bracketMatchingEnabledField)
-				.addField(language.getText("texteditor.settings.code.animbracketmatch"), animateBracketMatchingField)
-				.addField(language.getText("texteditor.settings.code.showmatchedbracketpopup"), showMatchedBracketPopupField)
-				.addField(language.getText("texteditor.settings.code.paintmatchedbracketpair"), paintMatchedBracketPairField)
-				.addField(language.getText("texteditor.settings.code.codefolding"), codeFoldingEnabledField)
-				.addField(language.getText("texteditor.settings.code.closecurlies"), closeCurlyBracesField)
-				.addField(language.getText("texteditor.settings.code.closemarkuptags"), closeMarkupTagsField)
-				.addField(language.getText("texteditor.settings.code.eolvisible"), eolMarkersVisibleField)
-				.addField(language.getText("texteditor.settings.code.hilitesecondarylang"), highlightSecondaryLanguagesField)
-				.addField(language.getText("texteditor.settings.code.focustips"), useFocusableTipsField)
-				.addField(language.getText("texteditor.settings.code.clearwhitespace"), clearWhitespaceLinesEnabledField)
-				.addField(language.getText("texteditor.settings.code.whitespacevisible"), whitespaceVisibleField)
-				.addField(language.getText("texteditor.settings.code.painttablines"), paintTabLinesField)
-				.addField(language.getText("texteditor.settings.code.markoccur"), markOccurrencesField)
-				.addField(language.getText("texteditor.settings.code.markallonsearches"), markAllOnOccurrenceSearchesField)
-				.addField(language.getText("texteditor.settings.code.markoccurdelay"), markOccurrencesDelayField)
-				.addField(language.getText("texteditor.settings.code.paintmarkoccurborder"), paintMarkOccurrencesBorderField)
-				.addField(language.getText("texteditor.settings.code.useselectedtextcolor"), useSelectedTextColorField)
-				.addField(language.getText("texteditor.settings.code.parserdelay"), parserDelayField)
-				.addField(language.getText("texteditor.settings.code.hyperlinksenabled"), hyperlinksEnabledField)
-				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
+			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)), 
+				utils.formField("texteditor.settings.code.marginline", marginLineField),
+				utils.formField("texteditor.settings.code.marginlinepos", marginLinePositionField),
+				utils.formField("texteditor.settings.code.roundedselection", roundedSelectionEdgesField),
+				utils.formField("texteditor.settings.code.hilitecurline", highlightCurrentLineField),
+				utils.formField("texteditor.settings.code.autoindent", autoIndentEnabledField),
+				utils.formField("texteditor.settings.code.bracketmatch", bracketMatchingEnabledField),
+				utils.formField("texteditor.settings.code.animbracketmatch", animateBracketMatchingField),
+				utils.formField("texteditor.settings.code.showmatchedbracketpopup", showMatchedBracketPopupField),
+				utils.formField("texteditor.settings.code.paintmatchedbracketpair", paintMatchedBracketPairField),
+				utils.formField("texteditor.settings.code.codefolding", codeFoldingEnabledField),
+				utils.formField("texteditor.settings.code.closecurlies", closeCurlyBracesField),
+				utils.formField("texteditor.settings.code.closemarkuptags", closeMarkupTagsField),
+				utils.formField("texteditor.settings.code.eolvisible", eolMarkersVisibleField),
+				utils.formField("texteditor.settings.code.hilitesecondarylang", highlightSecondaryLanguagesField),
+				utils.formField("texteditor.settings.code.focustips", useFocusableTipsField),
+				utils.formField("texteditor.settings.code.clearwhitespace", clearWhitespaceLinesEnabledField),
+				utils.formField("texteditor.settings.code.whitespacevisible", whitespaceVisibleField),
+				utils.formField("texteditor.settings.code.painttablines", paintTabLinesField),
+				utils.formField("texteditor.settings.code.markoccur", markOccurrencesField),
+				utils.formField("texteditor.settings.code.markallonsearches", markAllOnOccurrenceSearchesField),
+				utils.formField("texteditor.settings.code.markoccurdelay", markOccurrencesDelayField),
+				utils.formField("texteditor.settings.code.paintmarkoccurborder", paintMarkOccurrencesBorderField),
+				utils.formField("texteditor.settings.code.useselectedtextcolor", useSelectedTextColorField),
+				utils.formField("texteditor.settings.code.parserdelay", parserDelayField),
+				utils.formField("texteditor.settings.code.hyperlinksenabled", hyperlinksEnabledField)
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
 			)
 		);
 	}
