@@ -37,7 +37,7 @@ public final class Utility
 		.append("# This file is input for SWANTBLS.EXE, it specifies the switchnames\n")
 		.append("# and animated textures and flats usable with BOOM. The output of\n")
 		.append("# SWANTBLS is two lumps, SWITCHES.LMP and ANIMATED.LMP that should\n")
-		.append("# be inserted in the PWAD as lumps.")
+		.append("# be inserted in the PWAD as lumps.\n")
 		.append("#\n")
 		.append("# Of course, this is also readable by WSWANTBL.\n")
 	.toString();

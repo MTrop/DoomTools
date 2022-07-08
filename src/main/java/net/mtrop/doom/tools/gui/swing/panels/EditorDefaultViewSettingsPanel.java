@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;
@@ -24,6 +25,7 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = 6434971725684191370L;
 	
+	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
 	private EditorSettingsManager settings;
 	
@@ -41,6 +43,7 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 	 */
 	public EditorDefaultViewSettingsPanel()
 	{
+		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = EditorSettingsManager.get();
 		
@@ -68,14 +71,14 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 		));
 		
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, form(language.getInteger("texteditor.settings.label.width", 180))
-				.addField(language.getText("texteditor.settings.view.encoding"), defaultEncodingField)
-				.addField(language.getText("texteditor.settings.view.tabsize"), tabSizeField)
-				.addField(language.getText("texteditor.settings.view.spacetabs"), tabEmulatedField)
-				.addField(language.getText("texteditor.settings.view.linewrap"), lineWrapField)
-				.addField(language.getText("texteditor.settings.view.wordwrap"), wrapStyleField)
-				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
-			)
+			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)), 
+				utils.formField("texteditor.settings.view.encoding", defaultEncodingField),
+				utils.formField("texteditor.settings.view.tabsize", tabSizeField),
+				utils.formField("texteditor.settings.view.spacetabs", tabEmulatedField),
+				utils.formField("texteditor.settings.view.linewrap", lineWrapField),
+				utils.formField("texteditor.settings.view.wordwrap", wrapStyleField)
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings()))
+			))
 		);
 	}
 	

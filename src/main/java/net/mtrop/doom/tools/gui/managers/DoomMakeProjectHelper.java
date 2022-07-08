@@ -5,13 +5,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.DoomMakeMain;
@@ -210,35 +208,6 @@ public final class DoomMakeProjectHelper
 		return out;
 	}
 	
-	/**
-	 * Calls a DoomMake project target.
-	 * @param projectDirectory the project directory.
-	 * @param stdout the standard out stream. 
-	 * @param stderr the standard error stream. 
-	 * @param targetName the target name.
-	 * @param agentOverride if true, bypasses agent detection.
-	 * @return the list of project targets.
-	 * @throws FileNotFoundException 
-	 * @throws ProcessCallException 
-	 */
-	public InstancedFuture<Integer> callDoomMakeTarget(File projectDirectory, PrintStream stdout, PrintStream stderr, String targetName, boolean agentOverride) throws FileNotFoundException, ProcessCallException
-	{
-		checkProjectDirectory(projectDirectory);
-		
-		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
-		if (agentOverride)
-			callable.arg(DoomMakeMain.SWITCH_AGENT_BYPASS);
-		
-		callable.arg(targetName)
-			.setOut(stdout)
-			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."));
-		
-		LOG.infof("Calling DoomMake (%s).", targetName);
-		return InstancedFuture.instance(callable).spawn();
-	}
-
 	private static Properties getProjectProperties(File projectDirectory)
 	{
 		Properties properties = new Properties();

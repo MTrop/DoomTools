@@ -3,7 +3,9 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 import java.io.File;
 
-import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
+import javax.swing.JPanel;
+
+import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 
@@ -17,7 +19,7 @@ import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
  * DECOHack export panel.
  * @author Matthew Tropiano
  */
-public class DecoHackExportPanel extends MultiFileEditorPanel
+public class DecoHackExportPanel extends JPanel
 {
 	private static final long serialVersionUID = -6601542918464394270L;
 
@@ -28,7 +30,7 @@ public class DecoHackExportPanel extends MultiFileEditorPanel
 	private JFormField<File> sourceOutputField;
 	private JFormField<Boolean> budgetField;
 	
-	public DecoHackExportPanel(ExportSettings settings)
+	public DecoHackExportPanel(PatchExportSettings settings)
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();

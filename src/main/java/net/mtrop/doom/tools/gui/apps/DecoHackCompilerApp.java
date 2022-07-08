@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -73,16 +73,16 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
-		ExportSettings settings;
+		PatchExportSettings settings;
 		if (sourcePath != null)
 		{
 			scriptFile = FileUtils.canonizeFile(new File(sourcePath));
-			settings = new ExportSettings(scriptFile.getParentFile());
+			settings = new PatchExportSettings(scriptFile.getParentFile());
 		}
 		else
 		{
 			scriptFile = null;
-			settings = new ExportSettings();
+			settings = new PatchExportSettings();
 		}
 		
 		this.sourceFileField = fileField(
@@ -220,7 +220,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	{
 		File scriptFile = sourceFileField.getValue();
 		Charset encoding = charsetField.getValue();
-		ExportSettings exportSettings = new ExportSettings();
+		PatchExportSettings exportSettings = new PatchExportSettings();
 		exportSettings.setOutputFile(exportPanel.getPatchOutput());
 		exportSettings.setSourceOutputFile(exportPanel.getSourceOutput());
 		exportSettings.setOutputBudget(exportPanel.getBudget());

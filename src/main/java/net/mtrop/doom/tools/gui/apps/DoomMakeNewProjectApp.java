@@ -408,7 +408,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			utils.getWindowIcons(), 
 			language.getText("doommake.newproject.modal.openproject.title"),
 			containerOf(borderLayout(4, 4),
-				node(BorderLayout.CENTER, wrappedLabel(language.getText("doommake.newproject.modal.openproject.message")))
+				node(BorderLayout.CENTER, label(language.getText("doommake.newproject.modal.openproject.message")))
 			),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.folder", true),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.tools", false),

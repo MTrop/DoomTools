@@ -3,23 +3,23 @@ package net.mtrop.doom.tools.gui.apps.data;
 import java.io.File;
 
 /**
- * DECOHack export settings for WadScript.
+ * DECOHack export settings.
  * @author Matthew Tropiano
  */
-public class ExportSettings
+public class PatchExportSettings
 {
 	private File outputFile;
 	private File sourceOutputFile;
 	private boolean outputBudget;
 	
-	public ExportSettings()
+	public PatchExportSettings()
 	{
 		this.outputFile = null;
 		this.sourceOutputFile = null;
 		this.outputBudget = false;
 	}
 	
-	public ExportSettings(File sourceFile)
+	public PatchExportSettings(File sourceFile)
 	{
 		this.outputFile = new File(sourceFile.getParent() + File.separator + "dehacked.deh");
 		this.sourceOutputFile = null;

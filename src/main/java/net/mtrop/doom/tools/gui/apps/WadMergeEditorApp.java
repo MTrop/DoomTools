@@ -486,7 +486,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, mergeSettings);
-		appCommon.onExecuteWadMergeWithSettings(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
 	}
 	
 	private void onRunAgain()
@@ -521,7 +521,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, mergeSettings);
-		appCommon.onExecuteWadMergeWithSettings(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
 	}
 
 	private MergeSettings createMergeSettings(MergeSettings initSettings) 

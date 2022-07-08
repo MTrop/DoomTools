@@ -228,7 +228,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		MergeSettings executionSettings = new MergeSettings();
 		executionSettings.setWorkingDirectory(executePanel.getWorkingDirectory());
 		executionSettings.setArgs(executePanel.getArgs());
-		appCommon.onExecuteWadMergeWithSettings(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 }

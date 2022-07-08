@@ -18,7 +18,7 @@ import javax.swing.JMenuBar;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -88,7 +88,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
 	private File fileToOpenFirst;
 	private EditorHandle currentHandle;
-	private Map<EditorHandle, ExecutionSettings> handleToSettingsMap;
+	private Map<EditorHandle, ScriptExecutionSettings> handleToSettingsMap;
 	
 	// ...
 
@@ -317,7 +317,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 				state.put("editor.selected", String.valueOf(i));
 			
 			String settingPrefix = "execution." + i;
-			ExecutionSettings settings = handleToSettingsMap.get(handle);
+			ScriptExecutionSettings settings = handleToSettingsMap.get(handle);
 			if (settings != null)
 			{
 				state.put(settingPrefix + ".enabled", String.valueOf(true));
@@ -352,7 +352,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			boolean enabled = ValueUtils.parseBoolean(state.get(settingPrefix + ".enabled"), false);
 			if (enabled)
 			{
-				ExecutionSettings settings = new ExecutionSettings();
+				ScriptExecutionSettings settings = new ScriptExecutionSettings();
 				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
 				settings.setWorkingDirectory(ValueUtils.parse(state.get(settingPrefix + ".workdir"), parseFile));
 				settings.setStandardInPath(ValueUtils.parse(state.get(settingPrefix + ".stdin"), parseFile));
@@ -485,15 +485,15 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private void executeWithArgs(File scriptFile, Charset encoding, File workDir) 
 	{
-		ExecutionSettings executionSettings;
+		ScriptExecutionSettings executionSettings;
 		executionSettings = handleToSettingsMap.get(currentHandle);
-		executionSettings = createExecutionSettings(executionSettings != null ? executionSettings : new ExecutionSettings(workDir));
+		executionSettings = createExecutionSettings(executionSettings != null ? executionSettings : new ScriptExecutionSettings(workDir));
 
 		if (executionSettings == null)
 			return;
 		
 		handleToSettingsMap.put(currentHandle, executionSettings);
-		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 	
 	private void onRunAgain()
@@ -520,25 +520,25 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private void executeAgain(File scriptFile, File workDir)
 	{
-		ExecutionSettings executionSettings;
+		ScriptExecutionSettings executionSettings;
 		if ((executionSettings = handleToSettingsMap.get(currentHandle)) == null)
-			executionSettings = createExecutionSettings(new ExecutionSettings(workDir));
+			executionSettings = createExecutionSettings(new ScriptExecutionSettings(workDir));
 		
 		if (executionSettings == null)
 			return;
 		
 		handleToSettingsMap.put(currentHandle, executionSettings);
-		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), executionSettings);
+		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), executionSettings);
 	}
 
-	private ExecutionSettings createExecutionSettings(ExecutionSettings initSettings) 
+	private ScriptExecutionSettings createExecutionSettings(ScriptExecutionSettings initSettings) 
 	{
 		final WadScriptExecuteWithArgsPanel argsPanel = new WadScriptExecuteWithArgsPanel(initSettings);
-		ExecutionSettings settings = utils.createSettingsModal(
+		ScriptExecutionSettings settings = utils.createSettingsModal(
 			language.getText("wadscript.run.withargs.title"),
 			argsPanel,
 			(panel) -> {
-				ExecutionSettings out = new ExecutionSettings();
+				ScriptExecutionSettings out = new ScriptExecutionSettings();
 				out.setWorkingDirectory(panel.getWorkingDirectory());
 				out.setStandardInPath(panel.getStandardInPath());
 				out.setEntryPoint(panel.getEntryPoint());

@@ -1,13 +1,11 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -15,8 +13,6 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.Action;
 import javax.swing.JCheckBox;
 import javax.swing.JMenuBar;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 
 import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
@@ -27,14 +23,12 @@ import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectControlPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectTargetListPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -58,18 +52,20 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
 
+    private static final String[] NO_ARGS = new String[0];
+
     // Singletons
 
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
     /** Language manager. */
     private DoomToolsLanguageManager language;
-    /** Task manager. */
-    private DoomToolsTaskManager tasks;
     /** Project helper. */
     private DoomMakeProjectHelper helper;
     /** Settings manager. */
 	private DoomMakeSettingsManager settings;
+    /** App Common. */
+	private AppCommon appCommon;
 
 	// Components
 	
@@ -110,9 +106,9 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.tasks = DoomToolsTaskManager.get();
 		this.helper = DoomMakeProjectHelper.get();
 		this.settings = DoomMakeSettingsManager.get();
+		this.appCommon = AppCommon.get();
 
 		this.listPanel = new DoomMakeProjectTargetListPanel(
 			Collections.emptySortedSet(),
@@ -212,21 +208,16 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
 		refreshTargets();
 		
-		Border targetsBorder = createTitledBorder(
-			createLineBorder(Color.GRAY, 1), language.getText("doommake.project.targets"), TitledBorder.LEADING, TitledBorder.TOP
-		);
-		
 		return containerOf(
-			dimension(400, 300),
+			dimension(300, 225),
 			node(containerOf(
-				node(BorderLayout.NORTH, containerOf(
+				node(BorderLayout.NORTH, containerOf(createEmptyBorder(0, 4, 0, 4),
+					node(BorderLayout.CENTER, label(language.getText("doommake.project.targets"))),
 					node(BorderLayout.EAST, control)
 				)),
 				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
-					node(BorderLayout.CENTER, containerOf(targetsBorder, 
-						node(containerOf(createEmptyBorder(4, 4, 4, 4), 
-							node(scroll(listPanel))
-						))
+					node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
+						node(scroll(listPanel))
 					)),
 					node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 						node(BorderLayout.CENTER, autoBuildCheckbox),
@@ -349,7 +340,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			public int callBuild(String target)
 			{
 				try {
-					return runTarget(target, null, null, true).get();
+					return AppCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, null, null, null).get();
 				} catch (InterruptedException e) {
 					LOG.warn("DoomMake call interrupted!");
 					return -1;
@@ -447,50 +438,10 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			return;
 		if (currentTarget == null)
 			return;
-
-		utils.createProcessModal(
-			getApplicationContainer(), 
-			language.getText("doommake.project.logging.title", currentTarget), 
-			language.getText("doommake.project.build.message.running", currentTarget), 
-			language.getText("doommake.project.build.message.success"), 
-			language.getText("doommake.project.build.message.error"), 
-			(stream, errstream) -> runTarget(currentTarget, stream, errstream, false)
-		).start(tasks);
+		
+		appCommon.onExecuteDoomMake(getApplicationContainer(), statusPanel, projectDirectory, null, currentTarget, NO_ARGS, false);
 	}
 
-	private InstancedFuture<Integer> runTarget(final String targetName, final PrintStream out, final PrintStream err, final boolean agentOverride)
-	{
-		return tasks.spawn(() -> {
-			Integer result = null;
-			updateTargetsEnabled(false);
-			try {
-				statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", targetName));
-				result = helper.callDoomMakeTarget(projectDirectory, out, err, targetName, agentOverride).get();
-				if (result == 0)
-				{
-					statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.success"));
-				}
-				else
-				{
-					LOG.errorf("Error on DoomMake invoke (%s) result was %d: %s", targetName, result, projectDirectory.getAbsolutePath());
-					statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
-				}
-			} catch (FileNotFoundException | ProcessCallException e) {
-				LOG.errorf(e, "Error on DoomMake invoke (%s): %s", targetName, projectDirectory.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
-			} catch (InterruptedException e) {
-				LOG.warnf("Call to DoomMake invoke interrupted (%s): %s", targetName, projectDirectory.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("doommake.project.build.message.interrupt"));
-			} catch (ExecutionException e) {
-				LOG.errorf(e, "Error on DoomMake invoke (%s): %s", targetName, projectDirectory.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
-			} finally {
-				updateTargetsEnabled(true);
-			}
-			return result;
-		});
-	}
-	
 	private void updateTargetsEnabled(boolean enabled)
 	{
 		final boolean state = enabled && (autoBuildAgent == null || !autoBuildAgent.isRunning());

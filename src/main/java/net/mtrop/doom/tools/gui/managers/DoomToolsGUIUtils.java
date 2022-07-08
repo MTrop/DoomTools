@@ -7,6 +7,10 @@ import java.awt.Container;
 import java.awt.Image;
 import java.awt.Dialog.ModalityType;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +41,7 @@ import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
@@ -478,19 +483,17 @@ public final class DoomToolsGUIUtils
 	 * Creates a process modal, prepped to start and open.
 	 * @param parent the parent owner.
 	 * @param title the title of the modal.
-	 * @param activityMessage the message to display during execution.
-	 * @param successMessage the success message if the process terminates with a zero result.
-	 * @param errorMessage the error message if the process terminates with a nonzero result.
-	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR).
+	 * @param inFile the input stream file.
+	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
 	 * @return a modal handle to start with a task manager.
 	 */
-	public ProcessModal createProcessModal(final Container parent, final String title, final String activityMessage, final String successMessage, final String errorMessage, final BiFunction<PrintStream, PrintStream, InstancedFuture<Integer>> modalOutFunction) 
+	public ProcessModal createProcessModal(final Container parent, final String title, final File inFile, final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction) 
 	{
 		// Show output.
 		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
 		final DoomToolsStatusPanel status = new DoomToolsStatusPanel();
 		
-		status.setActivityMessage(activityMessage);
+		status.setActivityMessage(language.getText("doomtools.process.activity"));
 		
 		final Modal<Void> outputModal = modal(
 			parent, 
@@ -509,12 +512,23 @@ public final class DoomToolsGUIUtils
 				final PrintStream outStream = outputPanel.getPrintStream();
 				final PrintStream errorStream = outputPanel.getErrorPrintStream();
 				tasks.spawn(() -> {
-					InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream);
-					Integer result = runInstance.result();
-					if (result == 0)
-						status.setSuccessMessage(successMessage);
-					else
-						status.setErrorMessage(errorMessage);
+					try (InputStream stdin = inFile != null ? new FileInputStream(inFile) : IOUtils.getNullInputStream()) 
+					{
+						InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
+						Integer result = runInstance.result();
+						if (result == 0)
+							status.setSuccessMessage(language.getText("doomtools.process.success"));
+						else
+							status.setErrorMessage(language.getText("doomtools.process.error", String.valueOf(result)));
+					} 
+					catch (FileNotFoundException e) 
+					{
+						status.setErrorMessage(language.getText("doomtools.process.error", "Standard In file not found: " + inFile.getPath()));
+					} 
+					catch (IOException e) 
+					{
+						status.setErrorMessage(language.getText("doomtools.process.error", e.getLocalizedMessage()));
+					}
 				});
 				outputModal.openThenDispose();
 			}
@@ -538,27 +552,43 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
-	 * @return the WadScript file filter.
+	 * @return the DEFSWANI file filter.
 	 */
-	public FileFilter getWadScriptFileFilter()
+	public FileFilter getDEFSWANIFileFilter()
 	{
-		return fileExtensionFilter("WadScript (*.wscript/*.wscr/*.wsx)", "wscript", "wscr", "wsx");
+		return fileExtensionFilter(language.getText("doomtools.filter.defswani.description") + " (*.txt/*.dat)", "txt", "dat");
 	}
-	
-	/**
-	 * @return the WadMerge file filter.
-	 */
-	public FileFilter getWadMergeFileFilter()
-	{
-		return fileExtensionFilter("WadMerge (*.wadm/*.wadmerge)", "wadm", "wadmerge");
-	}
-	
+
 	/**
 	 * @return the DECOHack file filter.
 	 */
 	public FileFilter getDecoHackFileFilter()
 	{
-		return fileExtensionFilter("DECOHack Source (*.dh)", "dh");
+		return fileExtensionFilter(language.getText("doomtools.filter.decohack.description") + " (*.dh)", "dh");
+	}
+
+	/**
+	 * @return the WadMerge file filter.
+	 */
+	public FileFilter getWadMergeFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.wadmerge.description") + " (*.wadm/*.wadmerge)", "wadm", "wadmerge");
+	}
+	
+	/**
+	 * @return the WadScript file filter.
+	 */
+	public FileFilter getWadScriptFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.wadscript.description") + " (*.wscript/*.wscr/*.wsx)", "wscript", "wscr", "wsx");
+	}
+
+	/**
+	 * @return the WAD file filter.
+	 */
+	public FileFilter getWADFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.wadfile.description") + " (*.wad)", "wad");
 	}
 	
 	/**
@@ -590,6 +620,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * Process modal.
 	 */
+	@FunctionalInterface
 	public interface ProcessModal
 	{
 		/**
@@ -598,5 +629,26 @@ public final class DoomToolsGUIUtils
 		 */
 		void start(DoomToolsTaskManager tasks);
 	}
+	
+	/**
+	 * Process creation function.
+	 * @param <T1>
+	 * @param <T2>
+	 * @param <T3>
+	 * @param <R>
+	 */
+	@FunctionalInterface
+	public interface TriFunction<T1, T2, T3, R>
+	{
+		/**
+		 * Applies this function.
+		 * @param t1
+		 * @param t2
+		 * @param t3
+		 * @return the result.
+		 */
+		R apply(T1 t1, T2 t2, T3 t3);
+	}
+	
 	
 }

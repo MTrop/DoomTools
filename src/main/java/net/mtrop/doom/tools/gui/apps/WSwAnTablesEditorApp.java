@@ -6,8 +6,11 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,34 +19,39 @@ import java.util.function.Function;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
-import net.mtrop.doom.tools.decohack.DecoHackPatchType;
+import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadFile;
+import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.texture.Animated;
+import net.mtrop.doom.texture.Switches;
+import net.mtrop.doom.tools.WSwAnTablesMain;
+import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.settings.DecoHackSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
+import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesSettingsManager;
+import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
@@ -52,33 +60,25 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  * The DECOHack application.
  * @author Matthew Tropiano
  */
-public class DecoHackEditorApp extends DoomToolsApplicationInstance
+public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 {
+	// TODO: New DEFSWANI from WAD with ANIMATED/SWITCHES.
+	
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackEditorApp.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(WSwAnTablesEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
-	private static final String EMPTY_PATCH = (new StringBuilder())
-		.append("/*****************************************************************************\n")
-		.append(" * DECOHack Main Patch\n")
-		.append(" *****************************************************************************/\n")
-		.append("\n")
-		.append("#include <{{PATCH_TYPE}}>\n")
-		.append("#include <friendly>\n")
-		.append("\n")
-	.toString();
-	
     // Singletons
 
 	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
-	private DecoHackSettingsManager settings;
+	private WSwAnTablesSettingsManager settings;
 	private AppCommon appCommon;
 
 	// Referenced Components
 	
-	private DecoHackEditorPanel editorPanel;
+	private DefSwAniEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
 
 	private Action exportAction;
@@ -87,14 +87,14 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private File fileToOpenFirst;
 	private EditorHandle currentHandle;
-	private Map<EditorHandle, PatchExportSettings> handleToSettingsMap;
+	private Map<EditorHandle, DefSwAniExportSettings> handleToSettingsMap;
 
 	// ...
 
 	/**
 	 * Create a new DECOHack application.
 	 */
-	public DecoHackEditorApp() 
+	public WSwAnTablesEditorApp() 
 	{
 		this(null);
 	}
@@ -103,14 +103,14 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	 * Create a new DECOHack application.
 	 * @param fileToOpenFirst if not null, open this file on create.
 	 */
-	public DecoHackEditorApp(File fileToOpenFirst) 
+	public WSwAnTablesEditorApp(File fileToOpenFirst) 
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
-		this.settings = DecoHackSettingsManager.get();
+		this.settings = WSwAnTablesSettingsManager.get();
 		this.appCommon = AppCommon.get();
 		
-		this.editorPanel = new DecoHackEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new DefSwAniEditorPanel(new MultiFileEditorPanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
@@ -118,7 +118,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				return true;
 			}
 		}, 
-		new DecoHackEditorPanel.Listener()
+		new DefSwAniEditorPanel.Listener()
 		{
 			@Override
 			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next) 
@@ -131,26 +131,26 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
+		this.exportAction = utils.createActionFromLanguageKey("wswantbl.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -160,7 +160,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("decohack.editor.title");
+		return language.getText("wswantbl.editor.title");
 	}
 
 	@Override
@@ -175,11 +175,12 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonFileMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("decohack.menu.file.item.new",
-				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
-				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
+			utils.createItemFromLanguageKey("wswantbl.menu.file.item.new",
+				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
 			),
-			utils.createItemFromLanguageKey("decohack.menu.file.item.open", (c, e) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open", (c, e) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open.wad", (c, e) -> onOpenEditorFromWAD()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -209,7 +210,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonPatchMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("decohack.menu.patch.item.export", exportAction)
+			utils.createItemFromLanguageKey("wswantbl.menu.patch.item.export", exportAction)
 		);
 	}
 	
@@ -232,16 +233,16 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public JMenuBar createDesktopMenuBar() 
 	{
 		return menuBar(
-			utils.createMenuFromLanguageKey("decohack.menu.file", ArrayUtils.joinArrays(
+			utils.createMenuFromLanguageKey("wswantbl.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> attemptClose())
+					utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (c, e) -> attemptClose())
 				)
 			)),
-			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
+			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems())
 		);
 	}
 	
@@ -249,10 +250,10 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public JMenuBar createInternalMenuBar() 
 	{
 		return menuBar(
-			utils.createMenuFromLanguageKey("decohack.menu.file", createCommonFileMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wswantbl.menu.file", createCommonFileMenuItems()),
+			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
+			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems())
 		);
 	}
 
@@ -273,13 +274,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("decohack.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
 				onOpenFile(fileToOpenFirst);
 			else
-				onNewEditor(DecoHackPatchType.DOOM19.name().toLowerCase());
+				onNewEditor();
 		}
 	}
 
@@ -305,7 +306,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState() 
 	{
 		Map<String, String> state = super.getApplicationState();
-		editorPanel.saveState("decohack", state);
+		editorPanel.saveState("wswantbl", state);
 
 		for (int i = 0; i < editorPanel.getEditorCount(); i++)
 		{
@@ -314,15 +315,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				state.put("editor.selected", String.valueOf(i));
 			
 			String settingPrefix = "export." + i;
-			PatchExportSettings settings = handleToSettingsMap.get(handle);
+			DefSwAniExportSettings settings = handleToSettingsMap.get(handle);
 			if (settings != null)
 			{
 				state.put(settingPrefix + ".enabled", String.valueOf(true));
-				if (settings.getOutputFile() != null)
-					state.put(settingPrefix + ".outfile", settings.getOutputFile().getAbsolutePath());
-				if (settings.getSourceOutputFile() != null)
-					state.put(settingPrefix + ".srcfile", settings.getSourceOutputFile().getAbsolutePath());
-				state.put(settingPrefix + ".budget", String.valueOf(settings.isOutputBudget()));
+				if (settings.getOutputWAD() != null)
+					state.put(settingPrefix + ".outwad", settings.getOutputWAD().getAbsolutePath());
+				state.put(settingPrefix + ".outputsource", String.valueOf(settings.isOutputSource()));
 			}
 		}
 		
@@ -333,7 +332,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state) 
 	{
 		handleToSettingsMap.clear();
-		editorPanel.loadState("decohack", state);
+		editorPanel.loadState("wswantbl", state);
 		
 		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), 0);
 		editorPanel.setEditorByIndex(selectedIndex);
@@ -346,15 +345,13 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			boolean enabled = ValueUtils.parseBoolean(state.get(settingPrefix + ".enabled"), false);
 			if (enabled)
 			{
-				PatchExportSettings settings = new PatchExportSettings();
+				DefSwAniExportSettings settings = new DefSwAniExportSettings();
 				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
-				settings.setOutputFile(ValueUtils.parse(state.get(settingPrefix + ".outfile"), parseFile));
-				settings.setSourceOutputFile(ValueUtils.parse(state.get(settingPrefix + ".srcfile"), parseFile));
-				settings.setOutputBudget(ValueUtils.parseBoolean(state.get(settingPrefix + ".budget"), false));
+				settings.setOutputWAD(ValueUtils.parse(state.get(settingPrefix + ".outwad"), parseFile));
+				settings.setOutputSource(ValueUtils.parseBoolean(state.get(settingPrefix + ".outputsource"), false));
 				handleToSettingsMap.put(handle, settings);
 			}
 		}
-		
 	}
 	
 	
@@ -375,47 +372,32 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private void onNewEditor()
 	{
-		final JFormField<DecoHackPatchType> patchField = comboField(comboBox(Arrays.asList(DecoHackPatchType.values())));
-		patchField.setValue(DecoHackPatchType.DOOM19);
+		StringWriter writer = new StringWriter();
+		try (Reader reader = new InputStreamReader(IOUtils.openResource("gui/apps/defswani.txt"), Charset.forName("windows-1252")))
+		{
+			IOUtils.relay(reader, writer);
+		} 
+		catch (IOException e) 
+		{
+			LOG.error(e, "Could not get DEFSWANI data from resources.");
+		}
 		
-		JPanel panel = new JPanel();
-		containerOf(panel, borderLayout(0, 4),
-			node(BorderLayout.NORTH, label(language.getText("decohack.new.modal.message"))),
-			node(BorderLayout.SOUTH, patchField)
-		);
-		
-		Boolean choice = utils.createModal( 
-			language.getText("decohack.new.modal.title"), 
-			panel,
-			utils.createChoiceFromLanguageKey("doomtools.ok", true),
-			utils.createChoiceFromLanguageKey("doomtools.cancel", false)
-		).openThenDispose();
-		
-		if (choice == null || choice == Boolean.FALSE)
-			return;
-		
-		onNewEditor(patchField.getValue().getKeyword());
+		String editorName = "New " + NEW_COUNTER.getAndIncrement();
+		editorPanel.newEditor(editorName, writer.toString(), Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
 	}
 
-	private void onNewEditor(String patchType)
-	{
-		String content = EMPTY_PATCH.replace("{{PATCH_TYPE}}", patchType);
-		String editorName = "New " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, EMPTY_PATCH.replace("{{PATCH_TYPE}}", patchType), Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DECOHACK, content.length());
-	}
-	
 	private void onNewBlankEditor()
 	{
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, "", Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DECOHACK, 0);
+		editorPanel.newEditor(editorName, "", Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
 	}
-	
+
 	private void onOpenEditor()
 	{
 		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			language.getText("decohack.open.title"), 
-			language.getText("decohack.open.accept"),
+			language.getText("wswantbl.open.title"), 
+			language.getText("wswantbl.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
 			utils.getDecoHackFileFilter()
@@ -425,46 +407,121 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			onOpenFile(file);
 	}
 	
+	private void onOpenEditorFromWAD()
+	{
+		File file = utils.chooseFile(
+			getApplicationContainer(), 
+			language.getText("wswantbl.open.wad.title"), 
+			language.getText("wswantbl.open.wad.accept"),
+			settings::getLastOpenedWAD,
+			settings::setLastOpenedWAD,
+			utils.getWADFileFilter()
+		);
+		
+		if (file == null)
+			return;
+		
+		boolean isWad;
+		try {
+			isWad = Wad.isWAD(file);
+		} catch (FileNotFoundException e) {
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.notfound", file.getAbsolutePath()));
+			return;
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.ioerror", file.getAbsolutePath()));
+			return;
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.security", file.getAbsolutePath()));
+			return;
+		}
+	
+		if (!isWad)
+		{
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.badwad", file.getAbsolutePath()));
+			return;
+		}
+		
+		String content;
+		try (WadFile wad = new WadFile(file))
+		{
+			int animIndex = wad.indexOf("ANIMATED");
+			int switIndex = wad.indexOf("SWITCHES");
+			
+			if (animIndex < 0 || switIndex < 0)
+			{
+				SwingUtils.error(language.getText("wswantbl.open.wad.error.nodata", file.getAbsolutePath()));
+				return;
+			}
+			
+			Animated animated = wad.getDataAs(animIndex, Animated.class);
+			Switches switches = wad.getDataAs(switIndex, Switches.class);
+			
+			StringWriter sw = new StringWriter();
+			PrintWriter writer = new PrintWriter(sw);
+			Utility.writeSwitchAnimatedTables(switches, animated, WSwAnTablesMain.SWANTBLS_OUTPUT_HEADER, writer);
+			content = sw.toString();
+		} 
+		catch (WadException e) 
+		{
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.badwad", file.getAbsolutePath()));
+			return;
+		}
+		catch (IOException e) 
+		{
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.ioerror", file.getAbsolutePath()));
+			return;
+		}
+		catch (SecurityException e) 
+		{
+			SwingUtils.error(language.getText("wswantbl.open.wad.error.security", file.getAbsolutePath()));
+			return;
+		}
+		
+		String editorName = "Wad " + NEW_COUNTER.getAndIncrement();
+		editorPanel.newEditor(editorName, content, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
+	}
+
 	private void onOpenFile(File file)
 	{
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error", file.getName()));
+			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error", file.getName()));
 			SwingUtils.error(language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error", file.getName()));
+			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error", file.getName()));
 			SwingUtils.error(language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
 		} catch (SecurityException e) {
 			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error.security", file.getName()));
+			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error.security", file.getName()));
 			SwingUtils.error(language.getText("decohack.open.error.security", file.getAbsolutePath()));
 		}
 	}
 	
 	private boolean saveBeforeExecute()
 	{
-		if (currentHandle.needsToSave() || currentHandle.getContentSourceFile() == null)
+		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
 			Boolean saveChoice = modal(
 				getApplicationContainer(), 
 				utils.getWindowIcons(), 
-				language.getText("decohack.save.modal.title"),
-				containerOf(label(language.getText("decohack.save.modal.message", currentHandle.getEditorTabName()))), 
+				language.getText("wswantbl.save.modal.title"),
+				containerOf(label(language.getText("wswantbl.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
 			).openThenDispose();
 			
-			if (saveChoice == null || saveChoice == false)
+			if (saveChoice == null)
 				return false;
 			else if (saveChoice == true)
 			{
 				if (!editorPanel.saveCurrentEditor())
 					return false;
 			}
+			// else, continue on.
 		}
 
 		return true;
@@ -474,51 +531,65 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(getApplicationContainer(), language.getText("decohack.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), language.getText("wswantbl.error.mustsave"));
 			return;
 		}
 		
 		// Should be set if saveBeforeExecute() succeeds.
-		final File scriptFile = currentHandle.getContentSourceFile();
-		
-		PatchExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
-		final PatchExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new PatchExportSettings(scriptFile));
+		// If no file, then make a temporary one for export.
+
+		if (currentHandle.getContentSourceFile() != null)
+		{
+			File scriptFile = currentHandle.getContentSourceFile();
+			exportWithSettings(scriptFile);
+		}
+		else
+		{
+			try (TempFile scriptFile = currentHandle.createTempCopy())
+			{
+				exportWithSettings(scriptFile);
+			}
+		}
+	}
+
+	private void exportWithSettings(final File scriptFile) 
+	{
+		DefSwAniExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
+		final DefSwAniExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new DefSwAniExportSettings());
 		
 		if (processSettings == null)
 			return;
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
-
-		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), processSettings);
+		appCommon.onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, processSettings);
 	}
 
-	private PatchExportSettings createExportSettings(File sourceFile, final PatchExportSettings initSettings) 
+	private DefSwAniExportSettings createExportSettings(File sourceFile, final DefSwAniExportSettings initSettings) 
 	{
-		final DecoHackExportPanel argsPanel = new DecoHackExportPanel(initSettings);
-		PatchExportSettings settings = utils.createSettingsModal(
-			language.getText("decohack.export.title"),
+		final DefSwAniExportPanel argsPanel = new DefSwAniExportPanel(initSettings);
+		DefSwAniExportSettings settings = utils.createSettingsModal(
+			language.getText("wswantbl.export.title"),
 			argsPanel,
 			(panel) -> {
-				PatchExportSettings out = new PatchExportSettings(sourceFile);
-				out.setOutputFile(panel.getPatchOutput());
-				out.setSourceOutputFile(panel.getSourceOutput());
-				out.setOutputBudget(panel.getBudget());
+				DefSwAniExportSettings out = new DefSwAniExportSettings();
+				out.setOutputWAD(panel.getOutputWAD());
+				out.setOutputSource(panel.getOutputSource());
 				return out;
 			},
-			utils.createChoiceFromLanguageKey("decohack.export.choice.export", true),
+			utils.createChoiceFromLanguageKey("wswantbl.export.choice.export", true),
 			utils.createChoiceFromLanguageKey("doomtools.cancel")
 		);
 		
 		return settings;
 	}
 
-	private class DecoHackEditorPanel extends MultiFileEditorPanel
+	private class DefSwAniEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = -9024669807749249148L;
 		
 		private FileFilter[] TYPES = null;
 		
-		public DecoHackEditorPanel(Options options, Listener listener)
+		public DefSwAniEditorPanel(Options options, Listener listener)
 		{
 			super(options, listener);
 		}
@@ -526,7 +597,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected String getDefaultStyleName() 
 		{
-			return DoomToolsEditorProvider.SYNTAX_STYLE_DECOHACK;
+			return DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI;
 		}
 		
 		@Override

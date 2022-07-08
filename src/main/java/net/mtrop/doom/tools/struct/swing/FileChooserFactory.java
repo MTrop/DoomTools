@@ -378,7 +378,7 @@ public final class FileChooserFactory
 			if (file.isDirectory())
 				return true;
 			String filename = file.getName();
-			int lastIndexOf = filename.indexOf('.');
+			int lastIndexOf = filename.lastIndexOf('.');
 			if (lastIndexOf < 0)
 				return false;
 			for (int i = 0; i < extensions.length; i++)

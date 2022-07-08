@@ -8,19 +8,19 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
  * Execution settings for WadScript.
  * @author Matthew Tropiano
  */
-public class ExecutionSettings
+public class ScriptExecutionSettings
 {
 	private File workingDirectory;
 	private File standardInPath;
 	private String entryPoint;
 	private String[] args;
 	
-	public ExecutionSettings()
+	public ScriptExecutionSettings()
 	{
 		this(null);
 	}
 	
-	public ExecutionSettings(File workingDirectory)
+	public ScriptExecutionSettings(File workingDirectory)
 	{
 		this.workingDirectory = workingDirectory;
 		this.standardInPath = null;

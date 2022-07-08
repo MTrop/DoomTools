@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -73,16 +73,16 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
-		ExecutionSettings settings;
+		ScriptExecutionSettings settings;
 		if (scriptPath != null)
 		{
 			scriptFile = FileUtils.canonizeFile(new File(scriptPath));
-			settings = new ExecutionSettings(scriptFile.getParentFile());
+			settings = new ScriptExecutionSettings(scriptFile.getParentFile());
 		}
 		else
 		{
 			scriptFile = null;
-			settings = new ExecutionSettings();
+			settings = new ScriptExecutionSettings();
 		}
 		
 		this.sourceFileField = fileField(
@@ -232,12 +232,12 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	{
 		File scriptFile = sourceFileField.getValue();
 		Charset encoding = charsetField.getValue();
-		ExecutionSettings executionSettings = new ExecutionSettings();
+		ScriptExecutionSettings executionSettings = new ScriptExecutionSettings();
 		executionSettings.setWorkingDirectory(executePanel.getWorkingDirectory());
 		executionSettings.setStandardInPath(executePanel.getStandardInPath());
 		executionSettings.setEntryPoint(executePanel.getEntryPoint());
 		executionSettings.setArgs(executePanel.getArgs());
-		appCommon.onExecuteWadScriptWithSettings(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 }

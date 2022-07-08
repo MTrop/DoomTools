@@ -2,18 +2,22 @@ package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.Container;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.mtrop.doom.tools.DecoHackMain;
+import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.apps.data.ExecutionSettings;
-import net.mtrop.doom.tools.gui.apps.data.ExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -47,6 +51,10 @@ public final class AppCommon
 
 	/* ==================================================================== */
 	
+	private static final AtomicLong DEFAULT_THREADFACTORY_ID = new AtomicLong(0L);
+	private static final ThreadFactory DEFAULT_THREADFACTORY = 
+		(runnable) -> new Thread(runnable, "AppThread-" + DEFAULT_THREADFACTORY_ID.getAndIncrement());
+
 	private DoomToolsGUIUtils utils;
 	private DoomToolsTaskManager tasks;
 	private DoomToolsLanguageManager language;
@@ -66,7 +74,7 @@ public final class AppCommon
 	 * @param encoding the encoding of the source file.
 	 * @param processSettings
 	 */
-	public void onExecuteDecoHack(Container parent, final DoomToolsStatusPanel statusPanel, File sourceFile, Charset encoding, ExportSettings processSettings)
+	public void onExecuteDecoHack(Container parent, final DoomToolsStatusPanel statusPanel, File sourceFile, Charset encoding, PatchExportSettings processSettings)
 	{
 		File sourceOutputFile = processSettings.getSourceOutputFile();
 		File outputFile = processSettings.getOutputFile(); 
@@ -75,53 +83,175 @@ public final class AppCommon
 		utils.createProcessModal(
 			parent, 
 			language.getText("decohack.export.message.title"), 
-			language.getText("decohack.export.message.running", sourceFile.getName()), 
-			language.getText("decohack.export.message.success"), 
-			language.getText("decohack.export.message.error"), 
-			(stream, errstream) -> executeDecoHack(statusPanel, sourceFile, encoding, sourceOutputFile, outputFile, budget, stream, errstream)
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("decohack.export.message.running", sourceFile.getName()), 
+				language.getText("decohack.export.message.success"), 
+				language.getText("decohack.export.message.interrupt"), 
+				language.getText("decohack.export.message.error"),
+				callDecoHack(sourceFile, encoding, sourceOutputFile, outputFile, budget, stdout, stderr)
+			) 
 		).start(tasks);
 	}
 	
-	private InstancedFuture<Integer> executeDecoHack(
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel.
+	 * @param projectDirectory the project directory.
+	 * @param standardInFile the standard in.
+	 * @param target the target name.
+	 * @param args the script arguments, if any.
+	 * @param agentOverride if true, override the agent warning. 
+	 */
+	public void onExecuteDoomMake(Container parent, final DoomToolsStatusPanel statusPanel, final File projectDirectory, final File standardInFile, final String target, final String[] args, boolean agentOverride)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wadscript.run.message.title"),
+			standardInFile,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("doommake.project.build.message.running", target), 
+				language.getText("doommake.project.build.message.success"), 
+				language.getText("doommake.project.build.message.interrupt"), 
+				language.getText("doommake.project.build.message.error"), 
+				callDoomMake(projectDirectory, target, agentOverride, args, stdout, stderr, stdin)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param scriptFile the script file to run.
+	 * @param encoding the encoding of the script file.
+	 * @param executionSettings
+	 */
+	public void onExecuteWadScript(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, ScriptExecutionSettings executionSettings)
+	{
+		final File workingDirectory = executionSettings.getWorkingDirectory();
+		final File standardInPath = executionSettings.getStandardInPath();
+		final String entryPoint = executionSettings.getEntryPoint();
+		final String[] args = executionSettings.getArgs();
+		
+		utils.createProcessModal(
+			parent, 
+			language.getText("wadscript.run.message.title"),
+			standardInPath,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wadscript.run.message.running", entryPoint), 
+				language.getText("wadscript.run.message.success"), 
+				language.getText("wadscript.run.message.interrupt"),
+				language.getText("wadscript.run.message.error"),
+				callWadScript(scriptFile, workingDirectory, entryPoint, encoding, args, stdout, stderr, stdin)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param scriptFile the script file to run.
+	 * @param encoding the encoding of the script file.
+	 * @param mergeSettings
+	 */
+	public void onExecuteWadMerge(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, MergeSettings mergeSettings)
+	{
+		final File workingDirectory = mergeSettings.getWorkingDirectory();
+		final String[] args = mergeSettings.getArgs();
+		
+		utils.createProcessModal(
+			parent, 
+			language.getText("wadmerge.run.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wadmerge.run.message.running"), 
+				language.getText("wadmerge.run.message.success"), 
+				language.getText("wadmerge.run.message.interrupt"), 
+				language.getText("wadmerge.run.message.error"), 
+				callWadMerge(scriptFile, workingDirectory, encoding, args, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param scriptFile the script file to run.
+	 * @param exportSettings the export settings.
+	 */
+	public void onExecuteWSwAnTbl(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, DefSwAniExportSettings exportSettings)
+	{
+		final File outWAD = exportSettings.getOutputWAD();
+		final boolean outputSource = exportSettings.isOutputSource();
+		
+		utils.createProcessModal(
+			parent, 
+			language.getText("wadmerge.run.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wswantbl.run.message.running"), 
+				language.getText("wswantbl.run.message.success"), 
+				language.getText("wswantbl.run.message.interrupt"), 
+				language.getText("wswantbl.run.message.error"), 
+				callWSwAnTbl(scriptFile, outWAD, outputSource, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param statusPanel the status panel of the primary app.
+	 * @param activityMessage the message to display in the modal during execution.
+	 * @param successMessage the message to display in the modal on successful finish.
+	 * @param interruptMessage the message to display in the modal on interruption.
+	 * @param errorMessage the message to display in the modal on error.
+	 * @param task the instanced future to execute.
+	 * @return
+	 */
+	private InstancedFuture<Integer> execute(
 		final DoomToolsStatusPanel statusPanel, 
-		File scriptFile, 
-		Charset encoding, 
-		File outSourceFile, 
-		File outTargetFile, 
-		boolean budget, 
-		PrintStream stdout, 
-		PrintStream stderr
+		final String activityMessage, 
+		final String successMessage, 
+		final String interruptMessage,
+		final String errorMessage,
+		final InstancedFuture<Integer> task
 	){
 		return tasks.spawn(() -> {
 			Integer result = null;
-			InputStream stdin = null;
 			try
 			{
-				statusPanel.setActivityMessage(language.getText("decohack.export.message.running", scriptFile.getName()));
-				result = callDecoHack(scriptFile, encoding, outSourceFile, outTargetFile, budget, stdout, stderr).get();
+				statusPanel.setActivityMessage(activityMessage);
+				result = task.get();
 				if (result == 0)
 				{
-					statusPanel.setSuccessMessage(language.getText("decohack.export.message.success"));
+					statusPanel.setSuccessMessage(successMessage);
 				}
 				else
 				{
-					LOG.errorf("Error on DECOHack invoke. Result was %d: %s", result, scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-					statusPanel.setErrorMessage(language.getText("decohack.export.message.error.result", result));
+					LOG.errorf(errorMessage);
+					statusPanel.setErrorMessage(errorMessage);
 				}
 			} catch (InterruptedException e) {
-				LOG.warnf("Call to DECOHack invoke interrupted: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-				statusPanel.setErrorMessage(language.getText("decohack.export.message.interrupt"));
+				LOG.warnf(interruptMessage);
+				statusPanel.setErrorMessage(interruptMessage);
 			} catch (ExecutionException e) {
-				LOG.errorf(e, "Error on DECOHack invoke: %s", scriptFile != null ? scriptFile.getAbsolutePath() : "STDIN");
-				statusPanel.setErrorMessage(language.getText("decohack.export.message.error"));
-			} finally {
-				IOUtils.close(stdin);
+				LOG.errorf(e, errorMessage);
+				statusPanel.setErrorMessage(errorMessage);
 			}
 			return result;
 		});
 	}
-	
-	private static InstancedFuture<Integer> callDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
+
+	public static InstancedFuture<Integer> callDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
 		
@@ -131,7 +261,7 @@ public final class AppCommon
 		
 		if (outSourceFile != null)
 			callable.arg(DecoHackMain.SWITCH_SOURCE_OUTPUT).arg(outSourceFile.getAbsolutePath());
-
+	
 		if (budget)
 			callable.arg(DecoHackMain.SWITCH_BUDGET);
 		
@@ -143,76 +273,40 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDERR."));
 		
 		LOG.infof("Calling DECOHack (%s).", scriptFile);
-		return InstancedFuture.instance(callable).spawn();
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
 	/**
-	 * 
-	 * @param parent the parent container for the modal.
-	 * @param statusPanel the status panel
-	 * @param scriptFile the script file to run.
-	 * @param encoding the encoding of the script file.
-	 * @param executionSettings
+	 * Calls a DoomMake project target.
+	 * @param projectDirectory the project directory.
+	 * @param stdout the standard out stream. 
+	 * @param stderr the standard error stream. 
+	 * @param targetName the target name.
+	 * @param agentOverride if true, bypasses agent detection.
+	 * @param args script arguments.
+	 * @param stdin standard in.
+	 * @return the list of project targets.
 	 */
-	public void onExecuteWadScriptWithSettings(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, ExecutionSettings executionSettings)
+	public static InstancedFuture<Integer> callDoomMake(File projectDirectory, String targetName, boolean agentOverride, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
-		final File workingDirectory = executionSettings.getWorkingDirectory();
-		final File standardInPath = executionSettings.getStandardInPath();
-		final String entryPoint = executionSettings.getEntryPoint();
-		final String[] args = executionSettings.getArgs();
+		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
+		if (agentOverride)
+			callable.arg(DoomMakeMain.SWITCH_AGENT_BYPASS);
 		
-		utils.createProcessModal(
-			parent, 
-			language.getText("wadscript.run.message.title"), 
-			language.getText("wadscript.run.message.running", entryPoint), 
-			language.getText("wadscript.run.message.success"), 
-			language.getText("wadscript.run.message.error"), 
-			(stream, errstream) -> executeWadScript(statusPanel, scriptFile, workingDirectory, entryPoint, encoding, args, stream, errstream, standardInPath)
-		).start(tasks);
+		callable.arg(targetName)
+			.args(args)
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(stdin)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDIN."));
+		
+		LOG.infof("Calling DoomMake (%s).", targetName);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	private InstancedFuture<Integer> executeWadScript(
-		final DoomToolsStatusPanel statusPanel, 
-		final File scriptFile, 
-		final File workingDirectory, 
-		String entryPoint, 
-		Charset encoding,
-		String[] args, 
-		final PrintStream out, 
-		final PrintStream err, 
-		final File input
-	){
-		return tasks.spawn(() -> {
-			Integer result = null;
-			InputStream stdin = null;
-			try
-			{
-				stdin = input != null ? new FileInputStream(input) : IOUtils.getNullInputStream();
-				statusPanel.setActivityMessage(language.getText("wadscript.run.message.running", scriptFile.getName()));
-				result = callWadScript(scriptFile, workingDirectory, entryPoint, encoding, args, out, err, stdin).get();
-				if (result == 0)
-				{
-					statusPanel.setSuccessMessage(language.getText("wadscript.run.message.success"));
-				}
-				else
-				{
-					LOG.errorf("Error on WadScript invoke (%s) result was %d: %s", entryPoint, result, scriptFile.getAbsolutePath());
-					statusPanel.setErrorMessage(language.getText("wadscript.run.message.error.result", result));
-				}
-			} catch (InterruptedException e) {
-				LOG.warnf("Call to WadScript invoke interrupted (%s): %s", entryPoint, scriptFile.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.run.message.interrupt"));
-			} catch (ExecutionException e) {
-				LOG.errorf(e, "Error on WadScript invoke (%s): %s", entryPoint, scriptFile.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
-			} finally {
-				IOUtils.close(stdin);
-			}
-			return result;
-		});
-	}
-
-	private static InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public static InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
 		ProcessCallable callable = Common.spawnJava(WadScriptMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -227,71 +321,10 @@ public final class AppCommon
 			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDIN."));
 		
 		LOG.infof("Calling WadScript (%s:%s).", scriptFile, entryPoint);
-		return InstancedFuture.instance(callable).spawn();
-	}
-	
-	/**
-	 * 
-	 * @param parent the parent container for the modal.
-	 * @param statusPanel the status panel
-	 * @param scriptFile the script file to run.
-	 * @param encoding the encoding of the script file.
-	 * @param mergeSettings
-	 */
-	public void onExecuteWadMergeWithSettings(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, MergeSettings mergeSettings)
-	{
-		final File workingDirectory = mergeSettings.getWorkingDirectory();
-		final String[] args = mergeSettings.getArgs();
-		
-		utils.createProcessModal(
-			parent, 
-			language.getText("wadmerge.run.message.title"), 
-			language.getText("wadmerge.run.message.running"), 
-			language.getText("wadmerge.run.message.success"), 
-			language.getText("wadmerge.run.message.error"), 
-			(stream, errstream) -> executeWadMerge(statusPanel, scriptFile, workingDirectory, encoding, args, stream, errstream)
-		).start(tasks);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	private InstancedFuture<Integer> executeWadMerge(
-		final DoomToolsStatusPanel statusPanel, 
-		final File scriptFile,
-		File workingDirectory,
-		Charset encoding,
-		String[] args, 
-		final PrintStream out, 
-		final PrintStream err
-	){
-		return tasks.spawn(() -> {
-			Integer result = null;
-			InputStream stdin = null;
-			try
-			{
-				statusPanel.setActivityMessage(language.getText("wadscript.run.message.running", scriptFile.getName()));
-				result = callWadMerge(scriptFile, workingDirectory, encoding, args, out, err).get();
-				if (result == 0)
-				{
-					statusPanel.setSuccessMessage(language.getText("wadscript.run.message.success"));
-				}
-				else
-				{
-					LOG.errorf("Error on WadMerge invoke. Result was %d: %s", result, scriptFile.getAbsolutePath());
-					statusPanel.setErrorMessage(language.getText("wadscript.run.message.error.result", result));
-				}
-			} catch (InterruptedException e) {
-				LOG.warnf("Call to WadMerge invoke interrupted: %s", scriptFile.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.run.message.interrupt"));
-			} catch (ExecutionException e) {
-				LOG.errorf(e, "Error on WadMerge invoke: %s", scriptFile.getAbsolutePath());
-				statusPanel.setErrorMessage(language.getText("wadscript.run.message.error"));
-			} finally {
-				IOUtils.close(stdin);
-			}
-			return result;
-		});
-	}
-
-	private static InstancedFuture<Integer> callWadMerge(final File scriptFile, final File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	public static InstancedFuture<Integer> callWadMerge(final File scriptFile, final File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -299,11 +332,32 @@ public final class AppCommon
 			.args(args)
 			.setOut(stdout)
 			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDERR."));
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDERR."));
 		
 		LOG.infof("Calling WadMerge (%s).", scriptFile);
-		return InstancedFuture.instance(callable).spawn();
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+
+	public static InstancedFuture<Integer> callWSwAnTbl(File sourceFile, File outWAD, boolean addSource, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(WSwAnTablesMain.class)
+			.setWorkingDirectory(sourceFile.getParentFile()); // unnecessary, but do it anyway
+		
+		callable.arg(outWAD.getAbsolutePath());
+
+		callable.arg(WSwAnTablesMain.SWITCH_VERBOSE);
+		callable.arg(WSwAnTablesMain.SWITCH_IMPORT).arg(sourceFile.getAbsolutePath());
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(IOUtils.getNullInputStream())
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDERR."));
+		
+		LOG.infof("Calling WSwAnTbl (%s).", sourceFile);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
 }
