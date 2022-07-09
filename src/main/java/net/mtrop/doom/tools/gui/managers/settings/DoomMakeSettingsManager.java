@@ -29,6 +29,7 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
+    private static final String PATH_LAST_FILE = "path.lastFile";
     private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
     private static final String DOOMMAKE_PATH_SLADE = "path.slade";
     private static final String DOOMMAKE_PATH_IDE = "path.vscode";
@@ -113,4 +114,22 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 		return getFile(DOOMMAKE_PATH_MAPEDITOR);
 	}
 	
+	/**
+	 * Sets the last file opened or saved.
+	 * @param path the file.
+	 */
+	public void setLastTouchedFile(File path) 
+	{
+		setFile(PATH_LAST_FILE, path);
+		commit();
+	}
+
+	/**
+	 * @return the last file opened or saved.
+	 */
+	public File getLastTouchedFile() 
+	{
+		return getFile(PATH_LAST_FILE);
+	}
+
 }
