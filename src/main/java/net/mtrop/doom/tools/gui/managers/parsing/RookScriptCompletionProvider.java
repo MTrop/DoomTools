@@ -49,7 +49,7 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 			super(parent, 
 				getInputText(namespace, type), 
 				getInstructions(type.getUsage()), 
-				getFullSignatureTemplate(type), 
+				getFullSignatureTemplate(namespace, type), 
 				getInstructions(type.getUsage()), 
 				getFunctionDescriptionHTML(namespace, type)
 			);
@@ -74,11 +74,13 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 			return instructions;
 		}
 
-		private static String getFullSignatureTemplate(ScriptFunctionType type)
+		private static String getFullSignatureTemplate(String namespace, ScriptFunctionType type)
 		{
 			StringBuilder sb = new StringBuilder();
 			ScriptFunctionType.Usage usage = type.getUsage();
 			
+			if (namespace != null)
+				sb.append(namespace.toLowerCase()).append("::");
 			sb.append(type.name().toLowerCase()).append("(");
 
 			boolean first = true;
@@ -145,11 +147,13 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 			html.pop();
 		
 			// Full instructions.
+			html.push("div").html("&nbsp;").pop();
 			html.push("div").text(usage.getInstructions()).pop();
 			
 			// Parameters
 			if (!usage.getParameterInstructions().isEmpty())
 			{
+				html.push("div").html("&nbsp;").pop();
 				html.push("div");
 				for (ParameterUsage pusage : usage.getParameterInstructions())
 				{
@@ -162,8 +166,9 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 				html.pop();
 			}
 			
+			html.push("div").html("&nbsp;").pop();
 			html.push("div")
-				.tag("strong", "Returns:")
+				.tag("strong", "RETURNS:")
 			.pop();
 		
 			writeFunctionTypeUsageHTML(html, usage.getReturnTypes());			

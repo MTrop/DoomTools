@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 import org.fife.ui.autocomplete.AbstractCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
+import org.fife.ui.autocomplete.TemplateCompletion;
 
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 
@@ -24,18 +25,18 @@ public class WadMergeCompletionProvider extends CommonCompletionProvider
 	/**
 	 * Special completion for WadMerge-based stuff.
 	 */
-	public class CommandCompletion extends AbstractCompletion
+	public class CommandCompletion extends TemplateCompletion
 	{
-		private final String name;
-		private final String usage; 
 		private final String summaryText;
 		
 		protected CommandCompletion(CompletionProvider parent, WadMergeCommand command) 
 		{
-			super(parent);
-			this.name = command.name().toLowerCase();
-			this.usage = command.usage().toLowerCase();
-
+			super(parent, 
+				command.name().toLowerCase(), 
+				command.usage().toLowerCase(), 
+				command.usage().toLowerCase().replace("[", "${").replace("]", "}")
+			);
+			
 			final ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 			try (PrintStream textOut = new PrintStream(bos, true))
 			{
@@ -45,29 +46,11 @@ public class WadMergeCompletionProvider extends CommonCompletionProvider
 		}
 		
 		@Override
-		public String getInputText()
-		{
-			return name;
-		}
-
-		@Override
-		public String getReplacementText()
-		{
-			return usage;
-		}
-
-		@Override
 		public String getSummary()
 		{
 			return summaryText;
 		}
 
-		@Override
-		public String toString() 
-		{
-			return usage;
-		}
-		
 	}
 
 }
