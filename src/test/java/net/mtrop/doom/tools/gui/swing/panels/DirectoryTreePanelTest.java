@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
 
@@ -18,8 +19,15 @@ public final class DirectoryTreePanelTest
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		final DirectoryTreePanel panel = new DirectoryTreePanel(new File("."), new DirectoryTreePanel.DirectoryTreeListener() 
+		final DirectoryTreePanel panel = new DirectoryTreePanel(new File("."));
+		panel.setDirectoryTreeListener(new DirectoryTreePanel.DirectoryTreeListener() 
 		{
+			@Override
+			public void onFileSelectionChange() 
+			{
+				System.out.println(Arrays.toString(panel.getSelectedFiles()));
+			}
+
 			@Override
 			public void onFileConfirmed(File confirmedFile) 
 			{

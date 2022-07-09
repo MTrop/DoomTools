@@ -37,6 +37,7 @@ import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
@@ -298,8 +299,8 @@ public class DoomToolsMainWindow extends JFrame
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (c, e) -> addApplication(new WadScriptExecutorApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (c, e) -> addApplication(new WSwAnTablesEditorApp()))
-					//utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (c, e) -> addApplication(new WSwAnTablesCompilerApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (c, e) -> addApplication(new WSwAnTablesEditorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (c, e) -> addApplication(new WSwAnTablesCompilerApp()))
 				)
 			),
 

@@ -16,6 +16,8 @@ import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
+import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
@@ -61,6 +63,10 @@ public final class DoomToolsGUIMain
 		String WADSCRIPT = "wadscript";
 		/** WadScript Executor. */
 		String WADSCRIPT_EXECUTOR = "wadscript-executor";
+		/** WSwAnTbl. */
+		String WSWANTBL = "wswantbl";
+		/** WSwAnTbl Compiler. */
+		String WSWANTBL_COMPILER = "wswantbl-compiler";
 	}
 	
 	/**
@@ -214,10 +220,15 @@ public final class DoomToolsGUIMain
 		// run standalone application.
 		else 
 		{
-			if (ApplicationNames.WADMERGE.equals(args[0]))
+			if (ApplicationNames.DECOHACK.equals(args[0]))
 			{
 				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+				startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
+			}
+			else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new DecoHackCompilerApp(path));
 			}
 			else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
 			{
@@ -243,6 +254,11 @@ public final class DoomToolsGUIMain
 						SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 				}
 			}
+			else if (ApplicationNames.WADMERGE.equals(args[0]))
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+			}
 			else if (ApplicationNames.WADMERGE_EXECUTOR.equals(args[0]))
 			{
 				String path = ArrayUtils.arrayElement(args, 1);
@@ -258,15 +274,15 @@ public final class DoomToolsGUIMain
 				String path = ArrayUtils.arrayElement(args, 1);
 				startApplication(new WadScriptExecutorApp(path));
 			}
-			else if (ApplicationNames.DECOHACK.equals(args[0]))
+			else if (ApplicationNames.WSWANTBL.equals(args[0]))
 			{
 				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
+				startApplication(new WSwAnTablesEditorApp(path != null ? new File(path) : null));
 			}
-			else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
+			else if (ApplicationNames.WSWANTBL_COMPILER.equals(args[0]))
 			{
 				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new DecoHackCompilerApp(path));
+				startApplication(new WSwAnTablesCompilerApp(path));
 			}
 			else
 			{

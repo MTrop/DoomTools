@@ -3,6 +3,7 @@ DoomMake
 
 ### Changed for 0.17.0
 
+* `Added` The `TOOL::WSWANTBL(...)` function was changed to support source import.
 * `Added` The `TOOL::WADMERGE(...)` function was changed to support alternate input charset encoding.
 * `Added` The `TOOL::WADSCRIPT(...)` function was changed to support alternate input charset encoding.
 * `Added` The `TOOL::DECOHACK(...)` function was changed to support alternate input charset encoding.

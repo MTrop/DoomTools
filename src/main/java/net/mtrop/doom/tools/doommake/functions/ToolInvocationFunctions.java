@@ -660,9 +660,10 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
-							"sourcefile:OBJECTREF(File)",
-							"wadfile:OBJECTREF(File)",
-							"exportmode:BOOLEAN",
+							"sourceFile:OBJECTREF(File)",
+							"wadFile:OBJECTREF(File)",
+							"exportMode:BOOLEAN",
+							"importSource:BOOLEAN",
 							"verbose:BOOLEAN"
 						) + "}",
 						"Map of options."

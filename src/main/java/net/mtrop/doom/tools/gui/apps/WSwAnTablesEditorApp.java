@@ -62,8 +62,6 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  */
 public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 {
-	// TODO: New DEFSWANI from WAD with ANIMATED/SWITCHES.
-	
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(WSwAnTablesEditorApp.class); 
 
@@ -400,7 +398,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			language.getText("wswantbl.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.getDecoHackFileFilter()
+			utils.getDEFSWANIFileFilter()
 		);
 		
 		if (file != null)
@@ -567,6 +565,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	private DefSwAniExportSettings createExportSettings(File sourceFile, final DefSwAniExportSettings initSettings) 
 	{
 		final DefSwAniExportPanel argsPanel = new DefSwAniExportPanel(initSettings);
+		argsPanel.setPreferredSize(dimension(400, 100));
 		DefSwAniExportSettings settings = utils.createSettingsModal(
 			language.getText("wswantbl.export.title"),
 			argsPanel,

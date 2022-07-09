@@ -26,7 +26,7 @@ public interface Version
 	String WADMERGE = Common.getVersionString("wadmerge");
 	String WADSCRIPT = Common.getVersionString("wadscript");
 	String WADTEX = Common.getVersionString("wadtex");
-	String WSWANTBL = Common.getVersionString("wswantbls");
+	String WSWANTBL = Common.getVersionString("wswantbl");
 	String WTEXPORT = Common.getVersionString("wtexport");
 	String WTEXSCAN = Common.getVersionString("wtexscan");
 }

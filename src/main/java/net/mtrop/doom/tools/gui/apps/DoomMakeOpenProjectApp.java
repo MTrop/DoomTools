@@ -340,7 +340,13 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			public int callBuild(String target)
 			{
 				try {
-					return AppCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, null, null, null).get();
+					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
+					int result = AppCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, null, null, null).get();
+					if (result != 0)
+						statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
+					else
+						statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.success"));
+					return result;
 				} catch (InterruptedException e) {
 					LOG.warn("DoomMake call interrupted!");
 					return -1;

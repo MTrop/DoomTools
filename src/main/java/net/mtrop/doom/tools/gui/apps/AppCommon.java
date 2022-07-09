@@ -198,10 +198,10 @@ public final class AppCommon
 			null,
 			(stdout, stderr, stdin) -> execute(
 				statusPanel,
-				language.getText("wswantbl.run.message.running"), 
-				language.getText("wswantbl.run.message.success"), 
-				language.getText("wswantbl.run.message.interrupt"), 
-				language.getText("wswantbl.run.message.error"), 
+				language.getText("wswantbl.export.message.running"), 
+				language.getText("wswantbl.export.message.success"), 
+				language.getText("wswantbl.export.message.interrupt"), 
+				language.getText("wswantbl.export.message.error"), 
 				callWSwAnTbl(scriptFile, outWAD, outputSource, stdout, stderr)
 			)
 		).start(tasks);
@@ -346,8 +346,11 @@ public final class AppCommon
 		
 		callable.arg(outWAD.getAbsolutePath());
 
-		callable.arg(WSwAnTablesMain.SWITCH_VERBOSE);
-		callable.arg(WSwAnTablesMain.SWITCH_IMPORT).arg(sourceFile.getAbsolutePath());
+		callable.arg(WSwAnTablesMain.SWITCH_VERBOSE1);
+		callable.arg(WSwAnTablesMain.SWITCH_IMPORT1).arg(sourceFile.getAbsolutePath());
+		
+		if (addSource)
+			callable.arg(WSwAnTablesMain.SWITCH_ADDSOURCE1);
 		
 		callable
 			.setOut(stdout)

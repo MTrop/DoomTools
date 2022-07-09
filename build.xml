@@ -94,7 +94,7 @@
 	
 	<!-- Versions -->
 	<property name="wadmerge.version" value="${build.version}" />
-	<property name="wswantbls.version" value="${build.version}" />
+	<property name="wswantbl.version" value="${build.version}" />
 	<property name="wadtex.version" value="${build.version}" />
 	<property name="wtexscan.version" value="${build.version}" />
 	<property name="wtexport.version" value="${build.version}" />
@@ -137,7 +137,7 @@
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
-		<echo file="${build.versions.dir}/wswantbls.version" message="${wswantbls.version}" />
+		<echo file="${build.versions.dir}/wswantbl.version" message="${wswantbl.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
 		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
 		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
