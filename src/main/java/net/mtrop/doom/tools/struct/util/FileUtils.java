@@ -16,11 +16,13 @@ import java.net.URL;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+
 
 /**
  * Simple utility functions around files.
@@ -39,6 +41,27 @@ public final class FileUtils
 
 	private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 	
+    private static final Comparator<File> FILELIST_COMPARATOR;
+	private static final Comparator<File> FILE_COMPARATOR;
+
+	static
+	{
+		final Comparator<File> fileNameComparator = (a, b) -> (
+			System.getProperty("os.name").contains("Windows")
+				? String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
+			    : a.getPath().compareTo(b.getPath())
+		);
+		
+		FILELIST_COMPARATOR = (a, b) -> (
+			a.isDirectory() 
+				? (b.isDirectory() ? fileNameComparator.compare(a, b) : -1)
+				: (b.isDirectory() ? 1 : fileNameComparator.compare(a, b))
+		);
+		
+		FILE_COMPARATOR = (a, b) -> fileNameComparator.compare(a, b);
+	}
+	
+
 	/**
 	 * Creates a blank file or updates its last modified date.
 	 * @param filePath	the abstract path to use.
@@ -825,6 +848,25 @@ public final class FileUtils
 			return a.getAbsolutePath().equals(b.getAbsolutePath());
 	}
 	
+	/**
+	 * Gets a file comparator that sorts files by name, lexicographically.
+	 * Name sort is case-insensitive on operating systems with case-insensitive filesystems. 
+	 * @return the comparator.
+	 */
+	public static Comparator<File> getFileComparator()
+	{
+		return FILE_COMPARATOR;
+	}
+
+	/**
+	 * Gets a file comparator that sorts directories before files, lexicographically.
+	 * Name sort is case-insensitive on operating systems with case-insensitive filesystems. 
+	 * @return the comparator.
+	 */
+	public static Comparator<File> getFileListComparator()
+	{
+		return FILELIST_COMPARATOR;
+	}
 	
 	/**
 	 * A path to a temporary file that is deleted on close.

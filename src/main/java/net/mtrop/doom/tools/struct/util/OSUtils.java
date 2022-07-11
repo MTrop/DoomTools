@@ -78,6 +78,8 @@ public final class OSUtils
 	private static final String APP_DIR;		// set in static method.
 	/** Current user's home directory. */
 	private static final String HOME_DIR;
+	/** Current user's temp directory. */
+	private static final String TEMP_DIR;
 
 	static
 	{
@@ -162,6 +164,7 @@ public final class OSUtils
 		
 		WORK_DIR = System.getProperty("user.dir");
 		HOME_DIR = System.getProperty("user.home");
+		TEMP_DIR = System.getProperty("java.io.tmpdir");
 		NULL_FILE = new File(IS_WINDOWS ? "NUL" : "/dev/null");
 	}
 
@@ -350,6 +353,14 @@ public final class OSUtils
 		return HOME_DIR;
 	}
 	
+	/** 
+	 * @return the current user's temporary directory.
+	 */
+	public static String getTempDirectoryPath()
+	{
+		return TEMP_DIR;
+	}
+
 	/**
 	 * @return the "null" file pipe for this operating system.
 	 */

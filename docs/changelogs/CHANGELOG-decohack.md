@@ -6,6 +6,7 @@ DECOHack
 * `Fixed` Changed the z-position parameter type for MBF's A_Spawn pointer to "fixed".
 * `Fixed` Changed the range parameter type for MBF21's A_MonsterMeleeAttack pointer to "fixed".
 * `Fixed` Some inconsistent error messages around flag setting/removal.
+* `Fixed` Thing `dropitem` didn't allow 0 as a viable value.
 * `Added` The DECOHack GUI, plus a switch to start it (`--gui`).
 * `Added` Documentation for all pointers when dumped with `--dump-pointers`.
 * `Added` A `--charset` switch for specifying the encoding of the input source files (if not system default).

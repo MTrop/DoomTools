@@ -91,7 +91,8 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 				getApplicationContainer(),
 				language.getText("wadscript.run.source.browse.title"), 
 				current, 
-				language.getText("wadscript.run.source.browse.accept") 
+				language.getText("wadscript.run.source.browse.accept"),
+				utils.getWadScriptFileFilter()
 			),
 			(selected) -> {
 				if (selected != null)

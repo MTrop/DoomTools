@@ -91,7 +91,8 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 				getApplicationContainer(),
 				language.getText("wadmerge.run.source.browse.title"), 
 				current, 
-				language.getText("wadmerge.run.source.browse.accept") 
+				language.getText("wadmerge.run.source.browse.accept"),
+				utils.getWadMergeFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)

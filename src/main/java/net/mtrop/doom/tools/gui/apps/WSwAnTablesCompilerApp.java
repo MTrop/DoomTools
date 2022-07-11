@@ -80,7 +80,8 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 				getApplicationContainer(),
 				language.getText("wswantbl.export.source.browse.title"), 
 				current, 
-				language.getText("wswantbl.export.source.browse.accept") 
+				language.getText("wswantbl.export.source.browse.accept"),
+				utils.getDEFSWANIFileFilter()
 			)
 		);
 

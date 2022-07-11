@@ -93,6 +93,11 @@ public final class ComponentFactory
 		{
 			this.swingId = swingId;
 		}
+		
+		public int getSwingId() 
+		{
+			return swingId;
+		}
 	}
 	
 	/**
@@ -108,6 +113,11 @@ public final class ComponentFactory
 		private ProgressBarOrientation(int swingId)
 		{
 			this.swingId = swingId;
+		}
+
+		public int getSwingId() 
+		{
+			return swingId;
 		}
 	}
 	

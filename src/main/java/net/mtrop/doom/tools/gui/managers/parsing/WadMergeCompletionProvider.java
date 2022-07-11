@@ -3,7 +3,6 @@ package net.mtrop.doom.tools.gui.managers.parsing;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.fife.ui.autocomplete.AbstractCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
 

@@ -45,7 +45,7 @@ public class DoomMakeProjectControlPanel extends JPanel
 			throw new IllegalArgumentException("Provided directory is not a directory.");
 		
 		LoaderFuture<BufferedImage> folderImage = images.getImageAsync("folder.png");
-		LoaderFuture<BufferedImage> vsCodeImage = images.getImageAsync("vscode.png");
+		LoaderFuture<BufferedImage> vsCodeImage = images.getImageAsync("ide.png");
 		LoaderFuture<BufferedImage> sladeImage = images.getImageAsync("slade.png");
 		
 		ComponentActionHandler<JButton> folderAction = (component, event) -> 

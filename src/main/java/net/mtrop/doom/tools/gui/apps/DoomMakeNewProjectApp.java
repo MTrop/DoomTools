@@ -100,10 +100,10 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public Map<String, String> getApplicationState()
 	{
-		return apply(super.getApplicationState(), (state) -> {
-			if (targetDirectory != null)
-				state.put(STATE_TARGET_DIRECTORY, targetDirectory.getAbsolutePath());
-		});
+		Map<String, String> state = super.getApplicationState();
+		if (targetDirectory != null)
+			state.put(STATE_TARGET_DIRECTORY, targetDirectory.getAbsolutePath());
+		return state;
 	}
 
 	@Override

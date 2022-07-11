@@ -9,10 +9,11 @@ import org.fife.ui.autocomplete.TemplateCompletion;
  */
 public enum RookScriptTemplateCompletion
 {
-	FORL("A \"for\" loop that iterates through a list.", (
-		"for (${i} = 0; ${i} < length(${list}); ${i} += 1) {\n" +
-		"\t${element} = ${list}[${i}];\n" +
+	CHECKBODY("A \"check\" body with error check afterwards.", (
+		"check (${err}) {\n" +
 		"\t${cursor}\n" +
+		"}\n"+
+		"if (${err}) {\n" +
 		"}"
 	)),
 
@@ -24,12 +25,6 @@ public enum RookScriptTemplateCompletion
 
 	EACHM("An \"each\" loop that iterates through a map.", (
 		"each (${k}, ${v} : ${map}) {\n" +
-		"\t${cursor}\n" +
-		"}"
-	)),
-	
-	WHILE("A \"while\" loop expression.", (
-		"while (${expression}) {\n" +
 		"\t${cursor}\n" +
 		"}"
 	)),
@@ -46,6 +41,13 @@ public enum RookScriptTemplateCompletion
 		"}"
 	)),
 	
+	FORL("A \"for\" loop that iterates through a list.", (
+		"for (${i} = 0; ${i} < length(${list}); ${i} += 1) {\n" +
+		"\t${element} = ${list}[${i}];\n" +
+		"\t${cursor}\n" +
+		"}"
+	)),
+
 	FUNCTION("A function with no arguments.", (
 		"function ${name}() {\n" +
 		"\t${cursor}\n" +
@@ -82,6 +84,12 @@ public enum RookScriptTemplateCompletion
 		"}"
 	)),
 
+	WHILE("A \"while\" loop expression.", (
+		"while (${expression}) {\n" +
+		"\t${cursor}\n" +
+		"}"
+	)),
+	
 	;
 	
 	private final String inputText;

@@ -1793,7 +1793,7 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				
-				if ((value = matchThingIndex(context)) == null)
+				if ((value = matchThingIndex(context, true)) == null)
 				{
 					addErrorMessage("Expected thing index after \"%s\".", KEYWORD_DROPITEM);
 					return false;
@@ -3736,11 +3736,19 @@ public final class DecoHackParser extends Lexer.Parser
 			return value;
 		}
 	}
+
+	// Matches a valid nonzero thing index number.
+	// If match, advance token and return integer.
+	// Else, return null.
+	private Integer matchThingIndex(AbstractPatchContext<?> context)
+	{
+		return matchThingIndex(context, false);
+	}
 	
 	// Matches a valid thing index number.
 	// If match, advance token and return integer.
 	// Else, return null.
-	private Integer matchThingIndex(AbstractPatchContext<?> context)
+	private Integer matchThingIndex(AbstractPatchContext<?> context, boolean allowZero)
 	{
 		Integer slot;
 		String autoThingName;
@@ -3759,6 +3767,9 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if ((slot = matchPositiveInteger()) != null)
 		{
+			if (allowZero && slot == 0)
+				return 0;
+			
 			return verifyThingIndex(context, slot);
 		}
 		else

@@ -1,0 +1,160 @@
+package net.mtrop.doom.tools.gui.swing.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.io.File;
+
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.border.TitledBorder;
+
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
+
+import static javax.swing.BorderFactory.*;
+
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+
+
+/**
+ * A panel for WTexScan applications.
+ * @author Matthew Tropiano
+ */
+public class WTexScanParametersPanel extends JPanel 
+{
+	private static final long serialVersionUID = 7244729529611529270L;
+	
+	private DoomToolsGUIUtils utils;
+	private DoomToolsLanguageManager language;
+	private WTexScanSettingsManager settings;
+	
+	private FileListPanel fileListField;
+	private JFormField<Boolean> outputTexturesField;
+	private JFormField<Boolean> outputFlatsField;
+	private JFormField<Boolean> outputBothField;
+	private JFormField<Boolean> skipSkiesField;
+	private JFormField<Boolean> noCommentMessagesField;
+	private JFormField<String> mapNameField;
+	
+	public enum OutputMode
+	{
+		BOTH,
+		TEXTURES,
+		FLATS;
+	}
+
+	public WTexScanParametersPanel()
+	{
+		this.utils = DoomToolsGUIUtils.get();
+		this.language = DoomToolsLanguageManager.get();
+		this.settings = WTexScanSettingsManager.get();
+		
+		this.fileListField = new FileListPanel(language.getText("wtexscan.files.label"), 
+			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
+			(files) -> settings.setLastTouchedFile(files[files.length - 1]),
+			() -> settings.getLastTouchedFile()
+		);
+		
+		JRadioButton textureButton = radio(false);
+		JRadioButton flatButton = radio(false);
+		JRadioButton bothButton = radio(true);
+
+		group(textureButton, flatButton, bothButton);
+
+		this.outputTexturesField = radioField(textureButton);
+		this.outputFlatsField = radioField(flatButton);
+		this.outputBothField = radioField(bothButton);
+		this.skipSkiesField = checkBoxField(checkBox(false));
+		this.noCommentMessagesField = checkBoxField(checkBox(false));
+		this.mapNameField = stringField(true);
+		
+		containerOf(this,
+			node(BorderLayout.CENTER, fileListField),
+			node(BorderLayout.SOUTH, containerOf(
+				borderLayout(0, 4),
+				node(BorderLayout.NORTH, containerOf(				
+					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.outtype.label"), TitledBorder.LEADING, TitledBorder.TOP), 
+					node(containerOf(createEmptyBorder(4, 4, 4, 4),
+						node(utils.createFormField(form(language.getInteger("wtexscan.label.width")),
+							utils.formField("wtexscan.textures", outputTexturesField),
+							utils.formField("wtexscan.flats", outputFlatsField),
+							utils.formField("wtexscan.both", outputBothField)
+						))
+					))
+				)),
+				node(BorderLayout.SOUTH, containerOf(
+					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.other.label"), TitledBorder.LEADING, TitledBorder.TOP), 
+					node(containerOf(createEmptyBorder(4, 4, 4, 4),
+						node(utils.createFormField(form(language.getInteger("wtexscan.label.width")),
+							utils.formField("wtexscan.mapname", mapNameField),
+							utils.formField("wtexscan.noskies", skipSkiesField),
+							utils.formField("wtexscan.nomsgs", noCommentMessagesField)
+						))
+					))
+				))
+			))
+		);
+	}
+	
+	public File[] getFiles()
+	{
+		return fileListField.getFiles();
+	}
+	
+	public void setFiles(File[] files)
+	{
+		fileListField.setFiles(files);
+	}
+	
+	public OutputMode getOutputMode() 
+	{
+		return 
+			outputTexturesField.getValue() ? OutputMode.TEXTURES : 
+			outputFlatsField.getValue() ? OutputMode.FLATS : 
+			outputBothField.getValue() ? OutputMode.BOTH : 
+			null 
+		;
+	}
+	
+	public void setOutputMode(OutputMode mode) 
+	{
+		outputTexturesField.setValue(mode == OutputMode.TEXTURES);
+		outputFlatsField.setValue(mode == OutputMode.FLATS);
+		outputBothField.setValue(mode == OutputMode.BOTH);
+	}
+	
+	public boolean getSkipSkies() 
+	{
+		return skipSkiesField.getValue();
+	}
+	
+	public void setSkipSkies(boolean value) 
+	{
+		skipSkiesField.setValue(value);
+	}
+	
+	public boolean getNoCommentMessages() 
+	{
+		return noCommentMessagesField.getValue();
+	}
+	
+	public void setNoCommentMessages(boolean value) 
+	{
+		noCommentMessagesField.setValue(value);
+	}
+	
+	public String getMapName()
+	{
+		return mapNameField.getValue();
+	}
+	
+	public void setMapName(String mapName)
+	{
+		mapNameField.setValue(mapName);
+	}
+	
+}

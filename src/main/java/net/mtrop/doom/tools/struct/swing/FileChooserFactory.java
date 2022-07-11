@@ -22,6 +22,355 @@ public final class FileChooserFactory
 	private static final BiFunction<FileFilter, File, File> NO_CHANGE_TRANSFORM = (x0, file) -> file;
 	
 	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File[] chooseFilesOrDirectories(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		jfc.setMultiSelectionEnabled(true);
+		if (initPath != null)
+			jfc.setSelectedFile(initPath);
+		if (title != null)
+			jfc.setDialogTitle(title);
+		jfc.resetChoosableFileFilters();
+		for (FileFilter filter : choosableFilters)
+		{
+			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
+		switch (jfc.showDialog(parent, approveText))
+		{
+			default:
+			case JFileChooser.CANCEL_OPTION: 
+			case JFileChooser.ERROR_OPTION:
+				return null;
+			case JFileChooser.APPROVE_OPTION:
+				return jfc.getSelectedFiles();
+		}
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(Component parent, String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFilesOrDirectories(String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		if (initPath != null)
+			jfc.setSelectedFile(initPath);
+		if (title != null)
+			jfc.setDialogTitle(title);
+		jfc.resetChoosableFileFilters();
+		for (FileFilter filter : choosableFilters)
+		{
+			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
+		switch (jfc.showDialog(parent, approveText))
+		{
+			default:
+			case JFileChooser.CANCEL_OPTION: 
+			case JFileChooser.ERROR_OPTION:
+				return null;
+			case JFileChooser.APPROVE_OPTION:
+				return transformFileFunction.apply(jfc.getFileFilter(), jfc.getSelectedFile());
+		}
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, title, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, title, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(parent, null, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, title, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file or directory chooser dialog.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFileOrDirectory(String approveText, FileFilter ... choosableFilters)
+	{
+		return chooseFileOrDirectory(null, null, null, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
 	 * Opens a directory chooser dialog.
 	 * @param parent the parent component for the chooser modal.
 	 * @param title the dialog title.
@@ -171,69 +520,6 @@ public final class FileChooserFactory
 
 	/**
 	 * Opens a file chooser dialog.
-	 * @param title the dialog title.
-	 * @param initPath the initial path for the file chooser.
-	 * @param approveText the text to put on the approval button.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File chooseFile(String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		return chooseFile(null, title, initPath, approveText, transformFileFunction, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
-	 * @param title the dialog title.
-	 * @param approveText the text to put on the approval button.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File chooseFile(String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		return chooseFile(null, title, null, approveText, transformFileFunction, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
-	 * @param title the dialog title.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File chooseFile(String title, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		return chooseFile(null, title, null, null, transformFileFunction, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
-	 * @param initPath the initial path for the file chooser.
-	 * @param approveText the text to put on the approval button.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File chooseFile(File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		return chooseFile(null, null, initPath, approveText, transformFileFunction, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public static File chooseFile(BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		return chooseFile(null, null, null, null, transformFileFunction, choosableFilters);
-	}
-
-	/**
-	 * Opens a file chooser dialog.
 	 * @param parent the parent component for the chooser modal.
 	 * @param title the dialog title.
 	 * @param initPath the initial path for the file chooser.
@@ -289,6 +575,45 @@ public final class FileChooserFactory
 	 * @param title the dialog title.
 	 * @param initPath the initial path for the file chooser.
 	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, null, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(String title, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, title, null, null, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
@@ -324,12 +649,36 @@ public final class FileChooserFactory
 	 * Opens a file chooser dialog.
 	 * @param initPath the initial path for the file chooser.
 	 * @param approveText the text to put on the approval button.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(File initPath, String approveText, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, null, initPath, approveText, transformFileFunction, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
 	public static File chooseFile(File initPath, String approveText, FileFilter ... choosableFilters)
 	{
 		return chooseFile(null, null, initPath, approveText, NO_CHANGE_TRANSFORM, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File chooseFile(BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
+	{
+		return chooseFile(null, null, null, null, transformFileFunction, choosableFilters);
 	}
 
 	/**

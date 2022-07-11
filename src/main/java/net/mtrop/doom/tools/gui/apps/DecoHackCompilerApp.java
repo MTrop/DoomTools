@@ -91,7 +91,8 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 				getApplicationContainer(),
 				language.getText("decohack.export.source.browse.title"), 
 				current, 
-				language.getText("decohack.export.source.browse.accept") 
+				language.getText("decohack.export.source.browse.accept"),
+				utils.getDecoHackFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)

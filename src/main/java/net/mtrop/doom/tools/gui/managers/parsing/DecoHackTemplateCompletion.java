@@ -116,7 +116,7 @@ public enum DecoHackTemplateCompletion
 		"\t${cursor}\n" +
 		"}\n"
 	)),
-
+	
 	STRINGSBLOCK("Adds a strings block.", (
 		"strings {\n" +
 		"\t${cursor}\n" +
@@ -151,6 +151,107 @@ public enum DecoHackTemplateCompletion
 		"thing ${ThingID} free ${StateLabel}\n"
 	)),
 
+	THINGPROPERTIES("Adds a Thing's properties and their default values.", (
+        "ednum -1\n" +
+        "\n" +
+        "health 0\n" +
+        "speed 0\n" +
+        "radius 0\n" +
+        "height 0\n" +
+        "damage 0\n" +
+        "reactiontime 0\n" +
+        "painchance 0\n" +
+        "mass 0\n" +
+        "\n" +
+        "clear flags\n"
+	)),
+
+	THINGPROPERTIESEXT("Adds a Thing's EXTENDED properties and their default values.", (
+        "ednum -1\n" +
+        "\n" +
+        "health 0\n" +
+        "speed 0\n" +
+        "radius 0\n" +
+        "height 0\n" +
+        "damage 0\n" +
+        "reactiontime 0\n" +
+        "painchance 0\n" +
+        "mass 0\n" + 
+        "\n" +
+        "dropitem MT_NULL\n" +
+        "\n" +
+        "clear flags\n"
+	)),
+
+	THINGPROPERTIESMBF21("Adds a Thing's MBF21 properties and their default values.", (
+        "ednum -1\n" +
+        "\n" +
+        "health 0\n" +
+        "speed 0\n" +
+        "radius 0\n" +
+        "height 0\n" +
+        "damage 0\n" +
+        "reactiontime 0\n" +
+        "painchance 0\n" +
+        "mass 0\n" +
+        "\n" +
+        "dropitem MT_NULL\n" +
+        "\n" +
+        "fastspeed -1\n" +
+        "meleerange 64\n" +
+        "infightinggroup 0\n" +
+        "projectilegroup 0\n" +
+        "splashgroup 0\n" +
+        "\n" +
+        "clear flags\n"
+	)),
+
+	THINGSOUNDS("Adds a Thing's sound properties and their default values.", (
+        "seesound \"\"\n" +
+        "attacksound \"\"\n" +
+        "painsound \"\"\n" +
+        "deathsound \"\"\n" +
+        "activesound \"\"\n"
+	)),
+
+	THINGSOUNDSMBF21("Adds a Thing's MBF21 sound properties and their default values.", (
+        "seesound \"\"\n" +
+        "attacksound \"\"\n" +
+        "painsound \"\"\n" +
+        "deathsound \"\"\n" +
+        "activesound \"\"\n" +
+        "ripsound \"\"\n"
+	)),
+
+	THINGSTATES("Adds a skeleton states block for Things (all significant labels).", (
+		"states {\n" +
+		"\tspawn:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tloop\n" +
+		"\tsee:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto see\n" +
+		"\tmelee:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto see\n" +
+		"\tmissile:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto see\n" +
+		"\tpain:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto see\n" +
+		"\tdeath:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tstop\n" +
+		"\txdeath:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tstop\n" +
+		"\traise:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto see\n" +
+		"}\n"
+	)),
+					
 	THINGSWAP("Adds a thing swap clause.", (
 		"thing ${Thing1} swap with ${Thing2}\n"
 	)),
@@ -173,6 +274,37 @@ public enum DecoHackTemplateCompletion
 
 	WEAPONFREESTATES2("Adds a \"free a weapon's specific connected states\" clause.", (
 		"weapon ${WeaponID} free ${StateLabel}\n"
+	)),
+
+	WEAPONPROPERTIES("Adds a Weapon's properties and their blank values.", (
+        "ammotype AM_CLIP\n"
+	)),
+
+	WEAPONPROPERTIESMBF21("Adds a Weapon's MBF21 properties and their blank values.", (
+        "ammotype AM_CLIP\n" +
+        "ammopershot -1\n" +
+        "\n" +
+        "clear flags\n"
+	)),
+
+	WEAPONSTATES("Adds a skeleton states block for Weapons (all significant labels).", (
+		"states {\n" +
+		"\tready:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tloop\n" +
+		"\tselect:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tloop\n" +
+		"\tdeselect:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tloop\n" +
+		"\tfire:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto ready\n" +
+		"\tflash:\n" +
+		"\t\t// ... states ...\n" +
+		"\t\tgoto lightdone\n" +
+		"}\n"
 	)),
 
 	WEAPONSWAP("Adds a weapon's swap clause.", (

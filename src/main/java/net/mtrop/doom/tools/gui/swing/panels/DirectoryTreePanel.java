@@ -1,6 +1,5 @@
 package net.mtrop.doom.tools.gui.swing.panels;
 
-import java.awt.AWTKeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
@@ -49,7 +48,6 @@ import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -69,24 +67,11 @@ public class DirectoryTreePanel extends JPanel
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DirectoryTreePanel.class); 
 
-    private static final Comparator<File> CHILD_FILE_COMPARATOR;
 	private static final Comparator<FileNode> CHILD_COMPARATOR;
 
 	static
 	{
-		final Comparator<File> fileNameComparator = (a, b) -> (
-			OSUtils.isWindows()
-				? String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
-			    : a.getPath().compareTo(b.getPath())
-		);
-		
-		CHILD_FILE_COMPARATOR = (a, b) -> (
-			a.isDirectory() 
-				? (b.isDirectory() ? fileNameComparator.compare(a, b) : -1)
-				: (b.isDirectory() ? 1 : fileNameComparator.compare(a, b))
-		);
-		
-		CHILD_COMPARATOR = (a, b) -> CHILD_FILE_COMPARATOR.compare(a.file, b.file);
+		CHILD_COMPARATOR = (a, b) -> FileUtils.getFileListComparator().compare(a.file, b.file);
 	}
 	
 	// =======================================================================
@@ -311,7 +296,7 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public synchronized File[] getSelectedFiles()
 	{
-		Set<File> fileSet = new TreeSet<>(CHILD_FILE_COMPARATOR);
+		Set<File> fileSet = new TreeSet<>(FileUtils.getFileListComparator());
 		TreePath[] selectionPaths = fileTree.getSelectionPaths();
 		if (selectionPaths != null)
 		{
@@ -940,7 +925,7 @@ public class DirectoryTreePanel extends JPanel
 			if (files == null)
 				return;
 			
-			Arrays.sort(files, CHILD_FILE_COMPARATOR);
+			Arrays.sort(files, FileUtils.getFileListComparator());
 			
 			children = new ArrayList<>(files.length);
 			for (int i = 0; i < files.length; i++) 

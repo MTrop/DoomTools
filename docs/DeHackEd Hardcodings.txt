@@ -66,7 +66,7 @@ More State Stuff
 
 The [SpawnState] state on every thing is SET instead of updated via Thinker
 update, which means that it's action pointer will not be called. The state
-will also NOT ADVANCE if the duration of the that frame is 0 or less.
+will also NOT ADVANCE if the duration of that frame is 0 or less.
 
 
 Thing Slot Hardcoding

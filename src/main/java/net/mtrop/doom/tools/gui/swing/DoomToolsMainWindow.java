@@ -39,6 +39,7 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
+import net.mtrop.doom.tools.gui.apps.WTexScanApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
@@ -301,6 +302,11 @@ public class DoomToolsMainWindow extends JFrame
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (c, e) -> addApplication(new WSwAnTablesEditorApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (c, e) -> addApplication(new WSwAnTablesCompilerApp()))
+				),
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (c, e) -> addApplication(new WTexScanApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (c, e) -> addApplication(new WTexScanApp())), // TODO: FINISH THIS
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (c, e) -> addApplication(new WTexScanApp())) // TODO: FINISH THIS
 				)
 			),
 

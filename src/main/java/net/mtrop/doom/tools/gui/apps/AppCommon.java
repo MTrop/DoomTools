@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
+import net.mtrop.doom.tools.WTexScanMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
@@ -24,10 +25,12 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
@@ -209,6 +212,33 @@ public final class AppCommon
 
 	/**
 	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param sourceFiles 
+	 * @param outputMode 
+	 * @param noSkies 
+	 * @param noMessages 
+	 * @param mapName 
+	 */
+	public void onExecuteWTexScan(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wtexscan.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wtexscan.status.message.running"), 
+				language.getText("wtexscan.status.message.success"), 
+				language.getText("wtexscan.status.message.interrupt"), 
+				language.getText("wtexscan.status.message.error"), 
+				callWTexScan(sourceFiles, outputMode, noSkies, noMessages, mapName, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
 	 * @param statusPanel the status panel of the primary app.
 	 * @param activityMessage the message to display in the modal during execution.
 	 * @param successMessage the message to display in the modal on successful finish.
@@ -360,6 +390,48 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDERR."));
 		
 		LOG.infof("Calling WSwAnTbl (%s).", sourceFile);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+	
+	public static InstancedFuture<Integer> callWTexScan(File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(WTexScanMain.class);
+		
+		sourceFiles = FileUtils.explodeFiles(sourceFiles);
+		
+		for (int i = 0; i < sourceFiles.length; i++) 
+			callable.arg(sourceFiles[i].getAbsolutePath());	
+
+		switch (outputMode)
+		{
+			default:
+			case BOTH:
+				break;
+			case TEXTURES:
+				callable.arg(WTexScanMain.SWITCH_TEXTURES);
+				break;
+			case FLATS:
+				callable.arg(WTexScanMain.SWITCH_FLATS);
+				break;
+		}
+		
+		if (noSkies)
+			callable.arg(WTexScanMain.SWITCH_NOSKIES);
+		
+		if (noMessages)
+			callable.arg(WTexScanMain.SWITCH_QUIET);
+
+		if (mapName != null)
+			callable.arg(WTexScanMain.SWITCH_MAP).arg(mapName);
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(IOUtils.getNullInputStream())
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexScan STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexScan STDERR."));
+		
+		LOG.infof("Calling WTexScan.");
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
