@@ -18,6 +18,8 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
+import net.mtrop.doom.tools.gui.apps.WTExportApp;
+import net.mtrop.doom.tools.gui.apps.WTexScanApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
@@ -67,6 +69,10 @@ public final class DoomToolsGUIMain
 		String WSWANTBL = "wswantbl";
 		/** WSwAnTbl Compiler. */
 		String WSWANTBL_COMPILER = "wswantbl-compiler";
+		/** WTexScan. */
+		String WTEXSCAN = "wtexscan";
+		/** WTExport. */
+		String WTEXPORT = "wtexport";
 	}
 	
 	/**
@@ -217,81 +223,87 @@ public final class DoomToolsGUIMain
 	    	DoomToolsGUIPreWarmer.get();
 			get().createAndDisplayMainWindow();
 		}
+
 		// run standalone application.
-		else 
+		else if (ApplicationNames.DECOHACK.equals(args[0]))
 		{
-			if (ApplicationNames.DECOHACK.equals(args[0]))
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
+		}
+		else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new DecoHackCompilerApp(path));
+		}
+		else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
+		{
+			startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
+		}
+		else if (ApplicationNames.DOOMMAKE_OPEN.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			
+			// No path. Open file.
+			if (ObjectUtils.isEmpty(path))
 			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
-			}
-			else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new DecoHackCompilerApp(path));
-			}
-			else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
-			{
-				startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
-			}
-			else if (ApplicationNames.DOOMMAKE_OPEN.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				
-				// No path. Open file.
-				if (ObjectUtils.isEmpty(path))
-				{
-					DoomMakeOpenProjectApp app;
-					if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
-						startApplication(app);
-				}
-				else
-				{
-					File projectDirectory = new File(args[1]);
-					if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
-						startApplication(new DoomMakeOpenProjectApp(projectDirectory));
-					else
-						SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
-				}
-			}
-			else if (ApplicationNames.WADMERGE.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
-			}
-			else if (ApplicationNames.WADMERGE_EXECUTOR.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WadMergeExecutorApp(path));
-			}
-			else if (ApplicationNames.WADSCRIPT.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
-			}
-			else if (ApplicationNames.WADSCRIPT_EXECUTOR.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WadScriptExecutorApp(path));
-			}
-			else if (ApplicationNames.WSWANTBL.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WSwAnTablesEditorApp(path != null ? new File(path) : null));
-			}
-			else if (ApplicationNames.WSWANTBL_COMPILER.equals(args[0]))
-			{
-				String path = ArrayUtils.arrayElement(args, 1);
-				startApplication(new WSwAnTablesCompilerApp(path));
+				DoomMakeOpenProjectApp app;
+				if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
+					startApplication(app);
 			}
 			else
 			{
-        		SwingUtils.error("Expected valid application name.");
-	    		System.err.println("ERROR: Expected valid application name.");
-        		System.exit(-1);
-	        	return;
+				File projectDirectory = new File(args[1]);
+				if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
+					startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+				else
+					SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 			}
-		}		
+		}
+		else if (ApplicationNames.WADMERGE.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+		}
+		else if (ApplicationNames.WADMERGE_EXECUTOR.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadMergeExecutorApp(path));
+		}
+		else if (ApplicationNames.WADSCRIPT.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
+		}
+		else if (ApplicationNames.WADSCRIPT_EXECUTOR.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadScriptExecutorApp(path));
+		}
+		else if (ApplicationNames.WSWANTBL.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WSwAnTablesEditorApp(path != null ? new File(path) : null));
+		}
+		else if (ApplicationNames.WSWANTBL_COMPILER.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WSwAnTablesCompilerApp(path));
+		}
+		else if (ApplicationNames.WTEXSCAN.equals(args[0]))
+		{
+			startApplication(new WTexScanApp());
+		}
+		else if (ApplicationNames.WTEXPORT.equals(args[0]))
+		{
+			startApplication(new WTExportApp());
+		}
+		else
+		{
+    		SwingUtils.error("Expected valid application name.");
+    		System.err.println("ERROR: Expected valid application name.");
+    		System.exit(-1);
+        	return;
+		}
 	}
 
 	/** Settings singleton. */

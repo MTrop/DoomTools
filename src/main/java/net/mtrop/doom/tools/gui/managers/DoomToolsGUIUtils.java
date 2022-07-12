@@ -413,12 +413,12 @@ public final class DoomToolsGUIUtils
 	 * @param formFields the list of fields to add.
 	 * @return the form panel passed in.
 	 */
-	public JFormPanel createFormField(JFormPanel formPanel, FormFieldInfo ... formFields)
+	public JFormPanel createForm(JFormPanel formPanel, FormFieldInfo ... formFields)
 	{
 		for (int i = 0; i < formFields.length; i++) 
 		{
 			FormFieldInfo formFieldInfo = formFields[i];
-			String label = language.getText(formFieldInfo.languageKey);
+			String label = formFieldInfo.languageKey != null ? language.getText(formFieldInfo.languageKey) : "";
 			String tipKey = formFieldInfo.languageKey + ".tip";
 			String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
 			formPanel.addTipField(label, tip, formFieldInfo.field);
@@ -613,6 +613,14 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * @return the text file filter.
+	 */
+	public FileFilter getTextFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.textfile.description") + " (*.txt)", "txt");
+	}
+
+	/**
 	 * @return the WadMerge file filter.
 	 */
 	public FileFilter getWadMergeFileFilter()
@@ -637,7 +645,23 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
-	 * Creates a {@link FormFieldInfo} object for use with {@link #createFormField(JFormPanel, FormFieldInfo...)}.
+	 * @return the WAD type file filter.
+	 */
+	public FileFilter getWADTypeFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.wadtype.description") + " (*.wad/*.pk3/*.pke)", "wad", "pk3", "pke");
+	}
+	
+	/**
+	 * @return the WAD container file filter.
+	 */
+	public FileFilter getWADContainerFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.container.description") + " (*.wad/*.pk3/*.pke/*.zip)", "wad", "pk3", "pke", "zip");
+	}
+	
+	/**
+	 * Creates a {@link FormFieldInfo} object for use with {@link #createForm(JFormPanel, FormFieldInfo...)}.
 	 * @param languageKey the language key prefix for the label and tooltip.
 	 * @param field the field to add.
 	 * @return new info.
@@ -645,6 +669,17 @@ public final class DoomToolsGUIUtils
 	public FormFieldInfo formField(String languageKey, JFormField<?> field)
 	{
 		return new FormFieldInfo(languageKey, field);
+	}
+	
+	/**
+	 * Creates a {@link FormFieldInfo} object for use with {@link #createForm(JFormPanel, FormFieldInfo...)}.
+	 * The label is blank.
+	 * @param field the field to add.
+	 * @return new info.
+	 */
+	public FormFieldInfo formField(JFormField<?> field)
+	{
+		return new FormFieldInfo(null, field);
 	}
 	
 	/**

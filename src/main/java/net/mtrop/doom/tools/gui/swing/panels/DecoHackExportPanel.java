@@ -62,7 +62,7 @@ public class DecoHackExportPanel extends JPanel
 		this.budgetField = checkBoxField(checkBox(budget));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("decohack.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("decohack.export.label.width")),
 				utils.formField("decohack.export.patch", patchOutputField),
 				utils.formField("decohack.export.outsource", sourceOutputField),
 				utils.formField("decohack.export.budget", budgetField)

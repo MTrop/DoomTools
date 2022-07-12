@@ -71,10 +71,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private WadScriptSettingsManager settings;
-	private AppCommon appCommon;
 	
 	// Referenced Components
 	
@@ -106,10 +103,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	 */
 	public WadScriptEditorApp(File fileToOpenFirst) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadScriptSettingsManager.get();
-		this.appCommon = AppCommon.get();
 		
 		this.editorPanel = new WadScriptEditorPanel(new MultiFileEditorPanel.Options() 
 		{
@@ -132,27 +126,27 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("wadscript.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.runAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.run", (e) -> onRunAgain());
-		this.runParametersAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.params", (e) -> onRunWithArgs());
+		this.runAction = getUtils().createActionFromLanguageKey("wadscript.menu.run.item.run", (e) -> onRunAgain());
+		this.runParametersAction = getUtils().createActionFromLanguageKey("wadscript.menu.run.item.params", (e) -> onRunWithArgs());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -162,7 +156,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("wadscript.editor.title");
+		return getLanguage().getText("wadscript.editor.title");
 	}
 
 	@Override
@@ -176,6 +170,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonFileMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadscript.menu.file.item.new",
 				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
@@ -195,6 +191,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
 			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
@@ -210,6 +208,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createWadScriptRunMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadscript.menu.run.item.run", runAction),
 			utils.createItemFromLanguageKey("wadscript.menu.run.item.params", runParametersAction)
@@ -218,6 +218,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonEditorMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
@@ -234,6 +236,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -251,6 +255,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
@@ -276,7 +282,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -401,13 +407,13 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	{
 		final Container parent = getApplicationContainer();
 		
-		File file = utils.chooseFile(
+		File file = getUtils().chooseFile(
 			parent, 
-			language.getText("wadscript.open.title"), 
-			language.getText("wadscript.open.accept"),
+			getLanguage().getText("wadscript.open.title"), 
+			getLanguage().getText("wadscript.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.getWadScriptFileFilter()
+			getUtils().getWadScriptFileFilter()
 		);
 		
 		if (file != null)
@@ -416,6 +422,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenFile(File file)
 	{
+		DoomToolsLanguageManager language = getLanguage();
 		final Container parent = getApplicationContainer();
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
@@ -440,9 +447,11 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
+			DoomToolsGUIUtils utils = getUtils();
+			
 			Boolean saveChoice = modal(parent, utils.getWindowIcons(), 
-				language.getText("wadscript.run.save.modal.title"),
-				containerOf(label(language.getText("wadscript.run.save.modal.message", currentHandle.getEditorTabName()))), 
+				getLanguage().getText("wadscript.run.save.modal.title"),
+				containerOf(label(getLanguage().getText("wadscript.run.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
@@ -493,7 +502,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, executionSettings);
-		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		getCommon().onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 	
 	private void onRunAgain()
@@ -528,14 +537,16 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, executionSettings);
-		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), executionSettings);
+		getCommon().onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), executionSettings);
 	}
 
 	private ScriptExecutionSettings createExecutionSettings(ScriptExecutionSettings initSettings) 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		final WadScriptExecuteWithArgsPanel argsPanel = new WadScriptExecuteWithArgsPanel(initSettings);
 		ScriptExecutionSettings settings = utils.createSettingsModal(
-			language.getText("wadscript.run.withargs.title"),
+			getLanguage().getText("wadscript.run.withargs.title"),
 			argsPanel,
 			(panel) -> {
 				ScriptExecutionSettings out = new ScriptExecutionSettings();
@@ -584,7 +595,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{utils.getWadScriptFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().getWadScriptFileFilter()} : TYPES;
 		}
 	
 		@Override

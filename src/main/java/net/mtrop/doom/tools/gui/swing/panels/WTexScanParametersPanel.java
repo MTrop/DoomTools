@@ -55,9 +55,13 @@ public class WTexScanParametersPanel extends JPanel
 		
 		this.fileListField = new FileListPanel(language.getText("wtexscan.files.label"), 
 			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
-			(files) -> settings.setLastTouchedFile(files[files.length - 1]),
+			(files) -> {
+				if (files != null && files.length > 0)
+					settings.setLastTouchedFile(files[files.length - 1]);
+			},
 			() -> settings.getLastTouchedFile()
 		);
+		this.fileListField.setFileFilter(utils.getWADContainerFilter());
 		
 		JRadioButton textureButton = radio(false);
 		JRadioButton flatButton = radio(false);
@@ -79,7 +83,7 @@ public class WTexScanParametersPanel extends JPanel
 				node(BorderLayout.NORTH, containerOf(				
 					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.outtype.label"), TitledBorder.LEADING, TitledBorder.TOP), 
 					node(containerOf(createEmptyBorder(4, 4, 4, 4),
-						node(utils.createFormField(form(language.getInteger("wtexscan.label.width")),
+						node(utils.createForm(form(language.getInteger("wtexscan.label.width")),
 							utils.formField("wtexscan.textures", outputTexturesField),
 							utils.formField("wtexscan.flats", outputFlatsField),
 							utils.formField("wtexscan.both", outputBothField)
@@ -89,7 +93,7 @@ public class WTexScanParametersPanel extends JPanel
 				node(BorderLayout.SOUTH, containerOf(
 					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.other.label"), TitledBorder.LEADING, TitledBorder.TOP), 
 					node(containerOf(createEmptyBorder(4, 4, 4, 4),
-						node(utils.createFormField(form(language.getInteger("wtexscan.label.width")),
+						node(utils.createForm(form(language.getInteger("wtexscan.label.width")),
 							utils.formField("wtexscan.mapname", mapNameField),
 							utils.formField("wtexscan.noskies", skipSkiesField),
 							utils.formField("wtexscan.nomsgs", noCommentMessagesField)

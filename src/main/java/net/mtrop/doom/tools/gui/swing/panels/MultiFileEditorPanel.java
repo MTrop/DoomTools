@@ -3,6 +3,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
+import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -231,6 +232,8 @@ public class MultiFileEditorPanel extends JPanel
 
 	/** Editor theme. */
 	private Theme currentTheme;
+	/** Editor font. */
+	private Font currentFont;
 	/** Editor coding settings. */
 	private EditorViewSettings defaultViewSettings;
 
@@ -901,6 +904,7 @@ public class MultiFileEditorPanel extends JPanel
 		codeSettings = settings.getDefaultEditorCodeSettings();
 		autoCompleteSettings = settings.getDefaultEditorAutoCompleteSettings();
 		setTheme(EditorThemeType.THEME_MAP.getOrDefault(settings.getEditorThemeName(), EditorThemeType.DEFAULT));
+		setEditorFont(settings.getEditorFont());
 		forEachOpenEditor((handle) -> codeSettings.apply(handle.editorPanel.textArea));
 		forEachOpenEditor((handle) -> autoCompleteSettings.apply(handle.currentAutoCompletion));
 		forEachOpenEditor((handle) -> handle.editorPanel.textArea.setWrapStyleWord(defaultViewSettings.isWrapStyleWord()));
@@ -935,6 +939,16 @@ public class MultiFileEditorPanel extends JPanel
 		final Theme theme = loadTheme(themeType);
 		currentTheme = theme;
 		forEachOpenEditor((handle) -> theme.apply(handle.editorPanel.textArea));
+	}
+	
+	/**
+	 * Sets a font across all editors (and future ones).
+	 * @param fontType the font type.
+	 */
+	public void setEditorFont(Font fontType)
+	{
+		currentFont = fontType;
+		forEachOpenEditor((handle) -> handle.editorPanel.textArea.setFont(fontType));
 	}
 	
 	/**
@@ -997,6 +1011,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		defaultViewSettings.apply(textArea);
 		currentTheme.apply(textArea);
+		textArea.setFont(currentFont);
 		
 		setEditorViewSettingsByContent(textArea, originalContent);
 		if (attachedFile != null) // only scan for ending if existing file

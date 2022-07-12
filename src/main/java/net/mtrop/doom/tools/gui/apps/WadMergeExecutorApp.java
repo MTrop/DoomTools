@@ -15,7 +15,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.WadMergeExecutorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
@@ -39,11 +38,8 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 {
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private WadMergeExecutorSettingsManager settings;
 	private DoomToolsEditorProvider editorProvider;
-	private AppCommon appCommon;
 	
 	// Referenced Components
 	
@@ -66,11 +62,8 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	 */
 	public WadMergeExecutorApp(String scriptPath) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadMergeExecutorSettingsManager.get();
 		this.editorProvider = DoomToolsEditorProvider.get();
-		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
 		MergeSettings settings;
@@ -89,10 +82,10 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				language.getText("wadmerge.run.source.browse.title"), 
+				getLanguage().getText("wadmerge.run.source.browse.title"), 
 				current, 
-				language.getText("wadmerge.run.source.browse.accept"),
-				utils.getWadMergeFileFilter() 
+				getLanguage().getText("wadmerge.run.source.browse.accept"),
+				getUtils().getWadMergeFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -112,14 +105,16 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("wadmerge.executor.title");
+		return getLanguage().getText("wadmerge.executor.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadmerge.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadmerge.run.withargs.label.width")),
 				utils.formField("wadmerge.run.withargs.source", sourceFileField),
 				utils.formField("wadmerge.run.withargs.charset", charsetField)
 			)),
@@ -136,6 +131,8 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadmerge.menu.file",
 				utils.createItemFromLanguageKey("wadmerge.menu.file.item.exit", (c, e) -> attemptClose())
@@ -166,7 +163,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("wadmerge.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadmerge.status.message.ready"));
 	}
 
 	@Override
@@ -229,7 +226,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		MergeSettings executionSettings = new MergeSettings();
 		executionSettings.setWorkingDirectory(executePanel.getWorkingDirectory());
 		executionSettings.setArgs(executePanel.getArgs());
-		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		getCommon().onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 }

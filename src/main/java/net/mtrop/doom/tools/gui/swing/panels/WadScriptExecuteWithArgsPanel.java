@@ -89,7 +89,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadscript.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadscript.run.withargs.label.width")),
 				utils.formField("wadscript.run.withargs.workdir", workingDirFileField),
 				utils.formField("wadscript.run.withargs.stdin", standardInPathField),
 				utils.formField("wadscript.run.withargs.entrypoint", entryPointField),

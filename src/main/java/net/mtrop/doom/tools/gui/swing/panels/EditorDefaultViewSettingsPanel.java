@@ -71,7 +71,7 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 		));
 		
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)), 
+			node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("texteditor.settings.label.width", 180)), 
 				utils.formField("texteditor.settings.view.encoding", defaultEncodingField),
 				utils.formField("texteditor.settings.view.tabsize", tabSizeField),
 				utils.formField("texteditor.settings.view.spacetabs", tabEmulatedField),

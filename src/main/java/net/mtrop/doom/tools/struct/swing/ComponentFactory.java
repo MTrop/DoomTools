@@ -922,6 +922,65 @@ public final class ComponentFactory
 		return radio(null, null, false, handler);
 	}
 
+	/* ==================================================================== */
+	/* ==== Radio Buttons                                              ==== */
+	/* ==================================================================== */
+	
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param label the radio button label.
+	 * @param checked the checked state.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, String label, boolean checked)
+	{
+		return radio(icon, label, checked, null);
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param label the radio button label.
+	 * @param checked the checked state.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(String label, boolean checked)
+	{
+		return radio(null, label, checked, null);
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param checked the checked state.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, boolean checked)
+	{
+		return radio(icon, null, checked, null);
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param icon the radio button icon.
+	 * @param label the radio button label.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, String label)
+	{
+		return radio(icon, label, false, null);
+	}
+
+	/**
+	 * Creates a radio button, unchecked.
+	 * @param label the radio button label.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(String label)
+	{
+		return radio(null, label, false, null);
+	}
+
 	/**
 	 * Creates a radio button.
 	 * @param checked the checked state.
@@ -1287,6 +1346,7 @@ public final class ComponentFactory
 	{
 		return new JTextField();
 	}
+
 
 	/* ==================================================================== */
 	/* ==== Progress Bars                                              ==== */

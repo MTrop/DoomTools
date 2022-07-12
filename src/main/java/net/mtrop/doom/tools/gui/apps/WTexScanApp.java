@@ -2,19 +2,24 @@ package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
+import static net.mtrop.doom.tools.struct.swing.ComponentFactory.menuBar;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
@@ -25,12 +30,7 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WTexScanApp extends DoomToolsApplicationInstance
 {
-	/** Utils. */
-	private DoomToolsGUIUtils utils;
-    /** Language manager. */
-    private DoomToolsLanguageManager language;
-    /** App Common */
-    private AppCommon appCommon;
+	private WTexScanSettingsManager settings;
 	
     /** Parameter panel. */
     private WTexScanParametersPanel parametersPanel;
@@ -38,23 +38,20 @@ public class WTexScanApp extends DoomToolsApplicationInstance
     private DoomToolsStatusPanel statusPanel;
     
 	/**
-	 * Creates a new New Project app instance.
+	 * Creates a new WTexScan app instance.
 	 */
 	public WTexScanApp() 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
-		this.appCommon = AppCommon.get();
+		this.settings = WTexScanSettingsManager.get();
 		
 		this.parametersPanel = new WTexScanParametersPanel();
 		this.statusPanel = new DoomToolsStatusPanel();
-		this.statusPanel.setSuccessMessage(language.getText("wtexscan.status.message.ready"));
 	}
 	
 	@Override
 	public String getTitle()
 	{
-		return language.getText("wtexscan.title");
+		return getLanguage().getText("wtexscan.title");
 	}
 	
 	@Override
@@ -101,6 +98,24 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
+	public JMenuBar createDesktopMenuBar() 
+	{
+		DoomToolsGUIUtils utils = getUtils();
+		
+		return menuBar(
+			utils.createMenuFromLanguageKey("wtexscan.menu.file",
+				utils.createItemFromLanguageKey("wtexscan.menu.file.item.exit", (c, e) -> attemptClose())
+			)
+		);
+	}
+	
+	@Override
+	public JMenuBar createInternalMenuBar() 
+	{
+		return null;
+	}
+
+	@Override
 	public Container createContentPane()
 	{
 		return containerOf(borderLayout(0, 4),
@@ -108,12 +123,42 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(utils.createButtonFromLanguageKey("wtexscan.button.start", (c, e) -> onScanMaps()))
+					node(getUtils().createButtonFromLanguageKey("wtexscan.button.start", (c, e) -> onScanMaps()))
 				))
 			))
 		);
 	}
 
+	@Override
+	public void onCreate(Object frame) 
+	{
+		if (frame instanceof JFrame)
+		{
+			JFrame f = (JFrame)frame;
+			Rectangle bounds = settings.getBounds();
+			boolean maximized = settings.getBoundsMaximized();
+			f.setBounds(bounds);
+			if (maximized)
+				f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		}
+	}
+
+	@Override
+	public void onOpen(Object frame) 
+	{
+		statusPanel.setSuccessMessage(getLanguage().getText("wtexscan.status.message.ready"));
+	}
+
+	@Override
+	public void onClose(Object frame) 
+	{
+		if (frame instanceof JFrame)
+		{
+			JFrame f = (JFrame)frame;
+			settings.setBounds(f);
+		}
+	}
+	
 	private void onScanMaps() 
 	{
 		File[] files = parametersPanel.getFiles();
@@ -122,7 +167,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		boolean noMessages = parametersPanel.getNoCommentMessages();
 		String mapName = parametersPanel.getMapName();
 		
-		appCommon.onExecuteWTexScan(getApplicationContainer(), statusPanel, 
+		getCommon().onExecuteWTexScan(getApplicationContainer(), statusPanel, 
 			files, 
 			mode, 
 			noSkies, 

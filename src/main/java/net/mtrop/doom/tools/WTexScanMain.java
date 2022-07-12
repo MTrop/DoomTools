@@ -36,6 +36,8 @@ import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
@@ -50,6 +52,7 @@ public final class WTexScanMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_BAD_OPTIONS = 2;
+	private static final int ERROR_IOERROR = 3;
 	private static final int ERROR_UNKNOWN = -1;
 
 	public static final String SWITCH_HELP = "--help";
@@ -64,6 +67,7 @@ public final class WTexScanMain
 	public static final String SWITCH_NOSKIES = "--no-skies";
 	public static final String SWITCH_MAP = "--map";
 	public static final String SWITCH_MAP2 = "-m";
+	public static final String SWITCH_GUI = "--gui";
 
 	/** Regex pattern for Episode, Map. */
 	private static final Pattern EPISODE_PATTERN = Pattern.compile("E[1-5]M[1-9]");
@@ -77,6 +81,7 @@ public final class WTexScanMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		private boolean gui;
 		private boolean help;
 		private boolean version;
 		private boolean quiet;
@@ -90,6 +95,7 @@ public final class WTexScanMain
 		{
 			this.stdout = null;
 			this.stderr = null;
+			this.gui = false;
 			this.help = false;
 			this.version = false;
 			this.quiet = false;
@@ -466,6 +472,17 @@ public final class WTexScanMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WTEXSCAN);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WTexScan GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -590,6 +607,8 @@ public final class WTexScanMain
 						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equals(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
 						options.setQuiet(true);
 					else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))

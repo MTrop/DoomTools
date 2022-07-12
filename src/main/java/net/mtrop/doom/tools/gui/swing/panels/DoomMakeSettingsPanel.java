@@ -40,7 +40,7 @@ public class DoomMakeSettingsPanel extends JPanel
 		this.settings = DoomMakeSettingsManager.get();
 		
 		containerOf(this, dimension(450, 200), borderLayout(0, 4),
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("doommake.settings.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.settings.label.width")),
 				utils.formField("doommake.settings.vscode.label", fileField(
 					settings.getPathToIDE(), 
 					(currentFile) -> chooseFile(

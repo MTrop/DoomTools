@@ -73,7 +73,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 		this.argsComponentList = new ArrayList<>(Math.max(initArgs.length, 4));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadmerge.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadmerge.run.withargs.label.width")),
 				utils.formField("wadmerge.run.withargs.workdir", workingDirFileField),
 				utils.formField("wadmerge.run.withargs.argfield", numArgsField)
 			)),

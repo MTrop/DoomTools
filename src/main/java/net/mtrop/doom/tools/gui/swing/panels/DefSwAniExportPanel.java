@@ -51,7 +51,7 @@ public class DefSwAniExportPanel extends JPanel
 		this.outputSourceField = checkBoxField(checkBox(outputSource));
 		
 		containerOf(this,
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wswantbl.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wswantbl.export.label.width")),
 				utils.formField("wswantbl.export.wad", outputWADField),
 				utils.formField("wswantbl.export.outsource", outputSourceField)
 			))

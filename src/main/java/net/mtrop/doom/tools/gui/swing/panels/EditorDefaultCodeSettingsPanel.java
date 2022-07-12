@@ -145,7 +145,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 		));
 
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)), 
+			node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("texteditor.settings.label.width", 180)), 
 				utils.formField("texteditor.settings.code.marginline", marginLineField),
 				utils.formField("texteditor.settings.code.marginlinepos", marginLinePositionField),
 				utils.formField("texteditor.settings.code.roundedselection", roundedSelectionEdgesField),

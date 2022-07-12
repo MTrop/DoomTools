@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.struct.swing;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -272,7 +273,7 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(boolean nullable)
 	{
-		return stringField("", nullable, null); 
+		return stringField(nullable ? null : "", nullable, null); 
 	}
 
 	/**
@@ -358,7 +359,7 @@ public final class FormFactory
 	 */
 	public static JFormField<Double> doubleField(boolean nullable)
 	{
-		return doubleField(0.0, nullable, null); 
+		return doubleField(nullable ? null : 0.0, nullable, null); 
 	}
 
 	/**
@@ -444,7 +445,7 @@ public final class FormFactory
 	 */
 	public static JFormField<Float> floatField(boolean nullable)
 	{
-		return floatField(0f, nullable, null); 
+		return floatField(nullable ? null : 0f, nullable, null); 
 	}
 
 	/**
@@ -530,7 +531,7 @@ public final class FormFactory
 	 */
 	public static JFormField<Long> longField(boolean nullable)
 	{
-		return longField(0L, nullable, null); 
+		return longField(nullable ? null : 0L, nullable, null); 
 	}
 
 	/**
@@ -616,7 +617,7 @@ public final class FormFactory
 	 */
 	public static JFormField<Integer> integerField(boolean nullable)
 	{
-		return integerField(0, nullable, null);
+		return integerField(nullable ? null : 0, nullable, null);
 	}
 
 	/**
@@ -686,6 +687,16 @@ public final class FormFactory
 	}
 
 	/**
+	 * Creates a new text field that stores a short type.
+	 * @param nullable if true, this is a nullable field.
+	 * @return the generated field.
+	 */
+	public static JFormField<Short> shortField(boolean nullable)
+	{
+		return shortField(nullable ? null : (short)0, false, null); 
+	}
+
+	/**
 	 * Creates a new non-nullable text field that stores a short type.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
@@ -750,6 +761,16 @@ public final class FormFactory
 	public static JFormField<Byte> byteField(Byte initialValue, boolean nullable)
 	{
 		return byteField(initialValue, nullable, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a byte type.
+	 * @param nullable if true, this is a nullable field.
+	 * @return the generated field.
+	 */
+	public static JFormField<Byte> byteField(boolean nullable)
+	{
+		return byteField(nullable ? null : (byte)0, false, null); 
 	}
 
 	/**
@@ -1423,13 +1444,13 @@ public final class FormFactory
 	 * @param panel the panel to set.
 	 * @return a new form field.
 	 */
-	public static JFormField<Void> panelField(final JPanel panel)
+	public static JFormField<Void> panelField(final Container panel)
 	{
 		return new JFormField<Void>()
 		{
 			private static final long serialVersionUID = -4652707139878678731L;
 			
-			private JPanel field;
+			private Container field;
 			
 			{
 				setLayout(new BorderLayout());

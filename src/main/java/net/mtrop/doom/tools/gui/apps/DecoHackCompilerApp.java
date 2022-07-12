@@ -15,7 +15,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DecoHackCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -39,11 +38,8 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 {
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private DecoHackCompilerSettingsManager settings;
 	private DoomToolsEditorProvider editorProvider;
-	private AppCommon appCommon;
 	
 	// Referenced Components
 	
@@ -66,11 +62,8 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	 */
 	public DecoHackCompilerApp(String sourcePath) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = DecoHackCompilerSettingsManager.get();
 		this.editorProvider = DoomToolsEditorProvider.get();
-		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
 		PatchExportSettings settings;
@@ -89,10 +82,10 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				language.getText("decohack.export.source.browse.title"), 
+				getLanguage().getText("decohack.export.source.browse.title"), 
 				current, 
-				language.getText("decohack.export.source.browse.accept"),
-				utils.getDecoHackFileFilter() 
+				getLanguage().getText("decohack.export.source.browse.accept"),
+				getUtils().getDecoHackFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -112,14 +105,16 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("decohack.compiler.title");
+		return getLanguage().getText("decohack.compiler.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return containerOf(dimension(400, 200), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("decohack.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("decohack.export.label.width")),
 				utils.formField("decohack.export.source", sourceFileField),
 				utils.formField("decohack.export.charset", charsetField)
 			)),
@@ -136,6 +131,8 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file",
 				utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> attemptClose())
@@ -166,7 +163,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
 	}
 
 	@Override
@@ -225,7 +222,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		exportSettings.setOutputFile(exportPanel.getPatchOutput());
 		exportSettings.setSourceOutputFile(exportPanel.getSourceOutput());
 		exportSettings.setOutputBudget(exportPanel.getBudget());
-		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, encoding, exportSettings);
+		getCommon().onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, encoding, exportSettings);
 	}
 
 }

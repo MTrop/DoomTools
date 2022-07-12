@@ -1,6 +1,11 @@
 WTexScan
 --------
 
+### Changed for 1.2.0
+
+* `Added` GUI Version of WTexScan.
+
+
 ### Changed for 1.1.1
 
 * `Added` Autodetect PKE.

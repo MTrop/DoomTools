@@ -24,7 +24,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DecoHackSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
@@ -71,10 +70,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private DecoHackSettingsManager settings;
-	private AppCommon appCommon;
 
 	// Referenced Components
 	
@@ -105,10 +101,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	 */
 	public DecoHackEditorApp(File fileToOpenFirst) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = DecoHackSettingsManager.get();
-		this.appCommon = AppCommon.get();
 		
 		this.editorPanel = new DecoHackEditorPanel(new MultiFileEditorPanel.Options() 
 		{
@@ -131,26 +124,26 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("decohack.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("decohack.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(language.getText("decohack.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("decohack.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
+		this.exportAction = getUtils().createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -160,7 +153,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("decohack.editor.title");
+		return getLanguage().getText("decohack.editor.title");
 	}
 
 	@Override
@@ -174,6 +167,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonFileMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("decohack.menu.file.item.new",
 				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
@@ -193,6 +188,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
 			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
@@ -208,6 +205,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonPatchMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("decohack.menu.patch.item.export", exportAction)
 		);
@@ -215,6 +214,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditorMenuItems()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
@@ -231,6 +232,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -248,6 +251,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
@@ -273,7 +278,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("decohack.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("decohack.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -380,12 +385,14 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		
 		JPanel panel = new JPanel();
 		containerOf(panel, borderLayout(0, 4),
-			node(BorderLayout.NORTH, label(language.getText("decohack.new.modal.message"))),
+			node(BorderLayout.NORTH, label(getLanguage().getText("decohack.new.modal.message"))),
 			node(BorderLayout.SOUTH, patchField)
 		);
 		
+		DoomToolsGUIUtils utils = getUtils();
+		
 		Boolean choice = utils.createModal( 
-			language.getText("decohack.new.modal.title"), 
+			getLanguage().getText("decohack.new.modal.title"), 
 			panel,
 			utils.createChoiceFromLanguageKey("doomtools.ok", true),
 			utils.createChoiceFromLanguageKey("doomtools.cancel", false)
@@ -412,10 +419,12 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenEditor()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			language.getText("decohack.open.title"), 
-			language.getText("decohack.open.accept"),
+			getLanguage().getText("decohack.open.title"), 
+			getLanguage().getText("decohack.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
 			utils.getDecoHackFileFilter()
@@ -431,28 +440,30 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error", file.getName()));
-			SwingUtils.error(language.getText("decohack.open.error.notfound", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(getLanguage().getText("decohack.status.message.editor.error", file.getName()));
+			SwingUtils.error(getLanguage().getText("decohack.open.error.notfound", file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error", file.getName()));
-			SwingUtils.error(language.getText("decohack.open.error.ioerror", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(getLanguage().getText("decohack.status.message.editor.error", file.getName()));
+			SwingUtils.error(getLanguage().getText("decohack.open.error.ioerror", file.getAbsolutePath()));
 		} catch (SecurityException e) {
 			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error.security", file.getName()));
-			SwingUtils.error(language.getText("decohack.open.error.security", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(getLanguage().getText("decohack.status.message.editor.error.security", file.getName()));
+			SwingUtils.error(getLanguage().getText("decohack.open.error.security", file.getAbsolutePath()));
 		}
 	}
 	
 	private boolean saveBeforeExecute()
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		if (currentHandle.needsToSave() || currentHandle.getContentSourceFile() == null)
 		{
 			Boolean saveChoice = modal(
 				getApplicationContainer(), 
 				utils.getWindowIcons(), 
-				language.getText("decohack.save.modal.title"),
-				containerOf(label(language.getText("decohack.save.modal.message", currentHandle.getEditorTabName()))), 
+				getLanguage().getText("decohack.save.modal.title"),
+				containerOf(label(getLanguage().getText("decohack.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
@@ -474,7 +485,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(getApplicationContainer(), language.getText("decohack.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), getLanguage().getText("decohack.error.mustsave"));
 			return;
 		}
 		
@@ -489,14 +500,16 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
 
-		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), processSettings);
+		getCommon().onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), processSettings);
 	}
 
 	private PatchExportSettings createExportSettings(File sourceFile, final PatchExportSettings initSettings) 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		final DecoHackExportPanel argsPanel = new DecoHackExportPanel(initSettings);
 		PatchExportSettings settings = utils.createSettingsModal(
-			language.getText("decohack.export.title"),
+			getLanguage().getText("decohack.export.title"),
 			argsPanel,
 			(panel) -> {
 				PatchExportSettings out = new PatchExportSettings(sourceFile);
@@ -544,7 +557,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{utils.getDecoHackFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().getDecoHackFileFilter()} : TYPES;
 		}
 	
 		@Override

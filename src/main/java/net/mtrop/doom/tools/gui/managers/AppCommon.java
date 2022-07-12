@@ -1,6 +1,8 @@
-package net.mtrop.doom.tools.gui.apps;
+package net.mtrop.doom.tools.gui.managers;
 
 import java.awt.Container;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -12,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
+import net.mtrop.doom.tools.WTExportMain;
 import net.mtrop.doom.tools.WTexScanMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
@@ -20,10 +23,6 @@ import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.InstancedFuture;
@@ -239,6 +238,83 @@ public final class AppCommon
 
 	/**
 	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param wTexScanList the input list from WTexScan.
+	 * @param sourceTextureFiles 
+	 * @param baseFile 
+	 * @param outputFile 
+	 * @param create 
+	 * @param noAnim 
+	 * @param noSwitch 
+	 * @param nullTex 
+	 */
+	public void onExecuteWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File wTexScanList, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wtexport.status.message.title"),
+			wTexScanList,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wtexport.status.message.running"), 
+				language.getText("wtexport.status.message.success"), 
+				language.getText("wtexport.status.message.interrupt"), 
+				language.getText("wtexport.status.message.error"), 
+				callWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, stdin)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param sourceFiles 
+	 * @param outputMode 
+	 * @param noSkies 
+	 * @param noMessages 
+	 * @param mapName 
+	 * @param sourceTextureFiles 
+	 * @param baseFile 
+	 * @param outputFile 
+	 * @param create 
+	 * @param noAnim 
+	 * @param noSwitch 
+	 * @param nullTex 
+	 */
+	public void onExecuteWTexScanToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wtexport.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wtexport.status.message.running"), 
+				language.getText("wtexport.status.message.success"), 
+				language.getText("wtexport.status.message.interrupt"), 
+				language.getText("wtexport.status.message.error"),
+				InstancedFuture.spawn(() -> {
+					int result;
+					
+					ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
+					PrintStream byteOut = new PrintStream(bos);
+					
+					result = callWTexScan(sourceFiles, outputMode, noSkies, noMessages, mapName, byteOut, stderr).result();
+					if (result != 0)
+						return result;
+					
+					ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+					
+					return callWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, bis).result();
+				})
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
 	 * @param statusPanel the status panel of the primary app.
 	 * @param activityMessage the message to display in the modal during execution.
 	 * @param successMessage the message to display in the modal on successful finish.
@@ -317,7 +393,7 @@ public final class AppCommon
 	 * @param stdin standard in.
 	 * @return the list of project targets.
 	 */
-	public static InstancedFuture<Integer> callDoomMake(File projectDirectory, String targetName, boolean agentOverride, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public InstancedFuture<Integer> callDoomMake(File projectDirectory, String targetName, boolean agentOverride, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
 		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
 		if (agentOverride)
@@ -336,7 +412,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public static InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
 		ProcessCallable callable = Common.spawnJava(WadScriptMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -354,7 +430,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public static InstancedFuture<Integer> callWadMerge(final File scriptFile, final File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWadMerge(final File scriptFile, final File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -369,7 +445,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public static InstancedFuture<Integer> callWSwAnTbl(File sourceFile, File outWAD, boolean addSource, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWSwAnTbl(File sourceFile, File outWAD, boolean addSource, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WSwAnTablesMain.class)
 			.setWorkingDirectory(sourceFile.getParentFile()); // unnecessary, but do it anyway
@@ -393,7 +469,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
-	public static InstancedFuture<Integer> callWTexScan(File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWTexScan(File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WTexScanMain.class);
 		
@@ -432,6 +508,44 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexScan STDERR."));
 		
 		LOG.infof("Calling WTexScan.");
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+	
+	public InstancedFuture<Integer> callWTExport(File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	{
+		ProcessCallable callable = Common.spawnJava(WTExportMain.class);
+		
+		for (int i = 0; i < sourceTextureFiles.length; i++) 
+			callable.arg(sourceTextureFiles[i].getAbsolutePath());	
+
+		if (baseFile != null)
+			callable.arg(WTExportMain.SWITCH_BASE).arg(baseFile.getAbsolutePath());
+
+		if (outputFile != null)
+			callable.arg(WTExportMain.SWITCH_OUTPUT).arg(outputFile.getAbsolutePath());
+		
+		if (create)
+			callable.arg(WTExportMain.SWITCH_CREATE);
+		else
+			callable.arg(WTExportMain.SWITCH_ADDITIVE);
+		
+		if (noAnim)
+			callable.arg(WTExportMain.SWITCH_NOANIMATED);
+		if (noSwitch)
+			callable.arg(WTExportMain.SWITCH_NOSWITCH);
+		
+		if (nullTex != null)
+			callable.arg(WTExportMain.SWITCH_NULLTEX).arg(nullTex);
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(stdin)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDERR."))
+			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDIN."));
+		
+		LOG.infof("Calling WTExport.");
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	

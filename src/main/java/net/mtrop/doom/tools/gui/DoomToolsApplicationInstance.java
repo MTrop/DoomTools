@@ -7,6 +7,10 @@ import java.util.TreeMap;
 import javax.swing.Icon;
 import javax.swing.JMenuBar;
 
+import net.mtrop.doom.tools.gui.managers.AppCommon;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+
 /**
  * Interface for assembling the GUI part of a DoomTools application instance and 
  * listening to environment events.
@@ -16,11 +20,21 @@ import javax.swing.JMenuBar;
  */
 public abstract class DoomToolsApplicationInstance
 {
+	/** Doom Tools GUI Utility singleton. */
+	private DoomToolsGUIUtils utils;
+	/** Doom Tools Language singleton. */
+	private DoomToolsLanguageManager language;
+	/** Application Commons singleton. */
+	private AppCommon appCommon;
+	
 	/** The listener set on all apps. */
 	private DoomToolsApplicationListener listener;
 	
 	protected DoomToolsApplicationInstance()
 	{
+		this.utils = DoomToolsGUIUtils.get();
+		this.language = DoomToolsLanguageManager.get();
+		this.appCommon = AppCommon.get();
 		this.listener = null; // set later
 	}
 	
@@ -219,6 +233,30 @@ public abstract class DoomToolsApplicationInstance
 	public void onBlur()
 	{
 		// Do nothing.
+	}
+
+	/**
+	 * @return the utils class singleton.
+	 */
+	protected DoomToolsGUIUtils getUtils() 
+	{
+		return utils;
+	}
+
+	/**
+	 * @return the language class singleton.
+	 */
+	protected DoomToolsLanguageManager getLanguage() 
+	{
+		return language;
+	}
+	
+	/**
+	 * @return the common application tool singleton.
+	 */
+	protected AppCommon getCommon() 
+	{
+		return appCommon;
 	}
 
 }

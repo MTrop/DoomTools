@@ -91,7 +91,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 		);
 		
 		containerOf(this, borderLayout(),
-			node(BorderLayout.CENTER, utils.createFormField(form(language.getInteger("texteditor.settings.label.width", 180)),
+			node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("texteditor.settings.label.width", 180)),
 				utils.formField("texteditor.settings.autocomp.enable", autoCompleteEnabledField),
 				utils.formField("texteditor.settings.autocomp.autoinsertsingle", autoCompleteSingleChoicesField),
 				utils.formField("texteditor.settings.autocomp.autoactivate", autoActivationEnabledField),

@@ -15,7 +15,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.WadScriptExecutorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
@@ -39,11 +38,8 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 {
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private WadScriptExecutorSettingsManager settings;
 	private DoomToolsEditorProvider editorProvider;
-	private AppCommon appCommon;
 	
 	// Referenced Components
 	
@@ -66,11 +62,8 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	 */
 	public WadScriptExecutorApp(String scriptPath) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = WadScriptExecutorSettingsManager.get();
 		this.editorProvider = DoomToolsEditorProvider.get();
-		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
 		ScriptExecutionSettings settings;
@@ -89,10 +82,10 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				language.getText("wadscript.run.source.browse.title"), 
+				getLanguage().getText("wadscript.run.source.browse.title"), 
 				current, 
-				language.getText("wadscript.run.source.browse.accept"),
-				utils.getWadScriptFileFilter()
+				getLanguage().getText("wadscript.run.source.browse.accept"),
+				getUtils().getWadScriptFileFilter()
 			),
 			(selected) -> {
 				if (selected != null)
@@ -112,14 +105,16 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("wadscript.executor.title");
+		return getLanguage().getText("wadscript.executor.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wadscript.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadscript.run.withargs.label.width")),
 				utils.formField("wadscript.run.withargs.source", sourceFileField),
 				utils.formField("wadscript.run.withargs.charset", charsetField)
 			)),
@@ -136,6 +131,8 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file",
 				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> attemptClose())
@@ -166,7 +163,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
 	}
 
 	@Override
@@ -238,7 +235,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		executionSettings.setStandardInPath(executePanel.getStandardInPath());
 		executionSettings.setEntryPoint(executePanel.getEntryPoint());
 		executionSettings.setArgs(executePanel.getArgs());
-		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		getCommon().onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 }

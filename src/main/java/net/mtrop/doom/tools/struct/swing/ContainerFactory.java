@@ -124,7 +124,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(JComponent container, Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
 	{
 		container.setBorder(border);
 		container.setLayout(layout);
@@ -144,7 +144,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Border border, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(JComponent container, Border border, LayoutManager layout, Node ... children)
 	{
 		return containerOf(container, null, border, layout, children);
 	}
@@ -157,7 +157,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Dimension preferredSize, Border border, Node ... children)
+	public static JComponent containerOf(JComponent container, Dimension preferredSize, Border border, Node ... children)
 	{
 		return containerOf(container, preferredSize, border, null, children);
 	}
@@ -169,7 +169,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Border border, Node ... children)
+	public static JComponent containerOf(JComponent container, Border border, Node ... children)
 	{
 		return containerOf(container, null, border, new BorderLayout(), children);
 	}
@@ -183,7 +183,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Dimension preferredSize, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(JComponent container, Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
 		return containerOf(container, preferredSize, null, layout, children);
 	}
@@ -196,7 +196,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(JComponent container, LayoutManager layout, Node ... children)
 	{
 		return containerOf(container, null, null, layout, children);
 	}
@@ -208,7 +208,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Dimension preferredSize, Node ... children)
+	public static JComponent containerOf(JComponent container, Dimension preferredSize, Node ... children)
 	{
 		return containerOf(container, preferredSize, null, new BorderLayout(), children);
 	}
@@ -219,7 +219,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container containerOf(JComponent container, Node ... children)
+	public static JComponent containerOf(JComponent container, Node ... children)
 	{
 		return containerOf(container, null, null, new BorderLayout(), children);
 	}
@@ -232,7 +232,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(Dimension preferredSize, Border border, LayoutManager layout, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, border, layout, children);
 	}
@@ -244,7 +244,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Dimension preferredSize, Border border, Node ... children)
+	public static JComponent containerOf(Dimension preferredSize, Border border, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, border, new BorderLayout(), children);
 	}
@@ -256,7 +256,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Dimension preferredSize, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(Dimension preferredSize, LayoutManager layout, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, null, layout, children);
 	}
@@ -267,7 +267,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Dimension preferredSize, Node ... children)
+	public static JComponent containerOf(Dimension preferredSize, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
 	}
@@ -279,7 +279,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
+	public static JComponent containerOf(Border border, LayoutManager layout, Node ... children)
 	{
 		return containerOf(new JPanel(), null, border, layout, children);
 	}
@@ -290,7 +290,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Border border, Node ... children)
+	public static JComponent containerOf(Border border, Node ... children)
 	{
 		return containerOf(new JPanel(), null, border, new BorderLayout(), children);
 	}
@@ -301,7 +301,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(LayoutManager layout, Node ... children)
+	public static JComponent containerOf(LayoutManager layout, Node ... children)
 	{
 		return containerOf(new JPanel(), null, null, layout, children);
 	}
@@ -311,7 +311,7 @@ public final class ContainerFactory
 	 * @param children the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container containerOf(Node ... children)
+	public static JComponent containerOf(Node ... children)
 	{
 		return containerOf(new JPanel(), null, null, new BorderLayout(), children);
 	}

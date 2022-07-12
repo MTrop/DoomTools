@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -37,10 +36,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 {
     // Singletons
 
-	private DoomToolsGUIUtils utils;
-	private DoomToolsLanguageManager language;
 	private WSwAnTablesCompilerSettingsManager settings;
-	private AppCommon appCommon;
 	
 	// Referenced Components
 	
@@ -62,10 +58,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	 */
 	public WSwAnTablesCompilerApp(String sourcePath) 
 	{
-		this.utils = DoomToolsGUIUtils.get();
-		this.language = DoomToolsLanguageManager.get();
 		this.settings = WSwAnTablesCompilerSettingsManager.get();
-		this.appCommon = AppCommon.get();
 		
 		File scriptFile;
 		DefSwAniExportSettings settings = new DefSwAniExportSettings();
@@ -78,10 +71,10 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				language.getText("wswantbl.export.source.browse.title"), 
+				getLanguage().getText("wswantbl.export.source.browse.title"), 
 				current, 
-				language.getText("wswantbl.export.source.browse.accept"),
-				utils.getDEFSWANIFileFilter()
+				getLanguage().getText("wswantbl.export.source.browse.accept"),
+				getUtils().getDEFSWANIFileFilter()
 			)
 		);
 
@@ -92,14 +85,16 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return language.getText("wswantbl.compiler.title");
+		return getLanguage().getText("wswantbl.compiler.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return containerOf(dimension(400, 150), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createFormField(form(language.getInteger("wswantbl.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wswantbl.export.label.width")),
 				utils.formField("wswantbl.export.source", sourceFileField)
 			)),
 			node(BorderLayout.CENTER, exportPanel),
@@ -115,6 +110,8 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
+		DoomToolsGUIUtils utils = getUtils();
+		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wswantbl.menu.file",
 				utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (c, e) -> attemptClose())
@@ -145,7 +142,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.ready"));
 	}
 
 	@Override
@@ -193,7 +190,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		DefSwAniExportSettings exportSettings = new DefSwAniExportSettings();
 		exportSettings.setOutputWAD(exportPanel.getOutputWAD());
 		exportSettings.setOutputSource(exportPanel.getOutputSource());
-		appCommon.onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
+		getCommon().onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
 	}
 
 }

@@ -1,5 +1,7 @@
 package net.mtrop.doom.tools.gui.managers.settings;
 
+import java.awt.Font;
+
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
@@ -30,6 +32,8 @@ public final class EditorSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 
+	private static final Font DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
+	
 	private EditorSettingsManager()
 	{
 		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(EditorSettingsManager.class));
@@ -108,6 +112,25 @@ public final class EditorSettingsManager extends DoomToolsSettings
 	public void setEditorThemeName(String name)
 	{
 		setString("theme.name", name);
+		commit();
+	}
+	
+	/**
+	 * Gets the default editor font.
+	 * @return the font.
+	 */
+	public Font getEditorFont()
+	{
+		return getFont("theme.font", DEFAULT_FONT);
+	}
+	
+	/**
+	 * Sets the default editor font.
+	 * @param font the font.
+	 */
+	public void setEditorFont(Font font)
+	{
+		setFont("theme.font", font);
 		commit();
 	}
 	

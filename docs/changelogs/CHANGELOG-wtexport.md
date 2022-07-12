@@ -3,8 +3,9 @@ WTEXport
 
 ### Changed for 1.5.0
 
-* `Added` More output info during the extraction process.
 * `Fixed` Textures/Flats in ANIMATED were added in an incorrect order if the provided texture/flat was not the start of an animation loop. (Issue #75)
+* `Added` More output info during the extraction process.
+* `Added` The GUI version of WTEXport.
 * `Changed` Removed some potential sorts that could ruin things.
 
 
