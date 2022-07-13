@@ -686,12 +686,11 @@ public final class DoomToolsGUIUtils
 	/**
 	 * Creates a source for help using a path relative to DoomTools's root.
 	 * @param path the path.
-	 * @param resource if true, path is a resource path. 
 	 * @return the help source.
 	 */
-	public HelpSource helpResource(String path, boolean resource)
+	public HelpSource helpResource(String path)
 	{
-		return new HelpSource(path, resource);
+		return new HelpSource(path, true);
 	}
 	
 	/**

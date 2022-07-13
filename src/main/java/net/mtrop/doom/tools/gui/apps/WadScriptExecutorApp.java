@@ -252,7 +252,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md")).open();
 	}
 
 }

@@ -461,7 +461,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md")).open();
 	}
 	
 }

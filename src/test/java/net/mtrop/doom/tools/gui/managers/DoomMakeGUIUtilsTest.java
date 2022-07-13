@@ -13,7 +13,7 @@ public final class DoomMakeGUIUtilsTest
 		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		utils.createHelpModal(ModalityType.APPLICATION_MODAL,
 			utils.helpText("Hello", "Hello, help!"),
-			utils.helpResource("src/main/java/net/mtrop/doom/tools/DecoHackMain.java", false),
+			utils.helpResource("src/main/java/net/mtrop/doom/tools/DecoHackMain.java"),
 			utils.helpProcess(DecoHackMain.class, "--help-full")
 		).open();
 	}

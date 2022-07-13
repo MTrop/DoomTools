@@ -239,7 +239,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md")).open();
 	}
 	
 }

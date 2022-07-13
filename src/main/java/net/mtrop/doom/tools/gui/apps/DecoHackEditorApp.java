@@ -545,17 +545,17 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelp()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("decohack/help.txt", true)).open();
+		getUtils().createHelpModal(getUtils().helpResource("decohack/help.txt")).open();
 	}
 	
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md")).open();
 	}
 	
 	private void onHelpHardcode()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/DeHackEd Hardcodings.txt", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/DeHackEd Hardcodings.txt")).open();
 	}
 
 	private void onPointerReference()

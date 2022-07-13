@@ -568,12 +568,12 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
 	}
 
 	private void onCommandReference()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/WadMerge Help.txt", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/WadMerge Help.txt")).open();
 	}
 
 	private class WadMergeEditorPanel extends MultiFileEditorPanel

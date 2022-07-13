@@ -582,12 +582,12 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md")).open();
 	}
 	
 	private void onRookScriptReference()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/RookScript Quick Guide.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/RookScript Quick Guide.md")).open();
 	}
 
 	private void onFunctionReference()

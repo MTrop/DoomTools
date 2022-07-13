@@ -288,7 +288,7 @@
 		<zip destfile="${dist.dir}/${jar.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
-			<zipfileset dir="docs" prefix="docs" />
+			<zipfileset dir="${resource.dir}/docs" prefix="docs" />
 		</zip>
 	</target>	
 
@@ -298,7 +298,7 @@
 			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset file="images/doomtools-logo.ico" prefix="docs" />
-			<zipfileset dir="docs" prefix="docs" />
+			<zipfileset dir="${resource.dir}/docs" prefix="docs" />
 		</zip>
 	</target>
 
@@ -308,7 +308,7 @@
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
 			<tarfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset file="images/doomtools-logo.ico" prefix="docs" />
-			<tarfileset dir="docs" prefix="docs" />
+			<tarfileset dir="${resource.dir}/docs" prefix="docs" />
 		</tar>
 	</target>
 

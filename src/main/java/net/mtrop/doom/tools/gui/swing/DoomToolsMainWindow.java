@@ -364,7 +364,7 @@ public class DoomToolsMainWindow extends JFrame
 		HelpSource[] sources = new HelpSource[licenses.length];
 		for (int i = 0; i < licenses.length; i++) {
 			String lic = licenses[i];
-			sources[i] = utils.helpResource(lic, false);
+			sources[i] = utils.helpResource(lic);
 		}
 		
 		utils.createHelpModal(ModalityType.APPLICATION_MODAL, sources).openThenDispose();
@@ -372,7 +372,7 @@ public class DoomToolsMainWindow extends JFrame
 	
 	private void openChangeLogModal()
 	{
-		utils.createHelpModal(ModalityType.APPLICATION_MODAL, utils.helpResource("docs/CHANGELOG.md", false)).openThenDispose();
+		utils.createHelpModal(ModalityType.APPLICATION_MODAL, utils.helpResource("docs/CHANGELOG.md")).openThenDispose();
 	}
 	
 	private void openSettingsModal()

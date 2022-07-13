@@ -243,7 +243,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
 	}
 	
 }

@@ -253,8 +253,8 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	private void onHelpChangelog()
 	{
 		getUtils().createHelpModal(
-			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexscan.md", false),
-			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexport.md", false)
+			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexscan.md"),
+			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexport.md")
 		).open();
 	}
 	

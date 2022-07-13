@@ -611,7 +611,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md", false)).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
 	}
 
 	private class DefSwAniEditorPanel extends MultiFileEditorPanel
