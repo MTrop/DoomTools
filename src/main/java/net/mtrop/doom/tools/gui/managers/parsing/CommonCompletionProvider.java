@@ -1,7 +1,7 @@
 package net.mtrop.doom.tools.gui.managers.parsing;
 
-import java.io.IOException;
 import java.io.StringWriter;
+import java.util.function.Consumer;
 
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
 
@@ -24,7 +24,7 @@ public abstract class CommonCompletionProvider extends DefaultCompletionProvider
 	 * @param writeFunc the writing function to call with a new HTMLWriter.
 	 * @return the String written.
 	 */
-	protected static String writeHTML(IOConsumer<HTMLWriter> writeFunc)
+	protected static String writeHTML(Consumer<HTMLWriter> writeFunc)
 	{
 		StringWriter out = new StringWriter(1024);
 		try (HTMLWriter html = new HTMLWriter(out, Options.SLASHES_IN_SINGLE_TAGS)) 
@@ -33,22 +33,7 @@ public abstract class CommonCompletionProvider extends DefaultCompletionProvider
 			writeFunc.accept(html);
 			html.end();
 		} 
-		catch (IOException e)
-		{
-			// Do nothing - shouldn't be thrown.
-		}
 		return out.toString();
-	}
-	
-	@FunctionalInterface
-	protected interface IOConsumer<T>
-	{
-		/**
-		 * Consumer execution method that eats any exceptions.
-		 * @param t the input.
-		 * @throws IOException 
-		 */
-		void accept(T t) throws IOException;
 	}
 	
 }

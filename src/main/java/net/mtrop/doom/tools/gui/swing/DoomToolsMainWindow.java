@@ -2,6 +2,7 @@ package net.mtrop.doom.tools.gui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
+import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,11 +42,13 @@ import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanApp;
+import net.mtrop.doom.tools.gui.apps.WTexScanTExportApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils.HelpSource;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
@@ -307,7 +310,7 @@ public class DoomToolsMainWindow extends JFrame
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (c, e) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (c, e) -> addApplication(new WTExportApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (c, e) -> addApplication(new WTexScanApp())) // TODO: FINISH THIS
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (c, e) -> addApplication(new WTexScanTExportApp()))
 				)
 			),
 
@@ -321,6 +324,7 @@ public class DoomToolsMainWindow extends JFrame
 			// Help
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (c, e) -> openAboutModal()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (c, e) -> openLicensesModal()),
 				separator(),
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (c, e) -> openDocs()),
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (c, e) -> openSettingsFolder()),
@@ -328,6 +332,7 @@ public class DoomToolsMainWindow extends JFrame
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (c, e) -> openWebsite()),
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (c, e) -> openRepositorySite()),
 				separator(),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> openChangeLogModal()),
 				utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (c, e) -> openUpdate())
 			)
 		);
@@ -340,6 +345,34 @@ public class DoomToolsMainWindow extends JFrame
 			new DoomToolsAboutPanel(), 
 			choice("OK", KeyEvent.VK_O)
 		).openThenDispose();
+	}
+	
+	private void openLicensesModal()
+	{
+		String[] licenses = {
+			"docs/licenses/LICENSE-BlackRookBase.txt",
+			"docs/licenses/LICENSE-BlackRookJSON.txt",
+			"docs/licenses/LICENSE-DoomStruct.txt",
+			"docs/licenses/LICENSE-RookScript.txt",
+			"docs/licenses/LICENSE-RookScript-Desktop.txt",
+			"docs/licenses/LICENSE-FlatLaF.txt",
+			"docs/licenses/LICENSE-RSyntaxTextArea.txt",
+			"docs/licenses/LICENSE-AutoComplete.txt",
+			"docs/licenses/LICENSE-Silk Icons.txt"
+		};
+		
+		HelpSource[] sources = new HelpSource[licenses.length];
+		for (int i = 0; i < licenses.length; i++) {
+			String lic = licenses[i];
+			sources[i] = utils.helpResource(lic, false);
+		}
+		
+		utils.createHelpModal(ModalityType.APPLICATION_MODAL, sources).openThenDispose();
+	}
+	
+	private void openChangeLogModal()
+	{
+		utils.createHelpModal(ModalityType.APPLICATION_MODAL, utils.helpResource("docs/CHANGELOG.md", false)).openThenDispose();
 	}
 	
 	private void openSettingsModal()

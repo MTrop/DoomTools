@@ -20,6 +20,7 @@ import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanApp;
+import net.mtrop.doom.tools.gui.apps.WTexScanTExportApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
@@ -73,6 +74,8 @@ public final class DoomToolsGUIMain
 		String WTEXSCAN = "wtexscan";
 		/** WTExport. */
 		String WTEXPORT = "wtexport";
+		/** WTexScan/WTExport. */
+		String WTEXSCAN_WTEXPORT = "wtexscan-wtexport";
 	}
 	
 	/**
@@ -296,6 +299,10 @@ public final class DoomToolsGUIMain
 		else if (ApplicationNames.WTEXPORT.equals(args[0]))
 		{
 			startApplication(new WTExportApp());
+		}
+		else if (ApplicationNames.WTEXSCAN_WTEXPORT.equals(args[0]))
+		{
+			startApplication(new WTexScanTExportApp());
 		}
 		else
 		{

@@ -18,6 +18,7 @@ import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.filechooser.FileFilter;
 
@@ -242,7 +243,8 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			)),
 			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 	
@@ -255,7 +257,8 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("wswantbl.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 
@@ -594,6 +597,21 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		);
 		
 		return settings;
+	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+		); 
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md", false)).open();
 	}
 
 	private class DefSwAniEditorPanel extends MultiFileEditorPanel

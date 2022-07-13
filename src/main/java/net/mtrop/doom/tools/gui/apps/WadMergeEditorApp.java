@@ -14,6 +14,7 @@ import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.filechooser.FileFilter;
 
@@ -249,7 +250,8 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			)),
 			utils.createMenuFromLanguageKey("wadmerge.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wadmerge.menu.run", createWadScriptRunMenuItems()),
-			utils.createMenuFromLanguageKey("wadmerge.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wadmerge.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 	
@@ -262,7 +264,8 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("wadmerge.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wadmerge.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wadmerge.menu.run", createWadScriptRunMenuItems()),
-			utils.createMenuFromLanguageKey("wadmerge.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wadmerge.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 
@@ -552,6 +555,27 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 		return settings;
 	}
 
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog()),
+			utils.createItemFromLanguageKey("wadmerge.menu.help.item.reference", (c, e) -> onCommandReference())
+		); 
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md", false)).open();
+	}
+
+	private void onCommandReference()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/WadMerge Help.txt", false)).open();
+	}
+
 	private class WadMergeEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = 5845859384586630726L;
@@ -594,5 +618,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 		}
 		
 	}
+	
+	
 	
 }

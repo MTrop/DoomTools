@@ -17,6 +17,8 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
@@ -155,6 +157,18 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		);
 	}
 
+	@Override
+	public JMenuBar createDesktopMenuBar() 
+	{
+		return menuBar(createHelpMenu());
+	}
+	
+	@Override
+	public JMenuBar createInternalMenuBar() 
+	{
+		return menuBar(createHelpMenu());
+	}
+	
 	// The title panel.
 	private static Container titlePanel(String title, Container container)
 	{
@@ -435,5 +449,20 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		
 	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
 	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+		); 
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md", false)).open();
+	}
+
 }

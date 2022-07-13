@@ -296,6 +296,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	private boolean pretty;
 	/** Internal tag stack. */
 	private Stack<String> tagStack;
+	/** Issue flag. */
+	private boolean error;
 	
 	public enum Options
 	{
@@ -314,6 +316,7 @@ public class HTMLWriter implements Flushable, AutoCloseable
 		this.tagStack = new Stack<>();
 		this.terminal = false;
 		this.pretty = false;
+		this.error = false;
 		for (Options opt : options) switch (opt)
 		{
 			case SLASHES_IN_SINGLE_TAGS:
@@ -442,11 +445,18 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	@SuppressWarnings("resource")
 	public static HTMLStringWriter createHTMLString(String doctype, Options ... options)
 	{
-		try {
-			return (HTMLStringWriter)((new HTMLStringWriter(options)).doctype(doctype));
-		} catch (IOException e) {
-			return null;
-		}
+		return (HTMLStringWriter)(new HTMLStringWriter(options).doctype(doctype));
+	}
+	
+	/**
+	 * Creates an HTMLWriter that just writes to a new String.
+	 * The {@link #toString()} method will complete and return the string contents.
+	 * @param options options for output.
+	 * @return the new HTMLStringWriter.
+	 */
+	public static HTMLStringWriter createHTMLString(Options ... options)
+	{
+		return new HTMLStringWriter(options);
 	}
 	
 	/**
@@ -472,9 +482,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Assumes native encoding.
 	 * @param file the file to read.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter html(File file) throws IOException
+	public HTMLWriter html(File file)
 	{
 		return html(file, Charset.defaultCharset());
 	}
@@ -484,13 +493,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param file the file to read.
 	 * @param charset the file encoding.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter html(File file, Charset charset) throws IOException
+	public HTMLWriter html(File file, Charset charset)
 	{
 		try (Reader reader = new InputStreamReader(new FileInputStream(file), charset))
 		{
 			return html(reader);
+		}
+		catch (IOException e)
+		{
+			error = true;
+			return this;
 		}
 	}
 	
@@ -499,13 +512,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param in the input stream.
 	 * @param charset the stream encoding.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter html(InputStream in, Charset charset) throws IOException
+	public HTMLWriter html(InputStream in, Charset charset)
 	{
 		try (Reader reader = new InputStreamReader(in, charset))
 		{
 			return html(reader);
+		}
+		catch (IOException e)
+		{
+			error = true;
+			return this;
 		}
 	}
 	
@@ -513,13 +530,16 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Reads in all characters from a Reader and writes them.
 	 * @param reader the reader.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter html(Reader reader) throws IOException
+	public HTMLWriter html(Reader reader)
 	{
-		writePrettyIndent();
-		writeReader(reader);
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writeReader(reader);
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -527,13 +547,16 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Writes a series of characters, as-is, unconverted.
 	 * @param text the string to write.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter html(CharSequence text) throws IOException
+	public HTMLWriter html(CharSequence text)
 	{
-		writePrettyIndent();
-		writer.append(text);
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writer.append(text);
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -543,9 +566,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Assumes native encoding.
 	 * @param file the file to read.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter text(File file) throws IOException
+	public HTMLWriter text(File file)
 	{
 		return html(file, Charset.defaultCharset());
 	}
@@ -556,13 +578,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param file the file to read.
 	 * @param charset the file encoding.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter text(File file, Charset charset) throws IOException
+	public HTMLWriter text(File file, Charset charset)
 	{
 		try (Reader reader = new InputStreamReader(new FileInputStream(file), charset))
 		{
 			return html(reader);
+		}
+		catch (IOException e)
+		{
+			error = true;
+			return this;
 		}
 	}
 	
@@ -572,13 +598,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param in the input stream.
 	 * @param charset the stream encoding.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter text(InputStream in, Charset charset) throws IOException
+	public HTMLWriter text(InputStream in, Charset charset)
 	{
 		try (Reader reader = new InputStreamReader(in, charset))
 		{
 			return html(reader);
+		}
+		catch (IOException e)
+		{
+			error = true;
+			return this;
 		}
 	}
 	
@@ -587,37 +617,44 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * converting special characters to HTML entities when possible.
 	 * @param reader the reader.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter text(Reader reader) throws IOException
+	public HTMLWriter text(Reader reader)
 	{
-		writePrettyIndent();
-		writeReaderConverted(reader);
-		writePrettyNewline();
-		return this;
+		try {
+			writePrettyIndent();
+			writeReaderConverted(reader);
+			writePrettyNewline();
+			return this;
+		} catch (IOException e) {
+			error = true;
+			return this;
+		}
 	}
 
 	/**
 	 * Writes a series of characters, converting special characters to HTML entities when possible.
 	 * @param text the string to write.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter text(CharSequence text) throws IOException
+	public HTMLWriter text(CharSequence text)
 	{
-		writePrettyIndent();
-		writeConverted(text);
-		writePrettyNewline();
-		return this;
+		try {
+			writePrettyIndent();
+			writeConverted(text);
+			writePrettyNewline();
+			return this;
+		} catch (IOException e) {
+			error = true;
+			return this;
+		}
 	}
 
 	/**
 	 * Writes a DOCTYPE tag.
 	 * @param type the document type.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter doctype(String type) throws IOException
+	public HTMLWriter doctype(String type)
 	{
 		html("<!DOCTYPE " + type + ">");
 		return this;
@@ -627,9 +664,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Writes a single, auto-terminated tag.
 	 * @param tagName the tag name.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName) throws IOException
+	public HTMLWriter tag(String tagName)
 	{
 		return tag(tagName, NO_ATTRIBUTES);
 	}
@@ -639,14 +675,18 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param tagName the tag name.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, Attribute ... attributes)
 	{
-		writePrettyIndent();
-		writeSingleTag(tagName, attributes);
-		writePrettyNewline();
-		return this;
+		try {
+			writePrettyIndent();
+			writeSingleTag(tagName, attributes);
+			writePrettyNewline();
+			return this;
+		} catch (IOException e) {
+			error = true;
+			return this;
+		}
 	}
 
 	/**
@@ -655,9 +695,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param tagName the tag name.
 	 * @param file the file to read.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, File file) throws IOException
+	public HTMLWriter tag(String tagName, File file)
 	{
 		return tag(tagName, file, Charset.defaultCharset(), NO_ATTRIBUTES);
 	}
@@ -669,9 +708,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param file the file to read.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, File file, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, File file, Attribute ... attributes)
 	{
 		return tag(tagName, file, Charset.defaultCharset(), attributes);
 	}
@@ -683,9 +721,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param file the file to read.
 	 * @param charset the file encoding.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, File file, Charset charset) throws IOException
+	public HTMLWriter tag(String tagName, File file, Charset charset)
 	{
 		return tag(tagName, file, charset, NO_ATTRIBUTES);
 	}
@@ -698,13 +735,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param charset the file encoding.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, File file, Charset charset, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, File file, Charset charset, Attribute ... attributes)
 	{
 		try (Reader reader = new InputStreamReader(new FileInputStream(file), charset))
 		{
 			return tag(tagName, reader, attributes);
+		}
+		catch (IOException e) 
+		{
+			error = true;
+			return this;
 		}
 	}
 
@@ -715,9 +756,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param in the input stream.
 	 * @param charset the stream encoding.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, InputStream in, Charset charset) throws IOException
+	public HTMLWriter tag(String tagName, InputStream in, Charset charset)
 	{
 		return tag(tagName, in, charset, NO_ATTRIBUTES);
 	}
@@ -730,13 +770,17 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param charset the stream encoding.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, InputStream in, Charset charset, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, InputStream in, Charset charset, Attribute ... attributes)
 	{
 		try (Reader reader = new InputStreamReader(in, charset))
 		{
 			return tag(tagName, reader, attributes);
+		}
+		catch (IOException e) 
+		{
+			error = true;
+			return this;
 		}
 	}
 
@@ -746,9 +790,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param tagName the tag name.
 	 * @param reader the reader.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, Reader reader) throws IOException
+	public HTMLWriter tag(String tagName, Reader reader)
 	{
 		return tag(tagName, reader, NO_ATTRIBUTES);
 	}
@@ -760,15 +803,18 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param reader the reader.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a read or write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, Reader reader, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, Reader reader, Attribute ... attributes)
 	{
-		writePrettyIndent();
-		writeStartTag(tagName, attributes);
-		writeReaderConverted(reader);
-		writeEndTag(tagName);
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writeStartTag(tagName, attributes);
+			writeReaderConverted(reader);
+			writeEndTag(tagName);
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -777,9 +823,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param tagName the tag name.
 	 * @param text the string to write.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, CharSequence text) throws IOException
+	public HTMLWriter tag(String tagName, CharSequence text)
 	{
 		return tag(tagName, text, NO_ATTRIBUTES);
 	}
@@ -790,15 +835,18 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param text the string to write.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter tag(String tagName, CharSequence text, Attribute ... attributes) throws IOException
+	public HTMLWriter tag(String tagName, CharSequence text, Attribute ... attributes)
 	{
-		writePrettyIndent();
-		writeStartTag(tagName, attributes);
-		writeConverted(text);
-		writeEndTag(tagName);
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writeStartTag(tagName, attributes);
+			writeConverted(text);
+			writeEndTag(tagName);
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -807,10 +855,9 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param name the name attribute.
 	 * @param content the content attribute.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #tag(String, Attribute...)
 	 */
-	public HTMLWriter meta(String name, String content) throws IOException
+	public HTMLWriter meta(String name, String content)
 	{
 		return tag("meta", name(name), attribute("content", content));
 	}
@@ -819,10 +866,9 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Writes a single LINK tag with "stylesheet" relationship and an HREF to the resource.
 	 * @param resourcePath the URI/URL to the style sheet.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #tag(String, Attribute...)
 	 */
-	public HTMLWriter css(String resourcePath) throws IOException
+	public HTMLWriter css(String resourcePath)
 	{
 		return tag("link", rel("stylesheet"), href(resourcePath));
 	}
@@ -833,10 +879,9 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * <p><code>tag("script", new File("script-file.js"), type("text/javascript"))</code>
 	 * @param resourcePath the URI/URL to the script data.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #tag(String, String, Attribute...)
 	 */
-	public HTMLWriter script(String resourcePath) throws IOException
+	public HTMLWriter script(String resourcePath)
 	{
 		// push-pop since script cannot be a singleton tag.
 		return push("script", type("text/javascript"), src(resourcePath)).pop();
@@ -846,15 +891,18 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Writes a tag with attributes, and text content.
 	 * @param text the comment data.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter comment(CharSequence text) throws IOException
+	public HTMLWriter comment(CharSequence text)
 	{
-		writePrettyIndent();
-		writer.append("<!-- ");
-		writer.append(text);
-		writer.append(" -->");
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writer.append("<!-- ");
+			writer.append(text);
+			writer.append(" -->");
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -862,10 +910,9 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Pushes (and writes) an open tag onto the stack. 
 	 * @param tagName the tag name.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #pop()
 	 */
-	public HTMLWriter push(String tagName) throws IOException
+	public HTMLWriter push(String tagName)
 	{
 		return push(tagName, NO_ATTRIBUTES);
 	}
@@ -875,32 +922,38 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * @param tagName the tag name.
 	 * @param attributes the attributes.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #pop()
 	 */
-	public HTMLWriter push(String tagName, Attribute ... attributes) throws IOException
+	public HTMLWriter push(String tagName, Attribute ... attributes)
 	{
-		writePrettyIndent();
-		writeStartTag(tagName, attributes);
-		writePrettyNewline();
-		tagStack.push(tagName);
+		try {
+			writePrettyIndent();
+			writeStartTag(tagName, attributes);
+			writePrettyNewline();
+			tagStack.push(tagName);
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
 	/**
 	 * Pops the last pushed tag and writes the end tag.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @throws EmptyStackException if there are no tags on the stack.
 	 * @see #push(String)
 	 * @see #push(String, Attribute...)
 	 */
-	public HTMLWriter pop() throws IOException
+	public HTMLWriter pop()
 	{
 		String tagName = tagStack.pop();
-		writePrettyIndent();
-		writeEndTag(tagName);
-		writePrettyNewline();
+		try {
+			writePrettyIndent();
+			writeEndTag(tagName);
+			writePrettyNewline();
+		} catch (IOException e) {
+			error = true;
+		}
 		return this;
 	}
 
@@ -908,9 +961,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Starts an HTML document.
 	 * Convenience method for: <code>doctype("html").push("html")</code>
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter start() throws IOException
+	public HTMLWriter start()
 	{
 		return doctype("html").push("html");
 	}
@@ -920,9 +972,8 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Convenience method for: <code>doctype(type).push("html")</code>
 	 * @param type the document type.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 */
-	public HTMLWriter start(String type) throws IOException
+	public HTMLWriter start(String type)
 	{
 		return doctype(type).push("html");
 	}
@@ -931,31 +982,48 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	 * Pops all pushed tags from the stack and flushes the stream.
 	 * Meant to the paired with {@link #start()} or {@link #start(String)}.
 	 * @return this writer.
-	 * @throws IOException if a write error occurs.
 	 * @see #pop()
 	 */
-	public HTMLWriter end() throws IOException
+	public HTMLWriter end()
 	{
 		while (!tagStack.isEmpty())
 			pop();
-		writer.flush();
+		flush();
 		return this;
 	}
 	
-	@Override
-	public void flush() throws IOException
+	/**
+	 * Flushes the writer and then checks if an error happened.
+	 * @return true if so, false if not.
+	 */
+	public boolean getError()
 	{
-		writer.flush();
+		flush();
+		return error;
+	}
+
+	@Override
+	public void flush()
+	{
+		try {
+			writer.flush();
+		} catch (IOException e) {
+			error = true;
+		}
 	}
 
 	/**
 	 * Calls {@link #end()} and closes the underlying writer.
 	 */
 	@Override
-	public void close() throws IOException
+	public void close()
 	{
 		end();
-		writer.close();
+		try {
+			writer.close();
+		} catch (IOException e) {
+			error = true;
+		}
 	}
 
 	private void writeStartTag(String tagName, Attribute... attributes) throws IOException
@@ -1056,18 +1124,14 @@ public class HTMLWriter implements Flushable, AutoCloseable
 	{
 		private HTMLStringWriter(Options ...options)
 		{
-			super(new StringWriter(512), options);
+			super(new StringWriter(1024), options);
 		}
 		
 		@Override
 		public String toString() 
 		{
-			try {
-				super.close();
-				return writer.toString();
-			} catch (IOException e) {
-				return null;
-			}
+			super.close();
+			return writer.toString();
 		}
 	}
 

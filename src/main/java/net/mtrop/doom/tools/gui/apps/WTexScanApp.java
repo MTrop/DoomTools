@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
@@ -105,20 +106,21 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtexscan.menu.file",
 				utils.createItemFromLanguageKey("wtexscan.menu.file.item.exit", (c, e) -> attemptClose())
-			)
+			),
+			createHelpMenu()
 		);
 	}
 	
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		return null;
+		return menuBar(createHelpMenu());
 	}
 
 	@Override
 	public Container createContentPane()
 	{
-		return containerOf(borderLayout(0, 4),
+		return containerOf(dimension(320, 450), borderLayout(0, 4),
 			node(BorderLayout.CENTER, parametersPanel),
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
@@ -174,6 +176,21 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 			noMessages,
 			mapName
 		);	
+	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+		); 
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wtexscan.md", false)).open();
 	}
 	
 }

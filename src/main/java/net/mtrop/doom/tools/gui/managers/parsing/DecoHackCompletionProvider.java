@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
@@ -41,7 +42,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	/** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackCompletionProvider.class); 
 
-    private static final Map<String, IOConsumer<HTMLWriter>> THING_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
+    private static final Map<String, Consumer<HTMLWriter>> THING_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
 		map.put("1", (html) -> {
 			html.tag("div", "This is the player actor. It is created several times per player, especially during deathmatch and co-op.");
 		});
@@ -233,18 +234,18 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		});
 	});
 
-	private static final Map<String, IOConsumer<HTMLWriter>> WEAPON_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
+	private static final Map<String, Consumer<HTMLWriter>> WEAPON_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
 		
-		final IOConsumer<HTMLWriter> NOFIRE_NOTES = (html) -> {
+		final Consumer<HTMLWriter> NOFIRE_NOTES = (html) -> {
 			html.tag("div", "This weapon must require a FIRE button press to start - it will not fire as it is brought up if FIRE is held.");
 			html.tag("div", "The no-fire behavior can be overridden in an MBF21 (or higher) patch format.");
 		};
 		
-		final IOConsumer<HTMLWriter> NOAUTOSWITCH_NOTES = (html) -> {
+		final Consumer<HTMLWriter> NOAUTOSWITCH_NOTES = (html) -> {
 			html.tag("div", "This weapon will not be autoswitched to.");
 		};
 
-		final IOConsumer<HTMLWriter> AUTOSWITCHFROM_NOTES = (html) -> {
+		final Consumer<HTMLWriter> AUTOSWITCHFROM_NOTES = (html) -> {
 			html.tag("div", "This weapon will be autoswitched away if the player finds ammo for another weapon.");
 		};
 		
@@ -270,7 +271,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		});
 	});
 	
-	private static final Map<String, IOConsumer<HTMLWriter>> STATE_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
+	private static final Map<String, Consumer<HTMLWriter>> STATE_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
 		map.put("0", (html) -> {
 			html.tag("div", "NULL state. Reserved.");
 			html.push("div")
@@ -309,7 +310,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			html.tag("div", "See A_VileChase for more info.");
 		});
 		
-		final IOConsumer<HTMLWriter> FASTMONSTER_NOTES = (html) -> {
+		final Consumer<HTMLWriter> FASTMONSTER_NOTES = (html) -> {
 			html.tag("div", "If \"Fast Monsters\" is enabled, this state has its duration halved.");
 			html.tag("div", "MBF21 (and higher) patches can clear this behavior with the \"NotFast\" state flag for this specific state.");
 		};
@@ -394,7 +395,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	 * @param resourcePath the resource path.
 	 * @param valueToNotesLookup lookup for summaries for specific defines.
 	 */
-	private void addDefineCompletions(DecoHackPatchType type, final String category, String resourcePath, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
+	private void addDefineCompletions(DecoHackPatchType type, final String category, String resourcePath, Map<String, Consumer<HTMLWriter>> valueToNotesLookup)
 	{
 		for (Map.Entry<String, String> entry : readDefines(resourcePath).entrySet())
 			createCompletion(type, category, entry.getKey(), entry.getValue(), valueToNotesLookup);
@@ -424,7 +425,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	 * @param resourcePath the resource path.
 	 * @param valueToNotesLookup lookup for summaries for specific defines.
 	 */
-	private void addAliasCompletions(String aliasType, DecoHackPatchType type, final String category, String resourcePath, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
+	private void addAliasCompletions(String aliasType, DecoHackPatchType type, final String category, String resourcePath, Map<String, Consumer<HTMLWriter>> valueToNotesLookup)
 	{
 		final String ALIAS_CLAUSE = "alias " + aliasType;
 
@@ -545,9 +546,9 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		return defineMap;
 	}
 	
-	private void createCompletion(DecoHackPatchType type, final String category, final String token, final String value, Map<String, IOConsumer<HTMLWriter>> valueToNotesLookup)
+	private void createCompletion(DecoHackPatchType type, final String category, final String token, final String value, Map<String, Consumer<HTMLWriter>> valueToNotesLookup)
 	{
-		final IOConsumer<HTMLWriter> addendum = valueToNotesLookup != null ? valueToNotesLookup.get(value) : null;
+		final Consumer<HTMLWriter> addendum = valueToNotesLookup != null ? valueToNotesLookup.get(value) : null;
 		
 		String summary = writeHTML((html) -> {
 			html.push("div")
@@ -745,7 +746,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			return writeHTML((html) -> writeFunctionUsageHTML(html, pointer));
 		}
 
-		private static void writeFunctionUsageHTML(HTMLWriter html, DEHActionPointer pointer) throws IOException
+		private static void writeFunctionUsageHTML(HTMLWriter html, DEHActionPointer pointer)
 		{
 			DEHActionPointer.Usage usage = pointer.getUsage();
 		
@@ -819,7 +820,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			}
 		}
 
-		private static void writeFunctionTypeUsageHTML(HTMLWriter html, Iterable<PointerParameter> parameterUsages) throws IOException
+		private static void writeFunctionTypeUsageHTML(HTMLWriter html, Iterable<PointerParameter> parameterUsages)
 		{
 			html.push("ul");
 			for (PointerParameter tusage : parameterUsages)

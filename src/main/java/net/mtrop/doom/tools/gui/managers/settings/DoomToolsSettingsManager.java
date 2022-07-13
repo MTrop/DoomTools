@@ -32,7 +32,8 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
 	/* ==================================================================== */
 	
     private static final String DOOMTOOLS_THEME = "theme";
-    private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
+    private static final String PATH_LAST_PROJECT = "path.lastProject";
+    private static final String PATH_LAST_SAVE = "path.lastSave";
 
 	/* ==================================================================== */
 
@@ -92,7 +93,7 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
 	 */
 	public void setLastProjectDirectory(File path) 
 	{
-		setFile(DOOMMAKE_PATH_LAST_PROJECT, path);
+		setFile(PATH_LAST_PROJECT, path);
 		commit();
 	}
 
@@ -101,7 +102,25 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
 	 */
 	public File getLastProjectDirectory() 
 	{
-		return getFile(DOOMMAKE_PATH_LAST_PROJECT);
+		return getFile(PATH_LAST_PROJECT);
+	}
+
+	/**
+	 * Sets the last file saved.
+	 * @param path the last file saved.
+	 */
+	public void setLastFileSave(File path) 
+	{
+		setFile(PATH_LAST_SAVE, path);
+		commit();
+	}
+
+	/**
+	 * @return the last file saved.
+	 */
+	public File getLastFileSave() 
+	{
+		return getFile(PATH_LAST_SAVE);
 	}
 
 }

@@ -1008,25 +1008,20 @@ public final class ModalFactory
 			buttons[i] = button;
 		}
 		
-		JPanel centerContent = null;
 		JPanel southContent = null;
-		
-		centerContent = new JPanel();
-		centerContent.setBorder(createEmptyBorder(4, 4, 4, 4));
-		centerContent.add(BorderLayout.CENTER, contentPane);
 		
 		if (buttons.length > 0)
 		{
 			southContent = new JPanel();
-			southContent.setBorder(createEmptyBorder(8, 8, 8, 8));
 			southContent.setLayout(new FlowLayout(FlowLayout.TRAILING, 4, 0));
 			for (int i = 0; i < buttons.length; i++) 
 				southContent.add(buttons[i]);
 		}
 		
 		JPanel modalPanel = new JPanel();
-		modalPanel.setLayout(new BorderLayout());
-		modalPanel.add(BorderLayout.CENTER, centerContent);
+		modalPanel.setLayout(new BorderLayout(0, 4));
+		modalPanel.setBorder(createEmptyBorder(8, 8, 8, 8));
+		modalPanel.add(BorderLayout.CENTER, contentPane);
 		if (southContent != null)
 			modalPanel.add(BorderLayout.SOUTH, southContent);
 		

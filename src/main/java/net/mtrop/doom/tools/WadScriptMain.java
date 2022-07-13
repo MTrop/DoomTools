@@ -192,73 +192,63 @@ public final class WadScriptMain
 	{
 		/**
 		 * Called on render start.
-		 * @throws IOException if a write error occurs.
 		 */
-		void startRender() throws IOException;
+		void startRender();
 		
 		/**
 		 * Starts the table of contents.
 		 * @param sections the section name list.
-		 * @throws IOException if a write error occurs.
 		 */
-		void startTableOfContents(String[] sections) throws IOException;
+		void startTableOfContents(String[] sections);
 
 		/**
 		 * Finishes the table of contents.
-		 * @throws IOException if a write error occurs.
 		 */
-		void finishTableOfContents() throws IOException;
+		void finishTableOfContents();
 		
 		/**
 		 * Starts rendering a section break.
 		 * @param title the section title.
-		 * @throws IOException if a write error occurs.
 		 */
-		void startSection(String title) throws IOException;
+		void startSection(String title);
 
 		/**
 		 * Starts rendering a single function usage doc.
 		 * @param namespace the function namespace.
 		 * @param functionName the function name.
 		 * @param parameterNames the parameters on the function render (can be null).
-		 * @throws IOException if a write error occurs.
 		 */
-		void startFunction(String namespace, String functionName, String[] parameterNames) throws IOException;
+		void startFunction(String namespace, String functionName, String[] parameterNames);
 
 		/**
 		 * Starts rendering a usage doc.
 		 * @param usage the usage to render.
-		 * @throws IOException if a write error occurs.
 		 */
-		void startUsage(Usage usage) throws IOException;
+		void startUsage(Usage usage);
 
 		/**
 		 * Finishes rendering a usage doc.
 		 * @param usage the usage to render.
-		 * @throws IOException if a write error occurs.
 		 */
-		void finishUsage(Usage usage) throws IOException;
+		void finishUsage(Usage usage);
 
 		/**
 		 * Finishes rendering a function break.
 		 * @param namespace the function namespace.
 		 * @param functionName the function name.
-		 * @throws IOException if a write error occurs.
 		 */
-		void finishFunction(String namespace, String functionName) throws IOException;
+		void finishFunction(String namespace, String functionName);
 
 		/**
 		 * Finishes rendering a section break.
 		 * @param title the section title.
-		 * @throws IOException if a write error occurs.
 		 */
-		void finishSection(String title) throws IOException;
+		void finishSection(String title);
 
 		/**
 		 * Called on render finish.
-		 * @throws IOException if a write error occurs.
 		 */
-		void finishRender() throws IOException;
+		void finishRender();
 		
 	}
 	
@@ -280,7 +270,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startTableOfContents(String[] sections) throws IOException
+		public void startTableOfContents(String[] sections)
 		{
 			printSectionHeader("Table of Contents");
 			for (int i = 0; i < sections.length; i++)
@@ -288,7 +278,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishTableOfContents() throws IOException 
+		public void finishTableOfContents() 
 		{
 			out.println();
 			out.println();
@@ -301,7 +291,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishSection(String title) throws IOException
+		public void finishSection(String title)
 		{
 			out.println();
 		}
@@ -332,7 +322,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage) throws IOException 
+		public void startUsage(Usage usage) 
 		{
 			out.append("    ").println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 			if (!usage.getParameterInstructions().isEmpty()) for (ParameterUsage pu : usage.getParameterInstructions())
@@ -349,13 +339,13 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishUsage(Usage usage) throws IOException 
+		public void finishUsage(Usage usage) 
 		{
 			// Do nothing.
 		}
 
 		@Override
-		public void finishFunction(String namespace, String functionName) throws IOException 
+		public void finishFunction(String namespace, String functionName) 
 		{
 			// Do nothing.
 		}
@@ -408,7 +398,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startTableOfContents(String[] sections) throws IOException
+		public void startTableOfContents(String[] sections)
 		{
 			out.println("# Table of Contents");
 			out.println();
@@ -421,7 +411,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishTableOfContents() throws IOException 
+		public void finishTableOfContents() 
 		{
 			out.println();
 		}
@@ -469,7 +459,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage) throws IOException 
+		public void startUsage(Usage usage) 
 		{
 			out.println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 			out.println();
@@ -494,19 +484,19 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishUsage(Usage usage) throws IOException 
+		public void finishUsage(Usage usage) 
 		{
 			out.println();
 		}
 
 		@Override
-		public void finishFunction(String namespace, String functionName) throws IOException 
+		public void finishFunction(String namespace, String functionName) 
 		{
 			out.println();
 		}
 
 		@Override
-		public void finishSection(String title) throws IOException 
+		public void finishSection(String title) 
 		{
 			out.println();
 		}
@@ -541,7 +531,7 @@ public final class WadScriptMain
 		}
 		
 		@Override
-		public void startRender() throws IOException
+		public void startRender()
 		{
 			if (!contentOnly)
 			{
@@ -554,6 +544,10 @@ public final class WadScriptMain
 						.html(reader)
 					.pop();
 				}
+				catch (IOException e)
+				{
+					
+				}
 				htmlout.pop();
 				htmlout.push("body");
 			}
@@ -564,7 +558,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startTableOfContents(String[] sections) throws IOException 
+		public void startTableOfContents(String[] sections) 
 		{
 			htmlout.push("div", HTMLWriter.id("top"), HTMLWriter.classes("table-of-contents"));
 			htmlout.push("div", HTMLWriter.classes("toc-title"))
@@ -584,13 +578,13 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishTableOfContents() throws IOException 
+		public void finishTableOfContents() 
 		{
 			htmlout.pop();
 		}
 
 		@Override
-		public void startSection(String title) throws IOException
+		public void startSection(String title)
 		{
 			String titleCode = getTitleCode(title);
 			htmlout.push("div", HTMLWriter.id("category-" + titleCode), HTMLWriter.classes("category-section"));
@@ -606,7 +600,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startFunction(String namespace, String functionName, String[] parameterNames) throws IOException 
+		public void startFunction(String namespace, String functionName, String[] parameterNames) 
 		{
 			String functionNameCode = getFunctionNameCode(namespace, functionName);
 			htmlout.push("div", HTMLWriter.id("function-" + functionNameCode), HTMLWriter.classes("function-section"));
@@ -634,7 +628,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage) throws IOException
+		public void startUsage(Usage usage)
 		{
 			htmlout.push("div", HTMLWriter.classes("function-description"))
 				.tag("p", usage.getInstructions())
@@ -645,7 +639,7 @@ public final class WadScriptMain
 			writeParameterReturn(usage.getReturnTypes());
 		}
 
-		private void writeParameterUsage(ParameterUsage paramUsage) throws IOException
+		private void writeParameterUsage(ParameterUsage paramUsage)
 		{
 			htmlout.push("div", HTMLWriter.classes("parameter-section"));
 			htmlout.push("div", HTMLWriter.classes("parameter-title"))
@@ -658,7 +652,7 @@ public final class WadScriptMain
 			htmlout.pop();
 		}
 
-		private void writeParameterReturn(List<TypeUsage> parameterUsageTypes) throws IOException
+		private void writeParameterReturn(List<TypeUsage> parameterUsageTypes)
 		{
 			htmlout.push("div", HTMLWriter.classes("parameter-section"));
 			htmlout.push("div", HTMLWriter.classes("parameter-title", "return"))
@@ -671,7 +665,7 @@ public final class WadScriptMain
 			htmlout.pop();
 		}
 		
-		private void writeParameterTypeUsage(List<TypeUsage> parameterUsageTypes) throws IOException
+		private void writeParameterTypeUsage(List<TypeUsage> parameterUsageTypes)
 		{
 			htmlout.push("div", HTMLWriter.classes("parameter-content"));
 			for (TypeUsage typeUsage : parameterUsageTypes)
@@ -703,25 +697,25 @@ public final class WadScriptMain
 		}
 		
 		@Override
-		public void finishUsage(Usage usage) throws IOException 
+		public void finishUsage(Usage usage) 
 		{
 			// Do nothing.
 		}
 
 		@Override
-		public void finishFunction(String namespace, String functionName) throws IOException 
+		public void finishFunction(String namespace, String functionName) 
 		{
 			htmlout.pop().pop();
 		}
 
 		@Override
-		public void finishSection(String title) throws IOException
+		public void finishSection(String title)
 		{
 			htmlout.pop().pop();
 		}
 
 		@Override
-		public void finishRender() throws IOException
+		public void finishRender()
 		{
 			IOUtils.close(htmlout);
 		}

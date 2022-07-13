@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
@@ -136,14 +137,15 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file",
 				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> attemptClose())
-			)
+			),
+			createHelpMenu()
 		);
 	}
 	
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		return null;
+		return menuBar(createHelpMenu());
 	}
 
 	@Override
@@ -236,6 +238,21 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		executionSettings.setEntryPoint(executePanel.getEntryPoint());
 		executionSettings.setArgs(executePanel.getArgs());
 		getCommon().onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+		); 
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md", false)).open();
 	}
 
 }

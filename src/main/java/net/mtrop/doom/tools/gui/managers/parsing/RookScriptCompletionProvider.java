@@ -1,6 +1,5 @@
 package net.mtrop.doom.tools.gui.managers.parsing;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
 
@@ -104,14 +103,10 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 				writeFunctionUsageHTML(html, namespace, type.name().toLowerCase(), type.getUsage());
 				html.end();
 			} 
-			catch (IOException e) 
-			{
-				// Do nothing - shouldn't be thrown.
-			}
 			return out.toString();
 		}
 
-		private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages) throws IOException
+		private static void writeFunctionTypeUsageHTML(HTMLWriter html, List<TypeUsage> typeUsages)
 		{
 			html.push("ul");
 			for (TypeUsage tusage : typeUsages)
@@ -127,7 +122,7 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 			html.pop();
 		}
 
-		private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage) throws IOException
+		private static void writeFunctionUsageHTML(HTMLWriter html, String namespace, String name, ScriptFunctionType.Usage usage)
 		{
 			// Signature.
 			html.push("div");

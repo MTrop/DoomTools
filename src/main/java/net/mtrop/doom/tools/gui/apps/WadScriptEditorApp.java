@@ -14,9 +14,11 @@ import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
@@ -233,6 +235,19 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		);
 	}
 	
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog()),
+			separator(),
+			utils.createItemFromLanguageKey("wadscript.menu.help.item.rookscript", (c, e) -> onRookScriptReference()),
+			utils.createItemFromLanguageKey("wadscript.menu.help.item.functions", (c, e) -> onFunctionReference())
+		); 
+	}
+
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
@@ -248,7 +263,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			)),
 			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wadscript.menu.run", createWadScriptRunMenuItems()),
-			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 	
@@ -261,7 +277,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("wadscript.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("wadscript.menu.run", createWadScriptRunMenuItems()),
-			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("wadscript.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 
@@ -561,6 +578,21 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		);
 		
 		return settings;
+	}
+
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md", false)).open();
+	}
+	
+	private void onRookScriptReference()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/RookScript Quick Guide.md", false)).open();
+	}
+
+	private void onFunctionReference()
+	{
+		getUtils().createHelpModal(getUtils().helpProcess(WadScriptMain.class, "--function-help")).open();
 	}
 
 	private class WadScriptEditorPanel extends MultiFileEditorPanel

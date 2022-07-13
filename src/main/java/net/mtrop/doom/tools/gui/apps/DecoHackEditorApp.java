@@ -15,10 +15,12 @@ import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.decohack.DecoHackPatchType;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
@@ -244,7 +246,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			)),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 	
@@ -257,7 +260,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("decohack.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
 			utils.createMenuFromLanguageKey("decohack.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems())
+			utils.createMenuFromLanguageKey("decohack.menu.editor", createCommonEditorMenuItems()),
+			createHelpMenu()
 		);
 	}
 
@@ -523,6 +527,40 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		);
 		
 		return settings;
+	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (c, e) -> onHelp()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog()),
+			separator(),
+			utils.createItemFromLanguageKey("decohack.menu.help.item.hardcode", (c, e) -> onHelpHardcode()),
+			utils.createItemFromLanguageKey("decohack.menu.help.item.pointers", (c, e) -> onPointerReference())
+		); 
+	}
+
+	private void onHelp()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("decohack/help.txt", true)).open();
+	}
+	
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md", false)).open();
+	}
+	
+	private void onHelpHardcode()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/DeHackEd Hardcodings.txt", false)).open();
+	}
+
+	private void onPointerReference()
+	{
+		getUtils().createHelpModal(getUtils().helpProcess(DecoHackMain.class, "--dump-pointers")).open();
 	}
 
 	private class DecoHackEditorPanel extends MultiFileEditorPanel

@@ -6,12 +6,16 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.Dialog.ModalityType;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -26,14 +30,20 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JTextArea;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.Environment;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
+import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
@@ -42,10 +52,14 @@ import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
+
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileExtensionFilter;
@@ -73,8 +87,9 @@ public final class DoomToolsGUIUtils
 
 	/* ==================================================================== */
 	
-	private DoomToolsImageManager images;
 	private DoomToolsLanguageManager language;
+	private DoomToolsImageManager images;
+	private DoomToolsSettingsManager settings;
 	
 	private List<Image> windowIcons;
 	private Icon windowIcon;
@@ -83,6 +98,7 @@ public final class DoomToolsGUIUtils
 	{
 		this.images = DoomToolsImageManager.get();
 		this.language = DoomToolsLanguageManager.get();
+		this.settings = DoomToolsSettingsManager.get();
 		
 		final Image icon16  = images.getImage("doomtools-logo-16.png"); 
 		final Image icon32  = images.getImage("doomtools-logo-32.png"); 
@@ -541,8 +557,12 @@ public final class DoomToolsGUIUtils
 					node(BorderLayout.WEST, status),
 					node(BorderLayout.EAST, containerOf(flowLayout(Flow.RIGHT, 4, 0),
 						node(createButtonFromLanguageKey("doomtools.clipboard.copy", (c, e) -> {
-							ClipboardUtils.sendStringToClipboard(outputPanel.getText());
+							copyToClipboard(outputPanel.getText());
 							status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
+						})),
+						node(createButtonFromLanguageKey("doomtools.clipboard.save", (c, e) -> {
+							if (saveToFile(outputPanel, outputPanel.getText()))
+								status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
 						}))
 					))
 				))
@@ -580,6 +600,121 @@ public final class DoomToolsGUIUtils
 		};
 	}
 
+	/**
+	 * Creates a help modal, modeless.
+	 * @param sources the help sources to put in the modal.
+	 * @return a modal. It starts invisible.
+	 */
+	public Modal<Void> createHelpModal(HelpSource ... sources)
+	{
+		return createHelpModal(ModalityType.MODELESS, sources);
+	}
+	
+	/**
+	 * Creates a help modal.
+	 * @param modalityType the modality type override.
+	 * @param sources the help sources to put in the modal.
+	 * @return a modal. It starts invisible.
+	 */
+	public Modal<Void> createHelpModal(ModalityType modalityType, HelpSource ... sources)
+	{
+		Modal<Void> out;
+		if (sources.length > 1)
+		{
+			Tab[] tabs = new Tab[sources.length];
+			for (int i = 0; i < sources.length; i++) 
+			{
+				HelpSource src = sources[i];
+				
+				int idx = src.path.lastIndexOf("/");
+				String path;
+				if (idx < 0)
+					path = src.path;
+				else
+					path = src.path.substring(idx + 1);
+				
+				JTextArea area = textArea(src.getText(), 25, 80);
+				area.setEditable(false);
+				area.setFont(EditorSettingsManager.get().getEditorFont());
+				tabs[i] = tab(path, src.path, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(area))));
+			}
+			
+			out = modal(language.getText("doomtools.help.title"), 
+				modalityType, 
+				containerOf(borderLayout(), 
+					node(BorderLayout.CENTER, tabs(TabPlacement.TOP, TabLayoutPolicy.SCROLL, tabs))
+				)
+			);
+		}
+		else
+		{
+			HelpSource src = sources[0];
+			
+			int idx = src.path.lastIndexOf("/");
+			String path;
+			if (idx < 0)
+				path = src.path;
+			else
+				path = src.path.substring(idx + 1);
+			
+			JTextArea area = textArea(src.getText(), 25, 90);
+			area.setEditable(false);
+			area.setFont(EditorSettingsManager.get().getEditorFont());
+			
+			out = modal(path, 
+				modalityType, 
+				containerOf(borderLayout(), 
+					node(BorderLayout.CENTER, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(area))))
+				)
+			);
+		}
+		out.setResizable(true);
+		return out;
+	}
+	
+	/**
+	 * Creates a singular text source for help.
+	 * @param name the tab name.
+	 * @param text the text.
+	 * @return the help source.
+	 */
+	public HelpSource helpText(String name, String text)
+	{
+		return new HelpSource(name, text);
+	}
+	
+	/**
+	 * Creates a source for help using a path relative to DoomTools's root.
+	 * @param path the path.
+	 * @param resource if true, path is a resource path. 
+	 * @return the help source.
+	 */
+	public HelpSource helpResource(String path, boolean resource)
+	{
+		return new HelpSource(path, resource);
+	}
+	
+	/**
+	 * Creates a source for help using a path relative to DoomTools's root.
+	 * @param mainClass the main class.
+	 * @param helpSwitch the help switch to use. 
+	 * @return the help source.
+	 */
+	public HelpSource helpProcess(Class<?> mainClass, String helpSwitch)
+	{
+		ProcessCallable callable = Common.spawnJava(mainClass).arg(helpSwitch);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
+		callable.setOut(bos);
+		try {
+			callable.call();
+			bos.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new HelpSource(mainClass.getSimpleName(), "[PROCESS ERROR]");
+		}
+		return new HelpSource(mainClass.getSimpleName(), new String(bos.toByteArray()));
+	}
+	
 	/**
 	 * @return the common window icons to use.
 	 */
@@ -682,6 +817,47 @@ public final class DoomToolsGUIUtils
 		return new FormFieldInfo(null, field);
 	}
 	
+	/* ==================================================================== */
+
+	private void copyToClipboard(String text)
+	{
+		ClipboardUtils.sendStringToClipboard(text);
+	}
+	
+	private boolean saveToFile(Component parent, String text)
+	{
+		FileFilter filter = getTextFileFilter();
+		File saveFile = chooseFile(parent, 
+			language.getText("doomtools.clipboard.save.title"),
+			language.getText("doomtools.clipboard.save.choose"),
+			settings::getLastFileSave, 
+			settings::setLastFileSave,
+			(f, input) -> (f == filter ? FileUtils.addMissingExtension(input, "txt") : input),
+			filter
+		);
+		
+		if (saveFile == null)
+			return false;
+		
+		try (FileOutputStream fos = new FileOutputStream(saveFile); ByteArrayInputStream bis = new ByteArrayInputStream(text.getBytes()))
+		{
+			IOUtils.relay(bis, fos);
+		} 
+		catch (IOException e) 
+		{
+			SwingUtils.error(parent, language.getText("doomtools.clipboard.save.error", e.getLocalizedMessage()));
+		}
+		catch (SecurityException e) 
+		{
+			SwingUtils.error(parent, language.getText("doomtools.clipboard.save.security"));
+		}
+		
+		return true;
+	}
+	
+	
+	/* ==================================================================== */
+	
 	/**
 	 * Form field info.
 	 */
@@ -695,6 +871,66 @@ public final class DoomToolsGUIUtils
 			this.languageKey = languageKey;
 			this.field = field;
 		}
+	}
+	
+	/**
+	 * Help source.
+	 */
+	public static class HelpSource
+	{
+		/** Source Relative to DoomTools Path */
+		private String path; // 
+		/** Is a resource path? */
+		private boolean resource;
+		/** Text override. */
+		private String text;
+		
+		private HelpSource(String path, String text)
+		{
+			this.path = path;
+			this.text = text;
+		}
+		
+		private HelpSource(String path, boolean resource)
+		{
+			this.path = path;
+			this.resource = resource;
+		}
+		
+		public String getText()
+		{
+			if (text != null)
+			{
+				return text;
+			}
+			else if (resource)
+			{
+				InputStream in = null;
+				try {
+					if ((in = IOUtils.openResource(path)) == null)
+						return "[NOT FOUND: Resource " + path + "]";
+					else
+						return IOUtils.getTextualContents(in, StandardCharsets.UTF_8);
+				} catch (IOException e) {
+					return "[ERROR: Resource " + path + ": " + e.getLocalizedMessage() + "]";
+				} finally {
+					IOUtils.close(in);
+				}
+			}
+			else
+			{
+				String root = ObjectUtils.isNull(Environment.getDoomToolsPath(), OSUtils.getWorkingDirectoryPath());
+				try (FileInputStream fis = new FileInputStream(new File(root + File.separator + path)))
+				{
+					return IOUtils.getTextualContents(fis, StandardCharsets.UTF_8);
+				} catch (FileNotFoundException e) {
+					return "[NOT FOUND: Path " + path + ": " + e.getLocalizedMessage() + "]";
+				} catch (IOException e) {
+					return "[ERROR: Path " + path + ": " + e.getLocalizedMessage() + "]";
+				}
+			}
+		}
+		
 	}
 	
 	/**

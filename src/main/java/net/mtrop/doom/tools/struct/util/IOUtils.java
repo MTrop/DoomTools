@@ -256,6 +256,28 @@ public final class IOUtils
 	}
 
 	/**
+	 * Retrieves the textual contents of a stream.
+	 * @param in		the input stream to use.
+	 * @param encoding	name of the encoding type.
+	 * @return		a contiguous string (including newline characters) of the stream's contents.
+	 * @throws IOException				if the read cannot be done.
+	 */
+	public static String getTextualContents(InputStream in, Charset encoding) throws IOException
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding));
+		String line;
+		while ((line = br.readLine()) != null)
+		{
+			sb.append(line);
+			sb.append('\n');
+		}
+		br.close();
+		return sb.toString();
+	}
+
+	/**
 	 * Retrieves the binary contents of a file.
 	 * @param f		the file to use.
 	 * @return		an array of the bytes that make up the file.

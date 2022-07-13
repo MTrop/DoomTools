@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.Action;
 import javax.swing.JCheckBox;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.doommake.AutoBuildAgent;
@@ -227,22 +228,21 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doommake.menu.file",
-				utils.createItemFromLanguageKey("doommake.menu.file.item.new",
-					(c, e) -> openNewProject()
-				),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.open",
-					(c, e) -> openOpenProject()
-				),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.new", (c, e) -> openNewProject()),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.open", (c, e) -> openOpenProject()),
 				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.settings",
-					(c, e) -> openSettings()
-				),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.settings", (c, e) -> openSettings()),
 				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.exit",
-					(c, e) -> attemptClose()
-				)
-			)
+				utils.createItemFromLanguageKey("doommake.menu.file.item.exit", (c, e) -> attemptClose())
+			),
+			createHelpMenu()
 		);
+	}
+	
+	@Override
+	public JMenuBar createInternalMenuBar() 
+	{
+		return menuBar(createHelpMenu());
 	}
 	
 	@Override
@@ -447,6 +447,21 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			listPanel.setEnabled(state);
 			targetRunAction.setEnabled(state);
 		});
+	}
+
+	// Make help menu for internal and desktop.
+	private JMenu createHelpMenu()
+	{
+		DoomToolsGUIUtils utils = getUtils();
+	
+		return utils.createMenuFromLanguageKey("doomtools.menu.help",
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+		); 
+	}
+	
+	private void onHelpChangelog()
+	{
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md", false)).open();
 	}
 	
 }
