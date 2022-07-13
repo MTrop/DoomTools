@@ -51,7 +51,6 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("<b>RSyntaxTextArea</b> and <b>AutoComplete</b> (C) 2021 Robert Futrell").append("<br/>");
 		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
 		sb.append("<b>SLADE3</b> Icon by Sir Juddington").append("<br/>");
-		sb.append("<b>Folder and VSCode Icons</b> (C) Microsoft Corp. 2021").append("<br/>");
 		sb.append("<br/>");
 		sb.append("All third-party licenses are available in the \"licenses\" folder in the documentation folder.").append("<br/>");
 		sb.append("<br/>");

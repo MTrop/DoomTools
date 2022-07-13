@@ -322,7 +322,7 @@
 			<fileset dir="${build.dir}/shell/cmd" />
 		</copy>
 		<copy todir="${build.installer.dir}/docs">
-			<fileset dir="docs" />
+			<fileset dir="${resource.dir}/docs"/>
 			<fileset file="README.md" />
 			<fileset file="LICENSE.txt" />
 		</copy>

@@ -412,7 +412,7 @@ check function getConvertPaletteSource() {
  * mode: One of 'palettes', 'colormaps', 'graphics', 'flats'. Default: 'graphics'
  * recurse: true to recurse directory, false to not. Default = true.
  ****************************************************************************/
-check function convert(sourceDir, targetDir, mode, recurse) {
+check function convertimg(sourceDir, targetDir, mode, recurse) {
 	if (empty(sourceDir))
 		return error("ToolError", "Source directory path not specified.");
 	if (empty(targetDir))
@@ -447,6 +447,31 @@ check function convertdmx(sourceDir, targetDir) {
 		outputdirectory: file(targetDir),
 		verbose: false
 	})) return error("ToolError", "DMXConvert threw an error.");
+}
+
+/****************************************************************************
+ * Calls DECOHack and throws an error if something bad happens.
+ * 
+ * rootFilePath: Path to root file.
+ * outFilePath: Output file.
+ * budget: If true, output budget. False, don't.
+ * outSourceFilePath: Combined source output file.
+ ****************************************************************************/
+function decohack(rootFilePath, outFilePath, budget, outSourceFilePath) {
+	if (empty(rootFilePath))
+		return error("ToolError", "Root file not specified.");
+	if (empty(outFilePath))
+		return error("ToolError", "Output file path not specified.");
+	if (budget === null)
+		return error("ToolError", "Budget flag is null.");
+		
+	if (tool::decohack({
+		inFile: rootFilePath,
+		inCharsetName: getProjectEncoding(),
+		outFile: outFilePath,
+		outputBudget: budget,
+		outSourceFile: outSourceFilePath
+	})) return error("ToolError", "DECOHack threw an error.");
 }
 
 /****************************************************************************
@@ -489,31 +514,6 @@ function wadscript(scriptFilePath, entryPoint, args) {
 		entryPointName: entryPoint,
 		args: args
 	})) return error("ToolError", "WadMerge threw an error.");
-}
-
-/****************************************************************************
- * Calls DECOHack and throws an error if something bad happens.
- * 
- * rootFilePath: Path to root file.
- * outFilePath: Output file.
- * budget: If true, output budget. False, don't.
- * outSourceFilePath: Combined source output file.
- ****************************************************************************/
-function decohack(rootFilePath, outFilePath, budget, outSourceFilePath) {
-	if (empty(rootFilePath))
-		return error("ToolError", "Root file not specified.");
-	if (empty(outFilePath))
-		return error("ToolError", "Output file path not specified.");
-	if (budget === null)
-		return error("ToolError", "Budget flag is null.");
-		
-	if (tool::decohack({
-		inFile: rootFilePath,
-		inCharsetName: getProjectEncoding(),
-		outFile: outFilePath,
-		outputBudget: budget,
-		outSourceFile: outSourceFilePath
-	})) return error("ToolError", "DECOHack threw an error.");
 }
 
 /****************************************************************************

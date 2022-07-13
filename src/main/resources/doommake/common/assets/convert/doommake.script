@@ -52,7 +52,7 @@ check function doConvertGraphics() {
 
 	println("Converting graphics...");
 	
-	convert(sourceDir, targetDir, "graphics");
+	convertimg(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-graphics");
@@ -80,7 +80,7 @@ check function doConvertSprites() {
 
 	println("Converting sprites...");
 	
-	convert(sourceDir, targetDir, "graphics");
+	convertimg(sourceDir, targetDir, "graphics");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-sprites");
@@ -108,7 +108,7 @@ check function doConvertColormaps() {
 
 	println("Converting colormaps...");
 	
-	convert(sourceDir, targetDir, "colormaps");
+	convertimg(sourceDir, targetDir, "colormaps");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-colormaps");

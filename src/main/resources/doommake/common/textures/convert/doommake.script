@@ -24,7 +24,7 @@ check function doConvertFlats() {
 
 	println("Converting flats...");
 
-	convert(sourceDir, targetDir, "flats");
+	convertimg(sourceDir, targetDir, "flats");
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-flats");
@@ -52,7 +52,7 @@ check function doConvertPatches() {
 
 	println("Converting patches...");
 
-	convert(sourceDir, targetDir);
+	convertimg(sourceDir, targetDir);
 
 	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("convert-patches");
@@ -69,7 +69,7 @@ check function doConvertTextureDirectory(sourceDir, targetDir) {
 
 	println("Converting textures...");
 
-	convert(sourceDir, targetDir);
+	convertimg(sourceDir, targetDir);
 
 	storeDirectoryChanged(sourceDir, hash);
 	println("Textures converted from `" + sourceDir + "` to `" + targetDir + "`.");
