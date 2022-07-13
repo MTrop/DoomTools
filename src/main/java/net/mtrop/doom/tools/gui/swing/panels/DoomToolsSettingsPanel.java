@@ -32,6 +32,8 @@ public class DoomToolsSettingsPanel extends JPanel
 	
 	/** DoomMake setting panel. */
 	private DoomMakeSettingsPanel doomMakeSettingsPanel;
+	/** DMXConv setting panel. */
+	private DMXConvertSettingsPanel dmxConvertSettingsPanel;
 	
 	
 	/**
@@ -43,11 +45,15 @@ public class DoomToolsSettingsPanel extends JPanel
 		this.settings = DoomToolsSettingsManager.get();
 		
 		this.doomMakeSettingsPanel = new DoomMakeSettingsPanel();
+		this.dmxConvertSettingsPanel = new DMXConvertSettingsPanel();
 		
 		containerOf(this,
 			node(BorderLayout.CENTER, tabs(TabPlacement.LEFT,
 				tab("DoomTools", containerOf(createEmptyBorder(8, 8, 8, 8),
 					node(createMainPanel())
+				)),
+				tab("DMXConvert", containerOf(createEmptyBorder(8, 8, 8, 8),
+					node(dmxConvertSettingsPanel)
 				)),
 				tab("DoomMake", containerOf(createEmptyBorder(8, 8, 8, 8),
 					node(doomMakeSettingsPanel)
