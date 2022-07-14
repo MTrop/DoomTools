@@ -12,11 +12,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel;
-import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
@@ -61,7 +61,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 
 		File[] files = parametersPanel.getFiles();
-		OutputMode mode = parametersPanel.getOutputMode();
+		TexScanOutputMode mode = parametersPanel.getOutputMode();
 		boolean noSkies = parametersPanel.getSkipSkies();
 		boolean noMessages = parametersPanel.getNoCommentMessages();
 		String mapName = parametersPanel.getMapName();
@@ -86,7 +86,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		File[] files = new File[count];
 		
 		final Function<String, File> fileParse = (input) -> new File(input);
-		final Function<String, OutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, OutputMode.class);
+		final Function<String, TexScanOutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, TexScanOutputMode.class);
 		
 		for (int i = 0; i < files.length; i++) 
 			files[i] = ValueUtils.parse(state.get("files." + i), fileParse);
@@ -164,7 +164,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	private void onScanMaps() 
 	{
 		File[] files = parametersPanel.getFiles();
-		OutputMode mode = parametersPanel.getOutputMode();
+		TexScanOutputMode mode = parametersPanel.getOutputMode();
 		boolean noSkies = parametersPanel.getSkipSkies();
 		boolean noMessages = parametersPanel.getNoCommentMessages();
 		String mapName = parametersPanel.getMapName();

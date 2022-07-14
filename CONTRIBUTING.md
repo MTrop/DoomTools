@@ -21,7 +21,7 @@ To contribute to this project, you must follow the Code of Conduct and Coding St
 
 5. Methods must have purposeful names, but not excessively large, descriptive ones. That's what documentation is for.
 
-6. You may not add additional dependencies to this project without adequate justification or review. Stay in the [java.desktop](https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html) module (and its child dependencies). *Removal* of dependencies, if any, are always a welcome proposition.
+6. You may not add additional dependencies to this project without adequate justification or review. "Adequate justification" is defined by the code maintainer. Stay in the [java.desktop](https://docs.oracle.com/en/java/javase/11/docs/api/java.desktop/module-summary.html) module (and its child dependencies). *Removal* of dependencies, if any, are always a welcome proposition and are subject to less scrutiny.
 
 ### Pull Requests
 

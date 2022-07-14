@@ -11,7 +11,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
+import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
+import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WTExportMain;
@@ -21,16 +23,17 @@ import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
+import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Common application functions across more than one application.
@@ -60,6 +63,21 @@ public final class AppCommon
 	private DoomToolsGUIUtils utils;
 	private DoomToolsTaskManager tasks;
 	private DoomToolsLanguageManager language;
+
+	public enum TexScanOutputMode
+	{
+		BOTH,
+		TEXTURES,
+		FLATS;
+	}
+
+	public enum GraphicsMode
+	{
+		GRAPHICS,
+		FLATS,
+		COLORMAPS,
+		PALETTES;
+	}
 
 	private AppCommon() 
 	{
@@ -97,6 +115,60 @@ public final class AppCommon
 		).start(tasks);
 	}
 	
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel.
+	 * @param inputFile input file/dir for conversion.
+	 * @param outputFile the output file, directory, or WAD.
+	 * @param recursive if true, the input file is a directory, and the search is recursive.
+	 * @param paletteSource the palette source file or WAD.
+	 * @param mode the default mode.
+	 * @param infoFileName the alternate name for the info file.
+	 */
+	public void onExecuteDImgConv(Container parent, final DoomToolsStatusPanel statusPanel, File inputFile, File outputFile, boolean recursive, File paletteSource, GraphicsMode mode, String infoFileName)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("dimgconv.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("dimgconv.status.message.running"), 
+				language.getText("dimgconv.status.message.success"), 
+				language.getText("dimgconv.status.message.interrupt"), 
+				language.getText("dimgconv.status.message.error"), 
+				callDImgConv(inputFile, outputFile, recursive, paletteSource, mode, infoFileName, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel.
+	 * @param inputFiles the input sound files (will be exploded into individual files).
+	 * @param ffmpegPath if not null, path to FFmpeg.
+	 * @param ffmpegOnly if null, normal path. True, ffmpeg only. False, JSPI only.
+	 * @param outputDir if not null, output directory.
+	 */
+	public void onExecuteDMXConv(Container parent, final DoomToolsStatusPanel statusPanel, File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, File outputDir)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("dmxconv.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("dmxconv.status.message.running"), 
+				language.getText("dmxconv.status.message.success"), 
+				language.getText("dmxconv.status.message.interrupt"), 
+				language.getText("dmxconv.status.message.error"), 
+				callDMXConv(inputFiles, ffmpegPath, ffmpegOnly, outputDir, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
 	/**
 	 * 
 	 * @param parent the parent container for the modal.
@@ -219,7 +291,7 @@ public final class AppCommon
 	 * @param noMessages 
 	 * @param mapName 
 	 */
-	public void onExecuteWTexScan(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
+	public void onExecuteWTexScan(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
 	{
 		utils.createProcessModal(
 			parent, 
@@ -283,7 +355,7 @@ public final class AppCommon
 	 * @param noSwitch 
 	 * @param nullTex 
 	 */
-	public void onExecuteWTexScanToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
+	public void onExecuteWTexScanToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
 	{
 		utils.createProcessModal(
 			parent, 
@@ -357,7 +429,18 @@ public final class AppCommon
 		});
 	}
 
-	public static InstancedFuture<Integer> callDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
+	/**
+	 * 
+	 * @param scriptFile
+	 * @param encoding
+	 * @param outSourceFile
+	 * @param outTargetFile
+	 * @param budget
+	 * @param stdout
+	 * @param stderr
+	 * @return the future task
+	 */
+	public InstancedFuture<Integer> callDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
 		
@@ -379,6 +462,109 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDERR."));
 		
 		LOG.infof("Calling DECOHack (%s).", scriptFile);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+
+	/**
+	 * Calls DImgConv.
+	 * @param inputFile input file/dir for conversion.
+	 * @param outputFile the output file, directory, or WAD.
+	 * @param recursive if true, the input file is a directory, and the search is recursive.
+	 * @param paletteSource the palette source file or WAD.
+	 * @param mode the default mode.
+	 * @param infoFileName the alternate name for the info file.
+	 * @param stdout
+	 * @param stderr
+	 * @return the future task
+	 */
+	public InstancedFuture<Integer> callDImgConv(File inputFile, File outputFile, boolean recursive, File paletteSource, GraphicsMode mode, String infoFileName, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(DImageConvertApp.class);
+		
+		if (inputFile != null)
+			callable.arg(inputFile.getAbsolutePath());
+		
+		if (outputFile != null)
+			callable.arg(DoomImageConvertMain.SWITCH_OUTPUT).arg(outputFile.getAbsolutePath());
+
+		if (recursive)
+			callable.arg(DoomImageConvertMain.SWITCH_RECURSIVE);
+
+		if (paletteSource != null)
+			callable.arg(DoomImageConvertMain.SWITCH_PALETTE).arg(paletteSource.getAbsolutePath());
+		
+		switch (mode)
+		{
+			case PALETTES:
+				callable.arg(DoomImageConvertMain.SWITCH_MODE_PALETTES);
+				break;
+			case COLORMAPS:
+				callable.arg(DoomImageConvertMain.SWITCH_MODE_COLORMAPS);
+				break;
+			case FLATS:
+				callable.arg(DoomImageConvertMain.SWITCH_MODE_FLATS);
+				break;
+			default:
+			case GRAPHICS:
+				break;
+		}
+		
+		if (!ObjectUtils.isEmpty(infoFileName))
+			callable.arg(DoomImageConvertMain.SWITCH_METAINFOFILE).arg(infoFileName);
+		
+		callable.arg(DoomImageConvertMain.SWITCH_VERBOSE);
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+		;
+
+		LOG.infof("Calling DMXConv.");
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+
+	/**
+	 * Calls DMXConvert.
+	 * @param inputFiles
+	 * @param ffmpegPath 
+	 * @param ffmpegOnly 
+	 * @param outputDir 
+	 * @param stdout
+	 * @param stderr
+	 * @return the future task
+	 */
+	public InstancedFuture<Integer> callDMXConv(File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, File outputDir, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(DMXConvertMain.class);
+		
+		inputFiles = FileUtils.explodeFiles(inputFiles);
+		for (int i = 0; i < inputFiles.length; i++) 
+			callable.arg(inputFiles[i].getAbsolutePath());	
+		
+		if (ffmpegPath != null)
+			callable.arg(DMXConvertMain.SWITCH_FFMPEG_PATH).arg(ffmpegPath.getAbsolutePath());
+		
+		if (ffmpegOnly != null)
+		{
+			if (ffmpegOnly)
+				callable.arg(DMXConvertMain.SWITCH_FFMPEG_ONLY);
+			else
+				callable.arg(DMXConvertMain.SWITCH_JSPI_ONLY);
+		}
+		
+		if (outputDir != null)
+			callable.arg(DMXConvertMain.SWITCH_OUTPUTDIR).arg(outputDir.getAbsolutePath());
+
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+		;
+
+		LOG.infof("Calling DMXConv.");
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
@@ -469,7 +655,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
-	public InstancedFuture<Integer> callWTexScan(File[] sourceFiles, OutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWTexScan(File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WTexScanMain.class);
 		

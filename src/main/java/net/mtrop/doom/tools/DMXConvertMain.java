@@ -25,6 +25,7 @@ import net.mtrop.doom.sound.DMXSound;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * Main class for Utility.
@@ -210,7 +211,9 @@ public final class DMXConvertMain
 					try {
 						ais = openFFmpegAudioStreamForFile(options.ffmpegPath, f);
 					} catch (IOException e) {
+						options.stderr.printf("I/O ERROR: FFmpeg: %s\n", e.getLocalizedMessage());
 						options.stderr.printf("ERROR: Could not read %s.\n", f.getPath());
+						IOUtils.close(ais);
 					}
 				}
 				
@@ -297,6 +300,8 @@ public final class DMXConvertMain
 		{
 			String exe = ffmpegPath != null ? ffmpegPath.getAbsolutePath() : "ffmpeg";
 
+			options.stdout.println("Calling FFmpeg...");
+			
 			Process proc = (new ProcessBuilder())
 				.command(
 					exe, "-i", input.getPath(), "-f", "wav", "-acodec", "pcm_s16le", "-ac", "2", "-"
@@ -305,8 +310,9 @@ public final class DMXConvertMain
 				.redirectOutput(Redirect.PIPE)
 			.start();
 			try {
-				return AudioSystem.getAudioInputStream(new BufferedInputStream(proc.getInputStream(), 2048));
+				return AudioSystem.getAudioInputStream(new BufferedInputStream(proc.getInputStream()));
 			} catch (UnsupportedAudioFileException e) {
+				options.stderr.printf("UNSUPPORTED: Java via FFmpeg: %s\n", e.getLocalizedMessage());
 				return null;
 			}
 		}
@@ -470,7 +476,7 @@ public final class DMXConvertMain
 		out.println("                        name (\"ffmpeg\") on the current PATH, and exits.");
 		out.println();
 		out.println("[files]:");
-		out.println("    <filenames>         The input sound files (wildcard expansion wll work!).");
+		out.println("    <filenames>         The input sound files (wildcard expansion will work!).");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output-dir [dir]  Sets the output directory path. If not set, each");

@@ -1,6 +1,12 @@
 DMXConv
 -------
 
+### Changed for 1.1.0
+
+* `Added` GUI Version of DMXConv.
+* `Added` Additional error output to diagnose FFmpeg issues.
+
+
 ### Changed for 1.0.2
 
 * `Fixed` Typo in an error message.

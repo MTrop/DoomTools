@@ -13,18 +13,18 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  * DMXConvert GUI settings singleton.
  * @author Matthew Tropiano
  */
-public final class DMXConvertSettingsManager extends DoomToolsSettings
+public final class DImageConvertSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "dmxconv.properties";
+    private static final String SETTINGS_FILENAME = "dimgconv.properties";
 
     /** The instance encapsulator. */
-    private static final SingletonProvider<DMXConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DMXConvertSettingsManager());
+    private static final SingletonProvider<DImageConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DImageConvertSettingsManager());
     
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static DMXConvertSettingsManager get()
+	public static DImageConvertSettingsManager get()
 	{
 		return INSTANCE.get();
 	}
@@ -32,13 +32,12 @@ public final class DMXConvertSettingsManager extends DoomToolsSettings
 	/* ==================================================================== */
 	
     private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String PATH_FFMPEG = "path.ffmpeg";
 
 	/* ==================================================================== */
 
-	private DMXConvertSettingsManager()
+	private DImageConvertSettingsManager()
 	{
-		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(DMXConvertSettingsManager.class));
+		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(DImageConvertSettingsManager.class));
 	}
 	
 	/**
@@ -84,24 +83,6 @@ public final class DMXConvertSettingsManager extends DoomToolsSettings
 	public File getLastTouchedFile() 
 	{
 		return getFile(PATH_LAST_FILE);
-	}
-
-	/**
-	 * Sets the path to FFmpeg.
-	 * @param path the file.
-	 */
-	public void setFFmpegPath(File path) 
-	{
-		setFile(PATH_FFMPEG, path);
-		commit();
-	}
-
-	/**
-	 * @return the path to FFmpeg.
-	 */
-	public File getFFmpegPath() 
-	{
-		return getFile(PATH_FFMPEG);
 	}
 
 }

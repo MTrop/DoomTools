@@ -84,6 +84,19 @@ For the time being, you are better off using the [ZDoom Wiki](https://zdoom.org/
 as guidance.
 
 
+### [DECOHack] Why can't DECOHack be entirely future-declaration cognizant like how State blocks with labels can be?
+
+Because that would go against DECOHack being an *altering* tool. DECOHack (and by extension, DeHackEd) is 
+not a tool that *creates* new things. Technically, everything in Doom is available to DECOHack (as it is 
+with DeHackEd), and DECOHack just modifies the data, up to and including "making" new data, which is, in 
+fact, altering already-existing "blank" data. Since DECOHack "paints over" existing space (as opposed to 
+constructing it), its cascading definition nature is the best approach.
+
+In the case of future-predicting States, it is altering just a single object at the end, and so its 
+future-predicting behavior can be contained entirely to one spot, and to allow for certain necessary state 
+loops to occur. Object definitions need no such ordering by themselves.
+
+
 ### [WadScript] Why is there no WADREPLACE() built-in for replacing WAD entries?
 
 "Replacing" an entry is essentially removing and adding at the same index, but you can

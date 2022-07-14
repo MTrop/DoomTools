@@ -748,7 +748,7 @@ public final class FileUtils
 	 * directories, by traversing directory paths.
 	 *
 	 * The returned list is not guaranteed to be in any order
-	 * related to the input list, and may contain files that are
+	 * related to the input list, and will contain files that are
 	 * in the input list if they are not directories.
 	 *
 	 * @param files	the list of files to expand.
@@ -769,7 +769,54 @@ public final class FileUtils
 			if (dequeuedFile.isDirectory())
 			{
 				for (File f : dequeuedFile.listFiles())
-					fileQueue.add(f);
+				{
+					if (f.isDirectory())
+						fileQueue.add(f);
+					else
+						fileList.add(f);
+				}
+			}
+			else
+			{
+				fileList.add(dequeuedFile);
+			}
+		}
+	
+		File[] out = new File[fileList.size()];
+		fileList.toArray(out);
+		return out;
+	}
+	
+	/**
+	 * Expands a list of files into a larger list of files,
+	 * such that all of the files in the resultant list are not
+	 * directories, by traversing directory paths, but unlike
+	 * {@link #explodeFiles(File...)}, this does NOT RECURSE!
+	 *
+	 * The returned list is not guaranteed to be in any order
+	 * related to the input list, and will contain files that are
+	 * in the input list if they are not directories.
+	 *
+	 * @param files	the list of files to expand.
+	 * @return	a list of all files found in the subdirectory search.
+	 * @throws	NullPointerException if files is null.
+	 */
+	public static File[] expandFiles(File ... files)
+	{
+		Queue<File> fileQueue = new LinkedList<File>();
+		List<File> fileList = new ArrayList<File>();
+	
+		for (File f : files)
+			fileQueue.add(f);
+	
+		while (!fileQueue.isEmpty())
+		{
+			File dequeuedFile = fileQueue.poll();
+			if (!dequeuedFile.isDirectory())
+			{
+				for (File f : dequeuedFile.listFiles())
+					if (!f.isDirectory())
+						fileList.add(f);
 			}
 			else
 			{

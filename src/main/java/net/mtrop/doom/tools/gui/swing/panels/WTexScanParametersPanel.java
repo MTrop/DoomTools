@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.TitledBorder;
 
+import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
@@ -40,13 +41,6 @@ public class WTexScanParametersPanel extends JPanel
 	private JFormField<Boolean> noCommentMessagesField;
 	private JFormField<String> mapNameField;
 	
-	public enum OutputMode
-	{
-		BOTH,
-		TEXTURES,
-		FLATS;
-	}
-
 	public WTexScanParametersPanel()
 	{
 		this.utils = DoomToolsGUIUtils.get();
@@ -114,21 +108,21 @@ public class WTexScanParametersPanel extends JPanel
 		fileListField.setFiles(files);
 	}
 	
-	public OutputMode getOutputMode() 
+	public TexScanOutputMode getOutputMode() 
 	{
 		return 
-			outputTexturesField.getValue() ? OutputMode.TEXTURES : 
-			outputFlatsField.getValue() ? OutputMode.FLATS : 
-			outputBothField.getValue() ? OutputMode.BOTH : 
+			outputTexturesField.getValue() ? TexScanOutputMode.TEXTURES : 
+			outputFlatsField.getValue() ? TexScanOutputMode.FLATS : 
+			outputBothField.getValue() ? TexScanOutputMode.BOTH : 
 			null 
 		;
 	}
 	
-	public void setOutputMode(OutputMode mode) 
+	public void setOutputMode(TexScanOutputMode mode) 
 	{
-		outputTexturesField.setValue(mode == OutputMode.TEXTURES);
-		outputFlatsField.setValue(mode == OutputMode.FLATS);
-		outputBothField.setValue(mode == OutputMode.BOTH);
+		outputTexturesField.setValue(mode == TexScanOutputMode.TEXTURES);
+		outputFlatsField.setValue(mode == TexScanOutputMode.FLATS);
+		outputBothField.setValue(mode == TexScanOutputMode.BOTH);
 	}
 	
 	public boolean getSkipSkies() 

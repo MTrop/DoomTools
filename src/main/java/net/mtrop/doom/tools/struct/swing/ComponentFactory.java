@@ -692,19 +692,72 @@ public final class ComponentFactory
 	 * Creates a check box.
 	 * @param icon the check box icon.
 	 * @param label the check box label.
+	 * @param mnemonic the check box mnemonic.
 	 * @param checked the checked state.
 	 * @param handler the handler for button click.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, String label, boolean checked, ToggleHandler handler)
+	public static JCheckBox checkBox(Icon icon, String label, int mnemonic, boolean checked, ToggleHandler handler)
 	{
 		final JCheckBox out = new JCheckBox(label);
 		if (icon != null)
 			out.setIcon(icon);
 		if (handler != null)
 			out.addItemListener(handler);
+		out.setMnemonic(mnemonic);
 		out.setSelected(checked);
 		return out;
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param label the check box label.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(String label, int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return checkBox(null, label, mnemonic, checked, handler);
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param icon the check box icon.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return checkBox(icon, null, mnemonic, checked, handler);
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return checkBox(null, null, mnemonic, checked, handler);
+	}
+
+	/**
+	 * Creates a check box.
+	 * @param icon the check box icon.
+	 * @param label the check box label.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(Icon icon, String label, boolean checked, ToggleHandler handler)
+	{
+		return checkBox(icon, label, 0, checked, handler);
 	}
 
 	/**
@@ -716,7 +769,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(String label, boolean checked, ToggleHandler handler)
 	{
-		return checkBox(null, label, checked, handler);
+		return checkBox(null, label, 0, checked, handler);
 	}
 
 	/**
@@ -728,7 +781,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(Icon icon, boolean checked, ToggleHandler handler)
 	{
-		return checkBox(icon, null, checked, handler);
+		return checkBox(icon, null, 0, checked, handler);
 	}
 
 	/**
@@ -739,7 +792,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(boolean checked, ToggleHandler handler)
 	{
-		return checkBox(null, null, checked, handler);
+		return checkBox(null, null, 0, checked, handler);
 	}
 
 	/**
@@ -751,7 +804,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(Icon icon, String label, ToggleHandler handler)
 	{
-		return checkBox(icon, label, false, handler);
+		return checkBox(icon, label, 0, false, handler);
 	}
 
 	/**
@@ -762,7 +815,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(String label, ToggleHandler handler)
 	{
-		return checkBox(null, label, false, handler);
+		return checkBox(null, label, 0, false, handler);
 	}
 
 	/**
@@ -773,7 +826,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(Icon icon, ToggleHandler handler)
 	{
-		return checkBox(icon, null, false, handler);
+		return checkBox(icon, null, 0, false, handler);
 	}
 
 	/**
@@ -783,7 +836,7 @@ public final class ComponentFactory
 	 */
 	public static JCheckBox checkBox(ToggleHandler handler)
 	{
-		return checkBox(null, null, false, handler);
+		return checkBox(null, null, 0, false, handler);
 	}
 
 	/**
@@ -820,10 +873,70 @@ public final class ComponentFactory
 		return checkBox(false);
 	}
 
+
 	/* ==================================================================== */
 	/* ==== Radio Buttons                                              ==== */
 	/* ==================================================================== */
 	
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param label the radio button label.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, String label, int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		JRadioButton out = new JRadioButton(label);
+		if (icon != null)
+			out.setIcon(icon);
+		if (handler != null)
+			out.addItemListener(handler);
+		out.setMnemonic(mnemonic);
+		out.setSelected(checked);
+		return out;
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param label the radio button label.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(String label, int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return radio(null, label, mnemonic, checked, handler);
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param icon the radio button icon.
+	 * @param mnemonic the check box mnemonic.
+	 * @param checked the checked state.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(Icon icon, int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return radio(icon, null, mnemonic, checked, handler);
+	}
+
+	/**
+	 * Creates a radio button.
+	 * @param checked the checked state.
+	 * @param mnemonic the check box mnemonic.
+	 * @param handler the handler for button click.
+	 * @return a new radio button.
+	 */
+	public static JRadioButton radio(int mnemonic, boolean checked, ToggleHandler handler)
+	{
+		return radio(null, null, mnemonic, checked, handler);
+	}
+
 	/**
 	 * Creates a radio button.
 	 * @param icon the radio button icon.
@@ -834,13 +947,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, String label, boolean checked, ToggleHandler handler)
 	{
-		JRadioButton out = new JRadioButton(label);
-		if (icon != null)
-			out.setIcon(icon);
-		if (handler != null)
-			out.addItemListener(handler);
-		out.setSelected(checked);
-		return out;
+		return radio(icon, label, 0, checked, handler);
 	}
 
 	/**
@@ -852,7 +959,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(String label, boolean checked, ToggleHandler handler)
 	{
-		return radio(null, label, checked, handler);
+		return radio(null, label, 0, checked, handler);
 	}
 
 	/**
@@ -864,7 +971,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, boolean checked, ToggleHandler handler)
 	{
-		return radio(icon, null, checked, handler);
+		return radio(icon, null, 0, checked, handler);
 	}
 
 	/**
@@ -875,7 +982,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(boolean checked, ToggleHandler handler)
 	{
-		return radio(null, null, checked, handler);
+		return radio(null, null, 0, checked, handler);
 	}
 
 	/**
@@ -887,7 +994,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, String label, ToggleHandler handler)
 	{
-		return radio(icon, label, false, handler);
+		return radio(icon, label, 0, false, handler);
 	}
 
 	/**
@@ -898,7 +1005,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(String label, ToggleHandler handler)
 	{
-		return radio(null, label, false, handler);
+		return radio(null, label, 0, false, handler);
 	}
 
 	/**
@@ -909,7 +1016,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, ToggleHandler handler)
 	{
-		return radio(icon, null, false, handler);
+		return radio(icon, null, 0, false, handler);
 	}
 
 	/**
@@ -919,13 +1026,9 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(ToggleHandler handler)
 	{
-		return radio(null, null, false, handler);
+		return radio(null, null, 0, false, handler);
 	}
 
-	/* ==================================================================== */
-	/* ==== Radio Buttons                                              ==== */
-	/* ==================================================================== */
-	
 	/**
 	 * Creates a radio button.
 	 * @param icon the radio button icon.
@@ -935,7 +1038,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, String label, boolean checked)
 	{
-		return radio(icon, label, checked, null);
+		return radio(icon, label, 0, checked, null);
 	}
 
 	/**
@@ -946,7 +1049,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(String label, boolean checked)
 	{
-		return radio(null, label, checked, null);
+		return radio(null, label, 0, checked, null);
 	}
 
 	/**
@@ -957,7 +1060,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, boolean checked)
 	{
-		return radio(icon, null, checked, null);
+		return radio(icon, null, 0, checked, null);
 	}
 
 	/**
@@ -968,7 +1071,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(Icon icon, String label)
 	{
-		return radio(icon, label, false, null);
+		return radio(icon, label, 0, false, null);
 	}
 
 	/**
@@ -978,7 +1081,7 @@ public final class ComponentFactory
 	 */
 	public static JRadioButton radio(String label)
 	{
-		return radio(null, label, false, null);
+		return radio(null, label, 0, false, null);
 	}
 
 	/**
@@ -2801,5 +2904,9 @@ public final class ComponentFactory
 		}
 		
 	}
+
+	/* ==================================================================== */
+	/* ==== Checkboxes                                                 ==== */
+	/* ==================================================================== */
 
 }

@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -363,6 +364,50 @@ public final class DoomToolsGUIUtils
 	public JButton createButtonFromLanguageKey(String keyPrefix, ComponentActionHandler<JButton> handler)
 	{
 		return createButtonFromLanguageKey(null, keyPrefix, handler);
+	}
+
+	/**
+	 * Creates a button from a language key, getting the necessary pieces to assemble it.
+	 * @param icon the button icon.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JRadioButton createRadioButtonFromLanguageKey(Icon icon, String keyPrefix, boolean checked, ToggleHandler handler)
+	{
+		String tipKey = keyPrefix + ".tip";
+		final String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
+		return ObjectUtils.apply(radio(
+			icon,
+			language.getText(keyPrefix),
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			checked,
+			handler
+		), (button) -> button.setToolTipText(tip));
+	}
+
+	/**
+	 * Creates a button from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JRadioButton createRadioButtonFromLanguageKey(String keyPrefix, boolean checked, ToggleHandler handler)
+	{
+		return createRadioButtonFromLanguageKey(null, keyPrefix, checked, handler);
+	}
+
+	/**
+	 * Creates a button from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @return the new menu item node.
+	 */
+	public JRadioButton createRadioButtonFromLanguageKey(String keyPrefix, boolean checked)
+	{
+		return createRadioButtonFromLanguageKey(null, keyPrefix, checked, null);
 	}
 
 	/**

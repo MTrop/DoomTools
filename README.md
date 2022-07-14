@@ -24,16 +24,6 @@ Copyright (c) 2019-2022 Matt Tropiano
 * [java.base](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/module-summary.html)  
 
 
-### Recommended Minified JRE Setup
-
-The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
-
-	jlink --add-modules java.desktop,jdk.crypto.ec,jdk.charsets --compress=2 --output [jredir]
-
-That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
-and perhaps future tools that pull resources from secure TLS Internet addresses, and `jdk.charsets` for the extended charsets.
-
-
 ### Source
 
 The `master` branch contains stable code (hopefully). Until a release is cut, the `master` branch will be shifting. 
@@ -115,6 +105,16 @@ Building a Windows Installer requires [Inno Setup 6.2.0](https://jrsoftware.org/
 
 The installer target will be skipped if the `inno.setup.dir` property is not set, and the embedded 
 JRE version of the installer will not be built if `embedded.jre.source.dir` is not set.
+
+
+### Recommended Minified JRE Setup
+
+The JRE added to the installer (or even just for running DoomTools) should be one made with the following command line:
+
+	jlink --add-modules java.desktop,jdk.crypto.ec,jdk.charsets --compress=2 --output [jredir]
+
+That's `java.desktop` for the required packages and `jdk.crypto.ec` to ensure it can hit secure sites for updating itself
+and perhaps future tools that pull resources from secure TLS Internet addresses, and `jdk.charsets` for the extended charsets.
 
 
 ### Manually Updating Your Own Installed Version via Source

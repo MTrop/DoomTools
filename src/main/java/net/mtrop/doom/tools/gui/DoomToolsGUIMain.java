@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.swing.JFrame;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
@@ -54,6 +55,8 @@ public final class DoomToolsGUIMain
 		String DECOHACK = "decohack";
 		/** DECOHack Compiler. */
 		String DECOHACK_COMPILER = "decohack-compiler";
+		/** DMXConvert. */
+		String DMXCONVERT = "dmxconv";
 		/** DoomMake - New Project. */
 		String DOOMMAKE_NEW = "doommake-new";
 		/** DoomMake - Open Project. */
@@ -237,6 +240,10 @@ public final class DoomToolsGUIMain
 		{
 			String path = ArrayUtils.arrayElement(args, 1);
 			startApplication(new DecoHackCompilerApp(path));
+		}
+		else if (ApplicationNames.DMXCONVERT.equals(args[0]))
+		{
+			startApplication(new DMXConvertApp());
 		}
 		else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
 		{

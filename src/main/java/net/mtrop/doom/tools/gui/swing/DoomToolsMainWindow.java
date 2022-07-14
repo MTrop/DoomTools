@@ -34,6 +34,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
@@ -287,6 +288,10 @@ public class DoomToolsMainWindow extends JFrame
 
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
+				utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (c, e) -> addApplication(new DMXConvertApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (c, e) -> addApplication(new DMXConvertApp())) // TODO: Finish this!
+				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (c, e) -> addApplication(new DecoHackEditorApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (c, e) -> addApplication(new DecoHackCompilerApp()))

@@ -12,12 +12,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTExportParametersPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel;
-import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel.OutputMode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -67,7 +67,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 
 		File[] files = texScanParametersPanel.getFiles();
-		OutputMode mode = texScanParametersPanel.getOutputMode();
+		TexScanOutputMode mode = texScanParametersPanel.getOutputMode();
 		boolean noSkies = texScanParametersPanel.getSkipSkies();
 		boolean noMessages = texScanParametersPanel.getNoCommentMessages();
 		String mapName = texScanParametersPanel.getMapName();
@@ -111,7 +111,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		File[] texScanFiles = new File[texScanCount];
 		
 		final Function<String, File> fileParse = (input) -> new File(input);
-		final Function<String, OutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, OutputMode.class);
+		final Function<String, TexScanOutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, TexScanOutputMode.class);
 		
 		for (int i = 0; i < texScanFiles.length; i++) 
 			texScanFiles[i] = ValueUtils.parse(state.get("wtexscan.files." + i), fileParse);
@@ -205,7 +205,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	private void onDoPipe() 
 	{
 		File[] files = texScanParametersPanel.getFiles();
-		OutputMode mode = texScanParametersPanel.getOutputMode();
+		TexScanOutputMode mode = texScanParametersPanel.getOutputMode();
 		boolean noSkies = texScanParametersPanel.getSkipSkies();
 		boolean noMessages = texScanParametersPanel.getNoCommentMessages();
 		String mapName = texScanParametersPanel.getMapName();
