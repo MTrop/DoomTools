@@ -55,7 +55,7 @@ public class WTexScanParametersPanel extends JPanel
 			},
 			() -> settings.getLastTouchedFile()
 		);
-		this.fileListField.setFileFilter(utils.getWADContainerFilter());
+		this.fileListField.setFileFilter(utils.createWADContainerFilter());
 		
 		JRadioButton textureButton = radio(false);
 		JRadioButton flatButton = radio(false);

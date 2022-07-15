@@ -176,10 +176,10 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadscript.menu.file.item.new",
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.main", (i) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
 			),
-			utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (c, e) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (i) -> onOpenEditor()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -241,10 +241,10 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog()),
 			separator(),
-			utils.createItemFromLanguageKey("wadscript.menu.help.item.rookscript", (c, e) -> onRookScriptReference()),
-			utils.createItemFromLanguageKey("wadscript.menu.help.item.functions", (c, e) -> onFunctionReference())
+			utils.createItemFromLanguageKey("wadscript.menu.help.item.rookscript", (i) -> onRookScriptReference()),
+			utils.createItemFromLanguageKey("wadscript.menu.help.item.functions", (i) -> onFunctionReference())
 		); 
 	}
 
@@ -258,7 +258,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> attemptClose())
+					utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (i) -> attemptClose())
 				)
 			)),
 			utils.createMenuFromLanguageKey("wadscript.menu.edit", createCommonEditMenuItems()),
@@ -430,7 +430,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			getLanguage().getText("wadscript.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().getWadScriptFileFilter()
+			getUtils().createWadScriptFileFilter()
 		);
 		
 		if (file != null)
@@ -627,7 +627,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().getWadScriptFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createWadScriptFileFilter()} : TYPES;
 		}
 	
 		@Override

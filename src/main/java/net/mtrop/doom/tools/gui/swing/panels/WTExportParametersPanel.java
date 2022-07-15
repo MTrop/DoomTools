@@ -48,7 +48,7 @@ public class WTExportParametersPanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = WTExportSettingsManager.get();
 
-		final FileFilter wadFilter = utils.getWADFileFilter();
+		final FileFilter wadFilter = utils.createWADFileFilter();
 		
 		this.fileListField = new FileListPanel(language.getText("wtexport.files.label"), 
 			ListSelectionMode.MULTIPLE_INTERVAL, true, true, 

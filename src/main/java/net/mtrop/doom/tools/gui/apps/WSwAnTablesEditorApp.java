@@ -171,11 +171,11 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wswantbl.menu.file.item.new",
-				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
-				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
+				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.main", (i) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
 			),
-			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open", (c, e) -> onOpenEditor()),
-			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open.wad", (c, e) -> onOpenEditorFromWAD()),
+			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open", (i) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open.wad", (i) -> onOpenEditorFromWAD()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -238,7 +238,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (c, e) -> attemptClose())
+					utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (i) -> attemptClose())
 				)
 			)),
 			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
@@ -405,7 +405,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			getLanguage().getText("wswantbl.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().getDEFSWANIFileFilter()
+			getUtils().createDEFSWANIFileFilter()
 		);
 		
 		if (file != null)
@@ -423,7 +423,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			getLanguage().getText("wswantbl.open.wad.accept"),
 			settings::getLastOpenedWAD,
 			settings::setLastOpenedWAD,
-			utils.getWADFileFilter()
+			utils.createWADFileFilter()
 		);
 		
 		if (file == null)
@@ -605,7 +605,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 
@@ -646,7 +646,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().getDecoHackFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createDecoHackFileFilter()} : TYPES;
 		}
 	
 		@Override

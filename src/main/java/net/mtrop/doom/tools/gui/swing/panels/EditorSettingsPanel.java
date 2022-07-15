@@ -57,8 +57,8 @@ public class EditorSettingsPanel extends JPanel
 			node(BorderLayout.NORTH, titlePanel(language.getText("texteditor.settings.theme"), themeSettingsPanel)),
 			node(BorderLayout.CENTER, scroll(scrolledPanel)),
 			node(BorderLayout.SOUTH, containerOf(createEmptyBorder(4, 4, 4, 4), flowLayout(Flow.TRAILING, 4, 0),
-				node(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())),
-				node(button(language.getText("texteditor.settings.apply"), (c, e) -> commitSettings()))
+				node(button(language.getText("texteditor.settings.reset"), (b) -> resetSettings())),
+				node(button(language.getText("texteditor.settings.apply"), (b) -> commitSettings()))
 			))
 		);
 	}

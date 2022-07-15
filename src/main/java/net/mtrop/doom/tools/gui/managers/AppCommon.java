@@ -23,7 +23,6 @@ import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
-import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -479,7 +478,7 @@ public final class AppCommon
 	 */
 	public InstancedFuture<Integer> callDImgConv(File inputFile, File outputFile, boolean recursive, File paletteSource, GraphicsMode mode, String infoFileName, PrintStream stdout, PrintStream stderr)
 	{
-		ProcessCallable callable = Common.spawnJava(DImageConvertApp.class);
+		ProcessCallable callable = Common.spawnJava(DoomImageConvertMain.class);
 		
 		if (inputFile != null)
 			callable.arg(inputFile.getAbsolutePath());
@@ -517,8 +516,8 @@ public final class AppCommon
 		callable
 			.setOut(stdout)
 			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DImgConv STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DImgConv STDERR."))
 		;
 
 		LOG.infof("Calling DMXConv.");
@@ -560,8 +559,8 @@ public final class AppCommon
 		callable
 			.setOut(stdout)
 			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DMXConv STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DMXConv STDERR."))
 		;
 
 		LOG.infof("Calling DMXConv.");

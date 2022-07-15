@@ -150,9 +150,9 @@ public class FindReplacePanel extends JPanel
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, containerOf()), // empty
 				node(BorderLayout.LINE_END, containerOf(gridLayout(2, 2, 4, 4),
-					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.find", (c, e) -> onFind())),
-					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replace", (c, e) -> onReplace())),
-					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replaceall", (c, e) -> onReplaceAll()))
+					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.find", (b) -> onFind())),
+					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replace", (b) -> onReplace())),
+					node(utils.createButtonFromLanguageKey("texteditor.modal.find.button.replaceall", (b) -> onReplaceAll()))
 				))
 			))
 		);

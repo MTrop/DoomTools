@@ -56,7 +56,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 				getLanguage().getText("wtexport.inputfile.browse.choose"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile,
-				getUtils().getTextFileFilter()
+				getUtils().createTextFileFilter()
 			)
 		);
 
@@ -129,7 +129,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtexport.menu.file",
-				utils.createItemFromLanguageKey("wtexport.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("wtexport.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -152,7 +152,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(getUtils().createButtonFromLanguageKey("wtexport.button.start", (c, e) -> onScanMaps()))
+					node(getUtils().createButtonFromLanguageKey("wtexport.button.start", (i) -> onScanMaps()))
 				))
 			))
 		);
@@ -223,7 +223,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 

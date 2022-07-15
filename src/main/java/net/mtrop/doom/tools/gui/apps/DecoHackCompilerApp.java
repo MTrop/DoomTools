@@ -86,7 +86,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 				getLanguage().getText("decohack.export.source.browse.title"), 
 				current, 
 				getLanguage().getText("decohack.export.source.browse.accept"),
-				getUtils().getDecoHackFileFilter() 
+				getUtils().createDecoHackFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -122,7 +122,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 			node(BorderLayout.CENTER, exportPanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(utils.createButtonFromLanguageKey("decohack.export.choice.export", (c, e) -> onRun())
+					node(utils.createButtonFromLanguageKey("decohack.export.choice.export", (i) -> onRun())
 				))),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
@@ -136,7 +136,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file",
-				utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -233,7 +233,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (b) -> onHelpChangelog())
 		); 
 	}
 

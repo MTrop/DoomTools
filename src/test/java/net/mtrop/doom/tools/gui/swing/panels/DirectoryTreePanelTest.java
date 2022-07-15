@@ -67,7 +67,7 @@ public final class DirectoryTreePanelTest
 
 		ObjectUtils.apply(frame("Test",
 			containerOf(
-				node(BorderLayout.NORTH, button("Refresh", (c,e) -> panel.refresh())),
+				node(BorderLayout.NORTH, button("Refresh", (b) -> panel.refresh())),
 				node(BorderLayout.CENTER, panel)
 			)
 		), 

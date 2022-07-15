@@ -101,7 +101,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 						getUtils().formField("dmxconv.outputdir", outputDirectory)
 					)),
 					node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING), 
-						node(getUtils().createButtonFromLanguageKey("dmxconv.convert", (c, e) -> onDoConversion())
+						node(getUtils().createButtonFromLanguageKey("dmxconv.convert", (i) -> onDoConversion())
 					)))
 				)),
 				node(BorderLayout.CENTER, containerOf()),
@@ -117,9 +117,9 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		
 		return menuBar(
 			utils.createMenuFromLanguageKey("dmxconv.menu.file",
-				utils.createItemFromLanguageKey("dmxconv.menu.file.item.settings", (c, e) -> openSettings()),
+				utils.createItemFromLanguageKey("dmxconv.menu.file.item.settings", (i) -> openSettings()),
 				separator(),
-				utils.createItemFromLanguageKey("dmxconv.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("dmxconv.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -181,7 +181,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 

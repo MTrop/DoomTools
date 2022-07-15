@@ -347,12 +347,12 @@ public class MultiFileEditorPanel extends JPanel
 		this.caretPositionLabel = label(" ");
 		this.findReplacePanel = new FindReplacePanel();
 		
-		this.editorPreferencesMenuItem = utils.createItemFromLanguageKey("texteditor.action.prefs", (c, e) -> openEditorPreferences());
+		this.editorPreferencesMenuItem = utils.createItemFromLanguageKey("texteditor.action.prefs", (i) -> openEditorPreferences());
 		this.changeEncodingMenuItem = utils.createItemFromLanguageKey("texteditor.action.encodings", encodingNodes);
 		this.changeLanguageMenuItem = utils.createItemFromLanguageKey("texteditor.action.languages", languageNodes);
 		this.changeSpacingMenuItem = utils.createItemFromLanguageKey("texteditor.action.spacing", spacingNodes);
 		this.changeLineEndingMenuItem = utils.createItemFromLanguageKey("texteditor.action.lineending", lineEndingNodes);
-		this.toggleLineWrapMenuItem = utils.createItemFromLanguageKey("texteditor.action.linewrap", (c, e) -> toggleCurrentEditorLineWrap());
+		this.toggleLineWrapMenuItem = utils.createItemFromLanguageKey("texteditor.action.linewrap", (i) -> toggleCurrentEditorLineWrap());
 
 		setTransferHandler(new FileTransferHandler());
 		
@@ -1491,7 +1491,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		List<MenuNode> out = new ArrayList<>();
 		for (Charset charset : charsets)
-			out.add(menuItem(charset.displayName(), (c, e) -> changeCurrentEditorEncoding(charset)));
+			out.add(menuItem(charset.displayName(), (i) -> changeCurrentEditorEncoding(charset)));
 		return out.toArray(new MenuNode[out.size()]);
 	}
 	
@@ -1502,12 +1502,12 @@ public class MultiFileEditorPanel extends JPanel
 		
 		List<MenuNode> out = new ArrayList<>();
 		for (Map.Entry<String, String> entry : languages.entrySet())
-			out.add(menuItem(entry.getKey(), (c, e) -> changeCurrentEditorStyle(entry.getValue())));
+			out.add(menuItem(entry.getKey(), (i) -> changeCurrentEditorStyle(entry.getValue())));
 		out.add(separator());
 		
 		List<MenuNode> others = new ArrayList<>();
 		for (Map.Entry<String, String> entry : otherLanguages.entrySet())
-			others.add(menuItem(entry.getKey(), (c, e) -> changeCurrentEditorStyle(entry.getValue())));
+			others.add(menuItem(entry.getKey(), (i) -> changeCurrentEditorStyle(entry.getValue())));
 		out.add(utils.createItemFromLanguageKey("texteditor.action.languages.other", others.toArray(new MenuNode[others.size()])));
 		return out.toArray(new MenuNode[out.size()]);
 	}
@@ -1516,21 +1516,21 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.spacing.spaces",
-				menuItem("2", KeyEvent.VK_2, (c, e) -> changeCurrentEditorSpacing(true, 2)),
-				menuItem("3", KeyEvent.VK_3, (c, e) -> changeCurrentEditorSpacing(true, 3)),
-				menuItem("4", KeyEvent.VK_4, (c, e) -> changeCurrentEditorSpacing(true, 4)),
-				menuItem("5", KeyEvent.VK_5, (c, e) -> changeCurrentEditorSpacing(true, 5)),
-				menuItem("6", KeyEvent.VK_6, (c, e) -> changeCurrentEditorSpacing(true, 6)),
-				menuItem("7", KeyEvent.VK_7, (c, e) -> changeCurrentEditorSpacing(true, 7)),
-				menuItem("8", KeyEvent.VK_8, (c, e) -> changeCurrentEditorSpacing(true, 8))
+				menuItem("2", KeyEvent.VK_2, (i) -> changeCurrentEditorSpacing(true, 2)),
+				menuItem("3", KeyEvent.VK_3, (i) -> changeCurrentEditorSpacing(true, 3)),
+				menuItem("4", KeyEvent.VK_4, (i) -> changeCurrentEditorSpacing(true, 4)),
+				menuItem("5", KeyEvent.VK_5, (i) -> changeCurrentEditorSpacing(true, 5)),
+				menuItem("6", KeyEvent.VK_6, (i) -> changeCurrentEditorSpacing(true, 6)),
+				menuItem("7", KeyEvent.VK_7, (i) -> changeCurrentEditorSpacing(true, 7)),
+				menuItem("8", KeyEvent.VK_8, (i) -> changeCurrentEditorSpacing(true, 8))
 			), utils.createItemFromLanguageKey("texteditor.action.spacing.tabs",
-				menuItem("2", KeyEvent.VK_2, (c, e) -> changeCurrentEditorSpacing(false, 2)),
-				menuItem("3", KeyEvent.VK_3, (c, e) -> changeCurrentEditorSpacing(false, 3)),
-				menuItem("4", KeyEvent.VK_4, (c, e) -> changeCurrentEditorSpacing(false, 4)),
-				menuItem("5", KeyEvent.VK_5, (c, e) -> changeCurrentEditorSpacing(false, 5)),
-				menuItem("6", KeyEvent.VK_6, (c, e) -> changeCurrentEditorSpacing(false, 6)),
-				menuItem("7", KeyEvent.VK_7, (c, e) -> changeCurrentEditorSpacing(false, 7)),
-				menuItem("8", KeyEvent.VK_8, (c, e) -> changeCurrentEditorSpacing(false, 8))
+				menuItem("2", KeyEvent.VK_2, (i) -> changeCurrentEditorSpacing(false, 2)),
+				menuItem("3", KeyEvent.VK_3, (i) -> changeCurrentEditorSpacing(false, 3)),
+				menuItem("4", KeyEvent.VK_4, (i) -> changeCurrentEditorSpacing(false, 4)),
+				menuItem("5", KeyEvent.VK_5, (i) -> changeCurrentEditorSpacing(false, 5)),
+				menuItem("6", KeyEvent.VK_6, (i) -> changeCurrentEditorSpacing(false, 6)),
+				menuItem("7", KeyEvent.VK_7, (i) -> changeCurrentEditorSpacing(false, 7)),
+				menuItem("8", KeyEvent.VK_8, (i) -> changeCurrentEditorSpacing(false, 8))
 			)
 		); 
 	}
@@ -1538,9 +1538,9 @@ public class MultiFileEditorPanel extends JPanel
 	private MenuNode[] createEditorLineEndingMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("texteditor.action.lineending.crlf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CRLF)),
-			utils.createItemFromLanguageKey("texteditor.action.lineending.lf", (c, e) -> changeCurrentEditorLineEnding(LineEnding.LF)),
-			utils.createItemFromLanguageKey("texteditor.action.lineending.cr", (c, e) -> changeCurrentEditorLineEnding(LineEnding.CR))
+			utils.createItemFromLanguageKey("texteditor.action.lineending.crlf", (i) -> changeCurrentEditorLineEnding(LineEnding.CRLF)),
+			utils.createItemFromLanguageKey("texteditor.action.lineending.lf", (i) -> changeCurrentEditorLineEnding(LineEnding.LF)),
+			utils.createItemFromLanguageKey("texteditor.action.lineending.cr", (i) -> changeCurrentEditorLineEnding(LineEnding.CR))
 		);
 	}
 	
@@ -1879,7 +1879,7 @@ public class MultiFileEditorPanel extends JPanel
 	
 			this.fileRevealAction = actionItem(language.getText("texteditor.action.reveal"), (e) -> openEditorFileInSystem(this));
 			
-			this.editorTab = new EditorTab(savedIcon, title, (c, e) -> attemptToCloseEditor(this));
+			this.editorTab = new EditorTab(savedIcon, title, (b) -> attemptToCloseEditor(this));
 			this.editorPanel = new EditorPanel(textArea);
 			
 			textArea.setSyntaxEditingStyle(styleName);
@@ -2131,7 +2131,7 @@ public class MultiFileEditorPanel extends JPanel
 		private JLabel titleLabel;
 		private JButton closeButton;
 		
-		private EditorTab(Icon icon, String title, ComponentActionHandler<JButton> closeHandler)
+		private EditorTab(Icon icon, String title, ButtonClickHandler closeHandler)
 		{
 			this.titleLabel = label(JLabel.LEADING, icon, title);
 			

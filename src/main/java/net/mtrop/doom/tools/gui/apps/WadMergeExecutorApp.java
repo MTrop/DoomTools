@@ -86,7 +86,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 				getLanguage().getText("wadmerge.run.source.browse.title"), 
 				current, 
 				getLanguage().getText("wadmerge.run.source.browse.accept"),
-				getUtils().getWadMergeFileFilter() 
+				getUtils().createWadMergeFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -122,7 +122,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 			node(BorderLayout.CENTER, executePanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(utils.createButtonFromLanguageKey("wadmerge.run.withargs.choice.run", (c, e) -> onRun()))
+					node(utils.createButtonFromLanguageKey("wadmerge.run.withargs.choice.run", (i) -> onRun()))
 				)),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
@@ -136,7 +136,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadmerge.menu.file",
-				utils.createItemFromLanguageKey("wadmerge.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("wadmerge.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -237,7 +237,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 	

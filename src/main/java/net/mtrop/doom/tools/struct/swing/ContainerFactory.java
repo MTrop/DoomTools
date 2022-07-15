@@ -451,7 +451,6 @@ public final class ContainerFactory
 		}
 	}
 
-	
 	/* ==================================================================== */
 	/* ==== Tabs                                                       ==== */
 	/* ==================================================================== */
@@ -579,7 +578,6 @@ public final class ContainerFactory
 		}
 	}
 
-	
 	/* ==================================================================== */
 	/* ==== Split Panes                                                ==== */
 	/* ==================================================================== */
@@ -632,7 +630,6 @@ public final class ContainerFactory
 		return split(SplitOrientation.HORIZONTAL, true, first, second);
 	}
 
-	
 	/* ==================================================================== */
 	/* ==== Scroll Panes                                               ==== */
 	/* ==================================================================== */
@@ -669,7 +666,6 @@ public final class ContainerFactory
 	{
 		return scroll(ScrollPolicy.AS_NEEDED, ScrollPolicy.AS_NEEDED, component);
 	}
-
 
 	/* ==================================================================== */
 	/* ==== Frames                                                     ==== */
@@ -775,7 +771,7 @@ public final class ContainerFactory
 		if (icon != null)
 			out.setIconImage(icon);
 		if (menuBar != null)
-			out.add(menuBar);
+			out.setJMenuBar(menuBar);
 		out.setContentPane(content);
 		out.setLocationByPlatform(true);
 		out.pack();

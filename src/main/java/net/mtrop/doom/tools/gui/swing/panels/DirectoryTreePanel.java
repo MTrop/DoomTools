@@ -167,53 +167,53 @@ public class DirectoryTreePanel extends JPanel
 	private JPopupMenu createSingleFilePopupMenu()
 	{
 		return popupMenu(
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.open", (c, e) -> onOpenFiles()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.file", (c, e) -> onRenameSelectedFile()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.open", (i) -> onOpenFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.file", (i) -> onRenameSelectedFile()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (c, e) -> onRefreshSelectedFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (c, e) -> onRevealSelectedFileInSystem()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (c, e) -> onCopySelectedFiles()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (c, e) -> onCopySelectedFilePath()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (c, e) -> onCopySelectedRelativeFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (i) -> onCopySelectedRelativeFilePath()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (c, e) -> onPasteClipboardFilesIntoSelectedDirectory()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (c, e) -> onDeleteSelectedFiles())
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (i) -> onPasteClipboardFilesIntoSelectedDirectory()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
 		);
 	}
 	
 	private JPopupMenu createSingleDirectoryPopupMenu()
 	{
 		return popupMenu(
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.file", (c, e) -> onAddNewFile()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.directory", (c, e) -> onAddNewDirectory()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.directory", (c, e) -> onRenameSelectedFile()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.file", (i) -> onAddNewFile()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.directory", (i) -> onAddNewDirectory()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.directory", (i) -> onRenameSelectedFile()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (c, e) -> onRefreshSelectedFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (c, e) -> onRevealSelectedFileInSystem()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.root", (c, e) -> onMakeSelectedDirectoryRoot()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.root", (i) -> onMakeSelectedDirectoryRoot()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (c, e) -> onCopySelectedFiles()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (c, e) -> onCopySelectedFilePath()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (c, e) -> onCopySelectedRelativeFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (i) -> onCopySelectedRelativeFilePath()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (c, e) -> onPasteClipboardFilesIntoSelectedDirectory()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (c, e) -> onDeleteSelectedFiles())
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (i) -> onPasteClipboardFilesIntoSelectedDirectory()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
 		);
 	}
 	
 	private JPopupMenu createMultiFilePopupMenu()
 	{
 		return popupMenu(
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.open", (c, e) -> onOpenFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.open", (i) -> onOpenFiles()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (c, e) -> onCopySelectedFiles()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (c, e) -> onCopySelectedFilePath()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (c, e) -> onCopySelectedRelativeFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (i) -> onCopySelectedRelativeFilePath()),
 			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (c, e) -> onDeleteSelectedFiles())
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
 		);
 	}
 	

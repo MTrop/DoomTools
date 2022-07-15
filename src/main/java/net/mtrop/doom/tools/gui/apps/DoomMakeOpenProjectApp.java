@@ -228,12 +228,12 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doommake.menu.file",
-				utils.createItemFromLanguageKey("doommake.menu.file.item.new", (c, e) -> openNewProject()),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.open", (c, e) -> openOpenProject()),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.new", (i) -> openNewProject()),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.open", (i) -> openOpenProject()),
 				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.settings", (c, e) -> openSettings()),
+				utils.createItemFromLanguageKey("doommake.menu.file.item.settings", (i) -> openSettings()),
 				separator(),
-				utils.createItemFromLanguageKey("doommake.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("doommake.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -455,7 +455,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 	

@@ -37,6 +37,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -171,6 +172,86 @@ public final class ComponentFactory
 		void onSelectionChange(int[] rowsSelected, int[] columnsSelected, boolean adjusting);
 	}
 	
+	/**
+	 * An action handler that is called when an action is performed.
+	 */
+	@FunctionalInterface
+	public interface ActionEventHandler
+	{
+		/**
+		 * Called when an action event happens.
+		 * @param e the ActionEvent.
+		 */
+	    void handleActionEvent(ActionEvent e);
+	}
+
+	/**
+	 * A handler interface for listening for change events.
+	 * @param <C> the component type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ComponentChangeHandler<C> extends ChangeListener
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void stateChanged(ChangeEvent event)
+		{
+			onChangeEvent((C)event.getSource());
+		}
+		
+		/**
+		 * Called when a component emits a change event.
+		 * @param component the associated component.
+		 */
+		void onChangeEvent(C component);
+	}
+
+	/**
+	 * A handler interface for listening for action events.
+	 * @param <C> the component type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ComponentActionHandler<C> extends ActionEventHandler
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void handleActionEvent(ActionEvent event)
+		{
+			onActionEvent((C)event.getSource(), event);
+		}
+		
+		/**
+		 * Called when the component emits an action.
+		 * @param component the component on the event.
+		 * @param event the emitted event.
+		 */
+		void onActionEvent(C component, ActionEvent event);
+	}
+
+	/**
+	 * A handler interface for listening for change events.
+	 * @param <C> the component type that this handles.
+	 * @param <T> the item type.
+	 */
+	@FunctionalInterface
+	public interface ComponentItemHandler<C, T> extends ItemListener
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void itemStateChanged(ItemEvent event)
+		{
+			C component = (C)event.getSource();
+			onItemChangeEvent(component, (T)event.getItem());
+		}
+		
+		/**
+		 * Called when a component emits an item change event.
+		 * @param component the associated component.
+		 * @param item the item affected.
+		 */
+		void onItemChangeEvent(C component, T item);
+	}
+
 	/**
 	 * A handler interface for listening for list selection events.
 	 * @param <M> the model type.
@@ -335,51 +416,6 @@ public final class ComponentFactory
 	}
 	
 	/**
-	 * A handler interface for listening for change events.
-	 * @param <C> the component type that this handles.
-	 */
-	@FunctionalInterface
-	public interface ComponentChangeHandler<C> extends ChangeListener
-	{
-		@Override
-		@SuppressWarnings("unchecked")
-		default void stateChanged(ChangeEvent event)
-		{
-			onChangeEvent((C)event.getSource());
-		}
-		
-		/**
-		 * Called when a component emits a change event.
-		 * @param component the associated component.
-		 */
-		void onChangeEvent(C component);
-	}
-	
-	/**
-	 * A handler interface for listening for change events.
-	 * @param <C> the component type that this handles.
-	 * @param <T> the item type.
-	 */
-	@FunctionalInterface
-	public interface ComponentItemHandler<C, T> extends ItemListener
-	{
-		@Override
-		@SuppressWarnings("unchecked")
-		default void itemStateChanged(ItemEvent event)
-		{
-			C component = (C)event.getSource();
-			onItemChangeEvent(component, (T)event.getItem());
-		}
-		
-		/**
-		 * Called when a component emits an item change event.
-		 * @param component the associated component.
-		 * @param item the item affected.
-		 */
-		void onItemChangeEvent(C component, T item);
-	}
-	
-	/**
 	 * A handler interface for listening for change events on toggleable components like checkboxes or radio buttons.
 	 */
 	@FunctionalInterface
@@ -397,6 +433,122 @@ public final class ComponentFactory
 		 */
 		void onChangeEvent(boolean selected);
 	}
+	
+	/**
+	 * A handler interface for listening for button clicks.
+	 */
+	@FunctionalInterface
+	public interface ButtonClickHandler extends ComponentActionHandler<JButton>
+	{
+		@Override
+		default void onActionEvent(JButton component, ActionEvent event)
+		{
+			onClick(component);
+		}
+		
+		/**
+		 * Called on button click.
+		 * @param button the button clicked.
+		 */
+		void onClick(JButton button);
+	}
+	
+	/**
+	 * A handler interface for listening for combo box change events.
+	 * @param <T> the item type.
+	 */
+	@FunctionalInterface
+	public interface ComboBoxChangeHandler<T> extends ComponentItemHandler<JComboBox<T>, T>
+	{
+		@Override
+		default void onItemChangeEvent(JComboBox<T> component, T item)
+		{
+			onChange(item);
+		}
+		
+		/**
+		 * Called on value change.
+		 * @param item the current value.
+		 */
+		void onChange(T item);
+	}
+
+	/**
+	 * A handler interface for listening for menu clicks.
+	 */
+	@FunctionalInterface
+	public interface MenuClickHandler extends ComponentActionHandler<JMenu>
+	{
+		@Override
+		default void onActionEvent(JMenu component, ActionEvent event)
+		{
+			onClick(component);
+		}
+		
+		/**
+		 * Called on menu click.
+		 * @param item the item clicked.
+		 */
+		void onClick(JMenu item);
+	}
+	
+	/**
+	 * A handler interface for listening for menu item clicks.
+	 */
+	@FunctionalInterface
+	public interface MenuItemClickHandler extends ComponentActionHandler<JMenuItem>
+	{
+		@Override
+		default void onActionEvent(JMenuItem component, ActionEvent event)
+		{
+			onClick(component);
+		}
+		
+		/**
+		 * Called on menu item click.
+		 * @param item the item clicked.
+		 */
+		void onClick(JMenuItem item);
+	}
+	
+	/**
+	 * A handler interface for listening for checkbox menu item clicks.
+	 */
+	@FunctionalInterface
+	public interface CheckBoxMenuItemClickHandler extends ComponentActionHandler<JCheckBoxMenuItem>
+	{
+		@Override
+		default void onActionEvent(JCheckBoxMenuItem component, ActionEvent event)
+		{
+			onClick(component);
+		}
+		
+		/**
+		 * Called on menu item click.
+		 * @param item the item clicked.
+		 */
+		void onClick(JCheckBoxMenuItem item);
+	}
+	
+	/**
+	 * A handler interface for listening for checkbox menu item clicks.
+	 */
+	@FunctionalInterface
+	public interface RadioButtonMenuItemClickHandler extends ComponentActionHandler<JRadioButtonMenuItem>
+	{
+		@Override
+		default void onActionEvent(JRadioButtonMenuItem component, ActionEvent event)
+		{
+			onClick(component);
+		}
+		
+		/**
+		 * Called on menu item click.
+		 * @param item the item clicked.
+		 */
+		void onClick(JRadioButtonMenuItem item);
+	}
+	
 	
 	/* ==================================================================== */
 	/* ==== Labels                                                     ==== */
@@ -511,7 +663,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
+	public static JButton button(Icon icon, String label, int mnemonic, ButtonClickHandler handler)
 	{
 		JButton out = new JButton(actionItem(icon, label, handler));
 		if (mnemonic > 0)
@@ -526,7 +678,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, String label, ComponentActionHandler<JButton> handler)
+	public static JButton button(Icon icon, String label, ButtonClickHandler handler)
 	{
 		return button(icon, label, 0, handler);
 	}
@@ -538,7 +690,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, int mnemonic, ComponentActionHandler<JButton> handler)
+	public static JButton button(Icon icon, int mnemonic, ButtonClickHandler handler)
 	{
 		return button(icon, null, 0, handler);
 	}
@@ -549,7 +701,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, ComponentActionHandler<JButton> handler)
+	public static JButton button(Icon icon, ButtonClickHandler handler)
 	{
 		return button(icon, 0, handler);
 	}
@@ -561,7 +713,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(String label, int mnemonic, ComponentActionHandler<JButton> handler)
+	public static JButton button(String label, int mnemonic, ButtonClickHandler handler)
 	{
 		return button(null, label, 0, handler);
 	}
@@ -572,7 +724,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(String label, ComponentActionHandler<JButton> handler)
+	public static JButton button(String label, ButtonClickHandler handler)
 	{
 		return button(label, 0, handler);
 	}
@@ -582,7 +734,7 @@ public final class ComponentFactory
 	 * @param handler the handler for button click.
 	 * @return a new button.
 	 */
-	public static JButton button(ComponentActionHandler<JButton> handler)
+	public static JButton button(ButtonClickHandler handler)
 	{
 		return button((String)null, handler);
 	}
@@ -597,7 +749,7 @@ public final class ComponentFactory
 	 */
 	public static JButton button(Icon icon, String label, int mnemonic, final JPopupMenu menu)
 	{
-		return button(icon, label, mnemonic, (b, e) -> {
+		return button(icon, label, mnemonic, (b) -> {
 			menu.show(b, 0, b.getHeight());
 		});
 	}
@@ -1622,7 +1774,7 @@ public final class ComponentFactory
 	 * @param handler the item change handler.
 	 * @return the resultant spinner.
 	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ComponentItemHandler<JComboBox<E>, E> handler)
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ComboBoxChangeHandler<E> handler)
 	{
 		JComboBox<E> out = new JComboBox<E>(model);
 		out.addItemListener(handler);
@@ -1647,7 +1799,7 @@ public final class ComponentFactory
 	 * @param handler the item change handler.
 	 * @return the resultant spinner.
 	 */
-	public static <E> JComboBox<E> comboBox(Collection<E> objects, ComponentItemHandler<JComboBox<E>, E> handler)
+	public static <E> JComboBox<E> comboBox(Collection<E> objects, ComboBoxChangeHandler<E> handler)
 	{
 		return comboBox(comboBoxModel(objects), handler);
 	}
@@ -2000,7 +2152,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new JMenu.
 	 */
-	public static JMenu menu(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenu> handler)
+	public static JMenu menu(Icon icon, String label, int mnemonic, MenuClickHandler handler)
 	{
 		JMenu out = new JMenu(actionItem(icon, label, handler));
 		out.setMnemonic(mnemonic);
@@ -2106,7 +2258,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(Icon icon, String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, int mnemonic, KeyStroke accelerator, MenuItemClickHandler handler)
 	{
 		return menuItem(mnemonic, accelerator, actionItem(icon, label, handler));
 	}
@@ -2119,7 +2271,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, int mnemonic, KeyStroke accelerator, MenuItemClickHandler handler)
 	{
 		return menuItem(null, label, mnemonic, accelerator, handler);
 	}
@@ -2132,7 +2284,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, int mnemonic, MenuItemClickHandler handler)
 	{
 		return menuItem(icon, label, mnemonic, null, handler);
 	}
@@ -2144,7 +2296,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, int mnemonic, MenuItemClickHandler handler)
 	{
 		return menuItem(null, label, mnemonic, null, handler);
 	}
@@ -2157,7 +2309,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(Icon icon, String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, KeyStroke accelerator, MenuItemClickHandler handler)
 	{
 		return menuItem(icon, label, 0, accelerator, handler);
 	}
@@ -2169,7 +2321,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, KeyStroke accelerator, MenuItemClickHandler handler)
 	{
 		return menuItem(null, label, 0, accelerator, handler);
 	}
@@ -2181,7 +2333,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(Icon icon, String label, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(Icon icon, String label, MenuItemClickHandler handler)
 	{
 		return menuItem(icon, label, 0, null, handler);
 	}
@@ -2192,7 +2344,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(String label, ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(String label, MenuItemClickHandler handler)
 	{
 		return menuItem(null, label, 0, null, handler);
 	}
@@ -2202,7 +2354,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode menuItem(ComponentActionHandler<JMenuItem> handler)
+	public static MenuNode menuItem(MenuItemClickHandler handler)
 	{
 		return menuItem(null, null, 0, null, handler);
 	}
@@ -2323,7 +2475,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(mnemonic, accelerator, selected, actionItem(icon, label, handler));
 	}
@@ -2337,7 +2489,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(mnemonic, accelerator, selected, actionItem(label, handler));
 	}
@@ -2351,7 +2503,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(mnemonic, null, selected, actionItem(icon, label, handler));
 	}
@@ -2364,7 +2516,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(mnemonic, null, selected, actionItem(label, handler));
 	}
@@ -2378,7 +2530,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(0, accelerator, selected, actionItem(icon, label, handler));
 	}
@@ -2391,7 +2543,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(0, accelerator, selected, actionItem(label, handler));
 	}
@@ -2404,7 +2556,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(0, null, selected, actionItem(icon, label, handler));
 	}
@@ -2416,7 +2568,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(0, null, selected, actionItem(label, handler));
 	}
@@ -2489,7 +2641,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(mnemonic, accelerator, selected, actionItem(icon, label, handler));
 	}
@@ -2503,7 +2655,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(mnemonic, accelerator, selected, actionItem(label, handler));
 	}
@@ -2517,7 +2669,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, int mnemonic, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(mnemonic, null, selected, actionItem(icon, label, handler));
 	}
@@ -2530,7 +2682,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(String label, boolean selected, int mnemonic, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(mnemonic, null, selected, actionItem(label, handler));
 	}
@@ -2544,7 +2696,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, KeyStroke accelerator, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(0, accelerator, selected, actionItem(icon, label, handler));
 	}
@@ -2557,7 +2709,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(String label, boolean selected, KeyStroke accelerator, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(0, accelerator, selected, actionItem(label, handler));
 	}
@@ -2570,7 +2722,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(Icon icon, String label, boolean selected, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(0, null, selected, actionItem(icon, label, handler));
 	}
@@ -2582,7 +2734,7 @@ public final class ComponentFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode radioItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public static MenuNode radioItem(String label, boolean selected, RadioButtonMenuItemClickHandler handler)
 	{
 		return radioItem(0, null, selected, actionItem(label, handler));
 	}
@@ -2709,9 +2861,9 @@ public final class ComponentFactory
 			this.accelerator = accelerator;
 		}
 	
-		private JCheckBoxMenuItem createItem()
+		private JRadioButtonMenuItem createItem()
 		{
-			JCheckBoxMenuItem item = new JCheckBoxMenuItem(action);
+			JRadioButtonMenuItem item = new JRadioButtonMenuItem(action);
 			item.setSelected(selected);
 			if (mnemonic > 0)
 				item.setMnemonic(mnemonic);
@@ -2845,41 +2997,6 @@ public final class ComponentFactory
 	public static Action actionItem(ActionEventHandler handler)
 	{
 		return new HandledAction(null, null, handler);
-	}
-
-	/**
-	 * A handler interface for listening for action events.
-	 * @param <C> the component type that this handles.
-	 */
-	@FunctionalInterface
-	public interface ComponentActionHandler<C> extends ActionEventHandler
-	{
-		@Override
-		@SuppressWarnings("unchecked")
-		default void handleActionEvent(ActionEvent event)
-		{
-			onActionEvent((C)event.getSource(), event);
-		}
-		
-		/**
-		 * Called when the component emits an action.
-		 * @param component the component on the event.
-		 * @param event the emitted event.
-		 */
-		void onActionEvent(C component, ActionEvent event);
-	}
-	
-	/**
-	 * An action handler that is called when an action is performed.
-	 */
-	@FunctionalInterface
-	public interface ActionEventHandler
-	{
-		/**
-		 * Called when an action event happens.
-		 * @param e the ActionEvent.
-		 */
-	    void handleActionEvent(ActionEvent e);
 	}
 
 	/**

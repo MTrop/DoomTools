@@ -105,7 +105,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtexscan.menu.file",
-				utils.createItemFromLanguageKey("wtexscan.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("wtexscan.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -125,7 +125,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(getUtils().createButtonFromLanguageKey("wtexscan.button.start", (c, e) -> onScanMaps()))
+					node(getUtils().createButtonFromLanguageKey("wtexscan.button.start", (i) -> onScanMaps()))
 				))
 			))
 		);
@@ -184,7 +184,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 

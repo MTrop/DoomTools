@@ -53,7 +53,7 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 		Set<Charset> charsets = DoomToolsEditorProvider.get().getAvailableCommonCharsets();
 		
 		this.defaultEncodingField = comboField(comboBox(comboBoxModel(charsets), 
-			(c, i) -> viewSettings.setDefaultEncoding(i)
+			(i) -> viewSettings.setDefaultEncoding(i)
 		));
 		this.defaultEncodingField.setValue(viewSettings.getDefaultEncoding());
 		
@@ -77,7 +77,7 @@ public class EditorDefaultViewSettingsPanel extends JPanel
 				utils.formField("texteditor.settings.view.spacetabs", tabEmulatedField),
 				utils.formField("texteditor.settings.view.linewrap", lineWrapField),
 				utils.formField("texteditor.settings.view.wordwrap", wrapStyleField)
-				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings()))
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (b) -> resetSettings()))
 			))
 		);
 	}

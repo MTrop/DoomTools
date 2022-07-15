@@ -72,9 +72,7 @@ public class DoomToolsSettingsPanel extends JPanel
 			GUIThemeType.DARCULA.name()
 		);
 		
-		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (c, i) -> {
-			settings.setThemeName((String)i);
-		}));
+		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (i) -> settings.setThemeName((String)i)));
 		themeField.setValue(settings.getThemeName());
 		
 		return containerOf(

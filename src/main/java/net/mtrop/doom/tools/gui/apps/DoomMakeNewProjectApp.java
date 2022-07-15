@@ -111,7 +111,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	{
 		// Hardcode only WAD Project for now.
 		Container projectTypePanel = titlePanel(getLanguage().getText("doommake.newproject.type"),
-			containerOf(node(comboBox(comboBoxModel(Arrays.asList(getLanguage().getText("doommake.newproject.type.wad"))), (c, i) -> {
+			containerOf(node(comboBox(comboBoxModel(Arrays.asList(getLanguage().getText("doommake.newproject.type.wad"))), (i) -> {
 				// Do nothing on change - no other options.
 			})))
 		);
@@ -134,7 +134,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		);
 		
 		Container controlPane = containerOf(flowLayout(Flow.TRAILING, 4, 4), node(
-			getUtils().createButtonFromLanguageKey("doommake.newproject.create", (c, e) -> createProject())
+			getUtils().createButtonFromLanguageKey("doommake.newproject.create", (i) -> createProject())
 		));
 	
 		JPanel projectPanel = new JPanel();
@@ -224,7 +224,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				}))
 			))),
 			node(titlePanel(language.getText("doommake.newproject.wadgen.patch"), containerOf(
-				node(comboBox(comboBoxModel(patchOptions), (c, i) -> {
+				node(comboBox(comboBoxModel(patchOptions), (i) -> {
 					removeTemplateCategory(WADProjectGenerator.CATEGORY_PATCHES);
 					if (i == patchDECOHack)
 						addTemplateName(WADProjectGenerator.TEMPLATE_DECOHACK);
@@ -233,7 +233,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				}))
 			))),
 			node(titlePanel(language.getText("doommake.newproject.wadgen.textures"), containerOf(
-				node(comboBox(comboBoxModel(textureOptions), (c, i) -> {
+				node(comboBox(comboBoxModel(textureOptions), (i) -> {
 					removeTemplateCategory(WADProjectGenerator.CATEGORY_TEXTURES);
 					if (i == textureWads)
 						addTemplateName(WADProjectGenerator.TEMPLATE_TEXTUREWADS);
@@ -244,7 +244,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				}))
 			))),
 			node(titlePanel(language.getText("doommake.newproject.wadgen.vctrl"), containerOf(
-				node(comboBox(comboBoxModel(versionControlOptions), (c, i) -> {
+				node(comboBox(comboBoxModel(versionControlOptions), (i) -> {
 					removeTemplateCategory(WADProjectGenerator.CATEGORY_REPOSITORY);
 					if (i == versionControlGit)
 						addTemplateName(WADProjectGenerator.TEMPLATE_GIT);
@@ -253,7 +253,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				}))
 			))),
 			node(titlePanel(language.getText("doommake.newproject.wadgen.run"), containerOf(
-				node(comboBox(comboBoxModel(runOptions), (c, i) -> {
+				node(comboBox(comboBoxModel(runOptions), (i) -> {
 					removeTemplateCategory(WADProjectGenerator.CATEGORY_EXECUTION);
 					if (i == runYes)
 						addTemplateName(WADProjectGenerator.TEMPLATE_RUN);
@@ -456,7 +456,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 

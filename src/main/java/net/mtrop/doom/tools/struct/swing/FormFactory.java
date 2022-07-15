@@ -983,7 +983,7 @@ public final class FormFactory
 			), 
 			changeListener
 		);
-		((JComponent)out.getFormInputComponent()).setTransferHandler(new FileDropTransferHandler(out));
+		out.setTransferHandler(new FileDropTransferHandler(out));
 		return out;
 	}
 	
@@ -2264,13 +2264,13 @@ public final class FormFactory
 		private FileDropTransferHandler(JFormField<File> fileField)
 		{
 			this.fileField = fileField;
-			
 		}
 		
 		@Override
 		public boolean canImport(TransferSupport support) 
 		{
-			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+				|| support.isDataFlavorSupported(DataFlavor.stringFlavor);
 		}
 		
 		@Override
@@ -2281,19 +2281,33 @@ public final class FormFactory
 				return false;
 			
 			Transferable transferable = support.getTransferable();
-			List<File> files;
-			try {
-				files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-			} catch (UnsupportedFlavorException | IOException e) {
-				return false;
+			
+			if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+			{
+				List<File> files;
+				try {
+					files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+				} catch (UnsupportedFlavorException | IOException e) {
+					return false;
+				}
+				
+				if (!files.isEmpty())
+					fileField.setValue(files.get(files.size() - 1));
 			}
-			
-			if (!files.isEmpty())
-				fileField.setValue(files.get(files.size() - 1));
-			
+			else 
+			{
+				String text;
+				try {
+					text = (String)transferable.getTransferData(DataFlavor.stringFlavor);
+				} catch (UnsupportedFlavorException | IOException e) {
+					return false;
+				}
+				
+				fileField.setValue(new File(text));
+			}
 			return true;
 		}
-		
+
 	}
 	
 	/**

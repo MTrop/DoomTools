@@ -173,10 +173,10 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("decohack.menu.file.item.new",
-				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.main", (c, e) -> onNewEditor()),
-				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.blank", (c, e) -> onNewBlankEditor())
+				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.main", (i) -> onNewEditor()),
+				utils.createItemFromLanguageKey("decohack.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
 			),
-			utils.createItemFromLanguageKey("decohack.menu.file.item.open", (c, e) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("decohack.menu.file.item.open", (i) -> onOpenEditor()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -241,7 +241,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (c, e) -> attemptClose())
+					utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (i) -> attemptClose())
 				)
 			)),
 			utils.createMenuFromLanguageKey("decohack.menu.edit", createCommonEditMenuItems()),
@@ -431,7 +431,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			getLanguage().getText("decohack.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.getDecoHackFileFilter()
+			utils.createDecoHackFileFilter()
 		);
 		
 		if (file != null)
@@ -535,11 +535,11 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (c, e) -> onHelp()),
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (i) -> onHelp()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog()),
 			separator(),
-			utils.createItemFromLanguageKey("decohack.menu.help.item.hardcode", (c, e) -> onHelpHardcode()),
-			utils.createItemFromLanguageKey("decohack.menu.help.item.pointers", (c, e) -> onPointerReference())
+			utils.createItemFromLanguageKey("decohack.menu.help.item.hardcode", (i) -> onHelpHardcode()),
+			utils.createItemFromLanguageKey("decohack.menu.help.item.pointers", (i) -> onPointerReference())
 		); 
 	}
 
@@ -595,7 +595,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().getDecoHackFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createDecoHackFileFilter()} : TYPES;
 		}
 	
 		@Override

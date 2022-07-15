@@ -275,70 +275,70 @@ public class DoomToolsMainWindow extends JFrame
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doomtools.menu.file",
-				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.open", (c, e) -> openWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.open", (i) -> openWorkspace()),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.save", actionSaveWorkspace),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.saveas", actionSaveWorkspaceAs),
 				separator(),
 				utils.createItemFromLanguageKey("doomtools.menu.file.item.workspace.close", actionClearWorkspace),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings", (c, e) -> openSettingsModal()),
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.settings", (i) -> openSettingsModal()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit", (c, e) -> shutDownHook.run())
+				utils.createItemFromLanguageKey("doomtools.menu.file.item.exit", (i) -> shutDownHook.run())
 			),
 
 			// Tools
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (c, e) -> addApplication(new DMXConvertApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (c, e) -> addApplication(new DMXConvertApp())) // TODO: Finish this!
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (i) -> addApplication(new DMXConvertApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DMXConvertApp())) // TODO: Finish this!
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (c, e) -> addApplication(new DecoHackEditorApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (c, e) -> addApplication(new DecoHackCompilerApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (i) -> addApplication(new DecoHackEditorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (i) -> addApplication(new DecoHackCompilerApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
-						utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (c, e) -> addApplication(new DoomMakeNewProjectApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (c, e) -> openDoomMakeProject())
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (i) -> addApplication(new DoomMakeNewProjectApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (i) -> openDoomMakeProject())
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.editor", (c, e) -> addApplication(new WadMergeEditorApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.execute", (c, e) -> addApplication(new WadMergeExecutorApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.editor", (i) -> addApplication(new WadMergeEditorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.execute", (i) -> addApplication(new WadMergeExecutorApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (c, e) -> addApplication(new WadScriptEditorApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (c, e) -> addApplication(new WadScriptExecutorApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (i) -> addApplication(new WadScriptEditorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (i) -> addApplication(new WadScriptExecutorApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (c, e) -> addApplication(new WSwAnTablesEditorApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (c, e) -> addApplication(new WSwAnTablesCompilerApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (i) -> addApplication(new WSwAnTablesEditorApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (i) -> addApplication(new WSwAnTablesCompilerApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (c, e) -> addApplication(new WTexScanApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (c, e) -> addApplication(new WTExportApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (c, e) -> addApplication(new WTexScanTExportApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (i) -> addApplication(new WTExportApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (i) -> addApplication(new WTexScanTExportApp()))
 				)
 			),
 
 			// View
 			utils.createMenuFromLanguageKey("doomtools.menu.view",
-				utils.createItemFromLanguageKey("doomtools.menu.view.item.cascade", (c, e) -> desktop.cascadeWorkspace()),
-				utils.createItemFromLanguageKey("doomtools.menu.view.item.minimize", (c, e) -> desktop.minimizeWorkspace()),
-				utils.createItemFromLanguageKey("doomtools.menu.view.item.restore", (c, e) -> desktop.restoreWorkspace())
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.cascade", (i) -> desktop.cascadeWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.minimize", (i) -> desktop.minimizeWorkspace()),
+				utils.createItemFromLanguageKey("doomtools.menu.view.item.restore", (i) -> desktop.restoreWorkspace())
 			),
 
 			// Help
 			utils.createMenuFromLanguageKey("doomtools.menu.help",
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (c, e) -> openAboutModal()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (c, e) -> openLicensesModal()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (i) -> openAboutModal()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (i) -> openLicensesModal()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (c, e) -> openDocs()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (c, e) -> openSettingsFolder()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (i) -> openDocs()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (i) -> openSettingsFolder()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (c, e) -> openWebsite()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (c, e) -> openRepositorySite()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (i) -> openWebsite()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (i) -> openRepositorySite()),
 				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> openChangeLogModal()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (c, e) -> openUpdate())
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> openChangeLogModal()),
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (i) -> openUpdate())
 			)
 		);
 	}

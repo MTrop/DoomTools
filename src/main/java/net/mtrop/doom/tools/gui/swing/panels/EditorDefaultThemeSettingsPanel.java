@@ -65,12 +65,12 @@ public class EditorDefaultThemeSettingsPanel extends JPanel
 		List<String> themes = new ArrayList<>(friendlyThemeNameMap.keySet());
 		List<String> fonts = new ArrayList<>(friendlyFontNameMap.keySet());
 		
-		themeField = comboField(comboBox(comboBoxModel(themes), (c, i) -> {
+		themeField = comboField(comboBox(comboBoxModel(themes), (i) -> {
 			themeName = friendlyThemeNameMap.get(i).name();
 		}));
 		themeField.setValue(EditorThemeType.THEME_MAP.getOrDefault(settings.getEditorThemeName(), EditorThemeType.DEFAULT).getFriendlyName());
 		
-		fontField = comboField(comboBox(comboBoxModel(fonts), (c, i) -> updateFont()));
+		fontField = comboField(comboBox(comboBoxModel(fonts), (i) -> updateFont()));
 		fontSizeField = spinnerField(spinner(spinnerModel(fontType.getSize(), 1, 72 * 3, 1), (c) -> updateFont()));
 		fontField.setValue(fontType.getName());
 		
@@ -79,7 +79,7 @@ public class EditorDefaultThemeSettingsPanel extends JPanel
 				.addField(language.getText("texteditor.settings.theme"), themeField)
 				.addField(language.getText("texteditor.settings.font"), fontField)
 				.addField(language.getText("texteditor.settings.font.size"), fontSizeField)
-				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
+				.addField(buttonField(button(language.getText("texteditor.settings.reset"), (b) -> resetSettings())))
 			)
 		);
 	}

@@ -20,8 +20,8 @@ public final class BlankFieldTest
 				.addField("", separatorField())
 				.addField("asdfasdf", stringField("asdfasdf"))
 				.addField("", buttonField(
-					button("Click Me", (c, e) -> System.out.println("asdfasdf")),
-					button("Click Me Too", (c, e) -> System.out.println("asdfasdf2"))
+					button("Click Me", (b) -> System.out.println("asdfasdf")),
+					button("Click Me Too", (b) -> System.out.println("asdfasdf2"))
 				))
 			)
 		)), 

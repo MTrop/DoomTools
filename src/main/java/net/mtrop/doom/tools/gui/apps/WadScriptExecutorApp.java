@@ -86,7 +86,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 				getLanguage().getText("wadscript.run.source.browse.title"), 
 				current, 
 				getLanguage().getText("wadscript.run.source.browse.accept"),
-				getUtils().getWadScriptFileFilter()
+				getUtils().createWadScriptFileFilter()
 			),
 			(selected) -> {
 				if (selected != null)
@@ -122,7 +122,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 			node(BorderLayout.CENTER, executePanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(utils.createButtonFromLanguageKey("wadscript.run.withargs.choice.run", (c, e) -> onRun()))
+					node(utils.createButtonFromLanguageKey("wadscript.run.withargs.choice.run", (i) -> onRun()))
 				)),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
@@ -136,7 +136,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file",
-				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (c, e) -> attemptClose())
+				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -246,7 +246,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
 	}
 

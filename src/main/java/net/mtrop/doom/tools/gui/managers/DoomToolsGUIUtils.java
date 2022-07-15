@@ -27,9 +27,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
@@ -47,7 +45,6 @@ import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
-import net.mtrop.doom.tools.struct.swing.ComponentFactory.ComponentActionHandler;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
@@ -280,7 +277,7 @@ public final class DoomToolsGUIUtils
 	 * @param handler the action to take on selection.
 	 * @return the new menu item node.
 	 */
-	public MenuNode createItemFromLanguageKey(String keyPrefix, ComponentActionHandler<JMenuItem> handler)
+	public MenuNode createItemFromLanguageKey(String keyPrefix, MenuItemClickHandler handler)
 	{
 		return menuItem(
 			language.getText(keyPrefix),
@@ -325,7 +322,7 @@ public final class DoomToolsGUIUtils
 	 * @param handler the action to take on selection.
 	 * @return the new menu item node.
 	 */
-	public MenuNode createCheckItemFromLanguageKey(String keyPrefix, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
+	public MenuNode createCheckItemFromLanguageKey(String keyPrefix, boolean selected, CheckBoxMenuItemClickHandler handler)
 	{
 		return checkBoxItem(
 			language.getText(keyPrefix),
@@ -343,7 +340,7 @@ public final class DoomToolsGUIUtils
 	 * @param handler the action to take on selection.
 	 * @return the new menu item node.
 	 */
-	public JButton createButtonFromLanguageKey(Icon icon, String keyPrefix, ComponentActionHandler<JButton> handler)
+	public JButton createButtonFromLanguageKey(Icon icon, String keyPrefix, ButtonClickHandler handler)
 	{
 		String tipKey = keyPrefix + ".tip";
 		final String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
@@ -361,7 +358,7 @@ public final class DoomToolsGUIUtils
 	 * @param handler the action to take on selection.
 	 * @return the new menu item node.
 	 */
-	public JButton createButtonFromLanguageKey(String keyPrefix, ComponentActionHandler<JButton> handler)
+	public JButton createButtonFromLanguageKey(String keyPrefix, ButtonClickHandler handler)
 	{
 		return createButtonFromLanguageKey(null, keyPrefix, handler);
 	}
@@ -601,11 +598,11 @@ public final class DoomToolsGUIUtils
 				node(BorderLayout.SOUTH, containerOf(
 					node(BorderLayout.WEST, status),
 					node(BorderLayout.EAST, containerOf(flowLayout(Flow.RIGHT, 4, 0),
-						node(createButtonFromLanguageKey("doomtools.clipboard.copy", (c, e) -> {
+						node(createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
 							copyToClipboard(outputPanel.getText());
 							status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
 						})),
-						node(createButtonFromLanguageKey("doomtools.clipboard.save", (c, e) -> {
+						node(createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
 							if (saveToFile(outputPanel, outputPanel.getText()))
 								status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
 						}))
@@ -778,7 +775,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the DEFSWANI file filter.
 	 */
-	public FileFilter getDEFSWANIFileFilter()
+	public FileFilter createDEFSWANIFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.defswani.description") + " (*.txt/*.dat)", "txt", "dat");
 	}
@@ -786,7 +783,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the DECOHack file filter.
 	 */
-	public FileFilter getDecoHackFileFilter()
+	public FileFilter createDecoHackFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.decohack.description") + " (*.dh)", "dh");
 	}
@@ -794,7 +791,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the text file filter.
 	 */
-	public FileFilter getTextFileFilter()
+	public FileFilter createTextFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.textfile.description") + " (*.txt)", "txt");
 	}
@@ -802,7 +799,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the WadMerge file filter.
 	 */
-	public FileFilter getWadMergeFileFilter()
+	public FileFilter createWadMergeFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.wadmerge.description") + " (*.wadm/*.wadmerge)", "wadm", "wadmerge");
 	}
@@ -810,7 +807,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the WadScript file filter.
 	 */
-	public FileFilter getWadScriptFileFilter()
+	public FileFilter createWadScriptFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.wadscript.description") + " (*.wscript/*.wscr/*.wsx)", "wscript", "wscr", "wsx");
 	}
@@ -818,7 +815,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the WAD file filter.
 	 */
-	public FileFilter getWADFileFilter()
+	public FileFilter createWADFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.wadfile.description") + " (*.wad)", "wad");
 	}
@@ -826,7 +823,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the WAD type file filter.
 	 */
-	public FileFilter getWADTypeFileFilter()
+	public FileFilter createWADTypeFileFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.wadtype.description") + " (*.wad/*.pk3/*.pke)", "wad", "pk3", "pke");
 	}
@@ -834,7 +831,7 @@ public final class DoomToolsGUIUtils
 	/**
 	 * @return the WAD container file filter.
 	 */
-	public FileFilter getWADContainerFilter()
+	public FileFilter createWADContainerFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.container.description") + " (*.wad/*.pk3/*.pke/*.zip)", "wad", "pk3", "pke", "zip");
 	}
@@ -870,7 +867,7 @@ public final class DoomToolsGUIUtils
 	
 	private boolean saveToFile(Component parent, String text)
 	{
-		FileFilter filter = getTextFileFilter();
+		FileFilter filter = createTextFileFilter();
 		File saveFile = chooseFile(parent, 
 			language.getText("doomtools.clipboard.save.title"),
 			language.getText("doomtools.clipboard.save.choose"),

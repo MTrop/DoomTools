@@ -44,7 +44,7 @@ public class DefSwAniExportPanel extends JPanel
 				language.getText("wswantbl.export.browse.title"), 
 				current, 
 				language.getText("wswantbl.export.browse.accept"),
-				utils.getWADFileFilter()
+				utils.createWADFileFilter()
 			)
 		);
 		

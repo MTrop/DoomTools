@@ -171,7 +171,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 				utils.formField("texteditor.settings.code.useselectedtextcolor", useSelectedTextColorField),
 				utils.formField("texteditor.settings.code.parserdelay", parserDelayField),
 				utils.formField("texteditor.settings.code.hyperlinksenabled", hyperlinksEnabledField)
-				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings())))
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (b) -> resetSettings())))
 			)
 		);
 	}

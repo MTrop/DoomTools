@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
@@ -48,42 +47,42 @@ public class DoomMakeProjectControlPanel extends JPanel
 		LoaderFuture<BufferedImage> vsCodeImage = images.getImageAsync("ide.png");
 		LoaderFuture<BufferedImage> sladeImage = images.getImageAsync("slade.png");
 		
-		ComponentActionHandler<JButton> folderAction = (component, event) -> 
+		ButtonClickHandler folderAction = (b) -> 
 		{
 			try {
 				helper.openExplorer(projectDirectory);
 			} catch (ProcessCallException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			} catch (FileNotFoundException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			}
 		};
 		
-		ComponentActionHandler<JButton> vsCodeAction = (component, event) -> 
+		ButtonClickHandler vsCodeAction = (b) -> 
 		{
 			try {
 				helper.openIDE(projectDirectory);
 			} catch (ProcessCallException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			} catch (RequiredSettingException e) {
 				// TODO: Make settings error modal.
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			} catch (FileNotFoundException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			}
 		};
 		
-		ComponentActionHandler<JButton> sladeAction = (component, event) -> 
+		ButtonClickHandler sladeAction = (b) -> 
 		{
 			try {
 				helper.openSourceFolderInSlade(projectDirectory);
 			} catch (ProcessCallException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			} catch (RequiredSettingException e) {
 				// TODO: Make settings error modal.
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			} catch (FileNotFoundException e) {
-				SwingUtils.error(component, e.getMessage());
+				SwingUtils.error(this, e.getMessage());
 			}
 		};
 		

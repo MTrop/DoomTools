@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.gui.apps;
 
+import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
@@ -7,22 +8,19 @@ import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.JRadioButton;
 
 import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.AppCommon.GraphicsMode;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DMXConvertSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
-import static net.mtrop.doom.tools.struct.swing.ModalFactory.modal;
 
 
 /**
@@ -59,19 +57,41 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
     {
     	this.settings = DImageConvertSettingsManager.get();
     	
-		FileFilter wadFilter = getUtils().getWADFileFilter();
-		
 		this.inputFileField = fileField(
 			(current) -> getUtils().chooseFileOrDirectory(
 				getApplicationContainer(), 
 				getLanguage().getText("dimgconv.inputfile.browse.title"), 
 				getLanguage().getText("dimgconv.inputfile.browse.accept"), 
 				settings::getLastTouchedFile, 
-				settings::setLastTouchedFile,
-				(filter, input) -> (filter == wadFilter ? FileUtils.addMissingExtension(input, "wad") : input),
-				wadFilter
+				settings::setLastTouchedFile
 			)
 		);
+		
+		this.recursiveField = checkBoxField(checkBox(false));
+		
+		this.paletteSourceField = fileField(
+			(current) -> getUtils().chooseFile(
+				getApplicationContainer(), 
+				getLanguage().getText("dimgconv.palette.browse.title"), 
+				getLanguage().getText("dimgconv.palette.browse.accept"), 
+				settings::getLastTouchedFile, 
+				settings::setLastTouchedFile
+			)
+		);
+
+		JRadioButton graphicButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.graphics", true);
+		JRadioButton flatButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.flats", false);
+		JRadioButton colormapButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.colormaps", false);
+		JRadioButton paletteButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.palettes", false);
+
+		group(graphicButton, flatButton, colormapButton, paletteButton);
+		
+		this.graphicModeField = radioField(graphicButton);
+		this.flatsModeField = radioField(flatButton);
+		this.colormapModeField = radioField(colormapButton);
+		this.paletteModeField = radioField(paletteButton);
+		
+		this.infoFileNameField = stringField(true);
 		
 		this.outputFileField = fileField(
 			(current) -> getUtils().chooseFileOrDirectory(
@@ -79,28 +99,43 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 				getLanguage().getText("dimgconv.outputfile.browse.title"), 
 				getLanguage().getText("dimgconv.outputfile.browse.accept"), 
 				settings::getLastTouchedFile, 
-				settings::setLastTouchedFile,
-				(filter, input) -> (filter == wadFilter ? FileUtils.addMissingExtension(input, "wad") : input),
-				wadFilter
+				settings::setLastTouchedFile
 			)
 		);
 
-		// TODO: Finish this.
-		
 		this.statusPanel = new DoomToolsStatusPanel();
     }
     
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("dmxconv.title");
+		return getLanguage().getText("dimgconv.title");
 	}
 
 	@Override
 	public Container createContentPane()
 	{
-		// TODO: Finish this.
-		return containerOf();
+		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		return containerOf(dimension(350, 242), borderLayout(0, 4),
+			node(BorderLayout.NORTH, containerOf(borderLayout(0, 4),
+				node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("dimgconv.label.width")),
+					utils.formField("dimgconv.inputfile", inputFileField),
+					utils.formField("dimgconv.recurse", recursiveField),
+					utils.formField("dimgconv.palette", paletteSourceField),
+					utils.formField("dimgconv.metafile", infoFileNameField),
+					utils.formField("dimgconv.modes", panelField(containerOf(gridLayout(2, 2), 
+						node(graphicModeField), node(flatsModeField),
+						node(colormapModeField), node(paletteModeField)
+					))),
+					utils.formField("dimgconv.outputfile", outputFileField)
+				)),
+				node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING),
+					node(utils.createButtonFromLanguageKey("dimgconv.convert", (b) -> onDoConversion()))
+				))
+			)),
+			node(BorderLayout.CENTER, containerOf()),
+			node(BorderLayout.SOUTH, statusPanel)
+		);
 	}
 
 	@Override
@@ -109,10 +144,8 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 		
 		return menuBar(
-			utils.createMenuFromLanguageKey("dmxconv.menu.file",
-				utils.createItemFromLanguageKey("dmxconv.menu.file.item.settings", (c, e) -> openSettings()),
-				separator(),
-				utils.createItemFromLanguageKey("dmxconv.menu.file.item.exit", (c, e) -> attemptClose())
+			utils.createMenuFromLanguageKey("dimgconv.menu.file",
+				utils.createItemFromLanguageKey("dimgconv.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -177,19 +210,9 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (c, e) -> onHelp()),
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (c, e) -> onHelpChangelog())
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (i) -> onHelp()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
-	}
-
-	// Open settings.
-	private void openSettings()
-	{
-		modal(
-			getApplicationContainer(),
-			getLanguage().getText("dmxconv.settings.title"),
-			new DMXConvertSettingsPanel()
-		).openThenDispose();
 	}
 
 	private void onHelp()
@@ -201,7 +224,5 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	{
 		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-dimgconv.md")).open();
 	}
-	
-	
 	
 }

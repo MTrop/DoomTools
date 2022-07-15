@@ -103,7 +103,7 @@ public class EditorDefaultAutoCompleteSettingsPanel extends JPanel
 				utils.formField("texteditor.settings.autocomp.description.height", descriptionWindowSizeHeightField),
 				utils.formField("texteditor.settings.autocomp.triggerkey", triggerKeyField),
 				utils.formField("texteditor.settings.autocomp.paramtruncate", parameterDescriptionTruncateThresholdField)
-				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (c, e) -> resetSettings()))
+				).addField(buttonField(button(language.getText("texteditor.settings.reset"), (b) -> resetSettings()))
 			))
 		);
 	}
