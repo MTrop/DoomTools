@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -17,6 +18,9 @@ import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DMXConvertSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.FileListPanel;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -34,7 +38,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	private DMXConvertSettingsManager settings;
 
 	/** Input sound files. */
-	private FileListPanel inputFiles;
+	private FileListPanel inputFileField;
 	/** Output directory. */
 	private JFormField<File> outputDirectory;
 	/** Normal conversion. */
@@ -50,7 +54,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
     {
     	this.settings = DMXConvertSettingsManager.get();
     	
-		this.inputFiles = new FileListPanel(getLanguage().getText("dmxconv.input"), 
+		this.inputFileField = new FileListPanel(getLanguage().getText("dmxconv.input"), 
 			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
 			(files) -> {
 				if (files != null && files.length > 0)
@@ -92,7 +96,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	public Container createContentPane()
 	{
 		return containerOf(dimension(350, 300), borderLayout(0, 4),
-			node(BorderLayout.CENTER, inputFiles),
+			node(BorderLayout.CENTER, inputFileField),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(borderLayout(0, 4),
 					node(BorderLayout.NORTH, getUtils().createTitlePanel(getLanguage().getText("dmxconv.programs"), containerOf(gridLayout(1, 3, 0, 4),
@@ -136,14 +140,41 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState()
 	{
 		Map<String, String> state = super.getApplicationState();
-		// TODO: Finish this.
+		
+		File[] inputFiles = inputFileField.getFiles();
+		File outputFile = outputDirectory.getValue();
+		Boolean conversionType = getConversionType();
+		
+		state.put("files.length", String.valueOf(inputFiles.length));
+		for (int i = 0; i < inputFiles.length; i++) 
+			state.put("files." + i, inputFiles[i].getAbsolutePath());
+		
+		state.put("output", outputFile.getAbsolutePath());
+		
+		if (conversionType != null)
+			state.put("conversiontype", String.valueOf(conversionType));
+
 		return state;
 	}
 
 	@Override
 	public void setApplicationState(Map<String, String> state)
 	{
-		// TODO: Finish this.
+		Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
+		Function<String, Boolean> parseBoolean = (input) -> ObjectUtils.isEmpty(input) ? null : ValueUtils.parseBoolean(input, false);
+
+		File[] inputFiles = new File[ValueUtils.parseInt(state.get("files.length"), 0)];
+		for (int i = 0; i < inputFiles.length; i++)
+			inputFiles[i] = ValueUtils.parse(state.get("files." + i), parseFile);
+		File outputFile = ValueUtils.parse(state.get("output"), parseFile);
+		Boolean conversionType = ValueUtils.parse(state.get("conversiontype"), parseBoolean);
+
+		inputFileField.setFiles(inputFiles);
+		outputDirectory.setValue(outputFile);
+		
+		normalConversionField.setValue(conversionType == null);
+		ffmpegConversionField.setValue(conversionType == Boolean.TRUE);
+		jspiConversionField.setValue(conversionType == Boolean.FALSE);
 	}
 
 	@Override
@@ -178,16 +209,21 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 
 	private void onDoConversion() 
 	{
-		File[] inputFile = inputFiles.getFiles();
+		File[] inputFile = inputFileField.getFiles();
 		File outputDir = outputDirectory.getValue();
 		File ffmpegPath = settings.getFFmpegPath();
-		Boolean ffmpegOnly = 
+		Boolean ffmpegOnly = getConversionType();
+		
+		getCommon().onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, outputDir);
+	}
+
+	private Boolean getConversionType()
+	{
+		return 
 			normalConversionField.getValue() ? null :
 			ffmpegConversionField.getValue() ? true :
 			jspiConversionField.getValue() ? false :
 			null;
-		
-		getCommon().onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, outputDir);
 	}
 
 	// Make help menu for internal and desktop.

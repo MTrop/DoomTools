@@ -129,6 +129,7 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state) 
 	{
 		Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
+		
 		sourceFileField.setValue(ValueUtils.parse(state.get("export.source"), parseFile));
 		exportPanel.setOutputWAD(ValueUtils.parse(state.get("export.outwad"), parseFile));
 		exportPanel.setNameOverride(state.get("export.name"));

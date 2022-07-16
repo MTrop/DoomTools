@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -17,6 +18,10 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.AppCommon.GraphicsMode;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -162,14 +167,41 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState()
 	{
 		Map<String, String> state = super.getApplicationState();
-		// TODO: Finish this.
+		
+		File inputFile = inputFileField.getValue();
+		File outputFile = outputFileField.getValue();
+		boolean recursive = recursiveField.getValue();
+		File paletteSource = paletteSourceField.getValue();
+		GraphicsMode graphicsMode = getGraphicsMode();
+		String infoFile = infoFileNameField.getValue();
+
+		state.put("input", inputFile.getAbsolutePath());
+		state.put("output", outputFile.getAbsolutePath());
+		state.put("recursive", String.valueOf(recursive));
+		state.put("palettesource", paletteSource.getAbsolutePath());
+		state.put("mode", String.valueOf(graphicsMode.name()));
+		state.put("infofilename", infoFile);
+		
 		return state;
 	}
 
 	@Override
 	public void setApplicationState(Map<String, String> state)
 	{
-		// TODO: Finish this.
+		Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
+
+		inputFileField.setValue(ValueUtils.parse(state.get("input"), parseFile));
+		outputFileField.setValue(ValueUtils.parse(state.get("output"), parseFile));
+		recursiveField.setValue(ValueUtils.parseBoolean(state.get("recursive"), false));
+		paletteSourceField.setValue(ValueUtils.parse(state.get("palettesource"), parseFile));
+		
+		GraphicsMode mode = EnumUtils.getEnumInstance(state.get("mode"), GraphicsMode.class);
+		graphicModeField.setValue(mode == GraphicsMode.GRAPHICS);
+		flatsModeField.setValue(mode == GraphicsMode.FLATS);
+		colormapModeField.setValue(mode == GraphicsMode.COLORMAPS);
+		paletteModeField.setValue(mode == GraphicsMode.PALETTES);
+		
+		infoFileNameField.setValue(state.get("infofilename"));
 	}
 
 	@Override
@@ -208,15 +240,20 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		File outputFile = outputFileField.getValue();
 		boolean recursive = recursiveField.getValue();
 		File paletteSource = paletteSourceField.getValue(); 
-		GraphicsMode mode = 
+		GraphicsMode mode = getGraphicsMode();
+		String infoFileName = infoFileNameField.getValue();
+		
+		getCommon().onExecuteDImgConv(getApplicationContainer(), statusPanel, inputFile, outputFile, recursive, paletteSource, mode, infoFileName);
+	}
+
+	private GraphicsMode getGraphicsMode()
+	{
+		return 
 			graphicModeField.getValue() ? GraphicsMode.GRAPHICS :
 			flatsModeField.getValue() ? GraphicsMode.FLATS :
 			colormapModeField.getValue() ? GraphicsMode.COLORMAPS :
 			paletteModeField.getValue() ? GraphicsMode.PALETTES :
 			null;
-		String infoFileName = infoFileNameField.getValue();
-		
-		getCommon().onExecuteDImgConv(getApplicationContainer(), statusPanel, inputFile, outputFile, recursive, paletteSource, mode, infoFileName);
 	}
 
 	// Make help menu for internal and desktop.
