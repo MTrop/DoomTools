@@ -46,7 +46,7 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-DECOHack v0.24.0 by Matt Tropiano (using DoomStruct v2.14.2)
+DECOHack v0.25.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -62,6 +62,8 @@ Usage: decohack [--help | -h | --version]
 
     --version                Prints version, and exits.
 
+    --gui                    Starts the GUI version of this program.
+
     --dump-constants         Dumps the list of available defined constants
                              to STDOUT.
 
@@ -75,14 +77,19 @@ Usage: decohack [--help | -h | --version]
     &lt;filename&gt; ...           The input filenames. One or more can be added,
                              parsed in the order specified.
 
-    --                       Script input is from Standard In, not a file.
+    --                       Source input is from Standard In, not a file.
 
 [switches]:
     --output [file]          Outputs the resultant patch to [file].
-    -o [file]
+    -o [file]                If [file] is a WAD file, the output patch is added
+                             or replaced in the WAD file as &quot;DEHACKED&quot;.
+
+    --charset [name]         Sets the input charset to [name]. The default
+    -c [name]                charset is windows-1252 (system default).
 
     --source-output [file]   Outputs the combined source to a single file.
-    -s [file]
+    -s [file]                If [file] is a WAD file, the source is added
+                             or replaced in the WAD file as &quot;DECOHACK&quot;.
 
     --output-charset [name]  Sets the output charset to [name]. The default
     -oc [name]               charset is ASCII, and there are not many reasons
@@ -369,7 +376,7 @@ argument is nonzero).
 
 
 Action pointers understand what is expected in each parameter - you can just
-refer to thing aliases, labels, and sounds or what-have-you as is and it
+refer to thing aliases, labels, and sounds or what-have-you as-is and it
 will attempt to figure it out:
 
     A_Spawn(Demon, 0.0)                           &#x2F;&#x2F; Thing alias
@@ -385,8 +392,8 @@ will attempt to figure it out:
       IMPORTANT: Some MBF pointers use the miscellaneous offset fields
       as function parameters, so attempting to use Offset on those
       weapon states that use them will cause an error! You can still 
-      use Offset with Doom&#x2F;Ultimate Doom 1.9 pointers - those do not 
-      use those fields at all.
+      use Offset with Doom&#x2F;Ultimate Doom 1.9 and MBF21 pointers - those 
+      do not use those fields at all.
       
  &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
 
@@ -614,10 +621,10 @@ protected. You can turn off the protection on states by doing the following:
 
  &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
 
-      IMPORTANT: DECOHack is not very smart about figuring out user
-      intent, especially around states with hardcoded purpose, in
-      order to keep patch crafting as flexible as possible. For 
-      example, one such state, State 266 (S_VILE_HEAL1), is the 
+      IMPORTANT: DECOHack is intentionally not very smart about 
+      figuring out user intent, especially around states with hardcoded 
+      purpose, in order to keep patch crafting as flexible as possible. 
+      For example, one such state, State 266 (S_VILE_HEAL1), is the 
       state that the action pointer &quot;A_VileChase&quot; can make an actor
       jump to when it resurrects a dead monster, despite the fact
       that it is not referenced ANYWHERE on a thing definition&#39;s
@@ -650,16 +657,17 @@ associated Thing for pickups.
         
         &#x2F;&#x2F;MBF21 fields
         ammopershot &lt;INTEGER&gt;
+        flags mbf21 &lt;INTEGER-EXPRESSION&gt;
         
         clear properties &#x2F;&#x2F; If present, clear all properties.
+
         clear flags &#x2F;&#x2F; If present, clear all flags (both sets, if available)
 
         &#x2F;&#x2F; MBF21 Flags (MBF21 feature set only)
-        flags mbf21 &lt;INTEGER&gt;
-        + mbf21 &lt;INTEGER&gt; &#x2F;&#x2F; set flag(s)
-        - mbf21 &lt;INTEGER&gt; &#x2F;&#x2F; unset flag(s)
-        + &lt;MBF21WeaponFlagName&gt; &#x2F;&#x2F; set flag
-        - &lt;MBF21WeaponFlagName&gt; &#x2F;&#x2F; unset flag
+        + mbf21 &lt;INTEGER&gt;           &#x2F;&#x2F; set flag(s)
+        - mbf21 &lt;INTEGER&gt;           &#x2F;&#x2F; unset flag(s)
+        + &lt;MBF21WeaponFlagName&gt;     &#x2F;&#x2F; set flag
+        - &lt;MBF21WeaponFlagName&gt;     &#x2F;&#x2F; unset flag
         
         &#x2F;&#x2F; specific state assignment.
         state &lt;WeaponStateName&gt; &lt;INTEGER&gt;
@@ -869,20 +877,22 @@ the thing state indices. Other labels are used for arbitrary jump points.
         painchance &lt;INTEGER&gt;
         mass &lt;INTEGER&gt;
 
+        flags &lt;INTEGER-EXPRESSION&gt;
+
+        flags mbf21 &lt;INTEGER-EXPRESSION&gt; &#x2F;&#x2F; MBF21 Only
+
         clear flags &#x2F;&#x2F; If present, clear all flags (both sets, if available)
 
-        flags &lt;INTEGER&gt;
-        + &lt;INTEGER&gt; &#x2F;&#x2F; set flag(s)
-        - &lt;INTEGER&gt; &#x2F;&#x2F; unset flag(s)
-        + &lt;ThingFlagName&gt; &#x2F;&#x2F; set flag
-        - &lt;ThingFlagName&gt; &#x2F;&#x2F; unset flag
+        + &lt;INTEGER&gt;                  &#x2F;&#x2F; set flag(s)
+        - &lt;INTEGER&gt;                  &#x2F;&#x2F; unset flag(s)
+        + &lt;ThingFlagName&gt;            &#x2F;&#x2F; set flag
+        - &lt;ThingFlagName&gt;            &#x2F;&#x2F; unset flag
 
         &#x2F;&#x2F; MBF21 Flags (MBF21 feature set only)
-        flags mbf21 &lt;INTEGER&gt;
-        + mbf21 &lt;INTEGER&gt; &#x2F;&#x2F; set flag(s)
-        - mbf21 &lt;INTEGER&gt; &#x2F;&#x2F; unset flag(s)
-        + &lt;MBF21ThingFlagName&gt; &#x2F;&#x2F; set flag
-        - &lt;MBF21ThingFlagName&gt; &#x2F;&#x2F; unset flag
+        + mbf21 &lt;INTEGER&gt;            &#x2F;&#x2F; set flag(s)
+        - mbf21 &lt;INTEGER&gt;            &#x2F;&#x2F; unset flag(s)
+        + &lt;MBF21ThingFlagName&gt;       &#x2F;&#x2F; set MBF21 flag
+        - &lt;MBF21ThingFlagName&gt;       &#x2F;&#x2F; unset MBF21 flag
 
         clear sounds &#x2F;&#x2F; if present, clear all sounds.
             

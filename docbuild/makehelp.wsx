@@ -1,38 +1,30 @@
+function fetchData(path)
+{
+    check (err)
+    {
+        writer = swopen();
+        reader = csropen(fisopen(file(path)));
+        each (line : csiterate(reader))
+            writer->cswriteln(line);
+    }
+    close(reader);
+    if (err)
+        return err;
+    
+    return writer->toString();
+}
+
 function headerData()
 {
     if (global::headerData == null)
-    {
-        check (err)
-        {
-            writer = swopen();
-            reader = csropen(fisopen(file("docbuild/header.html")));
-            each (line : csiterate(reader))
-                writer->cswriteln(line);
-            global::headerData = tostring(writer);
-        }
-        close(reader);
-        if (err)
-            return err;
-    }
+        global::headerData = fetchData("docbuild/header.html");
     return global::headerData;
 }
 
 function footerData()
 {
     if (global::footerData == null)
-    {
-        check (err)
-        {
-            writer = swopen();
-            reader = csropen(fisopen(file("docbuild/footer.html")));
-            each (line : csiterate(reader))
-                writer->cswriteln(line);
-            global::footerData = tostring(writer);
-        }
-        close(reader);
-        if (err)
-            return err;
-    }
+        global::footerData = fetchData("docbuild/footer.html");
     return global::footerData;
 }
 
@@ -69,6 +61,12 @@ function htmlsanitize(str)
     return writer->tostring();
 }
 
+// trims a buffer to its current position
+function clipBuffer(buffer)
+{
+    return buffer->bufsetsize(buffer->bufgetpos())->bufsetpos();
+}
+
 // returns text.
 function cmd(image, args)
 {
@@ -84,8 +82,7 @@ function cmd(image, args)
     if (result)
         return error("CMDError", image + " returned nonzero.");
 
-    // clip buffer to end
-    buffer->bufsetsize(buffer->bufgetpos())->bufsetpos();
+    buffer->clipBuffer();
 
     reader = csropen(bisopen(buffer));
     writer = swopen();

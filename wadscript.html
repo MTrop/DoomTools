@@ -56,6 +56,8 @@ Usage: wadscript [filename] [switches | scriptargs]
 [switches]:
     --help, -h                   Prints this help.
     --version                    Prints the version of this utility.
+    --gui                        Starts the GUI version of this program.
+
     --function-help              Prints all available function usages.
     --function-help-markdown     Prints all available function usages in
                                      Markdown format.
@@ -67,8 +69,13 @@ Usage: wadscript [filename] [switches | scriptargs]
                                      and exits.
     --entry-list                 Prints the list of entry point names for this
                                      script and exits.
-    --entry [name]               Use a different entry point named [name].
+    --entry [name], -e [name]    Use a different entry point named [name].
                                      Default: &quot;main&quot;
+    --charset [name], -c [name]  Use a specific charset encoding, [name],
+                                     instead of the system default. It is
+                                     assumed that the rest of the included
+                                     files are encoded this way, as well.
+                                     Default: windows-1252
     --runaway-limit [num]        Sets the runaway limit (in operations)
                                      before the soft protection on infinite
                                      loops triggers. 0 is no limit.

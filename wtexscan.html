@@ -46,7 +46,7 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-WTexScan v1.1.1 by Matt Tropiano (using DoomStruct v2.14.2)
+WTexScan v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wtexscan [--help | -h | --version] [files] [switches]
 
     --help              Prints help and exits.
@@ -58,16 +58,18 @@ Usage: wtexscan [--help | -h | --version] [files] [switches]
     &lt;filename&gt;          The files to inspect (WAD&#x2F;PK3&#x2F;PKE, accepts wildcards).
 
 [switches]:
-    --quiet             Output no messages.
-    -q
-
-    --textures          Output textures.
+    --textures          Output just textures.
     -t
 
-    --flats             Output flats.
+    --flats             Output just flats.
     -f
 
-    --no-skies          Skip adding associated skies per map.
+  If the above switches are not specified, both textures and flats are output.
+
+    --quiet             Output no comment-messages.
+    -q
+
+    --no-skies          Skip adding associated skies by map header.
 
     --map [mapname]     Map to scan. If not specified, all maps will be scanned.
     -m

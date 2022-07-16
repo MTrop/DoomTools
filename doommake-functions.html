@@ -29210,7 +29210,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), targetName:STRING, propertiesFile:OBJECTREF(File), scriptFile:OBJECTREF(File), args:LIST[STRING, ...], runawayLimit:INTEGER, activationDepth:INTEGER, stackDepth:INTEGER}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), targetName:STRING, propertiesFile:OBJECTREF(File), scriptFile:OBJECTREF(File), runawayLimit:INTEGER, activationDepth:INTEGER, stackDepth:INTEGER, args:LIST[STRING, ...]}</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -29264,7 +29264,7 @@
 						</div>
 						<div id="function-content-tool-decohack" class="function-content">
 							<div class="function-description">
-								<p>Calls the DecoHack tool. Inherits STDOUT/STDERR of this script unless overridden (see options). Do not use both [infile] and [infiles] as options. Use one or the other.</p>
+								<p>Calls the DecoHack tool. Inherits STDOUT/STDERR/STDIN of this script unless overridden (see options). If [useStdin] is true, then it will read from the [stdin] stream, either set or inherited. Also, do not use both [infile] and [infiles] as options. Use one or the other.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -29276,7 +29276,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), infile:OBJECTREF(File), infiles:LIST[OBJECTREF(File), ...], outfile:OBJECTREF(File), outsourcefile:OBJECTREF(File), outcharsetname:STRING, outputbudget:BOOLEAN}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), useStdin:BOOLEAN, inFile:OBJECTREF(File), inFiles:LIST[OBJECTREF(File), ...], inCharsetName:STRING, outFile:OBJECTREF(File), outSourceFile:OBJECTREF(File), outCharsetName:STRING, outputBudget:BOOLEAN}</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -29474,7 +29474,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), inputfile:OBJECTREF(File), args:LIST[STRING, ...], usestdin:BOOLEAN, verbose:BOOLEAN}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), inputfile:OBJECTREF(File), inputCharsetName:STRING, args:LIST[STRING, ...], usestdin:BOOLEAN, verbose:BOOLEAN}</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -29540,7 +29540,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), scriptFile:OBJECTREF(File), entryPointName:STRING, runawayLimit:INTEGER, activationDepth:INTEGER, stackDepth:INTEGER, args:LIST[STRING, ...]}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), stdin:OBJECTREF(InputStream), scriptFile:OBJECTREF(File), scriptCharsetName:STRING, entryPointName:STRING, runawayLimit:INTEGER, activationDepth:INTEGER, stackDepth:INTEGER, args:LIST[STRING, ...]}</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -29606,7 +29606,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), sourcefile:OBJECTREF(File), wadfile:OBJECTREF(File), additive:BOOLEAN, exportmode:BOOLEAN, strife:BOOLEAN, verbose:BOOLEAN}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), sourceFile:OBJECTREF(File), wadFile:OBJECTREF(File), additive:BOOLEAN, exportMode:BOOLEAN, entryName:STRING, strife:BOOLEAN, verbose:BOOLEAN}</span>
 										</div>
 										<div class="parameter-description">
 											<p>
@@ -29672,7 +29672,7 @@
 									<div class="parameter-usage">
 										<div class="parameter-type">
 											<span class="parameter-type-name">MAP</span>
-											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), sourcefile:OBJECTREF(File), wadfile:OBJECTREF(File), exportmode:BOOLEAN, verbose:BOOLEAN}</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), sourceFile:OBJECTREF(File), wadFile:OBJECTREF(File), exportMode:BOOLEAN, importSource:BOOLEAN, verbose:BOOLEAN}</span>
 										</div>
 										<div class="parameter-description">
 											<p>

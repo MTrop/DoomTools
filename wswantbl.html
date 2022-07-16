@@ -46,13 +46,15 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-WSwAnTbl v1.0.0 by Matt Tropiano (using DoomStruct v2.14.2)
+WSwAnTbl v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
 
     --help              Prints help and exits.
     -h
 
     --version           Prints version, and exits.
+
+    --gui               Starts the GUI version of this program.
 
 [file]:
     &lt;filename&gt;          The WAD file.
@@ -64,6 +66,9 @@ Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
     --import [srcfile]  Import mode.
     -i [srcfile]        Imports ANIMATED and SWITCHES from [srcfile] into
                         [file]. WAD file is created if it doesn&#39;t exist.
+
+    --import-source     If Import Mode is active, the source is imported
+    -s                  as &quot;DEFSWANI&quot; in the WAD file, as well.
 
 [switches]:
     --verbose           Prints verbose output.
