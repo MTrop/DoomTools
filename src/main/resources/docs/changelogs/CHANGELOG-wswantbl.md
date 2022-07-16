@@ -1,13 +1,9 @@
 WSwAnTbl
 --------
 
-### Changed for 1.2.0
-
-* `Added` The GUI version of WSwAnTbl.
-
-
 ### Changed for 1.1.0
 
+* `Added` The GUI version of WSwAnTbl.
 * `Fixed` Bad newline in export header comments.
 * `Added` An `--import-source` switch for adding the source file to the WAD on import as `DEFSWANI`.
 

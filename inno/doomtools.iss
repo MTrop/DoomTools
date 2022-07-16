@@ -75,8 +75,11 @@ Name: "{group}\{#DTAppName} Website";               Filename: "https://mtrop.git
 Name: "{group}\Utilities\DECOHack Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "decohack"
 Name: "{group}\Utilities\DoomMake";                 Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-open"
 Name: "{group}\Utilities\DoomMake (New Project)";   Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-new"
+Name: "{group}\Utilities\WADTex Editor";            Filename: "{app}\{#DTAppExeName}"; Parameters: "wadtex"
 Name: "{group}\Utilities\WadMerge Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wadmerge"
 Name: "{group}\Utilities\WadScript Editor";         Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
+Name: "{group}\Utilities\WSwAnTbl Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wswantbl"
+Name: "{group}\Utilities\WTexScan-WTExport";        Filename: "{app}\{#DTAppExeName}"; Parameters: "wtexscan-wtexport"
 Name: "{group}\{cm:UninstallProgram,{#DTAppName}}"; Filename: {uninstallexe}
 Name: "{autodesktop}\{#DTAppName}";                 Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon
 
