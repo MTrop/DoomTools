@@ -593,10 +593,11 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 						"{" + StringUtils.joinStrings(", ",
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
-							"sourcefile:OBJECTREF(File)",
-							"wadfile:OBJECTREF(File)",
+							"sourceFile:OBJECTREF(File)",
+							"wadFile:OBJECTREF(File)",
 							"additive:BOOLEAN",
-							"exportmode:BOOLEAN",
+							"exportMode:BOOLEAN",
+							"entryName:STRING",
 							"strife:BOOLEAN",
 							"verbose:BOOLEAN"
 						) + "}",
@@ -634,6 +635,9 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 					}
 				}
 				returnValue.set(WADTexMain.call(options));
+				return true;
+			} catch (OptionParseException e) {
+				returnValue.setError("BadOptions", "Option argument parse failed: " + e.getLocalizedMessage());
 				return true;
 			} catch (ClassCastException e) {
 				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());

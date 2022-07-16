@@ -27,6 +27,8 @@ import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
+import net.mtrop.doom.tools.gui.apps.WadTexCompilerApp;
+import net.mtrop.doom.tools.gui.apps.WadTexEditorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -72,6 +74,10 @@ public final class DoomToolsGUIMain
 		String WADSCRIPT = "wadscript";
 		/** WadScript Executor. */
 		String WADSCRIPT_EXECUTOR = "wadscript-executor";
+		/** WADTex. */
+		String WADTEX = "wadtex";
+		/** WADTex Compiler. */
+		String WADTEX_COMPILER = "wadtex-compiler";
 		/** WSwAnTbl. */
 		String WSWANTBL = "wswantbl";
 		/** WSwAnTbl Compiler. */
@@ -295,6 +301,16 @@ public final class DoomToolsGUIMain
 		{
 			String path = ArrayUtils.arrayElement(args, 1);
 			startApplication(new WadScriptExecutorApp(path));
+		}
+		else if (ApplicationNames.WADTEX.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadTexEditorApp(path != null ? new File(path) : null));
+		}
+		else if (ApplicationNames.WADTEX_COMPILER.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			startApplication(new WadTexCompilerApp(path != null ? path : null));
 		}
 		else if (ApplicationNames.WSWANTBL.equals(args[0]))
 		{

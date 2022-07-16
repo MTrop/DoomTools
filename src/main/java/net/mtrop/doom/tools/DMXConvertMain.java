@@ -23,6 +23,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import net.mtrop.doom.sound.DMXSound;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -40,8 +42,10 @@ public final class DMXConvertMain
 	private static final int ERROR_NO_FILES = 2;
 	private static final int ERROR_CONVERSION_SKIPPED = 3;
 	private static final int ERROR_NO_FFMPEG = 4;
+	private static final int ERROR_IOERROR = 5;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
@@ -63,6 +67,7 @@ public final class DMXConvertMain
 		private boolean help;
 		private boolean version;
 		private boolean tryFFMpeg;
+		private boolean gui;
 		
 		private List<File> sourceFiles;
 		private boolean onlyFFMpeg;
@@ -76,6 +81,7 @@ public final class DMXConvertMain
 			this.stderr = null;
 			this.help = false;
 			this.version = false;
+			this.gui = false;
 			
 			this.sourceFiles = new LinkedList<>();
 			this.onlyFFMpeg = false;
@@ -145,6 +151,17 @@ public final class DMXConvertMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DMXCONVERT);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DMXConv GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -362,6 +379,8 @@ public final class DMXConvertMain
 						options.version = true;
 					else if (arg.equals(SWITCH_TRYFFMPEG))
 						options.tryFFMpeg = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equals(SWITCH_FFMPEG_ONLY))
 						options.setOnlyFFMpeg(true);
 					else if (arg.equals(SWITCH_JSPI_ONLY))
@@ -471,6 +490,8 @@ public final class DMXConvertMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --gui               Starts the GUI version of this program.");
 		out.println();
 		out.println("    --try-ffmpeg        Quick test to attempt to find FFmpeg via its default");
 		out.println("                        name (\"ffmpeg\") on the current PATH, and exits.");

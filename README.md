@@ -137,7 +137,7 @@ that JAR is the latest date, then all of the DoomTools CMD/Bash/EXEs will use th
 the others that are also in that directory.
 
 The `deploy.jar` target will copy the JAR to the `/jar` directory off of the deployment, if you set the `deploy.dir`
-the deployment root.
+deployment root.
 
 This is similar to how DoomTools updates itself - it just downloads the latest stand-alone JAR from its main releases.
 

@@ -1,6 +1,11 @@
 WSwAnTbl
 --------
 
+### Changed for 1.2.0
+
+* `Added` The GUI version of WSwAnTbl.
+
+
 ### Changed for 1.1.0
 
 * `Fixed` Bad newline in export header comments.

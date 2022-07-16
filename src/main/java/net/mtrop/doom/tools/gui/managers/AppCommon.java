@@ -15,6 +15,7 @@ import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.WADTexMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WTExportMain;
 import net.mtrop.doom.tools.WTexScanMain;
@@ -22,6 +23,7 @@ import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
+import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
@@ -201,6 +203,34 @@ public final class AppCommon
 	 * @param statusPanel the status panel
 	 * @param scriptFile the script file to run.
 	 * @param encoding the encoding of the script file.
+	 * @param mergeSettings
+	 */
+	public void onExecuteWadMerge(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, MergeSettings mergeSettings)
+	{
+		final File workingDirectory = mergeSettings.getWorkingDirectory();
+		final String[] args = mergeSettings.getArgs();
+		
+		utils.createProcessModal(
+			parent, 
+			language.getText("wadmerge.run.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wadmerge.run.message.running"), 
+				language.getText("wadmerge.run.message.success"), 
+				language.getText("wadmerge.run.message.interrupt"), 
+				language.getText("wadmerge.run.message.error"), 
+				callWadMerge(scriptFile, workingDirectory, encoding, args, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param scriptFile the script file to run.
+	 * @param encoding the encoding of the script file.
 	 * @param executionSettings
 	 */
 	public void onExecuteWadScript(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, ScriptExecutionSettings executionSettings)
@@ -229,26 +259,27 @@ public final class AppCommon
 	 * 
 	 * @param parent the parent container for the modal.
 	 * @param statusPanel the status panel
-	 * @param scriptFile the script file to run.
-	 * @param encoding the encoding of the script file.
-	 * @param mergeSettings
+	 * @param sourceFile the source file.
+	 * @param exportSettings
 	 */
-	public void onExecuteWadMerge(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, MergeSettings mergeSettings)
+	public void onExecuteWadTex(Container parent, final DoomToolsStatusPanel statusPanel, final File sourceFile, WadTexExportSettings exportSettings)
 	{
-		final File workingDirectory = mergeSettings.getWorkingDirectory();
-		final String[] args = mergeSettings.getArgs();
+		final File outputWAD = exportSettings.getOutputWAD();
+		final String nameOverride = exportSettings.getNameOverride();
+		final boolean appendMode = exportSettings.getAppendMode();
+		final boolean forceStrife = exportSettings.getForceStrife();
 		
 		utils.createProcessModal(
 			parent, 
-			language.getText("wadmerge.run.message.title"),
+			language.getText("wadscript.run.message.title"),
 			null,
 			(stdout, stderr, stdin) -> execute(
 				statusPanel,
-				language.getText("wadmerge.run.message.running"), 
-				language.getText("wadmerge.run.message.success"), 
-				language.getText("wadmerge.run.message.interrupt"), 
-				language.getText("wadmerge.run.message.error"), 
-				callWadMerge(scriptFile, workingDirectory, encoding, args, stdout, stderr)
+				language.getText("wadtex.export.message.running"), 
+				language.getText("wadtex.export.message.success"), 
+				language.getText("wadtex.export.message.interrupt"),
+				language.getText("wadtex.export.message.error"),
+				callWadTex(sourceFile, outputWAD, nameOverride, appendMode, forceStrife, stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -597,7 +628,22 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public InstancedFuture<Integer> callWadScript(final File scriptFile, final File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public InstancedFuture<Integer> callWadMerge(File scriptFile, File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
+		callable.arg(scriptFile.getAbsolutePath())
+			.arg(WadMergeMain.SWITCH_CHARSET1).arg(encoding.displayName())
+			.args(args)
+			.setOut(stdout)
+			.setErr(stderr)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDERR."));
+		
+		LOG.infof("Calling WadMerge (%s).", scriptFile.getAbsolutePath());
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+
+	public InstancedFuture<Integer> callWadScript(File scriptFile, File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
 		ProcessCallable callable = Common.spawnJava(WadScriptMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -615,18 +661,30 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public InstancedFuture<Integer> callWadMerge(final File scriptFile, final File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWadTex(File sourceFile, File outputWAD, String nameOverride, boolean appendMode, boolean forceStrife, PrintStream stdout, PrintStream stderr)
 	{
-		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
-		callable.arg(scriptFile.getAbsolutePath())
-			.arg(WadMergeMain.SWITCH_CHARSET1).arg(encoding.displayName())
-			.args(args)
+		ProcessCallable callable = Common.spawnJava(WADTexMain.class);
+		callable.arg(outputWAD.getAbsolutePath())
+			.arg(WADTexMain.SWITCH_IMPORT1).arg(sourceFile.getAbsolutePath());
+		
+		if (!ObjectUtils.isEmpty(nameOverride))
+			callable.arg(WADTexMain.SWITCH_NAME1).arg(nameOverride);
+
+		if (appendMode)
+			callable.arg(WADTexMain.SWITCH_ADDITIVE1);
+
+		if (forceStrife)
+			callable.arg(WADTexMain.SWITCH_STRIFE);
+
+		callable.arg(WADTexMain.SWITCH_VERBOSE1);
+		
+		callable
 			.setOut(stdout)
 			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDERR."));
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadTex STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadTex STDERR."));
 		
-		LOG.infof("Calling WadMerge (%s).", scriptFile);
+		LOG.infof("Calling WadTex (%s <- %s).", outputWAD.getAbsolutePath(), sourceFile.getAbsolutePath());
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
@@ -704,15 +762,15 @@ public final class AppCommon
 			callable.arg(sourceTextureFiles[i].getAbsolutePath());	
 
 		if (baseFile != null)
-			callable.arg(WTExportMain.SWITCH_BASE).arg(baseFile.getAbsolutePath());
+			callable.arg(WTExportMain.SWITCH_BASE1).arg(baseFile.getAbsolutePath());
 
 		if (outputFile != null)
-			callable.arg(WTExportMain.SWITCH_OUTPUT).arg(outputFile.getAbsolutePath());
+			callable.arg(WTExportMain.SWITCH_OUTPUT1).arg(outputFile.getAbsolutePath());
 		
 		if (create)
-			callable.arg(WTExportMain.SWITCH_CREATE);
+			callable.arg(WTExportMain.SWITCH_CREATE1);
 		else
-			callable.arg(WTExportMain.SWITCH_ADDITIVE);
+			callable.arg(WTExportMain.SWITCH_ADDITIVE1);
 		
 		if (noAnim)
 			callable.arg(WTExportMain.SWITCH_NOANIMATED);

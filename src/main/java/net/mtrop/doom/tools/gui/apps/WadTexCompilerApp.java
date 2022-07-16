@@ -12,16 +12,17 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesCompilerSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
+import net.mtrop.doom.tools.gui.managers.settings.WadTexCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.gui.swing.panels.WadTexExportPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
+import net.mtrop.doom.util.NameUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
@@ -31,63 +32,73 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
 /**
- * The WSwAnTbl compiler application.
+ * The WADTex compiler application.
  * @author Matthew Tropiano
  */
-public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
+public class WadTexCompilerApp extends DoomToolsApplicationInstance
 {
     // Singletons
 
-	private WSwAnTablesCompilerSettingsManager settings;
+	private WadTexCompilerSettingsManager settings;
 	
 	// Referenced Components
 	
 	private JFormField<File> sourceFileField;
-	private DefSwAniExportPanel exportPanel;
+	private WadTexExportPanel exportPanel;
 	private DoomToolsStatusPanel statusPanel;
 
 	/**
-	 * Create a new WSwAnTbl application.
+	 * Create a new WADTex application.
 	 */
-	public WSwAnTablesCompilerApp() 
+	public WadTexCompilerApp() 
 	{
 		this(null);
 	}
 	
 	/**
-	 * Create a new WSwAnTbl application.
+	 * Create a new WADTex application.
 	 * @param sourcePath the source file path.
 	 */
-	public WSwAnTablesCompilerApp(String sourcePath) 
+	public WadTexCompilerApp(String sourcePath) 
 	{
-		this.settings = WSwAnTablesCompilerSettingsManager.get();
+		this.settings = WadTexCompilerSettingsManager.get();
 		
 		File scriptFile;
-		DefSwAniExportSettings settings = new DefSwAniExportSettings();
+		WadTexExportSettings exportSettings = new WadTexExportSettings();
 		if (sourcePath != null)
+		{
 			scriptFile = FileUtils.canonizeFile(new File(sourcePath));
+			exportSettings.setNameOverride(NameUtils.toValidEntryName(scriptFile.getName()));
+		}
 		else
+		{
 			scriptFile = null;
+			exportSettings.setNameOverride("TEXTURE1");
+		}
 		
 		this.sourceFileField = fileField(
 			scriptFile, 
-			(current) -> chooseFile(
-				getApplicationContainer(),
-				getLanguage().getText("wswantbl.export.source.browse.title"), 
-				current, 
-				getLanguage().getText("wswantbl.export.source.browse.accept"),
-				getUtils().createDEFSWANIFileFilter()
-			)
+			(current) -> {
+				current = current != null ? current : settings.getLastTouchedFile();
+				return chooseFile(
+					getApplicationContainer(),
+					getLanguage().getText("wadtex.export.source.browse.title"), 
+					current, 
+					getLanguage().getText("wadtex.export.source.browse.accept"),
+					getUtils().createTextFileFilter()
+				);
+			},
+			(selected) -> settings.setLastTouchedFile(selected)
 		);
 
-		this.exportPanel = new DefSwAniExportPanel(settings);
+		this.exportPanel = new WadTexExportPanel(exportSettings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
 	
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wswantbl.compiler.title");
+		return getLanguage().getText("wadtex.compiler.title");
 	}
 
 	@Override
@@ -96,14 +107,20 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 		
 		File sourceFile = sourceFileField.getValue();
+		
 		File outWADFile = exportPanel.getOutputWAD();
-		boolean outputSource = exportPanel.getOutputSource();
+		String nameOverride = exportPanel.getNameOverride();
+		boolean appendMode = exportPanel.getAppendMode();
+		boolean forceStrife = exportPanel.getForceStrife();
 		
 		if (sourceFile != null)
 			state.put("export.source", sourceFile.getAbsolutePath());
 		if (outWADFile != null)
 			state.put("export.outwad", outWADFile.getAbsolutePath());
-		state.put("export.outputsource", String.valueOf(outputSource));
+		if (nameOverride != null)
+			state.put("export.name", nameOverride);
+		state.put("export.append", String.valueOf(appendMode));
+		state.put("export.strife", String.valueOf(forceStrife));
 		
 		return state;
 	}
@@ -114,7 +131,9 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
 		sourceFileField.setValue(ValueUtils.parse(state.get("export.source"), parseFile));
 		exportPanel.setOutputWAD(ValueUtils.parse(state.get("export.outwad"), parseFile));
-		exportPanel.setOutputSource(ValueUtils.parseBoolean(state.get("export.outputsource"), false));
+		exportPanel.setNameOverride(state.get("export.name"));
+		exportPanel.setAppendMode(ValueUtils.parseBoolean(state.get("export.append"), false));
+		exportPanel.setForceStrife(ValueUtils.parseBoolean(state.get("export.strife"), false));
 	}
 
 	@Override
@@ -122,14 +141,14 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	{
 		DoomToolsGUIUtils utils = getUtils();
 		
-		return containerOf(dimension(400, 150), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wswantbl.export.label.width")),
+		return containerOf(dimension(400, 200), borderLayout(0, 4), 
+			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadtex.export.label.width")),
 				utils.formField("wswantbl.export.source", sourceFileField)
 			)),
 			node(BorderLayout.CENTER, exportPanel),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(flowLayout(Flow.TRAILING), 
-					node(utils.createButtonFromLanguageKey("wswantbl.export.choice.export", (i) -> onRun())
+					node(utils.createButtonFromLanguageKey("wadtex.export.choice.export", (i) -> onRun())
 				))),
 				node(BorderLayout.SOUTH, statusPanel)
 			))
@@ -142,8 +161,8 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 		
 		return menuBar(
-			utils.createMenuFromLanguageKey("wswantbl.menu.file",
-				utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (i) -> attemptClose())
+			utils.createMenuFromLanguageKey("wadtex.menu.file",
+				utils.createItemFromLanguageKey("wadtex.menu.file.item.exit", (i) -> attemptClose())
 			),
 			createHelpMenu()
 		);
@@ -172,7 +191,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.ready"));
 	}
 
 	@Override
@@ -191,24 +210,26 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	private void onRun()
 	{
 		File scriptFile = sourceFileField.getValue();
-		DefSwAniExportSettings exportSettings = new DefSwAniExportSettings();
+		WadTexExportSettings exportSettings = new WadTexExportSettings();
 		exportSettings.setOutputWAD(exportPanel.getOutputWAD());
-		exportSettings.setOutputSource(exportPanel.getOutputSource());
+		exportSettings.setNameOverride(exportPanel.getNameOverride());
+		exportSettings.setAppendMode(exportPanel.getAppendMode());
+		exportSettings.setForceStrife(exportPanel.getForceStrife());
 		
 		if (scriptFile == null)
 		{
-			SwingUtils.error(getLanguage().getText("wswantbl.error.nosource"));
+			SwingUtils.error(getLanguage().getText("wadtex.error.nosource"));
 			sourceFileField.requestFocus();
 			return;
 		}
-
+		
 		if (exportSettings.getOutputWAD() == null)
 		{
 			SwingUtils.error(getLanguage().getText("wadtex.error.notarget"));
 			return;
 		}
 		
-		getCommon().onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
+		getCommon().onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
 	}
 
 	// Make help menu for internal and desktop.
@@ -223,7 +244,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
 	}
 
 }

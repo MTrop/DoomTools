@@ -16,7 +16,7 @@ import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 
 /**
- * DECOHack export panel.
+ * DEFSWANI export panel.
  * @author Matthew Tropiano
  */
 public class DefSwAniExportPanel extends JPanel

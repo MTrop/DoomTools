@@ -26,6 +26,8 @@ import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.tools.common.Utility;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 
 /**
  * Main class for JSwantbls.
@@ -37,8 +39,10 @@ public final class WSwAnTablesMain
 	private static final int ERROR_BAD_INPUTOUTPUT_FILE = 1;
 	private static final int ERROR_BAD_PARSE = 2;
 	private static final int ERROR_MISSING_DATA = 3;
+	private static final int ERROR_IOERROR = 4;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP1 = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERBOSE1 = "--verbose";
@@ -66,6 +70,8 @@ public final class WSwAnTablesMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean gui;
+		
 		private Boolean exportMode;
 		private boolean importSource;
 		private File sourceFile;
@@ -75,9 +81,12 @@ public final class WSwAnTablesMain
 		{
 			this.stdout = null;
 			this.stderr = null;
+
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
+			this.gui = false;
+
 			this.exportMode = null;
 			this.importSource = false;
 			this.sourceFile = null;
@@ -142,6 +151,17 @@ public final class WSwAnTablesMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WSWANTBL);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WSwAnTbl GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -365,6 +385,8 @@ public final class WSwAnTablesMain
 						options.help = true;
 					else if (arg.equals(SWITCH_VERBOSE1) || arg.equals(SWITCH_VERBOSE2))
 						options.verbose = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
 					else if (arg.equals(SWITCH_ADDSOURCE1) || arg.equals(SWITCH_ADDSOURCE2))
@@ -462,6 +484,8 @@ public final class WSwAnTablesMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --gui               Starts the GUI version of this program.");
 		out.println();
 		out.println("[file]:");
 		out.println("    <filename>          The WAD file.");

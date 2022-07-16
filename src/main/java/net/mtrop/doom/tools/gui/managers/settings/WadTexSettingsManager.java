@@ -10,21 +10,21 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 
 
 /**
- * WSwAnTbl GUI settings singleton.
+ * WadTex GUI settings singleton.
  * @author Matthew Tropiano
  */
-public final class WSwAnTablesSettingsManager extends DoomToolsSettings
+public final class WadTexSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wswantbl.properties";
+    private static final String SETTINGS_FILENAME = "wadtex.properties";
 
     /** The instance encapsulator. */
-    private static final SingletonProvider<WSwAnTablesSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WSwAnTablesSettingsManager());
+    private static final SingletonProvider<WadTexSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadTexSettingsManager());
     
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static WSwAnTablesSettingsManager get()
+	public static WadTexSettingsManager get()
 	{
 		return INSTANCE.get();
 	}
@@ -35,12 +35,13 @@ public final class WSwAnTablesSettingsManager extends DoomToolsSettings
     private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
     private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
     private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
+    private static final String SHOW_BUDGET = "show.budget";
 
 	/* ==================================================================== */
 
-	private WSwAnTablesSettingsManager()
+	private WadTexSettingsManager()
 	{
-		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WSwAnTablesSettingsManager.class));
+		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WadTexSettingsManager.class));
 	}
 	
 	/**
@@ -140,6 +141,24 @@ public final class WSwAnTablesSettingsManager extends DoomToolsSettings
 	public File getLastExportSourceFile() 
 	{
 		return getFile(EXPORT_SOURCE_PATH_LAST_FILE);
+	}
+
+	/**
+	 * Sets the last state of "showing the budget".
+	 * @param enabled the enabled state.
+	 */
+	public void setShowBudgetDefault(boolean enabled) 
+	{
+		setBoolean(SHOW_BUDGET, enabled);
+		commit();
+	}
+
+	/**
+	 * @return the last state of "showing the budget".
+	 */
+	public boolean getShowBudgetDefault() 
+	{
+		return getBoolean(SHOW_BUDGET);
 	}
 
 }

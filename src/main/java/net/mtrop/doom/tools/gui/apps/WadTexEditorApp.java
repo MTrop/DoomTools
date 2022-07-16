@@ -26,22 +26,26 @@ import javax.swing.filechooser.FileFilter;
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.WadException;
-import net.mtrop.doom.texture.Animated;
-import net.mtrop.doom.texture.Switches;
-import net.mtrop.doom.tools.WSwAnTablesMain;
+import net.mtrop.doom.object.BinaryObject;
+import net.mtrop.doom.texture.CommonTextureList;
+import net.mtrop.doom.texture.DoomTextureList;
+import net.mtrop.doom.texture.PatchNames;
+import net.mtrop.doom.texture.StrifeTextureList;
+import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.tools.WADTexMain;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
+import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
+import net.mtrop.doom.tools.gui.managers.settings.WadTexSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.swing.panels.WadTexExportPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -51,6 +55,8 @@ import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
+import net.mtrop.doom.util.NameUtils;
+import net.mtrop.doom.util.TextureUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -59,23 +65,23 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
 /**
- * The WSwAnTbl application.
+ * The WadTex application.
  * @author Matthew Tropiano
  */
-public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
+public class WadTexEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WSwAnTablesEditorApp.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(WadTexEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
     // Singletons
 
-	private WSwAnTablesSettingsManager settings;
+	private WadTexSettingsManager settings;
 
 	// Referenced Components
 	
-	private DefSwAniEditorPanel editorPanel;
+	private WadTexEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
 
 	private Action exportAction;
@@ -84,27 +90,27 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	
 	private File fileToOpenFirst;
 	private EditorHandle currentHandle;
-	private Map<EditorHandle, DefSwAniExportSettings> handleToSettingsMap;
+	private Map<EditorHandle, WadTexExportSettings> handleToSettingsMap;
 
 	// ...
 
 	/**
-	 * Create a new WSwAnTbl application.
+	 * Create a new WadTex application.
 	 */
-	public WSwAnTablesEditorApp() 
+	public WadTexEditorApp() 
 	{
 		this(null);
 	}
 	
 	/**
-	 * Create a new WSwAnTbl application.
+	 * Create a new WadTex application.
 	 * @param fileToOpenFirst if not null, open this file on create.
 	 */
-	public WSwAnTablesEditorApp(File fileToOpenFirst) 
+	public WadTexEditorApp(File fileToOpenFirst) 
 	{
-		this.settings = WSwAnTablesSettingsManager.get();
+		this.settings = WadTexSettingsManager.get();
 		
-		this.editorPanel = new DefSwAniEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new WadTexEditorPanel(new MultiFileEditorPanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
@@ -112,7 +118,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 				return true;
 			}
 		}, 
-		new DefSwAniEditorPanel.Listener()
+		new WadTexEditorPanel.Listener()
 		{
 			@Override
 			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next) 
@@ -125,26 +131,26 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = getUtils().createActionFromLanguageKey("wswantbl.menu.patch.item.export", (e) -> onExport());
+		this.exportAction = getUtils().createActionFromLanguageKey("wadtex.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -154,7 +160,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wswantbl.editor.title");
+		return getLanguage().getText("wadtex.editor.title");
 	}
 
 	@Override
@@ -171,12 +177,12 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 		
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("wswantbl.menu.file.item.new",
-				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.main", (i) -> onNewEditor()),
-				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
+			utils.createItemFromLanguageKey("wadtex.menu.file.item.new",
+				utils.createItemFromLanguageKey("wadtex.menu.file.item.new.item.main", (i) -> onNewEditor()),
+				utils.createItemFromLanguageKey("wadtex.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
 			),
-			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open", (i) -> onOpenEditor()),
-			utils.createItemFromLanguageKey("wswantbl.menu.file.item.open.wad", (i) -> onOpenEditorFromWAD()),
+			utils.createItemFromLanguageKey("wadtex.menu.file.item.open", (i) -> onOpenEditor()),
+			utils.createItemFromLanguageKey("wadtex.menu.file.item.open.wad", (i) -> onOpenEditorFromWAD()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),
@@ -208,7 +214,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonPatchMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			getUtils().createItemFromLanguageKey("wswantbl.menu.patch.item.export", exportAction)
+			getUtils().createItemFromLanguageKey("wadtex.menu.patch.item.export", exportAction)
 		);
 	}
 	
@@ -235,16 +241,16 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 		
 		return menuBar(
-			utils.createMenuFromLanguageKey("wswantbl.menu.file", ArrayUtils.joinArrays(
+			utils.createMenuFromLanguageKey("wadtex.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
 				ArrayUtils.arrayOf(
 					separator(),
-					utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (i) -> attemptClose())
+					utils.createItemFromLanguageKey("wadtex.menu.file.item.exit", (i) -> attemptClose())
 				)
 			)),
-			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.patch", createCommonPatchMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.editor", createCommonEditorMenuItems()),
 			createHelpMenu()
 		);
 	}
@@ -255,10 +261,10 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = getUtils();
 		
 		return menuBar(
-			utils.createMenuFromLanguageKey("wswantbl.menu.file", createCommonFileMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.patch", createCommonPatchMenuItems()),
-			utils.createMenuFromLanguageKey("wswantbl.menu.editor", createCommonEditorMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.file", createCommonFileMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.patch", createCommonPatchMenuItems()),
+			utils.createMenuFromLanguageKey("wadtex.menu.editor", createCommonEditorMenuItems()),
 			createHelpMenu()
 		);
 	}
@@ -280,7 +286,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.ready"));
+		statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -312,7 +318,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState() 
 	{
 		Map<String, String> state = super.getApplicationState();
-		editorPanel.saveState("wswantbl", state);
+		editorPanel.saveState("wadtex", state);
 
 		for (int i = 0; i < editorPanel.getEditorCount(); i++)
 		{
@@ -321,13 +327,16 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 				state.put("editor.selected", String.valueOf(i));
 			
 			String settingPrefix = "export." + i;
-			DefSwAniExportSettings settings = handleToSettingsMap.get(handle);
+			WadTexExportSettings settings = handleToSettingsMap.get(handle);
 			if (settings != null)
 			{
 				state.put(settingPrefix + ".enabled", String.valueOf(true));
 				if (settings.getOutputWAD() != null)
 					state.put(settingPrefix + ".outwad", settings.getOutputWAD().getAbsolutePath());
-				state.put(settingPrefix + ".outputsource", String.valueOf(settings.isOutputSource()));
+				if (settings.getNameOverride() != null)
+					state.put(settingPrefix + ".name", settings.getNameOverride());
+				state.put(settingPrefix + ".strife", String.valueOf(settings.getForceStrife()));
+				state.put(settingPrefix + ".append", String.valueOf(settings.getAppendMode()));
 			}
 		}
 		
@@ -338,7 +347,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state) 
 	{
 		handleToSettingsMap.clear();
-		editorPanel.loadState("wswantbl", state);
+		editorPanel.loadState("wadtex", state);
 		
 		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), 0);
 		editorPanel.setEditorByIndex(selectedIndex);
@@ -351,10 +360,12 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			boolean enabled = ValueUtils.parseBoolean(state.get(settingPrefix + ".enabled"), false);
 			if (enabled)
 			{
-				DefSwAniExportSettings settings = new DefSwAniExportSettings();
+				WadTexExportSettings settings = new WadTexExportSettings();
 				Function<String, File> parseFile = (input) -> ObjectUtils.isEmpty(input) ? null : FileUtils.canonizeFile(new File(input));
 				settings.setOutputWAD(ValueUtils.parse(state.get(settingPrefix + ".outwad"), parseFile));
-				settings.setOutputSource(ValueUtils.parseBoolean(state.get(settingPrefix + ".outputsource"), false));
+				settings.setNameOverride(state.get(settingPrefix + ".name"));
+				settings.setForceStrife(ValueUtils.parseBoolean(state.get(settingPrefix + ".strife"), false));
+				settings.setAppendMode(ValueUtils.parseBoolean(state.get(settingPrefix + ".append"), false));
 				handleToSettingsMap.put(handle, settings);
 			}
 		}
@@ -379,34 +390,34 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	private void onNewEditor()
 	{
 		StringWriter writer = new StringWriter();
-		try (Reader reader = new InputStreamReader(IOUtils.openResource("gui/apps/defswani.txt"), StandardCharsets.UTF_8))
+		try (Reader reader = new InputStreamReader(IOUtils.openResource("gui/apps/wadtex.txt"), StandardCharsets.UTF_8))
 		{
 			IOUtils.relay(reader, writer);
 		} 
 		catch (IOException e) 
 		{
-			LOG.error(e, "Could not get DEFSWANI data from resources.");
+			LOG.error(e, "Could not get WADTEX data from resources.");
 		}
 		
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, writer.toString(), Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
+		editorPanel.newEditor(editorName, writer.toString(), Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX, 0);
 	}
 
 	private void onNewBlankEditor()
 	{
 		String editorName = "New " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, "", Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
+		editorPanel.newEditor(editorName, "", Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX, 0);
 	}
 
 	private void onOpenEditor()
 	{
 		File file = getUtils().chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wswantbl.open.title"), 
-			getLanguage().getText("wswantbl.open.accept"),
+			getLanguage().getText("wadtex.open.title"), 
+			getLanguage().getText("wadtex.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().createDEFSWANIFileFilter()
+			getUtils().createTextFileFilter()
 		);
 		
 		if (file != null)
@@ -420,8 +431,8 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		
 		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wswantbl.open.wad.title"), 
-			getLanguage().getText("wswantbl.open.wad.accept"),
+			getLanguage().getText("wadtex.open.wad.title"), 
+			getLanguage().getText("wadtex.open.wad.accept"),
 			settings::getLastOpenedWAD,
 			settings::setLastOpenedWAD,
 			utils.createWADFileFilter()
@@ -434,60 +445,96 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		try {
 			isWad = Wad.isWAD(file);
 		} catch (FileNotFoundException e) {
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.notfound", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.notfound", file.getAbsolutePath()));
 			return;
 		} catch (IOException e) {
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.ioerror", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.ioerror", file.getAbsolutePath()));
 			return;
 		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.security", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.security", file.getAbsolutePath()));
 			return;
 		}
 	
 		if (!isWad)
 		{
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.badwad", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.badwad", file.getAbsolutePath()));
 			return;
 		}
 		
-		String content;
 		try (WadFile wad = new WadFile(file))
 		{
-			int animIndex = wad.indexOf("ANIMATED");
-			int switIndex = wad.indexOf("SWITCHES");
+			int texture1Index = wad.indexOf("TEXTURE1");
+			int texture2Index = wad.indexOf("TEXTURE2");
+			int pnamesIndex =   wad.indexOf("PNAMES");
 			
-			if (animIndex < 0 || switIndex < 0)
+			if (pnamesIndex < 0 || (pnamesIndex >= 0 && texture1Index < 0 && texture2Index < 0))
 			{
-				SwingUtils.error(language.getText("wswantbl.open.wad.error.nodata", file.getAbsolutePath()));
+				SwingUtils.error(language.getText("wadtex.open.wad.error.nodata", file.getAbsolutePath()));
 				return;
 			}
 			
-			Animated animated = wad.getDataAs(animIndex, Animated.class);
-			Switches switches = wad.getDataAs(switIndex, Switches.class);
+			PatchNames pnames = wad.getDataAs(pnamesIndex, PatchNames.class);
+			byte[] texture1data = texture1Index >= 0 ? wad.getData(texture1Index) : null;
+			byte[] texture2data = texture2Index >= 0 ? wad.getData(texture2Index) : null;
 			
-			StringWriter sw = new StringWriter();
-			PrintWriter writer = new PrintWriter(sw);
-			Utility.writeSwitchAnimatedTables(switches, animated, WSwAnTablesMain.SWANTBLS_OUTPUT_HEADER, writer);
-			content = sw.toString();
+			CommonTextureList<?> texture1List = null;
+			if (texture1data != null)
+			{
+				if (TextureUtils.isStrifeTextureData(texture1data))
+					texture1List = BinaryObject.create(StrifeTextureList.class, texture1data);
+				else
+					texture1List = BinaryObject.create(DoomTextureList.class, texture1data);
+			}
+
+			CommonTextureList<?> texture2List = null;
+			if (texture2data != null)
+			{
+				if (TextureUtils.isStrifeTextureData(texture2data))
+					texture2List = BinaryObject.create(StrifeTextureList.class, texture2data);
+				else
+					texture2List = BinaryObject.create(DoomTextureList.class, texture2data);
+			}
+
+			TextureSet textureSet1 = texture1List != null ? new TextureSet(pnames, texture1List) : null;
+			TextureSet textureSet2 = texture2List != null ? new TextureSet(pnames, texture2List) : null;
+			
+			if (textureSet1 != null)
+			{
+				StringWriter sw = new StringWriter();
+				PrintWriter writer = new PrintWriter(sw);
+				Utility.writeDEUTEXFile(textureSet1, WADTexMain.WADTEX_OUTPUT_HEADER, writer);
+				String content = sw.toString();
+				
+				String editorName = "Texture1 " + NEW_COUNTER.getAndIncrement();
+				editorPanel.newEditor(editorName, content, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX, 0);
+			}
+
+			if (textureSet2 != null)
+			{
+				StringWriter sw = new StringWriter();
+				PrintWriter writer = new PrintWriter(sw);
+				Utility.writeDEUTEXFile(textureSet2, WADTexMain.WADTEX_OUTPUT_HEADER, writer);
+				String content = sw.toString();
+				
+				String editorName = "Texture2 " + NEW_COUNTER.getAndIncrement();
+				editorPanel.newEditor(editorName, content, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX, 0);
+			}
 		} 
 		catch (WadException e) 
 		{
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.badwad", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.badwad", file.getAbsolutePath()));
 			return;
 		}
 		catch (IOException e) 
 		{
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.ioerror", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.ioerror", file.getAbsolutePath()));
 			return;
 		}
 		catch (SecurityException e) 
 		{
-			SwingUtils.error(language.getText("wswantbl.open.wad.error.security", file.getAbsolutePath()));
+			SwingUtils.error(language.getText("wadtex.open.wad.error.security", file.getAbsolutePath()));
 			return;
 		}
-		
-		String editorName = "Wad " + NEW_COUNTER.getAndIncrement();
-		editorPanel.newEditor(editorName, content, Charset.defaultCharset(), DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI, 0);
 	}
 
 	private void onOpenFile(File file)
@@ -498,16 +545,15 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error", file.getName()));
-			SwingUtils.error(language.getText("wswantbl.open.error.notfound", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(language.getText("wadtex.status.message.editor.error", file.getName()));
+			SwingUtils.error(language.getText("wadtex.open.error.notfound", file.getAbsolutePath()));
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error", file.getName()));
-			SwingUtils.error(language.getText("wswantbl.open.error.ioerror", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(language.getText("wadtex.status.message.editor.error", file.getName()));
+			SwingUtils.error(language.getText("wadtex.open.error.ioerror", file.getAbsolutePath()));
 		} catch (SecurityException e) {
 			LOG.errorf(e, "Selected file could not be read (access denied): %s", file.getAbsolutePath());
-			statusPanel.setErrorMessage(language.getText("wswantbl.status.message.editor.error.security", file.getName()));
-			SwingUtils.error(language.getText("wswantbl.open.error.security", file.getAbsolutePath()));
+			statusPanel.setErrorMessage(language.getText("wadtex.status.message.editor.error.security", file.getName()));
 		}
 	}
 	
@@ -521,8 +567,8 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			Boolean saveChoice = modal(
 				getApplicationContainer(), 
 				utils.getWindowIcons(), 
-				language.getText("wswantbl.save.modal.title"),
-				containerOf(label(language.getText("wswantbl.save.modal.message", currentHandle.getEditorTabName()))), 
+				language.getText("wadtex.save.modal.title"),
+				containerOf(label(language.getText("wadtex.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
@@ -545,7 +591,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("wswantbl.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), getLanguage().getText("wadtex.error.mustsave"));
 			return;
 		}
 		
@@ -568,32 +614,45 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void exportWithSettings(final File scriptFile) 
 	{
-		DefSwAniExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
-		final DefSwAniExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new DefSwAniExportSettings());
+		WadTexExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
+		
+		final WadTexExportSettings processSettings;
+		if (existingSettings != null)
+		{
+			processSettings = createExportSettings(scriptFile, existingSettings);
+		}
+		else
+		{
+			WadTexExportSettings settings = new WadTexExportSettings();
+			settings.setNameOverride(NameUtils.toValidEntryName(currentHandle.getEditorTabName()));
+			processSettings = createExportSettings(scriptFile, settings);
+		}
 		
 		if (processSettings == null)
 			return;
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
-		getCommon().onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, processSettings);
+		getCommon().onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, processSettings);
 	}
 
-	private DefSwAniExportSettings createExportSettings(File sourceFile, final DefSwAniExportSettings initSettings) 
+	private WadTexExportSettings createExportSettings(File sourceFile, final WadTexExportSettings initSettings) 
 	{
 		DoomToolsGUIUtils utils = getUtils();
 		
-		final DefSwAniExportPanel argsPanel = new DefSwAniExportPanel(initSettings);
-		argsPanel.setPreferredSize(dimension(400, 100));
-		DefSwAniExportSettings settings = utils.createSettingsModal(
-			getLanguage().getText("wswantbl.export.title"),
+		final WadTexExportPanel argsPanel = new WadTexExportPanel(initSettings);
+		argsPanel.setPreferredSize(dimension(350, 120));
+		WadTexExportSettings settings = utils.createSettingsModal(
+			getLanguage().getText("wadtex.export.title"),
 			argsPanel,
 			(panel) -> {
-				DefSwAniExportSettings out = new DefSwAniExportSettings();
+				WadTexExportSettings out = new WadTexExportSettings();
 				out.setOutputWAD(panel.getOutputWAD());
-				out.setOutputSource(panel.getOutputSource());
+				out.setNameOverride(panel.getNameOverride());
+				out.setAppendMode(panel.getAppendMode());
+				out.setForceStrife(panel.getForceStrife());
 				return out;
 			},
-			utils.createChoiceFromLanguageKey("wswantbl.export.choice.export", true),
+			utils.createChoiceFromLanguageKey("wadtex.export.choice.export", true),
 			utils.createChoiceFromLanguageKey("doomtools.cancel")
 		);
 		
@@ -612,16 +671,16 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
+		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
 	}
 
-	private class DefSwAniEditorPanel extends MultiFileEditorPanel
+	private class WadTexEditorPanel extends MultiFileEditorPanel
 	{
 		private static final long serialVersionUID = -9024669807749249148L;
 		
 		private FileFilter[] TYPES = null;
 		
-		public DefSwAniEditorPanel(Options options, Listener listener)
+		public WadTexEditorPanel(Options options, Listener listener)
 		{
 			super(options, listener);
 		}
@@ -629,7 +688,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected String getDefaultStyleName() 
 		{
-			return DoomToolsEditorProvider.SYNTAX_STYLE_DEFSWANI;
+			return DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX;
 		}
 		
 		@Override
@@ -647,7 +706,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createDEFSWANIFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createTextFileFilter()} : TYPES;
 		}
 	
 		@Override

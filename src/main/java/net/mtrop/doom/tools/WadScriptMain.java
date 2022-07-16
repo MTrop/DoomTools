@@ -98,6 +98,7 @@ public final class WadScriptMain
 	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
+
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_ENTRY1 = "--entry";
 	public static final String SWITCH_ENTRY2 = "-e";

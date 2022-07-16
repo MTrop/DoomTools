@@ -27,6 +27,8 @@ import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.util.NameUtils;
@@ -45,10 +47,11 @@ public final class DoomImageConvertMain
 	private static final int ERROR_NO_DESTINATION = 3;
 	private static final int ERROR_NO_PALETTE = 4;
 	private static final int ERROR_BAD_OUTPUT = 5;
-	private static final int ERROR_IO = 6;
+	private static final int ERROR_IOERROR = 6;
 	private static final int ERROR_PARSE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
@@ -101,6 +104,7 @@ public final class DoomImageConvertMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean gui;
 		
 		// Palette source for conversion.
 		private File paletteSourcePath;
@@ -124,7 +128,8 @@ public final class DoomImageConvertMain
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
-			
+			this.gui = false;
+
 			this.sourcePath = null;
 			this.recursive = false;
 			this.outputPath = new File(".");
@@ -224,6 +229,17 @@ public final class DoomImageConvertMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DImgConv GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -306,7 +322,7 @@ public final class DoomImageConvertMain
 				catch (IOException e) 
 				{
 					options.stderr.println("ERROR: I/O Error reading palette: " + e.getLocalizedMessage());
-					return ERROR_IO;
+					return ERROR_IOERROR;
 				}
 			}
 			
@@ -420,12 +436,12 @@ public final class DoomImageConvertMain
 					catch (IOException e)
 					{
 						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
 					{
 						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (UtilityException e) 
 					{
@@ -444,12 +460,12 @@ public final class DoomImageConvertMain
 					catch (IOException e)
 					{
 						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
 					{
 						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (UtilityException e) 
 					{
@@ -476,12 +492,12 @@ public final class DoomImageConvertMain
 					catch (IOException e)
 					{
 						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
 					{
 						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 				}
 				else if (outputDir != null)
@@ -496,12 +512,12 @@ public final class DoomImageConvertMain
 					catch (IOException e)
 					{
 						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
 					{
 						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 				}
 				else if (outputWad != null)
@@ -513,12 +529,12 @@ public final class DoomImageConvertMain
 					catch (IOException e)
 					{
 						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
 					{
 						options.stderr.println("ERROR: OS threw security error: " + e.getLocalizedMessage());
-						return ERROR_IO;
+						return ERROR_IOERROR;
 					} 
 				}
 				else
@@ -878,6 +894,8 @@ public final class DoomImageConvertMain
 						options.help = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equalsIgnoreCase(SWITCH_GUI))
+						options.gui = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERBOSE) || arg.equalsIgnoreCase(SWITCH_VERBOSE2))
 						options.setVerbose(true);
 					else if (arg.equalsIgnoreCase(SWITCH_RECURSIVE) || arg.equalsIgnoreCase(SWITCH_RECURSIVE2))
@@ -1007,6 +1025,8 @@ public final class DoomImageConvertMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --gui               Starts the GUI version of this program.");
 		out.println();
 		out.println("[source]:");
 		out.println("    The source file or directory to read from.");

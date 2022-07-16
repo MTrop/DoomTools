@@ -34,6 +34,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
@@ -48,6 +49,8 @@ import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
+import net.mtrop.doom.tools.gui.apps.WadTexCompilerApp;
+import net.mtrop.doom.tools.gui.apps.WadTexEditorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils.HelpSource;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -290,7 +293,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (i) -> addApplication(new DMXConvertApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DMXConvertApp())) // TODO: Finish this!
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DImageConvertApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (i) -> addApplication(new DecoHackEditorApp())),
@@ -308,11 +311,15 @@ public class DoomToolsMainWindow extends JFrame
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.editor", (i) -> addApplication(new WadScriptEditorApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadscript.item.execute", (i) -> addApplication(new WadScriptExecutorApp()))
 				),
-				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl",
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.editor", (i) -> addApplication(new WSwAnTablesEditorApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wswantbl.item.compile", (i) -> addApplication(new WSwAnTablesCompilerApp()))
-				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures",
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wswantbl",
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wswantbl.item.editor", (i) -> addApplication(new WSwAnTablesEditorApp())),
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wswantbl.item.compile", (i) -> addApplication(new WSwAnTablesCompilerApp()))
+					),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex",
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.editor", (i) -> addApplication(new WadTexEditorApp())),
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.compile", (i) -> addApplication(new WadTexCompilerApp()))
+					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (i) -> addApplication(new WTExportApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (i) -> addApplication(new WTexScanTExportApp()))

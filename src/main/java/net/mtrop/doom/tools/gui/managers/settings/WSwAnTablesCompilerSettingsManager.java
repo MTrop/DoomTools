@@ -10,7 +10,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 
 
 /**
- * WadScript GUI settings singleton.
+ * WSwAnTbl GUI settings singleton.
  * @author Matthew Tropiano
  */
 public final class WSwAnTablesCompilerSettingsManager extends DoomToolsSettings
@@ -35,7 +35,6 @@ public final class WSwAnTablesCompilerSettingsManager extends DoomToolsSettings
     private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
     private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
     private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
-    private static final String SHOW_BUDGET = "show.budget";
 
 	/* ==================================================================== */
 
@@ -141,24 +140,6 @@ public final class WSwAnTablesCompilerSettingsManager extends DoomToolsSettings
 	public File getLastExportSourceFile() 
 	{
 		return getFile(EXPORT_SOURCE_PATH_LAST_FILE);
-	}
-
-	/**
-	 * Sets the last state of "showing the budget".
-	 * @param enabled the enabled state.
-	 */
-	public void setShowBudgetDefault(boolean enabled) 
-	{
-		setBoolean(SHOW_BUDGET, enabled);
-		commit();
-	}
-
-	/**
-	 * @return the last state of "showing the budget".
-	 */
-	public boolean getShowBudgetDefault() 
-	{
-		return getBoolean(SHOW_BUDGET);
 	}
 
 }

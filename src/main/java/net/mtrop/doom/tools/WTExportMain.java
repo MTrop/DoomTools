@@ -39,6 +39,8 @@ import net.mtrop.doom.texture.Switches;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.texture.TextureSet.Texture;
 import net.mtrop.doom.tools.exception.OptionParseException;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wtexport.TextureTables;
@@ -54,22 +56,25 @@ public final class WTExportMain
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_FILE = 1;
 	private static final int ERROR_NO_FILES = 2;
+	private static final int ERROR_IOERROR = 3;
 	private static final int ERROR_BAD_OPTIONS = 4;
 	private static final int ERROR_UNKNOWN = -1;
 
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
 	private static final Pattern FLAT_MARKER = Pattern.compile("F[0-9]*_(START|END)");
 	
-	public static final String SWITCH_HELP = "--help";
+	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_GUI2 = "--gui-wtexscan";
+	public static final String SWITCH_HELP1 = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
-	public static final String SWITCH_BASE = "--base-wad";
+	public static final String SWITCH_BASE1 = "--base-wad";
 	public static final String SWITCH_BASE2 = "-b";
-	public static final String SWITCH_OUTPUT = "--output";
+	public static final String SWITCH_OUTPUT1 = "--output";
 	public static final String SWITCH_OUTPUT2 = "-o";
-	public static final String SWITCH_CREATE = "--create";
+	public static final String SWITCH_CREATE1 = "--create";
 	public static final String SWITCH_CREATE2 = "-c";
-	public static final String SWITCH_ADDITIVE = "--add";
+	public static final String SWITCH_ADDITIVE1 = "--add";
 	public static final String SWITCH_ADDITIVE2 = "-a";
 	public static final String SWITCH_NULLTEX = "--null-texture";
 	public static final String SWITCH_NOANIMATED = "--no-animated";
@@ -86,6 +91,8 @@ public final class WTExportMain
 		
 		private boolean help;
 		private boolean version;
+		private boolean gui;
+		private boolean wtexscan;
 		private boolean quiet;
 
 		/** Path to base wad. */
@@ -112,7 +119,13 @@ public final class WTExportMain
 			this.stdout = null;
 			this.stderr = null;
 			this.stdin = null;
+			
+			this.help = false;
+			this.version = false;
+			this.gui = false;
+			this.wtexscan = false; 
 			this.quiet = false;
+			
 			this.baseWad = null;
 			this.outWad = null;
 			this.noAnimated = false;
@@ -1228,6 +1241,17 @@ public final class WTExportMain
 		@Override
 		public Integer call() 
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(options.wtexscan ? ApplicationNames.WTEXSCAN_WTEXPORT : ApplicationNames.WTEXPORT);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WTExport GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -1507,21 +1531,28 @@ public final class WTExportMain
 			{
 				case STATE_INIT:
 				{
-					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+					if (arg.equals(SWITCH_HELP1) || arg.equals(SWITCH_HELP2))
 						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
+					else if (arg.equals(SWITCH_GUI))
+						options.gui = true;
+					else if (arg.equals(SWITCH_GUI2))
+					{
+						options.gui = true;
+						options.wtexscan = true;
+					}
 					else if (arg.equals(SWITCH_NOANIMATED))
 						options.setNoAnimated(true);
 					else if (arg.equals(SWITCH_NOSWITCH))
 						options.setNoSwitches(true);
-					else if (arg.equals(SWITCH_CREATE) || arg.equals(SWITCH_CREATE2))
+					else if (arg.equals(SWITCH_CREATE1) || arg.equals(SWITCH_CREATE2))
 						options.setAdditive(false);
-					else if (arg.equals(SWITCH_ADDITIVE) || arg.equals(SWITCH_ADDITIVE2))
+					else if (arg.equals(SWITCH_ADDITIVE1) || arg.equals(SWITCH_ADDITIVE2))
 						options.setAdditive(true);
-					else if (arg.equals(SWITCH_BASE) || arg.equals(SWITCH_BASE2))
+					else if (arg.equals(SWITCH_BASE1) || arg.equals(SWITCH_BASE2))
 						state = STATE_BASE;
-					else if (arg.equals(SWITCH_OUTPUT) || arg.equals(SWITCH_OUTPUT2))
+					else if (arg.equals(SWITCH_OUTPUT1) || arg.equals(SWITCH_OUTPUT2))
 						state = STATE_OUT;
 					else if (arg.equals(SWITCH_NULLTEX))
 						state = STATE_NULLTEX;
@@ -1626,6 +1657,11 @@ public final class WTExportMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version             Prints version, and exits.");
+		out.println();
+		out.println("    --gui                 Starts the GUI version of this program.");
+		out.println();
+		out.println("    --gui-wtexscan        Starts the GUI version of this program that also");
+		out.println("                          uses WTexScan to generate the list.");
 		out.println();
 		out.println("[files]:");
 		out.println("    <filenames>           A valid WAD file (that contains the textures to");

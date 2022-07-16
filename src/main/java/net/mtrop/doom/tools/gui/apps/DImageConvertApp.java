@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -155,6 +156,20 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	public JMenuBar createInternalMenuBar() 
 	{
 		return menuBar(createHelpMenu());
+	}
+
+	@Override
+	public Map<String, String> getApplicationState()
+	{
+		Map<String, String> state = super.getApplicationState();
+		// TODO: Finish this.
+		return state;
+	}
+
+	@Override
+	public void setApplicationState(Map<String, String> state)
+	{
+		// TODO: Finish this.
 	}
 
 	@Override

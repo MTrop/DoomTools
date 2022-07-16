@@ -1,4 +1,4 @@
-; This file is the texture listing for the TEXTURE1 lump (plus PNAMES).
+; This file is the texture listing for the TEXTUREx lump (plus PNAMES).
 ;
 ; Use ";" to make comment lines.
 ; This is also compatible with DEUTEX!
@@ -8,17 +8,15 @@
 ; TEXNAME W H
 ; * PATCHNAM X Y
 ; ...
-
+;
 ; NOTE: If you intend to use this for adding to an IWAD's texture set,
 ; you will need to add the texture definitions from the IWAD here, or they
-; will not be available when you compile the project together.
-
-; You can rebuild this file from the project's IWAD by running:
-; doommake rebuildtextures
-; ... but only if you delete this file (and/or texture2.txt). 
+; will not be available when you compile the project together!
+;
+; See: Open From WAD
+;
 
 ; First texture is the NULL texture.
 AASTINKY 24 72
 *   WALL00_3 0 0
 *   WALL00_3 12 -6
-
