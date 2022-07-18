@@ -4,6 +4,8 @@ DECOHack
 ### Changed for 0.26.0
 
 * `Added` A directory tree for the GUI.
+* `Added` A warning on wrong int/fixed type use (Enhancement #78).
+* `Added` A warning on wrong Thing type use (MISSILE vs. not) (Enhancement #77).
 
 
 ### Changed for 0.25.0
