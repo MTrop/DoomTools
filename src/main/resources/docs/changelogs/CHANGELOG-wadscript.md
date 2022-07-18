@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.6.0
+
+* `Added` A directory tree for the GUI.
+
+
 ### Changed for 1.5.0
 
 * `Fixed` The `--entry` switch didn't parse the command line properly after its use.

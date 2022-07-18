@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.26.0
+
+* `Added` A directory tree for the GUI.
+
+
 ### Changed for 0.25.0
 
 * `Fixed` Changed the z-position parameter type for MBF's A_Spawn pointer to "fixed".
