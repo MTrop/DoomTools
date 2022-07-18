@@ -3218,6 +3218,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer parseSoundIndex(AbstractPatchContext<?> context)
 	{
 		Integer value;
+		
 		if ((value = matchSoundIndexName(context)) == null)
 		{
 			addErrorMessage("Expected a valid sound name.");
@@ -4318,7 +4319,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Fixed - coerce to whole number.
 		else if (lexeme.contains("."))
 		{
-			addWarningMessage("Expected integer, but will be converted to fixed-point.");
+			addWarningMessage("Found fixed-point, but will be converted to integer.");
 			try {
 				int out = (int)(Double.parseDouble(lexeme));
 				nextToken();
@@ -4367,7 +4368,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Whole number - coerce to fixed.
 		else
 		{
-			addWarningMessage("Expected fixed-point, but will be converted to integer.");
+			addWarningMessage("Found integer, but will be converted to fixed-point.");
 			long v = Long.parseLong(lexeme);
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
