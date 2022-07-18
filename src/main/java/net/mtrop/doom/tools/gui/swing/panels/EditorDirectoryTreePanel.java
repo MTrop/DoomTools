@@ -89,7 +89,7 @@ public class EditorDirectoryTreePanel extends JPanel
 		else
 		{
 			treePanel.setVisible(false);
-			treePanel.setRootDirectory(FileUtils.NULL_FILE);
+			treePanel.setTemporaryRootDirectory(FileUtils.NULL_FILE);
 		}
 	}
 	
@@ -122,7 +122,7 @@ public class EditorDirectoryTreePanel extends JPanel
 	private void onResetTop()
 	{
 		if (rootDirectory != null)
-			treePanel.setRootDirectory(rootDirectory);
+			treePanel.setTemporaryRootDirectory(rootDirectory);
 	}
 	
 }

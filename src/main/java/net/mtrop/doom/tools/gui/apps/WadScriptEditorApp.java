@@ -16,6 +16,7 @@ import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JSplitPane;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.tools.WadScriptMain;
@@ -189,15 +190,18 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
+		JSplitPane split = split(
+			containerOf(dimension(215, 500), 
+				node(BorderLayout.CENTER, treePanel)
+			),
+			containerOf(dimension(610, 500),
+				node(BorderLayout.CENTER, editorPanel)
+			)
+		);
+		split.setDividerLocation(-1);
+		
 		return containerOf(borderLayout(0, 8), 
-			node(BorderLayout.CENTER, split(
-				containerOf(dimension(215, 500), 
-					node(BorderLayout.CENTER, treePanel)
-				),
-				containerOf(dimension(610, 500),
-					node(BorderLayout.CENTER, editorPanel)
-				)
-			)),
+			node(BorderLayout.CENTER, split),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
@@ -210,7 +214,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 				utils.createItemFromLanguageKey("wadscript.menu.file.item.new.item.blank", (i) -> onNewBlankEditor())
 			),
 			utils.createItemFromLanguageKey("wadscript.menu.file.item.open", (i) -> onOpenEditor()),
-			utils.createItemFromLanguageKey("decohack.menu.file.item.open.directory", (i) -> onOpenDirectory()),
+			utils.createItemFromLanguageKey("wadscript.menu.file.item.open.directory", (i) -> onOpenDirectory()),
 			separator(),
 			utils.createItemFromLanguageKey("texteditor.action.close", editorPanel.getActionFor(ActionNames.ACTION_CLOSE)),
 			utils.createItemFromLanguageKey("texteditor.action.closeallbutcurrent", editorPanel.getActionFor(ActionNames.ACTION_CLOSE_ALL_BUT_CURRENT)),

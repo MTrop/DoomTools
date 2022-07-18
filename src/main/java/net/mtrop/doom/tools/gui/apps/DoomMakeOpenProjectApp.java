@@ -19,6 +19,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeExecutionPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -28,7 +29,7 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
 /**
- * The DoomMake New Project application.
+ * The DoomMake Open Project application.
  * @author Matthew Tropiano
  */
 public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
@@ -46,6 +47,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	// Components
 
 	private DoomMakeExecutionPanel executionPanel;
+	private DoomToolsStatusPanel statusPanel;
 	
 	// Fields
     
@@ -67,7 +69,8 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	public DoomMakeOpenProjectApp(File targetDirectory)
 	{
 		this.settings = DoomMakeSettingsManager.get();
-		this.executionPanel = new DoomMakeExecutionPanel(targetDirectory);
+		this.statusPanel = new DoomToolsStatusPanel();
+		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory);
 		this.projectDirectory = targetDirectory;
 	}
 	
@@ -142,7 +145,8 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		return containerOf(
 			dimension(300, 225),
-			node(BorderLayout.CENTER, executionPanel)
+			node(BorderLayout.CENTER, executionPanel),
+			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
 

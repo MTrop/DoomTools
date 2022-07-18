@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.gui.swing.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
@@ -16,20 +15,15 @@ import net.mtrop.doom.tools.doommake.AutoBuildAgent;
 import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
 import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
-import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
-import static javax.swing.BorderFactory.createEmptyBorder;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.ContainerFactory.containerOf;
-import static net.mtrop.doom.tools.struct.swing.ContainerFactory.node;
-import static net.mtrop.doom.tools.struct.swing.ContainerFactory.scroll;
-import static net.mtrop.doom.tools.struct.swing.LayoutFactory.borderLayout;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
 /**
@@ -64,13 +58,13 @@ public class DoomMakeExecutionPanel extends JPanel
     private JCheckBox autoBuildCheckbox;
     /** Target run action. */
     private Action targetRunAction;
-    /** Status messages. */
-    private DoomToolsStatusPanel statusPanel;
 
 	// Fields
     
     /** Project directory. */
     private File projectDirectory;
+    /** Status messages. */
+    private DoomToolsStatusPanel statusPanel;
 
     // State
     
@@ -80,18 +74,20 @@ public class DoomMakeExecutionPanel extends JPanel
     private AutoBuildAgent autoBuildAgent;
 
     /**
-	 * Creates a new open project application.
+	 * Creates a new panel.
+     * @param statusPanel the status panel to talk to.
 	 */
-	public DoomMakeExecutionPanel()
+	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel)
 	{
-		this(null);
+		this(statusPanel, null);
 	}
 	
     /**
-	 * Creates a new open project application from a project directory.
+	 * Creates a new panel from a project directory.
+     * @param statusPanel the status panel to talk to.
      * @param targetDirectory 
 	 */
-	public DoomMakeExecutionPanel(File targetDirectory)
+	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory)
 	{
 		this.language = DoomToolsLanguageManager.get();
 		this.helper = DoomMakeProjectHelper.get();
@@ -114,7 +110,7 @@ public class DoomMakeExecutionPanel extends JPanel
 		
 		this.targetRunAction = actionItem(language.getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
 
-		this.statusPanel = new DoomToolsStatusPanel();
+		this.statusPanel = statusPanel;
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
 		this.projectDirectory = targetDirectory;
@@ -127,68 +123,21 @@ public class DoomMakeExecutionPanel extends JPanel
 		
 		containerOf(this,
 			node(containerOf(
-				node(BorderLayout.NORTH, containerOf(createEmptyBorder(0, 4, 0, 4),
+				node(BorderLayout.NORTH, containerOf(borderLayout(4, 0),
 					node(BorderLayout.CENTER, label(language.getText("doommake.project.targets"))),
 					node(BorderLayout.EAST, control)
 				)),
 				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
-					node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
+					node(BorderLayout.CENTER, containerOf(
 						node(scroll(listPanel))
 					)),
 					node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 						node(BorderLayout.CENTER, autoBuildCheckbox),
-						node(BorderLayout.EAST, button(targetRunAction)),
-						node(BorderLayout.SOUTH, statusPanel)
+						node(BorderLayout.EAST, button(targetRunAction))
 					))
 				))
 			))
 		);
-	}
-	
-	/**
-	 * Opens a dialog for opening a directory, checks
-	 * if the directory is a project directory, and then returns the directory. 
-	 * @param parent the parent window for the dialog.
-	 * @return the valid directory selected, or null if not valid.
-	 */
-	public static File openAndGetDirectory(Component parent)
-	{
-		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
-		DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
-		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
-		
-		File projectDir = utils.chooseDirectory(
-			parent,
-			language.getText("doommake.project.open.browse.title"),
-			language.getText("doommake.project.open.browse.accept"),
-			settings::getLastProjectDirectory,
-			settings::setLastProjectDirectory
-		);
-		
-		if (projectDir == null)
-			return null;
-		
-		if (!isProjectDirectory(projectDir))
-		{
-			SwingUtils.error(parent, language.getText("doommake.project.open.browse.baddir", projectDir.getAbsolutePath()));
-			return null;
-		}
-		
-		return projectDir;
-	}
-	
-	/**
-	 * Opens a dialog for opening a directory, checks
-	 * if the directory is a project directory, and returns an application instance. 
-	 * @param parent the parent window for the dialog.
-	 * @return a new app instance, or null if bad directory selected.
-	 */
-	public static DoomMakeExecutionPanel openAndCreate(Component parent)
-	{
-		File directory;
-		if ((directory = openAndGetDirectory(parent)) == null)
-			return null;
-		return new DoomMakeExecutionPanel(directory);
 	}
 	
 	/**

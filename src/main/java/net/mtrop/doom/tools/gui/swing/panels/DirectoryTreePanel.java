@@ -156,7 +156,7 @@ public class DirectoryTreePanel extends JPanel
 		this.language = DoomToolsLanguageManager.get();
 		this.tasks = DoomToolsTaskManager.get();
 		
-		this.rootDirectory = FileUtils.canonizeFile(rootDirectory);
+		this.rootDirectory = rootDirectory != null ? FileUtils.canonizeFile(rootDirectory) : null;
 		this.directoryTreeListener = directoryTreeListener;
 
 		this.singleFilePopupMenu = createSingleFilePopupMenu();
@@ -260,6 +260,16 @@ public class DirectoryTreePanel extends JPanel
 	 * @param rootDirectory
 	 */
 	public void setRootDirectory(File rootDirectory) 
+	{
+		this.rootDirectory = FileUtils.canonizeFile(rootDirectory);
+		fileTree.setRootDirectory(rootDirectory);
+	}
+	
+	/**
+	 * Sets the new root directory (temporarily).
+	 * @param rootDirectory
+	 */
+	public void setTemporaryRootDirectory(File rootDirectory) 
 	{
 		fileTree.setRootDirectory(rootDirectory);
 	}
@@ -684,7 +694,7 @@ public class DirectoryTreePanel extends JPanel
 	{
 		File selected = getSelectedFile();
 		if (selected != null && selected.isDirectory())
-			setRootDirectory(selected);
+			setTemporaryRootDirectory(selected);
 	}
 
 	/**

@@ -223,6 +223,18 @@ public class RookScriptTokenMaker extends CommonTokenMaker
 						currentType = NULL;
 						i--; // wait one char.
 					}
+					else if (c == '"' || c == '`')
+					{
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
+						currentType = NULL;
+						i--; // wait one char.
+					}
+					else if (c == '/')
+					{
+						addToken(segmentChars, currentTokenStart, i - 1, currentType, newDocumentStartOffset + currentTokenStart, false); 
+						currentType = NULL;
+						i--; // wait one char.
+					}
 					else if (isDelimiterBreak(c))
 					{
 						// Do nothing.

@@ -18,6 +18,7 @@ import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
@@ -66,6 +67,8 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_NEW = "doommake-new";
 		/** DoomMake - Open Project. */
 		String DOOMMAKE_OPEN = "doommake-open";
+		/** DoomMake - Studio Project. */
+		String DOOMMAKE_STUDIO = "doommake-studio";
 		/** WadMerge. */
 		String WADMERGE = "wadmerge";
 		/** WadMerge Executor. */
@@ -278,6 +281,26 @@ public final class DoomToolsGUIMain
 				File projectDirectory = new File(args[1]);
 				if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
 					startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+				else
+					SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+			}
+		}
+		else if (ApplicationNames.DOOMMAKE_STUDIO.equals(args[0]))
+		{
+			String path = ArrayUtils.arrayElement(args, 1);
+			
+			// No path. Open file.
+			if (ObjectUtils.isEmpty(path))
+			{
+				DoomMakeStudioApp app;
+				if ((app = DoomMakeStudioApp.openAndCreate(null)) != null)
+					startApplication(app);
+			}
+			else
+			{
+				File projectDirectory = new File(args[1]);
+				if (DoomMakeStudioApp.isProjectDirectory(projectDirectory))
+					startApplication(new DoomMakeStudioApp(projectDirectory));
 				else
 					SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
 			}
