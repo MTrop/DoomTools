@@ -16,22 +16,23 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
  */
 public enum DEHActionPointerParamType
 {
-	BOOL       (Type.INTEGER, 0, 1),
-	UBYTE      (Type.INTEGER, 0, 255),
-	BYTE       (Type.INTEGER, -128, 127),
-	SHORT      (Type.INTEGER, -32768, 32767),
-	USHORT     (Type.INTEGER, 0, 65535),
-	INT        (Type.INTEGER, Integer.MIN_VALUE, Integer.MAX_VALUE),
-	UINT       (Type.INTEGER, 0, Integer.MAX_VALUE),
-	ANGLEINT   (Type.INTEGER, -359, 359),
-	ANGLEUINT  (Type.INTEGER, 0, 359),
-	ANGLEFIXED (Type.FIXED,   (-360 << 16) + 1, (360 << 16) - 1),
-	FIXED      (Type.FIXED,   Integer.MIN_VALUE, Integer.MAX_VALUE),
-	STATE      (Type.STATE,   0, Integer.MAX_VALUE),
-	THING      (Type.THING,   0, Integer.MAX_VALUE),
-	WEAPON     (Type.WEAPON,  0, Integer.MAX_VALUE),
-	SOUND      (Type.SOUND,   0, Integer.MAX_VALUE),
-	FLAGS      (Type.FLAGS,   Integer.MIN_VALUE, Integer.MAX_VALUE),
+	BOOL          (Type.INTEGER,       0, 1),
+	UBYTE         (Type.INTEGER,       0, 255),
+	BYTE          (Type.INTEGER,       -128, 127),
+	SHORT         (Type.INTEGER,       -32768, 32767),
+	USHORT        (Type.INTEGER,       0, 65535),
+	INT           (Type.INTEGER,       Integer.MIN_VALUE, Integer.MAX_VALUE),
+	UINT          (Type.INTEGER,       0, Integer.MAX_VALUE),
+	ANGLEINT      (Type.INTEGER,       -359, 359),
+	ANGLEUINT     (Type.INTEGER,       0, 359),
+	ANGLEFIXED    (Type.FIXED,         (-360 << 16) + 1, (360 << 16) - 1),
+	FIXED         (Type.FIXED,         Integer.MIN_VALUE, Integer.MAX_VALUE),
+	STATE         (Type.STATE,         0, Integer.MAX_VALUE),
+	THING         (Type.THING,         0, Integer.MAX_VALUE),
+	THINGMISSILE  (Type.THINGMISSILE,  0, Integer.MAX_VALUE),
+	WEAPON        (Type.WEAPON,        0, Integer.MAX_VALUE),
+	SOUND         (Type.SOUND,         0, Integer.MAX_VALUE),
+	FLAGS         (Type.FLAGS,         Integer.MIN_VALUE, Integer.MAX_VALUE),
 	;
 
 	public enum Type
@@ -41,6 +42,7 @@ public enum DEHActionPointerParamType
 		FLAGS,
 		STATE,
 		THING,
+		THINGMISSILE,
 		WEAPON,
 		SOUND
 	}

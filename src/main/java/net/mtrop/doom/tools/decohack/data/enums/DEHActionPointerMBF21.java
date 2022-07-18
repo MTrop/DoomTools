@@ -39,10 +39,10 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 		).parameter("zvel", FIXED, "The initial Z-velocity of the spawned actor (up/down)."
 	)),
 	
-	MONSTERPROJECTILE   (false, "MonsterProjectile", params(THING, ANGLEFIXED, ANGLEFIXED, FIXED, FIXED), usage(
+	MONSTERPROJECTILE   (false, "MonsterProjectile", params(THINGMISSILE, ANGLEFIXED, ANGLEFIXED, FIXED, FIXED), usage(
 		"Fires a projectile from the calling actor.",
 		"The spawned projectile also has its \"tracer\" pointer set to the calling actor's target to enable tracing behavior."
-		).parameter("thingId", THING, "The thing to spawn as the new projectile (must be flagged as a projectile)."
+		).parameter("thingId", THINGMISSILE, "The thing to spawn as the new projectile (must be flagged as MISSILE)."
 		).parameter("angle", ANGLEFIXED, "The angle of the spawned actor, relative to the calling actor's angle."
 		).parameter("pitch", ANGLEFIXED, "The pitch of the spawned actor, relative to the calling actor's pitch."
 		).parameter("hoffset", FIXED, "The horizontal position relative to the calling actor."
@@ -169,11 +169,11 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 
 	// MBF21 Weapon Action Pointers
 	
-	WEAPONPROJECTILE    (true,  "WeaponProjectile", params(THING, ANGLEFIXED, ANGLEFIXED, FIXED, FIXED), usage(
+	WEAPONPROJECTILE    (true,  "WeaponProjectile", params(THINGMISSILE, ANGLEFIXED, ANGLEFIXED, FIXED, FIXED), usage(
 		"Fires a projectile from the calling player.",
 		"Unlike most of DOOM19's attack codepointers, this function will NOT consume ammo, trigger the weapon's FLASH state, nor play a sound.",
 		"The projectile spawned will have its \"tracer\" reference set to the actor found by Doom's autoaim, if any."
-		).parameter("thingId", THING, "The thing to spawn as the new projectile (must be flagged as a projectile)."
+		).parameter("thingId", THINGMISSILE, "The thing to spawn as the new projectile (must be flagged as MISSILE)."
 		).parameter("angle", ANGLEFIXED, "The angle of the spawned actor, relative to the calling player's angle."
 		).parameter("pitch", ANGLEFIXED, "The pitch of the spawned actor, relative to the calling player's pitch."
 		).parameter("hoffset", FIXED, "The horizontal position relative to the calling player."

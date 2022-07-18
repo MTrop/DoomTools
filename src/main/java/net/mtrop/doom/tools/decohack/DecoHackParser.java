@@ -3452,9 +3452,22 @@ public final class DecoHackParser extends Lexer.Parser
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 		{
-			if (paramType == DEHActionPointerParamType.THING)
+			if (paramType == DEHActionPointerParamType.THING || paramType == DEHActionPointerParamType.THINGMISSILE)
 				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
-			return parseThingOrThingStateIndex(context);
+			
+			Integer thingIndex;
+			if ((thingIndex = parseThingOrThingStateIndex(context)) == null)
+				return null;
+			
+			// Verify missile type.
+			if (paramType == DEHActionPointerParamType.THINGMISSILE)
+			{
+				DEHThing thing = context.getThing(thingIndex);
+				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
+					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
+			}
+			
+			return thingIndex;
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 		{
@@ -4243,6 +4256,25 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				return value;
 			}
+
+			case THINGMISSILE:
+			{
+				Object value;
+				if ((value = matchThingIndex(context)) == null)
+				{
+					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
+					return null;
+				}
+				
+				Integer index = (Integer)value;
+				
+				// Verify missile type.
+				DEHThing thing = context.getThing(index);
+				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
+					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
+				
+				return value;
+			}
 			
 			case WEAPON:
 			{
@@ -4286,6 +4318,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Fixed - coerce to whole number.
 		else if (lexeme.contains("."))
 		{
+			addWarningMessage("Expected integer, but will be converted to fixed-point.");
 			try {
 				int out = (int)(Double.parseDouble(lexeme));
 				nextToken();
@@ -4314,6 +4347,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Always take hex numbers as raw.
 		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
 		{
+			addWarningMessage("Expected fixed-point - hex numbers are interpreted as-is.");
 			long v = parseUnsignedHexLong(lexeme.substring(2));
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
@@ -4333,6 +4367,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Whole number - coerce to fixed.
 		else
 		{
+			addWarningMessage("Expected fixed-point, but will be converted to integer.");
 			long v = Long.parseLong(lexeme);
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
