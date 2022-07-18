@@ -860,7 +860,7 @@ public final class DecoHackMain
 		out.println();
 		if (full)
 		{
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(IOUtils.openResource("decohack/help.txt")))) {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(IOUtils.openResource("docs/DECOHack Help.txt")))) {
 				String line;
 				while ((line = br.readLine()) != null)
 					out.println(line);
