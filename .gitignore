@@ -40,4 +40,5 @@ thumbs.db
 /deps
 /dist
 /target
+/temp
 *.log

@@ -95,23 +95,29 @@ import static net.mtrop.doom.tools.struct.util.ObjectUtils.apply;
  * The editor panel for editing many files at once.
  * @author Matthew Tropiano
  */
-public class MultiFileEditorPanel extends JPanel
+public class EditorMultiFilePanel extends JPanel
 {
 	private static final long serialVersionUID = -3208735521175265227L;
 	
     /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(MultiFileEditorPanel.class); 
+    private static final Logger LOG = DoomToolsLogger.getLogger(EditorMultiFilePanel.class); 
 
     private static final FileFilter[] NO_FILTERS = new FileFilter[0];
 
-	private static final Set<WeakReference<MultiFileEditorPanel>> ACTIVE_PANELS = new HashSet<>(8);
+	private static final Set<WeakReference<EditorMultiFilePanel>> ACTIVE_PANELS = new HashSet<>(8);
 
 	private static final Charset UTF8 = Charset.forName("UTF-8");
 
-	private static final Options DEFAULT_OPTIONS = new MultiFileEditorPanel.Options()
+	private static final Options DEFAULT_OPTIONS = new EditorMultiFilePanel.Options()
 	{
 		@Override
 		public boolean hideStyleChangePanel()
+		{
+			return false;
+		}
+
+		@Override
+		public boolean hideTreeActions()
 		{
 			return false;
 		}
@@ -135,6 +141,8 @@ public class MultiFileEditorPanel extends JPanel
 		String ACTION_GOTO = "goto";
 		String ACTION_FIND = "find";
 		String ACTION_REVEAL = "reveal";
+		String ACTION_REVEAL_TREE = "revealtree";
+		String ACTION_OPEN_DIRECTORY = "opendirectory";
 	}
 	
 	// ======================================================================
@@ -202,6 +210,10 @@ public class MultiFileEditorPanel extends JPanel
 	private Action findAction;
 	/** Reveal Action */
 	private Action revealAction;
+	/** Reveal in Tree Action */
+	private Action revealTreeAction;
+	/** Open Directory Action */
+	private Action openDirectoryAction;
 
 	/** Editor preferences item. */
 	private MenuNode editorPreferencesMenuItem;
@@ -245,7 +257,7 @@ public class MultiFileEditorPanel extends JPanel
 	/**
 	 * Creates a new multi-file editor panel with default options.
 	 */
-	public MultiFileEditorPanel()
+	public EditorMultiFilePanel()
 	{
 		this(DEFAULT_OPTIONS, null);
 	}
@@ -254,7 +266,7 @@ public class MultiFileEditorPanel extends JPanel
 	 * Creates a new multi-file editor panel with default options.
 	 * @param listener the listener.
 	 */
-	public MultiFileEditorPanel(Listener listener)
+	public EditorMultiFilePanel(Listener listener)
 	{
 		this(DEFAULT_OPTIONS, listener);
 	}
@@ -264,7 +276,7 @@ public class MultiFileEditorPanel extends JPanel
 	 * @param options the panel options.
 	 * @param listener the listener.
 	 */
-	public MultiFileEditorPanel(Options options, Listener listener)
+	public EditorMultiFilePanel(Options options, Listener listener)
 	{
 		this.editorProvider = DoomToolsEditorProvider.get();
 		this.icons = DoomToolsIconManager.get();
@@ -303,12 +315,14 @@ public class MultiFileEditorPanel extends JPanel
 		this.findAction = utils.createActionFromLanguageKey("texteditor.action.find", (event) -> openFindDialog());
 		
 		this.revealAction = utils.createActionFromLanguageKey("texteditor.action.reveal", (event) -> openCurrentEditorFileInSystem());
+		this.revealTreeAction = utils.createActionFromLanguageKey("texteditor.action.reveal.tree", (event) -> openCurrentEditorInTree());
+		this.openDirectoryAction = utils.createActionFromLanguageKey("texteditor.action.opendir", (event) -> openCurrentEditorDirectory());
 		
 		final MenuNode[] encodingNodes = createEditorEncodingMenuItems();
 		final MenuNode[] languageNodes = createEditorStyleMenuItems();
 		final MenuNode[] spacingNodes = createEditorSpacingMenuItems();
 		final MenuNode[] lineEndingNodes = createEditorLineEndingMenuItems();
-		final MenuNode[] editorFileNodes = createEditorCurrentFileMenuItems();
+		final MenuNode[] editorFileNodes = createEditorCurrentFileMenuItems(options.hideTreeActions());
 		
 		this.unifiedActionMap = apply(new HashMap<>(), (map) -> {
 			map.put(ActionNames.ACTION_SAVE, saveAction);
@@ -327,6 +341,8 @@ public class MultiFileEditorPanel extends JPanel
 			map.put(ActionNames.ACTION_GOTO, gotoAction);
 			map.put(ActionNames.ACTION_FIND, findAction);
 			map.put(ActionNames.ACTION_REVEAL, revealAction);
+			map.put(ActionNames.ACTION_REVEAL_TREE, revealTreeAction);
+			map.put(ActionNames.ACTION_OPEN_DIRECTORY, openDirectoryAction);
 		});
 		
 		this.filePathLabel = apply(label(" "), (e) -> {
@@ -378,7 +394,7 @@ public class MultiFileEditorPanel extends JPanel
 		
 		synchronized (ACTIVE_PANELS) 
 		{
-			ACTIVE_PANELS.add(new WeakReference<MultiFileEditorPanel>(this));
+			ACTIVE_PANELS.add(new WeakReference<EditorMultiFilePanel>(this));
 		}
 	}
 	
@@ -917,11 +933,11 @@ public class MultiFileEditorPanel extends JPanel
 	{
 		synchronized (ACTIVE_PANELS) 
 		{
-			Iterator<WeakReference<MultiFileEditorPanel>> it = ACTIVE_PANELS.iterator();
+			Iterator<WeakReference<EditorMultiFilePanel>> it = ACTIVE_PANELS.iterator();
 			while (it.hasNext())
 			{
-				WeakReference<MultiFileEditorPanel> panelRef = it.next();
-				MultiFileEditorPanel panel;
+				WeakReference<EditorMultiFilePanel> panelRef = it.next();
+				EditorMultiFilePanel panel;
 				if ((panel = panelRef.get()) != null)
 					panel.reloadSettings();
 				else
@@ -1257,6 +1273,8 @@ public class MultiFileEditorPanel extends JPanel
 		gotoAction.setEnabled(editorPresent);
 		findAction.setEnabled(editorPresent);
 		revealAction.setEnabled(editorPresent && currentEditor.contentSourceFile != null);
+		revealTreeAction.setEnabled(editorPresent && currentEditor.contentSourceFile != null);
+		openDirectoryAction.setEnabled(editorPresent && currentEditor.contentSourceFile != null);
 	}
 	
 	private void updateEncodingLabel()
@@ -1478,6 +1496,30 @@ public class MultiFileEditorPanel extends JPanel
 	}
 	
 	/**
+	 * Opens the current editor's file in the tree. 
+	 */
+	private boolean openCurrentEditorInTree()
+	{
+		if (currentEditor == null)
+			return false;
+		if (listener != null)
+			listener.onTreeRevealRequest(currentEditor);
+		return true;
+	}
+	
+	/**
+	 * Opens the current editor's directory in the tree. 
+	 */
+	private boolean openCurrentEditorDirectory()
+	{
+		if (currentEditor == null)
+			return false;
+		if (listener != null)
+			listener.onTreeDirectoryRequest(currentEditor);
+		return true;
+	}
+	
+	/**
 	 * Clears all highlights/markers on every editor.
 	 */
 	private void clearAllHighlights()
@@ -1544,10 +1586,14 @@ public class MultiFileEditorPanel extends JPanel
 		);
 	}
 	
-	private MenuNode[] createEditorCurrentFileMenuItems()
+	private MenuNode[] createEditorCurrentFileMenuItems(boolean hideTreeActions)
 	{
-		return ArrayUtils.arrayOf(
+		return hideTreeActions ? ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.reveal", revealAction)
+		) : ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("texteditor.action.reveal", revealAction),
+			utils.createItemFromLanguageKey("texteditor.action.reveal.tree", revealTreeAction),
+			utils.createItemFromLanguageKey("texteditor.action.reveal.opendir", openDirectoryAction)
 		);
 	}
 	
@@ -1821,6 +1867,18 @@ public class MultiFileEditorPanel extends JPanel
 		 * @param handle the handle closed.
 		 */
 		void onClose(EditorHandle handle);
+
+		/**
+		 * Called when an editor wants its parent directory shown in the directory tree.
+		 * @param handle the handle.
+		 */
+		void onTreeDirectoryRequest(EditorHandle handle);
+
+		/**
+		 * Called when an editor wants its file shown in the directory tree.
+		 * @param handle the handle.
+		 */
+		void onTreeRevealRequest(EditorHandle handle);
 	}
 
 	/**
@@ -1829,7 +1887,12 @@ public class MultiFileEditorPanel extends JPanel
 	public interface Options
 	{
 		/**
-		 * @return true to allow style changing, false to forbid it.
+		 * @return false to allow tree actions, true to forbid it.
+		 */
+		boolean hideTreeActions();
+
+		/**
+		 * @return false to allow style changing, true to forbid it.
 		 */
 		boolean hideStyleChangePanel();
 	}

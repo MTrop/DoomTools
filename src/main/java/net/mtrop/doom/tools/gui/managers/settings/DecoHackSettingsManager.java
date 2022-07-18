@@ -34,7 +34,7 @@ public final class DecoHackSettingsManager extends DoomToolsSettings
     private static final String PATH_LAST_FILE = "path.lastFile";
     private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
     private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
-    private static final String SHOW_BUDGET = "show.budget";
+    private static final String TREE_WIDTH = "tree.width";
 
 	/* ==================================================================== */
 
@@ -62,6 +62,25 @@ public final class DecoHackSettingsManager extends DoomToolsSettings
 		return getFrameBounds("default");
 	}
 	
+	/**
+	 * Sets tree panel width.
+	 * @param width the width in pixels.
+	 */
+	public void setTreeWidth(int width)
+	{
+		setInteger(TREE_WIDTH, width);
+		commit();
+	}
+	
+	/**
+	 * Gets tree panel width.
+	 * @return the width.
+	 */
+	public int getTreeWidth()
+	{
+		return getInteger(TREE_WIDTH, 250);
+	}
+		
 	/**
 	 * @return if the main DoomTools window should be maximized.
 	 */
@@ -122,24 +141,6 @@ public final class DecoHackSettingsManager extends DoomToolsSettings
 	public File getLastExportSourceFile() 
 	{
 		return getFile(EXPORT_SOURCE_PATH_LAST_FILE);
-	}
-
-	/**
-	 * Sets the last state of "showing the budget".
-	 * @param enabled the enabled state.
-	 */
-	public void setShowBudgetDefault(boolean enabled) 
-	{
-		setBoolean(SHOW_BUDGET, enabled);
-		commit();
-	}
-
-	/**
-	 * @return the last state of "showing the budget".
-	 */
-	public boolean getShowBudgetDefault() 
-	{
-		return getBoolean(SHOW_BUDGET);
 	}
 
 }

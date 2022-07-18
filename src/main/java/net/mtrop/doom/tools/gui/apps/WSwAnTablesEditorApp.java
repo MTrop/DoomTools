@@ -33,15 +33,13 @@ import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -104,10 +102,16 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	{
 		this.settings = WSwAnTablesSettingsManager.get();
 		
-		this.editorPanel = new DefSwAniEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new DefSwAniEditorPanel(new EditorMultiFilePanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
+			{
+				return true;
+			}
+
+			@Override
+			public boolean hideTreeActions()
 			{
 				return true;
 			}
@@ -125,26 +129,38 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
+			}
+
+			@Override
+			public void onTreeDirectoryRequest(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+
+			@Override
+			public void onTreeRevealRequest(EditorHandle handle)
+			{
+				// Do nothing.
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = getUtils().createActionFromLanguageKey("wswantbl.menu.patch.item.export", (e) -> onExport());
+		this.exportAction = utils.createActionFromLanguageKey("wswantbl.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -154,7 +170,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wswantbl.editor.title");
+		return language.getText("wswantbl.editor.title");
 	}
 
 	@Override
@@ -168,8 +184,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonFileMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wswantbl.menu.file.item.new",
 				utils.createItemFromLanguageKey("wswantbl.menu.file.item.new.item.main", (i) -> onNewEditor()),
@@ -190,8 +204,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
 			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
@@ -208,14 +220,12 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonPatchMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			getUtils().createItemFromLanguageKey("wswantbl.menu.patch.item.export", exportAction)
+			utils.createItemFromLanguageKey("wswantbl.menu.patch.item.export", exportAction)
 		);
 	}
 	
 	private MenuNode[] createCommonEditorMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
@@ -232,8 +242,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wswantbl.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -252,8 +260,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wswantbl.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wswantbl.menu.edit", createCommonEditMenuItems()),
@@ -280,7 +286,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -400,13 +406,13 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onOpenEditor()
 	{
-		File file = getUtils().chooseFile(
+		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wswantbl.open.title"), 
-			getLanguage().getText("wswantbl.open.accept"),
+			language.getText("wswantbl.open.title"), 
+			language.getText("wswantbl.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().createDEFSWANIFileFilter()
+			utils.createDEFSWANIFileFilter()
 		);
 		
 		if (file != null)
@@ -415,13 +421,10 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenEditorFromWAD()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		DoomToolsLanguageManager language = getLanguage();
-		
 		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wswantbl.open.wad.title"), 
-			getLanguage().getText("wswantbl.open.wad.accept"),
+			language.getText("wswantbl.open.wad.title"), 
+			language.getText("wswantbl.open.wad.accept"),
 			settings::getLastOpenedWAD,
 			settings::setLastOpenedWAD,
 			utils.createWADFileFilter()
@@ -492,8 +495,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onOpenFile(File file)
 	{
-		DoomToolsLanguageManager language = getLanguage();
-		
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
@@ -513,9 +514,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	
 	private boolean saveBeforeExecute()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		DoomToolsLanguageManager language = getLanguage();
-		
 		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
 			Boolean saveChoice = modal(
@@ -545,7 +543,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("wswantbl.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), language.getText("wswantbl.error.mustsave"));
 			return;
 		}
 		
@@ -575,17 +573,15 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
-		getCommon().onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, processSettings);
+		appCommon.onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, processSettings);
 	}
 
 	private DefSwAniExportSettings createExportSettings(File sourceFile, final DefSwAniExportSettings initSettings) 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		final DefSwAniExportPanel argsPanel = new DefSwAniExportPanel(initSettings);
 		argsPanel.setPreferredSize(dimension(400, 100));
 		DefSwAniExportSettings settings = utils.createSettingsModal(
-			getLanguage().getText("wswantbl.export.title"),
+			language.getText("wswantbl.export.title"),
 			argsPanel,
 			(panel) -> {
 				DefSwAniExportSettings out = new DefSwAniExportSettings();
@@ -603,8 +599,6 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -612,10 +606,10 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
 	}
 
-	private class DefSwAniEditorPanel extends MultiFileEditorPanel
+	private class DefSwAniEditorPanel extends EditorMultiFilePanel
 	{
 		private static final long serialVersionUID = -9024669807749249148L;
 		
@@ -647,7 +641,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createDEFSWANIFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{utils.createDEFSWANIFileFilter()} : TYPES;
 		}
 	
 		@Override

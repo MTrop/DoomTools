@@ -11,6 +11,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,10 +24,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 import javax.swing.DropMode;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
@@ -33,25 +41,32 @@ import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
+import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.swing.ModalFactory.Modal;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
 /**
@@ -60,8 +75,6 @@ import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
  */
 public class DirectoryTreePanel extends JPanel
 {
-	// TODO: NOT DONE. Finish this!
-	
 	private static final long serialVersionUID = 5496698746549135647L;
 	
     /** Logger. */
@@ -80,6 +93,7 @@ public class DirectoryTreePanel extends JPanel
 	
 	private DoomToolsGUIUtils utils;
 	private DoomToolsLanguageManager language;
+	private DoomToolsTaskManager tasks;
 	
 	// Components
 
@@ -103,6 +117,14 @@ public class DirectoryTreePanel extends JPanel
 	private KeyStroke deleteKeyStroke;
 	private KeyStroke refreshKeystroke;
 
+	/**
+	 * Creates a file tree panel.
+	 */
+	public DirectoryTreePanel()
+	{
+		this(null, false, null);
+	}
+	
 	/**
 	 * Creates a file tree panel.
 	 * @param rootDirectory the root directory.
@@ -130,24 +152,11 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	public DirectoryTreePanel(File rootDirectory, boolean readOnly, DirectoryTreeListener directoryTreeListener)
 	{
-		if (!rootDirectory.isDirectory())
-			throw new IllegalArgumentException(rootDirectory.getPath() + " is not a directory.");
-		
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
-		
-		FileTree tree = new FileTree(rootDirectory, readOnly);
-		FileTreeListener treeListener = new FileTreeListener();
-		tree.addTreeSelectionListener(treeListener);
-		tree.addTreeWillExpandListener(treeListener);
-		tree.addTreeExpansionListener(treeListener);
-		
-		FileTreeInputListener inputListener = new FileTreeInputListener();
-		tree.addKeyListener(inputListener);
-		tree.addMouseListener(inputListener);
+		this.tasks = DoomToolsTaskManager.get();
 		
 		this.rootDirectory = FileUtils.canonizeFile(rootDirectory);
-		this.fileTree = tree;
 		this.directoryTreeListener = directoryTreeListener;
 
 		this.singleFilePopupMenu = createSingleFilePopupMenu();
@@ -159,6 +168,18 @@ public class DirectoryTreePanel extends JPanel
 		this.deleteKeyStroke = language.getKeyStroke("texteditor.action.delete.keystroke");
 		this.refreshKeystroke = language.getKeyStroke("dirtree.popup.menu.item.refresh.keystroke");
 
+		FileTree tree = new FileTree(rootDirectory, readOnly);
+		FileTreeListener treeListener = new FileTreeListener();
+		tree.addTreeSelectionListener(treeListener);
+		tree.addTreeWillExpandListener(treeListener);
+		tree.addTreeExpansionListener(treeListener);
+		
+		FileTreeInputListener inputListener = new FileTreeInputListener();
+		tree.addKeyListener(inputListener);
+		tree.addMouseListener(inputListener);
+
+		this.fileTree = tree;
+		
 		containerOf(this,
 			node(BorderLayout.CENTER, scroll(tree))
 		);
@@ -568,8 +589,23 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onPasteFiles(File parent, File[] filesToPaste)
 	{
-		// TODO: Move or Copy, Overwrite or No
-		System.out.println(parent.getPath() + ": " + Arrays.toString(filesToPaste));
+		String dialogtitle = language.getText("dirtree.modal.paste.title");
+		String dialogLabel = language.getText("dirtree.modal.paste.message", filesToPaste.length, parent.getAbsolutePath());
+		
+		// Copy and skip/overwrite.
+		Boolean overwrite = utils.createModal(dialogtitle, containerOf(node(BorderLayout.CENTER, wrappedLabel(dialogLabel))), 
+			utils.createChoiceFromLanguageKey("dirtree.modal.paste.choice.copyskip", (Boolean)false),
+			utils.createChoiceFromLanguageKey("dirtree.modal.paste.choice.copyover", (Boolean)true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
+		).openThenDispose();
+		
+		if (overwrite == null)
+			return;
+
+		doFileRelocate(parent, filesToPaste, overwrite, "dirtree.newfile.modal.copy.title", "dirtree.newfile.copy.result");
+		
+		if (directoryTreeListener != null)
+			directoryTreeListener.onFilesCopied(filesToPaste);
 	}
 
 	/**
@@ -577,8 +613,24 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onDroppedFiles(File[] filesToPaste)
 	{
-		// TODO: Move or Copy, Overwrite or No
-		System.out.println("DROP: " + fileTree.getDropLocation().getPath() + ": " + Arrays.toString(filesToPaste));
+		File parent = ((FileNode)fileTree.getDropLocation().getPath().getLastPathComponent()).file;
+		if (!parent.isDirectory())
+			parent = parent.getParentFile();
+		
+		String dialogtitle = language.getText("dirtree.modal.drop.title");
+		String dialogLabel = language.getText("dirtree.modal.drop.message", filesToPaste.length, parent.getAbsolutePath());
+		
+		// Copy and skip/overwrite.
+		Boolean overwrite = utils.createModal(dialogtitle, containerOf(node(BorderLayout.CENTER, wrappedLabel(dialogLabel))), 
+			utils.createChoiceFromLanguageKey("dirtree.modal.drop.choice.copyskip", (Boolean)false),
+			utils.createChoiceFromLanguageKey("dirtree.modal.drop.choice.copyover", (Boolean)true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
+		).openThenDispose();
+		
+		if (overwrite == null)
+			return;
+
+		doFileRelocate(parent, filesToPaste, overwrite, "dirtree.newfile.modal.copy.title", "dirtree.newfile.copy.result");
 	}
 
 	/**
@@ -586,10 +638,33 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onDeleteSelectedFiles()
 	{
-		// TODO: Ask to confirm.
-		// TODO: Delete files / directories.
-		// TODO: For each deleted, remove node from tree.
-		System.out.println("DELETE: " + Arrays.toString(getSelectedFiles()));
+		File[] selectedFiles = getSelectedFiles();
+
+		if (SwingUtils.noTo(language.getText("dirtree.delete", selectedFiles.length)))
+			return;
+
+		File[] out = NO_FILES;
+		
+		for (int i = 0; i < selectedFiles.length; i++)
+		{
+			if (FileUtils.filePathEquals(selectedFiles[i], rootDirectory))
+				continue;
+			
+			out = FileUtils.deleteDirectory(selectedFiles[i], true);
+			
+			File parent = selectedFiles[i].getParentFile();
+			if (parent == null)
+				continue;
+			TreePath path = getTreePathForFile(parent);
+			if (path == null)
+				reloadNode((FileNode)((FileTreeModel)fileTree.getModel()).getRoot());
+			else
+				reloadNode((FileNode)path.getLastPathComponent());
+		}
+		
+		SwingUtils.info(language.getText("dirtree.delete.result", out.length));
+		if (directoryTreeListener != null)
+			directoryTreeListener.onFilesDeleted(out);
 	}
 
 	/**
@@ -632,6 +707,79 @@ public class DirectoryTreePanel extends JPanel
 		((FileTreeModel)fileTree.getModel()).reload(node);
 	}
 
+	private void doFileRelocate(File parent, File[] filesToPaste, Boolean overwrite, String titleKey, String resultKey) 
+	{
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+		final AtomicInteger result = new AtomicInteger(0);
+		JLabel fileLabel = label();
+		JProgressBar progressBar = progressBar();
+		progressBar.setMinimum(0);
+		progressBar.setMaximum(filesToPaste.length);
+		progressBar.setPreferredSize(dimension(100, 20));
+		
+		final Modal<Void> modal = modal(language.getText(titleKey), containerOf(gridLayout(2, 1, 0, 4),
+			node(BorderLayout.NORTH, fileLabel),
+			node(BorderLayout.SOUTH, progressBar)
+		));
+		
+		InstancedFuture<Void> copyTask = tasks.spawn(createCopyTask(parent, filesToPaste, overwrite, cancelSwitch, result, (file, progress) -> {
+			fileLabel.setText(file != null ? file.getName() + "..." : "");
+			progressBar.setValue(progress);
+			if (progress == filesToPaste.length)
+				modal.dispose();
+		}));
+		
+		modal.openThenDispose(); // on close, continue
+		cancelSwitch.set(true);  // cancel to stop task if not over.
+		copyTask.result();       // join task
+	
+		SwingUtils.info(language.getText(resultKey, result.get()));
+		
+		reloadNode((FileNode)getTreePathForFile(parent).getLastPathComponent());
+	}
+
+	private Runnable createCopyTask(File parent, File[] toCopy, boolean overwrite, AtomicBoolean cancelSwitch, AtomicInteger result, BiConsumer<File, Integer> eachFile)
+	{
+		//TODO: Do something about folder copy.
+		return () -> 
+		{
+			for (int i = 0; i < toCopy.length; i++) 
+			{
+				if (cancelSwitch.get())
+					return;
+				
+				File source = toCopy[i];
+				File target = new File(parent.getAbsolutePath() + File.separator + source.getName());
+				FileUtils.createPathForFile(target);
+				eachFile.accept(target, i);
+				if (overwrite || !target.exists())
+				{
+					try (FileInputStream fis = new FileInputStream(source); FileOutputStream fos = new FileOutputStream(target))
+					{
+						IOUtils.relay(fis, fos);
+						result.incrementAndGet();
+					} 
+					catch (FileNotFoundException e)
+					{
+						SwingUtils.error(language.getText("dirtree.newfile.copy.notfound", source));
+						target.delete();
+					} 
+					catch (IOException e)
+					{
+						SwingUtils.error(language.getText("dirtree.newfile.copy.ioerror", target));
+						target.delete();
+					}
+					catch (SecurityException e)
+					{
+						SwingUtils.error(language.getText("dirtree.newfile.copy.security"));
+						target.delete();
+					}
+				}
+			}
+			eachFile.accept(null, toCopy.length);
+		};
+	}
+
 	/**
 	 * Listener interface for tree actions.
 	 */
@@ -639,8 +787,9 @@ public class DirectoryTreePanel extends JPanel
 	{
 		/**
 		 * Called when a file selection changes.
+		 * @param selectedFiles the selected files.
 		 */
-		void onFileSelectionChange();
+		void onFileSelectionChange(File[] selectedFiles);
 		
 		/**
 		 * Called when a file is confirmed via selection (double-click).
@@ -655,23 +804,6 @@ public class DirectoryTreePanel extends JPanel
 		 */
 		void onFileRename(File changedFile, String newName);
 		
-		/**
-		 * Called when a new file was already inserted into the tree.
-		 * @param fileName the name of the new file (just name).
-		 * @param parentFile its parent file. Must be a directory.
-		 * @param directory if the added file is a directory.
-		 * @return true if the insert was successful.
-		 */
-		boolean onFileInsert(String fileName, File parentFile, boolean directory);
-		
-		/**
-		 * Called when a group of files were already dropped into a place in the tree.
-		 * @param parentFile the parent node in the tree. Must be a directory.
-		 * @param droppedSourceFiles the array of file paths that were dropped in. 
-		 * @return true if the files were moved/copied, false otherwise.
-		 */
-		boolean onFilesDropped(File parentFile, File[] droppedSourceFiles);
-	
 		/**
 		 * Called when a group of files were already copied into the clipboard.
 		 * @param copiedFiles the files to copy.
@@ -704,7 +836,9 @@ public class DirectoryTreePanel extends JPanel
 
 			setTransferHandler(new FileTransferTreeHandler());
 			setDragEnabled(true);
-			setDropMode(DropMode.ON_OR_INSERT);
+			setDropMode(DropMode.ON);
+			
+			setCellRenderer(new FileTreeCellRenderer());
 		}
 		
 		/**
@@ -850,7 +984,7 @@ public class DirectoryTreePanel extends JPanel
 		public void valueChanged(TreeSelectionEvent event)
 		{
 			if (directoryTreeListener != null)
-				directoryTreeListener.onFileSelectionChange();
+				directoryTreeListener.onFileSelectionChange(getSelectedFiles());
 		}
 		
 		@Override
@@ -891,6 +1025,26 @@ public class DirectoryTreePanel extends JPanel
 			super(root);
 		}
 	}
+
+	/**
+	 * The cell renderer.
+	 * Maybe one day this will have custom icons, but for now this is to make it so that
+	 * FileNode.toString() does not affect Tree presentation (because it affects traversal).
+	 */
+	private static class FileTreeCellRenderer extends DefaultTreeCellRenderer
+	{
+		private static final long serialVersionUID = -661862086263680971L;
+
+		@Override
+		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) 
+		{
+			JLabel label = (JLabel)super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+			if (value instanceof FileNode)
+				label.setText(((FileNode)value).file.getName());
+			return label;
+		}
+	}
+	
 	
 	/**
 	 * A single node in the file tree.

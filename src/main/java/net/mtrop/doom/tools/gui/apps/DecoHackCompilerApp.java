@@ -15,7 +15,6 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.DecoHackCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DecoHackExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -83,10 +82,10 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				getLanguage().getText("decohack.export.source.browse.title"), 
+				language.getText("decohack.export.source.browse.title"), 
 				current, 
-				getLanguage().getText("decohack.export.source.browse.accept"),
-				getUtils().createDecoHackFileFilter() 
+				language.getText("decohack.export.source.browse.accept"),
+				utils.createDecoHackFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -106,16 +105,14 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("decohack.compiler.title");
+		return language.getText("decohack.compiler.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return containerOf(dimension(400, 200), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("decohack.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("decohack.export.label.width")),
 				utils.formField("decohack.export.source", sourceFileField),
 				utils.formField("decohack.export.charset", charsetField)
 			)),
@@ -132,8 +129,6 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-
 		return menuBar(
 			utils.createMenuFromLanguageKey("decohack.menu.file",
 				utils.createItemFromLanguageKey("decohack.menu.file.item.exit", (i) -> attemptClose())
@@ -165,7 +160,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 	}
 
 	@Override
@@ -224,14 +219,12 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		exportSettings.setOutputFile(exportPanel.getPatchOutput());
 		exportSettings.setSourceOutputFile(exportPanel.getSourceOutput());
 		exportSettings.setOutputBudget(exportPanel.getBudget());
-		getCommon().onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, encoding, exportSettings);
+		appCommon.onExecuteDecoHack(getApplicationContainer(), statusPanel, scriptFile, encoding, exportSettings);
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (b) -> onHelpChangelog())
 		); 
@@ -239,7 +232,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-decohack.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-decohack.md")).open();
 	}
 	
 }

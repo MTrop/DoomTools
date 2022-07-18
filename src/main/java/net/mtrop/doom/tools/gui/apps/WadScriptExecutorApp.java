@@ -15,7 +15,6 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WadScriptExecutorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
@@ -83,10 +82,10 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				getLanguage().getText("wadscript.run.source.browse.title"), 
+				language.getText("wadscript.run.source.browse.title"), 
 				current, 
-				getLanguage().getText("wadscript.run.source.browse.accept"),
-				getUtils().createWadScriptFileFilter()
+				language.getText("wadscript.run.source.browse.accept"),
+				utils.createWadScriptFileFilter()
 			),
 			(selected) -> {
 				if (selected != null)
@@ -106,16 +105,14 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wadscript.executor.title");
+		return language.getText("wadscript.executor.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadscript.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadscript.run.withargs.label.width")),
 				utils.formField("wadscript.run.withargs.source", sourceFileField),
 				utils.formField("wadscript.run.withargs.charset", charsetField)
 			)),
@@ -132,8 +129,6 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadscript.menu.file",
 				utils.createItemFromLanguageKey("wadscript.menu.file.item.exit", (i) -> attemptClose())
@@ -165,7 +160,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 	}
 
 	@Override
@@ -237,14 +232,12 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		executionSettings.setStandardInPath(executePanel.getStandardInPath());
 		executionSettings.setEntryPoint(executePanel.getEntryPoint());
 		executionSettings.setArgs(executePanel.getArgs());
-		getCommon().onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadScript(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -252,7 +245,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadscript.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wadscript.md")).open();
 	}
 
 }

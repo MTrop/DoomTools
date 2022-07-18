@@ -15,7 +15,6 @@ import javax.swing.JMenuBar;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WadMergeExecutorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
@@ -83,10 +82,10 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				getLanguage().getText("wadmerge.run.source.browse.title"), 
+				language.getText("wadmerge.run.source.browse.title"), 
 				current, 
-				getLanguage().getText("wadmerge.run.source.browse.accept"),
-				getUtils().createWadMergeFileFilter() 
+				language.getText("wadmerge.run.source.browse.accept"),
+				utils.createWadMergeFileFilter() 
 			),
 			(selected) -> {
 				if (selected != null)
@@ -106,16 +105,14 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wadmerge.executor.title");
+		return language.getText("wadmerge.executor.title");
 	}
 
 	@Override
 	public Container createContentPane() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return containerOf(dimension(400, 400), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadmerge.run.withargs.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadmerge.run.withargs.label.width")),
 				utils.formField("wadmerge.run.withargs.source", sourceFileField),
 				utils.formField("wadmerge.run.withargs.charset", charsetField)
 			)),
@@ -132,8 +129,6 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadmerge.menu.file",
 				utils.createItemFromLanguageKey("wadmerge.menu.file.item.exit", (i) -> attemptClose())
@@ -165,7 +160,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadmerge.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadmerge.status.message.ready"));
 	}
 
 	@Override
@@ -228,14 +223,12 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		MergeSettings executionSettings = new MergeSettings();
 		executionSettings.setWorkingDirectory(executePanel.getWorkingDirectory());
 		executionSettings.setArgs(executePanel.getArgs());
-		getCommon().onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, encoding, executionSettings);
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -243,7 +236,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 	
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
 	}
 	
 }

@@ -64,10 +64,10 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
     	this.settings = DImageConvertSettingsManager.get();
     	
 		this.inputFileField = fileField(
-			(current) -> getUtils().chooseFileOrDirectory(
+			(current) -> utils.chooseFileOrDirectory(
 				getApplicationContainer(), 
-				getLanguage().getText("dimgconv.inputfile.browse.title"), 
-				getLanguage().getText("dimgconv.inputfile.browse.accept"), 
+				language.getText("dimgconv.inputfile.browse.title"), 
+				language.getText("dimgconv.inputfile.browse.accept"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile
 			)
@@ -76,19 +76,19 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		this.recursiveField = checkBoxField(checkBox(false));
 		
 		this.paletteSourceField = fileField(
-			(current) -> getUtils().chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(), 
-				getLanguage().getText("dimgconv.palette.browse.title"), 
-				getLanguage().getText("dimgconv.palette.browse.accept"), 
+				language.getText("dimgconv.palette.browse.title"), 
+				language.getText("dimgconv.palette.browse.accept"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile
 			)
 		);
 
-		JRadioButton graphicButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.graphics", true);
-		JRadioButton flatButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.flats", false);
-		JRadioButton colormapButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.colormaps", false);
-		JRadioButton paletteButton = getUtils().createRadioButtonFromLanguageKey("dimgconv.button.palettes", false);
+		JRadioButton graphicButton = utils.createRadioButtonFromLanguageKey("dimgconv.button.graphics", true);
+		JRadioButton flatButton = utils.createRadioButtonFromLanguageKey("dimgconv.button.flats", false);
+		JRadioButton colormapButton = utils.createRadioButtonFromLanguageKey("dimgconv.button.colormaps", false);
+		JRadioButton paletteButton = utils.createRadioButtonFromLanguageKey("dimgconv.button.palettes", false);
 
 		group(graphicButton, flatButton, colormapButton, paletteButton);
 		
@@ -100,10 +100,10 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		this.infoFileNameField = stringField(true);
 		
 		this.outputFileField = fileField(
-			(current) -> getUtils().chooseFileOrDirectory(
+			(current) -> utils.chooseFileOrDirectory(
 				getApplicationContainer(), 
-				getLanguage().getText("dimgconv.outputfile.browse.title"), 
-				getLanguage().getText("dimgconv.outputfile.browse.accept"), 
+				language.getText("dimgconv.outputfile.browse.title"), 
+				language.getText("dimgconv.outputfile.browse.accept"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile
 			)
@@ -115,7 +115,7 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("dimgconv.title");
+		return language.getText("dimgconv.title");
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		return containerOf(dimension(350, 242), borderLayout(0, 4),
 			node(BorderLayout.NORTH, containerOf(borderLayout(0, 4),
-				node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("dimgconv.label.width")),
+				node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("dimgconv.label.width")),
 					utils.formField("dimgconv.inputfile", inputFileField),
 					utils.formField("dimgconv.recurse", recursiveField),
 					utils.formField("dimgconv.palette", paletteSourceField),
@@ -147,8 +147,6 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("dimgconv.menu.file",
 				utils.createItemFromLanguageKey("dimgconv.menu.file.item.exit", (i) -> attemptClose())
@@ -221,7 +219,7 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("dmxconv.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("dmxconv.status.message.ready"));
 	}
 
 	@Override
@@ -243,7 +241,7 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		GraphicsMode mode = getGraphicsMode();
 		String infoFileName = infoFileNameField.getValue();
 		
-		getCommon().onExecuteDImgConv(getApplicationContainer(), statusPanel, inputFile, outputFile, recursive, paletteSource, mode, infoFileName);
+		appCommon.onExecuteDImgConv(getApplicationContainer(), statusPanel, inputFile, outputFile, recursive, paletteSource, mode, infoFileName);
 	}
 
 	private GraphicsMode getGraphicsMode()
@@ -259,8 +257,6 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.help", (i) -> onHelp()),
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
@@ -269,12 +265,12 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 
 	private void onHelp()
 	{
-		getUtils().createHelpModal(getUtils().helpProcess(DoomImageConvertMain.class, "--help")).open();
+		utils.createHelpModal(utils.helpProcess(DoomImageConvertMain.class, "--help")).open();
 	}
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-dimgconv.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-dimgconv.md")).open();
 	}
 	
 }

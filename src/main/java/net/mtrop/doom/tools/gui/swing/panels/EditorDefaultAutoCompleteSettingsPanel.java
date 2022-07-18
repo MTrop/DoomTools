@@ -6,7 +6,7 @@ import javax.swing.KeyStroke;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorAutoCompleteSettings;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;

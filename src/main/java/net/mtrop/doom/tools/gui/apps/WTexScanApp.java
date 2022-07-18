@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel;
@@ -52,7 +51,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return getLanguage().getText("wtexscan.title");
+		return language.getText("wtexscan.title");
 	}
 	
 	@Override
@@ -101,8 +100,6 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtexscan.menu.file",
 				utils.createItemFromLanguageKey("wtexscan.menu.file.item.exit", (i) -> attemptClose())
@@ -125,7 +122,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(getUtils().createButtonFromLanguageKey("wtexscan.button.start", (i) -> onScanMaps()))
+					node(utils.createButtonFromLanguageKey("wtexscan.button.start", (i) -> onScanMaps()))
 				))
 			))
 		);
@@ -148,7 +145,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wtexscan.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wtexscan.status.message.ready"));
 	}
 
 	@Override
@@ -169,7 +166,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		boolean noMessages = parametersPanel.getNoCommentMessages();
 		String mapName = parametersPanel.getMapName();
 		
-		getCommon().onExecuteWTexScan(getApplicationContainer(), statusPanel, 
+		appCommon.onExecuteWTexScan(getApplicationContainer(), statusPanel, 
 			files, 
 			mode, 
 			noSkies, 
@@ -181,8 +178,6 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -190,7 +185,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wtexscan.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wtexscan.md")).open();
 	}
 	
 }

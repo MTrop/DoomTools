@@ -21,14 +21,12 @@ import javax.swing.filechooser.FileFilter;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WadMergeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
@@ -107,10 +105,16 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	{
 		this.settings = WadMergeSettingsManager.get();
 		
-		this.editorPanel = new WadMergeEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new WadMergeEditorPanel(new EditorMultiFilePanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
+			{
+				return true;
+			}
+
+			@Override
+			public boolean hideTreeActions()
 			{
 				return true;
 			}
@@ -128,27 +132,39 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(getLanguage().getText("wadmerge.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(language.getText("wadmerge.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wadmerge.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wadmerge.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wadmerge.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wadmerge.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
+			}
+
+			@Override
+			public void onTreeDirectoryRequest(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+
+			@Override
+			public void onTreeRevealRequest(EditorHandle handle)
+			{
+				// Do nothing.
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.runAction = getUtils().createActionFromLanguageKey("wadmerge.menu.run.item.run", (e) -> onRunAgain());
-		this.runParametersAction = getUtils().createActionFromLanguageKey("wadmerge.menu.run.item.params", (e) -> onRunWithArgs());
+		this.runAction = utils.createActionFromLanguageKey("wadmerge.menu.run.item.run", (e) -> onRunAgain());
+		this.runParametersAction = utils.createActionFromLanguageKey("wadmerge.menu.run.item.params", (e) -> onRunWithArgs());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -158,7 +174,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wadmerge.editor.title");
+		return language.getText("wadmerge.editor.title");
 	}
 
 	@Override
@@ -172,8 +188,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonFileMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadmerge.menu.file.item.new",
 				utils.createItemFromLanguageKey("wadmerge.menu.file.item.new.item.main", (i) -> onNewEditor()),
@@ -193,8 +207,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
 			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
@@ -210,8 +222,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createWadScriptRunMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadmerge.menu.run.item.run", runAction),
 			utils.createItemFromLanguageKey("wadmerge.menu.run.item.params", runParametersAction)
@@ -220,8 +230,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonEditorMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
@@ -238,8 +246,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadmerge.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -258,8 +264,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadmerge.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wadmerge.menu.edit", createCommonEditMenuItems()),
@@ -286,7 +290,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadscript.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -403,13 +407,13 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	{
 		final Container parent = getApplicationContainer();
 		
-		File file = getUtils().chooseFile(
+		File file = utils.chooseFile(
 			parent, 
-			getLanguage().getText("wadmerge.open.title"), 
-			getLanguage().getText("wadmerge.open.accept"),
+			language.getText("wadmerge.open.title"), 
+			language.getText("wadmerge.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().createWadScriptFileFilter()
+			utils.createWadScriptFileFilter()
 		);
 		
 		if (file != null)
@@ -418,7 +422,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenFile(File file)
 	{
-		DoomToolsLanguageManager language = getLanguage();
 		final Container parent = getApplicationContainer();
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
@@ -441,12 +444,11 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	{
 		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
-			DoomToolsGUIUtils utils = getUtils();
 			Boolean saveChoice = modal(
 				getApplicationContainer(), 
 				utils.getWindowIcons(), 
-				getLanguage().getText("wadmerge.run.save.modal.title"),
-				containerOf(label(getLanguage().getText("wadmerge.run.save.modal.message", currentHandle.getEditorTabName()))), 
+				language.getText("wadmerge.run.save.modal.title"),
+				containerOf(label(language.getText("wadmerge.run.save.modal.message", currentHandle.getEditorTabName()))), 
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
 				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
 				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
@@ -497,7 +499,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, mergeSettings);
-		getCommon().onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
 	}
 	
 	private void onRunAgain()
@@ -532,15 +534,14 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, mergeSettings);
-		getCommon().onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
+		appCommon.onExecuteWadMerge(getApplicationContainer(), statusPanel, scriptFile, currentHandle.getContentCharset(), mergeSettings);
 	}
 
 	private MergeSettings createMergeSettings(MergeSettings initSettings) 
 	{
-		DoomToolsGUIUtils utils = getUtils();
 		final WadMergeExecuteWithArgsPanel argsPanel = new WadMergeExecuteWithArgsPanel(initSettings);
 		MergeSettings settings = utils.createSettingsModal(
-			getLanguage().getText("wadmerge.run.withargs.title"),
+			language.getText("wadmerge.run.withargs.title"),
 			argsPanel,
 			(panel) -> {
 				MergeSettings out = new MergeSettings();
@@ -558,8 +559,6 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog()),
 			utils.createItemFromLanguageKey("wadmerge.menu.help.item.reference", (i) -> onCommandReference())
@@ -568,15 +567,15 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wadmerge.md")).open();
 	}
 
 	private void onCommandReference()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/WadMerge Help.txt")).open();
+		utils.createHelpModal(utils.helpResource("docs/WadMerge Help.txt")).open();
 	}
 
-	private class WadMergeEditorPanel extends MultiFileEditorPanel
+	private class WadMergeEditorPanel extends EditorMultiFilePanel
 	{
 		private static final long serialVersionUID = 5845859384586630726L;
 		
@@ -608,7 +607,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createWadScriptFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{utils.createWadScriptFileFilter()} : TYPES;
 		}
 	
 		@Override

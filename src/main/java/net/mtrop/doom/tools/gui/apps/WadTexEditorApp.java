@@ -37,14 +37,12 @@ import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WadTexSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.ActionNames;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorHandle;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexExportPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
@@ -110,10 +108,16 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	{
 		this.settings = WadTexSettingsManager.get();
 		
-		this.editorPanel = new WadTexEditorPanel(new MultiFileEditorPanel.Options() 
+		this.editorPanel = new WadTexEditorPanel(new EditorMultiFilePanel.Options() 
 		{
 			@Override
 			public boolean hideStyleChangePanel() 
+			{
+				return true;
+			}
+
+			@Override
+			public boolean hideTreeActions()
 			{
 				return true;
 			}
@@ -131,26 +135,38 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 			public void onSave(EditorHandle handle) 
 			{
 				File sourceFile = handle.getContentSourceFile();
-				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.saved", sourceFile.getName()));
+				statusPanel.setSuccessMessage(language.getText("wadtex.status.message.saved", sourceFile.getName()));
 				onHandleChange();
 			}
 
 			@Override
 			public void onOpen(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.editor.open", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wadtex.status.message.editor.open", handle.getEditorTabName()));
 			}
 
 			@Override
 			public void onClose(EditorHandle handle) 
 			{
-				statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.editor.close", handle.getEditorTabName()));
+				statusPanel.setSuccessMessage(language.getText("wadtex.status.message.editor.close", handle.getEditorTabName()));
 				handleToSettingsMap.remove(handle);
+			}
+
+			@Override
+			public void onTreeDirectoryRequest(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+
+			@Override
+			public void onTreeRevealRequest(EditorHandle handle)
+			{
+				// Do nothing.
 			}
 		});
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		this.exportAction = getUtils().createActionFromLanguageKey("wadtex.menu.patch.item.export", (e) -> onExport());
+		this.exportAction = utils.createActionFromLanguageKey("wadtex.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
 		this.handleToSettingsMap = new HashMap<>();
@@ -160,7 +176,7 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wadtex.editor.title");
+		return language.getText("wadtex.editor.title");
 	}
 
 	@Override
@@ -174,8 +190,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 
 	private MenuNode[] createCommonFileMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("wadtex.menu.file.item.new",
 				utils.createItemFromLanguageKey("wadtex.menu.file.item.new.item.main", (i) -> onNewEditor()),
@@ -196,8 +210,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	
 	private MenuNode[] createCommonEditMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.undo", editorPanel.getActionFor(ActionNames.ACTION_UNDO)),
 			utils.createItemFromLanguageKey("texteditor.action.redo", editorPanel.getActionFor(ActionNames.ACTION_REDO)),
@@ -214,14 +226,12 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	private MenuNode[] createCommonPatchMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			getUtils().createItemFromLanguageKey("wadtex.menu.patch.item.export", exportAction)
+			utils.createItemFromLanguageKey("wadtex.menu.patch.item.export", exportAction)
 		);
 	}
 	
 	private MenuNode[] createCommonEditorMenuItems()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("texteditor.action.goto", editorPanel.getActionFor(ActionNames.ACTION_GOTO)),
 			utils.createItemFromLanguageKey("texteditor.action.find", editorPanel.getActionFor(ActionNames.ACTION_FIND)),
@@ -238,8 +248,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadtex.menu.file", ArrayUtils.joinArrays(
 				createCommonFileMenuItems(),
@@ -258,8 +266,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createInternalMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadtex.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("wadtex.menu.edit", createCommonEditMenuItems()),
@@ -286,7 +292,7 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadtex.status.message.ready"));
 		if (editorPanel.getOpenEditorCount() == 0)
 		{
 			if (fileToOpenFirst != null && fileToOpenFirst.exists() && !fileToOpenFirst.isDirectory())
@@ -411,13 +417,13 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 
 	private void onOpenEditor()
 	{
-		File file = getUtils().chooseFile(
+		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wadtex.open.title"), 
-			getLanguage().getText("wadtex.open.accept"),
+			language.getText("wadtex.open.title"), 
+			language.getText("wadtex.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			getUtils().createTextFileFilter()
+			utils.createTextFileFilter()
 		);
 		
 		if (file != null)
@@ -426,13 +432,10 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	
 	private void onOpenEditorFromWAD()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		DoomToolsLanguageManager language = getLanguage();
-		
 		File file = utils.chooseFile(
 			getApplicationContainer(), 
-			getLanguage().getText("wadtex.open.wad.title"), 
-			getLanguage().getText("wadtex.open.wad.accept"),
+			language.getText("wadtex.open.wad.title"), 
+			language.getText("wadtex.open.wad.accept"),
 			settings::getLastOpenedWAD,
 			settings::setLastOpenedWAD,
 			utils.createWADFileFilter()
@@ -539,8 +542,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 
 	private void onOpenFile(File file)
 	{
-		DoomToolsLanguageManager language = getLanguage();
-		
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
@@ -559,9 +560,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	
 	private boolean saveBeforeExecute()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		DoomToolsLanguageManager language = getLanguage();
-		
 		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
 		{
 			Boolean saveChoice = modal(
@@ -591,7 +589,7 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	{
 		if (!saveBeforeExecute())
 		{
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("wadtex.error.mustsave"));
+			SwingUtils.error(getApplicationContainer(), language.getText("wadtex.error.mustsave"));
 			return;
 		}
 		
@@ -632,17 +630,15 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		handleToSettingsMap.put(currentHandle, processSettings);
-		getCommon().onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, processSettings);
+		appCommon.onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, processSettings);
 	}
 
 	private WadTexExportSettings createExportSettings(File sourceFile, final WadTexExportSettings initSettings) 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		final WadTexExportPanel argsPanel = new WadTexExportPanel(initSettings);
 		argsPanel.setPreferredSize(dimension(350, 120));
 		WadTexExportSettings settings = utils.createSettingsModal(
-			getLanguage().getText("wadtex.export.title"),
+			language.getText("wadtex.export.title"),
 			argsPanel,
 			(panel) -> {
 				WadTexExportSettings out = new WadTexExportSettings();
@@ -662,8 +658,6 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -671,10 +665,10 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
 	}
 
-	private class WadTexEditorPanel extends MultiFileEditorPanel
+	private class WadTexEditorPanel extends EditorMultiFilePanel
 	{
 		private static final long serialVersionUID = -9024669807749249148L;
 		
@@ -706,7 +700,7 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 		@Override
 		protected FileFilter[] getSaveFileTypes() 
 		{
-			return TYPES == null ? TYPES = new FileFilter[]{getUtils().createTextFileFilter()} : TYPES;
+			return TYPES == null ? TYPES = new FileFilter[]{utils.createTextFileFilter()} : TYPES;
 		}
 	
 		@Override

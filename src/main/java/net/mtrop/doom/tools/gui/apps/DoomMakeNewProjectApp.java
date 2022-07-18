@@ -33,8 +33,6 @@ import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
@@ -88,7 +86,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return getLanguage().getText("doommake.newproject.title");
+		return language.getText("doommake.newproject.title");
 	}
 	
 	@Override
@@ -110,31 +108,31 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	public Container createContentPane()
 	{
 		// Hardcode only WAD Project for now.
-		Container projectTypePanel = titlePanel(getLanguage().getText("doommake.newproject.type"),
-			containerOf(node(comboBox(comboBoxModel(Arrays.asList(getLanguage().getText("doommake.newproject.type.wad"))), (i) -> {
+		Container projectTypePanel = titlePanel(language.getText("doommake.newproject.type"),
+			containerOf(node(comboBox(comboBoxModel(Arrays.asList(language.getText("doommake.newproject.type.wad"))), (i) -> {
 				// Do nothing on change - no other options.
 			})))
 		);
 		
-		Container projectDirectoryPanel = titlePanel(getLanguage().getText("doommake.newproject.directory"),
+		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
 			containerOf(node(fileField(targetDirectory,
 				(current) -> chooseDirectory(
 					getApplicationContainer(), 
-					getLanguage().getText("doommake.newproject.directory.browse.title"), 
+					language.getText("doommake.newproject.directory.browse.title"), 
 					current, 
-					getLanguage().getText("doommake.newproject.directory.browse.accept"), 
+					language.getText("doommake.newproject.directory.browse.accept"), 
 					FileFilters.DIRECTORIES
 				), 
 				(selected) -> { 
 					targetDirectory = selected;
 					if (targetDirectory != null && targetDirectory.isDirectory() && targetDirectory.listFiles().length > 0)
-						SwingUtils.warning(getApplicationContainer(), getLanguage().getText("doommake.newproject.directory.browse.notempty"));
+						SwingUtils.warning(getApplicationContainer(), language.getText("doommake.newproject.directory.browse.notempty"));
 				}
 			)))
 		);
 		
 		Container controlPane = containerOf(flowLayout(Flow.TRAILING, 4, 4), node(
-			getUtils().createButtonFromLanguageKey("doommake.newproject.create", (i) -> createProject())
+			utils.createButtonFromLanguageKey("doommake.newproject.create", (i) -> createProject())
 		));
 	
 		JPanel projectPanel = new JPanel();
@@ -185,8 +183,6 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	// The options for WAD Generators.
 	private Node[] getWADGeneratorOptionNodes()
 	{
-		DoomToolsLanguageManager language = getLanguage();
-		
 		final String patchNone = language.getText("doommake.newproject.wadgen.patch.none");
 		final String patchDECOHack = language.getText("doommake.newproject.wadgen.patch.decohack");
 		final String patchOther = language.getText("doommake.newproject.wadgen.patch.other");
@@ -299,9 +295,9 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			case FILE:
 				field = fileField(
 					(current) -> chooseFile(
-						getLanguage().getText("doommake.newproject.directory.browse.title"), 
+						language.getText("doommake.newproject.directory.browse.title"), 
 						current, 
-						getLanguage().getText("doommake.newproject.directory.browse.accept")
+						language.getText("doommake.newproject.directory.browse.accept")
 					), 
 					(selected) -> { 
 						stringValue.set(selected == null ? "" : selected.getAbsolutePath());
@@ -316,7 +312,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			node(BorderLayout.SOUTH, field)
 		);
 		return modal(
-			getUtils().getWindowIcons(),
+			utils.getWindowIcons(),
 			title,
 			contentPane,
 			(value) -> {
@@ -329,7 +325,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				}
 				return true;
 			},
-			choice(getLanguage().getText("doomtools.ok"), KeyEvent.VK_ENTER, true, () -> stringValue.get())
+			choice(language.getText("doomtools.ok"), KeyEvent.VK_ENTER, true, () -> stringValue.get())
 		);
 	}
 	
@@ -344,7 +340,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			while (true)
 			{
 				String value = createOptionModal(
-					getLanguage().getText("doommake.newproject.modal.option.title"),
+					language.getText("doommake.newproject.modal.option.title"),
 					prompt,
 					replacer
 				).openThenDispose();
@@ -375,19 +371,19 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	{
 		if (targetDirectory == null)
 		{
-			SwingUtils.error(getLanguage().getText("doommake.newproject.error.nulldirectory"));
+			SwingUtils.error(language.getText("doommake.newproject.error.nulldirectory"));
 			return;
 		}
 		else if (targetDirectory.exists() && !targetDirectory.isDirectory())
 		{
-			SwingUtils.error(getLanguage().getText("doommake.newproject.error.notadirectory"));
+			SwingUtils.error(language.getText("doommake.newproject.error.notadirectory"));
 			return;
 		}
 		
 		File[] files = targetDirectory.listFiles(); 
 		if (files != null && files.length > 0)
 		{
-			SwingUtils.error(getLanguage().getText("doommake.newproject.error.baddirectory"));
+			SwingUtils.error(language.getText("doommake.newproject.error.baddirectory"));
 			return;
 		}
 		
@@ -410,15 +406,13 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			return;
 		}
 		
-		DoomToolsGUIUtils utils = getUtils();
-		
 		// Returns a trinary.
 		Boolean result = modal(
 			getApplicationContainer(), 
 			utils.getWindowIcons(), 
-			getLanguage().getText("doommake.newproject.modal.openproject.title"),
+			language.getText("doommake.newproject.modal.openproject.title"),
 			containerOf(borderLayout(4, 4),
-				node(BorderLayout.CENTER, label(getLanguage().getText("doommake.newproject.modal.openproject.message")))
+				node(BorderLayout.CENTER, label(language.getText("doommake.newproject.modal.openproject.message")))
 			),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.folder", true),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.tools", false),
@@ -435,7 +429,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				if (!SwingUtils.open(targetDirectory))
 				{
 					SwingUtils.error(
-						getLanguage().getText("doommake.newproject.modal.openproject.folder.error", targetDirectory.getAbsolutePath())
+						language.getText("doommake.newproject.modal.openproject.folder.error", targetDirectory.getAbsolutePath())
 					);
 				}
 			} catch (IOException e) {
@@ -453,8 +447,6 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -462,7 +454,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-doommake.md")).open();
 	}
 
 }

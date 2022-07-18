@@ -4,40 +4,26 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import javax.swing.Action;
-import javax.swing.JCheckBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
-import net.mtrop.doom.tools.doommake.AutoBuildAgent;
-import net.mtrop.doom.tools.doommake.AutoBuildAgent.Listener;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
-import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectControlPanel;
-import net.mtrop.doom.tools.gui.swing.panels.DoomMakeProjectTargetListPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomMakeExecutionPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
-import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
-import static javax.swing.BorderFactory.*;
-
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
@@ -52,37 +38,19 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
     /** Logger. */
     private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
 
-    private static final String[] NO_ARGS = new String[0];
-
     // Singletons
 
-    /** Project helper. */
-    private DoomMakeProjectHelper helper;
     /** Settings manager. */
 	private DoomMakeSettingsManager settings;
 
 	// Components
-	
-    /** Targets component. */
-    private DoomMakeProjectTargetListPanel listPanel;
-    /** Checkbox for flagging auto-build. */
-    private JCheckBox autoBuildCheckbox;
-    /** Target run action. */
-    private Action targetRunAction;
-    /** Status messages. */
-    private DoomToolsStatusPanel statusPanel;
 
+	private DoomMakeExecutionPanel executionPanel;
+	
 	// Fields
     
     /** Project directory. */
     private File projectDirectory;
-
-    // State
-    
-    /** Current target. */
-    private String currentTarget;
-    /** Auto build agent. */
-    private AutoBuildAgent autoBuildAgent;
 
     /**
 	 * Creates a new open project application.
@@ -98,33 +66,9 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	 */
 	public DoomMakeOpenProjectApp(File targetDirectory)
 	{
-		this.helper = DoomMakeProjectHelper.get();
 		this.settings = DoomMakeSettingsManager.get();
-
-		this.listPanel = new DoomMakeProjectTargetListPanel(
-			Collections.emptySortedSet(),
-			(target) -> setCurrentTarget(target), 
-			(target) -> { 
-				setCurrentTarget(target);
-				runCurrentTarget();
-			}
-		);
-		this.autoBuildCheckbox = checkBox(getLanguage().getText("doommake.project.autobuild"), false, (v) -> {
-			if (v)
-				startAgent();
-			else
-				shutDownAgent();
-		});
-		
-		this.targetRunAction = actionItem(getLanguage().getText("doommake.project.buildaction"), (e) -> runCurrentTarget());
-
-		this.statusPanel = new DoomToolsStatusPanel();
-		this.statusPanel.setSuccessMessage(getLanguage().getText("doommake.project.build.message.ready"));
-
+		this.executionPanel = new DoomMakeExecutionPanel(targetDirectory);
 		this.projectDirectory = targetDirectory;
-		
-		this.currentTarget = null;
-		this.autoBuildAgent = null;
 	}
 	
 	/**
@@ -190,41 +134,21 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return getLanguage().getText("doommake.project.title", projectDirectory.getName());
+		return language.getText("doommake.project.title", projectDirectory.getName());
 	}
 
 	@Override
 	public Container createContentPane()
 	{
-		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
-		refreshTargets();
-		
 		return containerOf(
 			dimension(300, 225),
-			node(containerOf(
-				node(BorderLayout.NORTH, containerOf(createEmptyBorder(0, 4, 0, 4),
-					node(BorderLayout.CENTER, label(getLanguage().getText("doommake.project.targets"))),
-					node(BorderLayout.EAST, control)
-				)),
-				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
-					node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
-						node(scroll(listPanel))
-					)),
-					node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
-						node(BorderLayout.CENTER, autoBuildCheckbox),
-						node(BorderLayout.EAST, button(targetRunAction)),
-						node(BorderLayout.SOUTH, statusPanel)
-					))
-				))
-			))
+			node(BorderLayout.CENTER, executionPanel)
 		);
 	}
 
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			// File
 			utils.createMenuFromLanguageKey("doommake.menu.file",
@@ -258,8 +182,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public void onClose(Object frame) 
 	{
-		if (autoBuildAgent != null)
-			autoBuildAgent.shutDown();
+		executionPanel.shutDownAgent();
 	}
 	
 	@Override
@@ -267,6 +190,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		Map<String, String> state = super.getApplicationState();
 		state.put(STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
+		executionPanel.saveState(state);
 		return state;
 	}
 
@@ -274,94 +198,9 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state)
 	{
 		this.projectDirectory = state.containsKey(STATE_PROJECT_DIRECTORY) ? new File(state.get(STATE_PROJECT_DIRECTORY)) : null;
+		executionPanel.loadState(state);
 	}
 
-	// Starts the agent.
-	private void startAgent()
-	{
-		if (autoBuildAgent != null)
-			throw new IllegalStateException("INTERNAL ERROR: Start agent while agent running!");
-		
-		autoBuildAgent = new AutoBuildAgent(projectDirectory, new Listener() 
-		{
-			@Override
-			public void onAgentStarted() 
-			{
-				LOG.info("Agent started: " + projectDirectory.getPath());
-				updateTargetsEnabled(false);
-			}
-			
-			@Override
-			public void onAgentStartupException(String message, Exception exception) 
-			{
-				LOG.error("Agent startup error: " + message);
-			}
-
-			@Override
-			public void onAgentStopped() 
-			{
-				LOG.info("Agent stopped: " + projectDirectory.getPath());
-				updateTargetsEnabled(true);
-			}
-
-			@Override
-			public void onAgentStoppedException(String message, Exception exception) 
-			{
-				LOG.error("Agent stop error: " + message);
-			}
-
-			@Override
-			public void onBuildPrepared() 
-			{
-				LOG.info("Change detected. Build prepared.");
-			}
-
-			@Override
-			public void onBuildStart() 
-			{
-				LOG.info("Build started.");
-			}
-
-			@Override
-			public void onBuildEnd(int result) 
-			{
-				LOG.info("Build ended.");
-			}
-			
-			@Override
-			public int callBuild(String target)
-			{
-				try {
-					statusPanel.setActivityMessage(getLanguage().getText("doommake.project.build.message.running", target));
-					int result = getCommon().callDoomMake(projectDirectory, target, true, NO_ARGS, null, null, null).get();
-					if (result != 0)
-						statusPanel.setErrorMessage(getLanguage().getText("doommake.project.build.message.error"));
-					else
-						statusPanel.setSuccessMessage(getLanguage().getText("doommake.project.build.message.success"));
-					return result;
-				} catch (InterruptedException e) {
-					LOG.warn("DoomMake call interrupted!");
-					return -1;
-				} catch (ExecutionException e) {
-					LOG.error(e, "Exception occurred on DoomMake call!");
-					return -1;
-				}
-			}
-			
-		});
-		
-		autoBuildAgent.start();
-	}
-	
-	private void shutDownAgent()
-	{
-		if (autoBuildAgent == null)
-			throw new IllegalStateException("INTERNAL ERROR: Shutdown agent while agent not running!");
-
-		autoBuildAgent.shutDown();
-		autoBuildAgent = null;
-	}
-	
 	// Open new project app (new instance).
 	private void openNewProject()
 	{
@@ -369,7 +208,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW);
 		} catch (IOException e) {
 			LOG.error(e, "Couldn't start New Project!");
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("doommake.error.app.newproject"));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.error.app.newproject"));
 		}
 	}
 
@@ -384,7 +223,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, dir.getAbsolutePath());
 		} catch (IOException e) {
 			LOG.error(e, "Couldn't start Open Project: " + dir.getAbsolutePath());
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("doommake.error.app.openproject", dir.getAbsolutePath()));
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.error.app.openproject", dir.getAbsolutePath()));
 		}
 	}
 
@@ -393,67 +232,14 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		modal(
 			getApplicationContainer(),
-			getLanguage().getText("doommake.project.settings.title"),
+			language.getText("doommake.project.settings.title"),
 			new DoomMakeSettingsPanel()
 		).openThenDispose();
-	}
-
-	// Refresh targets.
-	private void refreshTargets()
-	{
-		String absolutePath = projectDirectory.getAbsolutePath();
-		try {
-			listPanel.refreshTargets(helper.getProjectTargets(projectDirectory));
-			LOG.infof("Targets refreshed for %s", absolutePath);
-		} catch (FileNotFoundException e) {
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("doommake.project.targets.error.nodirectory", absolutePath));
-			LOG.errorf("Project directory does not exist: %s", absolutePath);
-		} catch (ProcessCallException e) {
-			SwingUtils.error(getApplicationContainer(), getLanguage().getText("doommake.project.targets.error.gettargets", absolutePath));
-			LOG.errorf("Could not invoke `doommake --targets` in %s", absolutePath);
-		}
-	}
-	
-	/**
-	 * Sets the current target to execute.
-	 * @param target the new target.
-	 */
-	private void setCurrentTarget(String target)
-	{
-		currentTarget = target;
-		updateTargetsEnabled(currentTarget != null);
-	}
-	
-	/**
-	 * Runs the current target.
-	 */
-	private void runCurrentTarget()
-	{
-		// execution failsafe
-		if (!targetRunAction.isEnabled())
-			return;
-		if (autoBuildAgent != null && autoBuildAgent.isRunning())
-			return;
-		if (currentTarget == null)
-			return;
-		
-		getCommon().onExecuteDoomMake(getApplicationContainer(), statusPanel, projectDirectory, null, currentTarget, NO_ARGS, false);
-	}
-
-	private void updateTargetsEnabled(boolean enabled)
-	{
-		final boolean state = enabled && (autoBuildAgent == null || !autoBuildAgent.isRunning());
-		SwingUtils.invoke(() -> {
-			listPanel.setEnabled(state);
-			targetRunAction.setEnabled(state);
-		});
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -461,7 +247,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-doommake.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-doommake.md")).open();
 	}
 	
 }

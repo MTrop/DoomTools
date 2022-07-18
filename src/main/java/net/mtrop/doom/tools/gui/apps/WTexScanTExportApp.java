@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTExportParametersPanel;
@@ -58,7 +57,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return getLanguage().getText("wtextex.title");
+		return language.getText("wtextex.title");
 	}
 	
 	@Override
@@ -139,8 +138,6 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtextex.menu.file",
 				utils.createItemFromLanguageKey("wtextex.menu.file.item.exit", (i) -> attemptClose())
@@ -160,13 +157,13 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	{
 		return containerOf(dimension(640, 450), borderLayout(0, 4),
 			node(BorderLayout.CENTER, containerOf(gridLayout(1, 2, 4, 0),
-				node(getUtils().createTitlePanel(getLanguage().getText("wtexscan.title"), texScanParametersPanel)),
-				node(getUtils().createTitlePanel(getLanguage().getText("wtexport.title"), texportParametersPanel))
+				node(utils.createTitlePanel(language.getText("wtexscan.title"), texScanParametersPanel)),
+				node(utils.createTitlePanel(language.getText("wtexport.title"), texportParametersPanel))
 			)),
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(getUtils().createButtonFromLanguageKey("wtextex.button.start", (i) -> onDoPipe()))
+					node(utils.createButtonFromLanguageKey("wtextex.button.start", (i) -> onDoPipe()))
 				))
 			))
 		);
@@ -189,7 +186,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wtextex.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wtextex.status.message.ready"));
 	}
 
 	@Override
@@ -220,11 +217,11 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		
 		if (outputWad.exists() && create)
 		{
-			if (SwingUtils.noTo(getApplicationContainer(), getLanguage().getText("wtexport.overwrite.message", outputWad.getName())))
+			if (SwingUtils.noTo(getApplicationContainer(), language.getText("wtexport.overwrite.message", outputWad.getName())))
 				return;
 		}
 
-		getCommon().onExecuteWTexScanToWTExport(getApplicationContainer(), statusPanel, 
+		appCommon.onExecuteWTexScanToWTExport(getApplicationContainer(), statusPanel, 
 			files, 
 			mode, 
 			noSkies, 
@@ -243,8 +240,6 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -252,9 +247,9 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(
-			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexscan.md"),
-			getUtils().helpResource("docs/changelogs/CHANGELOG-wtexport.md")
+		utils.createHelpModal(
+			utils.helpResource("docs/changelogs/CHANGELOG-wtexscan.md"),
+			utils.helpResource("docs/changelogs/CHANGELOG-wtexport.md")
 		).open();
 	}
 	

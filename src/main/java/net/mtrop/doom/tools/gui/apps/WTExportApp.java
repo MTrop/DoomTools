@@ -12,7 +12,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WTExportSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTExportParametersPanel;
@@ -50,13 +49,13 @@ public class WTExportApp extends DoomToolsApplicationInstance
 		this.settings = WTExportSettingsManager.get();
 		
 		this.inputFileField = fileField(
-			(current) -> getUtils().chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(), 
-				getLanguage().getText("wtexport.inputfile.browse.title"), 
-				getLanguage().getText("wtexport.inputfile.browse.choose"), 
+				language.getText("wtexport.inputfile.browse.title"), 
+				language.getText("wtexport.inputfile.browse.choose"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile,
-				getUtils().createTextFileFilter()
+				utils.createTextFileFilter()
 			)
 		);
 
@@ -67,7 +66,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return getLanguage().getText("wtexport.title");
+		return language.getText("wtexport.title");
 	}
 	
 	@Override
@@ -125,8 +124,6 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wtexport.menu.file",
 				utils.createItemFromLanguageKey("wtexport.menu.file.item.exit", (i) -> attemptClose())
@@ -145,14 +142,14 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	public Container createContentPane()
 	{
 		return containerOf(dimension(320, 450), borderLayout(0, 4),
-			node(BorderLayout.NORTH, getUtils().createForm(form(getLanguage().getInteger("wtexport.label.width")),
-				getUtils().formField("wtexport.input", inputFileField)
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wtexport.label.width")),
+				utils.formField("wtexport.input", inputFileField)
 			)),
 			node(BorderLayout.CENTER, parametersPanel),
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.TRAILING),
-					node(getUtils().createButtonFromLanguageKey("wtexport.button.start", (i) -> onScanMaps()))
+					node(utils.createButtonFromLanguageKey("wtexport.button.start", (i) -> onScanMaps()))
 				))
 			))
 		);
@@ -175,7 +172,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wtexscan.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wtexscan.status.message.ready"));
 	}
 
 	@Override
@@ -201,11 +198,11 @@ public class WTExportApp extends DoomToolsApplicationInstance
 		
 		if (outputWad.exists() && create)
 		{
-			if (SwingUtils.noTo(getApplicationContainer(), getLanguage().getText("wtexport.overwrite.message", outputWad.getName())))
+			if (SwingUtils.noTo(getApplicationContainer(), language.getText("wtexport.overwrite.message", outputWad.getName())))
 				return;
 		}
 		
-		getCommon().onExecuteWTExport(getApplicationContainer(), statusPanel, 
+		appCommon.onExecuteWTExport(getApplicationContainer(), statusPanel, 
 			inputFile,
 			textureWads, 
 			baseWad, 
@@ -220,8 +217,6 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -229,7 +224,7 @@ public class WTExportApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wtexport.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wtexport.md")).open();
 	}
 	
 }

@@ -4,7 +4,7 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorThemeType;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorThemeType;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;

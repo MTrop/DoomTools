@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JRadioButton;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DMXConvertSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -54,7 +53,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
     {
     	this.settings = DMXConvertSettingsManager.get();
     	
-		this.inputFileField = new FileListPanel(getLanguage().getText("dmxconv.input"), 
+		this.inputFileField = new FileListPanel(language.getText("dmxconv.input"), 
 			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
 			(files) -> {
 				if (files != null && files.length > 0)
@@ -64,18 +63,18 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		);
 		
 		this.outputDirectory = fileField(
-			(current) -> getUtils().chooseDirectory(
+			(current) -> utils.chooseDirectory(
 				getApplicationContainer(), 
-				getLanguage().getText("dmxconv.outputdir.browse.title"), 
-				getLanguage().getText("dmxconv.outputdir.browse.accept"), 
+				language.getText("dmxconv.outputdir.browse.title"), 
+				language.getText("dmxconv.outputdir.browse.accept"), 
 				settings::getLastTouchedFile, 
 				settings::setLastTouchedFile
 			)
 		);
 		
-		JRadioButton normalButton = getUtils().createRadioButtonFromLanguageKey("dmxconv.programs.nopreference", true);
-		JRadioButton ffmpegOnly = getUtils().createRadioButtonFromLanguageKey("dmxconv.programs.ffmpegonly", false);
-		JRadioButton jspiOnly = getUtils().createRadioButtonFromLanguageKey("dmxconv.programs.jspionly", false);
+		JRadioButton normalButton = utils.createRadioButtonFromLanguageKey("dmxconv.programs.nopreference", true);
+		JRadioButton ffmpegOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.ffmpegonly", false);
+		JRadioButton jspiOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.jspionly", false);
 		
 		group(normalButton, ffmpegOnly, jspiOnly);
 		
@@ -89,7 +88,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("dmxconv.title");
+		return language.getText("dmxconv.title");
 	}
 
 	@Override
@@ -99,14 +98,14 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 			node(BorderLayout.CENTER, inputFileField),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(borderLayout(0, 4),
-					node(BorderLayout.NORTH, getUtils().createTitlePanel(getLanguage().getText("dmxconv.programs"), containerOf(gridLayout(1, 3, 0, 4),
+					node(BorderLayout.NORTH, utils.createTitlePanel(language.getText("dmxconv.programs"), containerOf(gridLayout(1, 3, 0, 4),
 						node(normalConversionField), node(ffmpegConversionField), node(jspiConversionField)
 					))),
-					node(BorderLayout.CENTER, getUtils().createForm(form(getLanguage().getInteger("dmxconv.label.width")),
-						getUtils().formField("dmxconv.outputdir", outputDirectory)
+					node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("dmxconv.label.width")),
+						utils.formField("dmxconv.outputdir", outputDirectory)
 					)),
 					node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING), 
-						node(getUtils().createButtonFromLanguageKey("dmxconv.convert", (i) -> onDoConversion())
+						node(utils.createButtonFromLanguageKey("dmxconv.convert", (i) -> onDoConversion())
 					)))
 				)),
 				node(BorderLayout.CENTER, containerOf()),
@@ -118,8 +117,6 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("dmxconv.menu.file",
 				utils.createItemFromLanguageKey("dmxconv.menu.file.item.settings", (i) -> openSettings()),
@@ -194,7 +191,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("dmxconv.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("dmxconv.status.message.ready"));
 	}
 
 	@Override
@@ -214,7 +211,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		File ffmpegPath = settings.getFFmpegPath();
 		Boolean ffmpegOnly = getConversionType();
 		
-		getCommon().onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, outputDir);
+		appCommon.onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, outputDir);
 	}
 
 	private Boolean getConversionType()
@@ -229,8 +226,6 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -241,14 +236,14 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	{
 		modal(
 			getApplicationContainer(),
-			getLanguage().getText("dmxconv.settings.title"),
+			language.getText("dmxconv.settings.title"),
 			new DMXConvertSettingsPanel()
 		).openThenDispose();
 	}
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-dmxconv.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-dmxconv.md")).open();
 	}
 	
 	

@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WSwAnTablesCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DefSwAniExportPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -73,10 +72,10 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 			scriptFile, 
 			(current) -> chooseFile(
 				getApplicationContainer(),
-				getLanguage().getText("wswantbl.export.source.browse.title"), 
+				language.getText("wswantbl.export.source.browse.title"), 
 				current, 
-				getLanguage().getText("wswantbl.export.source.browse.accept"),
-				getUtils().createDEFSWANIFileFilter()
+				language.getText("wswantbl.export.source.browse.accept"),
+				utils.createDEFSWANIFileFilter()
 			)
 		);
 
@@ -87,7 +86,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wswantbl.compiler.title");
+		return language.getText("wswantbl.compiler.title");
 	}
 
 	@Override
@@ -120,10 +119,8 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return containerOf(dimension(400, 150), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wswantbl.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wswantbl.export.label.width")),
 				utils.formField("wswantbl.export.source", sourceFileField)
 			)),
 			node(BorderLayout.CENTER, exportPanel),
@@ -139,8 +136,6 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wswantbl.menu.file",
 				utils.createItemFromLanguageKey("wswantbl.menu.file.item.exit", (i) -> attemptClose())
@@ -172,7 +167,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wswantbl.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wswantbl.status.message.ready"));
 	}
 
 	@Override
@@ -197,25 +192,23 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		
 		if (scriptFile == null)
 		{
-			SwingUtils.error(getLanguage().getText("wswantbl.error.nosource"));
+			SwingUtils.error(language.getText("wswantbl.error.nosource"));
 			sourceFileField.requestFocus();
 			return;
 		}
 
 		if (exportSettings.getOutputWAD() == null)
 		{
-			SwingUtils.error(getLanguage().getText("wadtex.error.notarget"));
+			SwingUtils.error(language.getText("wadtex.error.notarget"));
 			return;
 		}
 		
-		getCommon().onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
+		appCommon.onExecuteWSwAnTbl(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -223,7 +216,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wswantbl.md")).open();
 	}
 
 }

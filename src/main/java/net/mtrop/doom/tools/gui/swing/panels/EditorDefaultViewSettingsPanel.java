@@ -6,7 +6,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorViewSettings;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;

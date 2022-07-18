@@ -13,7 +13,6 @@ import javax.swing.JMenuBar;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
-import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.settings.WadTexCompilerSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexExportPanel;
@@ -82,10 +81,10 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 				current = current != null ? current : settings.getLastTouchedFile();
 				return chooseFile(
 					getApplicationContainer(),
-					getLanguage().getText("wadtex.export.source.browse.title"), 
+					language.getText("wadtex.export.source.browse.title"), 
 					current, 
-					getLanguage().getText("wadtex.export.source.browse.accept"),
-					getUtils().createTextFileFilter()
+					language.getText("wadtex.export.source.browse.accept"),
+					utils.createTextFileFilter()
 				);
 			},
 			(selected) -> settings.setLastTouchedFile(selected)
@@ -98,7 +97,7 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle() 
 	{
-		return getLanguage().getText("wadtex.compiler.title");
+		return language.getText("wadtex.compiler.title");
 	}
 
 	@Override
@@ -140,10 +139,8 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return containerOf(dimension(400, 200), borderLayout(0, 4), 
-			node(BorderLayout.NORTH, utils.createForm(form(getLanguage().getInteger("wadtex.export.label.width")),
+			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadtex.export.label.width")),
 				utils.formField("wswantbl.export.source", sourceFileField)
 			)),
 			node(BorderLayout.CENTER, exportPanel),
@@ -159,8 +156,6 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public JMenuBar createDesktopMenuBar() 
 	{
-		DoomToolsGUIUtils utils = getUtils();
-		
 		return menuBar(
 			utils.createMenuFromLanguageKey("wadtex.menu.file",
 				utils.createItemFromLanguageKey("wadtex.menu.file.item.exit", (i) -> attemptClose())
@@ -192,7 +187,7 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 	@Override
 	public void onOpen(Object frame) 
 	{
-		statusPanel.setSuccessMessage(getLanguage().getText("wadtex.status.message.ready"));
+		statusPanel.setSuccessMessage(language.getText("wadtex.status.message.ready"));
 	}
 
 	@Override
@@ -219,25 +214,23 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 		
 		if (scriptFile == null)
 		{
-			SwingUtils.error(getLanguage().getText("wadtex.error.nosource"));
+			SwingUtils.error(language.getText("wadtex.error.nosource"));
 			sourceFileField.requestFocus();
 			return;
 		}
 		
 		if (exportSettings.getOutputWAD() == null)
 		{
-			SwingUtils.error(getLanguage().getText("wadtex.error.notarget"));
+			SwingUtils.error(language.getText("wadtex.error.notarget"));
 			return;
 		}
 		
-		getCommon().onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
+		appCommon.onExecuteWadTex(getApplicationContainer(), statusPanel, scriptFile, exportSettings);
 	}
 
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		DoomToolsGUIUtils utils = getUtils();
-	
 		return utils.createMenuFromLanguageKey("doomtools.menu.help",
 			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog())
 		); 
@@ -245,7 +238,7 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 
 	private void onHelpChangelog()
 	{
-		getUtils().createHelpModal(getUtils().helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
+		utils.createHelpModal(utils.helpResource("docs/changelogs/CHANGELOG-wadtex.md")).open();
 	}
 
 }

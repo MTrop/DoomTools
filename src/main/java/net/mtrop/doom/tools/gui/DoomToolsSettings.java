@@ -18,9 +18,9 @@ import org.fife.ui.rsyntaxtextarea.Theme;
 
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorAutoCompleteSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorCodeSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorViewSettings;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;

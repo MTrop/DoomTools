@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 public abstract class DoomToolsApplicationInstance
 {
 	/** Doom Tools GUI Utility singleton. */
-	private DoomToolsGUIUtils utils;
+	protected final DoomToolsGUIUtils utils;
 	/** Doom Tools Language singleton. */
-	private DoomToolsLanguageManager language;
+	protected final DoomToolsLanguageManager language;
 	/** Application Commons singleton. */
-	private AppCommon appCommon;
+	protected final AppCommon appCommon;
 	
 	/** The listener set on all apps. */
 	private DoomToolsApplicationListener listener;
@@ -233,30 +233,6 @@ public abstract class DoomToolsApplicationInstance
 	public void onBlur()
 	{
 		// Do nothing.
-	}
-
-	/**
-	 * @return the utils class singleton.
-	 */
-	protected DoomToolsGUIUtils getUtils() 
-	{
-		return utils;
-	}
-
-	/**
-	 * @return the language class singleton.
-	 */
-	protected DoomToolsLanguageManager getLanguage() 
-	{
-		return language;
-	}
-	
-	/**
-	 * @return the common application tool singleton.
-	 */
-	protected AppCommon getCommon() 
-	{
-		return appCommon;
 	}
 
 }

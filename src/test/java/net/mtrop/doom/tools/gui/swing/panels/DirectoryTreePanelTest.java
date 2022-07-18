@@ -11,21 +11,19 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-
 
 public final class DirectoryTreePanelTest 
 {
 	public static void main(String[] args) 
 	{
 		DoomToolsGUIMain.setLAF();
-		final DirectoryTreePanel panel = new DirectoryTreePanel(new File("."));
-		panel.setDirectoryTreeListener(new DirectoryTreePanel.DirectoryTreeListener() 
+		final EditorDirectoryTreePanel panel = new EditorDirectoryTreePanel(new File(".\\temp"));
+		panel.setListener(new DirectoryTreePanel.DirectoryTreeListener() 
 		{
 			@Override
-			public void onFileSelectionChange() 
+			public void onFileSelectionChange(File[] selectedFiles) 
 			{
-				System.out.println(Arrays.toString(panel.getSelectedFiles()));
+				System.out.println(Arrays.toString(selectedFiles));
 			}
 
 			@Override
@@ -45,18 +43,6 @@ public final class DirectoryTreePanelTest
 			}
 
 			@Override
-			public boolean onFilesDropped(File parentFile, File[] droppedSourceFiles) 
-			{
-				return false;
-			}
-			
-			@Override
-			public boolean onFileInsert(String fileName, File parentFile, boolean directory) 
-			{
-				return false;
-			}
-
-			@Override
 			public void onFileRename(File changedFile, String newName) 
 			{
 				System.out.println("RENAME: " + changedFile + " -> " + newName);
@@ -67,7 +53,6 @@ public final class DirectoryTreePanelTest
 
 		ObjectUtils.apply(frame("Test",
 			containerOf(
-				node(BorderLayout.NORTH, button("Refresh", (b) -> panel.refresh())),
 				node(BorderLayout.CENTER, panel)
 			)
 		), 

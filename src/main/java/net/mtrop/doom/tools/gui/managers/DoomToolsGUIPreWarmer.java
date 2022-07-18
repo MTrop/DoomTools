@@ -3,7 +3,7 @@ package net.mtrop.doom.tools.gui.managers;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 /**
@@ -108,7 +108,7 @@ public final class DoomToolsGUIPreWarmer
 		tasks.spawn(() -> {
 			DoomToolsEditorProvider editorProvider = DoomToolsEditorProvider.get();
 			editorProvider.initCustomLanguages();
-			new MultiFileEditorPanel();
+			new EditorMultiFilePanel();
 			new RSyntaxTextArea();
 			LOG.info("Component pre-warm finished.");
 		});

@@ -4,9 +4,9 @@ import java.awt.Font;
 
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorAutoCompleteSettings;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorCodeSettings;
-import net.mtrop.doom.tools.gui.swing.panels.MultiFileEditorPanel.EditorViewSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorAutoCompleteSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorCodeSettings;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorViewSettings;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 
 

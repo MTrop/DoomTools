@@ -32,6 +32,7 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	/* ==================================================================== */
 	
     private static final String PATH_LAST_FILE = "path.lastFile";
+    private static final String TREE_WIDTH = "tree.width";
 
 	/* ==================================================================== */
 
@@ -83,6 +84,25 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	public File getLastTouchedFile() 
 	{
 		return getFile(PATH_LAST_FILE);
+	}
+
+	/**
+	 * Sets tree panel width.
+	 * @param width the width in pixels.
+	 */
+	public void setTreeWidth(int width)
+	{
+		setInteger(TREE_WIDTH, width);
+		commit();
+	}
+	
+	/**
+	 * Gets tree panel width.
+	 * @return the width.
+	 */
+	public int getTreeWidth()
+	{
+		return getInteger(TREE_WIDTH, 250);
 	}
 
 }
