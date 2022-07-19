@@ -360,6 +360,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		// Set the last directory successfully opened.
 		settings.setLastProjectDirectory(projectDirectory);
+		onNewEditor();
 	}
 	
 	@Override
