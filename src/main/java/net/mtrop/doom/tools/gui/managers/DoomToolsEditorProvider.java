@@ -133,11 +133,11 @@ public final class DoomToolsEditorProvider
 			
 			// Custom
 			put("dh",         SYNTAX_STYLE_DECOHACK);
-			put("script",     SYNTAX_STYLE_DOOMMAKE);
 			put("dmake",      SYNTAX_STYLE_DOOMMAKE);
 			put("rscript",    SYNTAX_STYLE_ROOKSCRIPT);
 			put("wadmerge",   SYNTAX_STYLE_WADMERGE);
 			put("wadm",       SYNTAX_STYLE_WADMERGE);
+			put("script",     SYNTAX_STYLE_WADSCRIPT);
 			put("wscr",       SYNTAX_STYLE_WADSCRIPT);
 			put("wscript",    SYNTAX_STYLE_WADSCRIPT);
 			put("wsx",        SYNTAX_STYLE_WADSCRIPT);

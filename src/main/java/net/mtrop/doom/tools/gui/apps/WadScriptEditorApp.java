@@ -78,6 +78,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	
 	// Referenced Components
 	
+	private JSplitPane splitPaneHorizontal;
 	private EditorDirectoryTreePanel treePanel;
 	private WadScriptEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
@@ -173,6 +174,16 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		this.treePanel = new WadScriptTreePanel();
 		onOpenDirectory(new File(OSUtils.getWorkingDirectoryPath()));
 		
+		splitPaneHorizontal = split(
+			containerOf(dimension(215, 500), 
+				node(BorderLayout.CENTER, treePanel)
+			),
+			containerOf(dimension(610, 500),
+				node(BorderLayout.CENTER, editorPanel)
+			)
+		);
+		splitPaneHorizontal.setDividerLocation(215);
+
 		this.runAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.run", (e) -> onRunAgain());
 		this.runParametersAction = utils.createActionFromLanguageKey("wadscript.menu.run.item.params", (e) -> onRunWithArgs());
 		
@@ -190,18 +201,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		JSplitPane split = split(
-			containerOf(dimension(215, 500), 
-				node(BorderLayout.CENTER, treePanel)
-			),
-			containerOf(dimension(610, 500),
-				node(BorderLayout.CENTER, editorPanel)
-			)
-		);
-		split.setDividerLocation(-1);
-		
 		return containerOf(borderLayout(0, 8), 
-			node(BorderLayout.CENTER, split),
+			node(BorderLayout.CENTER, splitPaneHorizontal),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
@@ -316,7 +317,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			f.setBounds(bounds);
 			if (maximized)
 				f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-			treePanel.setSize(dimension(settings.getTreeWidth(), treePanel.getHeight()));
+			splitPaneHorizontal.setDividerLocation(settings.getTreeWidth());
 		}
 	}
 	
@@ -340,7 +341,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		{
 			JFrame f = (JFrame)frame;
 			settings.setBounds(f);
-			settings.setTreeWidth(treePanel.getWidth());
+			settings.setTreeWidth(splitPaneHorizontal.getDividerLocation());
 		}
 	}
 	
@@ -429,15 +430,8 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 
 	private void onHandleChange()
 	{
-		if (currentHandle != null)
-		{
-			// Do nothing, for now.
-		}
-		else
-		{
-			// Do nothing, for now.
-		}
-
+		runAction.setEnabled(currentHandle != null);
+		runParametersAction.setEnabled(currentHandle != null);
 	}
 	
 	private void onNewEditor()

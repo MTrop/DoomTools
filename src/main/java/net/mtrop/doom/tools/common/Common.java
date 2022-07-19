@@ -181,4 +181,35 @@ public final class Common
 		return true;
 	}
 	
+	/**
+	 * Opens the terminal at a specific directory.
+	 * @param target the target directory to open.
+	 * @return true if the command succeeded, false if not.
+	 */
+	public static boolean openTerminalAtDirectory(File target)
+	{
+		ProcessCallable pc = null;
+		if (OSUtils.isWindows())
+			pc = ProcessCallable.create("cmd.exe", "/k", "start").setWorkingDirectory(target);
+		else if (OSUtils.isOSX())
+			pc = ProcessCallable.create("open", "-n", "/Applications/Utilities/Terminal.app").setWorkingDirectory(target);
+		// TODO: Need to test these.
+		else if (OSUtils.onPath("xterm"))
+			pc = ProcessCallable.create("xterm").setWorkingDirectory(target);
+		else if (OSUtils.onPath("zsh"))
+			pc = ProcessCallable.create("zsh").setWorkingDirectory(target);
+		else if (OSUtils.onPath("sh"))
+			pc = ProcessCallable.create("sh").setWorkingDirectory(target);
+		
+		if (pc == null)
+			return false;
+
+		try {
+			pc.exec();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+	
 }

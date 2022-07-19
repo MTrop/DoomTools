@@ -94,6 +94,16 @@ public class EditorDirectoryTreePanel extends JPanel
 	}
 	
 	/**
+	 * Sets the root directory temporarily.
+	 * @param rootDirectory the root directory of the tree.
+	 */
+	public void setTemporaryRootDirectory(File rootDirectory)
+	{
+		treePanel.setTemporaryRootDirectory(rootDirectory);
+		treePanel.setVisible(true);
+	}
+	
+	/**
 	 * @return the current root directory.
 	 */
 	public File getRootDirectory() 
@@ -122,7 +132,7 @@ public class EditorDirectoryTreePanel extends JPanel
 	private void onResetTop()
 	{
 		if (rootDirectory != null)
-			treePanel.setTemporaryRootDirectory(rootDirectory);
+			treePanel.setRootDirectory(rootDirectory);
 	}
 	
 }

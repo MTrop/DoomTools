@@ -194,6 +194,7 @@ public class DirectoryTreePanel extends JPanel
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
 			separator(),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.terminal", (i) -> onOpenTerminalHere()),
 			separator(),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
@@ -214,6 +215,7 @@ public class DirectoryTreePanel extends JPanel
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
 			separator(),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
+			utils.createItemFromLanguageKey("dirtree.popup.menu.item.terminal", (i) -> onOpenTerminalHere()),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.root", (i) -> onMakeSelectedDirectoryRoot()),
 			separator(),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
@@ -688,6 +690,21 @@ public class DirectoryTreePanel extends JPanel
 	}
 
 	/**
+	 * Prepares to open a directory in a shell.
+	 */
+	private void onOpenTerminalHere()
+	{
+		File selected = getSelectedFile();
+		if (selected != null)
+		{
+			if (selected.isDirectory())
+				Common.openTerminalAtDirectory(selected);
+			else
+				Common.openTerminalAtDirectory(selected.getParentFile());
+		}
+	}
+
+	/**
 	 * Sets a selected directory as the new root.
 	 */
 	private void onMakeSelectedDirectoryRoot()
@@ -825,6 +842,7 @@ public class DirectoryTreePanel extends JPanel
 		 * @param deletedFiles the files deleted.
 		 */
 		void onFilesDeleted(File[] deletedFiles);
+
 	}
 
 

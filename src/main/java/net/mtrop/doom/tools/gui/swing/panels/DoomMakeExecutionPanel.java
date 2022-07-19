@@ -74,20 +74,12 @@ public class DoomMakeExecutionPanel extends JPanel
     private AutoBuildAgent autoBuildAgent;
 
     /**
-	 * Creates a new panel.
-     * @param statusPanel the status panel to talk to.
-	 */
-	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel)
-	{
-		this(statusPanel, null);
-	}
-	
-    /**
 	 * Creates a new panel from a project directory.
      * @param statusPanel the status panel to talk to.
      * @param targetDirectory 
+     * @param ideMode if true, omit the IDE button.
 	 */
-	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory)
+	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, boolean ideMode)
 	{
 		this.language = DoomToolsLanguageManager.get();
 		this.helper = DoomMakeProjectHelper.get();
@@ -118,11 +110,11 @@ public class DoomMakeExecutionPanel extends JPanel
 		this.currentTarget = null;
 		this.autoBuildAgent = null;
 
-		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory);
+		DoomMakeProjectControlPanel control = new DoomMakeProjectControlPanel(projectDirectory, this, ideMode);
 		refreshTargets();
 		
 		containerOf(this,
-			node(containerOf(
+			node(containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(borderLayout(4, 0),
 					node(BorderLayout.CENTER, label(language.getText("doommake.project.targets"))),
 					node(BorderLayout.EAST, control)
@@ -154,6 +146,24 @@ public class DoomMakeExecutionPanel extends JPanel
 		return true;
 	}
 	
+	/**
+	 * Refreshes the targets.
+	 */
+	public void refreshTargets()
+	{
+		String absolutePath = projectDirectory.getAbsolutePath();
+		try {
+			listPanel.refreshTargets(helper.getProjectTargets(projectDirectory));
+			LOG.infof("Targets refreshed for %s", absolutePath);
+		} catch (FileNotFoundException e) {
+			SwingUtils.error(this, language.getText("doommake.project.targets.error.nodirectory", absolutePath));
+			LOG.errorf("Project directory does not exist: %s", absolutePath);
+		} catch (ProcessCallException e) {
+			SwingUtils.error(this, language.getText("doommake.project.targets.error.gettargets", absolutePath));
+			LOG.errorf("Could not invoke `doommake --targets` in %s", absolutePath);
+		}
+	}
+
 	/**
 	 * Saves this component's state to a state map.
 	 * @param state the output state map.
@@ -260,23 +270,7 @@ public class DoomMakeExecutionPanel extends JPanel
 		
 		autoBuildAgent.start();
 	}
-	
-	// Refresh targets.
-	private void refreshTargets()
-	{
-		String absolutePath = projectDirectory.getAbsolutePath();
-		try {
-			listPanel.refreshTargets(helper.getProjectTargets(projectDirectory));
-			LOG.infof("Targets refreshed for %s", absolutePath);
-		} catch (FileNotFoundException e) {
-			SwingUtils.error(this, language.getText("doommake.project.targets.error.nodirectory", absolutePath));
-			LOG.errorf("Project directory does not exist: %s", absolutePath);
-		} catch (ProcessCallException e) {
-			SwingUtils.error(this, language.getText("doommake.project.targets.error.gettargets", absolutePath));
-			LOG.errorf("Could not invoke `doommake --targets` in %s", absolutePath);
-		}
-	}
-	
+
 	/**
 	 * Sets the current target to execute.
 	 * @param target the new target.

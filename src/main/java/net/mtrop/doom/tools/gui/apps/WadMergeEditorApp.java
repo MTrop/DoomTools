@@ -381,14 +381,8 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 
 	private void onHandleChange()
 	{
-		if (currentHandle != null)
-		{
-			// Do nothing, for now.
-		}
-		else
-		{
-			// Do nothing, for now.
-		}
+		runAction.setEnabled(currentHandle != null);
+		runParametersAction.setEnabled(currentHandle != null);
 	}
 	
 	private void onNewEditor()

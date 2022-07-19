@@ -371,15 +371,7 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 
 	private void onHandleChange()
 	{
-		if (currentHandle != null)
-		{
-			// Do nothing.
-		}
-		else
-		{
-			// Do nothing.
-		}
-
+		exportAction.setEnabled(currentHandle != null);
 	}
 	
 	private void onNewEditor()

@@ -30,7 +30,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A single process Runnawrapper because Processes are the worst to deal with.
+ * A single process wrapper because Processes are the worst to deal with.
  * This Process builder is abstracted as a {@link Callable}, so it and other instances
  * can be added to an executor.
  * <p> If the same output reference is provided for more than one stream (STDOUT and STDERR),

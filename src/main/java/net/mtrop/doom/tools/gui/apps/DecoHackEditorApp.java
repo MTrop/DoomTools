@@ -79,6 +79,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	// Referenced Components
 	
+	private JSplitPane splitPaneHorizontal;
 	private EditorDirectoryTreePanel treePanel;
 	private DecoHackEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
@@ -173,6 +174,16 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		this.treePanel = new DecoHackTreePanel();
 		onOpenDirectory(new File(OSUtils.getWorkingDirectoryPath()));
 		
+		this.splitPaneHorizontal = split(
+			containerOf(dimension(215, 500), 
+				node(BorderLayout.CENTER, treePanel)
+			),
+			containerOf(dimension(610, 500),
+				node(BorderLayout.CENTER, editorPanel)
+			)
+		);
+		this.splitPaneHorizontal.setDividerLocation(215);
+
 		this.exportAction = utils.createActionFromLanguageKey("decohack.menu.patch.item.export", (e) -> onExport());
 		
 		this.currentHandle = null;
@@ -189,18 +200,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane() 
 	{
-		JSplitPane split = split(
-			containerOf(dimension(215, 500), 
-				node(BorderLayout.CENTER, treePanel)
-			),
-			containerOf(dimension(610, 500),
-				node(BorderLayout.CENTER, editorPanel)
-			)
-		);
-		split.setDividerLocation(-1);
-		
 		return containerOf(borderLayout(0, 8), 
-			node(BorderLayout.CENTER, split),
+			node(BorderLayout.CENTER, splitPaneHorizontal),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
@@ -303,7 +304,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			f.setBounds(bounds);
 			if (maximized)
 				f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-			treePanel.setSize(dimension(settings.getTreeWidth(), treePanel.getHeight()));
+			splitPaneHorizontal.setDividerLocation(settings.getTreeWidth());
 		}
 	}
 	
@@ -327,7 +328,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		{
 			JFrame f = (JFrame)frame;
 			settings.setBounds(f);
-			settings.setTreeWidth(treePanel.getWidth());
+			settings.setTreeWidth(splitPaneHorizontal.getDividerLocation());
 		}
 	}
 	
@@ -406,15 +407,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	private void onHandleChange()
 	{
-		if (currentHandle != null)
-		{
-			// Do nothing.
-		}
-		else
-		{
-			// Do nothing.
-		}
-
+		exportAction.setEnabled(currentHandle != null);
 	}
 	
 	private void onNewEditor()

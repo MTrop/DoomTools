@@ -2070,6 +2070,14 @@ public class EditorMultiFilePanel extends JPanel
 		}
 		
 		/**
+		 * @return the editor style type.
+		 */
+		public String getCurrentStyleType() 
+		{
+			return currentStyle;
+		}
+		
+		/**
 		 * @return true if this editor has unsaved data.
 		 */
 		public boolean needsToSave()
