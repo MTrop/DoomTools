@@ -1083,6 +1083,13 @@ public class DirectoryTreePanel extends JPanel
 		{
 			super(root);
 		}
+		
+		@Override
+		public void reload(TreeNode node) 
+		{
+			((FileNode)node).clearChildren();
+			super.reload(node);
+		}
 	}
 
 	/**
@@ -1128,12 +1135,23 @@ public class DirectoryTreePanel extends JPanel
 			this.file = FileUtils.canonizeFile(file);
 			this.children = null;
 		}
+
+		/**
+		 * Clears the children.
+		 */
+		public synchronized void clearChildren()
+		{
+			children = null;
+		}
 		
 		/**
 		 * Refreshes the children.
 		 */
 		public synchronized void refreshChildren()
 		{
+			if (children != null)
+				return;
+			
 			File[] files = file.listFiles();
 			if (files == null)
 				return;
