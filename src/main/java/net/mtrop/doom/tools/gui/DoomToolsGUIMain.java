@@ -181,7 +181,14 @@ public final class DoomToolsGUIMain
 		return Common.spawnJava(DoomToolsGUIMain.class).arg(appName).args(args).exec();
 	}
 	
-	
+	// Sets the exception handler.
+	private static void setExceptionHandler()
+	{
+		Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+			LOG.errorf(exception, "Thread [%s] threw an uncaught exception!", thread.getName());
+		});
+	}
+
 	/* ==================================================================== */
 
 	/**
@@ -228,6 +235,7 @@ public final class DoomToolsGUIMain
 	public static void main(String[] args) 
 	{
 		setLAF();
+		setExceptionHandler();
 		
 		// no args - run main application.
 		if (args.length == 0)
@@ -263,7 +271,10 @@ public final class DoomToolsGUIMain
 		}
 		else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
 		{
-			startApplication(new DoomMakeNewProjectApp(ArrayUtils.arrayElement(args, 1)));
+			String path = ArrayUtils.arrayElement(args, 1);
+			if (ObjectUtils.isEmpty(path))
+				path = null;
+			startApplication(new DoomMakeNewProjectApp(path, !ObjectUtils.isEmpty(ArrayUtils.arrayElement(args, 2))));
 		}
 		else if (ApplicationNames.DOOMMAKE_OPEN.equals(args[0]))
 		{

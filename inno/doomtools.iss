@@ -74,6 +74,7 @@ Name: "{group}\{#DTAppName} Documentation";         Filename: "{app}\docs"; Flag
 Name: "{group}\{#DTAppName} Website";               Filename: "https://mtrop.github.io/DoomTools/"
 Name: "{group}\Utilities\DECOHack Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "decohack"
 Name: "{group}\Utilities\DoomMake";                 Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-open"
+Name: "{group}\Utilities\DoomMake Studio";          Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-studio"
 Name: "{group}\Utilities\DoomMake (New Project)";   Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-new"
 Name: "{group}\Utilities\WADTex Editor";            Filename: "{app}\{#DTAppExeName}"; Parameters: "wadtex"
 Name: "{group}\Utilities\WadMerge Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wadmerge"
@@ -111,6 +112,7 @@ begin
             exePath := appPath + '\{#DTAppExeName}';
             ExplorerAddCommandItem('doommake-new', 'New Doom&Make Project', exePath, exePath + ' doommake-new "%V"');
             ExplorerAddCommandItem('doommake-open', 'Open Doom&Make Project', exePath, exePath + ' doommake-open "%V"');
+            ExplorerAddCommandItem('doommake-studio', 'Open in DoomMake &Studio', exePath, exePath + ' doommake-studio "%V"');
         end;
     end;
 end;
@@ -122,5 +124,6 @@ begin
         EnvRemovePath(ExpandConstant('{app}'));
         ExplorerRemoveCommandItem('doommake-new');
         ExplorerRemoveCommandItem('doommake-open');
+        ExplorerRemoveCommandItem('doommake-studio');
     end;
 end;

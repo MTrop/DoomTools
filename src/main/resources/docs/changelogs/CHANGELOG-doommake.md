@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.18.0
+
+* `Added` A "Studio" mode only accessible as Desktop App: `doommake-gui doommake-studio`
+
+
 ### Changed for 0.17.0
 
 * `Added` The `TOOL::WADTEX(...)` function was changed to support entry name override.

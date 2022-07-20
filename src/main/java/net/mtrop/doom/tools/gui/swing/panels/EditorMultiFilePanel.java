@@ -1001,9 +1001,15 @@ public class EditorMultiFilePanel extends JPanel
 		if (styleName == null)
 		{
 			if (attachedFile != null)
+			{
 				styleName = editorProvider.getStyleByFile(attachedFile);
+				if (styleName == null)
+					styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
+			}
 			else
+			{
 				styleName = SyntaxConstants.SYNTAX_STYLE_NONE;
+			}
 		}
 		
 		// Remove all CRs for editor, keep LFs.

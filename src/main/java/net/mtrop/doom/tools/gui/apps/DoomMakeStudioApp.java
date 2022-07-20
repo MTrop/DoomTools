@@ -68,8 +68,6 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 {
-    private static final String STATE_PROJECT_DIRECTORY = "projectDirectory";
-
     private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
 	/** Logger. */
@@ -290,7 +288,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	@Override
 	public String getTitle()
 	{
-		return language.getText("doommake.project.title", projectDirectory.getName());
+		return language.getText("doommake.studio.project.title", projectDirectory.getName());
 	}
 
 	@Override
@@ -388,18 +386,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	public Map<String, String> getApplicationState()
 	{
 		Map<String, String> state = super.getApplicationState();
-		state.put(STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
-		executionPanel.saveState(state);
-		// TODO: Finish this.
+		// Not executable as internal application.
 		return state;
 	}
 
 	@Override
 	public void setApplicationState(Map<String, String> state)
 	{
-		this.projectDirectory = state.containsKey(STATE_PROJECT_DIRECTORY) ? new File(state.get(STATE_PROJECT_DIRECTORY)) : null;
-		executionPanel.loadState(state);
-		// TODO: Finish this.
+		// Not executable as internal application.
 	}
 
 	private MenuNode[] createCommonFileMenuItems()
@@ -480,7 +474,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private void openNewProject()
 	{
 		try {
-			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW);
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, "", "true");
 		} catch (IOException e) {
 			LOG.error(e, "Couldn't start New Project!");
 			SwingUtils.error(getApplicationContainer(), language.getText("doommake.error.app.newproject"));
@@ -582,6 +576,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 		if (openWadFile(file))
 			return;
+		if (openUnknownFile(file))
+			return;
 		
 		try {
 			editorPanel.openFileEditor(file, Charset.defaultCharset());
@@ -598,6 +594,26 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			statusPanel.setErrorMessage(language.getText("doommake.status.message.editor.error.security", file.getName()));
 			SwingUtils.error(parent, language.getText("doommake.open.error.security", file.getAbsolutePath()));
 		}
+	}
+
+	// Returns true if handled.
+	private boolean openUnknownFile(File file)
+	{
+		if (DoomToolsEditorProvider.get().getStyleByFile(file) != null)
+			return false;
+		
+		if (SwingUtils.yesTo(language.getText("doommake.open.system")))
+		{
+			try {
+				SwingUtils.open(file);
+				return true;
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("doommake.open.system.ioerror"));
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("doommake.open.system.security"));
+			}
+		}
+		return false;
 	}
 	
 	// Returns true if handled.

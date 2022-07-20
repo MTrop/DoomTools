@@ -883,6 +883,7 @@ public final class FileUtils
 		{
 			if (directory.delete())
 				aggregator.add(directory);
+			return;
 		}
 		
 		for (int i = 0; i < files.length; i++) 
@@ -891,9 +892,6 @@ public final class FileUtils
 			if (file.isDirectory() && recurse)
 			{
 				deleteDirectoryRecurse(aggregator, file, recurse, filter);
-				if (file.listFiles().length == 0)
-					if (file.delete())
-						aggregator.add(file);
 			}
 			else
 			{

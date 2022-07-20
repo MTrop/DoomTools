@@ -1,6 +1,9 @@
 package net.mtrop.doom.tools.gui.managers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
@@ -63,6 +66,7 @@ public final class DoomToolsEditorProvider
 		private static final long serialVersionUID = -2713345708437194651L;
 		{
 			put("defswani.txt",         SYNTAX_STYLE_DEFSWANI);
+			put("defswani.dat",         SYNTAX_STYLE_DEFSWANI);
 			put("doommake.script",      SYNTAX_STYLE_DOOMMAKE);
 			put("doommake-lib.script",  SYNTAX_STYLE_DOOMMAKE);
 			put("doommake-init.script", SYNTAX_STYLE_DOOMMAKE);
@@ -84,6 +88,7 @@ public final class DoomToolsEditorProvider
 			put("asm",        SYNTAX_STYLE_ASSEMBLER_X86);
 			put("bbc",        SYNTAX_STYLE_BBCODE);
 			put("c",          SYNTAX_STYLE_C);
+			put("cfg",        SYNTAX_STYLE_NONE);
 			put("cljs",       SYNTAX_STYLE_CLOJURE);
 			put("cpp",        SYNTAX_STYLE_CPLUSPLUS);
 			put("cs",         SYNTAX_STYLE_CSHARP);
@@ -92,6 +97,7 @@ public final class DoomToolsEditorProvider
 			put("d",          SYNTAX_STYLE_D);
 			put("dart",       SYNTAX_STYLE_DART);
 			put("dtd",        SYNTAX_STYLE_DTD);
+			put("diz",        SYNTAX_STYLE_NONE);
 			put("fortran",    SYNTAX_STYLE_FORTRAN);
 			put("go",         SYNTAX_STYLE_GO);
 			put("groovy",     SYNTAX_STYLE_GROOVY);
@@ -110,6 +116,7 @@ public final class DoomToolsEditorProvider
 			put("lua",        SYNTAX_STYLE_LUA);
 			put("md",         SYNTAX_STYLE_MARKDOWN);
 			put("mxml",       SYNTAX_STYLE_MXML);
+			put("nfo",        SYNTAX_STYLE_NONE);
 			put("nsis",       SYNTAX_STYLE_NSIS);
 			put("pl",         SYNTAX_STYLE_PERL);
 			put("php",        SYNTAX_STYLE_PHP);
@@ -352,6 +359,9 @@ public final class DoomToolsEditorProvider
 		if ((styleName = EXTENSION_TO_STYLE_MAP.get(ext)) != null)
 			return styleName;
 
+		if (isBinaryFile(file))
+			return null;
+		
 		return SYNTAX_STYLE_NONE;
 	}
 
@@ -379,4 +389,32 @@ public final class DoomToolsEditorProvider
 		return out;
 	}
 
+	// Tiny test to check if a file is a binary file.
+	private static boolean isBinaryFile(File file)
+	{
+		final int THRESHOLD = 512;
+		byte[] buffer = new byte[THRESHOLD];
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
+		{
+			int amt = raf.read(buffer);
+			for (int i = 0; i < amt; i++)
+				if ((buffer[i] & 0x0ff) > 127)
+					return true;
+			return false;
+		} 
+		catch (FileNotFoundException e) 
+		{
+			return false;
+		} 
+		catch (IOException e) 
+		{
+			return false;
+		} 
+		catch (SecurityException e) 
+		{
+			return false;
+		}
+		
+	}
+	
 }

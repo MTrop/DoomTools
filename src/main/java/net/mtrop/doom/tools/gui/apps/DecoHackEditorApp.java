@@ -397,9 +397,6 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 				handleToSettingsMap.put(handle, settings);
 			}
 		}
-		
-		treePanel.setSize(dimension(ValueUtils.parseInt(state.get("tree.width"), 1), treePanel.getHeight()));
-		treePanel.setRootDirectory(ValueUtils.parse(state.get("tree.dir"), parseFile));
 	}
 	
 	

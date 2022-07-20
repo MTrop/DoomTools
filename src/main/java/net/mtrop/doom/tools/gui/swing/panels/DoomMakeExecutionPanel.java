@@ -166,20 +166,22 @@ public class DoomMakeExecutionPanel extends JPanel
 
 	/**
 	 * Saves this component's state to a state map.
+	 * @param prefix the key prefix
 	 * @param state the output state map.
 	 */
-	public void saveState(Map<String, String> state)
+	public void saveState(String prefix, Map<String, String> state)
 	{
-		state.put(STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
+		state.put(prefix + "." + STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
 	}
 
 	/**
 	 * Loads this component's state from a state map.
+	 * @param prefix the key prefix
 	 * @param state the input state map.
 	 */
-	public void loadState(Map<String, String> state)
+	public void loadState(String prefix, Map<String, String> state)
 	{
-		this.projectDirectory = state.containsKey(STATE_PROJECT_DIRECTORY) ? new File(state.get(STATE_PROJECT_DIRECTORY)) : null;
+		this.projectDirectory = state.containsKey(prefix + "." + STATE_PROJECT_DIRECTORY) ? new File(state.get(prefix + "." + STATE_PROJECT_DIRECTORY)) : null;
 	}
 
 	/**

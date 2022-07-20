@@ -194,7 +194,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		Map<String, String> state = super.getApplicationState();
 		state.put(STATE_PROJECT_DIRECTORY, projectDirectory.getAbsolutePath());
-		executionPanel.saveState(state);
+		executionPanel.saveState("doommake", state);
 		return state;
 	}
 
@@ -202,7 +202,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	public void setApplicationState(Map<String, String> state)
 	{
 		this.projectDirectory = state.containsKey(STATE_PROJECT_DIRECTORY) ? new File(state.get(STATE_PROJECT_DIRECTORY)) : null;
-		executionPanel.loadState(state);
+		executionPanel.loadState("doommake", state);
 	}
 
 	// Open new project app (new instance).

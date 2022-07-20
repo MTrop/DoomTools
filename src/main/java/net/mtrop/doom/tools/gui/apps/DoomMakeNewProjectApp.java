@@ -62,25 +62,29 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	private File targetDirectory;
 	/** Set of used templates. */
 	private Set<String> templateNameSet;
+	/** Open the Studio version? */
+	private boolean studio;
 	
 	/**
 	 * Creates a new New Project app instance.
 	 */
 	public DoomMakeNewProjectApp() 
 	{
-		this(null);
+		this(null, false);
 	}
 	
 	/**
 	 * Creates a new New Project app instance.
 	 * @param targetDirectoryPath the starting directory path, if any.
+	 * @param studio if true, opens DoomMake Studio instead of just the regular open project. 
 	 */
-	public DoomMakeNewProjectApp(String targetDirectoryPath) 
+	public DoomMakeNewProjectApp(String targetDirectoryPath, boolean studio) 
 	{
 		this.projectGenerator = new WADProjectGenerator();
 		
 		this.targetDirectory = ObjectUtils.isEmpty(targetDirectoryPath) ? null : new File(targetDirectoryPath);
 		this.templateNameSet = new TreeSet<>();
+		this.studio = studio;
 	}
 	
 	@Override
@@ -406,6 +410,11 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			return;
 		}
 		
+		String toolKey = studio 
+			? "doommake.newproject.modal.openproject.choice.studio"
+			: "doommake.newproject.modal.openproject.choice.tools"
+		;
+		
 		// Returns a trinary.
 		Boolean result = modal(
 			getApplicationContainer(), 
@@ -415,7 +424,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				node(BorderLayout.CENTER, label(language.getText("doommake.newproject.modal.openproject.message")))
 			),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.folder", true),
-			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.tools", false),
+			utils.createChoiceFromLanguageKey(toolKey, false),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.none", null)
 		).openThenDispose();
 
@@ -438,7 +447,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		}
 		else // Open in Doom Tools
 		{
-			startApplication(new DoomMakeOpenProjectApp(targetDirectory));
+			startApplication(studio ? new DoomMakeStudioApp(targetDirectory) : new DoomMakeOpenProjectApp(targetDirectory));
 			attemptClose();
 		}
 		

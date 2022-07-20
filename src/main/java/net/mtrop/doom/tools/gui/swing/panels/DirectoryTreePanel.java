@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.swing.DropMode;
 import javax.swing.JLabel;
@@ -60,6 +60,7 @@ import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.ModalFactory.Modal;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -601,8 +602,10 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onPasteFiles(File parent, File[] filesToPaste)
 	{
+		int fileCount = countFilesToCopy(filesToPaste);
+		
 		String dialogtitle = language.getText("dirtree.modal.paste.title");
-		String dialogLabel = language.getText("dirtree.modal.paste.message", filesToPaste.length, parent.getAbsolutePath());
+		String dialogLabel = language.getText("dirtree.modal.paste.message", fileCount, parent.getAbsolutePath());
 		
 		// Copy and skip/overwrite.
 		Boolean overwrite = utils.createModal(dialogtitle, containerOf(node(BorderLayout.CENTER, wrappedLabel(dialogLabel))), 
@@ -625,12 +628,13 @@ public class DirectoryTreePanel extends JPanel
 	 */
 	private void onDroppedFiles(File[] filesToPaste)
 	{
+		int fileCount = countFilesToCopy(filesToPaste);
 		File parent = ((FileNode)fileTree.getDropLocation().getPath().getLastPathComponent()).file;
 		if (!parent.isDirectory())
 			parent = parent.getParentFile();
 		
 		String dialogtitle = language.getText("dirtree.modal.drop.title");
-		String dialogLabel = language.getText("dirtree.modal.drop.message", filesToPaste.length, parent.getAbsolutePath());
+		String dialogLabel = language.getText("dirtree.modal.drop.message", fileCount, parent.getAbsolutePath());
 		
 		// Copy and skip/overwrite.
 		Boolean overwrite = utils.createModal(dialogtitle, containerOf(node(BorderLayout.CENTER, wrappedLabel(dialogLabel))), 
@@ -662,7 +666,7 @@ public class DirectoryTreePanel extends JPanel
 			if (FileUtils.filePathEquals(selectedFiles[i], rootDirectory))
 				continue;
 			
-			out = FileUtils.deleteDirectory(selectedFiles[i], true);
+			out = ArrayUtils.joinArrays(out, FileUtils.deleteDirectory(selectedFiles[i], true));
 			
 			File parent = selectedFiles[i].getParentFile();
 			if (parent == null)
@@ -738,21 +742,24 @@ public class DirectoryTreePanel extends JPanel
 	{
 		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final AtomicInteger result = new AtomicInteger(0);
+		
+		final int fileCount = countFilesToCopy(filesToPaste);
+		
 		JLabel fileLabel = label();
 		JProgressBar progressBar = progressBar();
 		progressBar.setMinimum(0);
-		progressBar.setMaximum(filesToPaste.length);
+		progressBar.setMaximum(fileCount);
 		progressBar.setPreferredSize(dimension(100, 20));
 		
-		final Modal<Void> modal = modal(language.getText(titleKey), containerOf(gridLayout(2, 1, 0, 4),
+		final Modal<Void> modal = modal(language.getText(titleKey), containerOf(dimension(200, 64), gridLayout(2, 1, 0, 4),
 			node(BorderLayout.NORTH, fileLabel),
 			node(BorderLayout.SOUTH, progressBar)
 		));
 		
-		InstancedFuture<Void> copyTask = tasks.spawn(createCopyTask(parent, filesToPaste, overwrite, cancelSwitch, result, (file, progress) -> {
+		InstancedFuture<Void> copyTask = tasks.spawn(createCopyTask(parent, filesToPaste, overwrite, cancelSwitch, result, (file) -> {
 			fileLabel.setText(file != null ? file.getName() + "..." : "");
-			progressBar.setValue(progress);
-			if (progress == filesToPaste.length)
+			progressBar.setValue(result.get());
+			if (result.get() == fileCount)
 				modal.dispose();
 		}));
 		
@@ -765,26 +772,42 @@ public class DirectoryTreePanel extends JPanel
 		reloadNode((FileNode)getTreePathForFile(parent).getLastPathComponent());
 	}
 
-	private Runnable createCopyTask(File parent, File[] toCopy, boolean overwrite, AtomicBoolean cancelSwitch, AtomicInteger result, BiConsumer<File, Integer> eachFile)
+	private int countFilesToCopy(File[] toCopy)
 	{
-		//TODO: Do something about folder copy.
-		return () -> 
+		int out = 0;
+		for (int i = 0; i < toCopy.length; i++)
 		{
-			for (int i = 0; i < toCopy.length; i++) 
+			File file = toCopy[i];
+			if (file.isDirectory())
+				out += countFilesToCopy(file.listFiles());
+			out++;
+		}
+		return out;
+	}
+	
+	private Runnable createCopyTask(File parent, File[] toCopy, boolean overwrite, AtomicBoolean cancelSwitch, AtomicInteger result, Consumer<File> eachFile)
+	{
+		return () -> copyFolder(parent, toCopy, overwrite, cancelSwitch, result, eachFile);
+	}
+	
+	private void copyFolder(File parent, File[] toCopy, boolean overwrite, AtomicBoolean cancelSwitch, AtomicInteger result, Consumer<File> eachFile)
+	{
+		for (int i = 0; i < toCopy.length; i++) 
+		{
+			if (cancelSwitch.get())
+				return;
+			
+			File source = toCopy[i];
+			File target = new File(parent.getAbsolutePath() + File.separator + source.getName());
+			
+			if (!source.isDirectory())
 			{
-				if (cancelSwitch.get())
-					return;
-				
-				File source = toCopy[i];
-				File target = new File(parent.getAbsolutePath() + File.separator + source.getName());
 				FileUtils.createPathForFile(target);
-				eachFile.accept(target, i);
 				if (overwrite || !target.exists())
 				{
 					try (FileInputStream fis = new FileInputStream(source); FileOutputStream fos = new FileOutputStream(target))
 					{
 						IOUtils.relay(fis, fos);
-						result.incrementAndGet();
 					} 
 					catch (FileNotFoundException e)
 					{
@@ -802,9 +825,17 @@ public class DirectoryTreePanel extends JPanel
 						target.delete();
 					}
 				}
+				result.incrementAndGet();
+				eachFile.accept(target);
 			}
-			eachFile.accept(null, toCopy.length);
-		};
+			else
+			{
+				FileUtils.createPath(target.getAbsolutePath());
+				copyFolder(target, source.listFiles(), overwrite, cancelSwitch, result, eachFile);
+				result.incrementAndGet();
+				eachFile.accept(target);
+			}
+		}
 	}
 
 	/**
