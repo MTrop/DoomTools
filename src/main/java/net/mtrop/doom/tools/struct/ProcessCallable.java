@@ -644,7 +644,8 @@ public class ProcessCallable implements Callable<Integer>
 	 */
 	public ProcessCallable setIn(final File sourceFile)
 	{
-		stdInRedirector = (process) -> new InputToOutputStreamThread(new FileInputStream(sourceFile), process.getOutputStream()) 
+		final File src = sourceFile == null ? NULL_FILE : sourceFile;
+		stdInRedirector = (process) -> new InputToOutputStreamThread(new FileInputStream(src), process.getOutputStream()) 
 		{
 			@Override
 			public void afterClose() throws IOException

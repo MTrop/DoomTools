@@ -577,7 +577,7 @@ public class FileListPanel extends JPanel
 		 */
 		public void clear()
 		{
-			synchronized (TOOL_TIP_TEXT_KEY)
+			synchronized (MUTEX)
 			{
 				fileSet.clear();
 				fileList.clear();

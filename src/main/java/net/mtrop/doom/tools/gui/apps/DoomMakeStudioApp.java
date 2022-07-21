@@ -13,10 +13,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -26,11 +29,13 @@ import net.mtrop.doom.tools.WadScriptMain;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.gui.RepositoryHelper.Git;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
+import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
@@ -44,6 +49,7 @@ import net.mtrop.doom.tools.gui.swing.panels.EditorDirectoryTreePanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
+import net.mtrop.doom.tools.gui.swing.panels.GitRepositoryPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -55,6 +61,8 @@ import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.WadUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+
+import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
@@ -81,8 +89,10 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 	// Components
 
-	private JSplitPane splitPaneHorizontal;
-	private JSplitPane splitPaneVertical;
+	private JTabbedPane tabPanel;
+	private JSplitPane filesSplitPaneHorizontal;
+	private JSplitPane filesSplitPaneVertical;
+	private JComponent repositoryPanel;
 	private EditorDirectoryTreePanel treePanel;
 	private DoomMakeExecutionPanel executionPanel;
 	private DoomMakeEditorPanel editorPanel;
@@ -194,21 +204,38 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, true);
 		
-		this.splitPaneVertical = split(SplitOrientation.VERTICAL,
-			containerOf(dimension(215, 350), node(treePanel)),
-			containerOf(dimension(215, 150), node(executionPanel))
-		);
+		if (Git.isGit(targetDirectory))		
+			this.repositoryPanel = new GitRepositoryPanel(targetDirectory);
+		else
+			this.repositoryPanel = containerOf(label(JLabel.CENTER, language.getText("doommake.tab.norepo")));
 		
-		this.splitPaneHorizontal = split(
+		DoomToolsIconManager icons = DoomToolsIconManager.get();
+		
+		JComponent fileTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
+			node(this.filesSplitPaneVertical = split(SplitOrientation.VERTICAL,
+				containerOf(dimension(215, 350), node(treePanel)),
+				containerOf(dimension(215, 150), node(executionPanel))
+			))
+		);
+		JComponent repoTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
+			node(repositoryPanel)
+		);
+
+		this.tabPanel = tabs(TabPlacement.LEFT, TabLayoutPolicy.SCROLL, 
+			tab(icons.getImage("doommake-folder.png"), fileTab), 
+			tab(icons.getImage("doommake-repo.png"), repoTab)
+		);
+
+		this.filesSplitPaneHorizontal = split(
 			containerOf(dimension(215, 500), 
-				node(BorderLayout.CENTER, splitPaneVertical)
+				node(BorderLayout.CENTER, tabPanel)
 			),
 			containerOf(dimension(610, 500),
 				node(BorderLayout.CENTER, editorPanel)
 			)
 		);
-		this.splitPaneHorizontal.setDividerLocation(215);
-		this.splitPaneVertical.setDividerLocation(350);
+		this.filesSplitPaneHorizontal.setDividerLocation(215);
+		this.filesSplitPaneVertical.setDividerLocation(350);
 		
 		this.runWadMergeAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.run", (e) -> onRunWadMergeAgain());
 		this.runWadMergeParametersAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.params", (e) -> onRunWadMergeWithArgs());
@@ -295,7 +322,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	public Container createContentPane()
 	{
 		return containerOf(borderLayout(0, 8), 
-			node(BorderLayout.CENTER, splitPaneHorizontal),
+			node(BorderLayout.CENTER, filesSplitPaneHorizontal),
 			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
@@ -345,8 +372,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			f.setBounds(bounds);
 			if (maximized)
 				f.setExtendedState(f.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-			splitPaneHorizontal.setDividerLocation(studioSettings.getHorizontalDividerWidth());
-			splitPaneVertical.setDividerLocation(studioSettings.getVerticalDividerHeight());
+			filesSplitPaneHorizontal.setDividerLocation(studioSettings.getHorizontalDividerWidth());
+			filesSplitPaneVertical.setDividerLocation(studioSettings.getVerticalDividerHeight());
 		}
 	}
 	
@@ -369,8 +396,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			JFrame f = (JFrame)frame;
 			studioSettings.setBounds(f);
-			studioSettings.setHorizontalDividerWidth(splitPaneHorizontal.getDividerLocation());
-			studioSettings.setVerticalDividerHeight(splitPaneVertical.getDividerLocation());
+			studioSettings.setHorizontalDividerWidth(filesSplitPaneHorizontal.getDividerLocation());
+			studioSettings.setVerticalDividerHeight(filesSplitPaneVertical.getDividerLocation());
 		}
 	}
 	

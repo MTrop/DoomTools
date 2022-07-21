@@ -504,6 +504,17 @@ public final class ContainerFactory
 	}
 	
 	/**
+	 * Creates a tab.
+	 * @param icon the tab icon.
+	 * @param component the component attached to the tab.
+	 * @return a new Tab.
+	 */
+	public static Tab tab(Icon icon, Component component)
+	{
+		return new Tab(icon, null, null, component);
+	}
+	
+	/**
 	 * Creates a tabbed pane component.
 	 * @param tabPlacement the tab placement policy.
 	 * @param tabLayoutPolicy the tab layout policy.
