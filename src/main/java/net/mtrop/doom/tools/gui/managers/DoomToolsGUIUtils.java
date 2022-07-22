@@ -582,43 +582,99 @@ public final class DoomToolsGUIUtils
 	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
 	 * @return a modal handle to start with a task manager.
 	 */
-	public ProcessModal createProcessModal(final Container parent, final String title, final File inFile, final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction) 
-	{
-		// Show output.
-		final DoomToolsTextOutputPanel outputPanel = new DoomToolsTextOutputPanel();
+	public ProcessModal createProcessModal(
+		final Container parent, 
+		final String title, 
+		final File inFile, 
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
+	){
+		return createProcessModal(parent, title, inFile, new DoomToolsTextOutputPanel(), false, modalOutFunction);
+	}
+	
+	/**
+	 * Creates a process modal, prepped to start and selectively open.
+	 * @param parent the parent owner.
+	 * @param title the title of the modal.
+	 * @param inFile the input stream file.
+	 * @param dontOpen if set, the modal is not opened.
+	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
+	 * @return a modal handle to start with a task manager.
+	 */
+	public ProcessModal createProcessModal(
+		final Container parent, 
+		final String title, 
+		final File inFile, 
+		final boolean dontOpen,
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
+	){
+		return createProcessModal(parent, title, inFile, new DoomToolsTextOutputPanel(), dontOpen, modalOutFunction);
+	}
+	
+	/**
+	 * Creates a process modal, prepped to start and selectively open.
+	 * @param parent the parent owner.
+	 * @param title the title of the modal.
+	 * @param inFile the input stream file.
+	 * @param outputPanel the output panel to send out and err output to.
+	 * @param dontOpen if set, the modal is not opened.
+	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
+	 * @return a modal handle to start with a task manager.
+	 */
+	public ProcessModal createProcessModal(
+		final Container parent, 
+		final String title, 
+		final File inFile, 
+		final DoomToolsTextOutputPanel outputPanel,
+		final boolean dontOpen,
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
+	){
 		final DoomToolsStatusPanel status = new DoomToolsStatusPanel();
 		
+		// Show output.
 		status.setActivityMessage(language.getText("doomtools.process.activity"));
 		
-		final Modal<Void> outputModal = modal(
-			parent, 
-			title,
-			containerOf(borderLayout(0, 4),
-				node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, outputPanel)),
-				node(BorderLayout.SOUTH, containerOf(
-					node(BorderLayout.WEST, status),
-					node(BorderLayout.EAST, containerOf(flowLayout(Flow.RIGHT, 4, 0),
-						node(createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
-							copyToClipboard(outputPanel.getText());
-							status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
-						})),
-						node(createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
-							if (saveToFile(outputPanel, outputPanel.getText()))
-								status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
-						}))
+		final Modal<Void> outputModal;
+		
+		if (!dontOpen)
+		{
+			outputModal = modal(
+				parent, 
+				title,
+				containerOf(borderLayout(0, 4),
+					node(BorderLayout.CENTER, scroll(ScrollPolicy.AS_NEEDED, outputPanel)),
+					node(BorderLayout.SOUTH, containerOf(
+						node(BorderLayout.WEST, status),
+						node(BorderLayout.EAST, containerOf(flowLayout(Flow.RIGHT, 4, 0),
+							node(createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
+								copyToClipboard(outputPanel.getText());
+								status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
+							})),
+							node(createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
+								if (saveToFile(outputPanel, outputPanel.getText()))
+									status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
+							}))
+						))
 					))
-				))
-			)
-		);
+				)
+			);
+		}
+		else
+		{
+			outputModal = null;
+		}
 		
 		return new ProcessModal() 
 		{
 			@Override
-			public void start(DoomToolsTaskManager tasks) 
+			public void start(DoomToolsTaskManager tasks, final Runnable onStart, final Runnable onEnd) 
 			{
 				final PrintStream outStream = outputPanel.getPrintStream();
 				final PrintStream errorStream = outputPanel.getErrorPrintStream();
-				tasks.spawn(() -> {
+				tasks.spawn(() -> 
+				{
+					if (onStart != null)
+						onStart.run();
+					
 					try (InputStream stdin = inFile != null ? new FileInputStream(inFile) : IOUtils.getNullInputStream()) 
 					{
 						InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
@@ -636,11 +692,17 @@ public final class DoomToolsGUIUtils
 					{
 						status.setErrorMessage(language.getText("doomtools.process.error", e.getLocalizedMessage()));
 					}
+					
+					if (onEnd != null)
+						onEnd.run();
 				});
-				outputModal.openThenDispose();
+				if (!dontOpen)
+					outputModal.openThenDispose();
 			}
 		};
 	}
+	
+	
 
 	/**
 	 * Creates a help modal, modeless.
@@ -983,8 +1045,21 @@ public final class DoomToolsGUIUtils
 		/**
 		 * Starts the task and opens the modal.
 		 * @param tasks
+		 * @param onStart called on start.
+		 * @param onEnd called on end.
 		 */
-		void start(DoomToolsTaskManager tasks);
+		default void start(DoomToolsTaskManager tasks)
+		{
+			start(tasks, null, null);
+		}
+
+		/**
+		 * Starts the task and opens the modal.
+		 * @param tasks
+		 * @param onStart called on start.
+		 * @param onEnd called on end.
+		 */
+		void start(DoomToolsTaskManager tasks, Runnable onStart, Runnable onEnd);
 	}
 	
 	/**

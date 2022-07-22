@@ -65,6 +65,8 @@ public class DoomMakeExecutionPanel extends JPanel
     private File projectDirectory;
     /** Status messages. */
     private DoomToolsStatusPanel statusPanel;
+    /** Logging panel override. */
+    private DoomToolsTextOutputPanel outputPanel;
 
     // State
     
@@ -77,9 +79,10 @@ public class DoomMakeExecutionPanel extends JPanel
 	 * Creates a new panel from a project directory.
      * @param statusPanel the status panel to talk to.
      * @param targetDirectory 
+     * @param outputPanel optional output override panel.
      * @param ideMode if true, omit the IDE button.
 	 */
-	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, boolean ideMode)
+	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, DoomToolsTextOutputPanel outputPanel, boolean ideMode)
 	{
 		this.language = DoomToolsLanguageManager.get();
 		this.helper = DoomMakeProjectHelper.get();
@@ -105,6 +108,8 @@ public class DoomMakeExecutionPanel extends JPanel
 		this.statusPanel = statusPanel;
 		this.statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.ready"));
 
+		this.outputPanel = outputPanel;
+		
 		this.projectDirectory = targetDirectory;
 		
 		this.currentTarget = null;
@@ -296,7 +301,9 @@ public class DoomMakeExecutionPanel extends JPanel
 		if (currentTarget == null)
 			return;
 		
-		appCommon.onExecuteDoomMake(this, statusPanel, projectDirectory, null, currentTarget, NO_ARGS, false);
+		appCommon.onExecuteDoomMake(this, outputPanel != null ? outputPanel : new DoomToolsTextOutputPanel(), statusPanel, outputPanel != null, projectDirectory, null, currentTarget, NO_ARGS, false,
+			()->updateTargetsEnabled(false), ()->updateTargetsEnabled(true)
+		);
 	}
 
 	private void updateTargetsEnabled(boolean enabled)

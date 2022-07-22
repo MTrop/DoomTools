@@ -1,5 +1,6 @@
 package net.mtrop.doom.tools.gui.managers;
 
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,9 @@ public final class DoomToolsLanguageManager
 	private static final String OS_MACOS = "mac";
 	/** OS: Default Linux. */
 	private static final String OS_LINUX = "linux";
+	
+	/** That dang option key on MacOS. */
+	private static final int OPTION_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	
 	/** Missing text. */
 	private static final String MISSING_TEXT = "[[NO LANGUAGE MATCH]]";
@@ -229,7 +233,28 @@ public final class DoomToolsLanguageManager
 			return null;
 		
 		String value = getText(key, args);
-		KeyStroke out = KeyStroke.getKeyStroke(value);
+		
+		KeyStroke out;
+		
+		// Special handling for MacOS because of course
+		if (OSUtils.isOSX())
+		{
+			if (value.contains("option"))
+			{
+				value = value.replace("option", "").trim();
+				KeyStroke temp = KeyStroke.getKeyStroke(value);
+				out = KeyStroke.getKeyStroke(temp.getKeyCode(), temp.getModifiers() | OPTION_MASK);
+			}
+			else
+			{
+				out = KeyStroke.getKeyStroke(value);
+			}
+		}
+		else
+		{
+			out = KeyStroke.getKeyStroke(value);
+		}
+		
 		if (out == null)
 			LOG.info("Language key " + key + " was not parseable: " + value);
 		return out;

@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.gui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -13,8 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Action;
@@ -25,21 +22,22 @@ import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
 import com.blackrook.json.JSONWriter.Options;
 
-import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
@@ -51,6 +49,7 @@ import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadTexCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WadTexEditorApp;
+import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils.HelpSource;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -64,6 +63,7 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
@@ -300,8 +300,9 @@ public class DoomToolsMainWindow extends JFrame
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.compile", (i) -> addApplication(new DecoHackCompilerApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
-						utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (i) -> addApplication(new DoomMakeNewProjectApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (i) -> openDoomMakeProject())
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (i) -> addApplication(new DoomMakeNewProjectApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (i) -> openDoomMakeProject()),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.studio", (i) -> openDoomMakeStudio())
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.editor", (i) -> addApplication(new WadMergeEditorApp())),
@@ -334,19 +335,19 @@ public class DoomToolsMainWindow extends JFrame
 			),
 
 			// Help
-			utils.createMenuFromLanguageKey("doomtools.menu.help",
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (i) -> openAboutModal()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (i) -> openLicensesModal()),
-				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (i) -> openDocs()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (i) -> openSettingsFolder()),
-				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (i) -> openWebsite()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (i) -> openRepositorySite()),
-				separator(),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> openChangeLogModal()),
-				utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (i) -> openUpdate())
-			)
+			utils.createMenuFromLanguageKey("doomtools.menu.help", ArrayUtils.joinArrays(
+				ArrayUtils.arrayOf(
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (i) -> openAboutModal()),
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (i) -> openLicensesModal()),
+					separator()
+				),
+				AppCommon.get().getCommonHelpMenuItems(),
+				ArrayUtils.arrayOf(
+					separator(),
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> openChangeLogModal()),
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.update", (i) -> openUpdate())
+				)
+			))
 		);
 	}
 	
@@ -395,139 +396,6 @@ public class DoomToolsMainWindow extends JFrame
 			settingsPanel 
 		).openThenDispose();
 		settingsPanel.commitSettings();
-	}
-	
-	private void openDocs()
-	{
-		final String path; 
-		try {
-			path = Environment.getDoomToolsPath();
-		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
-			return;
-		}
-		
-		if (ObjectUtils.isEmpty(path))
-		{
-			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
-			return;
-		}
-		
-		if (!Desktop.isDesktopSupported())
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop"));
-			return;
-		}
-
-		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
-			return;
-		}
-		
-		LOG.info("Opening the DoomTools documentation folder...");
-
-		File docsDir = new File(path + File.separator + "docs");
-		if (!docsDir.exists())
-		{
-			SwingUtils.error(language.getText("doomtools.error.opendocs.notfound"));
-		}
-		else
-		{
-			try {
-				Desktop.getDesktop().open(docsDir);
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("doomtools.error.opendocs.io"));
-			} catch (SecurityException e) {
-				SwingUtils.error(language.getText("doomtools.error.opendocs.security"));
-			}
-		}
-	}
-	
-	private void openSettingsFolder()
-	{
-		if (!Desktop.isDesktopSupported())
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop"));
-			return;
-		}
-
-		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
-			return;
-		}
-		
-		LOG.info("Opening the DoomTools settings folder...");
-		
-		File settingsDir = new File(Paths.APPDATA_PATH);
-		if (!settingsDir.exists())
-		{
-			SwingUtils.error(language.getText("doomtools.error.opensettings.notfound"));
-			return;
-		}
-		
-		try {
-			Desktop.getDesktop().open(settingsDir);
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("doomtools.error.opensettings.io"));
-		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("doomtools.error.opensettings.security"));
-		}
-	}
-	
-	private void openWebsite()
-	{
-		if (!Desktop.isDesktopSupported())
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop"));
-			return;
-		}
-
-		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
-			return;
-		}
-				
-		LOG.info("Opening the DoomTools website...");
-
-		try {
-			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_WEBSITE));
-		} catch (URISyntaxException e) {
-			SwingUtils.error(language.getText("doomtools.error.openweb.url"));
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("doomtools.error.openweb.io"));
-		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("doomtools.error.openweb.security"));
-		}
-	}
-	
-	private void openRepositorySite()
-	{
-		if (!Desktop.isDesktopSupported())
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop"));
-			return;
-		}
-
-		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
-		{
-			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
-			return;
-		}
-				
-		LOG.info("Opening the DoomTools code repository website...");
-
-		try {
-			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_REPO_WEBSITE));
-		} catch (URISyntaxException e) {
-			SwingUtils.error(language.getText("doomtools.error.openrepo.url"));
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("doomtools.error.openrepo.io"));
-		} catch (SecurityException e) {
-			SwingUtils.error(language.getText("doomtools.error.openrepo.security"));
-		}
 	}
 	
 	private void openUpdate()
@@ -747,6 +615,20 @@ public class DoomToolsMainWindow extends JFrame
 		DoomMakeOpenProjectApp app;
 		if ((app = DoomMakeOpenProjectApp.openAndCreate(this)) != null)
 			addApplication(app);
+	}
+
+	private void openDoomMakeStudio()
+	{
+		File dir;
+		if ((dir = DoomMakeStudioApp.openAndGetDirectory(this)) == null)
+			return;
+		
+		try {
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_STUDIO, dir.getAbsolutePath());
+		} catch (IOException e) {
+			LOG.error(e, "Couldn't start Open Project: " + dir.getAbsolutePath());
+			SwingUtils.error(this, language.getText("doommake.error.app.openproject", dir.getAbsolutePath()));
+		}
 	}
 
 }

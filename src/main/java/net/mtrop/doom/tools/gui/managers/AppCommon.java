@@ -1,11 +1,17 @@
 package net.mtrop.doom.tools.gui.managers;
 
+import static net.mtrop.doom.tools.struct.swing.ComponentFactory.separator;
+
 import java.awt.Container;
+import java.awt.Desktop;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
@@ -15,6 +21,8 @@ import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.DoomToolsMain;
+import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.WADTexMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WTExportMain;
@@ -25,13 +33,18 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
+import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -85,6 +98,150 @@ public final class AppCommon
 		this.utils = DoomToolsGUIUtils.get();
 		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
+	}
+
+	public MenuNode[] getCommonHelpMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.opendocs", (i) -> openDocs()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.opensettings", (i) -> openSettingsFolder()),
+			separator(),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.openweb", (i) -> openWebsite()),
+			utils.createItemFromLanguageKey("doomtools.menu.help.item.openrepo", (i) -> openRepositorySite())
+		);
+	}
+	
+	private void openDocs()
+	{
+		final String path; 
+		try {
+			path = Environment.getDoomToolsPath();
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		if (ObjectUtils.isEmpty(path))
+		{
+			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
+			return;
+		}
+		
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
+			return;
+		}
+		
+		LOG.info("Opening the DoomTools documentation folder...");
+
+		File docsDir = new File(path + File.separator + "docs");
+		if (!docsDir.exists())
+		{
+			SwingUtils.error(language.getText("doomtools.error.opendocs.notfound"));
+		}
+		else
+		{
+			try {
+				Desktop.getDesktop().open(docsDir);
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("doomtools.error.opendocs.io"));
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("doomtools.error.opendocs.security"));
+			}
+		}
+	}
+	
+	private void openSettingsFolder()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.open"));
+			return;
+		}
+		
+		LOG.info("Opening the DoomTools settings folder...");
+		
+		File settingsDir = new File(Paths.APPDATA_PATH);
+		if (!settingsDir.exists())
+		{
+			SwingUtils.error(language.getText("doomtools.error.opensettings.notfound"));
+			return;
+		}
+		
+		try {
+			Desktop.getDesktop().open(settingsDir);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.opensettings.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.opensettings.security"));
+		}
+	}
+	
+	private void openWebsite()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
+			return;
+		}
+				
+		LOG.info("Opening the DoomTools website...");
+
+		try {
+			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_WEBSITE));
+		} catch (URISyntaxException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.url"));
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.openweb.security"));
+		}
+	}
+	
+	private void openRepositorySite()
+	{
+		if (!Desktop.isDesktopSupported())
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop"));
+			return;
+		}
+
+		if (!Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+		{
+			SwingUtils.error(language.getText("doomtools.error.desktop.browse"));
+			return;
+		}
+				
+		LOG.info("Opening the DoomTools code repository website...");
+
+		try {
+			Desktop.getDesktop().browse(new URI(DoomToolsMain.DOOMTOOLS_REPO_WEBSITE));
+		} catch (URISyntaxException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.url"));
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.io"));
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("doomtools.error.openrepo.security"));
+		}
 	}
 
 	/**
@@ -179,13 +336,67 @@ public final class AppCommon
 	 * @param target the target name.
 	 * @param args the script arguments, if any.
 	 * @param agentOverride if true, override the agent warning. 
+	 * @param onStart what to call on process start.
+	 * @param onEnd what to call on process end.
 	 */
-	public void onExecuteDoomMake(Container parent, final DoomToolsStatusPanel statusPanel, final File projectDirectory, final File standardInFile, final String target, final String[] args, boolean agentOverride)
-	{
+	public void onExecuteDoomMake(
+		Container parent, 
+		final DoomToolsStatusPanel statusPanel, 
+		final File projectDirectory, 
+		final File standardInFile, 
+		final String target, 
+		final String[] args, 
+		boolean agentOverride,
+		Runnable onStart,
+		Runnable onEnd
+	){
+		onExecuteDoomMake(
+			parent, 
+			new DoomToolsTextOutputPanel(), 
+			statusPanel, 
+			false, 
+			projectDirectory, 
+			standardInFile, 
+			target, 
+			args, 
+			agentOverride, 
+			onStart, onEnd
+		);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param outputPanel the output panel to output to.
+	 * @param statusPanel the status panel.
+	 * @param noModal if true, does not show a modal.
+	 * @param projectDirectory the project directory.
+	 * @param standardInFile the standard in.
+	 * @param target the target name.
+	 * @param args the script arguments, if any.
+	 * @param agentOverride if true, override the agent warning. 
+	 * @param onStart what to call on process start.
+	 * @param onEnd what to call on process end.
+	 */
+	public void onExecuteDoomMake(
+		Container parent, 
+		final DoomToolsTextOutputPanel outputPanel,
+		final DoomToolsStatusPanel statusPanel, 
+		final boolean noModal,
+		final File projectDirectory, 
+		final File standardInFile, 
+		final String target, 
+		final String[] args, 
+		boolean agentOverride,
+		Runnable onStart,
+		Runnable onEnd
+	){
 		utils.createProcessModal(
 			parent, 
 			language.getText("wadscript.run.message.title"),
 			standardInFile,
+			outputPanel,
+			noModal,
 			(stdout, stderr, stdin) -> execute(
 				statusPanel,
 				language.getText("doommake.project.build.message.running", target), 
@@ -194,7 +405,7 @@ public final class AppCommon
 				language.getText("doommake.project.build.message.error"), 
 				callDoomMake(projectDirectory, target, agentOverride, args, stdout, stderr, stdin)
 			)
-		).start(tasks);
+		).start(tasks, onStart, onEnd);
 	}
 
 	/**

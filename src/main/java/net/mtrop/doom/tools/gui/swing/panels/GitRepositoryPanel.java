@@ -236,6 +236,39 @@ public class GitRepositoryPanel extends JPanel
 		refreshEntries();
 	}
 	
+	public void refreshInfo()
+	{
+		tasks.spawn(() -> {
+			BranchStatus bs = client.fetchBranchStatus();
+			branchPanel.setText(bs.getName());
+			String remote = bs.getRemoteName();
+			remoteBranchPanel.setText(remote != null ? remote : "");
+			aheadBehindPanel.setText("+" + bs.getAhead() + ", " + "-" + bs.getBehind());
+		});
+	}
+
+	public void refreshEntries()
+	{
+		tasks.spawn(() -> {
+			List<StatusEntry> staged = new LinkedList<>(); 
+			List<StatusEntry> unstaged = new LinkedList<>();
+			for (StatusEntry status : client.fetchStatus())
+			{
+				if (status.isStaged())
+					staged.add(status);
+				else
+					unstaged.add(status);
+			}
+			stagedChangesModel.setEntries(staged.toArray(new StatusEntry[staged.size()]));
+			unstagedChangesModel.setEntries(unstaged.toArray(new StatusEntry[unstaged.size()]));
+			
+			stageAction.setEnabled(!unstaged.isEmpty());
+			stageAllAction.setEnabled(!unstaged.isEmpty());
+			unstageAction.setEnabled(!staged.isEmpty());
+			unstageAllAction.setEnabled(!staged.isEmpty());
+		});
+	}
+
 	private void onStage() 
 	{
 		StatusEntry[] entries = getSelectedEntries(unstagedChanges);
@@ -396,39 +429,6 @@ public class GitRepositoryPanel extends JPanel
 			statusPanel.setSuccessMessage(language.getText("git.repo.status.pull"));
 			refreshInfo();
 			refreshEntries();
-		});
-	}
-	
-	private void refreshInfo()
-	{
-		tasks.spawn(() -> {
-			BranchStatus bs = client.fetchBranchStatus();
-			branchPanel.setText(bs.getName());
-			String remote = bs.getRemoteName();
-			remoteBranchPanel.setText(remote != null ? remote : "");
-			aheadBehindPanel.setText("+" + bs.getAhead() + ", " + "-" + bs.getBehind());
-		});
-	}
-	
-	private void refreshEntries()
-	{
-		tasks.spawn(() -> {
-			List<StatusEntry> staged = new LinkedList<>(); 
-			List<StatusEntry> unstaged = new LinkedList<>();
-			for (StatusEntry status : client.fetchStatus())
-			{
-				if (status.isStaged())
-					staged.add(status);
-				else
-					unstaged.add(status);
-			}
-			stagedChangesModel.setEntries(staged.toArray(new StatusEntry[staged.size()]));
-			unstagedChangesModel.setEntries(unstaged.toArray(new StatusEntry[unstaged.size()]));
-			
-			stageAction.setEnabled(!unstaged.isEmpty());
-			stageAllAction.setEnabled(!unstaged.isEmpty());
-			unstageAction.setEnabled(!staged.isEmpty());
-			unstageAllAction.setEnabled(!staged.isEmpty());
 		});
 	}
 	

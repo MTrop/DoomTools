@@ -20,6 +20,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.border.BevelBorder;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 
@@ -45,6 +46,7 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomMakeExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeExecutionPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorDirectoryTreePanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
@@ -93,6 +95,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private JSplitPane filesSplitPaneHorizontal;
 	private JSplitPane filesSplitPaneVertical;
 	private JComponent repositoryPanel;
+	private DoomToolsTextOutputPanel loggingPanel;
 	private EditorDirectoryTreePanel treePanel;
 	private DoomMakeExecutionPanel executionPanel;
 	private DoomMakeEditorPanel editorPanel;
@@ -164,6 +167,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			{
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("doommake.status.message.saved", sourceFile.getName()));
+				if (repositoryPanel instanceof GitRepositoryPanel)
+					((GitRepositoryPanel)repositoryPanel).refreshEntries();
 				onHandleChange();
 			}
 
@@ -202,13 +207,15 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.treePanel.setRootDirectory(targetDirectory);
 		this.treePanel.setLabel(targetDirectory.getName());
 		
-		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, true);
-		
 		if (Git.isGit(targetDirectory))		
 			this.repositoryPanel = new GitRepositoryPanel(targetDirectory);
 		else
 			this.repositoryPanel = containerOf(label(JLabel.CENTER, language.getText("doommake.tab.norepo")));
 		
+		this.loggingPanel = new DoomToolsTextOutputPanel();
+
+		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, this.loggingPanel, true);		
+
 		DoomToolsIconManager icons = DoomToolsIconManager.get();
 		
 		JComponent fileTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
@@ -220,10 +227,16 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		JComponent repoTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
 			node(repositoryPanel)
 		);
+		JComponent loggingTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
+			node(containerOf(createBevelBorder(BevelBorder.LOWERED),
+				node(scroll(loggingPanel))
+			))
+		);
 
 		this.tabPanel = tabs(TabPlacement.LEFT, TabLayoutPolicy.SCROLL, 
 			tab(icons.getImage("doommake-folder.png"), fileTab), 
-			tab(icons.getImage("doommake-repo.png"), repoTab)
+			tab(icons.getImage("doommake-repo.png"), repoTab),
+			tab(icons.getImage("doommake-log.png"), loggingTab)
 		);
 
 		this.filesSplitPaneHorizontal = split(
@@ -887,7 +900,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		final String target = executionSettings.getEntryPoint();
 		final String[] args = executionSettings.getArgs();
 		
-		appCommon.onExecuteDoomMake(getApplicationContainer(), statusPanel, workDir, standardInPath, target, args, true);
+		appCommon.onExecuteDoomMake(getApplicationContainer(), statusPanel, workDir, standardInPath, target, args, true, null, null);
 	}
 
 	private void executeDoomMakeWithArgs(File scriptFile, File workDir) 
@@ -913,7 +926,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		final String target = executionSettings.getEntryPoint();
 		final String[] args = executionSettings.getArgs();
 		
-		appCommon.onExecuteDoomMake(getApplicationContainer(), statusPanel, workDir, standardInPath, target, args, true);
+		appCommon.onExecuteDoomMake(getApplicationContainer(), statusPanel, workDir, standardInPath, target, args, true, null, null);
 	}
 
 	private ScriptExecutionSettings createExecutionSettings(ScriptExecutionSettings initSettings) 
