@@ -3,7 +3,7 @@ DoomMake
 
 ### Changed for 0.18.0
 
-* `Added` A "Studio" mode only accessible as Desktop App: `doommake-gui doommake-studio`
+* `Added` A "Studio" mode only runnable as a Desktop App.
 
 
 ### Changed for 0.17.0
