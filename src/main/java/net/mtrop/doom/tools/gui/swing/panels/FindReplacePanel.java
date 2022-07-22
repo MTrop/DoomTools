@@ -178,6 +178,14 @@ public class FindReplacePanel extends JPanel
 		this.context = null;
 	}
 	
+	/**
+	 * Calls {@link #requestFocus()} on the Find field.
+	 */
+	public void focusFindField()
+	{
+		findField.requestFocus();
+	}
+	
 	private void updateSearchContext()
 	{
 		if (context == null)

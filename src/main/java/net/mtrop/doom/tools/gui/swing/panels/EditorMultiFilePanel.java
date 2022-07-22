@@ -1683,6 +1683,7 @@ public class EditorMultiFilePanel extends JPanel
 		if (findModal != null)
 		{
 			findModal.requestFocus();
+			findReplacePanel.focusFindField();
 			return;
 		}
 		
@@ -1702,6 +1703,7 @@ public class EditorMultiFilePanel extends JPanel
 			}
 		});
 		findModal.open();
+		findReplacePanel.focusFindField();
 	}
 
 	/**
