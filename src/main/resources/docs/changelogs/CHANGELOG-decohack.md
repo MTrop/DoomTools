@@ -3,6 +3,7 @@ DECOHack
 
 ### Changed for 0.26.0
 
+* `Fixed` Added some bit flags that were missing from the docs: UNUSEDX bits, FRIENDLY.
 * `Added` A directory tree for the GUI.
 * `Added` A warning on wrong int/fixed type use (Enhancement #78).
 * `Added` A warning on wrong Thing type use (MISSILE vs. not) (Enhancement #77).

@@ -15,6 +15,7 @@ public enum DEHThingMBFFlag implements DEHFlag
 	TOUCHY        (0x10000000, "Thing dies if it collides with a solid object."),
 	BOUNCES       (0x20000000, "Thing bounces if it collides with a floor or wall. Plays SIGHT sound on bounce."),
 	FRIEND        (0x40000000, "Thing is friendly to players. Affects A_Chase logic and targeting."),
+	FRIENDLY      (0x40000000, "Thing is friendly to players. Affects A_Chase logic and targeting."),
 	;
 
 	private final int value;

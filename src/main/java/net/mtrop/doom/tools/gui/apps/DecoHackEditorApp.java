@@ -585,7 +585,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 
 	private void onHelp()
 	{
-		utils.createHelpModal(utils.helpResource("decohack/help.txt")).open();
+		utils.createHelpModal(utils.helpResource("docs/DECOHack Help.txt")).open();
 	}
 	
 	private void onHelpChangelog()
