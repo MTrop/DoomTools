@@ -549,7 +549,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWithArgs(scriptFile, currentHandle.getContentCharset(), new File(OSUtils.getWorkingDirectoryPath()));
+				executeWithArgs(scriptFile, currentHandle.getContentCharset(), treePanel.getRootDirectory());
 			}
 		}
 	}

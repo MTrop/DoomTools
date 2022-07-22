@@ -67,7 +67,6 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.WadUtils;
-import net.mtrop.doom.tools.struct.util.OSUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -750,7 +749,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWadMergeAgain(scriptFile, new File(OSUtils.getWorkingDirectoryPath()));
+				executeWadMergeAgain(scriptFile, treePanel.getRootDirectory());
 			}
 		}
 	}
@@ -772,7 +771,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWadMergeWithArgs(scriptFile, new File(OSUtils.getWorkingDirectoryPath()));
+				executeWadMergeWithArgs(scriptFile, treePanel.getRootDirectory());
 			}
 		}
 	}
@@ -794,7 +793,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWadScriptAgain(scriptFile, new File(OSUtils.getWorkingDirectoryPath()));
+				executeWadScriptAgain(scriptFile, treePanel.getRootDirectory());
 			}
 		}
 	}
@@ -816,7 +815,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			try (TempFile scriptFile = currentHandle.createTempCopy())
 			{
-				executeWadScriptWithArgs(scriptFile, currentHandle.getContentCharset(), new File(OSUtils.getWorkingDirectoryPath()));
+				executeWadScriptWithArgs(scriptFile, currentHandle.getContentCharset(), treePanel.getRootDirectory());
 			}
 		}
 	}

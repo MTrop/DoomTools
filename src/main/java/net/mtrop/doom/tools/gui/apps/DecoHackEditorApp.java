@@ -541,7 +541,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		final File scriptFile = currentHandle.getContentSourceFile();
 		
 		PatchExportSettings existingSettings = handleToSettingsMap.get(currentHandle);
-		final PatchExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new PatchExportSettings(scriptFile));
+		final PatchExportSettings processSettings = createExportSettings(scriptFile, existingSettings != null ? existingSettings : new PatchExportSettings(treePanel.getRootDirectory()));
 		
 		if (processSettings == null)
 			return;
