@@ -33,9 +33,11 @@ public interface RepositoryHelper
 		STAGE,
 		STAGE_ALL,
 		UNSTAGE,
+		REVERT,
 		PULL,
 		PUSH,
 		PUSH_BRANCH,
+		BRANCH,
 		CHECKOUT_BRANCH,
 		MERGE,
 	}
@@ -251,9 +253,11 @@ public interface RepositoryHelper
 				case STAGE:
 				case STAGE_ALL:
 				case UNSTAGE:
+				case REVERT:
 				case COMMIT:
 				case PULL:
 				case PUSH:
+				case BRANCH:
 				case PUSH_BRANCH:
 				case CHECKOUT_BRANCH:
 				case MERGE:
@@ -276,6 +280,8 @@ public interface RepositoryHelper
 					return performStageAll();
 				case UNSTAGE:
 					return performUnStage(args);
+				case REVERT:
+					return performRevert(args);
 				case COMMIT:
 					return performCommit(args);
 				case PULL:
@@ -284,6 +290,8 @@ public interface RepositoryHelper
 					return performPush();
 				case PUSH_BRANCH:
 					return performPushBranch(args);
+				case BRANCH:
+					return performBranch(args);
 				case CHECKOUT_BRANCH:
 					return performCheckout(args);
 				case MERGE:
@@ -470,6 +478,16 @@ public interface RepositoryHelper
 		}
 		
 		/**
+		 * Reverts a set of file changes.
+		 * @param paths the list of paths.
+		 * @return the resulting error code. 0 is no error.
+		 */
+		public int revert(String ... paths)
+		{
+			return perform(Operation.REVERT, paths);
+		}
+		
+		/**
 		 * Pulls commits from the upstream for the current branch.
 		 * @return the resulting error code. 0 is no error.
 		 */
@@ -518,6 +536,26 @@ public interface RepositoryHelper
 			return perform(Operation.COMMIT, paragraphs);
 		}
 		
+		/**
+		 * Checks out a branch.
+		 * @param branch the branch to check out.
+		 * @return the resulting error code. 0 is no error.
+		 */
+		public int checkout(String branch)
+		{
+			return perform(Operation.CHECKOUT_BRANCH, branch);
+		}
+		
+		/**
+		 * Creates a new branch.
+		 * @param newBranch the new branch to create.
+		 * @return the resulting error code. 0 is no error.
+		 */
+		public int branch(String newBranch)
+		{
+			return perform(Operation.BRANCH, newBranch);
+		}
+		
 		private ProcessCallable start()
 		{
 			return start(null, null);
@@ -548,6 +586,15 @@ public interface RepositoryHelper
 			return doCall(start().arg("restore").arg("--staged").args(args), "UNSTAGE");
 		}
 
+		private int performRevert(String ... args)
+		{
+			ProcessCallable callable = start().arg("restore");
+			for (int i = 0; i < args.length; i++)
+				callable.arg(args[i]);
+			
+			return doCall(callable, "REVERT");
+		}
+
 		private int performCommit(String ... args)
 		{
 			ProcessCallable callable = start().arg("commit");
@@ -570,6 +617,11 @@ public interface RepositoryHelper
 		private int performPushBranch(String ... args)
 		{
 			return doCall(start().arg("push").arg("--set-upstream").setIn((File)null), "PUSH-UPSTREAM");
+		}
+
+		private int performBranch(String ... args)
+		{
+			return doCall(start().arg("branch").args(args), "BRANCH");
 		}
 
 		private int performMerge(String ... args)

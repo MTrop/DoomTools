@@ -38,6 +38,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.RepositoryHelper.Git;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
+import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
@@ -222,10 +223,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 		DoomToolsIconManager icons = DoomToolsIconManager.get();
 		
+		final int DEFAULT_WIDTH = 340;
+		
 		JComponent fileTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
 			node(this.filesSplitPaneVertical = split(SplitOrientation.VERTICAL,
-				containerOf(dimension(215, 350), node(treePanel)),
-				containerOf(dimension(215, 150), node(executionPanel))
+				containerOf(dimension(DEFAULT_WIDTH, 350), node(treePanel)),
+				containerOf(dimension(DEFAULT_WIDTH, 150), node(executionPanel))
 			))
 		);
 		JComponent repoTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
@@ -244,14 +247,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		);
 
 		this.filesSplitPaneHorizontal = split(
-			containerOf(dimension(215, 500), 
+			containerOf(dimension(DEFAULT_WIDTH, 500), 
 				node(BorderLayout.CENTER, tabPanel)
 			),
 			containerOf(dimension(610, 500),
 				node(BorderLayout.CENTER, editorPanel)
 			)
 		);
-		this.filesSplitPaneHorizontal.setDividerLocation(215);
+		this.filesSplitPaneHorizontal.setDividerLocation(DEFAULT_WIDTH);
 		this.filesSplitPaneVertical.setDividerLocation(350);
 		
 		this.runWadMergeAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.run", (e) -> onRunWadMergeAgain());
@@ -505,13 +508,19 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	// Make help menu for internal and desktop.
 	private JMenu createHelpMenu()
 	{
-		return utils.createMenuFromLanguageKey("doomtools.menu.help",
-			utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog()),
-			separator(),
-			utils.createItemFromLanguageKey("doommake.menu.help.item.rookscript", (i) -> onRookScriptReference()),
-			utils.createItemFromLanguageKey("doommake.menu.help.item.wadscript.functions", (i) -> onWadScriptFunctionReference()),
-			utils.createItemFromLanguageKey("doommake.menu.help.item.doommake.functions", (i) -> onDoomMakeFunctionReference())
-		); 
+		return utils.createMenuFromLanguageKey("doomtools.menu.help", ArrayUtils.joinArrays(
+			ArrayUtils.arrayOf(
+				utils.createItemFromLanguageKey("doomtools.menu.help.item.changelog", (i) -> onHelpChangelog()),
+				separator()
+			),
+			AppCommon.get().getCommonHelpMenuItems(),
+			ArrayUtils.arrayOf(
+				separator(),
+				utils.createItemFromLanguageKey("doommake.menu.help.item.rookscript", (i) -> onRookScriptReference()),
+				utils.createItemFromLanguageKey("doommake.menu.help.item.wadscript.functions", (i) -> onWadScriptFunctionReference()),
+				utils.createItemFromLanguageKey("doommake.menu.help.item.doommake.functions", (i) -> onDoomMakeFunctionReference())
+			)
+		)); 
 	}
 
 	// Open new project app (new instance).

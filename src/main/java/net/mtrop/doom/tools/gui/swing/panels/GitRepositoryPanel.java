@@ -13,14 +13,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -35,13 +38,17 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.RepositoryHelper.BranchStatus;
 import net.mtrop.doom.tools.gui.RepositoryHelper.Git;
 import net.mtrop.doom.tools.struct.Loader.LoaderFuture;
+import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
+
 
 /**
  * Git repository panel.
@@ -50,6 +57,8 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 public class GitRepositoryPanel extends JPanel 
 {
 	private static final long serialVersionUID = 6824090744834896705L;
+	
+	private static final Pattern BRANCH_REGEX = Pattern.compile("[!\"#$%&'()+,\\-0-9;<=>@A-Z\\]_`a-z{|}]+");
 	
 	private final DoomToolsGUIUtils utils;
 	private final DoomToolsLanguageManager language;
@@ -66,11 +75,15 @@ public class GitRepositoryPanel extends JPanel
 	private final JLabel remoteBranchPanel;
 	private final JLabel aheadBehindPanel;
 	
+	private JPopupMenu branchMenu;
+	
 	private final Action stageAction;
 	private final Action stageAllAction;
+	private final Action revertAction;
 	private final Action unstageAction;
 	private final Action unstageAllAction;
 	private final Action commitAction;
+	private final JButton checkoutButton;
 	private final Action pullAction;
 	private final Action pushAction;
 	private final Action refreshAction;
@@ -156,19 +169,22 @@ public class GitRepositoryPanel extends JPanel
 		final LoaderFuture<ImageIcon> addIcon = icons.getImageAsync("add.png");
 		final LoaderFuture<ImageIcon> removeIcon = icons.getImageAsync("remove.png");
 		final LoaderFuture<ImageIcon> addAllIcon = icons.getImageAsync("add-add.png");
+		final LoaderFuture<ImageIcon> undoIcon = icons.getImageAsync("undo.png");
 		final LoaderFuture<ImageIcon> removeAllIcon = icons.getImageAsync("remove-remove.png");
 		final LoaderFuture<ImageIcon> refreshIcon = icons.getImageAsync("refresh.png");
 
 		this.stageAction = actionItem(addIcon.result(), (e) -> onStage());
 		this.stageAllAction = actionItem(addAllIcon.result(), (e) -> onStageAll());
+		this.revertAction = actionItem(undoIcon.result(), (e) -> onRevert());
 		this.unstageAction = actionItem(removeIcon.result(), (e) -> onUnstage());
 		this.unstageAllAction = actionItem(removeAllIcon.result(), (e) -> onUnstageAll());
 		this.commitAction = utils.createActionFromLanguageKey("git.repo.commit", (e) -> onCommit());
 		this.pullAction = utils.createActionFromLanguageKey("git.repo.pull", (e) -> onPull());
 		this.pushAction = utils.createActionFromLanguageKey("git.repo.push", (e) -> onPush());
 		this.refreshAction = actionItem(refreshIcon.result(), (e) -> {
-			refreshInfo();
+			refreshInfoSynchronous();
 			refreshEntries();
+			refreshBranches();
 		});
 		
 		this.commitArea = textArea();
@@ -180,6 +196,7 @@ public class GitRepositoryPanel extends JPanel
 			node(BorderLayout.NORTH, containerOf(borderLayout(),
 				node(BorderLayout.CENTER, label(language.getText("git.repo.unstaged.label"))),
 				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 0, 0),
+					node(button(revertAction)),
 					node(button(stageAction)),
 					node(button(stageAllAction))
 				))
@@ -205,8 +222,11 @@ public class GitRepositoryPanel extends JPanel
 			node(BorderLayout.CENTER, scroll(commitArea)),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(0, 4),
 				node(BorderLayout.NORTH, containerOf(borderLayout(),
-					node(BorderLayout.LINE_START, containerOf(flowLayout(Flow.LEADING, 4, 0),
-						node(button(commitAction))
+					node(BorderLayout.LINE_START, containerOf(gridLayout(2, 1, 0, 4),
+						node(button(commitAction)),
+						node(checkoutButton = utils.createButtonFromLanguageKey("git.repo.checkout", (b) -> {
+							branchMenu.show(b, b.getX(), b.getY());
+						}))
 					)),
 					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 4, 0),
 						node(button(pullAction)),
@@ -214,11 +234,11 @@ public class GitRepositoryPanel extends JPanel
 						node(button(refreshAction))
 					))
 				)),
-				node(BorderLayout.SOUTH, containerOf(gridLayout(1, 2, 4, 0),
+				node(BorderLayout.SOUTH, containerOf(borderLayout(4, 0),
 					node(BorderLayout.LINE_START, branchPanel),
-					node(BorderLayout.LINE_END, containerOf(borderLayout(),
-						node(BorderLayout.LINE_START, remoteBranchPanel),
-						node(BorderLayout.LINE_END, aheadBehindPanel)
+					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 8, 0),
+						node(remoteBranchPanel),
+						node(aheadBehindPanel)
 					))
 				))
 			))
@@ -237,24 +257,32 @@ public class GitRepositoryPanel extends JPanel
 			))
 		);
 		
-		refreshInfo();
+		refreshInfoSynchronous();
 		refreshEntries();
+		refreshBranches();
 	}
 	
 	public void refreshInfo()
 	{
-		tasks.spawn(() -> {
-			BranchStatus bs = client.fetchBranchStatus();
-			branchPanel.setText(bs.getName());
-			String remote = bs.getRemoteName();
-			remoteBranchPanel.setText(remote != null ? remote : "");
-			aheadBehindPanel.setText("+" + bs.getAhead() + ", " + "-" + bs.getBehind());
+		tasks.spawn(() -> 
+		{
+			refreshInfoSynchronous();
 		});
+	}
+
+	public void refreshInfoSynchronous()
+	{
+		BranchStatus bs = client.fetchBranchStatus();
+		branchPanel.setText(bs.getName());
+		String remote = bs.getRemoteName();
+		remoteBranchPanel.setText(remote != null ? remote : "");
+		aheadBehindPanel.setText("+" + bs.getAhead() + ", " + "-" + bs.getBehind());
 	}
 
 	public void refreshEntries()
 	{
-		tasks.spawn(() -> {
+		tasks.spawn(() -> 
+		{
 			List<StatusEntry> staged = new LinkedList<>(); 
 			List<StatusEntry> unstaged = new LinkedList<>();
 			for (StatusEntry status : client.fetchStatus())
@@ -272,6 +300,63 @@ public class GitRepositoryPanel extends JPanel
 			unstageAction.setEnabled(!staged.isEmpty());
 			unstageAllAction.setEnabled(!staged.isEmpty());
 		});
+	}
+
+	public void refreshBranches()
+	{
+		tasks.spawn(() ->
+		{
+			List<MenuNode> menuNodes = new LinkedList<>();
+			for (String branch : client.fetchBranches())
+				menuNodes.add(checkBoxItem(branch, branchPanel.getText().equals(branch), (c) -> onCheckout(branch)));
+			menuNodes.add(separator());
+			menuNodes.add(utils.createItemFromLanguageKey("git.repo.branch.create", (i) -> onBranchCreate()));
+			branchMenu = popupMenu(ArrayUtils.items(menuNodes, MenuNode.class));
+		});
+	}
+	
+	private void onBranchCreate()
+	{
+		JFormField<String> branchNameField = stringField(true);
+		
+		Boolean ok = modal(
+			language.getText("git.repo.branch.create.title"), 
+			containerOf(dimension(100, 20), borderLayout(),
+				node(BorderLayout.CENTER, branchNameField)
+			), 
+			utils.createChoiceFromLanguageKey("doomtools.ok", (Boolean)true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok == null || ok == false || ObjectUtils.isEmpty(branchNameField.getValue()))
+			return;
+		
+		final String branch = branchNameField.getValue();
+		
+		if (!BRANCH_REGEX.matcher(branch).matches())
+		{
+			SwingUtils.error(language.getText("git.repo.branch.create.badname"));
+			return;
+		}
+		
+		setActionsEnabled(false);
+		tasks.spawn(() ->
+		{
+			if (client.branch(branch) == 0)
+				client.checkout(branch);
+			refreshInfoSynchronous();
+			refreshBranches();
+			setActionsEnabled(true);
+		});
+	}
+
+	private void setActionsEnabled(boolean enabled)
+	{
+		commitAction.setEnabled(enabled);
+		checkoutButton.setEnabled(enabled);
+		pullAction.setEnabled(enabled);
+		pushAction.setEnabled(enabled);
+		refreshAction.setEnabled(enabled);
 	}
 
 	private void onStage() 
@@ -310,6 +395,34 @@ public class GitRepositoryPanel extends JPanel
 		}
 		
 		statusPanel.setSuccessMessage(language.getText("git.repo.status.staged.all"));
+		refreshEntries();
+	}
+
+	private void onRevert()
+	{
+		StatusEntry[] entries = getSelectedEntries(unstagedChanges);
+		if (entries.length == 0)
+			return;
+
+		if (SwingUtils.noTo(language.getText("git.repo.revert.message", entries.length)))
+			return;
+
+		String[] paths = new String[entries.length];
+		for (int i = 0; i < entries.length; i++) 
+		{
+			StatusEntry entry = entries[i];
+			paths[i] = entry.getPath();
+		}
+		
+		int result;
+		if ((result = client.revert(paths)) != 0)
+		{
+			SwingUtils.error(language.getText("git.repo.revert.error", result));
+			statusPanel.setErrorMessage(language.getText("git.repo.revert.error", result));
+			return;
+		}
+		
+		statusPanel.setSuccessMessage(language.getText("git.repo.status.reverted", paths.length));
 		refreshEntries();
 	}
 
@@ -370,6 +483,7 @@ public class GitRepositoryPanel extends JPanel
 			return;
 		}		
 		
+		setActionsEnabled(false);
 		String[] paragraphs = content.split("\\n\\n+");
 		
 		int result;
@@ -377,6 +491,7 @@ public class GitRepositoryPanel extends JPanel
 		{
 			SwingUtils.error(language.getText("git.repo.commit.error", result));
 			statusPanel.setErrorMessage(language.getText("git.repo.commit.error", result));
+			setActionsEnabled(true);
 			return;
 		}
 
@@ -385,6 +500,7 @@ public class GitRepositoryPanel extends JPanel
 		statusPanel.setSuccessMessage(language.getText("git.repo.status.commit"));
 		refreshInfo();
 		refreshEntries();
+		setActionsEnabled(true);
 	}
 
 	private void onPush()
@@ -395,20 +511,24 @@ public class GitRepositoryPanel extends JPanel
 			return;
 		}
 
+		setActionsEnabled(false);
 		statusPanel.setActivityMessage(language.getText("git.repo.status.pushing"));
 
-		tasks.spawn(() -> {
+		tasks.spawn(() -> 
+		{
 			int result;
 			if ((result = client.push()) != 0)
 			{
 				SwingUtils.error(language.getText("git.repo.push.error", result));
 				statusPanel.setErrorMessage(language.getText("git.repo.push.error", result));
+				setActionsEnabled(true);
 				return;
 			}
 
 			statusPanel.setSuccessMessage(language.getText("git.repo.status.push"));
 			refreshInfo();
 			refreshEntries();
+			setActionsEnabled(true);
 		});
 	}
 	
@@ -420,20 +540,48 @@ public class GitRepositoryPanel extends JPanel
 			return;
 		}
 
+		setActionsEnabled(false);
 		statusPanel.setActivityMessage(language.getText("git.repo.status.pulling"));
 
-		tasks.spawn(() -> {
+		tasks.spawn(() -> 
+		{
 			int result;
 			if ((result = client.pull()) != 0)
 			{
 				SwingUtils.error(language.getText("git.repo.pull.error", result));
 				statusPanel.setErrorMessage(language.getText("git.repo.pull.error", result));
+				setActionsEnabled(true);
 				return;
 			}
 
 			statusPanel.setSuccessMessage(language.getText("git.repo.status.pull"));
 			refreshInfo();
 			refreshEntries();
+			setActionsEnabled(true);
+		});
+	}
+	
+	private void onCheckout(final String branchName)
+	{
+		setActionsEnabled(false);
+		statusPanel.setActivityMessage(language.getText("git.repo.status.checkingout", branchName));
+
+		tasks.spawn(() -> 
+		{
+			int result;
+			if ((result = client.checkout(branchName)) != 0)
+			{
+				SwingUtils.error(language.getText("git.repo.checkout.error", result));
+				statusPanel.setErrorMessage(language.getText("git.repo.checkout.error", result));
+				setActionsEnabled(true);
+				return;
+			}
+
+			statusPanel.setSuccessMessage(language.getText("git.repo.status.checkout", branchName));
+			refreshInfoSynchronous();
+			refreshEntries();
+			refreshBranches();
+			setActionsEnabled(true);
 		});
 	}
 	
