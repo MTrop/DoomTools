@@ -103,7 +103,7 @@ A:hover {
 }
 
 PRE {
-	font-family: 'Courier New', Courier, monospace;
+	font-family: Menlo, "Bitstream Vera Sans Mono", "DejaVu Sans Mono", Monaco, Consolas, monospace;
 	background-color: #041418;
 	color: #dddddd;
 	padding: 16px;

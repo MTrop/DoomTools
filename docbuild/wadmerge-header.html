@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="%%description%%" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="%%title%%" />
+		<meta itemprop="description" content="%%description%%" />
+		<meta itemprop="image" content="%%imageurl%%" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="%%pageurl%%" />
+		<meta name="twitter:title" content="%%title%%" />
+		<meta name="twitter:description" content="%%description%%" />
+		<meta name="twitter:image:src" content="%%imageurl%%" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="%%pageurl%%" />
+		<meta property="og:title" content="%%title%%" />
+		<meta property="og:image" content="%%imageurl%%" />
+		<meta property="og:description" content="%%description%%" />
+
+		<title>%%title%%</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<link rel="StyleSheet" type="text/css" href="css/ipscode.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">%%maintitle%%</h1>
+		</div>
+		<div>
+			<p>
+				A utility for making simple build scripts for compiling together projects made of several files into a single WADs, or merging WADs of different kinds together. Very flexible.
+			</p>
+			<pre class="ipsCode">wadmerge build.txt</pre>
+			<p>
+				You can make snazzy build scripts that look like this!
+			</p>
+			<pre class="ipsCode">
+create outwad
+
+datemarker outwad __VER__
+
+# Merge in maps.
+mergewad outwad maps/map01.wad
+mergewad outwad maps/map02.wad
+mergewad outwad maps/map03.wad
+
+# Merge in textures.
+marker outwad pp_start
+mergedir outwad textures/patches
+marker outwad pp_end
+marker outwad ff_start
+mergedir outwad textures/flats
+marker outwad ff_end
+
+mergedeutexfile outwad textures/texture1.txt
+
+# Export to file.
+finish outwad build/mymod.wad
+end
+			</pre>
+			<p>
+				Go crazy!
+			</p>			
+		</div>
+		<div>
+			<h3 class="main-title-name w3-center">Full Command Help</h3>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">

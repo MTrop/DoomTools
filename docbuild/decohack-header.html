@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="%%description%%" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="%%title%%" />
+		<meta itemprop="description" content="%%description%%" />
+		<meta itemprop="image" content="%%imageurl%%" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="%%pageurl%%" />
+		<meta name="twitter:title" content="%%title%%" />
+		<meta name="twitter:description" content="%%description%%" />
+		<meta name="twitter:image:src" content="%%imageurl%%" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="%%pageurl%%" />
+		<meta property="og:title" content="%%title%%" />
+		<meta property="og:image" content="%%imageurl%%" />
+		<meta property="og:description" content="%%description%%" />
+
+		<title>%%title%%</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<link rel="StyleSheet" type="text/css" href="css/ipscode.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">%%maintitle%%</h1>
+		</div>
+		<div>
+			<p>
+				Have you ever wanted to create some kind of insane mod for Vanilla Doom (and other classic Dooms) 
+				but wished that there was a better programmatic way to write weapon, ammo, sound, string, par time, 
+				and thing definitions with a DECORATE-like language? Introducing <em><strong>DECOHack</strong></em>, 
+				the thing that does exactly that!
+			</p>
+			<p>
+				<em>DECOHack </em>takes a file (or series of files) written in a DECORATE-ish language and turns it 
+				into a DEH/BEX file that can be loaded into your favorite source port, or patched into your favorite 
+				executable via DeHackEd! Supports all patch schemes up to <strong>DSDHACKED</strong>.
+			</p>
+			
+			<pre class="command-line">decohack code.dh --output dehacked.deh</pre>
+			
+			<p>
+				Hate backpacks? Turn them into BFGs!
+			</p>
+			
+			<pre class="ipsCode prettyprint lang-c prettyprinted">
+<span class="com">#include</span><span class="pln"> </span><span class="str">&lt;doom19&gt;</span><span class="pln">
+</span><span class="com">#include</span><span class="pln"> </span><span class="str">&lt;friendly&gt;</span><span class="pln">
+
+</span><span class="com">// copy BFG pickup into backpack</span><span class="pln">
+thing MTF_BACKPACK </span><span class="pun">:</span><span class="pln"> thing MTF_BFG
+</span><span class="pun">{</span><span class="pln">
+	</span><span class="com">//keep ednum, though</span><span class="pln">
+	ednum </span><span class="lit">8</span><span class="pln">
+</span><span class="pun">}</span></pre>
+			
+			<p>
+				Make an Imp with a <em>worse </em>attack!
+			</p>
+			
+			<pre class="ipsCode prettyprint lang-c prettyprinted">
+<span class="com">#include</span><span class="pln"> </span><span class="str">&lt;doom19&gt;</span><span class="pln">
+</span><span class="com">#include</span><span class="pln"> </span><span class="str">&lt;friendly&gt;</span><span class="pln">
+
+thing MTF_IMP free states
+thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
+</span><span class="pun">{</span><span class="pln">
+	health </span><span class="lit">200</span><span class="pln">
+	speed </span><span class="lit">12</span><span class="pln">
+	
+	clear states
+	</span><span>States</span><span class="pln">
+	</span><span class="pun">{</span><span class="pln">
+		</span><span>Spawn</span><span class="pun">:</span><span class="pln">
+			TROO AB </span><span class="lit">10</span><span class="pln"> A_Look
+			</span><span>Loop</span><span class="pln">
+		</span><span>See</span><span class="pun">:</span><span class="pln">
+			TROO AABBCCDD </span><span class="lit">3</span><span class="pln"> A_Chase
+			</span><span>Loop</span><span class="pln">
+		</span><span>Melee</span><span class="pun">:</span><span class="pln">
+		</span><span>Missile</span><span class="pun">:</span><span class="pln">
+			TROO EF </span><span class="lit">8</span><span class="pln"> A_FaceTarget
+			TROO G </span><span class="lit">6</span><span class="pln"> A_BruisAttack
+			</span><span>Goto</span><span class="pln"> </span><span>See</span><span class="pln">
+		</span><span>Pain</span><span class="pun">:</span><span class="pln">
+			TROO H </span><span class="lit">2</span><span class="pln">
+			TROO H </span><span class="lit">2</span><span class="pln"> A_Pain
+			</span><span>Goto</span><span class="pln"> </span><span>See</span><span class="pln">
+		</span><span>Death</span><span class="pun">:</span><span class="pln">
+			TROO I </span><span class="lit">8</span><span class="pln">
+			TROO J </span><span class="lit">8</span><span class="pln"> A_Scream
+			TROO K </span><span class="lit">6</span><span class="pln">
+			TROO L </span><span class="lit">6</span><span class="pln"> A_Fall
+			TROO M </span><span class="pun">-</span><span class="lit">1</span><span class="pln">
+			</span><span>Stop</span><span class="pln">
+		</span><span>XDeath</span><span class="pun">:</span><span class="pln">
+			TROO N </span><span class="lit">5</span><span class="pln">
+			TROO O </span><span class="lit">5</span><span class="pln"> A_XScream
+			TROO P </span><span class="lit">5</span><span class="pln">
+			TROO Q </span><span class="lit">5</span><span class="pln"> A_Fall
+			TROO RST </span><span class="lit">5</span><span class="pln">
+			TROO U </span><span class="pun">-</span><span class="lit">1</span><span class="pln">
+			</span><span>Stop</span><span class="pln">
+		</span><span>Raise</span><span class="pun">:</span><span class="pln">
+			TROO ML </span><span class="lit">8</span><span class="pln">
+			TROO KJI </span><span class="lit">6</span><span class="pln">
+			</span><span>Goto</span><span class="pln"> </span><span>See</span><span class="pln">
+	</span><span class="pun">}</span><span class="pln">
+</span><span class="pun">}</span></pre>
+			<p>
+				The sky's the limit (within reason, as it is still limited to Doom engine quirks and limitations)!
+			</p>
+			<p>
+				If you're worried about how many states you have left (in total or action-pointer allocated), you can run DECOHack with the `<strong>--budget</strong>` switch. Full help available via the `<strong>--help-full</strong>` switch. You can do a lot! It's all documented, even the worst of Doom's hardcodings!
+			</p>
+		</div>
+		<div>
+			<h3 class="main-title-name w3-center">Full Command and Utility Help</h3>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">

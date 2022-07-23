@@ -1,0 +1,105 @@
+.ipsCode
+{
+  background: #05161B;
+  border: 0 !important;
+  border-radius: 3px;
+}
+
+.prettyprint
+{
+  background: #05161B;
+  font-family: Menlo, "Bitstream Vera Sans Mono", "DejaVu Sans Mono", Monaco, Consolas, monospace;
+}
+
+.pln
+{
+  color: #dddddd;
+}
+
+ol.linenums
+{
+  margin-top: 0;
+  margin-bottom: 0;
+  color: #6b7394;
+}
+
+li.L0, li.L1, li.L2, li.L3, li.L4, li.L5, li.L6, li.L7, li.L8, li.L9
+{
+  padding-left: 1em;
+  background-color: #05161B;
+  list-style-type: decimal;
+}
+
+@media screen
+{
+  .str
+  {
+    color: #ac9739;
+  }
+
+  .kwd
+  {
+    color: #5C81A4;
+  }
+
+  .com
+  {
+    color: #6b7394;
+  }
+
+  .typ
+  {
+    color: #3d8fd1;
+  }
+
+  .lit
+  {
+    color: #c76b29;
+  }
+
+  .pun
+  {
+    color: #dddddd;
+  }
+
+  .opn
+  {
+    color: #dddddd;
+  }
+
+  .clo
+  {
+    color: #dddddd;
+  }
+
+  .tag
+  {
+    color: #c94922;
+  }
+
+  .atn
+  {
+    color: #c76b29;
+  }
+
+  .atv
+  {
+    color: #22a2c9;
+  }
+
+  .dec
+  {
+    color: #c76b29;
+  }
+
+  .var
+  {
+    color: #c94922;
+  }
+
+  .fun
+  {
+    color: #3d8fd1;
+  }
+}
+

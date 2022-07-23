@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="%%description%%" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="%%title%%" />
+		<meta itemprop="description" content="%%description%%" />
+		<meta itemprop="image" content="%%imageurl%%" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="%%pageurl%%" />
+		<meta name="twitter:title" content="%%title%%" />
+		<meta name="twitter:description" content="%%description%%" />
+		<meta name="twitter:image:src" content="%%imageurl%%" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="%%pageurl%%" />
+		<meta property="og:title" content="%%title%%" />
+		<meta property="og:image" content="%%imageurl%%" />
+		<meta property="og:description" content="%%description%%" />
+
+		<title>%%title%%</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<link rel="StyleSheet" type="text/css" href="css/ipscode.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/logo.svg"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">%%maintitle%%</h1>
+		</div>
+		<div>
+			<p>
+				The second version of TEXtract, WTEXport is a utility that extracts a set of flats and textures 
+				from a source WAD and adds the extracted textures to a new WAD or an existing WAD, using the output
+				piped in from WTexScan. Also uses ANIMATED/SWITCHES in order to figure out extra textures to copy 
+				over to complete full sets.
+			</p>
+			<pre class="ipsCode">
+wtexscan maps.wad | wtexport texturepack.wad --base-wad doom2.wad --output maps.wad --add
+wtexscan maps.wad | wtexport texturepack.wad --base-wad doom2.wad --output mapstex.wad --create</pre>
+			<p>
+				It has some limitations though - doesn't read ANIMDEFS yet. In that case you may be better off doing 
+				things more manually via WadTex.
+			</p>
+		</div>
+		<div>
+			<h3 class="main-title-name w3-center">Full Command Help</h3>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre class="text-documentation">

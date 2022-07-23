@@ -4,30 +4,30 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
 		<!-- Standard -->
-		<meta name="description" content="The generated DoomMake Help Page" />
+		<meta name="description" content="%%description%%" />
 		<meta name="generator" content="VSCode" />
 		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
 
 		<!-- Schema.org markup for Google+ -->
-		<meta itemprop="name" content="DoomTools - DoomMake Help" />
-		<meta itemprop="description" content="The generated DoomMake Help Page" />
-		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta itemprop="name" content="%%title%%" />
+		<meta itemprop="description" content="%%description%%" />
+		<meta itemprop="image" content="%%imageurl%%" />
 
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/doommake.html" />
-		<meta name="twitter:title" content="DoomTools - DoomMake Help" />
-		<meta name="twitter:description" content="The generated DoomMake Help Page" />
-		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta name="twitter:url" content="%%pageurl%%" />
+		<meta name="twitter:title" content="%%title%%" />
+		<meta name="twitter:description" content="%%description%%" />
+		<meta name="twitter:image:src" content="%%imageurl%%" />
 
 		<!-- Open Graph -->
 		<meta property="og:type" content="article" />
-		<meta property="og:url" content="https://mtrop.github.io/DoomTools/doommake.html" />
-		<meta property="og:title" content="DoomTools - DoomMake Help" />
-		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
-		<meta property="og:description" content="The generated DoomMake Help Page" />
+		<meta property="og:url" content="%%pageurl%%" />
+		<meta property="og:title" content="%%title%%" />
+		<meta property="og:image" content="%%imageurl%%" />
+		<meta property="og:description" content="%%description%%" />
 
-		<title>DoomTools - DoomMake Help</title>
+		<title>%%title%%</title>
 
 		<!-- Style and Scripts -->
 		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
@@ -43,7 +43,7 @@
 		</div>
 		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
 		<div class="w3-row main-title">
-			<h1 class="main-title-name w3-center">DoomMake Help</h1>
+			<h1 class="main-title-name w3-center">%%maintitle%%</h1>
 		</div>
 		<div>
 			<p>
@@ -225,119 +225,3 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-DoomMake v0.18.0 by Matt Tropiano
-(using DoomStruct v2.14.2 , WadScript v1.6.0, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
-Usage: doommake [target] [args] [switches]
-                [directory] --new-project [templates...]
-                [--gui | --new-project-gui]
-                [--list-templates | -t]
-                [--help | -h | --version]
-                [--function-help | --function-help-markdown]
-                [--disassemble]
-                [--embed]
-
-[target]:
-    The target entry point to execute. Default is &quot;make&quot;.
-
-[args]:
-    The additional arguments to pass along to the script.
-
-[templates]:
-    The names of the template(s) to use or combine for the new project
-    (applied altogether). Only one from each category is allowed.
-    E.g.: --new-project maps git
-        Combines the &quot;maps&quot;, and &quot;git&quot; templates together.
-
-[directory]:
-    The directory&#x2F;name for the new project.
-
-[switches]:
-    --help, -h                     Prints this help.
-    --version                      Prints the version of this utility.
-    --function-help                Prints all available function usages.
-    --function-help-markdown       Prints all available function usages in
-                                       Markdown format.
-    --function-help-html           Prints all available function usages in
-                                       HTML format.
-    --function-help-html-div       Prints all available function usages in
-                                       HTML format, but just the content.
-    --disassemble                  Prints the disassembly for the make script
-                                       in use and exits.
-
------------------------------------------------------------------------------
-
-    --new-project, -n [templates]  Creates a new project made up of a set of
-                                      templates (requires [directory]).
-
-    --list-templates, -t           Lists all available project templates.
-
------------------------------------------------------------------------------
-
-    --gui                          Opens this project in a graphical interface
-                                       mode.
-
-    --studio                       Opens this project in DoomMake Studio.
-
-    --new-project-gui              Opens the &quot;New Project&quot; GUI.
-
------------------------------------------------------------------------------
-
-    --script, -s [filename]        Use [filename] for the root build script.
-                                       Default is &quot;doommake.script&quot;.
-    --properties, -p [filename]    Use [filename] for the project properties.
-                                       Default is &quot;doommake.properties&quot;.
-
-    --runaway-limit [num]          Sets the runaway limit (in operations)
-                                       before the soft protection on infinite
-                                       loops triggers. 0 is no limit.
-                                       Default: 0
-    --activation-depth [num]       Sets the activation depth to [num].
-                                       Default: 256
-    --stack-depth [num]            Sets the stack value depth to [num].
-                                       Default: 2048
-
------------------------------------------------------------------------------
-
-    --targets                      Displays all available targets for this
-                                       project.
-
------------------------------------------------------------------------------
-
-    --embed                        Embeds DoomTools&#x2F;DoomMake into the current
-                                       project.
-
------------------------------------------------------------------------------
-
-    --auto-build                   Starts DoomMake as an agent for detecting
-                                       changes in the current project and
-                                       kicking off full builds when changes
-                                       are detected.
-
-    --auto-build-verbose           Same as above, except it produces more
-                                       verbose output.
-
-While the agent is listening on a project, any attempt to run any DoomMake
-targets on that project will error out. In order to run targets, you can use:
-
-    --agent-bypass                 Bypasses agent detection. USE WITH CAUTION.
-                                       Used internally.
-
------------------------------------------------------------------------------
-
-Scopes
-------
-DoomMake has a variable scope called &#x60;global&#x60; that serves as a common variable
-scope for sharing values outside of functions or for data that you would want
-to initialize once.
-		</pre>
-    <!-- VVV FOOTER VVV -->
-		<div class="w3-row site-footer">
-			<div class="w3-col s12 w3-center w3-small">
-				Copyright (C) Matt "MTrop" Tropiano<br/>
-				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
-				Doom is a registered trademark of id Software, LLC<br/>
-				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
-			</div>
-		</div>
-	</body>
-</html>

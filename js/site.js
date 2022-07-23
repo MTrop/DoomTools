@@ -93,9 +93,9 @@ function display_release_data(release, release_section_element, release_version_
 		else if (filename.indexOf('-cmd') >= 0)
 			return 3;
 		else if (filename.indexOf('-setup-jre') >= 0)
-			return 2;
-		else if (filename.indexOf('-setup') >= 0)
 			return 1;
+		else if (filename.indexOf('-setup') >= 0)
+			return 2;
 		else
 			return 0;
 	};
@@ -109,7 +109,7 @@ function display_release_data(release, release_section_element, release_version_
 		else if (filename.indexOf('-cmd') >= 0)
 			return 'CMD (Windows) Version';
 		else if (filename.indexOf('-setup-jre') >= 0)
-			return 'Windows Installer w/ JRE (x64)';
+			return 'Windows Installer (x64)';
 		else if (filename.indexOf('-setup') >= 0)
 			return 'Windows Installer (no JRE)';
 		else
@@ -127,11 +127,16 @@ function display_release_data(release, release_section_element, release_version_
 
 		let link = $DJ.e('a', {
 			"href": asset.browser_download_url, 
-			"class": 'w3-button w3-round-large w3-margin download-link'
+			"class": asset.name.indexOf('-setup-jre') >= 0 
+				? 'w3-button w3-xlarge w3-round-large w3-margin download-link'
+				: 'w3-button w3-round-large w3-margin download-link'
 		});
 		link.innerHTML = linkhtml;
 
-		release_links_element.append($DJ.e('div', {"class":'w3-col l6 w3-center'}, [link]));
+		if (asset.name.indexOf('-setup-jre') >= 0)
+			release_links_element.append($DJ.e('div', {"class":'w3-col l12 w3-center'}, [link]));
+		else
+			release_links_element.append($DJ.e('div', {"class":'w3-col l6 w3-center'}, [link]));
 	});
 
 	release_version_element[0].innerHTML = version;

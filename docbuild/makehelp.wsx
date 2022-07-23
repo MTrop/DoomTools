@@ -14,8 +14,11 @@ function fetchData(path)
     return writer->toString();
 }
 
-function headerData()
+function headerData(file)
 {
+    if (file !== null)
+        return fetchData("docbuild/" + file);
+
     if (global::headerData == null)
         global::headerData = fetchData("docbuild/header.html");
     return global::headerData;
@@ -92,9 +95,9 @@ function cmd(image, args)
     return tostring(writer);
 }
 
-check function dumpUtil(command, helparg, destination, replacers)
+check function dumpUtil(command, helparg, destination, replacers, header)
 {
-    headerHTML = headerData();
+    headerHTML = headerData(header);
     each (k, v : replacers)
         headerHTML = headerHTML->strreplaceall("%%"+k+"%%", v);
     precontent = cmd(command, [helparg])->htmlsanitize();
@@ -124,7 +127,7 @@ check entry main()
         "description": "The generated DECOHack Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/decohack.html"
-    });
+    }, "decohack-header.html");
     dumpUtil("dimgconv",  "--help", file("dimgconv.html"), {
         "title": "DoomTools - DImgConv Help",
         "maintitle": "DImgConv Help",
@@ -138,54 +141,54 @@ check entry main()
         "description": "The generated DMXConv Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/dmxconv.html"
-    });
+    }, "dmxconv-header.html");
     dumpUtil("doommake",  "--help", file("doommake.html"), {
         "title": "DoomTools - DoomMake Help",
         "maintitle": "DoomMake Help",
         "description": "The generated DoomMake Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/doommake.html"
-    });
+    }, "doommake-header.html");
     dumpUtil("wadmerge",  "--help", file("wadmerge.html"), {
         "title": "DoomTools - WadMerge Help",
         "maintitle": "WadMerge Help",
         "description": "The generated WadMerge Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wadmerge.html"
-    });
+    }, "wadmerge-header.html");
     dumpUtil("wadscript",  "--help", file("wadscript.html"), {
         "title": "DoomTools - WadScript Help",
         "maintitle": "WadScript Help",
         "description": "The generated WadScript Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wadscript.html"
-    });
+    }, "wadscript-header.html");
     dumpUtil("wadtex",  "--help", file("wadtex.html"), {
         "title": "DoomTools - WadTex Help",
         "maintitle": "WadTex Help",
         "description": "The generated WadTex Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wadtex.html"
-    });
+    }, "wadtex-header.html");
     dumpUtil("wswantbl",  "--help", file("wswantbl.html"), {
         "title": "DoomTools - WSwAnTbl Help",
         "maintitle": "WSwAnTbl Help",
         "description": "The generated WSwAnTbl Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wswantbl.html"
-    });
+    }, "wswantbl-header.html");
     dumpUtil("wtexport",  "--help", file("wtexport.html"), {
         "title": "DoomTools - WTExport Help",
         "maintitle": "WTExport Help",
         "description": "The generated WTExport Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wtexport.html"
-    });
+    }, "wtexport-header.html");
     dumpUtil("wtexscan",  "--help", file("wtexscan.html"), {
         "title": "DoomTools - WTexScan Help",
         "maintitle": "WTexScan Help",
         "description": "The generated WTexScan Help Page",
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wtexscan.html"
-    });
+    }, "wtexscan-header.html");
 }

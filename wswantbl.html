@@ -32,6 +32,7 @@
 		<!-- Style and Scripts -->
 		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
 		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<link rel="StyleSheet" type="text/css" href="css/ipscode.css" />
 	</head>
 	<body>
 		<div>
@@ -44,9 +45,20 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WSwAnTbl Help</h1>
 		</div>
+		<div>
+			<p>
+				A utility that, like SWANTBLS, imports or exports SWITCHES/ANIMATED data into/from a WAD file, creating/reading a file that is formatted like DEFSWANI.DAT from way back when. Again, for big nerds that like big text files.
+			</p>
+			<pre class="ipsCode">
+wswantbl boomstuf.wad --export DEFSWANI.txt
+wswantbl boomstuf.wad --import DEFSWANI.txt</pre>
+		</div>
+		<div>
+			<h3 class="main-title-name w3-center">Full Command Help</h3>
+		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre class="text-documentation">
-WSwAnTbl v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
+WSwAnTbl v1.1.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
 
     --help              Prints help and exits.
