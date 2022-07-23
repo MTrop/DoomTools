@@ -259,7 +259,6 @@ public interface RepositoryHelper
 				case PULL:
 				case PUSH:
 				case BRANCH:
-				//case PUSH_BRANCH:
 				case PUSH_NEW_BRANCH:
 				case CHECKOUT_BRANCH:
 				case MERGE:
@@ -298,6 +297,8 @@ public interface RepositoryHelper
 					return performCheckout(args);
 				case MERGE:
 					return performMerge(args);
+				default:
+					// Fall through.
 			}
 			
 			throw new UnsupportedOperationException("Not supported: " + operation.name());
