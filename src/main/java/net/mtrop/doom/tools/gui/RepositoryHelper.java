@@ -37,6 +37,7 @@ public interface RepositoryHelper
 		PULL,
 		PUSH,
 		PUSH_BRANCH,
+		PUSH_NEW_BRANCH,
 		BRANCH,
 		CHECKOUT_BRANCH,
 		MERGE,
@@ -258,7 +259,8 @@ public interface RepositoryHelper
 				case PULL:
 				case PUSH:
 				case BRANCH:
-				case PUSH_BRANCH:
+				//case PUSH_BRANCH:
+				case PUSH_NEW_BRANCH:
 				case CHECKOUT_BRANCH:
 				case MERGE:
 					return true;
@@ -288,8 +290,8 @@ public interface RepositoryHelper
 					return performPull();
 				case PUSH:
 					return performPush();
-				case PUSH_BRANCH:
-					return performPushBranch(args);
+				case PUSH_NEW_BRANCH:
+					return performPushNewBranch(args);
 				case BRANCH:
 					return performBranch(args);
 				case CHECKOUT_BRANCH:
@@ -506,18 +508,28 @@ public interface RepositoryHelper
 		}
 		
 		/**
+		 * Pushes a branch.
+		 * @param branch the branch to push.
+		 * @return the resulting error code. 0 is no error.
+		 */
+		public int pushBranch(String branch)
+		{
+			return perform(Operation.PUSH_BRANCH, branch);
+		}
+
+		/**
 		 * Pushes a new branch to a remote and sets the upstream for the current branch.
 		 * @param remoteName the name of the remote.
 		 * @param branchName the remote name of the branch. 
 		 * @return the resulting error code. 0 is no error.
 		 */
-		public int pushBranch(String remoteName, String branchName)
+		public int pushNewBranch(String remoteName, String branchName)
 		{
-			return perform(Operation.PUSH, remoteName, branchName);
+			return perform(Operation.PUSH_NEW_BRANCH, remoteName, branchName);
 		}
 		
 		/**
-		 * Merges another branch with the current branch.
+		 * Merges another branch into the current branch.
 		 * @param branchName the name of the branch to merge into this one. 
 		 * @return the resulting error code. 0 is no error.
 		 */
@@ -614,9 +626,9 @@ public interface RepositoryHelper
 			return doCall(start().arg("push").setIn((File)null), "PUSH");
 		}
 
-		private int performPushBranch(String ... args)
+		private int performPushNewBranch(String ... args)
 		{
-			return doCall(start().arg("push").arg("--set-upstream").setIn((File)null), "PUSH-UPSTREAM");
+			return doCall(start().arg("push").arg("--set-upstream").args(args).setIn((File)null), "PUSH-UPSTREAM");
 		}
 
 		private int performBranch(String ... args)

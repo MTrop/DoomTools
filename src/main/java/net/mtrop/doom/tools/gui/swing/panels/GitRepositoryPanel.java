@@ -505,10 +505,18 @@ public class GitRepositoryPanel extends JPanel
 
 	private void onPush()
 	{
-		if (ObjectUtils.isEmpty(remoteBranchPanel))
+		if (ObjectUtils.isEmpty(remoteBranchPanel.getText()))
 		{
-			SwingUtils.error(language.getText("git.repo.push.noremote"));
-			return;
+			if (SwingUtils.yesTo(language.getText("git.repo.push.noremote.ask")))
+			{
+				onPushBranch(branchPanel.getText());
+				return;
+			}
+			else
+			{
+				SwingUtils.error(language.getText("git.repo.push.noremote"));
+				return;
+			}
 		}
 
 		setActionsEnabled(false);
@@ -531,10 +539,55 @@ public class GitRepositoryPanel extends JPanel
 			setActionsEnabled(true);
 		});
 	}
+
+	private void onPushBranch(final String branchName)
+	{
+		JFormField<String> remoteNameField = stringField("origin", true);
+		
+		Boolean ok = modal(
+			language.getText("git.repo.branch.remote.title"), 
+			containerOf(dimension(100, 20), borderLayout(),
+				node(BorderLayout.CENTER, remoteNameField)
+			), 
+			utils.createChoiceFromLanguageKey("doomtools.ok", (Boolean)true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok == null || ok == false || ObjectUtils.isEmpty(remoteNameField.getValue()))
+			return;
+		
+		final String remote = remoteNameField.getValue();
+		
+		if (!BRANCH_REGEX.matcher(remote).matches())
+		{
+			SwingUtils.error(language.getText("git.repo.branch.remote.badname"));
+			return;
+		}
+		
+		setActionsEnabled(false);
+		statusPanel.setActivityMessage(language.getText("git.repo.status.pushing"));
+
+		tasks.spawn(() -> 
+		{
+			int result;
+			if ((result = client.pushNewBranch(remote, branchName)) != 0)
+			{
+				SwingUtils.error(language.getText("git.repo.push.error", result));
+				statusPanel.setErrorMessage(language.getText("git.repo.push.error", result));
+				setActionsEnabled(true);
+				return;
+			}
+
+			statusPanel.setSuccessMessage(language.getText("git.repo.status.push"));
+			refreshInfo();
+			refreshEntries();
+			setActionsEnabled(true);
+		});
+	}
 	
 	private void onPull()
 	{
-		if (ObjectUtils.isEmpty(remoteBranchPanel))
+		if (ObjectUtils.isEmpty(remoteBranchPanel.getText()))
 		{
 			SwingUtils.error(language.getText("git.repo.pull.noremote"));
 			return;

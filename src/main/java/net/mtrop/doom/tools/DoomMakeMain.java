@@ -93,6 +93,7 @@ public final class DoomMakeMain
 	public static final String SWITCH_NEWPROJECT_GUI = "--new-project-gui";
 	public static final String SWITCH_EMBED = "--embed";
 	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_STUDIO = "--studio";
 	public static final String SWITCH_AGENT = "--auto-build";
 	public static final String SWITCH_AGENT_VERBOSE = "--auto-build-verbose";
 	public static final String SWITCH_AGENT_BYPASS = "--agent-bypass";
@@ -151,6 +152,7 @@ public final class DoomMakeMain
 		private boolean listModules;
 		private boolean embed;
 		private boolean gui;
+		private boolean guiStudio;
 		private boolean guiNewProject;
 		private boolean agent;
 		private boolean verboseAgent;
@@ -180,6 +182,8 @@ public final class DoomMakeMain
 			this.listModules = false;
 			this.embed = false;
 			this.gui = false;
+			this.guiStudio = false;
+			this.guiNewProject = false;
 			this.agent = false;
 			this.verboseAgent = false;
 			
@@ -294,6 +298,39 @@ public final class DoomMakeMain
 		@Override
 		public Integer call()
 		{
+			if (options.gui)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, OSUtils.getWorkingDirectoryPath());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DoomMake GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+			
+			if (options.guiStudio)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_STUDIO, OSUtils.getWorkingDirectoryPath());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DoomMake Studio!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+			
+			if (options.guiNewProject)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, OSUtils.getWorkingDirectoryPath());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DoomMake New Project GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+			
 			if (options.help)
 			{
 				splash(options.stdout);
@@ -309,17 +346,6 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 
-			if (options.guiNewProject)
-			{
-				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_NEW, OSUtils.getWorkingDirectoryPath());
-				} catch (IOException e) {
-					options.stderr.println("ERROR: Could not start DoomMake New Project GUI!");
-					return ERROR_IOERROR;
-				}
-				return ERROR_NONE;
-			}
-			
 			if (options.projectType != null)
 			{
 				ProjectGenerator generator = options.projectType.createGenerator();
@@ -385,17 +411,6 @@ public final class DoomMakeMain
 			loadProperties(new File("doommake.project.properties"));
 			loadProperties(options.propertiesFile);
 
-			if (options.gui)
-			{
-				try {
-					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DOOMMAKE_OPEN, OSUtils.getWorkingDirectoryPath());
-				} catch (IOException e) {
-					options.stderr.println("ERROR: Could not start DoomMake GUI!");
-					return ERROR_IOERROR;
-				}
-				return ERROR_NONE;
-			}
-			
 			boolean agentRunning;
 			try {
 				agentRunning = isAgentRunning();
@@ -794,6 +809,8 @@ public final class DoomMakeMain
 						options.agentBypass = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_STUDIO))
+						options.guiStudio = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT_GUI))
 						options.guiNewProject = true;
 					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
@@ -1130,6 +1147,8 @@ public final class DoomMakeMain
 		out.println();
 		out.println("    --gui                          Opens this project in a graphical interface");
 		out.println("                                       mode.");
+		out.println();
+		out.println("    --studio                       Opens this project in DoomMake Studio.");
 		out.println();
 		out.println("    --new-project-gui              Opens the \"New Project\" GUI.");
 		out.println();
