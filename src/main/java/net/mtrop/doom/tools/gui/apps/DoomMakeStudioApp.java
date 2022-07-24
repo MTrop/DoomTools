@@ -36,6 +36,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.RepositoryHelper.Git;
+import net.mtrop.doom.tools.gui.RepositoryHelper.Mercurial;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.AppCommon;
@@ -58,6 +59,7 @@ import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.GitRepositoryPanel;
+import net.mtrop.doom.tools.gui.swing.panels.MercurialRepositoryPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -174,6 +176,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				statusPanel.setSuccessMessage(language.getText("doommake.status.message.saved", sourceFile.getName()));
 				if (repositoryPanel instanceof GitRepositoryPanel)
 					((GitRepositoryPanel)repositoryPanel).refreshEntries();
+				else if (repositoryPanel instanceof MercurialRepositoryPanel)
+					((MercurialRepositoryPanel)repositoryPanel).refreshEntries();
 				onHandleChange();
 			}
 
@@ -214,6 +218,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		if (Git.isGit(targetDirectory))		
 			this.repositoryPanel = new GitRepositoryPanel(targetDirectory);
+		else if (Mercurial.isMercurial(targetDirectory))		
+			this.repositoryPanel = new MercurialRepositoryPanel(targetDirectory);
 		else
 			this.repositoryPanel = containerOf(label(JLabel.CENTER, language.getText("doommake.tab.norepo")));
 		
