@@ -488,7 +488,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	/** Mnemonic name for BEX/DECORATE. */
 	private String mnemonic;
 
-	private static final DEHActionPointerParamType[] NO_PARAMS = new DEHActionPointerParamType[0];
+	private static final DEHValueType[] NO_PARAMS = new DEHValueType[0];
 	
 	private DEHActionPointerDoom19(int frame, String mnemonic, Usage usage)
 	{
@@ -535,13 +535,13 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	}
 	
 	@Override
-	public DEHActionPointerParamType[] getParams()
+	public DEHValueType[] getParams()
 	{
 		return NO_PARAMS;
 	}
 
 	@Override
-	public DEHActionPointerParamType getParam(int index)
+	public DEHValueType getParam(int index)
 	{
 		return null;
 	}

@@ -10,7 +10,7 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.params;
 import static net.mtrop.doom.tools.decohack.data.DEHActionPointer.usage;
-import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.*;
+import static net.mtrop.doom.tools.decohack.data.enums.DEHValueType.*;
 
 import java.util.Map;
 
@@ -123,9 +123,9 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 	/** Is Weapon state. */
 	private boolean weapon;
 	/** Action pointer parameters. */
-	private DEHActionPointerParamType[] params;
+	private DEHValueType[] params;
 
-	private DEHActionPointerMBF(boolean weapon, String mnemonic, DEHActionPointerParamType[] params, Usage usage)
+	private DEHActionPointerMBF(boolean weapon, String mnemonic, DEHValueType[] params, Usage usage)
 	{
 		this.usage = usage;
 		this.mnemonic = mnemonic;
@@ -163,13 +163,13 @@ public enum DEHActionPointerMBF implements DEHActionPointer
 	}
 	
 	@Override
-	public DEHActionPointerParamType[] getParams()
+	public DEHValueType[] getParams()
 	{
 		return params;
 	}
 
 	@Override
-	public DEHActionPointerParamType getParam(int index)
+	public DEHValueType getParam(int index)
 	{
 		return index < 0 || index >= params.length ? null : params[index];
 	}

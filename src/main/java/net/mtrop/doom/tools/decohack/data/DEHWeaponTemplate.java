@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -30,6 +31,10 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	private int addMBF21Flags;
 	private int remMBF21Flags;
 
+	/** Custom properties. */
+	private Map<DEHProperty, String> customProperties;
+	
+
 	public DEHWeaponTemplate()
 	{
 		this.ammoType = null;
@@ -39,6 +44,8 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 		this.mbf21Flags = null;
 		this.addMBF21Flags = 0;
 		this.remMBF21Flags = 0;
+
+		this.customProperties = new HashMap<>();
 	}
 	
 	/**
@@ -65,14 +72,40 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 		for (String label : getLabels())
 			destination.setLabel(label, getLabel(label));
 		
+		for (Map.Entry<DEHProperty, String> property : customProperties.entrySet())
+			destination.setCustomPropertyValue(property.getKey(), property.getValue());
+
 		return this;
 	}
 	
+	/**
+	 * Sets a custom property value.
+	 * @param property the property.
+	 * @param value the value.
+	 */
+	public void setCustomPropertyValue(DEHProperty property, int value)
+	{
+		setCustomPropertyValue(property, String.valueOf(value));
+	}
+
+	@Override
+	public void setCustomPropertyValue(DEHProperty property, String value)
+	{
+		customProperties.put(property, value);
+	}
+
+	@Override
+	public void clearCustomPropertyValues()
+	{
+		customProperties.clear();
+	}
+
 	@Override
 	public DEHWeaponTemplate clearProperties()
 	{
 		setAmmoType(Ammo.BULLETS);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		clearCustomPropertyValues();
 		return this;
 	}
 

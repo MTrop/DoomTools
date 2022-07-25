@@ -76,6 +76,10 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	 */
 	String getEditorKey(String key);
 	
+	void setCustomPropertyValue(DEHProperty property, String value);
+
+	void clearCustomPropertyValues();
+	
 	SELF setHealth(int health);
 
 	SELF setSpeed(int speed);

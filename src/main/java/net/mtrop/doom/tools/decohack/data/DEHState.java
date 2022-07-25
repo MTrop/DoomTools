@@ -17,7 +17,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single state.
  * @author Matthew Tropiano
  */
-public class DEHState implements DEHObject<DEHState>
+public class DEHState extends DEHObject<DEHState>
 {
 	private int spriteIndex;
 	private int frameIndex; // 28 max
@@ -270,6 +270,7 @@ public class DEHState implements DEHObject<DEHState>
 			if (mbf21Flags != frame.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 

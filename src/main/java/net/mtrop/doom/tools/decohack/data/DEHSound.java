@@ -15,7 +15,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single sound entry.
  * @author Matthew Tropiano
  */
-public class DEHSound implements DEHObject<DEHSound>
+public class DEHSound extends DEHObject<DEHSound>
 {
 	/** Sound priority (unsigned byte). */
 	private int priority;
@@ -122,6 +122,7 @@ public class DEHSound implements DEHObject<DEHSound>
 			writer.append("Value = ").append(String.valueOf(priority)).append("\r\n");
 		if (singular != sound.singular)
 			writer.append("Zero/One = ").append(String.valueOf(singular ? 1 : 0)).append("\r\n");
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 	

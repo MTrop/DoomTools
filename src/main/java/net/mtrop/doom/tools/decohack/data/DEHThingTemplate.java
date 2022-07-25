@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -75,6 +76,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	/** Ripper sound position. */
 	private Integer ripSoundPosition;
 
+	/** Custom properties. */
+	private Map<DEHProperty, String> customProperties;
+	
 	/**
 	 * Creates a new blank thing.
 	 */
@@ -117,6 +121,8 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.fastSpeed = null;
 		this.meleeRange = null;
 		this.ripSoundPosition = null;
+
+		this.customProperties = new HashMap<>();
 	}
 
 	/**
@@ -201,9 +207,34 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		for (String label : stateIndexMap.keySet())
 			destination.setLabel(label, stateIndexMap.getOrDefault(label, 0));
 
+		for (Map.Entry<DEHProperty, String> property : customProperties.entrySet())
+			destination.setCustomPropertyValue(property.getKey(), property.getValue());
+
 		return this;
 	}
 	
+	/**
+	 * Sets a custom property value.
+	 * @param property the property.
+	 * @param value the value.
+	 */
+	public void setCustomPropertyValue(DEHProperty property, int value)
+	{
+		setCustomPropertyValue(property, String.valueOf(value));
+	}
+
+	@Override
+	public void setCustomPropertyValue(DEHProperty property, String value)
+	{
+		customProperties.put(property, value);
+	}
+
+	@Override
+	public void clearCustomPropertyValues()
+	{
+		customProperties.clear();
+	}
+
 	@Override
 	public DEHThingTemplate clearProperties() 
 	{
@@ -222,6 +253,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		setSplashGroup(DEFAULT_GROUP);
 		setFastSpeed(DEFAULT_FASTSPEED);
 		setMeleeRange(DEFAULT_MELEE_RANGE);
+		clearCustomPropertyValues();
 		return this;
 	}
 

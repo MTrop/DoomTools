@@ -20,7 +20,7 @@ import net.mtrop.doom.util.RangeUtils;
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
  * @author Matthew Tropiano
  */
-public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
+public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHThing>
 {
 	private String name;
 	
@@ -154,6 +154,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 		setSplashGroup(DEFAULT_GROUP);
 		setFastSpeed(DEFAULT_FASTSPEED);
 		setMeleeRange(DEFAULT_MELEE_RANGE);
+		clearCustomPropertyValues();
 		return this;
 	}
 	
@@ -815,7 +816,7 @@ public class DEHThing implements DEHObject<DEHThing>, DEHThingTarget<DEHThing>
 			if (ripSoundPosition != thing.ripSoundPosition)
 				writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 		}
-
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 

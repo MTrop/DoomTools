@@ -10,11 +10,11 @@ import java.util.Map;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
- * Enumeration of action pointer parameter types.
+ * Enumeration of action pointer/property parameter types.
  * @author Xaser Acheron
  * @author Matthew Tropiano
  */
-public enum DEHActionPointerParamType
+public enum DEHValueType
 {
 	BOOL          (Type.INTEGER,       0, 1),
 	UBYTE         (Type.INTEGER,       0, 255),
@@ -33,6 +33,9 @@ public enum DEHActionPointerParamType
 	WEAPON        (Type.WEAPON,        0, Integer.MAX_VALUE),
 	SOUND         (Type.SOUND,         0, Integer.MAX_VALUE),
 	FLAGS         (Type.FLAGS,         Integer.MIN_VALUE, Integer.MAX_VALUE),
+
+	// For custom properties ONLY.
+	STRING        (Type.STRING),
 	;
 
 	public enum Type
@@ -44,21 +47,29 @@ public enum DEHActionPointerParamType
 		THING,
 		THINGMISSILE,
 		WEAPON,
-		SOUND
+		SOUND,
+		STRING
 	}
 	
 	private Type typeCheck;
 	private int valueMin;
 	private int valueMax;
 
-	private static final Map<String, DEHActionPointerParamType> NAME_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHActionPointerParamType.class);
+	private static final Map<String, DEHValueType> NAME_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHValueType.class);
 	
-	public static DEHActionPointerParamType getByName(String mnemonic)
+	public static DEHValueType getByName(String mnemonic)
 	{
 		return NAME_MAP.get(mnemonic);
 	}
 	
-	private DEHActionPointerParamType(Type typeCheck, int valueMin, int valueMax)
+	private DEHValueType(Type typeCheck)
+	{
+		this.typeCheck = typeCheck;
+		this.valueMin = 0;
+		this.valueMax = 0;
+	}
+
+	private DEHValueType(Type typeCheck, int valueMin, int valueMax)
 	{
 		this.typeCheck = typeCheck;
 		this.valueMin = valueMin;
@@ -80,6 +91,11 @@ public enum DEHActionPointerParamType
 		return valueMax;
 	}
 
+	public boolean isValueCheckable()
+	{
+		return typeCheck != Type.STRING;
+	}
+	
 	public boolean isValueValid(int value)
 	{
 		return value >= valueMin && value <= valueMax;

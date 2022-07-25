@@ -33,6 +33,7 @@ import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
+import net.mtrop.doom.tools.decohack.data.DEHProperty;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
@@ -40,14 +41,14 @@ import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
 import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
+import net.mtrop.doom.tools.decohack.data.enums.DEHValueType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHValueType.Type;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
@@ -55,6 +56,7 @@ import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
 import net.mtrop.doom.tools.struct.PreprocessorLexer;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
@@ -101,6 +103,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_DURATION = "duration";
 	private static final String KEYWORD_NEXTSTATE = "nextstate";
 	private static final String KEYWORD_POINTER = "pointer";
+	private static final String KEYWORD_PROPERTY = "property";
 
 	private static final String KEYWORD_ALIAS = "alias";
 	private static final String KEYWORD_AUTO = "auto";
@@ -487,6 +490,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses an ammo block.
+	// TODO: Add custom property support.
 	private boolean parseAmmoBlock(AbstractPatchContext<?> context)
 	{
 		DEHAmmo ammo;
@@ -556,6 +560,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses an sound block.
+	// TODO: Add custom property support.
 	private boolean parseSoundBlock(AbstractPatchContext<?> context)
 	{
 		DEHSound sound;
@@ -672,7 +677,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
-	// Parses a par block.
+	// Parses a miscellany block.
+	// TODO: Add custom property support.
 	private boolean parseMiscellaneousBlock(AbstractPatchContext<?> context)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -862,9 +868,13 @@ public final class DecoHackParser extends Lexer.Parser
 
 				return parseCustomPointerClause(context, false);
 			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHThing.class);
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_THING);
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_PROPERTY, KEYWORD_THING);
 				return false;
 			}
 		}
@@ -880,17 +890,104 @@ public final class DecoHackParser extends Lexer.Parser
 
 				return parseCustomPointerClause(context, true);
 			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHWeapon.class);
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_WEAPON);
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_POINTER, KEYWORD_PROPERTY, KEYWORD_WEAPON);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_AMMO))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHAmmo.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_PROPERTY, KEYWORD_AMMO);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_STATE))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHState.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_PROPERTY, KEYWORD_STATE);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHSound.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_PROPERTY, KEYWORD_SOUND);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_MISC))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHMiscellany.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_PROPERTY, KEYWORD_MISC);
 				return false;
 			}
 		}
 		else
 		{
-			addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_WEAPON, KEYWORD_CUSTOM);
+			addErrorMessage("Expected an object type after \"%s\": %s", KEYWORD_CUSTOM, Arrays.toString(ArrayUtils.arrayOf(KEYWORD_MISC, KEYWORD_STATE, KEYWORD_SOUND, KEYWORD_AMMO, KEYWORD_WEAPON, KEYWORD_THING)));
 			return false;
 		}
+	}
+
+	// Parses a custom pointer clause.
+	private boolean parseCustomPropertyClause(AbstractPatchContext<?> context, Class<?> objectClass)
+	{
+		String keyword;
+		if ((keyword = matchIdentifier()) == null)
+		{
+			addErrorMessage("Expected identifier for custom property name.");
+			return false;
+		}
+
+		String propertyTypeName;
+		if ((propertyTypeName = matchIdentifier()) == null)
+		{
+			addErrorMessage("Expected identifier for parameter type after \"%s\".", keyword);
+			return false;
+		}
+		
+		DEHValueType paramType;
+		if ((paramType = DEHValueType.getByName(propertyTypeName)) == null)
+		{
+			addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
+			return false;
+		}
+
+		if (!currentType(DecoHackKernel.TYPE_STRING))
+		{
+			addErrorMessage("Expected DeHackEd label name after type.");
+			return false;
+		}
+		String dehackedLabel = matchString();
+		
+		context.addCustomProperty(objectClass, new DEHProperty(keyword, dehackedLabel, paramType));
+		return true;
 	}
 	
 	// Parses a custom pointer clause.
@@ -936,7 +1033,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		// Parameters
-		List<DEHActionPointerParamType> params = new LinkedList<>();
+		List<DEHValueType> params = new LinkedList<>();
 		if (matchType(DecoHackKernel.TYPE_LPAREN))
 		{
 			String parameterTypeName;
@@ -949,10 +1046,10 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 					
-					DEHActionPointerParamType paramType;
-					if ((paramType = DEHActionPointerParamType.getByName(parameterTypeName)) == null)
+					DEHValueType paramType;
+					if ((paramType = DEHValueType.getByName(parameterTypeName)) == null)
 					{
-						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHActionPointerParamType.values()));
+						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
 						return false;
 					}
 					if (params.size() >= type.getMaxCustomParams())
@@ -973,7 +1070,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		}
 		
-		DEHActionPointerParamType[] parameters = params.toArray(new DEHActionPointerParamType[params.size()]);
+		DEHValueType[] parameters = params.toArray(new DEHValueType[params.size()]);
 		context.addActionPointer(new DEHActionPointerEntry(weapon, type, pointerMnemonic, parameters));
 		return true;
 	}
@@ -1509,6 +1606,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a thing body.
+	// TODO: Add custom property support.
 	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
 		editorKeys.clear();
@@ -2270,6 +2368,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a weapon body.
+	// TODO: Add custom property support.
 	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -2774,6 +2873,7 @@ public final class DecoHackParser extends Lexer.Parser
 			context.setFreeState(index, false);
 			return true;
 		}
+		// TODO: Add custom property support.
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_SPRITENAME))
@@ -3337,7 +3437,7 @@ public final class DecoHackParser extends Lexer.Parser
 					if (matchType(DecoHackKernel.TYPE_RPAREN))
 						return true;
 
-					DEHActionPointerParamType paramType;
+					DEHValueType paramType;
 					if ((paramType = pointer.getParam(0)) == null)
 					{
 						addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
@@ -3408,7 +3508,7 @@ public final class DecoHackParser extends Lexer.Parser
 						// get argument
 						int argIndex = action.args.size();
 						
-						DEHActionPointerParamType paramType;
+						DEHValueType paramType;
 						if ((paramType = pointer.getParam(argIndex)) == null)
 						{
 							addErrorMessage("Too many args for action %s: this action expects a maximum of %d args.", action.pointer.getMnemonic(), action.pointer.getParams().length);
@@ -3448,12 +3548,12 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a pointer argument value.
-	private Object parseActionPointerParameterValue(DEHActionPointerParamType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
+	private Object parseActionPointerParameterValue(DEHValueType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
 		{
-			if (paramType == DEHActionPointerParamType.THING || paramType == DEHActionPointerParamType.THINGMISSILE)
+			if (paramType == DEHValueType.THING || paramType == DEHValueType.THINGMISSILE)
 				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
 			
 			Integer thingIndex;
@@ -3461,7 +3561,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			
 			// Verify missile type.
-			if (paramType == DEHActionPointerParamType.THINGMISSILE)
+			if (paramType == DEHValueType.THINGMISSILE)
 			{
 				DEHThing thing = context.getThing(thingIndex);
 				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
@@ -3472,19 +3572,19 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_WEAPON))
 		{
-			if (paramType == DEHActionPointerParamType.WEAPON)
+			if (paramType == DEHValueType.WEAPON)
 				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
 			return parseWeaponOrWeaponStateIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
 		{
-			if (paramType == DEHActionPointerParamType.SOUND)
+			if (paramType == DEHValueType.SOUND)
 				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
 			return parseSoundIndex(context);
 		}
 		else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
 		{
-			if (paramType == DEHActionPointerParamType.FLAGS)
+			if (paramType == DEHValueType.FLAGS)
 				addWarningMessage("The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
 			return matchNumericExpression(context, actor, Type.FLAGS);
 		}
@@ -4440,8 +4540,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		DEHActionPointerParamType param = action.getParam(index);
-		if (!param.isValueValid(value))
+		DEHValueType param = action.getParam(index);
+		if (param.isValueCheckable() && !param.isValueValid(value))
 		{
 			addErrorMessage("Invalid value '%d' for %s arg %d: value must be between %d and %d.", value, action.getMnemonic(), index, param.getValueMin(), param.getValueMax());
 			return false;

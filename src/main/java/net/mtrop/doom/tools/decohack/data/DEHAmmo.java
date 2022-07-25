@@ -15,7 +15,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single ammo entry.
  * @author Matthew Tropiano
  */
-public class DEHAmmo implements DEHObject<DEHAmmo>
+public class DEHAmmo extends DEHObject<DEHAmmo>
 {
 	/** Ammo name. */
 	private String name;
@@ -127,6 +127,7 @@ public class DEHAmmo implements DEHObject<DEHAmmo>
 			writer.append("Max ammo = ").append(String.valueOf(max)).append("\r\n");
 		if (pickup != ammo.pickup)
 			writer.append("Per ammo = ").append(String.valueOf(pickup)).append("\r\n");
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 

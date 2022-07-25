@@ -19,7 +19,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single weapon entry.
  * @author Matthew Tropiano
  */
-public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapon>
+public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<DEHWeapon>
 {
 	static final float BUTT = ((-360 << 16) + 1) / 65536f;
 	
@@ -109,6 +109,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 	{
 		setAmmoType(Ammo.BULLETS);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		clearCustomPropertyValues();
 		return this;
 	}
 
@@ -394,7 +395,7 @@ public class DEHWeapon implements DEHObject<DEHWeapon>, DEHWeaponTarget<DEHWeapo
 			if (mbf21Flags != weapon.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
-
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 

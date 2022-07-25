@@ -7,6 +7,8 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 
@@ -15,15 +17,62 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
  * @author Matthew Tropiano
  * @param <SELF> this object's class.
  */
-public interface DEHObject<SELF>
+public abstract class DEHObject<SELF>
 {
+	/** Custom properties. */
+	private Map<DEHProperty, String> customProperties;
+	
+	protected DEHObject()
+	{
+		this.customProperties = new HashMap<>();
+	}
+	
+	/**
+	 * Sets a custom property value.
+	 * @param property the property.
+	 * @param value the value.
+	 */
+	public void setCustomPropertyValue(DEHProperty property, int value)
+	{
+		setCustomPropertyValue(property, String.valueOf(value));
+	}
+
+	/**
+	 * Sets a custom property value.
+	 * @param property the property.
+	 * @param value the value.
+	 */
+	public void setCustomPropertyValue(DEHProperty property, String value)
+	{
+		customProperties.put(property, value);
+	}
+
+	/**
+	 * Clears the custom properties.
+	 */
+	public void clearCustomPropertyValues()
+	{
+		customProperties.clear();
+	}
+	
+	/**
+	 * Writes the custom properties out to DeHackEd.
+	 * @param writer the writer to use.
+	 * @throws IOException if a write error occurs.
+	 */
+	public void writeCustomProperties(Writer writer) throws IOException
+	{
+		for (Map.Entry<DEHProperty, String> property : customProperties.entrySet())
+			writer.append(property.getKey().getDeHackEdLabel()).append(" = ").append(property.getValue()).append("\r\n");
+	}
+	
 	/**
 	 * Copies this object's values/properties.
 	 * @param source the source object.
 	 * @return this object.
 	 */
-	SELF copyFrom(SELF source);
-	
+	public abstract SELF copyFrom(SELF source);
+
 	/**
 	 * Writes this object to a DeHackEd file stream.
 	 * @param writer the writer to write to.
@@ -31,6 +80,6 @@ public interface DEHObject<SELF>
 	 * @param level the highest feature level to export for.
 	 * @throws IOException if a write error occurs.
 	 */
-	void writeObject(Writer writer, SELF original, DEHFeatureLevel level) throws IOException;
+	public abstract void writeObject(Writer writer, SELF original, DEHFeatureLevel level) throws IOException;
 	
 }

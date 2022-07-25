@@ -5,7 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
+import net.mtrop.doom.tools.decohack.data.enums.DEHValueType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 
 /**
@@ -21,9 +21,9 @@ public class DEHActionPointerEntry implements DEHActionPointer
 	/** Action pointer type. */
 	private DEHActionPointerType type;
 	/** Action pointer parameters. */
-	private DEHActionPointerParamType[] params;
+	private DEHValueType[] params;
 
-	public DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic, DEHActionPointerParamType ... params)
+	public DEHActionPointerEntry(boolean weapon, DEHActionPointerType type, String mnemonic, DEHValueType ... params)
 	{
 		this.weapon = weapon;
 		this.mnemonic = mnemonic;
@@ -56,13 +56,13 @@ public class DEHActionPointerEntry implements DEHActionPointer
 	}
 	
 	@Override
-	public DEHActionPointerParamType[] getParams()
+	public DEHValueType[] getParams()
 	{
 		return params;
 	}
 
 	@Override
-	public DEHActionPointerParamType getParam(int index)
+	public DEHValueType getParam(int index)
 	{
 		return index < 0 || index >= params.length ? null : params[index];
 	}

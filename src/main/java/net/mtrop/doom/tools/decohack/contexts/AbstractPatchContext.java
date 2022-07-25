@@ -7,6 +7,8 @@ package net.mtrop.doom.tools.decohack.contexts;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -19,6 +21,7 @@ import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHObject;
+import net.mtrop.doom.tools.decohack.data.DEHProperty;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
@@ -56,6 +59,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
+	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
 	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
@@ -247,6 +251,46 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Set<Integer> getUsedStateIndices()
 	{
 		return states.keySet();
+	}
+	
+	/**
+	 * Adds a custom property to a DEH object class.
+	 * @param objectClass the class itself.
+	 * @param property the property to add.
+	 */
+	public void addCustomProperty(Class<?> objectClass, DEHProperty property)
+	{
+		Map<String, DEHProperty> propMap;
+		if ((propMap = customPropertyMap.get(objectClass)) != null)
+			customPropertyMap.put(objectClass, propMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		propMap.put(property.getKeyword(), property);
+	}
+	
+	/**
+	 * Retrieves a custom property by class and keyword.
+	 * @param objectClass the object class.
+	 * @param keyword the keyword.
+	 * @return the corresponding property, or null if none found.
+	 */
+	public DEHProperty getCustomPropertyByKeyword(Class<DEHObject<?>> objectClass, String keyword)
+	{
+		Map<String, DEHProperty> propMap;
+		if ((propMap = customPropertyMap.get(objectClass)) == null)
+			return null;
+		return propMap.get(keyword);
+	}
+
+	/**
+	 * Retrieves all custom properties by class in an immutable collection.
+	 * @param objectClass the object class.
+	 * @return the corresponding properties, or null if none found.
+	 */
+	public Collection<DEHProperty> getCustomPropertiesByClass(Class<DEHObject<?>> objectClass)
+	{
+		Map<String, DEHProperty> propMap;
+		if ((propMap = customPropertyMap.get(objectClass)) == null)
+			return null;
+		return Collections.unmodifiableCollection(propMap.values());
 	}
 
 	@Override

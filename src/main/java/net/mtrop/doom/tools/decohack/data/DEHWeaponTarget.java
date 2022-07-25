@@ -104,5 +104,9 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 	 * @return this object.
 	 */
 	SELF setFlashFrameIndex(int flashFrameIndex);
+
+	void setCustomPropertyValue(DEHProperty property, String value);
+
+	void clearCustomPropertyValues();
 	
 }

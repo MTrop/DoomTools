@@ -15,7 +15,7 @@ import net.mtrop.doom.util.RangeUtils;
  * All other miscellaneous DeHackEd stuff.
  * @author Matthew Tropiano
  */
-public class DEHMiscellany implements DEHObject<DEHMiscellany>
+public class DEHMiscellany extends DEHObject<DEHMiscellany>
 {
 	private boolean monsterInfightingEnabled;
 	private int initialBullets;
@@ -366,6 +366,7 @@ public class DEHMiscellany implements DEHObject<DEHMiscellany>
 			writer.append("Max Health = ").append(String.valueOf(maxHealth)).append("\r\n");
 		if (maxArmor != misc.maxArmor)
 			writer.append("Max Armor = ").append(String.valueOf(maxArmor)).append("\r\n");
+		writeCustomProperties(writer);
 		writer.flush();
 	}
 	

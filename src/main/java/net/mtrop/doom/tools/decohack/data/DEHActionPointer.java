@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerParamType;
+import net.mtrop.doom.tools.decohack.data.enums.DEHValueType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 
@@ -23,7 +23,7 @@ public interface DEHActionPointer
 	/** The NULL pointer. */
 	static DEHActionPointer NULL = new DEHActionPointer() 
 	{
-		final DEHActionPointerParamType[] NO_PARAMS = new DEHActionPointerParamType[0];
+		final DEHValueType[] NO_PARAMS = new DEHValueType[0];
 
 		@Override
 		public int getFrame()
@@ -44,13 +44,13 @@ public interface DEHActionPointer
 		}
 		
 		@Override
-		public DEHActionPointerParamType[] getParams() 
+		public DEHValueType[] getParams() 
 		{
 			return NO_PARAMS;
 		}
 		
 		@Override
-		public DEHActionPointerParamType getParam(int index) 
+		public DEHValueType getParam(int index) 
 		{
 			return null;
 		}
@@ -87,14 +87,14 @@ public interface DEHActionPointer
 	/**
 	 * @return the parameter list.
 	 */
-	DEHActionPointerParamType[] getParams();
+	DEHValueType[] getParams();
 
 	/**
 	 * Gets a specific param using the param index.
 	 * @param index the parameter index.
 	 * @return the corresponding parameter, or <code>null</code> if no parameter.
 	 */
-	DEHActionPointerParamType getParam(int index);
+	DEHValueType getParam(int index);
 
 	/**
 	 * @return the Usage documentation for this pointer.
@@ -136,7 +136,7 @@ public interface DEHActionPointer
 	 * @param types the parameter types.
 	 * @return the array of types.
 	 */
-	static DEHActionPointerParamType[] params(DEHActionPointerParamType ... types)
+	static DEHValueType[] params(DEHValueType ... types)
 	{
 		return ArrayUtils.arrayOf(types);
 	}
@@ -152,10 +152,10 @@ public interface DEHActionPointer
 		public static class PointerParameter
 		{
 			private String name;
-			private DEHActionPointerParamType type;
+			private DEHValueType type;
 			private List<String> instructions;
 			
-			private PointerParameter(String name, DEHActionPointerParamType type)
+			private PointerParameter(String name, DEHValueType type)
 			{
 				this.name = name;
 				this.type = type;
@@ -173,7 +173,7 @@ public interface DEHActionPointer
 			/**
 			 * @return the parameter's expected type.
 			 */
-			public DEHActionPointerParamType getType() 
+			public DEHValueType getType() 
 			{
 				return type;
 			}
@@ -201,7 +201,7 @@ public interface DEHActionPointer
 		 * @param instructions a list of instructions strings, representing paragraphs.
 		 * @return this Usage object.
 		 */
-		public Usage parameter(String name, DEHActionPointerParamType type, String ... instructions)
+		public Usage parameter(String name, DEHValueType type, String ... instructions)
 		{
 			PointerParameter out;
 			parameters.add(out = new PointerParameter(name, type));
