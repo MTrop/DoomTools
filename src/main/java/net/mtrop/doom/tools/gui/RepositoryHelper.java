@@ -330,7 +330,7 @@ public interface RepositoryHelper
 					for (int i = 0; i < 2; i++)
 					{
 						char status = statusChunk.charAt(i);
-						if (status == ' ' || status == '?' || status == '!')
+						if (status == ' ' || (i == 0 && status == '?') || status == '!')
 							continue;
 						boolean staged = i == 0;
 						

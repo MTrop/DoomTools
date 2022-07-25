@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.18.1
+
+* `Fixed` [GUI] The Git repo manager did not pick up untracked changes.
+* `Added` [GUI] The Beta version of the Mercurial repo manager.
+
+
 ### Changed for 0.18.0
 
 * `Added` A "Studio" mode only runnable as a Desktop App.
