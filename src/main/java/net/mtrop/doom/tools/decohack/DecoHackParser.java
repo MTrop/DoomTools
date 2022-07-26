@@ -551,7 +551,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, value))
+				if (!checkCustomPropertyValue(property, propertyName, value))
 					return false;
 				
 				ammo.setCustomPropertyValue(property, String.valueOf(value));
@@ -628,7 +628,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, value))
+				if (!checkCustomPropertyValue(property, propertyName, value))
 					return false;
 				
 				sound.setCustomPropertyValue(property, String.valueOf(value));
@@ -871,7 +871,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, val))
+				if (!checkCustomPropertyValue(property, propertyName, val))
 					return false;
 				
 				misc.setCustomPropertyValue(property, String.valueOf(val));
@@ -2042,7 +2042,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((val = matchNumericExpression(context, thing, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, val))
+				if (!checkCustomPropertyValue(property, propertyName, val))
 					return false;
 				
 				thing.setCustomPropertyValue(property, String.valueOf(val));
@@ -2592,7 +2592,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((val = matchNumericExpression(context, weapon, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, val))
+				if (!checkCustomPropertyValue(property, propertyName, val))
 					return false;
 				
 				weapon.setCustomPropertyValue(property, String.valueOf(val));
@@ -3092,7 +3092,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
-				if (!checkPropertyValue(property, propertyName, val))
+				if (!checkCustomPropertyValue(property, propertyName, val))
 					return false;
 				
 				state.setCustomPropertyValue(property, String.valueOf(val));
@@ -3920,17 +3920,26 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Checks the property value.
-	private boolean checkPropertyValue(DEHProperty property, String propertyName, Object val) 
+	private boolean checkCustomPropertyValue(DEHProperty property, String propertyName, Object value) 
 	{
-		if (val instanceof Integer)
+		if (value instanceof Integer)
 		{
 			DEHValueType param = property.getType();
-			if (param.isValueCheckable() && !param.isValueValid((Integer)val))
+			if (param.isValueCheckable() && !param.isValueValid((Integer)value))
 			{
-				addErrorMessage("Invalid value '%d' for property '%s': value must be between %d and %d.", val, propertyName, param.getValueMin(), param.getValueMax());
+				addErrorMessage("Invalid value '%d' for property '%s': value must be between %d and %d.", value, propertyName, param.getValueMin(), param.getValueMax());
 				return false;
 			}
 		}
+		else if (value instanceof String)
+		{
+			if (property.getType() != DEHValueType.STRING)
+			{
+				addErrorMessage("Invalid value '%d' for property '%s': value must be a string.", value, propertyName);
+				return false;
+			}
+		}
+		
 		return true;
 	}
 
@@ -4512,7 +4521,10 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				Object value;
 				if ((value = matchString()) == null)
+				{
+					addErrorMessage("Expected string.");
 					return null;
+				}
 				
 				return value;
 			}
