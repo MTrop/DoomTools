@@ -154,7 +154,7 @@ public final class OSUtils
 		if (IS_WINDOWS)
 			APP_DIR = System.getenv("APPDATA");
 		else if (IS_OSX)
-			APP_DIR = System.getenv("HOME");
+			APP_DIR = System.getenv("HOME") + "/Library/Preferences";
 		else if (IS_LINUX)
 			APP_DIR = System.getenv("HOME");
 		else if (IS_SOLARIS)
