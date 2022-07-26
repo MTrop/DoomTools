@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -129,6 +130,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.thingAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.customPropertyMap = new HashMap<>();
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -261,7 +263,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public void addCustomProperty(Class<?> objectClass, DEHProperty property)
 	{
 		Map<String, DEHProperty> propMap;
-		if ((propMap = customPropertyMap.get(objectClass)) != null)
+		if ((propMap = customPropertyMap.get(objectClass)) == null)
 			customPropertyMap.put(objectClass, propMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
 		propMap.put(property.getKeyword(), property);
 	}
@@ -272,7 +274,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param keyword the keyword.
 	 * @return the corresponding property, or null if none found.
 	 */
-	public DEHProperty getCustomPropertyByKeyword(Class<DEHObject<?>> objectClass, String keyword)
+	public DEHProperty getCustomPropertyByKeyword(Class<?> objectClass, String keyword)
 	{
 		Map<String, DEHProperty> propMap;
 		if ((propMap = customPropertyMap.get(objectClass)) == null)
@@ -285,7 +287,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param objectClass the object class.
 	 * @return the corresponding properties, or null if none found.
 	 */
-	public Collection<DEHProperty> getCustomPropertiesByClass(Class<DEHObject<?>> objectClass)
+	public Collection<DEHProperty> getCustomPropertiesByClass(Class<?> objectClass)
 	{
 		Map<String, DEHProperty> propMap;
 		if ((propMap = customPropertyMap.get(objectClass)) == null)
@@ -824,7 +826,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHThing original = getSourcePatch().getThing(i);
 			if (thing == null)
 				continue;
-			if (!thing.equals(original))
+			if (!thing.equals(original) || thing.hasCustomProperties())
 			{
 				writer.append("Thing ")
 					.append(String.valueOf(i))
@@ -844,7 +846,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHState original = getSourcePatch().getState(i);
 			if (state == null)
 				continue;
-			if (!state.equals(original))
+			if (!state.equals(original) || state.hasCustomProperties())
 			{
 				writer.append("Frame ").append(String.valueOf(i)).append(CRLF);
 				state.writeObject(writer, original, getSupportedFeatureLevel());
@@ -859,7 +861,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHSound original = getSourcePatch().getSound(i);
 			if (sound == null)
 				continue;
-			if (!sound.equals(original))
+			if (!sound.equals(original) || sound.hasCustomProperties())
 			{
 				// Sound ids in DeHackEd are off by 1
 				writer.append("Sound ").append(String.valueOf(i - 1)).append(CRLF);
@@ -875,7 +877,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHWeapon original = getSourcePatch().getWeapon(i);
 			if (weapon == null)
 				continue;
-			if (!weapon.equals(original))
+			if (!weapon.equals(original) || weapon.hasCustomProperties())
 			{
 				writer.append("Weapon ")
 					.append(String.valueOf(i))
@@ -895,7 +897,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHAmmo original = getSourcePatch().getAmmo(i);
 			if (ammo == null)
 				continue;
-			if (!ammo.equals(original))
+			if (!ammo.equals(original) || ammo.hasCustomProperties())
 			{
 				writer.append("Ammo ")
 					.append(String.valueOf(i))
@@ -911,7 +913,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 		DEHMiscellany misc = getMiscellany();
 		DEHMiscellany miscOriginal = getSourcePatch().getMiscellany();
-		if (!misc.equals(miscOriginal))
+		if (!misc.equals(miscOriginal) || misc.hasCustomProperties())
 		{
 			writer.append("Misc ").append(String.valueOf(0)).append(CRLF);
 			misc.writeObject(writer, miscOriginal, getSupportedFeatureLevel());

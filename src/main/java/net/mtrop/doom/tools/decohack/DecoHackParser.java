@@ -490,7 +490,6 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses an ammo block.
-	// TODO: Add custom property support.
 	private boolean parseAmmoBlock(AbstractPatchContext<?> context)
 	{
 		DEHAmmo ammo;
@@ -543,9 +542,23 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				ammo.setPickup(value);
 			}
+			else if (currentIsCustomProperty(context, DEHAmmo.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHAmmo.class, propertyName);
+				
+				Object value;
+				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, value))
+					return false;
+				
+				ammo.setCustomPropertyValue(property, String.valueOf(value));
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" or \"%s\".", KEYWORD_MAX, KEYWORD_PICKUP);
+				addErrorMessage("Expected \"%s\" or \"%s\" or a custom property.", KEYWORD_MAX, KEYWORD_PICKUP);
 				return false;
 			}
 		}
@@ -560,7 +573,6 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses an sound block.
-	// TODO: Add custom property support.
 	private boolean parseSoundBlock(AbstractPatchContext<?> context)
 	{
 		DEHSound sound;
@@ -607,9 +619,23 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				sound.setSingular(value);
 			}
+			else if (currentIsCustomProperty(context, DEHSound.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHSound.class, propertyName);
+				
+				Object value;
+				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, value))
+					return false;
+				
+				sound.setCustomPropertyValue(property, String.valueOf(value));
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" or \"%s\".", KEYWORD_PRIORITY, KEYWORD_SINGULAR);
+				addErrorMessage("Expected \"%s\" or \"%s\" or a custom property.", KEYWORD_PRIORITY, KEYWORD_SINGULAR);
 				return false;
 			}
 		}
@@ -678,7 +704,6 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a miscellany block.
-	// TODO: Add custom property support.
 	private boolean parseMiscellaneousBlock(AbstractPatchContext<?> context)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -837,6 +862,20 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				misc.setMaxArmor(value);
 			}
+			else if (currentIsCustomProperty(context, DEHMiscellany.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHMiscellany.class, propertyName);
+				
+				Object val;
+				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, val))
+					return false;
+				
+				misc.setCustomPropertyValue(property, String.valueOf(val));
+			}
 			else
 			{
 				addErrorMessage("Expected valid miscellaneous entry type.");
@@ -965,6 +1004,19 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
+		if (context.getCustomPropertyByKeyword(objectClass, keyword) != null)
+		{
+			addErrorMessage("Custom property \"%s\" was already defined for this object type.", keyword);
+			return false;
+		}
+
+		if (!currentType(DecoHackKernel.TYPE_STRING))
+		{
+			addErrorMessage("Expected DeHackEd label name after type.");
+			return false;
+		}
+		String dehackedLabel = matchString();
+		
 		String propertyTypeName;
 		if ((propertyTypeName = matchIdentifier()) == null)
 		{
@@ -979,13 +1031,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		if (!currentType(DecoHackKernel.TYPE_STRING))
-		{
-			addErrorMessage("Expected DeHackEd label name after type.");
-			return false;
-		}
-		String dehackedLabel = matchString();
-		
 		context.addCustomProperty(objectClass, new DEHProperty(keyword, dehackedLabel, paramType));
 		return true;
 	}
@@ -1606,7 +1651,6 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a thing body.
-	// TODO: Add custom property support.
 	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
 		editorKeys.clear();
@@ -1989,6 +2033,20 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setSplashGroup(value);
 			}
+			else if (currentIsCustomProperty(context, DEHThing.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, propertyName);
+				
+				Object val;
+				if ((val = matchNumericExpression(context, thing, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, val))
+					return false;
+				
+				thing.setCustomPropertyValue(property, String.valueOf(val));
+			}
 			else
 			{
 				addErrorMessage("Expected Thing property, \"%s\" directive, or state block start.", KEYWORD_CLEAR);
@@ -2368,7 +2426,6 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a weapon body.
-	// TODO: Add custom property support.
 	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -2525,6 +2582,20 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					weapon.setMBF21Flags(flags);
 				}
+			}
+			else if (currentIsCustomProperty(context, DEHWeapon.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHWeapon.class, propertyName);
+				
+				Object val;
+				if ((val = matchNumericExpression(context, weapon, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, val))
+					return false;
+				
+				weapon.setCustomPropertyValue(property, String.valueOf(val));
 			}
 			else
 			{
@@ -2873,7 +2944,6 @@ public final class DecoHackParser extends Lexer.Parser
 			context.setFreeState(index, false);
 			return true;
 		}
-		// TODO: Add custom property support.
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_SPRITENAME))
@@ -3012,6 +3082,20 @@ public final class DecoHackParser extends Lexer.Parser
 	
 				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
 				notModified = false;
+			}
+			else if (currentIsCustomProperty(context, DEHState.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHState.class, propertyName);
+				
+				Object val;
+				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+
+				if (!checkPropertyValue(property, propertyName, val))
+					return false;
+				
+				state.setCustomPropertyValue(property, String.valueOf(val));
 			}
 			else
 			{
@@ -3446,7 +3530,7 @@ public final class DecoHackParser extends Lexer.Parser
 					
 					// get first argument
 					Object p;
-					if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
+					if ((p = parseParameterValue(paramType, context, actor)) == null)
 						return false;
 					else if (p instanceof Integer)
 					{
@@ -3468,7 +3552,7 @@ public final class DecoHackParser extends Lexer.Parser
 							return false;
 						}
 						
-						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
+						if ((p = parseParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3516,7 +3600,7 @@ public final class DecoHackParser extends Lexer.Parser
 						}
 						
 						Object p;
-						if ((p = parseActionPointerParameterValue(paramType, context, actor)) == null)
+						if ((p = parseParameterValue(paramType, context, actor)) == null)
 							return false;
 						else if (p instanceof Integer)
 						{
@@ -3547,8 +3631,8 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
-	// Parses a pointer argument value.
-	private Object parseActionPointerParameterValue(DEHValueType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
+	// Parses a parameter value.
+	private Object parseParameterValue(DEHValueType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(KEYWORD_THING))
@@ -3824,6 +3908,32 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Checks if the current identifier is a custom property.
+	private boolean currentIsCustomProperty(AbstractPatchContext<?> context, Class<?> objectType)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return false;
+		if (context.getCustomPropertyByKeyword(objectType, currentLexeme()) == null)
+			return false;
+		
+		return true;
+	}
+
+	// Checks the property value.
+	private boolean checkPropertyValue(DEHProperty property, String propertyName, Object val) 
+	{
+		if (val instanceof Integer)
+		{
+			DEHValueType param = property.getType();
+			if (param.isValueCheckable() && !param.isValueValid((Integer)val))
+			{
+				addErrorMessage("Invalid value '%d' for property '%s': value must be between %d and %d.", val, propertyName, param.getValueMin(), param.getValueMax());
+				return false;
+			}
+		}
+		return true;
+	}
+
 	// Matches a valid state index number.
 	// If match, advance token and return integer.
 	// Else, return null.
@@ -3963,7 +4073,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 		return slot;
 	}
-	
+
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -4393,6 +4503,15 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				Object value;
 				if ((value = parseSoundIndex(context)) == null)
+					return null;
+				
+				return value;
+			}
+
+			case STRING:
+			{
+				Object value;
+				if ((value = matchString()) == null)
 					return null;
 				
 				return value;

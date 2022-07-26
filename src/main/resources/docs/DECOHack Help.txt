@@ -1305,6 +1305,27 @@ For example, a popular non-standard pointer, MonsterRail:
 
 
 ==============================================================================
+===== Custom Properties
+==============================================================================
+
+There are some ports out there that accept additional DeHackEd properties. In
+order to use those, you have to declare them ahead of time, like custom action
+pointers.
+
+    custom <Object> property <Name> <DEHLabel> <Type>
+
+...where <Object> is one of: thing, weapon, misc, state, sound, or ammo.
+...and <Name> is the property name.
+...and <Type> is one of the parameter types from Custom Action Pointers above,
+   along with an additional type, "string".
+...and <DEHLabel> is the DeHackEd entry name when the DEH patch gets written.
+
+For example, Doom Retro's "gib health" property for Things can be defined as:
+
+    custom thing property gibhealth "Gib health" int
+
+
+==============================================================================
 ===== Par Times
 ==============================================================================
 

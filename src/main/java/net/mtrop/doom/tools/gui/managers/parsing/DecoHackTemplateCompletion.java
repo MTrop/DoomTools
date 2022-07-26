@@ -32,7 +32,11 @@ public enum DecoHackTemplateCompletion
 		"\tpickup ${PickupAmount}\n" +
 		"}\n"
 	)),
-		
+
+	CUSTOMPROPERTY("Custom property clause.", (
+		"custom ${ObjectType} property ${PropertyName} \"${DEHLabel}\" ${Type}\n"
+	)),
+
 	CUSTOMTHINGPOINTER("Custom thing pointer clause.", (
 		"custom thing pointer ${PatchType} A_${PointerName}(${Types})\n"
 	)),
@@ -40,7 +44,7 @@ public enum DecoHackTemplateCompletion
 	CUSTOMWEAPONPOINTER("Custom weapon pointer clause.", (
 		"custom weapon pointer ${PatchType} A_${PointerName}(${Types})\n"
 	)),
-		
+
 	EACHTHINGFROM("Adds an \"each thing\" range block.", (
 		"each thing from ${ThingIDStart} to ${ThingIDEnd} {\n" +
 		"\t${cursor}\n" +

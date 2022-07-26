@@ -56,6 +56,14 @@ public abstract class DEHObject<SELF>
 	}
 	
 	/**
+	 * @return true if this has custom properties defined on it, false if not.
+	 */
+	public boolean hasCustomProperties()
+	{
+		return !customProperties.isEmpty();
+	}
+	
+	/**
 	 * Writes the custom properties out to DeHackEd.
 	 * @param writer the writer to use.
 	 * @throws IOException if a write error occurs.
