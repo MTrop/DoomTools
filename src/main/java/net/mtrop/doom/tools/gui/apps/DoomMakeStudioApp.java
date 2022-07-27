@@ -230,10 +230,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		DoomToolsIconManager icons = DoomToolsIconManager.get();
 		
 		final int DEFAULT_WIDTH = 340;
+		final int DEFAULT_HEIGHT = 350;
 		
 		JComponent fileTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
 			node(this.filesSplitPaneVertical = split(SplitOrientation.VERTICAL,
-				containerOf(dimension(DEFAULT_WIDTH, 350), node(treePanel)),
+				containerOf(dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT), node(treePanel)),
 				containerOf(dimension(DEFAULT_WIDTH, 150), node(executionPanel))
 			))
 		);
@@ -253,15 +254,15 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		);
 
 		this.filesSplitPaneHorizontal = split(
-			containerOf(dimension(DEFAULT_WIDTH, 500), 
+			containerOf( 
 				node(BorderLayout.CENTER, tabPanel)
 			),
-			containerOf(dimension(610, 500),
+			containerOf(
 				node(BorderLayout.CENTER, editorPanel)
 			)
 		);
 		this.filesSplitPaneHorizontal.setDividerLocation(DEFAULT_WIDTH);
-		this.filesSplitPaneVertical.setDividerLocation(350);
+		this.filesSplitPaneVertical.setDividerLocation(DEFAULT_HEIGHT);
 		
 		this.runWadMergeAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.run", (e) -> onRunWadMergeAgain());
 		this.runWadMergeParametersAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.params", (e) -> onRunWadMergeWithArgs());

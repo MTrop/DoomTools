@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-07-27** Some GUI graphics cleanup and changes.
+
 - **2022-07-18** Fixed syntax highlighting for strings on RookScript-based languages (WadScript, DoomMake).
 
 - **2022-07-05** Imported the `jdk.charsets` module for the embedded JRE.
