@@ -1269,31 +1269,18 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
 	{
 		Integer min, max;
-		if ((min = matchPositiveInteger()) != null)
+		if ((min = parseStateIndex(context)) != null)
 		{
-			if (min >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
-				return false;
-			}
-			
 			// protect range
 			if (matchIdentifierIgnoreCase(KEYWORD_TO))
 			{
-				if ((max = matchPositiveInteger()) != null)
+				if ((max = parseStateIndex(context)) != null)
 				{
-					if (max >= context.getStateCount())
-					{
-						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
-						return false;
-					}
-					
 					context.setProtectedState(min, max, protectedState);
 					return true;
 				}
 				else
 				{
-					addErrorMessage("Expected state index after \"%s\".", KEYWORD_TO);
 					return false;
 				}
 			}
@@ -1306,7 +1293,6 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected state index after \"%s\".", protectedState ? KEYWORD_PROTECT : KEYWORD_UNPROTECT);
 			return false;
 		}
 	}

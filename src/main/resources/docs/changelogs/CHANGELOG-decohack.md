@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.26.1
+
+* `Added` The `state protect` and `state unprotect` clauses now accept state index clauses, not just numbers.
+
+
 ### Changed for 0.26.0
 
 * `Fixed` Added some bit flags that were missing from the docs: UNUSEDX bits, FRIENDLY.

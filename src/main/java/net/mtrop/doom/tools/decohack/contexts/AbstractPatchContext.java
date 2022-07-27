@@ -56,12 +56,12 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected IntervalMap<Boolean> freeStatesMap;
 	protected IntervalMap<Boolean> protectedStatesMap;
 	protected IntervalMap<Boolean> freeThingsMap;
-	
+
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
-	
+
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
 	 * or returning it if it has already been shadowed.

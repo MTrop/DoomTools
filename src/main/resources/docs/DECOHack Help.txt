@@ -506,6 +506,15 @@ writing the following:
     state protect <INTEGER> to <INTEGER>
 
 
+You can also use a state clause in place of an integer for the first clause:
+
+    state protect thing 11 spawn
+
+
+Be careful though - it will protect the state at that resolved index, not 
+anything regarding the label specifically.
+
+
 It will not be flagged as "free" if in a range of free states, it won't be 
 treated as "free" in state filling functions, and attempting to alter the 
 state directly will throw an error. By default, state 0 and 1 are flagged as 
