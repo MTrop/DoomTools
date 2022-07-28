@@ -1,9 +1,10 @@
 DECOHack
 --------
 
-### Changed for 0.26.1
+### Changed for 0.27.0
 
-* `Added` The `state protect` and `state unprotect` clauses now accept state index clauses, not just numbers.
+* `Added` The `state protect` and `state unprotect` clauses now accept state index clauses, not just numbers. (Enhancement #12)
+* `Added` Custom properties. (Enhancement #55, #54)
 
 
 ### Changed for 0.26.0
