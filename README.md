@@ -39,6 +39,9 @@ Because they are all super useful, and can run anywhere (that runs Java). This a
 create a Continuous Integration path for building ongoing WAD projects. How cool would it be to always 
 have a demo copy buildable at all times?
 
+### Linux
+
+[Arch AUR doomtools-bin](https://aur.archlinux.org/packages/doomtools-bin)
 
 ### Compiling with Ant
 
