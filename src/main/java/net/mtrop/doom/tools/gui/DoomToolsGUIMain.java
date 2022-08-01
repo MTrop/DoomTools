@@ -45,6 +45,7 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 
@@ -225,10 +226,11 @@ public final class DoomToolsGUIMain
 	 */
 	public static void setLAF() 
 	{
+		if (OSUtils.isOSX())
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		GUIThemeType theme = GUIThemeType.MAP.get(DoomToolsSettingsManager.get().getThemeName());
 		SwingUtils.setLAF(theme != null ? theme.className : GUIThemeType.LIGHT.className);
 	}
-
 	
 
     /* ==================================================================== */

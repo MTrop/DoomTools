@@ -1,8 +1,12 @@
 package net.mtrop.doom.tools;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.Callable;
 
+import net.mtrop.doom.tools.WADTexMain.Context;
+import net.mtrop.doom.tools.WADTexMain.Options;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.exception.OptionParseException;
 
@@ -18,6 +22,8 @@ public final class UtilityMain
 
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
+	private static final int ERROR_IOERROR = 2;
+	private static final int ERROR_UNKNOWN = 3;
 
 	private static final String SWITCH_HELP = "--help";
 	private static final String SWITCH_HELP2 = "-h";
@@ -30,6 +36,8 @@ public final class UtilityMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		private InputStream stdin;
+		
 		private boolean help;
 		private boolean version;
 		
@@ -37,10 +45,30 @@ public final class UtilityMain
 		{
 			this.stdout = null;
 			this.stderr = null;
+			this.stdin = null;
+			
 			this.help = false;
 			this.version = false;
 		}
 		
+		public Options setStdout(OutputStream out) 
+		{
+			this.stdout = new PrintStream(out, true);;
+			return this;
+		}
+		
+		public Options setStderr(OutputStream err) 
+		{
+			this.stderr = new PrintStream(err, true);
+			return this;
+		}
+
+		public Options setStdin(InputStream in) 
+		{
+			this.stdin = in;
+			return this;
+		}
+
 		public Options setHelp(boolean help) 
 		{
 			this.help = help;
@@ -67,7 +95,8 @@ public final class UtilityMain
 			this.options = options;
 		}
 		
-		public int call()
+		@Override
+		public Integer call()
 		{
 			if (options.help)
 			{
@@ -94,15 +123,17 @@ public final class UtilityMain
 	 * Reads command line arguments and sets options.
 	 * @param out the standard output print stream.
 	 * @param err the standard error print stream. 
+	 * @param in the standard in stream. 
 	 * @param args the argument args.
 	 * @return the parsed options.
 	 * @throws OptionParseException if a parse exception occurs.
 	 */
-	public static Options options(PrintStream out, PrintStream err, String ... args) throws OptionParseException
+	public static Options options(PrintStream out, PrintStream err, InputStream in, String ... args) throws OptionParseException
 	{
 		Options options = new Options();
 		options.stdout = out;
 		options.stderr = err;
+		options.stdin = in;
 	
 		int i = 0;
 		while (i < args.length)
@@ -125,10 +156,25 @@ public final class UtilityMain
 	 */
 	public static int call(Options options)
 	{
-		return (new Context(options)).call();
+		try {
+			return (int)(asCallable(options).call());
+		} catch (Exception e) {
+			e.printStackTrace(options.stderr);
+			return ERROR_UNKNOWN;
+		}
 	}
 	
-	public static void main(String[] args) throws IOException
+	/**
+	 * Creates a {@link Callable} for this utility.
+	 * @param options the options to use.
+	 * @return a Callable that returns the process error.
+	 */
+	public static Callable<Integer> asCallable(Options options)
+	{
+		return new Context(options);
+	}
+	
+	public static void main(String[] args)
 	{
 		if (args.length == 0)
 		{
@@ -137,15 +183,15 @@ public final class UtilityMain
 			System.exit(-1);
 			return;
 		}
-	
+		
 		try {
-			System.exit(call(options(System.out, System.err, args)));
+			System.exit(call(options(System.out, System.err, System.in, args)));
 		} catch (OptionParseException e) {
 			System.err.println(e.getMessage());
 			System.exit(ERROR_BAD_OPTIONS);
 		}
 	}
-	
+
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
