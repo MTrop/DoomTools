@@ -385,18 +385,22 @@ check function exportColormapToImage(wad, lumpname, paletteImage) {
 
 check function getConvertPaletteSource() {
 
-	paletteFile1Path = getSourceDirectory() + PALETTE_ASSET_SRC + ".pal";
-	paletteFile2Path = getSourceDirectory() + PALETTE_ASSET_SRC + ".lmp";
+	srcdir = getSourceDirectory();
 
-	if (fileexists(paletteFile1Path)) {
-		println("Using palette found in `" + paletteFile1Path + "`...");
-		return paletteFile1Path; 
+	paths = [
+		srcdir + "/playpal.pal",
+		srcdir + "/playpal.lmp",
+		srcdir + PALETTE_ASSET_SRC + ".pal",
+		srcdir + PALETTE_ASSET_SRC + ".lmp"
+	];
+	
+	each (path : paths) {
+		if (fileexists(path)) {
+			println("Using palette found in `" + path + "`...");
+			return path;
+		}
 	}
-	if (fileexists(paletteFile2Path)) {
-		println("Using palette found in `" + paletteFile2Path + "`...");
-		return paletteFile2Path;
-	}
-
+	
 	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);

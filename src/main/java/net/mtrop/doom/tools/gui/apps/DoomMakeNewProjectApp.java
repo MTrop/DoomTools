@@ -39,6 +39,7 @@ import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static javax.swing.BorderFactory.*;
@@ -212,8 +213,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		final String runYes = language.getText("doommake.newproject.wadgen.run.yes");
 		Collection<String> runOptions = Arrays.asList(runNo, runYes);
 
-		return new Node[]
-		{
+		return ArrayUtils.arrayOf(
 			node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
 				node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (v) -> {
 					if (v)
@@ -264,7 +264,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 						addTemplateName(WADProjectGenerator.TEMPLATE_RUN);
 				}))
 			)))
-		};
+		);
 	}
 	
 	// Adds a template after removing associated ones.

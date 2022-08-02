@@ -1,0 +1,10 @@
+/*****************************************************************************
+ * TARGET: rebuildpalette
+ *****************************************************************************
+ * Extracts the palette from the IWAD, but only if it does not exist in source.
+ * doommake rebuildpalette
+ ****************************************************************************/
+check entry rebuildpalette(args) {
+	doRebuildPalette();
+}
+

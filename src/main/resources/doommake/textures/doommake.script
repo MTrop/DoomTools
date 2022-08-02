@@ -1,0 +1,45 @@
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Extracts the palette from the IWAD and adds it to source.
+ */
+check function doRebuildPalette() {
+
+	initBuild();
+
+	path = getSourceDirectory() + "/playpal.pal";
+
+	if (fileexists(path)) {
+		return error("PaletteExists", "Cannot extract palette: already exists. Delete file `" + path + "` to extract.");
+	}
+	
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	
+	check (err) {
+		iwad = wadfile(baseIwadPath);
+		playpalBuf = iwad->waddata("playpal");
+	}
+	close(iwad);
+	if (err) {
+		return err;
+	}
+	
+	if (playpalBuf === null) {
+		return error("NoPalette", "The IWAD for this project does not have a palette entry!");
+	}
+
+	playpalBuf->bufsetpos(0);
+	
+	check (err) {
+		fos = fosopen(file(path));
+		fos->write(playpalBuf);
+		println("Wrote `" + path + "`.")
+	}
+	close(fos);
+	if (err) {
+		return err;
+	}
+}
+

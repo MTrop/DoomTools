@@ -48,12 +48,14 @@ import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
+import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -86,11 +88,15 @@ public final class DoomMakeMain
 	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	public static final String SWITCH_TARGETS = "--targets";
-	public static final String SWITCH_LISTMODULES = "--list-templates";
-	public static final String SWITCH_LISTMODULES2 = "-t";
+	
+	public static final String SWITCH_PROJECTTYPE = "--project-type";
+	public static final String SWITCH_LISTTEMPLATES = "--list-templates";
+	public static final String SWITCH_LISTTEMPLATES2 = "-t";
 	public static final String SWITCH_NEWPROJECT = "--new-project";
 	public static final String SWITCH_NEWPROJECT2 = "-n";
+	
 	public static final String SWITCH_NEWPROJECT_GUI = "--new-project-gui";
+
 	public static final String SWITCH_EMBED = "--embed";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_STUDIO = "--studio";
@@ -125,7 +131,11 @@ public final class DoomMakeMain
 	 */
 	public enum ProjectType
 	{
-		WAD(WADProjectGenerator.class);
+		WAD(WADProjectGenerator.class),
+		TEXTURE(TextureProjectGenerator.class),
+		;
+		
+		public static final Map<String, ProjectType> TYPES = EnumUtils.createCaseInsensitiveNameMap(ProjectType.class);
 		
 		final Class<? extends ProjectGenerator> generatorClass; 
 		private ProjectType(Class<? extends ProjectGenerator> generatorClass)
@@ -188,7 +198,7 @@ public final class DoomMakeMain
 			this.verboseAgent = false;
 			
 			this.agentBypass = false;
-			this.projectType = null;
+			this.projectType = ProjectType.WAD;
 			this.templateNames = null;
 
 			this.mode = Mode.EXECUTE;
@@ -780,6 +790,7 @@ public final class DoomMakeMain
 		final int STATE_SWITCHES_STACK = 4;
 		final int STATE_SWITCHES_RUNAWAY = 5;
 		final int STATE_MODULENAME = 6;
+		final int STATE_PROJECTTYPE = 7;
 		int state = STATE_START;
 		
 		boolean target = false;
@@ -813,14 +824,16 @@ public final class DoomMakeMain
 						options.guiStudio = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT_GUI))
 						options.guiNewProject = true;
-					else if (arg.equalsIgnoreCase(SWITCH_LISTMODULES) || arg.equalsIgnoreCase(SWITCH_LISTMODULES2))
+					else if (arg.equalsIgnoreCase(SWITCH_PROJECTTYPE))
 					{
-						options.projectType = ProjectType.WAD;
+						state = STATE_PROJECTTYPE;
+					}
+					else if (arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES) || arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES2))
+					{
 						options.listModules = true;
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
-						options.projectType = ProjectType.WAD;
 						options.templateNames = new LinkedList<>();
 						state = STATE_MODULENAME;
 					}
@@ -918,6 +931,14 @@ public final class DoomMakeMain
 				}
 				break;
 				
+				case STATE_PROJECTTYPE:
+				{
+					if ((options.projectType = ProjectType.TYPES.get(arg)) == null)
+						throw new OptionParseException("Bad project type.");
+					state = STATE_START;
+				}
+				break;
+				
 			}
 			i++;
 		}
@@ -932,6 +953,8 @@ public final class DoomMakeMain
 			throw new OptionParseException("ERROR: Expected number after stack depth switch.");
 		if (state == STATE_SWITCHES_RUNAWAY)
 			throw new OptionParseException("ERROR: Expected number after runaway limit switch.");
+		if (state == STATE_PROJECTTYPE)
+			throw new OptionParseException("ERROR: Expected project type name after project type switch.");
 		
 		return options;
 	}
@@ -1137,6 +1160,10 @@ public final class DoomMakeMain
 		out.println("                                       in use and exits.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
+		out.println();
+		out.println("    --project-type [type]          Sets the project type. Possible values:");
+		out.println("                                      WAD, TEXTURE");
+		out.println("                                      Default: WAD");
 		out.println();
 		out.println("    --new-project, -n [templates]  Creates a new project made up of a set of");
 		out.println("                                      templates (requires [directory]).");
