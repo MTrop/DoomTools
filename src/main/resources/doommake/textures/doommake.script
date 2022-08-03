@@ -35,7 +35,7 @@ check function doRebuildPalette() {
 	check (err) {
 		fos = fosopen(file(path));
 		fos->write(playpalBuf);
-		println("Wrote `" + path + "`.")
+		println("Wrote `" + path + "`.");
 	}
 	close(fos);
 	if (err) {

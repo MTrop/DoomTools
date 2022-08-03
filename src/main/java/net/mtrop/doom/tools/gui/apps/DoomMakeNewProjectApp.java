@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -22,6 +23,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -34,6 +36,7 @@ import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
+import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
@@ -63,11 +66,12 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 
 	/** Project generator. */
 	private ProjectGenerator projectGenerator;
-
 	/** Target directory. */
 	private File targetDirectory;
-	/** Set of used templates. */
-	private Set<String> templateNameSet;
+
+	/** Selected template names per generator. */
+	private Map<ProjectGenerator, Set<String>> templateNameSet;
+	
 	/** Open the Studio version? */
 	private boolean studio;
 	
@@ -89,7 +93,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		this.projectGenerator = new WADProjectGenerator();
 		
 		this.targetDirectory = ObjectUtils.isEmpty(targetDirectoryPath) ? null : new File(targetDirectoryPath);
-		this.templateNameSet = new TreeSet<>();
+		this.templateNameSet = new HashMap<>();
 		this.studio = studio;
 	}
 	
@@ -117,12 +121,38 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		// Hardcode only WAD Project for now.
-		Container projectTypePanel = titlePanel(language.getText("doommake.newproject.type"),
-			containerOf(node(comboBox(comboBoxModel(Arrays.asList(language.getText("doommake.newproject.type.wad"))), (i) -> {
-				// Do nothing on change - no other options.
-			})))
+		final String projectWad = language.getText("doommake.newproject.type.wad");
+		final String projectTexture = language.getText("doommake.newproject.type.texture");
+
+		final CardLayout cards = new CardLayout();
+
+		final JComponent projectCardPanel = containerOf(new JPanel(), cards,
+			node(projectWad, containerOf(getWADGeneratorOptionNodes())),
+			node(projectTexture, containerOf(getTextureGeneratorOptionNodes()))
 		);
+
+		JScrollPane scrollPane = apply(
+			scroll(projectCardPanel), 
+			(p) -> p.setBorder(null)
+		);
+		
+		final ProjectGenerator wadGenerator = new WADProjectGenerator();
+		final ProjectGenerator textureGenerator = new TextureProjectGenerator();
+		
+		final ComboBoxChangeHandler<String> handler = (item) -> {
+			((CardLayout)projectCardPanel.getLayout()).show(projectCardPanel, item);
+			if (item.equalsIgnoreCase(projectWad))
+				projectGenerator = wadGenerator;
+			else if (item.equalsIgnoreCase(projectTexture))
+				projectGenerator = textureGenerator;
+		};
+		
+		Container projectTypePanel = titlePanel(language.getText("doommake.newproject.type"),
+			containerOf(node(comboBox(comboBoxModel(Arrays.asList(projectWad, projectTexture)), handler)))
+		);
+		
+		// Set default.
+		handler.onChange(projectWad);
 		
 		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
 			containerOf(node(fileField(targetDirectory,
@@ -145,13 +175,6 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			utils.createButtonFromLanguageKey("doommake.newproject.create", (i) -> createProject())
 		));
 	
-		JPanel projectPanel = new JPanel();
-		JScrollPane scrollPane = apply(
-			scroll(projectPanel), 
-			(p) -> p.setBorder(null)
-		);
-		containerOf(projectPanel, boxLayout(projectPanel, BoxAxis.Y_AXIS), getWADGeneratorOptionNodes());
-		
 		return containerOf(
 			node(BorderLayout.NORTH, containerOf(
 				node(BorderLayout.NORTH, projectTypePanel),
@@ -213,64 +236,121 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		final String runYes = language.getText("doommake.newproject.wadgen.run.yes");
 		Collection<String> runOptions = Arrays.asList(runNo, runYes);
 
+		JPanel panel = new JPanel();
+		
 		return ArrayUtils.arrayOf(
-			node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
-				node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (v) -> {
-					if (v)
-						addTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
-					else
-						removeTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
-				})),
-				node(BorderLayout.SOUTH, checkBox(language.getText("doommake.newproject.wadgen.contain.assets"), false, (v) -> {
-					if (v)
-						addTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
-					else
-						removeTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
-				}))
-			))),
-			node(titlePanel(language.getText("doommake.newproject.wadgen.patch"), containerOf(
-				node(comboBox(comboBoxModel(patchOptions), (i) -> {
-					removeTemplateCategory(WADProjectGenerator.CATEGORY_PATCHES);
-					if (i == patchDECOHack)
-						addTemplateName(WADProjectGenerator.TEMPLATE_DECOHACK);
-					else if (i == patchOther)
-						addTemplateName(WADProjectGenerator.TEMPLATE_PATCH);
-				}))
-			))),
-			node(titlePanel(language.getText("doommake.newproject.wadgen.textures"), containerOf(
-				node(comboBox(comboBoxModel(textureOptions), (i) -> {
-					removeTemplateCategory(WADProjectGenerator.CATEGORY_TEXTURES);
-					if (i == textureWads)
-						addTemplateName(WADProjectGenerator.TEMPLATE_TEXTUREWADS);
-					else if (i == textureProject)
-						addTemplateName(WADProjectGenerator.TEMPLATE_TEXTURES);
-					else if (i == textureProjectBoom)
-						addTemplateName(WADProjectGenerator.TEMPLATE_TEXTURES_BOOM);
-				}))
-			))),
-			node(titlePanel(language.getText("doommake.newproject.wadgen.vctrl"), containerOf(
-				node(comboBox(comboBoxModel(versionControlOptions), (i) -> {
-					removeTemplateCategory(WADProjectGenerator.CATEGORY_REPOSITORY);
-					if (i == versionControlGit)
-						addTemplateName(WADProjectGenerator.TEMPLATE_GIT);
-					else if (i == versionControlMercurial)
-						addTemplateName(WADProjectGenerator.TEMPLATE_MERCURIAL);
-				}))
-			))),
-			node(titlePanel(language.getText("doommake.newproject.wadgen.run"), containerOf(
-				node(comboBox(comboBoxModel(runOptions), (i) -> {
-					removeTemplateCategory(WADProjectGenerator.CATEGORY_EXECUTION);
-					if (i == runYes)
-						addTemplateName(WADProjectGenerator.TEMPLATE_RUN);
-				}))
-			)))
+			node(BorderLayout.NORTH, containerOf(panel, boxLayout(panel, BoxAxis.PAGE_AXIS),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
+					node(BorderLayout.NORTH, checkBox(language.getText("doommake.newproject.wadgen.contain.maps"), false, (v) -> {
+						if (v)
+							addTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
+						else
+							removeTemplateName(WADProjectGenerator.TEMPLATE_MAPS);
+					})),
+					node(BorderLayout.SOUTH, checkBox(language.getText("doommake.newproject.wadgen.contain.assets"), false, (v) -> {
+						if (v)
+							addTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
+						else
+							removeTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
+					}))
+				))),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.patch"), containerOf(
+					node(comboBox(comboBoxModel(patchOptions), (i) -> {
+						removeTemplateCategory(WADProjectGenerator.CATEGORY_PATCHES);
+						if (i == patchDECOHack)
+							addTemplateName(WADProjectGenerator.TEMPLATE_DECOHACK);
+						else if (i == patchOther)
+							addTemplateName(WADProjectGenerator.TEMPLATE_PATCH);
+					}))
+				))),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.textures"), containerOf(
+					node(comboBox(comboBoxModel(textureOptions), (i) -> {
+						removeTemplateCategory(WADProjectGenerator.CATEGORY_TEXTURES);
+						if (i == textureWads)
+							addTemplateName(WADProjectGenerator.TEMPLATE_TEXTUREWADS);
+						else if (i == textureProject)
+							addTemplateName(WADProjectGenerator.TEMPLATE_TEXTURES);
+						else if (i == textureProjectBoom)
+							addTemplateName(WADProjectGenerator.TEMPLATE_TEXTURES_BOOM);
+					}))
+				))),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.vctrl"), containerOf(
+					node(comboBox(comboBoxModel(versionControlOptions), (i) -> {
+						removeTemplateCategory(WADProjectGenerator.CATEGORY_REPOSITORY);
+						if (i == versionControlGit)
+							addTemplateName(WADProjectGenerator.TEMPLATE_GIT);
+						else if (i == versionControlMercurial)
+							addTemplateName(WADProjectGenerator.TEMPLATE_MERCURIAL);
+					}))
+				))),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.run"), containerOf(
+					node(comboBox(comboBoxModel(runOptions), (i) -> {
+						removeTemplateCategory(WADProjectGenerator.CATEGORY_EXECUTION);
+						if (i == runYes)
+							addTemplateName(WADProjectGenerator.TEMPLATE_RUN);
+					}))
+				)))
+			)),
+			node(BorderLayout.CENTER, containerOf())
+		);
+	}
+	
+	// The options for Texture WAD Generators.
+	private Node[] getTextureGeneratorOptionNodes()
+	{
+		final String textureProject = language.getText("doommake.newproject.texwad.textures.none");
+		final String textureProjectVanilla = language.getText("doommake.newproject.texwad.textures.vanilla");
+		final String textureProjectBoom = language.getText("doommake.newproject.texwad.textures.boom");
+		Collection<String> textureOptions = Arrays.asList(textureProject, textureProjectVanilla, textureProjectBoom);
+		
+		final String versionControlNone = language.getText("doommake.newproject.wadgen.vctrl.none");
+		final String versionControlGit = language.getText("doommake.newproject.wadgen.vctrl.git");
+		final String versionControlMercurial = language.getText("doommake.newproject.wadgen.vctrl.hg");
+		Collection<String> versionControlOptions = Arrays.asList(versionControlNone, versionControlGit, versionControlMercurial);
+
+		JPanel panel = new JPanel();
+
+		return ArrayUtils.arrayOf(
+			node(BorderLayout.NORTH, containerOf(panel, boxLayout(panel, BoxAxis.PAGE_AXIS),		
+				node(titlePanel(language.getText("doommake.newproject.texwad.textures"), containerOf(
+					node(comboBox(comboBoxModel(textureOptions), (i) -> {
+						removeTemplateCategory(TextureProjectGenerator.CATEGORY_TEXTURES);
+						if (i == textureProjectVanilla)
+							addTemplateName(TextureProjectGenerator.TEMPLATE_TEXTURES);
+						else if (i == textureProjectBoom)
+							addTemplateName(TextureProjectGenerator.TEMPLATE_TEXTURES_BOOM);
+					}))
+				))),
+				node(titlePanel(language.getText("doommake.newproject.wadgen.vctrl"), containerOf(
+					node(comboBox(comboBoxModel(versionControlOptions), (i) -> {
+						removeTemplateCategory(TextureProjectGenerator.CATEGORY_REPOSITORY);
+						if (i == versionControlGit)
+							addTemplateName(TextureProjectGenerator.TEMPLATE_GIT);
+						else if (i == versionControlMercurial)
+							addTemplateName(TextureProjectGenerator.TEMPLATE_MERCURIAL);
+					}))
+				)))
+			)),
+			node(BorderLayout.CENTER, containerOf())
 		);
 	}
 	
 	// Adds a template after removing associated ones.
 	private void addTemplateName(String templateToAdd)
 	{
-		templateNameSet.add(templateToAdd);
+		Set<String> set = templateNameSet.get(projectGenerator);
+		if (set == null)
+			templateNameSet.put(projectGenerator, set = new TreeSet<>());
+		set.add(templateToAdd);
+	}
+
+	// Removes a template name.
+	private void removeTemplateName(String templateToRemove)
+	{
+		Set<String> set = templateNameSet.get(projectGenerator);
+		if (set == null)
+			templateNameSet.put(projectGenerator, set = new TreeSet<>());
+		set.remove(templateToRemove);
 	}
 
 	// Removes a category of templates.
@@ -278,12 +358,6 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 	{
 		for (ProjectTemplate template : projectGenerator.getTemplatesByCategory(category))
 			removeTemplateName(template.getName());
-	}
-
-	// Removes a template name.
-	private void removeTemplateName(String templateToRemove)
-	{
-		templateNameSet.remove(templateToRemove);
 	}
 
 	private Modal<String> createOptionModal(String title, String prompt, final ProjectTokenReplacer replacer)
@@ -398,7 +472,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		
 		SortedSet<ProjectModule> selectedModules;
 		try {
-			selectedModules = projectGenerator.getSelectedModules(templateNameSet);
+			selectedModules = projectGenerator.getSelectedModules(templateNameSet.get(projectGenerator));
 		} catch (UtilityException e) {
 			SwingUtils.error(e.getLocalizedMessage());
 			return;

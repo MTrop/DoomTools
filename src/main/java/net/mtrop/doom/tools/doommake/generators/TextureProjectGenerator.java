@@ -7,6 +7,8 @@ package net.mtrop.doom.tools.doommake.generators;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +23,7 @@ import net.mtrop.doom.tools.doommake.ProjectModuleDescriptor;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
+import net.mtrop.doom.tools.exception.UtilityException;
 
 import static net.mtrop.doom.tools.doommake.ProjectTemplate.template;
 import static net.mtrop.doom.tools.doommake.ProjectModule.module;
@@ -39,9 +42,11 @@ import static net.mtrop.doom.tools.doommake.ProjectModuleDescriptor.fileContentA
  */
 public class TextureProjectGenerator extends ProjectGenerator
 {
+	public static final String CATEGORY_ASSETS = "Assets";
 	public static final String CATEGORY_TEXTURES = "Textures";
 	public static final String CATEGORY_REPOSITORY = "Repositories";
 
+	public static final String TEMPLATE_BASE = "base";
 	public static final String TEMPLATE_GIT = "git";
 	public static final String TEMPLATE_MERCURIAL = "hg";
 	public static final String TEMPLATE_TEXTURES = "textures";
@@ -50,6 +55,7 @@ public class TextureProjectGenerator extends ProjectGenerator
 	private static final String MODULE_GIT = "git";
 	private static final String MODULE_MERCURIAL = "hg";
 	private static final String MODULE_INIT = "init";
+	private static final String MODULE_BASE = "bare";
 	private static final String MODULE_TEXTURES = "textures";
 	private static final String MODULE_TEXTURES_VANILLA = "textures-vanilla";
 	private static final String MODULE_TEXTURES_BOOM = "textures-boom";
@@ -150,6 +156,24 @@ public class TextureProjectGenerator extends ProjectGenerator
 			)
 		);
 		
+		// ................................................................
+
+		MODULES.put(MODULE_BASE, module(100)
+			.base(descriptor())
+			.releaseScript(descriptor(
+				fileContentAppend("doommake.script",
+					"\t// Add other resource constructors here."
+				)
+			))
+			.releaseWadMergeLines(
+				"# Add resource merging here."
+			)
+			.todos(
+				"Add resources to merge to the WadMerge script."
+				,"Add targets to the doommake.script script."
+			)
+		);
+
 		// ................................................................
 
 		// A module that converts texture data.
@@ -289,6 +313,12 @@ public class TextureProjectGenerator extends ProjectGenerator
 		
 		// ................................................................
 
+		// Hidden base template.
+		TEMPLATES.put(TEMPLATE_BASE, template(
+			TEMPLATE_BASE, CATEGORY_ASSETS, "An empty base project.", true,
+			MODULE_INIT, MODULE_BASE
+		));
+		
 		TEMPLATES.put(TEMPLATE_GIT, template(
 			TEMPLATE_GIT, CATEGORY_REPOSITORY, "Adds Git repository ignores/attributes to the project.",
 			MODULE_INIT, MODULE_GIT
@@ -355,6 +385,16 @@ public class TextureProjectGenerator extends ProjectGenerator
 		return MODULES.get(name);
 	}
 
+	@Override
+	public SortedSet<ProjectModule> getSelectedModules(Collection<String> templateNameList) throws UtilityException 
+	{
+		// Ensure that the base project is selected.
+		SortedSet<ProjectModule> out = super.getSelectedModules(templateNameList);
+		if (out.isEmpty())
+			out = getSelectedModules(Arrays.asList(TEMPLATE_BASE));
+		return out;
+	}
+	
 	@Override
 	public void createProject(SortedSet<ProjectModule> selected, Map<String, String> replacerMap, File targetDirectory) throws IOException 
 	{
