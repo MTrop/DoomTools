@@ -21,10 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wadmerge.WadMergeCommand;
 import net.mtrop.doom.tools.wadmerge.WadMergeContext;
@@ -47,6 +47,7 @@ public final class WadMergeMain
 	public static final String SWITCH_VERBOSE = "--verbose";
 	public static final String SWITCH_VERBOSE2 = "-v";
 	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 
 	public static final String SWITCH_CHARSET1 = "--charset";
@@ -66,6 +67,7 @@ public final class WadMergeMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean changelog;
 		private boolean gui;
 		
 		private boolean useStdin;
@@ -82,6 +84,7 @@ public final class WadMergeMain
 			this.version = false;
 			this.verbose = false;
 			this.gui = false;
+			this.changelog = false;
 			this.useStdin = false;
 			this.inputFile = new File("wadmerge.txt");
 			this.inputCharset = Charset.defaultCharset();
@@ -183,6 +186,12 @@ public final class WadMergeMain
 				return ERROR_NONE;
 			}
 			
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wadmerge");
+				return ERROR_NONE;
+			}
+			
 			String streamName;
 			BufferedReader reader;
 			if (options.useStdin)
@@ -267,6 +276,8 @@ public final class WadMergeMain
 						options.useStdin = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (SWITCH_CHARSET1.equalsIgnoreCase(arg) || SWITCH_CHARSET2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_CHARSET;
 					else if (!sawInput)
@@ -364,6 +375,29 @@ public final class WadMergeMain
 	}
 	
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -373,6 +407,8 @@ public final class WadMergeMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version     Prints version, and exits.");
+		out.println();
+		out.println("    --changelog   Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui         Starts the GUI version of this program.");
 		out.println();

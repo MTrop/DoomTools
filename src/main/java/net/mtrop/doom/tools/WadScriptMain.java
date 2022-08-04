@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,6 +100,7 @@ public final class WadScriptMain
 	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
 	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_ENTRY1 = "--entry";
 	public static final String SWITCH_ENTRY2 = "-e";
@@ -748,6 +750,7 @@ public final class WadScriptMain
 	
 	public static class Options
 	{
+		private boolean changelog;
 		private boolean gui;
 		private PrintStream stdout;
 		private PrintStream stderr;
@@ -767,6 +770,7 @@ public final class WadScriptMain
 		
 		private Options()
 		{
+			this.changelog = false;
 			this.gui = false;
 			this.stdout = null;
 			this.stderr = null;
@@ -910,6 +914,12 @@ public final class WadScriptMain
 				return ERROR_NONE;
 			}
 
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wadscript");
+				return ERROR_NONE;
+			}
+			
 			if (options.mode == null)
 			{
 				splash(options.stdout);
@@ -1376,6 +1386,8 @@ public final class WadScriptMain
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (SWITCH_VERSION1.equalsIgnoreCase(arg))
 						options.mode = Mode.VERSION;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
@@ -1563,9 +1575,32 @@ public final class WadScriptMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: wadscript [filename] [switches | scriptargs]");
-		out.println("                 [--help | -h | --version]");
+		out.println("                 [--help | -h | --version | --changelog]");
 		out.println("                 [--function-help]");
 		out.println("                 [--disassemble] [filename]");
+	}
+	
+	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
 	}
 	
 }

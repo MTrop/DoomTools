@@ -71,6 +71,7 @@ public final class DecoHackMain
 	private static final int ERROR_MISSING_RESOURCE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
@@ -109,6 +110,7 @@ public final class DecoHackMain
 		private boolean help;
 		private boolean full;
 		private boolean version;
+		private boolean changelog;
 		private boolean dumpActionPointers;
 		private String dumpResource;
 		private boolean dryRun;
@@ -132,6 +134,7 @@ public final class DecoHackMain
 			this.gui = false;
 			this.help = false;
 			this.version = false;
+			this.changelog = false;
 			this.dumpActionPointers = false;
 			this.dumpResource = null;
 			this.dryRun = false;
@@ -255,6 +258,12 @@ public final class DecoHackMain
 			if (options.version)
 			{
 				splash(options.stdout);
+				return ERROR_NONE;
+			}
+			
+			if (options.changelog)
+			{
+				changelog(options.stdout, "decohack");
 				return ERROR_NONE;
 			}
 			
@@ -652,6 +661,8 @@ public final class DecoHackMain
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
 					else if (arg.equals(SWITCH_DRYRUN))
@@ -806,6 +817,29 @@ public final class DecoHackMain
 	}
 	
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -817,6 +851,8 @@ public final class DecoHackMain
 		out.println("    --help-full              Prints full help (not just usage) and exits.");
 		out.println();
 		out.println("    --version                Prints version, and exits.");
+		out.println();
+		out.println("    --changelog              Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui                    Starts the GUI version of this program.");
 		out.println();

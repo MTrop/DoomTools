@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,7 +38,6 @@ import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
 
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.WadScriptMain.Resolver;
 import net.mtrop.doom.tools.common.Common;
@@ -57,6 +57,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.StringUtils;
@@ -83,6 +84,7 @@ public final class DoomMakeMain
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_FUNCHELP1 = "--function-help";
 	public static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
@@ -161,6 +163,7 @@ public final class DoomMakeMain
 		private boolean version;
 		private boolean listModules;
 		private boolean embed;
+		private boolean changelog;
 		private boolean gui;
 		private boolean guiStudio;
 		private boolean guiNewProject;
@@ -191,6 +194,7 @@ public final class DoomMakeMain
 			this.version = false;
 			this.listModules = false;
 			this.embed = false;
+			this.changelog = false;
 			this.gui = false;
 			this.guiStudio = false;
 			this.guiNewProject = false;
@@ -356,6 +360,12 @@ public final class DoomMakeMain
 				return ERROR_NONE;
 			}
 
+			if (options.changelog)
+			{
+				changelog(options.stdout, "doommake");
+				return ERROR_NONE;
+			}
+			
 			if (options.projectType != null)
 			{
 				ProjectGenerator generator = options.projectType.createGenerator();
@@ -820,6 +830,8 @@ public final class DoomMakeMain
 						options.agentBypass = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equalsIgnoreCase(SWITCH_STUDIO))
 						options.guiStudio = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT_GUI))
@@ -1126,6 +1138,29 @@ public final class DoomMakeMain
 	}
 	
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -1149,6 +1184,7 @@ public final class DoomMakeMain
 		out.println("[switches]:");
 		out.println("    --help, -h                     Prints this help.");
 		out.println("    --version                      Prints the version of this utility.");
+		out.println("    --changelog                    Prints the changelog, and exits.");
 		out.println("    --function-help                Prints all available function usages.");
 		out.println("    --function-help-markdown       Prints all available function usages in");
 		out.println("                                       Markdown format.");

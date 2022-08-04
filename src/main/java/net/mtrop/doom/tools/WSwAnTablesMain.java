@@ -42,6 +42,7 @@ public final class WSwAnTablesMain
 	private static final int ERROR_IOERROR = 4;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP1 = "--help";
 	public static final String SWITCH_HELP2 = "-h";
@@ -70,6 +71,7 @@ public final class WSwAnTablesMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean changelog;
 		private boolean gui;
 		
 		private Boolean exportMode;
@@ -86,6 +88,7 @@ public final class WSwAnTablesMain
 			this.version = false;
 			this.verbose = false;
 			this.gui = false;
+			this.changelog = false;
 
 			this.exportMode = null;
 			this.importSource = false;
@@ -175,6 +178,12 @@ public final class WSwAnTablesMain
 			if (options.version)
 			{
 				splash(options.stdout);
+				return ERROR_NONE;
+			}
+			
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wswantbl");
 				return ERROR_NONE;
 			}
 			
@@ -387,6 +396,8 @@ public final class WSwAnTablesMain
 						options.verbose = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_VERSION))
 						options.version = true;
 					else if (arg.equals(SWITCH_ADDSOURCE1) || arg.equals(SWITCH_ADDSOURCE2))
@@ -475,6 +486,29 @@ public final class WSwAnTablesMain
 	}
 
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -484,6 +518,8 @@ public final class WSwAnTablesMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --changelog         Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui               Starts the GUI version of this program.");
 		out.println();

@@ -63,6 +63,7 @@ public final class WTExportMain
 	private static final Pattern PATCH_MARKER = Pattern.compile("P[0-9]*_(START|END)");
 	private static final Pattern FLAT_MARKER = Pattern.compile("F[0-9]*_(START|END)");
 	
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_GUI2 = "--gui-wtexscan";
 	public static final String SWITCH_HELP1 = "--help";
@@ -91,6 +92,7 @@ public final class WTExportMain
 		
 		private boolean help;
 		private boolean version;
+		private boolean changelog;
 		private boolean gui;
 		private boolean wtexscan;
 		private boolean quiet;
@@ -123,6 +125,7 @@ public final class WTExportMain
 			this.help = false;
 			this.version = false;
 			this.gui = false;
+			this.changelog = false;
 			this.wtexscan = false; 
 			this.quiet = false;
 			
@@ -1267,6 +1270,12 @@ public final class WTExportMain
 				return ERROR_NONE;
 			}
 		
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wtexport");
+				return ERROR_NONE;
+			}
+			
 			if (options.filePaths == null || options.filePaths.isEmpty())
 			{
 				options.errln("ERROR: No input WAD(s) specified.");
@@ -1542,6 +1551,8 @@ public final class WTExportMain
 						options.gui = true;
 						options.wtexscan = true;
 					}
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_NOANIMATED))
 						options.setNoAnimated(true);
 					else if (arg.equals(SWITCH_NOSWITCH))
@@ -1650,6 +1661,29 @@ public final class WTExportMain
 		out.println("                [files] --base-wad [base] --output [target] [--create | --add] [switches]");
 	}
 
+	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
 	// Prints the usage message.
 	private static void help(PrintStream out)
 	{
@@ -1657,6 +1691,8 @@ public final class WTExportMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version             Prints version, and exits.");
+		out.println();
+		out.println("    --changelog           Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui                 Starts the GUI version of this program.");
 		out.println();

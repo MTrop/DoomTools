@@ -36,6 +36,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.util.NameUtils;
 
 /**
@@ -56,6 +57,7 @@ public final class DoomImageConvertMain
 	private static final int ERROR_PARSE = 7;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
@@ -109,6 +111,7 @@ public final class DoomImageConvertMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean changelog;
 		private boolean gui;
 		
 		// Palette source for conversion.
@@ -134,6 +137,7 @@ public final class DoomImageConvertMain
 			this.version = false;
 			this.verbose = false;
 			this.gui = false;
+			this.changelog = false;
 
 			this.sourcePath = null;
 			this.recursive = false;
@@ -260,6 +264,12 @@ public final class DoomImageConvertMain
 				return ERROR_NONE;
 			}
 		
+			if (options.changelog)
+			{
+				changelog(options.stdout, "dimgconv");
+				return ERROR_NONE;
+			}
+			
 			// Check source.
 			if (options.sourcePath == null)
 			{
@@ -901,6 +911,8 @@ public final class DoomImageConvertMain
 						options.version = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERBOSE) || arg.equalsIgnoreCase(SWITCH_VERBOSE2))
 						options.setVerbose(true);
 					else if (arg.equalsIgnoreCase(SWITCH_RECURSIVE) || arg.equalsIgnoreCase(SWITCH_RECURSIVE2))
@@ -1021,6 +1033,29 @@ public final class DoomImageConvertMain
 	}
 	
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -1030,6 +1065,8 @@ public final class DoomImageConvertMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --changelog         Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui               Starts the GUI version of this program.");
 		out.println();

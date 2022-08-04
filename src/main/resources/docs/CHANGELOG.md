@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-08-04** Added `--changelog` switches to all utilities.
 - **2022-08-01** Changed GUI to use top menu bar on OSX.
 
 - **2022-07-27** Some GUI graphics cleanup and changes.

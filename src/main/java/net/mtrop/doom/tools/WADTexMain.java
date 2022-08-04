@@ -21,7 +21,6 @@ import java.util.concurrent.Callable;
 
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.object.BinaryObject;
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
@@ -33,6 +32,7 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 
@@ -50,6 +50,7 @@ public final class WADTexMain
 	private static final int ERROR_IOERROR = 5;
 	private static final int ERROR_UNKNOWN = -1;
 
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_HELP1 = "--help";
 	public static final String SWITCH_HELP2 = "-h";
@@ -82,6 +83,7 @@ public final class WADTexMain
 		private boolean help;
 		private boolean version;
 		private boolean verbose;
+		private boolean changelog;
 		private boolean gui;
 		
 		private boolean additive;
@@ -98,6 +100,7 @@ public final class WADTexMain
 			this.help = false;
 			this.version = false;
 			this.verbose = false;
+			this.changelog = false;
 			this.gui = false;
 			this.additive = false;
 			this.strife = false;
@@ -202,6 +205,12 @@ public final class WADTexMain
 			if (options.version)
 			{
 				splash(options.stdout);
+				return ERROR_NONE;
+			}
+			
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wadtex");
 				return ERROR_NONE;
 			}
 			
@@ -448,6 +457,8 @@ public final class WADTexMain
 						options.help = true;
 					else if (arg.equals(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_VERBOSE1) || arg.equals(SWITCH_VERBOSE2))
 						options.verbose = true;
 					else if (arg.equals(SWITCH_ADDITIVE1) || arg.equals(SWITCH_ADDITIVE2))
@@ -563,6 +574,29 @@ public final class WADTexMain
 	}
 
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -572,6 +606,8 @@ public final class WADTexMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --changelog         Prints the changelog, and exits.");
 		out.println();
 		out.println("[file]:");
 		out.println("    <filename>          The WAD file.");

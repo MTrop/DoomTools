@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.19.0
+
+* `Added` A Texture WAD project type for new projects.
+
+
 ### Changed for 0.18.1
 
 * `Fixed` [GUI] The Git repo manager did not pick up untracked changes.

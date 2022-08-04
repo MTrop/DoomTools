@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,10 +35,10 @@ import net.mtrop.doom.map.udmf.UDMFReader;
 import net.mtrop.doom.map.udmf.UDMFTable;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
-import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.NameUtils;
 
@@ -67,6 +68,7 @@ public final class WTexScanMain
 	public static final String SWITCH_NOSKIES = "--no-skies";
 	public static final String SWITCH_MAP = "--map";
 	public static final String SWITCH_MAP2 = "-m";
+	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 
 	/** Regex pattern for Episode, Map. */
@@ -81,6 +83,7 @@ public final class WTexScanMain
 	{
 		private PrintStream stdout;
 		private PrintStream stderr;
+		private boolean changelog;
 		private boolean gui;
 		private boolean help;
 		private boolean version;
@@ -96,6 +99,7 @@ public final class WTexScanMain
 			this.stdout = null;
 			this.stderr = null;
 			this.gui = false;
+			this.changelog = false;
 			this.help = false;
 			this.version = false;
 			this.quiet = false;
@@ -498,6 +502,12 @@ public final class WTexScanMain
 				return ERROR_NONE;
 			}
 		
+			if (options.changelog)
+			{
+				changelog(options.stdout, "wtexscan");
+				return ERROR_NONE;
+			}
+			
 			if (options.wadFiles.isEmpty())
 			{
 				splash(options.stdout);
@@ -609,6 +619,8 @@ public final class WTexScanMain
 						options.version = true;
 					else if (arg.equals(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_QUIET) || arg.equals(SWITCH_QUIET2))
 						options.setQuiet(true);
 					else if (arg.equals(SWITCH_TEXTURES) || arg.equals(SWITCH_TEXTURES2))
@@ -705,6 +717,29 @@ public final class WTexScanMain
 	}
 
 	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
+	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
 	 */
@@ -714,6 +749,8 @@ public final class WTexScanMain
 		out.println("    -h");
 		out.println();
 		out.println("    --version           Prints version, and exits.");
+		out.println();
+		out.println("    --changelog         Prints the changelog, and exits.");
 		out.println();
 		out.println("[files]:");
 		out.println("    <filename>          The files to inspect (WAD/PK3/PKE, accepts wildcards).");
