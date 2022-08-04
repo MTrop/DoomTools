@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WTExport Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				The second version of TEXtract, WTEXport is a utility that extracts a set of flats and textures 
@@ -64,7 +67,7 @@ wtexscan maps.wad | wtexport texturepack.wad --base-wad doom2.wad --output mapst
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 WTEXport v1.5.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wtexport [--help | -h | --version]
                 [files] --base-wad [base] --output [target] [--create | --add] [switches]
@@ -73,6 +76,8 @@ Usage: wtexport [--help | -h | --version]
     -h
 
     --version             Prints version, and exits.
+
+    --changelog           Prints the changelog, and exits.
 
     --gui                 Starts the GUI version of this program.
 
@@ -143,6 +148,45 @@ ICHOR04
 :end
 
 The utility WTEXSCAN already produces a list formatted this way.
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.5.0
+
+* &#x60;Fixed&#x60; Textures&#x2F;Flats in ANIMATED were added in an incorrect order if the provided texture&#x2F;flat was not the start of an animation loop. (Issue #75)
+* &#x60;Added&#x60; More output info during the extraction process.
+* &#x60;Added&#x60; The GUI version of WTEXport.
+* &#x60;Changed&#x60; Removed some potential sorts that could ruin things.
+
+
+### Changed for 1.4.0
+
+* &#x60;Fixed&#x60; Textures added via ANIMATED searching did not also check for SWITCHES pairings.
+
+
+### Changed for 1.3.0
+
+* &#x60;Fixed&#x60; Better support for texture WADs missing a TEXTURE1 lump (but having a TEXTURE2).
+
+
+### Changed for 1.2.0
+
+* &#x60;Fixed&#x60; A botched flat and namespace-texture ordering procedure that potentially messed up animations.
+
+
+### Changed for 1.1.0
+
+* &#x60;Changed&#x60; Removed an unnecessary sort step that butchered that Animation handling in flats and textures.
+* &#x60;Changed&#x60; Added some needed help.
+
+
+### Changed for 1.0.0
+
+* Initial Release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">

@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">DECOHack Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				Have you ever wanted to create some kind of insane mod for Vanilla Doom (and other classic Dooms) 
@@ -139,8 +142,8 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 			<h3 class="main-title-name w3-center">Full Command and Utility Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
-DECOHack v0.26.0 by Matt Tropiano (using DoomStruct v2.14.2)
+        <pre id="readme" class="text-documentation">
+DECOHack v0.27.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -155,6 +158,8 @@ Usage: decohack [--help | -h | --version]
     --help-full              Prints full help (not just usage) and exits.
 
     --version                Prints version, and exits.
+
+    --changelog              Prints the changelog, and exits.
 
     --gui                    Starts the GUI version of this program.
 
@@ -702,6 +707,15 @@ writing the following:
 
     state protect &lt;INTEGER&gt;
     state protect &lt;INTEGER&gt; to &lt;INTEGER&gt;
+
+
+You can also use a state clause in place of an integer for the first clause:
+
+    state protect thing 11 spawn
+
+
+Be careful though - it will protect the state at that resolved index, not 
+anything regarding the label specifically.
 
 
 It will not be flagged as &quot;free&quot; if in a range of free states, it won&#39;t be 
@@ -1503,6 +1517,51 @@ For example, a popular non-standard pointer, MonsterRail:
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Custom Properties
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+There are some ports out there that accept additional DeHackEd properties. In
+order to use those, you have to declare them ahead of time, like custom action
+pointers.
+
+    custom &lt;Object&gt; property &lt;Name&gt; &lt;DEHLabel&gt; &lt;ValueType&gt;
+
+...where &lt;Object&gt; is one of: 
+
+    thing, weapon, misc, state, sound, ammo
+    
+...and &lt;Name&gt; is the property name.
+
+...and &lt;DEHLabel&gt; is the DeHackEd entry name when the DEH patch gets written.
+
+...and &lt;ValueType&gt; is one of: 
+
+    bool         &#x2F;&#x2F; 0 or 1
+    byte         &#x2F;&#x2F; -127 to 127
+    ubyte        &#x2F;&#x2F; 0 to 255
+    short        &#x2F;&#x2F; -32767 to 32767
+    ushort       &#x2F;&#x2F; 0 to 65535
+    int          &#x2F;&#x2F; -2147483648 to 2147483647
+    uint         &#x2F;&#x2F; 0 to 2147483647
+    angleint     &#x2F;&#x2F; -359 to 359
+    angleuint    &#x2F;&#x2F; 0 to 359
+    anglefixed   &#x2F;&#x2F; -359.99998 to 359.99998
+    fixed        &#x2F;&#x2F; -32768.99998 to 32767.99998
+    state        &#x2F;&#x2F; 0 to 2147483647, verify valid state index, reference, or label.
+    thing        &#x2F;&#x2F; 0 to 2147483647, verify valid thing index.
+    thingmissile &#x2F;&#x2F; 0 to 2147483647, verify valid thing index, and thing is a MISSILE.
+    weapon       &#x2F;&#x2F; 0 to 2147483647, verify valid weapon index.
+    sound        &#x2F;&#x2F; valid sound name.
+    flags        &#x2F;&#x2F; -2147483648 to 2147483647, flag expression
+    string       &#x2F;&#x2F; any string expression, written as-is.
+
+
+For example, Doom Retro&#39;s &quot;gib health&quot; property for Things can be defined as:
+
+    custom thing property gibhealth &quot;Gib health&quot; int
+
+
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Par Times
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
@@ -1895,6 +1954,270 @@ block.
 #include &quot;classpath:decohack&#x2F;constants&#x2F;extended&#x2F;things.dh&quot;
 
     All thing mnemonics for Extended-DEH-compatible EXEs.
+
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 0.27.0
+
+* &#x60;Added&#x60; The &#x60;state protect&#x60; and &#x60;state unprotect&#x60; clauses now accept state index clauses, not just numbers. (Enhancement #12)
+* &#x60;Added&#x60; Custom properties. (Enhancement #55, #54)
+
+
+### Changed for 0.26.0
+
+* &#x60;Fixed&#x60; Added some bit flags that were missing from the docs: UNUSEDX bits, FRIENDLY.
+* &#x60;Added&#x60; A directory tree for the GUI.
+* &#x60;Added&#x60; A warning on wrong int&#x2F;fixed type use (Enhancement #78).
+* &#x60;Added&#x60; A warning on wrong Thing type use (MISSILE vs. not) (Enhancement #77).
+
+
+### Changed for 0.25.0
+
+* &#x60;Fixed&#x60; Changed the z-position parameter type for MBF&#39;s A_Spawn pointer to &quot;fixed&quot;.
+* &#x60;Fixed&#x60; Changed the range parameter type for MBF21&#39;s A_MonsterMeleeAttack pointer to &quot;fixed&quot;.
+* &#x60;Fixed&#x60; Some inconsistent error messages around flag setting&#x2F;removal.
+* &#x60;Fixed&#x60; Thing &#x60;dropitem&#x60; didn&#39;t allow 0 as a viable value.
+* &#x60;Added&#x60; The DECOHack GUI, plus a switch to start it (&#x60;--gui&#x60;).
+* &#x60;Added&#x60; Documentation for all pointers when dumped with &#x60;--dump-pointers&#x60;.
+* &#x60;Added&#x60; A &#x60;--charset&#x60; switch for specifying the encoding of the input source files (if not system default).
+* &#x60;Added&#x60; The ability to write the patch and the source directly into a WAD.
+* &#x60;Changed&#x60; MBF&#39;s A_FireOldBFG pointer should have been a weapon pointer instead of a thing pointer.
+* &#x60;Changed&#x60; Added a better error message for bad action pointers.
+* &#x60;Changed&#x60; Added an error message if the user does &quot;flag mixing&quot; on the same expression (see Issue #76).
+
+
+### Changed for 0.24.1
+
+* &#x60;Fixed&#x60; MBF Action Pointers were not recognized. This has been fixed.
+* &#x60;Fixed&#x60; An error is now thrown if you are attempting to define a custom action pointer that already exists.
+
+
+### Changed for 0.24.0
+
+* &#x60;Added&#x60; The ability to read a DECOHack patch from STDIN.
+* &#x60;Added&#x60; The ability to add custom action pointers. (Enhancement #72)
+
+
+### Changed for 0.23.0
+
+* &#x60;Added&#x60; A patch format for the Unity port, &#x60;doomunity&#x60;, which is &#x60;udoom19&#x60; but with no string limits (thanks, Xaser!). (PR #65).
+* &#x60;Added&#x60; A way to dump all known action pointers to DECOHack to STDOUT via the &#x60;--dump-pointers&#x60; runtime switch.
+* &#x60;Fixed&#x60; MBF21&#39;s &#x60;A_SeekTracer&#x60; parameters needed to check for FIXED angles, not UINT.
+* &#x60;Fixed&#x60; Some Action Pointer parameter interpretation - if a field needs a fixed expression, integer values are coerced to fixed, and vice-versa.
+* &#x60;Changed&#x60; Stricter (but safer) checking for types in parameters, such as Fixed values, and auto-detecting sounds, things, and states.
+* &#x60;Changed&#x60; Better string length error messages (Issue&#x2F;Enhancement #64).
+
+
+### Changed for 0.22.0
+
+* &#x60;Fixed&#x60; **MAJOR FIX** DECOHack was completely broken and would NPE out on any parse. Whoops. Fixed!
+
+
+### Changed for 0.21.0
+
+* &#x60;Added&#x60; STR_ &#x60;#defines&#x60; for BOOM&#39;s extended locked door strings were missing (thanks, Xaser!). (PR #61)
+* &#x60;Changed&#x60; A_RandomJump and A_WeaponJump should take a UINT, not BYTE for probability (thanks, Altazimuth!). (Issue #62)
+
+
+### Changed for 0.20.1
+
+* &#x60;Fixed&#x60; Extended sounds were off by 1. (Issue #60)
+
+
+### Changed for 0.20.0
+
+* &#x60;Added&#x60; Multiple input files can be added, parsed in the order provided. (Enhancement #57)
+* &#x60;Fixed&#x60; Bad tokens in action pointer blocks no longer hang the parser. (Issue #59)
+
+
+### Changed for 0.19.2
+
+* &#x60;Fixed&#x60; Changed maximum string lengths for Vanilla patches (doom19, udoom19). (Issue #56)
+
+
+### Changed for 0.19.1
+
+* &#x60;Fixed&#x60; Thing indices were not being parsed properly in action pointer parameters.
+
+
+### Changed for 0.19.0
+
+* &#x60;Fixed&#x60; &#x60;A_JumpIfHealthBelow&#x60; did not accept negative values for the health reference value. (Issue #53)
+* &#x60;Fixed&#x60; Actor label values were not backfilled properly if the action that used them needed applying to many frames on one line.
+* &#x60;Added&#x60; Auto-things and free-able things (all patches). (Enhancement #50)
+* &#x60;Added&#x60; Aliases for things and weapons via &#x60;alias thing&#x60; and &#x60;alias weapon&#x60; statements.
+* &#x60;Added&#x60; DSDHACKED patch support. (Enhancement #42)
+
+
+### Changed for 0.18.1
+
+* &#x60;Fixed&#x60; Editor keys were not being saved if a Thing body didn&#39;t have 
+  parse-able content right after body start.
+* &#x60;Changed&#x60; Copying a definition from the exact same one will not perform a copy,
+  as there is nothing to do.
+
+
+### Changed for 0.18.0
+
+* &#x60;Added&#x60; Support for editor keys on Things like DECORATE. (Enhancement #47)
+
+
+### Changed for 0.17.0
+
+* &#x60;Added&#x60; Labels can now be used pre-declared in actor (thing&#x2F;weapon) definitions. (Enhancement #35)
+* &#x60;Added&#x60; Some keywords&#x2F;delimiters to force interpretation of some action pointer parameters.
+* &#x60;Added&#x60; The output source switch for outputting the combined source into one file.
+* &#x60;Fixed&#x60; Some &quot;next state&quot; clauses did not throw errors properly in state blocks.
+* &#x60;Changed&#x60; The budget output does not output the action pointer budget if the patch in Boom format or higher.
+
+
+### Changed for 0.16.2
+
+* &#x60;Fixed&#x60; The &quot;Red Skull&quot; pickup string should be &#x60;GOTREDSKULL&#x60;, with two Ls.
+* &#x60;Changed&#x60; An error is now thrown if a string name is invalid (Boom and higher).
+
+
+### Changed for 0.16.1
+
+* &#x60;Fixed&#x60; Things did not have TRANSLUCENT set. (Issue #41)
+* &#x60;Fixed&#x60; NPE on actorless state fill.
+
+
+### Changed for 0.16.0
+
+* &#x60;Changed&#x60; Label-Goto-Label syntax in state bodies now supported. (Issue #37)
+
+
+### Changed for 0.15.0
+
+* &#x60;Changed&#x60; Altering a state directly now removes its &quot;free&quot; status, if set.
+* &#x60;Changed&#x60; Thing speed now accepts negative values.
+
+
+### Changed for 0.14.1
+
+* &#x60;Fixed&#x60; Lexer bugfix. Fixes inconsistent identifier concatenation. (Issue #32)
+
+
+### Changed for 0.14.0
+
+* &#x60;Added&#x60; Each Thing&#x2F;Weapon Characteristics Filling. (Enhancement #24)
+* &#x60;Added&#x60; Individual state property changes.
+* &#x60;Fixed&#x60; A_AddFlags, A_RemoveFlags, A_JumpIfFlagSet used the wrong parameter type.
+
+
+### Changed for 0.13.0
+
+* &#x60;Added&#x60; Multi-action pointer lines. (Enhancement #16)
+
+
+### Changed for 0.12.0.1
+
+* &#x60;Added&#x60; Missing docs for &#x60;ammopershot&#x60; weapon field.
+
+
+### Changed for 0.12.0
+
+**Major compiler change. Do not use numbers for your sound definitions and references!**
+
+* &#x60;Added&#x60; Pre-emptive weapon flag checking on non-MBF21 patches.
+* &#x60;Fixed&#x60; Weapon MBF21 flags were parsed incorrectly.
+* &#x60;Fixed&#x60; Ensure blank files are written when no changes are made.
+* &#x60;Changed&#x60; Sounds definitions now REQUIRE a name, not a number.
+* &#x60;Changed&#x60; Some internal sound index&#x2F;position handling to align with Doom internals rather than DeHackEd&#39;s mishandling of sound definitions.
+
+
+### Changed for 0.11.2
+
+* &#x60;Fixed&#x60; Extended (and higher) sound slots were not accessible via definition. (Issue #29)
+* &#x60;Fixed&#x60; NPE if no state clauses between labels. (Issue #28)
+
+
+### Changed for 0.11.1
+
+* &#x60;Fixed&#x60; Flag detection priority.
+* &#x60;Fixed&#x60; Splashgroup Outputs as Projectilegroup (Issue #27)
+* &#x60;Fixed&#x60; Melee range not being written correctly (Issue #25)
+* &#x60;Fixed&#x60; State search looped indefinitely if starting index was 0 with no free states. (Issue #26)
+* &#x60;Fixed&#x60; Thing speed info being written on no change.
+* &#x60;Changed&#x60; An error message for valid states.
+
+
+### Changed for 0.11.0
+
+* &#x60;Added&#x60; Missing DEHEXTRA thing fields and MBF21 support.
+* &#x60;Added&#x60; Correct action pointer use detection on things and weapons.
+* &#x60;Added&#x60; A way to combine flags per function pointer parameter.
+* &#x60;Added&#x60; &#x60;#include&#x60; directive aliases for convenience.
+* &#x60;Fixed&#x60; Sound indices for function calls were off by 1.
+* &#x60;Fixed&#x60; Megasphere health misc entry was not parsed! Whoops!
+* &#x60;Fixed&#x60; Megasphere health not initialized, either!
+
+
+### Changed for 0.10.1
+
+* &#x60;Fixed&#x60; The background flat string indices in the constants files were incorrect.
+
+
+### Changed for 0.10.0
+
+* &#x60;Added&#x60; An index value clause for sound indices on parameters.
+
+
+### Changed for 0.9.0
+
+* &#x60;Changed&#x60; Handling of protected states - protected states are never treated as free, and cannot be altered directly.
+
+
+### Changed for 0.8.0
+
+* &#x60;Fixed&#x60; Parsing a single state body with just the next frame clause did nothing. (Issue #10) (thanks, Aurelius!)
+* &#x60;Fixed&#x60; Certain non-blank DEH Extended states were not accessible.
+* &#x60;Added&#x60; Ability to clear single states or labels on things and weapons. (Issue #11)
+* &#x60;Changed&#x60; &#x60;S_FREE_START&#x60; in &#x60;classpath:decohack&#x2F;constants&#x2F;extended&#x2F;states.dh&#x60; is now 1100.
+
+
+### Changed for 0.7.0
+
+* &#x60;Fixed&#x60; Disallow MBF action pointers in non-MBF patches.
+* &#x60;Added&#x60; Support for using the &quot;unused&quot; state parameters as offsets (supported in Doom code). (Issue #9)
+
+
+### Changed for 0.6.1
+
+* &#x60;Fixed&#x60; Changed file export for compatibility with Java 8.
+
+
+### Changed for 0.6.0
+
+* &#x60;Added&#x60; Better state referencing.
+
+
+### Changed for 0.5.0
+
+* &#x60;Added&#x60; Support for DEHExtra sound definitions (thanks @XaserAcheron).
+* &#x60;Fixed&#x60; Better support for DEHExtra in general and code refactoring to accommodate.
+
+
+### Changed for 0.4.1
+
+* &#x60;Fixed&#x60; Changed &quot;Friendly&quot; things constants (&#x60;classpath:decohack&#x2F;constants&#x2F;friendly_things.dh&#x60;).
+* &#x60;Changed&#x60; Updated help.
+
+
+### Changed for 0.4.0
+
+* &#x60;Added&#x60; &quot;Friendly&quot; things constants (&#x60;classpath:decohack&#x2F;constants&#x2F;friendly_things.dh&#x60;).
+* &#x60;Added&#x60; Parser: Set weapon&#x2F;thing states using other weapon&#x2F;thing states.
+
+
+### Changed for 0.3.0
+
+* Initial Release.
 
 		</pre>
     <!-- VVV FOOTER VVV -->

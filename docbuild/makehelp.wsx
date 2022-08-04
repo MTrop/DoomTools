@@ -24,6 +24,13 @@ function headerData(file)
     return global::headerData;
 }
 
+function changelogData()
+{
+    if (global::changelogData == null)
+        global::changelogData = fetchData("docbuild/changelog.html");
+    return global::changelogData;
+}
+
 function footerData()
 {
     if (global::footerData == null)
@@ -101,11 +108,15 @@ check function dumpUtil(command, helparg, destination, replacers, header)
     each (k, v : replacers)
         headerHTML = headerHTML->strreplaceall("%%"+k+"%%", v);
     precontent = cmd(command, [helparg])->htmlsanitize();
+    changelogHTML = changelogData();
+    changelog = cmd(command, ["--changelog"])->htmlsanitize();
     footerHTML = footerData();
     
     writer = cswopen(fosopen(destination));
     writer->cswrite(headerHTML);
     writer->cswrite(precontent);
+    writer->cswrite(changelogHTML);
+    writer->cswrite(changelog);
     writer->cswrite(footerHTML);
     close(writer);
 

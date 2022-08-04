@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">DoomMake Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				Alright, everybody. I've been <em>hearing things.</em>
@@ -224,8 +227,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
-DoomMake v0.18.0 by Matt Tropiano
+        <pre id="readme" class="text-documentation">
+DoomMake v0.19.0 by Matt Tropiano
 (using DoomStruct v2.14.2 , WadScript v1.6.0, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
@@ -254,6 +257,7 @@ Usage: doommake [target] [args] [switches]
 [switches]:
     --help, -h                     Prints this help.
     --version                      Prints the version of this utility.
+    --changelog                    Prints the changelog, and exits.
     --function-help                Prints all available function usages.
     --function-help-markdown       Prints all available function usages in
                                        Markdown format.
@@ -265,6 +269,10 @@ Usage: doommake [target] [args] [switches]
                                        in use and exits.
 
 -----------------------------------------------------------------------------
+
+    --project-type [type]          Sets the project type. Possible values:
+                                      WAD, TEXTURE
+                                      Default: WAD
 
     --new-project, -n [templates]  Creates a new project made up of a set of
                                       templates (requires [directory]).
@@ -329,6 +337,159 @@ Scopes
 DoomMake has a variable scope called &#x60;global&#x60; that serves as a common variable
 scope for sharing values outside of functions or for data that you would want
 to initialize once.
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 0.19.0
+
+* &#x60;Added&#x60; A Texture WAD project type for new projects.
+
+
+### Changed for 0.18.1
+
+* &#x60;Fixed&#x60; [GUI] The Git repo manager did not pick up untracked changes.
+* &#x60;Added&#x60; [GUI] The Beta version of the Mercurial repo manager.
+
+
+### Changed for 0.18.0
+
+* &#x60;Added&#x60; A &quot;Studio&quot; mode only runnable as a Desktop App.
+
+
+### Changed for 0.17.0
+
+* &#x60;Added&#x60; The &#x60;TOOL::WADTEX(...)&#x60; function was changed to support entry name override.
+* &#x60;Added&#x60; The &#x60;TOOL::WSWANTBL(...)&#x60; function was changed to support source import.
+* &#x60;Added&#x60; The &#x60;TOOL::WADMERGE(...)&#x60; function was changed to support alternate input charset encoding.
+* &#x60;Added&#x60; The &#x60;TOOL::WADSCRIPT(...)&#x60; function was changed to support alternate input charset encoding.
+* &#x60;Added&#x60; The &#x60;TOOL::DECOHACK(...)&#x60; function was changed to support alternate input charset encoding.
+* &#x60;Added&#x60; Support for project-wide text encoding setting.
+* &#x60;Changed&#x60; Default DECOHack source code output file was changed from &#x60;dehsrc.dh&#x60; to &#x60;decohack.dh&#x60;. More to the point.
+
+
+### Changed for 0.16.0
+
+* &#x60;Fixed&#x60; (GUI) GUI still checked for DoomMake on PATH in order to run. This was unnecessary. (Issue #69)
+* &#x60;Added&#x60; The &#x60;TOOL::DECOHACK(...)&#x60; function was changed to support reading DECOHack source from STDIN.
+
+
+### Changed for 0.15.0
+
+* &#x60;Added&#x60; DoomMake Agent for listening for project changes. See help for more info!
+* &#x60;Added&#x60; DoomMake GUI for individual projects and creating new ones.
+* &#x60;Added&#x60; A &#x60;justrun&#x60; target for new projects using the &#x60;run&#x60; template to execute the project without building it.
+
+
+### Changed for 0.14.0
+
+* &#x60;Added&#x60; A switch for printing the targets for a project.
+* &#x60;Changed&#x60; The conversion function in graphics conversions now looks for (and prioritizes) loose palette assets for source palettes (in asset global folder) (new projects).
+* &#x60;Changed&#x60; Some WadMerge scripts for some templates to make use of the &#x60;FILECHARSUB&#x60; command for asset directory imports (new projects).
+
+
+### Changed for 0.13.1
+
+* &#x60;Fixed&#x60; The &#x60;texturewads&#x60; template added script lines that duped the extracted textures on export.
+
+
+### Changed for 0.13.0
+
+* &#x60;Added&#x60; &#x60;infiles&#x60; as a valid option field for &#x60;TOOL::DECOHACK&#x60;.
+* &#x60;Changed&#x60; Improved HTML documentation output.
+* &#x60;Changed&#x60; Single-patch texture generation added to the &#x60;textures&#x60; and &#x60;texturesboom&#x60; templates (new projects). (Enhancement #58)
+
+
+### Changed for 0.12.0
+
+* &#x60;Added&#x60; Some texture template types for Vanilla and Boom.
+* &#x60;Changed&#x60; Template ordering and setup for other texture templates (new projects).
+* &#x60;Changed&#x60; Some tweaks to default &#x60;.gitattributes&#x60; on Git template (new projects).
+* &#x60;Changed&#x60; The project &quot;TODO&quot; list is now a Markdown file.
+* &#x60;Changed&#x60; (Internal) Project Generator organization changes. (Issue #36)
+
+
+### Changed for 0.11.0
+
+* &#x60;Fixed&#x60; Some generated script documentation.
+* &#x60;Changed&#x60; Attempting to reduce map textures without any texture WADs errors out (new projects).
+* &#x60;Changed&#x60; Assets are now a separate template category.
+
+
+### Changed for 0.10.0
+
+* &#x60;Added&#x60; A patch source module for patches made in &quot;not DECOHack&quot;.
+* &#x60;Changed&#x60; &#x60;doClean()&#x60; will clean the build directory and distribution directories (new projects).
+* &#x60;Changed&#x60; More informational output (new projects).
+
+
+### Changed for 0.9.0
+
+* &#x60;Added&#x60; &#x60;dsdhacked&#x60; as a valid DECOHack patch type.
+
+
+### Changed for 0.8.0
+
+* &#x60;Added&#x60; The ability to embed DoomMake into a project (&#x60;--embed&#x60; switch).
+
+
+### Changed for 0.7.0
+
+* &#x60;Added&#x60; The options for &#x60;TOOL::DOOMTOOLS&#x60;.
+* &#x60;Added&#x60; Added including the DECOHack source in the result to DECOHack projects.
+* &#x60;Added&#x60; A switch for dumping documentation as HTML. (Enhancement #45)
+* &#x60;Fixed&#x60; Some tweaks to auto-detecting changes to projects.
+* &#x60;Fixed&#x60; &quot;Textures&quot; template: Converting patches used the wrong default mode.
+* &#x60;Changed&#x60; The options for &#x60;TOOL::DECOHACK&#x60; to include the source export.
+* &#x60;Changed&#x60; Project TODO text file is now generated in uppercase: &#x60;TODO.txt&#x60;.
+* &#x60;Changed&#x60; Repository &quot;ignore&quot; files changed slightly.
+
+
+### Changed for 0.6.0
+
+* &#x60;Added&#x60; HASHDIR() host function for detecting folder changes.
+* &#x60;Added&#x60; Modules added for asset and texture auto-conversion of graphics and sound assets.
+* &#x60;Added&#x60; The &quot;--disassemble&quot; switch. Not many people will use this.
+* &#x60;Changed&#x60; New projects now auto-detect project changes on build.
+* &#x60;Changed&#x60; The &quot;TODO&quot; list that gets printed at the end is now added to the project.
+
+
+### Changed for 0.5.0
+
+* &#x60;Added&#x60; Relocation of &#x60;src&#x60; directory via project property. (Enhancement #38)
+* &#x60;Changed&#x60; The run module checks for default files generated and runs them automatically.
+
+
+### Changed for 0.4.0
+
+* &#x60;Added&#x60; A wizard during project creation.
+* &#x60;Added&#x60; &quot;TODOs&quot; afterward when a project is made.
+* &#x60;Added&#x60; A target for texture projects that can rebuild the TEXTUREx definition lists.
+
+
+### Changed for 0.3.0
+
+* &#x60;Added&#x60; All scripts can now make use of a global scope called &#x60;global&#x60;.
+
+
+### Changed for 0.2.0
+
+* &#x60;Added&#x60; Ability to invoke DImgConv.
+
+
+### Changed for 0.1.1
+
+* &#x60;Fixed&#x60; The &#x60;run&#x60; module did not write properly to the make script.
+* &#x60;Fixed&#x60; Projects that are created without the init stubs do not try to append.
+* &#x60;Added&#x60; Mercurial repository support (creates &quot;ignore&quot; file).
+
+
+### Changed for 0.1.0
+
+* Initial release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">

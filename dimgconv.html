@@ -44,8 +44,11 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">DImgConv Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 DImgConv v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: dimgconv [--help | -h | --version]
                 [source] [switches]
@@ -54,6 +57,8 @@ Usage: dimgconv [--help | -h | --version]
     -h
 
     --version           Prints version, and exits.
+
+    --changelog         Prints the changelog, and exits.
 
     --gui               Starts the GUI version of this program.
 
@@ -151,6 +156,32 @@ Graphics with specific offsets:
 
     m_skull graphic 0 12
     m_doom graphic 30 -24
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.2.0
+
+* &#x60;Added&#x60; The GUI version of DImgConv.
+
+
+### Changed for 1.1.0
+
+* &#x60;Fixed&#x60; DImgConv would crash if no palette was provided but &quot;palettes&quot; default mode was set and a metadata file tried to change the mode for a file.
+
+
+### Changed for 1.0.1
+
+* &#x60;Fixed&#x60; DImgConv did not properly rename files to &quot;.lmp&quot; on convert if both source 
+  and destination were directories. (Issue #39)
+
+
+### Changed for 1.0.0
+
+* Initial Release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">

@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WSwAnTbl Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				A utility that, like SWANTBLS, imports or exports SWITCHES/ANIMATED data into/from a WAD file, creating/reading a file that is formatted like DEFSWANI.DAT from way back when. Again, for big nerds that like big text files.
@@ -57,7 +60,7 @@ wswantbl boomstuf.wad --import DEFSWANI.txt</pre>
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 WSwAnTbl v1.1.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
 
@@ -65,6 +68,8 @@ Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
     -h
 
     --version           Prints version, and exits.
+
+    --changelog         Prints the changelog, and exits.
 
     --gui               Starts the GUI version of this program.
 
@@ -85,6 +90,23 @@ Usage: wswantbl [--help | -h | --version] [file] [mode] [switches]
 [switches]:
     --verbose           Prints verbose output.
     -v
+
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.1.0
+
+* &#x60;Added&#x60; The GUI version of WSwAnTbl.
+* &#x60;Fixed&#x60; Bad newline in export header comments.
+* &#x60;Added&#x60; An &#x60;--import-source&#x60; switch for adding the source file to the WAD on import as &#x60;DEFSWANI&#x60;.
+
+
+### Changed for 1.0.0
+
+* Initial Release.
 
 		</pre>
     <!-- VVV FOOTER VVV -->

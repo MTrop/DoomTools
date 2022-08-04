@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WTexScan Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				A utility that scans one or more WAD files for maps and dumps the list of flats and textures 
@@ -62,7 +65,7 @@
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 WTexScan v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wtexscan [--help | -h | --version] [files] [switches]
 
@@ -70,6 +73,8 @@ Usage: wtexscan [--help | -h | --version] [files] [switches]
     -h
 
     --version           Prints version, and exits.
+
+    --changelog         Prints the changelog, and exits.
 
 [files]:
     &lt;filename&gt;          The files to inspect (WAD&#x2F;PK3&#x2F;PKE, accepts wildcards).
@@ -90,6 +95,32 @@ Usage: wtexscan [--help | -h | --version] [files] [switches]
 
     --map [mapname]     Map to scan. If not specified, all maps will be scanned.
     -m
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.2.0
+
+* &#x60;Added&#x60; GUI Version of WTexScan.
+
+
+### Changed for 1.1.1
+
+* &#x60;Added&#x60; Autodetect PKE.
+* &#x60;Changed&#x60; Temp file name for PK3&#x2F;PKEs extracted from an archive altered slightly.
+
+
+### Changed for 1.1.0
+
+* &#x60;Added&#x60; Map filtering switch feature (by @XaserAcheron).
+
+
+### Changed for 1.0.0
+
+* Initial Release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">

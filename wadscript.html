@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WadScript Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div class="w3-row w3-center">
 			<a href="wadscript-functions.html">WadScript Function Reference</a>
 		</div>
@@ -102,9 +105,9 @@
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 Usage: wadscript [filename] [switches | scriptargs]
-                 [--help | -h | --version]
+                 [--help | -h | --version | --changelog]
                  [--function-help]
                  [--disassemble] [filename]
 [filename]:
@@ -156,6 +159,78 @@ Scopes
 All scripts can access a scope called &#x60;global&#x60; that serves as a common variable
 scope for sharing values outside of functions or for data that you would want
 to initialize once.
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.6.0
+
+* &#x60;Added&#x60; A directory tree for the GUI.
+
+
+### Changed for 1.5.0
+
+* &#x60;Fixed&#x60; The &#x60;--entry&#x60; switch didn&#39;t parse the command line properly after its use.
+* &#x60;Added&#x60; The WadScript GUI, plus a switch to start it (&#x60;--gui&#x60;).
+* &#x60;Added&#x60; A &#x60;--charset&#x60; switch for specifying the encoding of the script files (if not system default).
+
+
+### Changed for 1.4.0
+
+* &#x60;Added&#x60; A switch for printing the entry points for a script.
+
+
+### Changed for 1.3.1
+
+* &#x60;Changed&#x60; Improved HTML documentation output.
+
+
+### Changed for 1.3.0
+
+* &#x60;Added&#x60; A switch for dumping documentation as HTML. (Enhancement #45)
+
+
+### Changed for 1.2.2
+
+* &#x60;Changed&#x60; WadScript will now dump a stacktrace if a script host function produces an unhandled exception.
+
+
+### Changed for 1.2.1
+
+* &#x60;Fixed&#x60; WADSETTYPE() did not accept two parameters, as described.
+
+
+### Changed for 1.2.0
+
+* &#x60;Added&#x60; All scripts can now make use of a global scope called &#x60;global&#x60;.
+
+
+### Changed for 1.1.0.1
+
+* &#x60;Added&#x60; Clarifications to documentation that PKE files are also openable like PK3s.
+
+
+### Changed for 1.1.0
+
+* &#x60;Added&#x60; Functions: WADSETTYPE for setting the WAD type.
+
+
+### Changed for 1.0.2
+
+* &#x60;Added&#x60; Made it easier to interface with from other tools.
+
+
+### Changed for 1.0.1
+
+* &#x60;Fixed&#x60; Markdown documentation output.
+
+
+### Changed for 1.0.0
+
+* Initial Release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">

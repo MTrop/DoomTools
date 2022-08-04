@@ -45,6 +45,9 @@
 		<div class="w3-row main-title">
 			<h1 class="main-title-name w3-center">WadTex Help</h1>
 		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
 		<div>
 			<p>
 				A utility that imports or exports a DEUTEX-style texture file into/from a WAD file with a set of TEXTUREx/PNAMES lumps. 
@@ -61,7 +64,7 @@ wadtex d2tex.wad --import doom2-textures.txt --entry-name textures1</pre>
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
-        <pre class="text-documentation">
+        <pre id="readme" class="text-documentation">
 WADTex v1.2.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wadtex [--help | -h | --version] [file] [mode] [switches]
 
@@ -69,6 +72,8 @@ Usage: wadtex [--help | -h | --version] [file] [mode] [switches]
     -h
 
     --version           Prints version, and exits.
+
+    --changelog         Prints the changelog, and exits.
 
 [file]:
     &lt;filename&gt;          The WAD file.
@@ -97,6 +102,27 @@ Usage: wadtex [--help | -h | --version] [file] [mode] [switches]
 [switches]:
     --verbose           Prints verbose output.
     -v
+		</pre>
+    <!-- VVV CHANGELOG VVV -->
+		<div>
+			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
+		</div>
+		<pre class="text-changelog">
+### Changed for 1.2.0
+
+* &#x60;Added&#x60; The GUI version of WadTex.
+* &#x60;Added&#x60; Entry name override for texture entry lump.
+
+
+### Changed for 1.1.0
+
+* &#x60;Fixed&#x60; Handling of PNAMES for multiple TEXTURE entry import.
+
+
+### Changed for 1.0.0
+
+* Initial Release.
+
 		</pre>
     <!-- VVV FOOTER VVV -->
 		<div class="w3-row site-footer">
