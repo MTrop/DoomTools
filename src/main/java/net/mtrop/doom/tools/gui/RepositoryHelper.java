@@ -579,7 +579,7 @@ public interface RepositoryHelper
 		
 		private ProcessCallable start(StringWriter out, StringWriter err)
 		{
-			return ProcessCallable.cmd("git").setWorkingDirectory(directory).setOut(out).setErr(err);
+			return ProcessCallable.shell("git").setWorkingDirectory(directory).setOut(out).setErr(err);
 		}
 		
 		private int performInit()
@@ -1072,7 +1072,7 @@ public interface RepositoryHelper
 		
 		private ProcessCallable start(StringWriter out, StringWriter err)
 		{
-			return ProcessCallable.cmd("hg").setWorkingDirectory(directory).setOut(out).setErr(err);
+			return ProcessCallable.shell("hg").setWorkingDirectory(directory).setOut(out).setErr(err);
 		}
 		
 		private int performInit()

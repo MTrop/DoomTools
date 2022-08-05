@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.19.1
+
+* `Fixed` [GUI] Repository managers attempted to call CMD on non-Windows OSes.
+
+
 ### Changed for 0.19.0
 
 * `Added` A Texture WAD project type for new projects.
