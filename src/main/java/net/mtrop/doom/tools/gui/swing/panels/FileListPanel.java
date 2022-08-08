@@ -117,7 +117,7 @@ public class FileListPanel extends JPanel
 			{
 				if (e.getKeyCode() == KeyEvent.VK_DELETE)
 					onRemoveSelected();
-				else if ((e.getModifiers() & KeyEvent.ALT_MASK) != 0)
+				else if ((e.getModifiersEx() & KeyEvent.ALT_DOWN_MASK) != 0)
 				{
 					if (e.getKeyCode() == KeyEvent.VK_UP)
 						onMoveUp();
