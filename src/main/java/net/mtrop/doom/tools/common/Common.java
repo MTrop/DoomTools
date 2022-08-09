@@ -192,8 +192,8 @@ public final class Common
 		if (OSUtils.isWindows())
 			pc = ProcessCallable.create("cmd.exe", "/k", "start").setWorkingDirectory(target);
 		else if (OSUtils.isOSX())
-			pc = ProcessCallable.create("open", "-n", "/Applications/Utilities/Terminal.app").setWorkingDirectory(target);
-		// TODO: Need to test these.
+			pc = ProcessCallable.create("open", "-a", "Terminal", target.getAbsolutePath()).setWorkingDirectory(target);
+		// TODO: Need to test these on Linux.
 		else if (OSUtils.onPath("xterm"))
 			pc = ProcessCallable.create("xterm").setWorkingDirectory(target);
 		else if (OSUtils.onPath("zsh"))

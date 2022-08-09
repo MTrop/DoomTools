@@ -40,7 +40,7 @@ public final class DoomToolsLanguageManager
 	private static final String OS_LINUX = "linux";
 	
 	/** That dang option key on MacOS. */
-	private static final int OPTION_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	private static final int OPTION_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 	
 	/** Missing text. */
 	private static final String MISSING_TEXT = "[[NO LANGUAGE MATCH]]";

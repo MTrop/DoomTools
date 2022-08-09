@@ -2089,7 +2089,7 @@ public final class FormFactory
 					e.consume();
 
 					int code = e.getKeyCode();
-					int modifiers = e.getModifiers();
+					int modifiersEx = e.getModifiersEx();
 					
 					switch (code) // alter just meta keys
 					{
@@ -2097,10 +2097,10 @@ public final class FormFactory
 						case KeyEvent.VK_ALT:
 						case KeyEvent.VK_META:
 						case KeyEvent.VK_SHIFT:
-							modifiers = 0;
+							modifiersEx = 0;
 					}
 					
-					KeyStroke input = transformer.apply(KeyStroke.getKeyStroke(code, modifiers)); 
+					KeyStroke input = transformer.apply(KeyStroke.getKeyStroke(code, modifiersEx)); 
 					if ((value != null && !value.equals(input)) || (value == null && input != null))
 						setValue(input);
 				}
