@@ -47,6 +47,7 @@ else
 	echo "your JRE or JDK directories, nor were Java binaries detected on your PATH."
 	echo
 	echo "For help, visit https://www.java.com/."
+	echo
 	echo "Java can be downloaded from the following places:"
 	echo
 	echo "Azul:      https://www.azul.com/downloads/"
