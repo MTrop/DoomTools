@@ -40,6 +40,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Using <b>FlatLaf v").append(Version.FLATLAF).append("</b>").append("<br/>");
 		sb.append("Using <b>RSyntaxTextArea v").append(Version.RSYNTAXTEXTAREA).append("</b>").append("<br/>");
 		sb.append("Using <b>AutoComplete v").append(Version.AUTOCOMPLETE).append("</b>").append("<br/>");
+		sb.append("Using <b>CommonMark v").append(Version.COMMONMARK).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("Contains <b>DECOHack v").append(Version.DECOHACK).append("</b>").append("<br/>");
 		sb.append("Contains <b>DImgConv v").append(Version.DIMGCONV).append("</b>").append("<br/>");

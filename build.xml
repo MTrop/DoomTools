@@ -50,11 +50,14 @@
 	<property name="autocomplete.lib.version" value="3.2.0" />
 	<property name="autocomplete.jar" value="autocomplete-${autocomplete.lib.version}.jar" />
 
+	<property name="commonmark.lib.version" value="0.19.0" />
+	<property name="commonmark.jar" value="commonmark-${commonmark.lib.version}.jar" />
+
 	
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}${S}${dev.base}/${commonmark.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -136,6 +139,7 @@
 		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
+		<echo file="${build.versions.dir}/commonmark.version" message="${commonmark.lib.version}" />
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbl.version" message="${wswantbl.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -178,6 +182,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${rsyntaxtextarea.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${autocomplete.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${commonmark.jar}"/>
 		</jar>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
@@ -220,7 +225,12 @@
 		<maven-jar-sources-dl group-path="com/fifesoft" artifact="autocomplete" version="${autocomplete.lib.version}" />
 	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.autocomplete, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.commonmark">
+		<maven-jar-dl group-path="org/commonmark" artifact="commonmark" version="${commonmark.lib.version}" />
+		<maven-jar-sources-dl group-path="org/commonmark" artifact="commonmark" version="${commonmark.lib.version}" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.autocomplete, dependency.commonmark, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />

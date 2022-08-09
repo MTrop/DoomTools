@@ -23,6 +23,7 @@ public interface Version
 	String FLATLAF = Common.getVersionString("flatlaf");
 	String RSYNTAXTEXTAREA = Common.getVersionString("rsyntaxtextarea");
 	String AUTOCOMPLETE = Common.getVersionString("autocomplete");
+	String COMMONMARK = Common.getVersionString("commonmark");
 
 	String DECOHACK = Common.getVersionString("decohack");
 	String DIMGCONV = Common.getVersionString("dimgconv");

@@ -11,6 +11,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.Dialog.ModalityType;
+import java.awt.Font;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -32,12 +35,25 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JMenu;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.html.HTMLDocument;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
+
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.common.Common;
@@ -742,10 +758,7 @@ public final class DoomToolsGUIUtils
 				else
 					path = src.path.substring(idx + 1);
 				
-				JTextArea area = textArea(src.getText(), 25, 80);
-				area.setEditable(false);
-				area.setFont(EditorSettingsManager.get().getEditorFont());
-				tabs[i] = tab(path, src.path, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(area))));
+				tabs[i] = tab(path, src.path, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))));
 			}
 			
 			out = modal(language.getText("doomtools.help.title"), 
@@ -766,20 +779,89 @@ public final class DoomToolsGUIUtils
 			else
 				path = src.path.substring(idx + 1);
 			
-			JTextArea area = textArea(src.getText(), 25, 90);
-			area.setEditable(false);
-			area.setFont(EditorSettingsManager.get().getEditorFont());
-			
 			out = modal(path, 
 				modalityType, 
 				containerOf(borderLayout(), 
-					node(BorderLayout.CENTER, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(area))))
+					node(BorderLayout.CENTER, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))))
 				)
 			);
 		}
 		out.setResizable(true);
 		return out;
 	}
+	
+	private static JComponent createComponentForHelpModal(String data, boolean markdown)
+	{
+		if (markdown)
+		{
+			Parser parser = new Parser.Builder().build();
+			Node document = parser.parse(data);
+			HtmlRenderer renderer = HtmlRenderer.builder().build();
+			String htmlData = renderer.render(document);
+			JEditorPane htmlPane = createHTMLContentPane();
+			htmlPane.setText("<html><body>" + htmlData + "</body></html>");
+			htmlPane.setPreferredSize(dimension(640, 480));
+			htmlPane.setCaretPosition(0);
+			return htmlPane;
+		}
+		else
+		{
+			JTextArea area = textArea(data, 25, 80);
+			area.setEditable(false);
+			area.setFont(EditorSettingsManager.get().getEditorFont());
+			return area;
+		}
+	}
+	
+	/** 
+	 * Creates the content panel. 
+	 */
+	private static JEditorPane createHTMLContentPane()
+	{
+		JEditorPane editorPane = new JEditorPane((new HTMLEditorKit()).getContentType(), "");
+		editorPane.setBorder(createEmptyBorder(8, 8, 8, 8));
+		editorPane.setEditable(false);
+		editorPane.setBackground(UIManager.getColor("Panel.background"));
+		
+		Font font = UIManager.getFont("Label.font");
+		String bodyRule = "body { " +
+			"font-family: " + font.getFamily() + "; " +
+			"font-size: " + font.getSize() + "pt; " +
+		"}";
+		
+		StyleSheet sheet = ((HTMLDocument)editorPane.getDocument()).getStyleSheet();
+		sheet.addRule(bodyRule);
+		sheet.addRule("h1 { font-size: 150% }");
+		sheet.addRule("h2 { font-size: 140% }");
+		sheet.addRule("h3 { font-size: 130% }");
+		sheet.addRule("h4 { font-size: 125% }");
+		sheet.addRule("h5 { font-size: 115% }");
+		sheet.addRule("h6 { font-size: 100% }");
+		sheet.addRule("code { font-size: 100% }");
+		sheet.addRule("kbd { font-size: 100% }");
+		sheet.addRule("pre { font-size: 100%; padding-left:2em }");
+		editorPane.addHyperlinkListener(new HyperlinkListener()
+		{
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent e)
+			{
+				if (e.getEventType() == EventType.ACTIVATED)
+				{
+					URI uri = null;
+					try {
+						uri = new URI(e.getDescription());
+						SwingUtils.browse(uri);
+					} catch (URISyntaxException ex) {
+						// Do nothing.
+					} catch (IOException ex) {
+						// Do nothing.
+					}
+				}
+			}
+		});
+		return editorPane;
+	}
+
 	
 	/**
 	 * Creates a singular text source for help.
