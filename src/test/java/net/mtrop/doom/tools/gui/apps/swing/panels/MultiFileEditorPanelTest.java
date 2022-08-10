@@ -22,7 +22,7 @@ public final class MultiFileEditorPanelTest
 			ep.newEditor("Stuff", "Hello, content!");
 			ep.newEditor("Stuff 2", "Hello, more content!");
 			try {
-				ep.openFileEditor(new File("src/test/java/net/mtrop/doom/tools/gui/MakeICNSMain.java"), Charset.defaultCharset());
+				ep.openFileEditor(new File("src/test/java/net/mtrop/doom/tools/gui/MakeICNSMain.java"), 0, Charset.defaultCharset());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

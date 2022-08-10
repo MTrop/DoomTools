@@ -556,15 +556,17 @@ public class EditorMultiFilePanel extends JPanel
 	 * Opens a file into a new tab.
 	 * Does nothing if the file is a directory.
 	 * @param file the file to load.
+	 * @param caretPosition the caret position.
 	 * @param encoding the file encoding.
+	 * @return the handle opened.
 	 * @throws FileNotFoundException if the file could not be found. 
 	 * @throws IOException if the file could not be read.
 	 * @throws SecurityException if the OS is forbidding the read.
 	 */
-	public void openFileEditor(File file, Charset encoding) throws FileNotFoundException, IOException
+	public EditorHandle openFileEditor(File file, int caretPosition, Charset encoding) throws FileNotFoundException, IOException
 	{
 		if (file.isDirectory())
-			return;
+			return null;
 		
 		StringWriter writer = new StringWriter();
 		try (Reader reader = new InputStreamReader(new FileInputStream(file), encoding))
@@ -576,7 +578,7 @@ public class EditorMultiFilePanel extends JPanel
 		if (getOpenEditorCount() == 1 && !currentEditor.needsToSave() && currentEditor.contentSourceFile == null)
 			closeCurrentEditor();
 		
-		createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString(), 0, null, null, null);
+		return createNewTab(file.getName(), file, encoding, getDefaultStyleName(), writer.toString(), caretPosition, null, null, null);
 	}
 	
 	/**
@@ -609,7 +611,7 @@ public class EditorMultiFilePanel extends JPanel
 		if (lookupFile.exists())
 		{
 			try {
-				openFileEditor(lookupFile, currentEditor.contentCharset);
+				openFileEditor(lookupFile, 0, currentEditor.contentCharset);
 				LOG.infof("Opened \"include\" path: %s", lookupFile.getAbsolutePath());
 			} catch (FileNotFoundException e) {
 				SwingUtils.error(language.getText("texteditor.action.include.error.notfound", lookupFile.getAbsolutePath()));
@@ -984,8 +986,9 @@ public class EditorMultiFilePanel extends JPanel
 	 * @param ending the line ending. Can be null.
 	 * @param contentLastModified the last modified timestamp. Can be null.
 	 * @param contentSourceFileLastModified the file last modified timestamp. Can be null.
+	 * @return the handle created or found.
 	 */
-	protected final synchronized void createNewTab(
+	protected final synchronized EditorHandle createNewTab(
 		String title, 
 		File attachedFile, 
 		Charset fileCharset, 
@@ -999,8 +1002,9 @@ public class EditorMultiFilePanel extends JPanel
 		if (attachedFile != null)
 			attachedFile = FileUtils.canonizeFile(attachedFile);
 		
-		if (focusOnFile(attachedFile))
-			return;
+		EditorHandle handle;
+		if ((handle = focusOnFile(attachedFile)) != null)
+			return handle;
 		
 		RSyntaxTextArea textArea = new RSyntaxTextArea();
 		
@@ -1023,7 +1027,7 @@ public class EditorMultiFilePanel extends JPanel
 		textArea.setText(textAreaContent);
 		textArea.setCaretPosition(caretPosition);
 
-		EditorHandle handle = attachedFile != null 
+		handle = attachedFile != null 
 			? new EditorHandle(attachedFile, fileCharset, styleName, textArea) 
 			: new EditorHandle(title, fileCharset, styleName, textArea)
 		;
@@ -1070,6 +1074,8 @@ public class EditorMultiFilePanel extends JPanel
 		
 		if (listener != null)
 			listener.onOpen(handle);
+		
+		return handle;
 	}
 
 	/**
@@ -1136,10 +1142,10 @@ public class EditorMultiFilePanel extends JPanel
 		}
 	}
 	
-	private boolean focusOnFile(File file)
+	private EditorHandle focusOnFile(File file)
 	{
 		if (!allOpenFiles.contains(file))
-			return false;
+			return null;
 
 		// Search sequentially because this seems to be the only reliable way to do this.
 		for (int i = 0; i < mainEditorTabs.getTabCount(); i++)
@@ -1150,11 +1156,11 @@ public class EditorMultiFilePanel extends JPanel
 			{
 				mainEditorTabs.setSelectedIndex(i);
 				SwingUtils.invoke(() -> handle.editorPanel.textArea.requestFocus());
-				return true;
+				return handle;
 			}
 		}
 		
-		return false;
+		return null;
 	}
 	
 	private void remapFileTabs(File oldFile, File newFile)
@@ -2195,7 +2201,7 @@ public class EditorMultiFilePanel extends JPanel
 			for (File f : files)
 			{
 				try {
-					openFileEditor(f, defaultViewSettings.getDefaultEncoding());
+					openFileEditor(f, 0, defaultViewSettings.getDefaultEncoding());
 				} catch (IOException e) {
 					error(language.getText("texteditor.dnd.droperror", f.getAbsolutePath()));
 				}

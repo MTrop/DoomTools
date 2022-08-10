@@ -60,10 +60,12 @@ import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.settings.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.GitRepositoryPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MercurialRepositoryPanel;
+import net.mtrop.doom.tools.gui.swing.panels.ProjectSearchPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.ProcessCallable;
+import net.mtrop.doom.tools.struct.WatchServiceThread;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
@@ -92,6 +94,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
     // Singletons
 
+    private final DoomMakeStudioApp SELF = this;
+    
     /** Settings manager. */
 	private DoomMakeSettingsManager settings;
 	private DoomMakeStudioSettingsManager studioSettings;
@@ -101,6 +105,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private JTabbedPane tabPanel;
 	private JSplitPane filesSplitPaneHorizontal;
 	private JSplitPane filesSplitPaneVertical;
+	private ProjectSearchPanel searchPanel;
 	private JComponent repositoryPanel;
 	private DoomToolsTextOutputPanel loggingPanel;
 	private EditorDirectoryTreePanel treePanel;
@@ -216,6 +221,10 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.treePanel.setRootDirectory(targetDirectory);
 		this.treePanel.setLabel(targetDirectory.getName());
 		
+		this.searchPanel = new ProjectSearchPanel(targetDirectory, (result) -> {
+			onOpenFile(result.getSource(), (int)result.getOffset());
+		});
+		
 		if (Git.isGit(targetDirectory))		
 			this.repositoryPanel = new GitRepositoryPanel(targetDirectory);
 		else if (Mercurial.isMercurial(targetDirectory))		
@@ -238,6 +247,9 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				containerOf(dimension(DEFAULT_WIDTH, 150), node(executionPanel))
 			))
 		);
+		JComponent searchTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
+			node(searchPanel)
+		);
 		JComponent repoTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
 			node(repositoryPanel)
 		);
@@ -249,6 +261,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 		this.tabPanel = tabs(TabPlacement.LEFT, TabLayoutPolicy.SCROLL, 
 			tab(icons.getImage("doommake-folder.png"), fileTab), 
+			tab(icons.getImage("doommake-search.png"), searchTab),
 			tab(icons.getImage("doommake-repo.png"), repoTab),
 			tab(icons.getImage("doommake-log.png"), loggingTab)
 		);
@@ -630,17 +643,22 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			onOpenFile(file);
 	}
 
-	private void onOpenFile(File file)
+	private EditorHandle onOpenFile(File file)
+	{
+		return onOpenFile(file, null);
+	}
+	
+	private EditorHandle onOpenFile(File file, Integer offset)
 	{
 		final Container parent = getApplicationContainer();
 
 		if (openWadFile(file))
-			return;
+			return null;
 		if (openUnknownFile(file))
-			return;
+			return null;
 		
 		try {
-			editorPanel.openFileEditor(file, Charset.defaultCharset());
+			return editorPanel.openFileEditor(file, offset != null ? offset : 0, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("doommake.status.message.editor.error", file.getName()));
@@ -654,6 +672,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			statusPanel.setErrorMessage(language.getText("doommake.status.message.editor.error.security", file.getName()));
 			SwingUtils.error(parent, language.getText("doommake.open.error.security", file.getAbsolutePath()));
 		}
+		
+		return null;
 	}
 
 	// Returns true if handled.
@@ -1034,6 +1054,26 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		return settings;
 	}
+	
+	private void onProjectFileCreated(File file)
+	{
+		searchPanel.registerFile(file);
+	}
+	
+	private void onProjectFileModified(File file)
+	{
+		searchPanel.registerFile(file);
+	}
+	
+	private void onProjectFileDeleted(File file)
+	{
+		searchPanel.deregisterFile(file);
+	}
+	
+	private void onWatcherError(String message)
+	{
+		statusPanel.setErrorMessage(message);
+	}
 
 	private class DoomMakeTreePanel extends EditorDirectoryTreePanel
 	{
@@ -1099,4 +1139,18 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 	}
 	
+	private class ProjectWatcher extends WatchServiceThread
+	{
+		private ProjectWatcher()
+		{
+			super(
+				projectDirectory,
+				true,
+				SELF::onProjectFileCreated,
+				SELF::onProjectFileModified,
+				SELF::onProjectFileDeleted,
+				SELF::onWatcherError
+			);
+		}
+	}
 }

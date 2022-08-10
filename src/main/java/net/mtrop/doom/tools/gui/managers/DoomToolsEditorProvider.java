@@ -6,9 +6,6 @@
 package net.mtrop.doom.tools.gui.managers;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
@@ -26,6 +23,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.CurlyFoldParser;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.managers.parsing.DEUTEXTokenMaker;
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackCompletionProvider;
 import net.mtrop.doom.tools.gui.managers.parsing.DecoHackTokenMaker;
@@ -364,7 +362,7 @@ public final class DoomToolsEditorProvider
 		if ((styleName = EXTENSION_TO_STYLE_MAP.get(ext)) != null)
 			return styleName;
 
-		if (isBinaryFile(file))
+		if (Common.isBinaryFile(file))
 			return null;
 		
 		return SYNTAX_STYLE_NONE;
@@ -394,32 +392,4 @@ public final class DoomToolsEditorProvider
 		return out;
 	}
 
-	// Tiny test to check if a file is a binary file.
-	private static boolean isBinaryFile(File file)
-	{
-		final int THRESHOLD = 512;
-		byte[] buffer = new byte[THRESHOLD];
-		try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
-		{
-			int amt = raf.read(buffer);
-			for (int i = 0; i < amt; i++)
-				if ((buffer[i] & 0x0ff) > 127)
-					return true;
-			return false;
-		} 
-		catch (FileNotFoundException e) 
-		{
-			return false;
-		} 
-		catch (IOException e) 
-		{
-			return false;
-		} 
-		catch (SecurityException e) 
-		{
-			return false;
-		}
-		
-	}
-	
 }

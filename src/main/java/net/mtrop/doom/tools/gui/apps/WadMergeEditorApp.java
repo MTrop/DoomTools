@@ -423,7 +423,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	{
 		final Container parent = getApplicationContainer();
 		try {
-			editorPanel.openFileEditor(file, Charset.defaultCharset());
+			editorPanel.openFileEditor(file, 0, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadmerge.status.message.editor.error", file.getName()));

@@ -6,12 +6,14 @@
 package net.mtrop.doom.tools.common;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -210,6 +212,41 @@ public final class Common
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Checks if a file is a binary file via a simple data test.
+	 * @param file the file to inspect.
+	 * @return true if so, false if not.
+	 */
+	public static boolean isBinaryFile(File file)
+	{
+		final int THRESHOLD = 512;
+		byte[] buffer = new byte[THRESHOLD];
+		try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
+		{
+			int amt = raf.read(buffer);
+			for (int i = 0; i < amt; i++)
+			{
+				int value = (buffer[i] & 0x0ff); 
+				if (value > 127 || (value >= 0 && value <= 5))
+					return true;
+			}
+			return false;
+		} 
+		catch (FileNotFoundException e) 
+		{
+			return false;
+		} 
+		catch (IOException e) 
+		{
+			return false;
+		} 
+		catch (SecurityException e) 
+		{
+			return false;
+		}
+		
 	}
 	
 }

@@ -1087,7 +1087,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1125,7 +1125,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1163,7 +1163,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1207,7 +1207,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1261,7 +1261,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1301,7 +1301,7 @@ public final class FormFactory
 			}
 
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1340,7 +1340,7 @@ public final class FormFactory
 			}
 			
 			@Override
-			protected Component getFormComponent() 
+			public Component getFormComponent() 
 			{
 				return field;
 			}
@@ -1393,7 +1393,7 @@ public final class FormFactory
 			}
 			
 			@Override
-			protected Component getFormComponent()
+			public Component getFormComponent()
 			{
 				return field;
 			}
@@ -1431,7 +1431,7 @@ public final class FormFactory
 			}
 			
 			@Override
-			protected Component getFormComponent()
+			public Component getFormComponent()
 			{
 				return field;
 			}
@@ -1470,7 +1470,7 @@ public final class FormFactory
 			}
 			
 			@Override
-			protected Component getFormComponent()
+			public Component getFormComponent()
 			{
 				return field;
 			}
@@ -1796,13 +1796,13 @@ public final class FormFactory
 		 * Gets the reference to this field's form component (for state stuff).
 		 * @return the component. Cannot be null.
 		 */
-		protected abstract Component getFormComponent();
+		public abstract Component getFormComponent();
 
 		/**
 		 * Gets the reference to this field's form component explicitly used for user input.
 		 * @return the component.
 		 */
-		protected Component getFormInputComponent()
+		public Component getFormInputComponent()
 		{
 			return getFormComponent();
 		}
@@ -1858,7 +1858,7 @@ public final class FormFactory
 		}
 		
 		@Override
-		protected Component getFormComponent() 
+		public Component getFormComponent() 
 		{
 			return formField;
 		}
@@ -1909,7 +1909,7 @@ public final class FormFactory
 		}
 		
 		@Override
-		protected Component getFormInputComponent() 
+		public Component getFormInputComponent() 
 		{
 			return getFormComponent();
 		}
@@ -2130,7 +2130,7 @@ public final class FormFactory
 		}
 
 		@Override
-		protected Component getFormComponent() 
+		public Component getFormComponent() 
 		{
 			return textField;
 		}
@@ -2171,6 +2171,10 @@ public final class FormFactory
 				public void keyPressed(KeyEvent e) 
 				{
 					if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					{
+						refreshValue();
+					}
+					else if (e.getKeyCode() == KeyEvent.VK_TAB)
 					{
 						e.getComponent().transferFocus();
 					}
@@ -2247,7 +2251,7 @@ public final class FormFactory
 		}
 		
 		@Override
-		protected Component getFormComponent() 
+		public Component getFormComponent() 
 		{
 			return textField;
 		}

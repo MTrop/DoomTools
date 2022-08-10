@@ -467,7 +467,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 	private void onOpenFile(File file)
 	{
 		try {
-			editorPanel.openFileEditor(file, Charset.defaultCharset());
+			editorPanel.openFileEditor(file, 0, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("decohack.status.message.editor.error", file.getName()));
