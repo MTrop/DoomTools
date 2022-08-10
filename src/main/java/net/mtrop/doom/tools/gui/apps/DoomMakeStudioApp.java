@@ -132,6 +132,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private Map<EditorHandle, MergeSettings> handleToWadMergeSettingsMap;
 	private ScriptExecutionSettings doomMakeSettings;
 	
+	private ProjectWatcher watcher;
+	
 	/**
 	 * Creates a new open project application.
 	 */
@@ -179,10 +181,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			{
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("doommake.status.message.saved", sourceFile.getName()));
-				if (repositoryPanel instanceof GitRepositoryPanel)
-					((GitRepositoryPanel)repositoryPanel).refreshEntries();
-				else if (repositoryPanel instanceof MercurialRepositoryPanel)
-					((MercurialRepositoryPanel)repositoryPanel).refreshEntries();
+				refreshRepository();
 				onHandleChange();
 			}
 
@@ -426,11 +425,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		// Set the last directory successfully opened.
 		settings.setLastProjectDirectory(projectDirectory);
 		onNewEditor();
+		watcher = new ProjectWatcher();
+		watcher.start();
 	}
 	
 	@Override
 	public void onClose(Object frame) 
 	{
+		watcher.interrupt();
 		executionPanel.shutDownAgent();
 		if (frame instanceof JFrame)
 		{
@@ -1055,6 +1057,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		return settings;
 	}
 	
+	private void refreshRepository() 
+	{
+		if (repositoryPanel instanceof GitRepositoryPanel)
+			((GitRepositoryPanel)repositoryPanel).refreshEntries();
+		else if (repositoryPanel instanceof MercurialRepositoryPanel)
+			((MercurialRepositoryPanel)repositoryPanel).refreshEntries();
+	}
+
 	private void onProjectFileCreated(File file)
 	{
 		searchPanel.registerFile(file);

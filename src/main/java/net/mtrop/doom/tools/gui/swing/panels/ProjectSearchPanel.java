@@ -58,6 +58,8 @@ public class ProjectSearchPanel extends JPanel
 	private Set<File> registeredFiles;
 	
 	private JFormField<String> findField;
+	private JFormField<Boolean> caseSensitiveField;
+	
 	private ResultModel searchResultListModel;
 	private JList<SearchResult> searchResultList;
 	private DoomToolsStatusPanel statusPanel;
@@ -110,11 +112,16 @@ public class ProjectSearchPanel extends JPanel
 			}
 		});
 		
+		this.caseSensitiveField = checkBoxField(checkBox(language.getText("doommake.search.field.case"), (v) -> {}));
+		
 		statusPanel.setSuccessMessage(language.getText("doommake.search.ready"));
 		
 		containerOf(this,
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.search.field.width")),
 				utils.formField("doommake.search.field.find", findField),
+				utils.formField(panelField(containerOf(flowLayout(Flow.LEADING),
+					node(caseSensitiveField)
+				))),
 				utils.formField(panelField(containerOf(flowLayout(Flow.TRAILING),
 					node(button(language.getText("doommake.search.button.find"), (b) -> onFindAll()))
 				)))
@@ -132,7 +139,7 @@ public class ProjectSearchPanel extends JPanel
 	 */
 	public void registerFile(File file)
 	{
-		if (!Common.isBinaryFile(file))
+		if (!Common.isBinaryFile(file) && !file.isHidden() && !file.isDirectory())
 			registeredFiles.add(FileUtils.canonizeFile(file));
 	}
 	
@@ -148,11 +155,18 @@ public class ProjectSearchPanel extends JPanel
 	/**
 	 * Searches for a specific phrase.
 	 * @param phrase the phrase to search for.
+	 * @param caseSensitive if true, case sensitive search.
 	 */
-	public void search(final String phrase)
+	public void search(String phrase, boolean caseSensitive)
 	{
 		if (ObjectUtils.isEmpty(phrase))
 			return;
+
+		final String finalPhrase;
+		if (!caseSensitive)
+			finalPhrase = phrase.toLowerCase();
+		else
+			finalPhrase = phrase;
 		
 		LOG.debug("Started search.");
 		statusPanel.setActivityMessage(language.getText("doommake.search.searching"));
@@ -168,12 +182,15 @@ public class ProjectSearchPanel extends JPanel
 					String line;
 					while ((line = reader.readLine()) != null)
 					{
+						if (!caseSensitive)
+							line = line.toLowerCase();
+						
 						int index;
 						int lineSearch = 0;
-						while ((index = line.indexOf(phrase, lineSearch)) >= 0)
+						while ((index = line.indexOf(finalPhrase, lineSearch)) >= 0)
 						{
-							searchResultListModel.addResult(new SearchResult(file, lines, index, index + phrase.length() - 1, offset + index));
-							lineSearch = index + phrase.length();
+							searchResultListModel.addResult(new SearchResult(file, lines, index, index + finalPhrase.length() - 1, offset + index));
+							lineSearch = index + finalPhrase.length();
 							count++;
 						}
 						offset += line.length() + 1;
@@ -201,7 +218,7 @@ public class ProjectSearchPanel extends JPanel
 	public void onFindAll()
 	{
 		searchResultListModel.clear();
-		search(findField.getValue());
+		search(findField.getValue(), caseSensitiveField.getValue());
 	}
 	
 	/**

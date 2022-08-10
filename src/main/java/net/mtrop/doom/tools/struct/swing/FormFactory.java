@@ -2173,6 +2173,7 @@ public final class FormFactory
 					if (e.getKeyCode() == KeyEvent.VK_ENTER)
 					{
 						refreshValue();
+						e.getComponent().transferFocus();
 					}
 					else if (e.getKeyCode() == KeyEvent.VK_TAB)
 					{
