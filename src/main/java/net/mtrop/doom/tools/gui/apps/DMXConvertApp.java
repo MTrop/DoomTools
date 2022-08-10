@@ -19,9 +19,9 @@ import javax.swing.JRadioButton;
 
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
-import net.mtrop.doom.tools.gui.swing.panels.DMXConvertSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.FileListPanel;
+import net.mtrop.doom.tools.gui.swing.panels.settings.DMXConvertSettingsPanel;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;

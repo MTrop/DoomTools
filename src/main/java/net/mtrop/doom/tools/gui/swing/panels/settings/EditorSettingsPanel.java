@@ -3,7 +3,7 @@
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
-package net.mtrop.doom.tools.gui.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -14,6 +14,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.swing.panels.EditorDefaultAutoCompleteSettingsPanel;
 
 import static javax.swing.BorderFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;

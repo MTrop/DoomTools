@@ -23,8 +23,8 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomMakeExecutionPanel;
-import net.mtrop.doom.tools.gui.swing.panels.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.gui.swing.panels.settings.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 

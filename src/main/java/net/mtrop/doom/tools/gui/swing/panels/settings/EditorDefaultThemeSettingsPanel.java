@@ -3,7 +3,7 @@
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
-package net.mtrop.doom.tools.gui.swing.panels;
+package net.mtrop.doom.tools.gui.swing.panels.settings;
 
 import javax.swing.JPanel;
 
