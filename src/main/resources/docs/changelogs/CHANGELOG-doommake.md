@@ -1,8 +1,9 @@
 DoomMake
 --------
 
-### Changed for 0.19.1
+### Changed for 0.20.0
 
+* `Added` [GUI-Studio] Project search.
 * `Fixed` [GUI] Repository managers attempted to call CMD on non-Windows OSes.
 * `Fixed` [GUI] Opening a Terminal on macOS now works as intended.
 
