@@ -540,7 +540,7 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 	private void onOpenFile(File file)
 	{
 		try {
-			editorPanel.openFileEditor(file, 0, Charset.defaultCharset());
+			editorPanel.openFileEditor(file, Charset.defaultCharset());
 		} catch (FileNotFoundException e) {
 			LOG.errorf(e, "Selected file could not be found: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("wadtex.status.message.editor.error", file.getName()));

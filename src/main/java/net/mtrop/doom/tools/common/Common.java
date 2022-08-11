@@ -221,7 +221,7 @@ public final class Common
 	 */
 	public static boolean isBinaryFile(File file)
 	{
-		final int THRESHOLD = 512;
+		final int THRESHOLD = 1024;
 		byte[] buffer = new byte[THRESHOLD];
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
 		{

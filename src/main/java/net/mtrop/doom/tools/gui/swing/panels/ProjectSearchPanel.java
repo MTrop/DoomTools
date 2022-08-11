@@ -80,8 +80,10 @@ public class ProjectSearchPanel extends JPanel
 		this.statusPanel = new DoomToolsStatusPanel();
 		
 		tasks.spawn(() -> {
+			statusPanel.setActivityMessage(language.getText("doommake.search.prep"));
 			for (File file : FileUtils.explodeFiles(projectDirectory))
 				registerFile(file);
+			statusPanel.setSuccessMessage(language.getText("doommake.search.ready"));
 		});
 
 		this.searchResultListModel = new ResultModel();
@@ -113,8 +115,6 @@ public class ProjectSearchPanel extends JPanel
 		});
 		
 		this.caseSensitiveField = checkBoxField(checkBox(language.getText("doommake.search.field.case"), (v) -> {}));
-		
-		statusPanel.setSuccessMessage(language.getText("doommake.search.ready"));
 		
 		containerOf(this,
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.search.field.width")),
@@ -269,7 +269,7 @@ public class ProjectSearchPanel extends JPanel
 		@Override
 		public String toString() 
 		{
-			return source.getName() + " - Line " + line;
+			return source.getName() + " (Line " + line + ") - " + source.getParent();
 		}
 		
 	}
