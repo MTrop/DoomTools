@@ -34,6 +34,8 @@ public final class Common
 	/** Version number map. */
 	private static final Map<String, String> VERSION_MAP = new HashMap<>();
 	
+	private static final ThreadLocal<byte[]> BYTE_THRESHOLD = ThreadLocal.withInitial(() -> new byte[1024]);
+	
     /**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
@@ -221,8 +223,7 @@ public final class Common
 	 */
 	public static boolean isBinaryFile(File file)
 	{
-		final int THRESHOLD = 1024;
-		byte[] buffer = new byte[THRESHOLD];
+		byte[] buffer = BYTE_THRESHOLD.get();
 		try (RandomAccessFile raf = new RandomAccessFile(file, "r"))
 		{
 			int amt = raf.read(buffer);

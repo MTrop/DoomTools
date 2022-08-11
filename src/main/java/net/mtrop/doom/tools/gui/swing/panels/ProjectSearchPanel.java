@@ -139,7 +139,10 @@ public class ProjectSearchPanel extends JPanel
 	 */
 	public void registerFile(File file)
 	{
-		if (!Common.isBinaryFile(file) && !file.isHidden() && !file.isDirectory())
+		// detect a change.
+		if (Common.isBinaryFile(file) || file.isHidden() || file.isDirectory())
+			deregisterFile(file);
+		else
 			registeredFiles.add(FileUtils.canonizeFile(file));
 	}
 	
@@ -281,7 +284,7 @@ public class ProjectSearchPanel extends JPanel
 
 		private ResultModel() 
 		{
-			this.results = new ArrayList<>();
+			this.results = Collections.synchronizedList(new ArrayList<>());
 			this.listeners = Collections.synchronizedList(new ArrayList<>(4));
 		}
 
