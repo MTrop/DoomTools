@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-08-23** New Folders get "new folder" names on directory trees.
+
 - **2022-08-08** Markdown is rendered out in Help dialogs.
 
 - **2022-08-04** Added `--changelog` switches to all utilities.

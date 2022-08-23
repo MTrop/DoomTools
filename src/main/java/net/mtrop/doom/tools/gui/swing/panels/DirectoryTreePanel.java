@@ -417,13 +417,13 @@ public class DirectoryTreePanel extends JPanel
 		return new TreePath(treeNodes.toArray(new Object[treeNodes.size()]));
 	}
 	
-	private String getNewName(File targetDirectory)
+	private String getNewName(File targetDirectory, String namePrefix, String title, String message)
 	{
 		int i = 1;
 		String newFilePath;
 		String newFileName;
 		do {
-			newFileName = "New File " + (i++);
+			newFileName = namePrefix + " " + (i++);
 			newFilePath = targetDirectory.getPath() + File.separator + newFileName;
 		} while (new File(newFilePath).exists());
 		
@@ -454,7 +454,12 @@ public class DirectoryTreePanel extends JPanel
 	{
 		File targetDirectory = getSelectedFile();
 
-		String newFileName = getNewName(targetDirectory);
+		String newFileName = getNewName(
+			targetDirectory, 
+			"New file",
+			language.getText("dirtree.modal.new.file.title"), 
+			language.getText("dirtree.modal.new.file.message")
+		);
 		if (newFileName == null)
 			return;
 		
@@ -483,11 +488,16 @@ public class DirectoryTreePanel extends JPanel
 	{
 		File targetDirectory = getSelectedFile();
 
-		String newFileName = getNewName(targetDirectory);
-		if (newFileName == null)
+		String newDirName = getNewName(
+			targetDirectory, 
+			"New folder",
+			language.getText("dirtree.modal.new.folder.title"), 
+			language.getText("dirtree.modal.new.folder.message")
+		);
+		if (newDirName == null)
 			return;
 		
-		String newFilePath = targetDirectory.getPath() + File.separator + newFileName;
+		String newFilePath = targetDirectory.getPath() + File.separator + newDirName;
 		
 		try {
 			File newFile = new File(newFilePath);
