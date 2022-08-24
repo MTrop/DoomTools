@@ -44,6 +44,8 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.struct.HTMLWriter;
+import net.mtrop.doom.tools.struct.HTMLWriter.HTMLStringWriter;
 import net.mtrop.doom.tools.struct.PreprocessorLexer.PreprocessorException;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -83,6 +85,7 @@ public final class DecoHackMain
 	public static final String SWITCH_CHARSET2 = "-c";
 
 	public static final String SWITCH_DUMPPOINTERS = "--dump-pointers";
+	public static final String SWITCH_DUMPPOINTERS_HTML = "--dump-pointers-html";
 	public static final String SWITCH_DUMPCONSTANTS = "--dump-constants";
 	public static final String SWITCH_DUMPRESOURCE = "--dump-resource";
 	
@@ -112,6 +115,7 @@ public final class DecoHackMain
 		private boolean version;
 		private boolean changelog;
 		private boolean dumpActionPointers;
+		private boolean dumpActionPointersHTML;
 		private String dumpResource;
 		private boolean dryRun;
 
@@ -264,6 +268,92 @@ public final class DecoHackMain
 			if (options.changelog)
 			{
 				changelog(options.stdout, "decohack");
+				return ERROR_NONE;
+			}
+			
+			if (options.dumpActionPointersHTML)
+			{
+				final BiPredicate<DEHActionPointer, DEHActionPointer> BREAK = (p1, p2) -> 
+					p1.isWeapon() != p2.isWeapon() || p1.getType() != p2.getType();
+				
+				List<DEHActionPointer> pointerList = new LinkedList<>();
+				pointerList.addAll(Arrays.asList(DEHActionPointerDoom19.values()));
+				pointerList.addAll(Arrays.asList(DEHActionPointerMBF.values()));
+				pointerList.addAll(Arrays.asList(DEHActionPointerMBF21.values()));
+				
+				HTMLStringWriter htmlwriter = HTMLWriter.createHTMLString(HTMLWriter.Options.PRETTY, HTMLWriter.Options.SLASHES_IN_SINGLE_TAGS);
+				
+				boolean firstCategory = true;
+				DEHActionPointer prev = null;
+				for (DEHActionPointer pointer : pointerList)
+				{
+					// Will skip A_NULL
+					if (prev != null)
+					{
+						if (BREAK.test(prev, pointer))
+						{
+							if (!firstCategory)
+								htmlwriter.pop().pop();
+							htmlwriter.push("div", HTMLWriter.classes("dh-content"));
+
+							htmlwriter.push("h1", HTMLWriter.classes("dh-pointer-type"));
+							htmlwriter.text(pointer.getType().name());
+							htmlwriter.tag("span", pointer.isWeapon() ? "Weapon Pointer" : "Thing Pointer", HTMLWriter.classes("dh-pointer-subtype"));
+							htmlwriter.pop();
+							
+							htmlwriter.push("div", HTMLWriter.classes("dh-pointer-type-section"));
+							firstCategory = false;
+						}
+						
+						// Print pointer and usage.
+						htmlwriter.push("div", HTMLWriter.id("A_" + pointer.getMnemonic()), HTMLWriter.classes("dh-pointer"));
+						htmlwriter.push("h3", HTMLWriter.classes("dh-pointer-name"));
+						htmlwriter.text("A_" + pointer.getMnemonic() + "(");
+
+						Usage usage = pointer.getUsage();
+						boolean first = true;
+						for (PointerParameter parameter : usage.getParameters())
+						{
+							if (!first)
+								htmlwriter.text(", ");
+							htmlwriter.tag("span", parameter.getName(), HTMLWriter.classes("dh-pointer-parameter"));
+							first = false;
+						}
+						htmlwriter.text(")");
+						htmlwriter.pop();
+
+						htmlwriter.push("div", HTMLWriter.classes("instructions"));
+						for (String instruction : usage.getInstructions())
+						{
+							htmlwriter.tag("p", instruction.trim());
+						}
+						htmlwriter.pop();
+						
+						if (usage.hasParameters())
+						{
+							htmlwriter.push("ul", HTMLWriter.classes("parameter-list"));
+							for (PointerParameter parameter : usage.getParameters())
+							{
+								htmlwriter.push("li", HTMLWriter.classes("parameter"));
+								htmlwriter.tag("span", parameter.getName(), HTMLWriter.classes("parameter-name"));
+								htmlwriter.tag("span", "(" + parameter.getType().name() + ")", HTMLWriter.classes("parameter-type"));
+								htmlwriter.push("div", HTMLWriter.classes("instructions"));
+								for (String instruction : parameter.getInstructions())
+								{
+									htmlwriter.tag("p", instruction.trim());
+								}
+								htmlwriter.pop().pop();
+							}
+							htmlwriter.pop();
+						}
+						htmlwriter.pop();
+					}
+
+					prev = pointer;
+				}
+				
+				options.stdout.println(htmlwriter.toString());
+				
 				return ERROR_NONE;
 			}
 			
@@ -669,6 +759,8 @@ public final class DecoHackMain
 						options.dryRun = true;
 					else if (arg.equals(SWITCH_DUMPPOINTERS))
 						options.dumpActionPointers = true;
+					else if (arg.equals(SWITCH_DUMPPOINTERS_HTML))
+						options.dumpActionPointersHTML = true;
 					else if (arg.equals(SWITCH_DUMPCONSTANTS))
 						options.dumpResource = RESOURCE_HELP_CONSTANTS;
 					else if (arg.equals(SWITCH_DUMPRESOURCE))

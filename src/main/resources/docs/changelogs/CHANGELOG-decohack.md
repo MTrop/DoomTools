@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.28.0
+
+* `Added` Documentation for all pointers in is HTML when dumped with `--dump-pointers-html`.
+
+
 ### Changed for 0.27.0
 
 * `Added` The `state protect` and `state unprotect` clauses now accept state index clauses, not just numbers. (Enhancement #12)
