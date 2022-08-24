@@ -1,0 +1,2212 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="Action pointer reference for DECOHack." />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="DECOHack Pointer Reference" />
+		<meta itemprop="description" content="Action pointer reference for DECOHack." />
+		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/decohack-pointers.html" />
+		<meta name="twitter:title" content="DECOHack Pointer Reference" />
+		<meta name="twitter:description" content="Action pointer reference for DECOHack." />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/decohack-pointers.html" />
+		<meta property="og:title" content="DECOHack Pointer Reference" />
+		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
+		<meta property="og:description" content="Action pointer reference for DECOHack." />
+
+		<title>DECOHack Pointer Reference</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/pointer-ref.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/doomtools-banner-adjusted.png"/>
+		</div>
+		<div class="nav-section">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<!-- Start DIV -->
+		<div class="script-docs">
+			<div class="main-title">
+				<h1 class="main-title-name">DECOHack Pointer Reference</h1>
+			</div>
+			<!-- Start Output -->
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					DOOM19
+					<span class="dh-pointer-subtype">Weapon Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_Light0" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Light0(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Sets the player's extra lighting level to 0.</p>
+							<p>Used to reset lighting after weapon fire. See A_Light1 and A_Light2.</p>
+						</div>
+					</div>
+					<div id="A_WeaponReady" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponReady(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Enables weapon ready checks for the calling player.</p>
+							<p>Listens for the calling player's weapon fire input flag for firing a weapon. If so, weapon enters the FIRE state.</p>
+							<p>Also sets the calling actor to S_PLAY (state 149) if the actor is in the S_PLAY_ATK1 or S_PLAY_ATK2 states (154 or 155).</p>
+							<p>Also if the current weapon is WP_CHAINSAW (slot 7) and it is called on state S_SAW (67), it will play sound &quot;SAWIDL&quot;.</p>
+							<p>Also puts this weapon into the LOWER state if the player is NOT dead and has a pending weapon to switch to.</p>
+							<p>Also sets the weapon graphic offsets for bobbing animation by player speed.</p>
+						</div>
+					</div>
+					<div id="A_Lower" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Lower(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Lowers the weapon by a specific offset amount.</p>
+							<p>The weapon is lowered by a certain offset amount (LOWERSPEED) until it is off the screen. If it is, the pending weapon is switched to and enters its RAISE state.</p>
+							<p>Can be called multiple times during one gametic to lower a weapon more quickly.</p>
+							<p>Since this is affected by graphic offset, you can use the offset parameters to influence this behavior.</p>
+						</div>
+					</div>
+					<div id="A_Raise" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Raise(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Raises the weapon by a specific offset amount.</p>
+							<p>The weapon is raised by a certain offset amount (RAISESPEED) until it reaches a certain offset (WEAPONTOP). Once it does, it enters the READY state.</p>
+							<p>Can be called multiple times during one gametic to raise a weapon more quickly.</p>
+							<p>Since this is affected by graphic offset, you can use the offset parameters to influence this behavior.</p>
+						</div>
+					</div>
+					<div id="A_Punch" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Punch(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a punch hitscan attack from the calling player.</p>
+							<p>If it is in range of a shootable actor, it plays the &quot;PUNCH&quot; sound, deals 1d10 x2 damage to that actor, further multiplied by 10 if the calling player has the Berserk powerup.</p>
+							<p>If the attack deals damage, it will turn the player towards what it punched.</p>
+							<p>The range of the attack is 64 map units.</p>
+						</div>
+					</div>
+					<div id="A_ReFire" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_ReFire(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs weapon refire logic.</p>
+							<p>Checks if the player's weapon fire input flag is set, and if possible, the weapon is fired again.</p>
+							<p>On refire, the player's &quot;refire&quot; count is incremented, the ammo amount is checked/deducted, and the weapon enters the FIRE state if all conditions are good.</p>
+							<p>However, if the player is dead, is switching away from a weapon, or the weapon fire input flag is not set, the &quot;refire&quot; count on the player is set to 0, and ammo checks occur.</p>
+							<p>NOTE: The &quot;refire&quot; count influences things like certain hitscan attack accuracies and which firing state to use on the chaingun (see A_FireCGun, A_FirePistol).</p>
+						</div>
+					</div>
+					<div id="A_FirePistol" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FirePistol(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a pistol shot from the calling player.</p>
+							<p>Plays the sound &quot;PISTOL&quot;, fires one hitscan attack, and subtracts 1 from the ammo type of this weapon.</p>
+							<p>The hitscan attack does 5 x 1d3 damage.</p>
+							<p>This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD.</p>
+							<p>If &quot;refire&quot; is 0, the hitscan is dead center, with no random angle.</p>
+						</div>
+					</div>
+					<div id="A_Light1" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Light1(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Sets the player's extra lighting level to 1.</p>
+							<p>See A_Light0 to reset.</p>
+						</div>
+					</div>
+					<div id="A_FireShotgun" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireShotgun(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a shotgun shot from the calling player.</p>
+							<p>Plays the sound &quot;SHOTGN&quot;, fires 7 hitscan attacks, and subtracts 1 from the ammo type of this weapon.</p>
+							<p>Each hitscan attack does 5 x 1d3 damage.</p>
+							<p>This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD.</p>
+						</div>
+					</div>
+					<div id="A_Light2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Light2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Sets the player's extra lighting level to 2.</p>
+							<p>See A_Light0 to reset.</p>
+						</div>
+					</div>
+					<div id="A_FireShotgun2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireShotgun2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a super-shotgun shot from the calling player.</p>
+							<p>Plays the sound &quot;DSHTGN&quot;, fires 20 hitscan attacks, and subtracts 2 from the ammo type of this weapon.</p>
+							<p>Each hitscan attack does 5 x 1d3 damage.</p>
+							<p>This also sets the calling player's state to S_PLAY_ATK2 (155), and displays the FLASH state for the weapon on the HUD.</p>
+						</div>
+					</div>
+					<div id="A_CheckReload" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CheckReload(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Checks if the calling player has sufficient ammo to fire for this weapon.</p>
+							<p>* If the player does not have sufficient ammo, this starts a switch to the next preferred weapon.</p>
+							<p>* If the weapon is in slot 8 (Super Shotgun), it checks for 2 for the current weapon.</p>
+							<p>* If the weapon is in slot 6 (BFG), it checks for [BFGCells] for the current weapon.</p>
+							<p>* All other slots, it checks for 1 ammo.</p>
+						</div>
+					</div>
+					<div id="A_OpenShotgun2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_OpenShotgun2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the sound &quot;DBOPN&quot; from the calling player.</p>
+						</div>
+					</div>
+					<div id="A_LoadShotgun2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_LoadShotgun2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the sound &quot;DBLOAD&quot; from the calling player.</p>
+						</div>
+					</div>
+					<div id="A_CloseShotgun2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CloseShotgun2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the sound &quot;DBCLS&quot; from the calling player and calls A_ReFire.</p>
+						</div>
+					</div>
+					<div id="A_FireCGun" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireCGun(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires the chaingun from the calling player.</p>
+							<p>Plays the sound &quot;PISTOL&quot;, fires one hitscan attack, and subtracts 1 from the ammo type of this weapon.</p>
+							<p>This also sets the calling player's state to S_PLAY_ATK2 (state 155).</p>
+							<p>If &quot;refire&quot; is 0, the hitscan is dead center.</p>
+							<p>NOTE: The FLASH state displayed for this firing is based on the offset from state S_CHAIN1 (52). If 52, FLASH. If 53, FLASH + 1.</p>
+						</div>
+					</div>
+					<div id="A_GunFlash" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_GunFlash(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a gun flash for the calling player.</p>
+							<p>Sets the calling player's state to S_PLAY_ATK2 (state 155), and displays the FLASH state for the weapon on the HUD.</p>
+						</div>
+					</div>
+					<div id="A_FireMissile" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireMissile(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a rocket from the calling player.</p>
+							<p>Subtracts 1 from the ammo type of this weapon and fires thing slot MT_ROCKET (34).</p>
+						</div>
+					</div>
+					<div id="A_Saw" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Saw(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a single chainsaw scan attack from the calling player.</p>
+							<p>If it is in range of a shootable actor, it plays the &quot;SAWHIT&quot; sound from the calling player, deals 1d10 x2 damage to that actor.</p>
+							<p>If the attack deals damage, it will turn the player towards what it punched.</p>
+							<p>If the attack misses, it plays the &quot;SAWFUL&quot; sound from the calling player.</p>
+							<p>The range of the attack is 64 map units.</p>
+						</div>
+					</div>
+					<div id="A_FirePlasma" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FirePlasma(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a plasma rifle projectile from the calling player.</p>
+							<p>Subtracts 1 from the ammo type of this weapon and fires thing slot MT_PLASMA (35).</p>
+							<p>Displays the FLASH or FLASH+1 state for the weapon on the HUD at random.</p>
+						</div>
+					</div>
+					<div id="A_BFGsound" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BFGsound(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the sound &quot;BFG&quot; from the calling player.</p>
+						</div>
+					</div>
+					<div id="A_FireBFG" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireBFG(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a BFG shot from the calling player.</p>
+							<p>Subtracts [BFGCells] from the ammo type of this weapon and fires thing slot MT_BFG (36).</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					DOOM19
+					<span class="dh-pointer-subtype">Thing Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_BFGSpray" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BFGSpray(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires the BFG tracer spray.</p>
+							<p>In the direction of this projectile's trajectory, a set of 40 hitscans are fired from the actor that shot the projectile that do 15d7 damage each.</p>
+							<p>If the tracers hit any shootable actor, it spawns thing MT_EXTRABFG (43) at their position.</p>
+						</div>
+					</div>
+					<div id="A_Explode" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Explode(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Makes a splash damage check from the calling actor.</p>
+							<p>The splash check damages all shootable actors (including the caller) in a 128 map unit area for a maximum of 128 damage the closer they are to the center of the calling actor.</p>
+							<p>Contrary to expectation, no sound is played and no actors are spawned.</p>
+						</div>
+					</div>
+					<div id="A_Pain" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Pain(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the calling actor's PAIN sound, if defined.</p>
+						</div>
+					</div>
+					<div id="A_PlayerScream" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_PlayerScream(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays a player death sound from the calling actor.</p>
+							<p>The played sound is &quot;PLDETH&quot;, unless the calling actor's health is lower than -50, then it plays &quot;PDIEHI&quot;.</p>
+						</div>
+					</div>
+					<div id="A_Fall" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Fall(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Unsets the calling actor's SOLID flag.</p>
+						</div>
+					</div>
+					<div id="A_XScream" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_XScream(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the &quot;SLOP&quot; sound from the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_Look" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Look(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Looks for a valid target for the calling actor.</p>
+							<p>When a target is found, the calling actor's SIGHT sound is played, if defined, its target is set to the seen actor, and it enters its SEE state.</p>
+							<p>If the calling actor is in thing slot MT_SPIDER (20) or MT_CYBORG (22), the SIGHT sound is played at full volume (in MBF21 patches, this can be altered via the FULLVOLSOUNDS flag).</p>
+							<p>This MUST be called before A_Chase is called - A_Chase requires a target to pursue, or this actor jumps back to its SPAWN state.</p>
+							<p>This pointer, along with A_Chase, comprises the &quot;AI&quot; of Doom monsters.</p>
+						</div>
+					</div>
+					<div id="A_Chase" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Chase(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Pursues the calling actor's current target.</p>
+							<p>If the target is in melee range, the calling actor jumps to its MELEE state, if defined, and also plays its ATTACK sound, if defined.</p>
+							<p>If the target is in missile range, the calling actor jumps to its MISSILE state, if defined.</p>
+							<p>If neither happen, the actor will randomly play its ACTIVE sound, if defined.</p>
+							<p>If the calling actor loses its target or its target is not flagged as SHOOTABLE, it jumps to its SPAWN state.</p>
+							<p>This pointer, along with A_Look, comprises the &quot;AI&quot; of Doom monsters.</p>
+						</div>
+					</div>
+					<div id="A_FaceTarget" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FaceTarget(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Faces the calling actor towards its current target.</p>
+							<p>See also: A_Chase, A_Look.</p>
+						</div>
+					</div>
+					<div id="A_PosAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_PosAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a zombieman attack from the calling actor.</p>
+							<p>Calls A_FaceTarget, plays sound &quot;PISTOL&quot; from the calling actor, and performs a single hitscan attack.</p>
+							<p>The hitscan attack does 5 x 1d3 damage.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_Scream" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Scream(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the calling actor's DEATH sound, if defined.</p>
+							<p>This has some special behavior: if the DEATH sound is &quot;PODTH1&quot;, &quot;PODTH2&quot;, or &quot;PODTH3&quot;, it will play one of those 3.</p>
+							<p>If the DEATH sound is &quot;BGDTH1&quot; or &quot;BGDTH2&quot; it will play one of those 2.</p>
+							<p>If the calling actor is in thing slot MT_SPIDER (20) or MT_CYBORG (22), the sound is played at full volume.</p>
+							<p>In MBF21 or higher patches, this &quot;full volume&quot; behavior can be overridden with the FULLVOLSOUNDS thing flag.</p>
+						</div>
+					</div>
+					<div id="A_VileChase" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_VileChase(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Does exactly what A_Chase does, with a few differences.</p>
+							<p>If a dead actor (CORPSE flag is set) with a defined RAISE state is in range, the dead actor is revived, and the calling actor will jump to state S_VILE_HEAL1 (266) and play sound &quot;SLOP&quot;.</p>
+							<p>The revived actor has its health reset, its flags restored, and its target cleared, and it enters its RAISE state.</p>
+							<p>Note that this calling actor enters a hardcoded state (266) on &quot;heal&quot;. This behavior cannot be changed via this pointer.</p>
+							<p>If you are making an MBF21 patch (or later), see A_HealChase for the non-hardcoded version.</p>
+						</div>
+					</div>
+					<div id="A_VileStart" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_VileStart(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the sound &quot;VILATK&quot; from the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_VileTarget" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_VileTarget(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Starts the archvile attack.</p>
+							<p>Calls A_FaceTarget and spawns thing MT_FIRE (slot 5) on the calling actor's target.</p>
+							<p>Also calls A_Fire on the spawned fire to put it in front of the player, if the caller has line-of-sight to the target.</p>
+							<p>The fire is set to the calling actor's tracer pointer, and the fire's target is the calling actor's target.</p>
+						</div>
+					</div>
+					<div id="A_VileAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_VileAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs the actual archvile attack.</p>
+							<p>If the calling actor has a line-of-sight to its target, play sound &quot;BAREXP&quot; and damage the target 20 points of damage.</p>
+							<p>The attack further makes a radius attack happen for 70 damage from the caller's tracer actor (the fire spawned via A_VileTarget).</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_StartFire" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_StartFire(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_Fire and plays sound &quot;FLAMST&quot; from the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_Fire" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Fire(
+							)
+						</h3>
+						<div class="instructions">
+							<p>The archvile fire special.</p>
+							<p>Puts the calling actor in front of its &quot;tracer&quot; actor if line-of-sight is maintained with its &quot;target&quot;.</p>
+							<p>If this actor has no tracer reference, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_FireCrackle" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireCrackle(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_Fire and plays sound &quot;FLAME&quot; from the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_Tracer" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Tracer(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Turns the trajectory of a missile with a tracer reference towards its target.</p>
+							<p>The angle adjustment only occurs on a gametic that is not a multiple of 4.</p>
+							<p>If the adjustment occurs, this also spawns a bullet puff (MT_PUFF, slot 38) AND rocket smoke (MT_SMOKE, slot 8) at the calling actor's position. A lot of source ports correct this behavior to remove the puff.</p>
+							<p>If the calling actor has no tracer target, this does no adjustment, but may still spawn puffs/smoke.</p>
+							<p>NOTE: Older versions of the Doom Engine will also align the &quot;gametics&quot; to a global ticker, potentially ruining demo playback through the title screen.</p>
+						</div>
+					</div>
+					<div id="A_SkelWhoosh" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SkelWhoosh(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and plays sound &quot;SKESWG&quot; from the calling actor.</p>
+							<p>If the calling actor has no target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_SkelFist" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SkelFist(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and attempts a melee attack from the calling actor.</p>
+							<p>If the attack connects, this does 1d10 x 6 damage.</p>
+							<p>If the calling actor has no target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_SkelMissile" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SkelMissile(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a tracer missile from the calling actor.</p>
+							<p>Calls A_FaceTarget, spawns a Revenant Rocket actor (MT_TRACER, slot 7) 16 map units higher than normal, and sets its &quot;tracer&quot; pointer to the caller's target.</p>
+							<p>If the calling actor has no target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_FatRaise" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FatRaise(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and plays sound &quot;MANATK&quot; from the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_FatAttack1" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FatAttack1(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires two mancubus fireballs - one forward, one to the calling actor's left.</p>
+							<p>Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10), one centered, one to the caller's left.</p>
+						</div>
+					</div>
+					<div id="A_FatAttack2" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FatAttack2(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires two mancubus fireballs - one forward, one to the calling actor's right.</p>
+							<p>Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10), one centered, one to the caller's right.</p>
+						</div>
+					</div>
+					<div id="A_FatAttack3" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FatAttack3(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires two mancubus fireballs - one each side of calling actor, not centered.</p>
+							<p>Calls A_FaceTarget and spawns two Mancubus fireballs (MT_FATSHOT, slot 10) on each side of calling actor, not centered.</p>
+						</div>
+					</div>
+					<div id="A_BossDeath" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BossDeath(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Triggers special map behavior.</p>
+							<p>Depending on the map it is called on and the actor that calls it, it may do something differently:</p>
+							<p>* If E1M8, checks if the caller is an MT_BRUISER (slot 16), then checks if all MT_BRUISER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.</p>
+							<p>* If E2M8, checks if the caller is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, exits the map.</p>
+							<p>* If E3M8, checks if the caller is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, exits the map.</p>
+							<p>* If E4M6, checks if the caller is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, opens the sector tagged 666 like a fast door.</p>
+							<p>* If E4M8, checks if the caller is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.</p>
+							<p>* If MAP07, checks if the caller is an MT_FATSO (slot 9), then checks if all MT_FATSO things are dead, and if so, lowers the sector tagged 666 to the lowest floor.</p>
+							<p>* If MAP07, checks if the caller is an MT_BABY (slot 9), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.</p>
+							<p>This does nothing if no players are alive by the time this triggers.</p>
+							<p>Some engines allow you to change this function's behavior via MAPINFO or some other mechanism.</p>
+						</div>
+					</div>
+					<div id="A_CPosAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CPosAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a single chaingunner attack from the calling actor.</p>
+							<p>Calls A_FaceTarget, plays sound &quot;SHOTGN&quot; from the calling actor, and performs a single hitscan attack.</p>
+							<p>The hitscan attack does 5 x 1d3 damage.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_CPosRefire" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CPosRefire(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Checks if the calling actor has line of sight to its target, and if not, enters its SEE state.</p>
+							<p>The calling actor also enters its SEE state if its target is dead, or it doesn't have a target.</p>
+							<p>There is also a 15% chance that this does not happen.</p>
+						</div>
+					</div>
+					<div id="A_TroopAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_TroopAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs an Imp attack from the calling actor.</p>
+							<p>If the calling actor's target is in melee range, the sound &quot;CLAW&quot; is played from the caller, and deals 1d8 x 3 damage to the target.</p>
+							<p>If the target is not in melee range, it fires an Imp Fireball (MT_TROOPSHOT, slot 32), instead.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_SargAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SargAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs a Pinky demon attack from the calling actor.</p>
+							<p>If the calling actor's target is in melee range, it deals 1d10 x 4 damage to the target.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_HeadAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_HeadAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs a Cacodemon attack from the calling actor.</p>
+							<p>If the calling actor's target is in melee range, it deals 1d6 x 10 damage to the target.</p>
+							<p>If the target is not in melee range, it fires a Cacodemon Fireball (MT_HEADSHOT, slot 33), instead.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_BruisAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BruisAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs a Baron/Hell Knight attack from the calling actor.</p>
+							<p>If the calling actor's target is in melee range, the sound &quot;CLAW&quot; is played from the caller, and deals 1d8 x 10 damage to the target.</p>
+							<p>If the target is not in melee range, it fires a Baron Fireball (MT_BRUISERSHOT, slot 17), instead.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_SkullAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SkullAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a Lost Soul attack.</p>
+							<p>The calling actor sets the &quot;SKULLFLY&quot; flag, plays its ATTACK sound, calls A_FaceTarget, and sets its forward momentum to SKULLSPEED.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_Metal" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Metal(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;METAL&quot; from the calling actor and calls A_Chase.</p>
+						</div>
+					</div>
+					<div id="A_SPosAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SPosAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a shotgunner attack from the calling actor.</p>
+							<p>Calls A_FaceTarget, plays sound &quot;SHOTGN&quot; from the calling actor, and performs three hitscan attacks at once.</p>
+							<p>Each hitscan attack does 5 x 1d3 damage.</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_SpidRefire" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SpidRefire(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Checks if the calling actor has line of sight to its target, and if not, enters its SEE state.</p>
+							<p>The calling actor also enters its SEE state if its target is dead, or it doesn't have a target.</p>
+							<p>There is also a 4% chance that this does not happen.</p>
+						</div>
+					</div>
+					<div id="A_BabyMetal" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BabyMetal(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;BSPWLK&quot; from the calling actor and calls A_Chase.</p>
+						</div>
+					</div>
+					<div id="A_BspiAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BspiAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs an Arachnotron attack from the calling actor.</p>
+							<p>The calling actor fires an Arachnotron Bullet (MT_ARACHPLAZ, slot 37).</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_Hoof" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Hoof(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;HOOF&quot; from the calling actor and calls A_Chase.</p>
+						</div>
+					</div>
+					<div id="A_CyberAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CyberAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and performs a Cyberdemon attack from the calling actor.</p>
+							<p>The calling actor fires a rocket (MT_ROCKET, slot 34).</p>
+							<p>If the calling actor does not have a target, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_PainAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_PainAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_FaceTarget and fires a Lost Soul (MT_SKULL, slot 19) from the calling actor at its target.</p>
+							<p>The spawned actor has A_SkullAttack immediately called on it, if it had room to move on spawn.</p>
+							<p>If it didn't have room to move, 10000 damage is dealt to it.</p>
+							<p>NOTE: In the original Doom (and some ports that enable this behavior), this first checks to see if there are 20 instances of MT_SKULL in the map, and if so, this does nothing.</p>
+						</div>
+					</div>
+					<div id="A_PainDie" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_PainDie(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_Fall and spawns 3 Lost Souls (MT_SKULL, slot 19).</p>
+						</div>
+					</div>
+					<div id="A_KeenDie" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_KeenDie(
+							)
+						</h3>
+						<div class="instructions">
+							<p>The &quot;Commander Keen&quot; death special.</p>
+							<p>Calls A_Fall, and then checks to see if all actors of the calling actor's type are dead. If so, opens the sector tagged 666 like a door.</p>
+							<p>NOTE: Despite its name, this can be called from ANY actor, on ANY map, and this will still function.</p>
+						</div>
+					</div>
+					<div id="A_BrainPain" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainPain(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;BOSPN&quot; from the calling actor at full volume.</p>
+						</div>
+					</div>
+					<div id="A_BrainScream" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainScream(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;BOSDTH&quot; from the calling actor at full volume and starts the Brain Death explosions.</p>
+							<p>The calling actor spawns 65 MT_ROCKET (slot 34) objects immediately set to state S_BRAINEXPLODE1 (799) with their duration tics each randomized from 0 to 7.</p>
+							<p>Each object is placed 320 units south of the calling actor and anywhere from 196 units west to 320 units east of it, and an absolute height of 128 to 640, with a slight upward thrust.</p>
+						</div>
+					</div>
+					<div id="A_BrainDie" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainDie(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Exits the level.</p>
+						</div>
+					</div>
+					<div id="A_BrainAwake" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainAwake(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Starts the &quot;Boss Brain&quot; routine.</p>
+							<p>The calling actor searches for all MT_BOSSTARGET (slot 28) things, filling the target list for A_BrainSpit and plays sound &quot;BOSSIT&quot; at full volume.</p>
+							<p>If this is called more than once, it can affect the ordering in a call to A_BrainSpit since there is only one list maintained in memory.</p>
+							<p>If there are more than 32 MT_BOSSTARGET things or 0 MT_BOSSTARGET things in the map when this is called, this can crash Doom.</p>
+						</div>
+					</div>
+					<div id="A_BrainSpit" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainSpit(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs the boss brain cube spit from the calling actor.</p>
+							<p>The calling actor fires a spawn cube (MT_SPAWNSHOT, slot 29) at the next MT_BOSSTARGET thing in the list prepared in a call to A_BrainAwake.</p>
+							<p>The calling actor also plays sound &quot;BOSPIT&quot; at full volume.</p>
+							<p>The spawned cube has its target set to the target spawn spot and its reaction time set to a value proportional to its distance from the target.</p>
+							<p>If the skill level is &quot;EASY&quot; (ITYTD or HNTR), this will do nothing every other call.</p>
+						</div>
+					</div>
+					<div id="A_SpawnSound" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SpawnSound(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays sound &quot;BOSCUB&quot; from the calling actor and calls A_SpawnFly.</p>
+						</div>
+					</div>
+					<div id="A_SpawnFly" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SpawnFly(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs the Spawn Cube Fly function.</p>
+							<p>The calling actor decrements its reaction time by one, and when it reaches zero: it removes itself, spawns MT_SPAWNFIRE (slot 30), plays sound &quot;TELEPT&quot; from its target, and spawns one of the following actors at its target's position (at some probablility):</p>
+							<p>* MT_TROOP (slot 12) at 19.53%.</p>
+							<p>* MT_SERGEANT (slot 13) at 15.63%.</p>
+							<p>* MT_SHADOWS (slot 14), MT_HEAD (slot 15), and MT_FATSO (slot 9) at 11.72%.</p>
+							<p>* MT_KNIGHT (slot 18) at 9.38%.</p>
+							<p>* MT_BABY (slot 21) at 7.81%.</p>
+							<p>* MT_BRUISER (slot 16), MT_UNDEAD (slot 6), and MT_PAIN (slot 23) at 3.91%.</p>
+							<p>* MT_VILE (slot 4) at 0.78%.</p>
+							<p>The spawned actor gets a teleport check that will telefrag the target position on MAP30.</p>
+						</div>
+					</div>
+					<div id="A_BrainExplode" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BrainExplode(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a re-explosion similar to what A_BrainScream starts.</p>
+							<p>The calling actor spawns an MT_ROCKET (slot 34) object immediately set to state S_BRAINEXPLODE1 (799) with their duration tics each randomized from 0 to 7.</p>
+							<p>The object preserves the calling actor's Y-position and its X-position slightly adjusted, and at a random absolute height of 128 to 640, with a slight upward thrust.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					MBF
+					<span class="dh-pointer-subtype">Thing Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_Detonate" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Detonate(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a radius damage attack according to the actor's damage property.</p>
+							<p>Like A_Explode, except both the radius and potential damage are taken from the calling actor's damage property.</p>
+							<p>For example, if the actor's Damage is 100, this has a radius of 100 and a max damage of 100 at the center.</p>
+						</div>
+					</div>
+					<div id="A_Mushroom" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Mushroom(
+							<span class="dh-pointer-parameter">vangle</span>
+							, 
+							<span class="dh-pointer-parameter">speed</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Calls A_Explode and then creates a mushroom-like explosion of Mancubus fireballs (MT_FATSHOT, slot 10) from the calling actor.</p>
+							<p>The Damage property of the calling actor controls how many fireballs are created.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">vangle</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The vertical angle of the launch (default 0.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">speed</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The projectile speed (default 0.0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_Spawn" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Spawn(
+							<span class="dh-pointer-parameter">thingId</span>
+							, 
+							<span class="dh-pointer-parameter">zpos</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Spawns an object in the same position as the calling actor.</p>
+							<p>Note that if both the caller and the spawned are SOLID, they can get stuck on each other.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">thingId</span>
+								<span class="parameter-type">(THING)</span>
+								<div class="instructions">
+									<p>The slot id/alias of the Thing to spawn (thing slot) (default 0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">zpos</span>
+								<span class="parameter-type">(SHORT)</span>
+								<div class="instructions">
+									<p>The Z-position of the spawned object relative to the caller (default 0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_Turn" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Turn(
+							<span class="dh-pointer-parameter">angle</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Adjusts the calling actor's angle by the desired angle.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">angle</span>
+								<span class="parameter-type">(ANGLEINT)</span>
+								<div class="instructions">
+									<p>The angle amount in degrees (default 0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_Face" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Face(
+							<span class="dh-pointer-parameter">angle</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Sets the calling actor's angle to an absolute value.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">angle</span>
+								<span class="parameter-type">(ANGLEUINT)</span>
+								<div class="instructions">
+									<p>The absolute angle in degrees (default 0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_Scratch" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Scratch(
+							<span class="dh-pointer-parameter">damage</span>
+							, 
+							<span class="dh-pointer-parameter">sound</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a melee attack from the calling actor, dealing a set amount of damage if it connects.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">damage</span>
+								<span class="parameter-type">(SHORT)</span>
+								<div class="instructions">
+									<p>The amount of damage on hit (default 0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play if the damage occurs (default &quot;&quot;).</p>
+									<p>The sound is played from the calling actor.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_PlaySound" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_PlaySound(
+							<span class="dh-pointer-parameter">sound</span>
+							, 
+							<span class="dh-pointer-parameter">fullvolume</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the desired sound from the calling actor.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play (default &quot;&quot;).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">fullvolume</span>
+								<span class="parameter-type">(BOOL)</span>
+								<div class="instructions">
+									<p>If true (non-zero), the sound is played at full volume, otherwise (zero), it is played from the caller (default 0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_RandomJump" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_RandomJump(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">chance</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the desired state if a random check succeeds.</p>
+							<p>If the check does not succeed, this will continue on instead of performing the jump.</p>
+							<p>It is recommended to NOT use this on a state with a duration less than 0 for it to work properly.</p>
+							<p>The RandomJump call may use a separate random seed, depending on implementation.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">chance</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>A probability value from 0 to 256, 0 being &quot;never&quot; while 256 is &quot;always.&quot;</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_LineEffect" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_LineEffect(
+							<span class="dh-pointer-parameter">special</span>
+							, 
+							<span class="dh-pointer-parameter">tag</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a specific line special event as though the calling actor activated one.</p>
+							<p>NOTE: Since this function uses the MISC fields for this state, the Offset directive cannot be used.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">special</span>
+								<span class="parameter-type">(SHORT)</span>
+								<div class="instructions">
+									<p>The line special to activate.</p>
+									<p>This value is the same as the line special numbers in map editors.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">tag</span>
+								<span class="parameter-type">(SHORT)</span>
+								<div class="instructions">
+									<p>The tag of the sector to affect.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_Die" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Die(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Kills the calling actor, as though it were dealt lethal damage.</p>
+							<p>Specifically, this damages the caller by its current health, with no source to the damage.</p>
+							<p>Since it is damaged by its remaining health, this will not put the caller in its &quot;extreme&quot; death state.</p>
+						</div>
+					</div>
+					<div id="A_BetaSkullAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_BetaSkullAttack(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs the &quot;beta&quot; version attack of the Lost Soul.</p>
+							<p>Plays the calling actor's ATTACK sound (if defined), calls A_FaceTarget, and damages its target 1d8 x the caller's Damage property.</p>
+							<p>This does not cause monster infighting, and does not damage the same &quot;species&quot; of the calling actor.</p>
+						</div>
+					</div>
+					<div id="A_Stop" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_Stop(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Arrests the momentum of the calling actor.</p>
+							<p>Sets the X, Y, and Z momentum of the calling actor to 0.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					MBF
+					<span class="dh-pointer-subtype">Weapon Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_FireOldBFG" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FireOldBFG(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a &quot;Beta BFG&quot; shot from the calling player.</p>
+							<p>This does a bunch of stuff - fires MT_PLASMA1 (slot 141) and an MT_PLASMA2 (slot 142) shot, subtracts 1 of the weapon's ammo, and sets player extralight to 2 (equivalent to calling A_Light2).</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					MBF21
+					<span class="dh-pointer-subtype">Thing Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_SpawnObject" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SpawnObject(
+							<span class="dh-pointer-parameter">thingId</span>
+							, 
+							<span class="dh-pointer-parameter">angle</span>
+							, 
+							<span class="dh-pointer-parameter">xoffset</span>
+							, 
+							<span class="dh-pointer-parameter">yoffset</span>
+							, 
+							<span class="dh-pointer-parameter">zoffset</span>
+							, 
+							<span class="dh-pointer-parameter">xvel</span>
+							, 
+							<span class="dh-pointer-parameter">yvel</span>
+							, 
+							<span class="dh-pointer-parameter">zvel</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Spawns a new actor relative to the position of the calling actor.</p>
+							<p>If the spawned actor is a projectile, its &quot;target&quot; and &quot;tracer&quot; references are copied from the calling actor.</p>
+							<p>If the spawned actor is NOT a projectile, its &quot;target&quot; is the calling actor and its &quot;tracer&quot; is set to the caller's target.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">thingId</span>
+								<span class="parameter-type">(THING)</span>
+								<div class="instructions">
+									<p>The thing to spawn.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">angle</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The angle of the spawned actor, relative to the calling actor's angle.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">xoffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The X-position relative to the calling actor's position (forward/back).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">yoffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The Y-position relative to the calling actor's position (left/right).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">zoffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The Z-position relative to the calling actor's position (up/down).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">xvel</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The initial X-velocity of the spawned actor (forward/back).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">yvel</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The initial Y-velocity of the spawned actor (left/right).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">zvel</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The initial Z-velocity of the spawned actor (up/down).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_MonsterProjectile" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_MonsterProjectile(
+							<span class="dh-pointer-parameter">thingId</span>
+							, 
+							<span class="dh-pointer-parameter">angle</span>
+							, 
+							<span class="dh-pointer-parameter">pitch</span>
+							, 
+							<span class="dh-pointer-parameter">hoffset</span>
+							, 
+							<span class="dh-pointer-parameter">voffset</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a projectile from the calling actor.</p>
+							<p>The spawned projectile also has its &quot;tracer&quot; pointer set to the calling actor's target to enable tracing behavior.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">thingId</span>
+								<span class="parameter-type">(THINGMISSILE)</span>
+								<div class="instructions">
+									<p>The thing to spawn as the new projectile (must be flagged as MISSILE).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">angle</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The angle of the spawned actor, relative to the calling actor's angle.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">pitch</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The pitch of the spawned actor, relative to the calling actor's pitch.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">hoffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The horizontal position relative to the calling actor.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">voffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The vertical position relative to the calling actor's default projectile fire height.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_MonsterBulletAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_MonsterBulletAttack(
+							<span class="dh-pointer-parameter">hspread</span>
+							, 
+							<span class="dh-pointer-parameter">vspread</span>
+							, 
+							<span class="dh-pointer-parameter">numBullets</span>
+							, 
+							<span class="dh-pointer-parameter">damageBase</span>
+							, 
+							<span class="dh-pointer-parameter">damageDice</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a multi-hitscan attack from the calling actor.</p>
+							<p>The damage formula is: (damagebase * random(1, damagedice)).</p>
+							<p>The damage parameter defaults are identical to Doom's monster bullet attack damage values.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">hspread</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The horizontal spread in degrees (default 0.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">vspread</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The vertical spread in degrees (default 0.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">numBullets</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The number of hitscans to fire (default 1).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageBase</span>
+								<span class="parameter-type">(USHORT)</span>
+								<div class="instructions">
+									<p>The attack base damage (default 3).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageDice</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The attack damage random multiplier (default 5).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_MonsterMeleeAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_MonsterMeleeAttack(
+							<span class="dh-pointer-parameter">damageBase</span>
+							, 
+							<span class="dh-pointer-parameter">damageDice</span>
+							, 
+							<span class="dh-pointer-parameter">sound</span>
+							, 
+							<span class="dh-pointer-parameter">range</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a generic melee attack from the calling actor.</p>
+							<p>The damage formula is: (damagebase * random(1, damagedice)).</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">damageBase</span>
+								<span class="parameter-type">(USHORT)</span>
+								<div class="instructions">
+									<p>The attack base damage (default 3).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageDice</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The attack damage random multiplier (default 8).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play if the damage occurs (default &quot;&quot;).</p>
+									<p>The sound is played from the calling actor.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">range</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The distance check for the attack connecting.</p>
+									<p>If not provided, the actor's default melee range is used.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_RadiusDamage" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_RadiusDamage(
+							<span class="dh-pointer-parameter">damage</span>
+							, 
+							<span class="dh-pointer-parameter">radius</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a generic radius damage attack from the calling actor.</p>
+							<p>The damage is at its greatest at the actor's centerpoint.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">damage</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The maximum damage.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">radius</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The attack radius in map units.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_NoiseAlert" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_NoiseAlert(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Alerts monsters within sound-travel distance of the calling actor's target.</p>
+						</div>
+					</div>
+					<div id="A_HealChase" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_HealChase(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">sound</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Does exactly what A_Chase does, with a few differences.</p>
+							<p>If a dead actor (CORPSE flag is set) with a defined RAISE state is in range, the dead actor is revived, and the calling actor will jump to the provided state and play the provided sound.</p>
+							<p>The revived actor has its health reset, its flags restored, and its target cleared, and it enters its RAISE state.</p>
+							<p>See A_VileChase for the inspiration. A_HealChase(S_VILE_HEAL1, slop) is the equivalent to A_VileChase.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to when this actor encounters a corpse.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play from the calling actor on revive.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_SeekTracer" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_SeekTracer(
+							<span class="dh-pointer-parameter">threshold</span>
+							, 
+							<span class="dh-pointer-parameter">maxTurnAngle</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Missile seeker function.</p>
+							<p>When called, this function will adjust the facing angle and velocity of this projectile towards its &quot;tracer&quot; reference.</p>
+							<p>The calling actor must have its &quot;tracer&quot; reference set, via A_MonsterProjectile or A_SpawnObject or A_FindTracer or potentially A_WeaponProjectile.</p>
+							<p>Note that when using this function, keep in mind that seek &quot;strength&quot; also depends on how often this function is called.</p>
+							<p>Calling A_SeekTracer every tic will result in a much more aggressive seek than calling it every 4 tics, even if the args are the same.</p>
+							<p>The inspiration for this function is based on Heretic's seeker missile logic, rather than Doom's, so there are some slight differences in behavior compared to A_Tracer (better z-axis seeking, for instance).</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">threshold</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>If the angle to &quot;tracer&quot; target is lower than this, missile will &quot;snap&quot; directly to face the target.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">maxTurnAngle</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The maximum angle a missile will turn towards the target if the angle is above the threshold.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_FindTracer" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_FindTracer(
+							<span class="dh-pointer-parameter">fov</span>
+							, 
+							<span class="dh-pointer-parameter">rangeBlocks</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Searches for a valid actor to set as a &quot;tracer&quot; reference, but ONLY if the calling actor doesn't already have one.</p>
+							<p>This is best used on projectiles shot from a player's weapon.</p>
+							<p>Actors that are friendly to the calling actor are not included in the search.</p>
+							<p>See A_ClearTracer to clear this actor's &quot;tracer&quot; reference, if needed.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">fov</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The field-of-view, relative to calling actor's angle, to search for targets.</p>
+									<p>If zero, the search will occur in all directions.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">rangeBlocks</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The distance to search, in map blocks (128 units) (default 10).</p>
+									<p>Do NOT set this to a high value - the larger the search, the more expensive the call.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_ClearTracer" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_ClearTracer(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Clears the calling actor's &quot;tracer&quot; reference.</p>
+							<p>May be necessary if you want A_FindTracer to seek a new target.</p>
+						</div>
+					</div>
+					<div id="A_JumpIfHealthBelow" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfHealthBelow(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">health</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if the calling actor's health is below the specified threshold.</p>
+							<p>The calling actor's health must be STRICTLY less than the provided value.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">health</span>
+								<span class="parameter-type">(INT)</span>
+								<div class="instructions">
+									<p>The health value.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_JumpIfTargetInSight" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfTargetInSight(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">fov</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if the calling actor's current target is in its line-of-sight.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">fov</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The field-of-view, relative to calling actor's angle, to search for its current target.</p>
+									<p>If zero, the search will occur in all directions.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_JumpIfTargetCloser" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfTargetCloser(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">distance</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if the calling actor's current target is closer than the specified distance.</p>
+							<p>The target's distance must be STRICTLY less than the provided value.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">distance</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The distance in map units.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_JumpIfTracerInSight" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfTracerInSight(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">fov</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if the calling actor's &quot;tracer&quot; reference is in its line-of-sight.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">fov</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The field-of-view, relative to calling actor's angle, to search for its current tracer reference.</p>
+									<p>If zero, the search will occur in all directions.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_JumpIfTracerCloser" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfTracerCloser(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">distance</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if the calling actor's &quot;tracer&quot; reference is closer than the specified distance.</p>
+							<p>The tracer's distance must be STRICTLY less than the provided value.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">distance</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The distance in map units.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_JumpIfFlagsSet" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_JumpIfFlagsSet(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">flags</span>
+							, 
+							<span class="dh-pointer-parameter">mbf21flags</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the provided state if ALL of the calling actor's thing flags are set to the provided values.</p>
+							<p>This is an AND check, not an equality check - all of the provided BITS must be set.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The Doom thing flag bits.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">mbf21flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The MBF21 thing flag bits.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_AddFlags" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_AddFlags(
+							<span class="dh-pointer-parameter">flags</span>
+							, 
+							<span class="dh-pointer-parameter">mbf21flags</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Sets the provided actor flag bits on the calling actor.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The Doom thing flag bits.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">mbf21flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The MBF21 thing flag bits.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_RemoveFlags" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_RemoveFlags(
+							<span class="dh-pointer-parameter">flags</span>
+							, 
+							<span class="dh-pointer-parameter">mbf21flags</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Clears the provided actor flag bits on the calling actor.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The Doom thing flag bits.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">mbf21flags</span>
+								<span class="parameter-type">(FLAGS)</span>
+								<div class="instructions">
+									<p>The MBF21 thing flag bits.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="dh-content">
+				<h1 class="dh-pointer-type">
+					MBF21
+					<span class="dh-pointer-subtype">Weapon Pointer</span>
+				</h1>
+				<div class="dh-pointer-type-section">
+					<div id="A_WeaponProjectile" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponProjectile(
+							<span class="dh-pointer-parameter">thingId</span>
+							, 
+							<span class="dh-pointer-parameter">angle</span>
+							, 
+							<span class="dh-pointer-parameter">pitch</span>
+							, 
+							<span class="dh-pointer-parameter">hoffset</span>
+							, 
+							<span class="dh-pointer-parameter">voffset</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a projectile from the calling player.</p>
+							<p>Unlike most of DOOM19's attack codepointers, this function will NOT consume ammo, trigger the weapon's FLASH state, nor play a sound.</p>
+							<p>The projectile spawned will have its &quot;tracer&quot; reference set to the actor found by Doom's autoaim, if any.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">thingId</span>
+								<span class="parameter-type">(THINGMISSILE)</span>
+								<div class="instructions">
+									<p>The thing to spawn as the new projectile (must be flagged as MISSILE).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">angle</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The angle of the spawned actor, relative to the calling player's angle.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">pitch</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The pitch of the spawned actor, relative to the calling player's pitch.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">hoffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The horizontal position relative to the calling player.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">voffset</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The vertical position relative to the calling player's default projectile fire height.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_WeaponBulletAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponBulletAttack(
+							<span class="dh-pointer-parameter">hspread</span>
+							, 
+							<span class="dh-pointer-parameter">vspread</span>
+							, 
+							<span class="dh-pointer-parameter">numBullets</span>
+							, 
+							<span class="dh-pointer-parameter">damageBase</span>
+							, 
+							<span class="dh-pointer-parameter">damageDice</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Fires a multi-hitscan attack from the calling player.</p>
+							<p>The damage formula is: (damageBase * random(1, damageDice)).</p>
+							<p>The damage parameter defaults are identical to Doom's monster bullet attack damage values.</p>
+							<p>Unlike most of DOOM19's attack codepointers, this function will NOT consume ammo, trigger the weapon's FLASH state, nor play a sound.</p>
+							<p>NOTE: The documentation is not incorrect - Doom actually reverses the base damage and dice for player attacks, compared to enemy hitscans.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">hspread</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The horizontal spread in degrees (default 0.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">vspread</span>
+								<span class="parameter-type">(ANGLEFIXED)</span>
+								<div class="instructions">
+									<p>The vertical spread in degrees (default 0.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">numBullets</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The number of hitscans to fire (default 1).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageBase</span>
+								<span class="parameter-type">(USHORT)</span>
+								<div class="instructions">
+									<p>The attack base damage (default 5).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageDice</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The attack damage random multiplier (default 3).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_WeaponMeleeAttack" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponMeleeAttack(
+							<span class="dh-pointer-parameter">damageBase</span>
+							, 
+							<span class="dh-pointer-parameter">damageDice</span>
+							, 
+							<span class="dh-pointer-parameter">berserkFactor</span>
+							, 
+							<span class="dh-pointer-parameter">sound</span>
+							, 
+							<span class="dh-pointer-parameter">range</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Performs a generic melee attack from the calling player.</p>
+							<p>The damage formula is: (damagebase * random(1, damagedice)).</p>
+							<p>If the calling player is Berserk, the damage is additionally multiplied by the berserk multiplier.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">damageBase</span>
+								<span class="parameter-type">(USHORT)</span>
+								<div class="instructions">
+									<p>The attack base damage (default 2).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">damageDice</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The attack damage random multiplier (default 10).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">berserkFactor</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The berserk attack damage multiplier (default 1.0).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play if the damage occurs (default &quot;&quot;).</p>
+									<p>The sound is played from the calling player.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">range</span>
+								<span class="parameter-type">(FIXED)</span>
+								<div class="instructions">
+									<p>The distance check for the attack connecting.</p>
+									<p>If not provided, the player's default melee range is used.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_WeaponSound" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponSound(
+							<span class="dh-pointer-parameter">sound</span>
+							, 
+							<span class="dh-pointer-parameter">fullvolume</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Plays the desired sound from the calling player.</p>
+							<p>NOTE: This does not affect alerting enemies!</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">sound</span>
+								<span class="parameter-type">(SOUND)</span>
+								<div class="instructions">
+									<p>The sound to play (default &quot;&quot;).</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">fullvolume</span>
+								<span class="parameter-type">(BOOL)</span>
+								<div class="instructions">
+									<p>If true (non-zero), the sound is played at full volume across the map, otherwise (zero), it is played from the caller (default 0).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_WeaponAlert" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponAlert(
+							)
+						</h3>
+						<div class="instructions">
+							<p>Alerts monsters within sound-travel distance of the calling player.</p>
+							<p>Overrides the SILENT weapon flag.</p>
+						</div>
+					</div>
+					<div id="A_WeaponJump" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_WeaponJump(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">chance</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the desired state if a random check succeeds.</p>
+							<p>If the check does not succeed, this will continue on instead of performing the jump.</p>
+							<p>It is recommended to NOT use this on a state with a duration less than 0 for it to work properly.</p>
+							<p>The WeaponJump call may use a separate random seed, depending on implementation.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">chance</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>A probability value from 0 to 256, 0 being &quot;never&quot; while 256 is &quot;always.&quot;</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_ConsumeAmmo" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_ConsumeAmmo(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">amount</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Subtracts ammo from the currently-selected weapon's ammo pool on the calling player.</p>
+							<p>If the amount is 0, the current weapon's AmmoPerShot property is used.</p>
+							<p>If the amount is negative, the ammo is added instead.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">amount</span>
+								<span class="parameter-type">(UINT)</span>
+								<div class="instructions">
+									<p>The amount of ammo to subtract.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_CheckAmmo" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_CheckAmmo(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">amount</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the desired state if the calling player's ammo is STRICTLY less than the provided value.</p>
+							<p>If the check does not succeed, this will continue on instead of performing the jump.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">amount</span>
+								<span class="parameter-type">(USHORT)</span>
+								<div class="instructions">
+									<p>The ammo value.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_RefireTo" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_RefireTo(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">noAmmoCheck</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Jumps to the desired state if the calling player is holding FIRE and there is emough ammo for a re-fire.</p>
+							<p>If the check does not succeed, this will continue on instead of performing the jump.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">noAmmoCheck</span>
+								<span class="parameter-type">(BOOL)</span>
+								<div class="instructions">
+									<p>If true (non-zero), the ammo check is skipped.</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+					<div id="A_GunFlashTo" class="dh-pointer">
+						<h3 class="dh-pointer-name">
+							A_GunFlashTo(
+							<span class="dh-pointer-parameter">state</span>
+							, 
+							<span class="dh-pointer-parameter">noThirdPerson</span>
+							)
+						</h3>
+						<div class="instructions">
+							<p>Starts the desired state as a gun-flash overlay for the calling player.</p>
+						</div>
+						<ul class="parameter-list">
+							<li class="parameter">
+								<span class="parameter-name">state</span>
+								<span class="parameter-type">(STATE)</span>
+								<div class="instructions">
+									<p>The state or state label to jump to.</p>
+									<p>It is recommended to use a state label.</p>
+								</div>
+							</li>
+							<li class="parameter">
+								<span class="parameter-name">noThirdPerson</span>
+								<span class="parameter-type">(BOOL)</span>
+								<div class="instructions">
+									<p>If true (non-zero), the calling player's actor state is NOT set to S_PLAY_ATK2 (155).</p>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			
+						<!-- END Output -->
+		</div>
+		<!-- END DIV -->
+		<div class="nav-section">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="footer-section">
+			Copyright (C) Matt "MTrop" Tropiano<br/>
+			<a href="https://www.dafont.com/amazdoom.font" class="toc-link">AmazDoom Font</a> by Amazingmax<br/>
+			Doom is a registered trademark of id Software, LLC<br/>
+			Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+		</div>
+		<!-- This page's JS. -->
+		<script type="text/javascript" src="js/domjunk.min.js"></script>
+		<script type="text/javascript" src="js/function-docs.js"></script>
+	</body>
+</html>

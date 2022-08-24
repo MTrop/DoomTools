@@ -1,0 +1,198 @@
+HTML {
+	background-color: #000000;
+	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+}
+
+BODY {
+	background-color: rgb(8, 41, 57);
+	color: rgb(240, 240, 240);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 100%;
+	border-left: 4px solid rgb(32, 32, 32);
+	border-right: 4px solid rgb(32, 32, 32);
+	max-width: 1205px;
+	padding-top: 64px;
+	padding-bottom: 32px;
+	margin-top: 0;
+	margin-bottom: 0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+H1 {
+	font-size: 200%;
+}
+
+H2 {
+	font-size: 150%;
+}
+
+H3 {
+	font-size: 125%;
+}
+
+H4 {
+	font-size: 100%;
+}
+
+A {
+	color: rgb(240, 240, 240);
+}
+
+A:hover {
+	color: rgb(255, 255, 255);
+}
+
+A:visited {
+	color: rgb(240, 240, 240);
+}
+
+.site-logo {
+	display: block;
+	max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+	height: auto;
+}
+
+.main-title {
+	width: 100%;
+	text-align: center;
+}
+
+.main-title-name {
+	font-size: 250%;
+	font-weight: 900;
+}
+
+.script-docs {
+	width: 100%;
+}
+
+.script-docs > .table-of-contents {
+	background-color: rgb(80, 80, 80);
+	margin: 16px;
+}
+
+.script-docs > .category-section {
+	background-color: rgb(80, 80, 80);
+	margin: 16px;
+}
+
+.toc-title {
+	background-color: rgb(200, 200, 200);
+	color: rgb(0, 0, 0);
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+.toc-content {
+	text-align: center;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+.toc-name {
+	margin: 0;
+}
+
+.toc-header {
+	padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+.toc-link-section {
+	padding: 8px;
+}
+
+.toc-link {
+	color: rgb(240, 240, 240);
+	text-decoration: none;
+}
+
+.toc-link:hover {
+	color: rgb(255, 255, 255);
+}
+
+.toc-link:visited {
+	color: rgb(240, 240, 240);
+}
+
+.return-section {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	margin-left: 16px;
+	margin-right: 16px;
+}
+
+.nav-section {
+	width: 100%;
+	text-align: center;
+	margin-top: 16px;
+	margin-bottom: 16px;
+}
+
+.footer-section {
+	width: 100%;
+	font-size: 80%;
+	text-align: center;
+}
+
+.show-section {
+	display: block !important;
+}
+
+.dh-content {
+	margin-left: 16px;
+	margin-right: 16px;
+}
+
+.dh-pointer-type {
+	background-color: rgb(80, 80, 80);
+	padding-left: 16px;
+	padding-right: 16px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+}
+
+.dh-pointer-type > .dh-pointer-subtype {
+	font-size: 80%;
+	font-weight: normal;
+}
+
+.dh-pointer-type-section {
+	margin-left: 16px;
+	margin-right: 16px;
+}
+
+.dh-pointer-name {
+	margin-bottom: 8px;
+}
+
+.dh-pointer-parameter {
+	font-style: italic;
+}
+
+.dh-pointer > .instructions {
+	margin-left: 32px;
+	margin-right: 32px;
+}
+
+.parameter-name {
+	font-weight: bold;
+}
+
+.instructions > p {
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
+}
+
+.parameter-list {
+	margin-left: 16px;
+}
