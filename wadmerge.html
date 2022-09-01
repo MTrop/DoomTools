@@ -89,7 +89,7 @@ end
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WadMerge v1.8.0 by Matt Tropiano (using DoomStruct v2.14.2)
+WadMerge v1.9.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Usage: wadmerge [--help | -h | --version]
                 [switches] [scriptfile] [arguments]
 
@@ -368,6 +368,38 @@ MERGEWADDIR [symbol] [path]
              BAD_SYMBOL if the destination symbol is invalid,
              BAD_DIRECTORY if the provided file is not a directory.
 
+MERGEENTRY [dest-symbol] [entry] [src-symbol] [opt:src-entry]
+    Adds an entry from [src-symbol] to [dest-symbol].
+    The entry copied is first entry found by the provided name.
+    [dest-symbol]: The destination buffer.
+    [entry]:       The entry to add.
+    [src-symbol]:  The source buffer.
+    [src-entry]:   (Optional) If specified, [src-entry] is the entry to read
+                   from [src-symbol], and [entry] is the new name for the
+                   entry.
+    ................................
+    Returns: OK if merge successful,
+             BAD_SYMBOL if the destination symbol is invalid,
+             BAD_SOURCE_SYMBOL if the source symbol is invalid,
+             BAD_ENTRY if the entry could not be found.
+
+MERGEENTRYFILE [symbol] [entry] [path] [opt:src-entry]
+    Adds an entry from a source WAD to [symbol].
+    The entry copied is first entry found by the provided name.
+    [symbol]:    The destination buffer.
+    [entry]:     The entry to add.
+    [path]:      The source buffer.
+    [src-entry]: (Optional) If specified, [src-entry] is the entry to read
+                 from [src-symbol], and [entry] is the new name for the
+                 entry.
+    ................................
+    Returns: OK if merge successful,
+             BAD_SYMBOL if the destination symbol is invalid,
+             BAD_SOURCE_SYMBOL if the source symbol is invalid,
+             BAD_ENTRY if the entry could not be found,
+             BAD_FILE if the file does not exist or is a directory,
+             BAD_WAD if the file is not a WAD.
+
 MERGESWANTBLS [symbol] [path]
     Reads file from [path], interprets it as a SWANTBLS file, creates two
     entries in [symbol]: ANIMATED and SWITCHES.
@@ -428,6 +460,12 @@ FILECHARSUB [char] [replacement]
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.9.0
+
+* &#x60;Added&#x60; [GUI] Verbose output flag for running scripts.
+* &#x60;Added&#x60; MERGEENTRY and MERGEENTRYFILE commands.
+
+
 ### Changed for 1.8.0
 
 * &#x60;Added&#x60; A &#x60;--charset&#x60; switch for specifying the encoding of the script files (if not system default).

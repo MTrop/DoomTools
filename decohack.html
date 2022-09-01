@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.27.0 by Matt Tropiano (using DoomStruct v2.14.2)
+DECOHack v0.29.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1607,7 +1607,7 @@ Miscellaneous data is in the miscellaneous block:
 
     misc
     {
-        monsterInfighting &lt;BOOLEAN&gt;
+        monstersFightOwnSpecies &lt;BOOLEAN&gt;
         initialBullets &lt;INTEGER&gt;
         initialHealth &lt;INTEGER&gt;
         greenArmorClass &lt;INTEGER&gt;
@@ -1961,6 +1961,16 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.29.0
+
+* &#x60;Added&#x60; &#x60;monstersFightOwnSpecies&#x60; miscellany field. (Enhancement #82)
+
+
+### Changed for 0.28.0
+
+* &#x60;Added&#x60; Documentation for all pointers in is HTML when dumped with &#x60;--dump-pointers-html&#x60;.
+
+
 ### Changed for 0.27.0
 
 * &#x60;Added&#x60; The &#x60;state protect&#x60; and &#x60;state unprotect&#x60; clauses now accept state index clauses, not just numbers. (Enhancement #12)
