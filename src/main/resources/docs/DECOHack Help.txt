@@ -1404,7 +1404,7 @@ Miscellaneous data is in the miscellaneous block:
 
     misc
     {
-        monsterInfighting <BOOLEAN>
+        monstersFightOwnSpecies <BOOLEAN>
         initialBullets <INTEGER>
         initialHealth <INTEGER>
         greenArmorClass <INTEGER>

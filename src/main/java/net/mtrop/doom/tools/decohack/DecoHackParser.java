@@ -84,6 +84,7 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_INITIAL_HEALTH = "initialHealth";
 	private static final String KEYWORD_INITIAL_BULLETS = "initialBullets";
 	private static final String KEYWORD_MONSTER_INFIGHTING = "monsterInfighting";
+	private static final String KEYWORD_MONSTER_INFIGHTING2 = "monstersFightOwnSpecies";
 	
 	private static final String KEYWORD_PARS = "pars";
 	
@@ -723,6 +724,15 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((flag = matchBoolean()) == null)
 				{
 					addErrorMessage("Expected boolean value after \"%s\".", KEYWORD_MONSTER_INFIGHTING);
+					return false;
+				}
+				misc.setMonsterInfightingEnabled(flag);
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_MONSTER_INFIGHTING2))
+			{
+				if ((flag = matchBoolean()) == null)
+				{
+					addErrorMessage("Expected boolean value after \"%s\".", KEYWORD_MONSTER_INFIGHTING2);
 					return false;
 				}
 				misc.setMonsterInfightingEnabled(flag);

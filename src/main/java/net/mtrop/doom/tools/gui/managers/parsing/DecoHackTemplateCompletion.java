@@ -76,7 +76,7 @@ public enum DecoHackTemplateCompletion
 	)),
 			
 	MISCPROPERTIES("Adds the miscellaneous block properties and their defaults.", (
-        "monsterInfighting false\n" +
+        "monstersFightOwnSpecies false\n" +
         "initialBullets 50\n" +
         "initialHealth 100\n" +
         "greenArmorClass 1\n" +

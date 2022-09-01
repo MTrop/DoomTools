@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.29.0
+
+* `Added` `monstersFightOwnSpecies` miscellany field. (Enhancement #82)
+
+
 ### Changed for 0.28.0
 
 * `Added` Documentation for all pointers in is HTML when dumped with `--dump-pointers-html`.
