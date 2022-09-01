@@ -42,6 +42,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 	private DoomToolsLanguageManager language;
 
 	private JFormField<File> workingDirFileField;
+	private JFormField<Boolean> verboseOutputField;
 
 	private JFormField<Integer> numArgsField; 
 	private Container argsFieldPanel;
@@ -72,6 +73,8 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 			)
 		);
 		
+		this.verboseOutputField = checkBoxField(checkBox(mergeSettings.getVerboseOutput()));
+		
 		this.numArgsField = integerField(initArgs.length, this::adjustFields);
 		this.argsFieldPanel = containerOf(createEmptyBorder(4, 8, 4, 8), gridLayout(0, 1, 0, 4));
 		this.argsFieldList = new ArrayList<>(Math.max(initArgs.length, 4));
@@ -80,6 +83,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 		containerOf(this,
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("wadmerge.run.withargs.label.width")),
 				utils.formField("wadmerge.run.withargs.workdir", workingDirFileField),
+				utils.formField("wadmerge.run.withargs.verbose", verboseOutputField),
 				utils.formField("wadmerge.run.withargs.argfield", numArgsField)
 			)),
 			node(BorderLayout.CENTER, dimension(320, 128), scroll(containerOf(
@@ -145,6 +149,22 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 		return workingDirFileField.getValue();
 	}
 
+	/**
+	 * @param verbose the new verbose output state.
+	 */
+	public void setVerboseOutput(boolean verbose) 
+	{
+		verboseOutputField.setValue(verbose);
+	}
+	
+	/**
+	 * @return the verbose output setting.
+	 */
+	public Boolean getVerboseOutput() 
+	{
+		return verboseOutputField.getValue();
+	}
+	
 	/**
 	 * @param args an array of the entered arguments.
 	 */

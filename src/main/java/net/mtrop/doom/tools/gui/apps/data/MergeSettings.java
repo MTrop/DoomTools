@@ -16,6 +16,7 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 public class MergeSettings
 {
 	private File workingDirectory;
+	private boolean verboseOutput;
 	private String[] args;
 	
 	public MergeSettings()
@@ -26,6 +27,7 @@ public class MergeSettings
 	public MergeSettings(File workingDirectory)
 	{
 		this.workingDirectory = workingDirectory;
+		this.verboseOutput = false;
 		this.args = new String[0];
 	}
 	
@@ -37,6 +39,16 @@ public class MergeSettings
 	public File getWorkingDirectory() 
 	{
 		return workingDirectory;
+	}
+
+	public void setVerboseOutput(boolean verboseOutput) 
+	{
+		this.verboseOutput = verboseOutput;
+	}
+	
+	public boolean getVerboseOutput() 
+	{
+		return verboseOutput;
 	}
 	
 	public void setArgs(String ... args) 

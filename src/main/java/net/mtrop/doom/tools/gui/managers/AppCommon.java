@@ -424,6 +424,7 @@ public final class AppCommon
 	public void onExecuteWadMerge(Container parent, final DoomToolsStatusPanel statusPanel, File scriptFile, Charset encoding, MergeSettings mergeSettings)
 	{
 		final File workingDirectory = mergeSettings.getWorkingDirectory();
+		final boolean verbose = mergeSettings.getVerboseOutput();
 		final String[] args = mergeSettings.getArgs();
 		
 		utils.createProcessModal(
@@ -436,7 +437,7 @@ public final class AppCommon
 				language.getText("wadmerge.run.message.success"), 
 				language.getText("wadmerge.run.message.interrupt"), 
 				language.getText("wadmerge.run.message.error"), 
-				callWadMerge(scriptFile, workingDirectory, encoding, args, stdout, stderr)
+				callWadMerge(scriptFile, workingDirectory, verbose, encoding, args, stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -844,12 +845,16 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 
-	public InstancedFuture<Integer> callWadMerge(File scriptFile, File workingDirectory, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWadMerge(File scriptFile, File workingDirectory, boolean verbose, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
-			.arg(WadMergeMain.SWITCH_CHARSET1).arg(encoding.displayName())
-			.args(args)
+			.arg(WadMergeMain.SWITCH_CHARSET1).arg(encoding.displayName());
+		
+		if (verbose)
+			callable.arg(WadMergeMain.SWITCH_VERBOSE);
+		
+		callable.args(args)
 			.setOut(stdout)
 			.setErr(stderr)
 			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDOUT."))

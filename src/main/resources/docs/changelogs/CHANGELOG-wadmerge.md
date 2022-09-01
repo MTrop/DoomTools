@@ -3,6 +3,7 @@ WadMerge
 
 ### Changed for 1.9.0
 
+* `Added` [GUI] Verbose output flag for running scripts.
 * `Added` MERGEENTRY and MERGEENTRYFILE commands.
 
 

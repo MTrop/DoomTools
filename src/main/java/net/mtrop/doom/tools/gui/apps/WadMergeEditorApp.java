@@ -545,6 +545,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			(panel) -> {
 				MergeSettings out = new MergeSettings();
 				out.setWorkingDirectory(panel.getWorkingDirectory());
+				out.setVerboseOutput(panel.getVerboseOutput());
 				out.setArgs(panel.getArgs());
 				return out;
 			},
