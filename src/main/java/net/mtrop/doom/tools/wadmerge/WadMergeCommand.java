@@ -892,6 +892,106 @@ public enum WadMergeCommand
 		}
 	},
 	
+	MERGEENTRY
+	{
+		@Override
+		public String usage() 
+		{
+			return "MERGEENTRY [dest-symbol] [entry] [src-symbol] [opt:src-entry]";
+		}
+
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println(usage());
+			out.println("    Adds an entry from [src-symbol] to [dest-symbol].");
+			out.println("    The entry copied is first entry found by the provided name.");
+			out.println("    [dest-symbol]: The destination buffer.");
+			out.println("    [entry]:       The entry to add.");
+			out.println("    [src-symbol]:  The source buffer.");
+			out.println("    [src-entry]:   (Optional) If specified, [src-entry] is the entry to read");
+			out.println("                   from [src-symbol], and [entry] is the new name for the");
+			out.println("                   entry.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
+			out.println("             BAD_ENTRY if the entry could not be found.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			String destSymbol = scanner.nextString();
+			String entry = scanner.nextString();
+			String srcSymbol = scanner.nextString();
+			
+			String srcEntry;
+			if (scanner.hasNext())
+				srcEntry = scanner.nextString();
+			else
+				srcEntry = entry;
+
+			try {
+				return context.mergeEntry(destSymbol, entry, srcSymbol, srcEntry);
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
+	MERGEENTRYFILE
+	{
+		@Override
+		public String usage() 
+		{
+			return "MERGEENTRYFILE [symbol] [entry] [path] [opt:src-entry]";
+		}
+
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println(usage());
+			out.println("    Adds an entry from a source WAD to [symbol].");
+			out.println("    The entry copied is first entry found by the provided name.");
+			out.println("    [symbol]:    The destination buffer.");
+			out.println("    [entry]:     The entry to add.");
+			out.println("    [path]:      The source buffer.");
+			out.println("    [src-entry]: (Optional) If specified, [src-entry] is the entry to read");
+			out.println("                 from [src-symbol], and [entry] is the new name for the");
+			out.println("                 entry.");
+			out.println("    ................................");
+			out.println("    Returns: OK if merge successful,");
+			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
+			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
+			out.println("             BAD_ENTRY if the entry could not be found,");
+			out.println("             BAD_FILE if the file does not exist or is a directory,");
+			out.println("             BAD_WAD if the file is not a WAD.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			String symbol = scanner.nextString();
+			String entry = scanner.nextString();
+			String path = scanner.nextString();
+			
+			String srcEntry;
+			if (scanner.hasNext())
+				srcEntry = scanner.nextString();
+			else
+				srcEntry = entry;
+
+			try {
+				return context.mergeEntry(symbol, entry, new File(path), srcEntry);
+			} catch (IOException e) {
+				context.logf("ERROR: I/O error on merge: %s\n", e.getLocalizedMessage());
+				return Response.BAD_FILE;
+			}
+		}
+	},
+	
 	MERGESWANTBLS
 	{
 		@Override

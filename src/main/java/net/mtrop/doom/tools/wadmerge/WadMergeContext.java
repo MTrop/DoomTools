@@ -682,14 +682,71 @@ public class WadMergeContext
 		verbosef("Added map `%s` to `%s` as `%s` (from `%s`).\n", header, destinationSymbol, newHeader, sourceSymbol);
 		return out;
 	}
+	
+	/**
+	 * Merges a single entry from one buffer to another.
+	 * @param symbol the buffer to merge into.
+	 * @param entry the target entry.
+	 * @param wadFile the source file to read from.
+	 * @param sourceEntry the source entry.
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid,
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid,
+	 * 		or BAD_FILE if the file does not exist or is a directory,
+	 * 		or BAD_WAD if the file is not a WAD.
+	 * @throws IOException if the file could not be read.
+	 */
+	public Response mergeEntry(String symbol, String entry, File wadFile, String sourceEntry) throws IOException
+	{
+		if (!wadFile.exists() || wadFile.isDirectory())
+			return Response.BAD_FILE;
+
+		if (!Wad.isWAD(wadFile))
+			return Response.BAD_WAD;
+
+		Wad buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
 		
+		try (WadFile wad = new WadFile(wadFile))
+		{
+			return mergeEntry(buffer, symbol, entry, wad, wadFile.getPath(), sourceEntry);
+		}		
+	}
+	
+	/**
+	 * Merges a single entry from one buffer to another.
+	 * @param destinationSymbol the buffer to merge into.
+	 * @param entry the target entry.
+	 * @param sourceSymbol the buffer to read from.
+	 * @param sourceEntry the source entry.
+	 * @return OK if merge successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid,
+	 * 		or BAD_SOURCE_SYMBOL if the source symbol is invalid.
+	 * @throws IOException if the file could not be read.
+	 */
+	public Response mergeEntry(String destinationSymbol, String entry, String sourceSymbol, String sourceEntry) throws IOException
+	{
+		destinationSymbol = destinationSymbol.toLowerCase();
+		Wad bufferDest;
+		if ((bufferDest = currentWads.get(destinationSymbol)) == null)
+			return Response.BAD_SYMBOL;
+		
+		sourceSymbol = sourceSymbol.toLowerCase();
+		Wad bufferSource;
+		if ((bufferSource = currentWads.get(sourceSymbol)) == null)
+			return Response.BAD_SOURCE_SYMBOL;
+		
+		return mergeEntry(bufferDest, destinationSymbol, entry, bufferSource, sourceSymbol, sourceEntry);
+	}
+	
 	/**
 	 * Merges a single file as an entry into a buffer.
 	 * Symbol is case-insensitive. The entry is coerced to a valid name.
 	 * @param symbol the buffer to merge into.
 	 * @param inFile the file to read.
 	 * @param entryName the name of the entry to write as (coerced to a valid name).
-	 * @return OK if the was written, 
+	 * @return OK if the entry was written, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
 	 * 		or BAD_FILE if the provided file does not exist or is a directory.
 	 * @throws IOException if the file could not be read.
@@ -1100,6 +1157,17 @@ public class WadMergeContext
 		
 		targetBuffer.addData(newHeader, source.getData(header));
 		mergeBulkData(targetBuffer, bufferName, targetBuffer.getEntryCount(), source, sourceName, entries);
+		return Response.OK;
+	}
+
+	private Response mergeEntry(Wad targetBuffer, String bufferName, String targetEntry, Wad source, String sourceName, String sourceEntry) throws IOException 
+	{
+		byte[] data = source.getData(sourceEntry);
+		if (data == null)
+			return Response.BAD_ENTRY;
+		
+		targetBuffer.addData(targetEntry, data);
+		verbosef("Added entry `%s` to `%s` as `%s` (from `%s`).\n", sourceEntry, bufferName, targetEntry, sourceName);
 		return Response.OK;
 	}
 

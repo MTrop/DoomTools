@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.9.0
+
+* `Added` MERGEENTRY and MERGEENTRYFILE commands.
+
+
 ### Changed for 1.8.0
 
 * `Added` A `--charset` switch for specifying the encoding of the script files (if not system default).

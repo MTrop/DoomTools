@@ -60,13 +60,13 @@ CREATE [symbol] [opt:iwad]
     Buffers are best used for speed, but large merges will consume
     lots of memory during merge.
     [symbol]: The symbol for the new buffer.
-    [iwad]:  (Optional) If "iwad", the created WAD file is an IWAD.
+    [iwad]:   (Optional) If "iwad", the created WAD file is an IWAD.
     ................................
     Returns: OK if a symbol was created.
              BAD_SYMBOL if the destination symbol already exists.
 
 CREATEFILE [symbol] [path] [opt:iwad]
-    Creates a new WAD file (on disk - not in memory), errors out if
+    Creates a new WAD file (on disk - not in memory), errors out if 
     the symbol exists or the new file could not be created.
     WARNING: If the file already exists, it is OVERWRITTEN!
     Files are best used for memory efficiency, but large merges will
@@ -208,10 +208,12 @@ MERGENAMESPACEFILE [symbol] [path] [namespace] [opt:amend]
 
 MERGEFILE [symbol] [path] [opt:entryname]
     Reads file from [path] into [symbol].
+    NOTE: Specifying a target entry name will override any replacement
+    behavior set by FILECHARSUB.
     [symbol]:    The symbol to add to.
     [path]:      The file to add.
-    [entryname]: (Optional) If specified, this is the entry name to use
-                 to import as.
+    [entryname]: (Optional) If specified, this is the name to use as
+                 the imported entry.
     ................................
     Returns: OK if merge successful,
              BAD_SYMBOL if the destination symbol is invalid,
@@ -283,6 +285,38 @@ MERGEWADDIR [symbol] [path]
              BAD_SYMBOL if the destination symbol is invalid,
              BAD_DIRECTORY if the provided file is not a directory.
 
+MERGEENTRY [dest-symbol] [entry] [src-symbol] [opt:src-entry]
+    Adds an entry from [src-symbol] to [dest-symbol].
+    The entry copied is first entry found by the provided name.
+    [dest-symbol]: The destination buffer.
+    [entry]:       The entry to add.
+    [src-symbol]:  The source buffer.
+    [src-entry]:   (Optional) If specified, [src-entry] is the entry to read
+                   from [src-symbol], and [entry] is the new name for the
+                   entry.
+    ................................
+    Returns: OK if merge successful,
+             BAD_SYMBOL if the destination symbol is invalid,
+             BAD_SOURCE_SYMBOL if the source symbol is invalid,
+             BAD_ENTRY if the entry could not be found.
+
+MERGEENTRYFILE [symbol] [entry] [path] [opt:src-entry]
+    Adds an entry from a source WAD to [symbol].
+    The entry copied is first entry found by the provided name.
+    [symbol]:    The destination buffer.
+    [entry]:     The entry to add.
+    [path]:      The source buffer.
+    [src-entry]: (Optional) If specified, [src-entry] is the entry to read
+                 from [src-symbol], and [entry] is the new name for the
+                 entry.
+    ................................
+    Returns: OK if merge successful,
+             BAD_SYMBOL if the destination symbol is invalid,
+             BAD_SOURCE_SYMBOL if the source symbol is invalid,
+             BAD_ENTRY if the entry could not be found,
+             BAD_FILE if the file does not exist or is a directory,
+             BAD_WAD if the file is not a WAD.
+
 MERGESWANTBLS [symbol] [path]
     Reads file from [path], interprets it as a SWANTBLS file, creates two
     entries in [symbol]: ANIMATED and SWITCHES.
@@ -323,3 +357,16 @@ MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]
              BAD_FILE if a file could not be read,
              BAD_SYMBOL if the destination symbol is invalid,
              BAD_DIRECTORY if the provided file is not a directory.
+
+FILECHARSUB [char] [replacement]
+    Sets a character replacement mapping (from this command onward) for
+    auto-merged lumps that come from file names. The intended use for this is
+    for renaming files to lump names that may have characters that can't be
+    used in file names in your filesystem.
+    For example: "VILE^1.lmp" will import as "VILE\1" if the following
+    was set:
+        FILECHARSUB ^ \
+    [char]:        The character to replace (first character is used).
+    [replacement]: The replacement character (first character is used).
+    ................................
+    Returns: OK.
