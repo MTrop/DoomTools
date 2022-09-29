@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.30.0
+
+* `Fixed` MBF21 pointer `A_ConsumeAmmo` had an incorrect signature/documentation, despite it compiling properly. (Issue #84)
+
+
 ### Changed for 0.29.0
 
 * `Added` `monstersFightOwnSpecies` miscellany field. (Enhancement #82)

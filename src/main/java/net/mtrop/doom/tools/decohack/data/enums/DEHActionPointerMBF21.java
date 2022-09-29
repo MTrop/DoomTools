@@ -228,13 +228,14 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 	CONSUMEAMMO         (true,  "ConsumeAmmo", params(SHORT), usage(
 		"Subtracts ammo from the currently-selected weapon's ammo pool on the calling player.",
 		"If the amount is 0, the current weapon's AmmoPerShot property is used.",
-		"If the amount is negative, the ammo is added instead."
-		).parameter("state", STATE, "The state or state label to jump to.", "It is recommended to use a state label."
+		"If the amount is negative, ammo is added to inventory instead.",
+		"Ammo will never be reduced below 0."
 		).parameter("amount", UINT, "The amount of ammo to subtract."
 	)),
 	
 	CHECKAMMO           (true,  "CheckAmmo", params(STATE, USHORT), usage(
 		"Jumps to the desired state if the calling player's ammo is STRICTLY less than the provided value.",
+		"If the amount is 0, the current weapon's AmmoPerShot property is used.",
 		"If the check does not succeed, this will continue on instead of performing the jump."
 		).parameter("state", STATE, "The state or state label to jump to.", "It is recommended to use a state label."
 		).parameter("amount", USHORT, "The ammo value."
