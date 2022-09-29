@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.29.0 by Matt Tropiano (using DoomStruct v2.14.2)
+DECOHack v0.30.0 by Matt Tropiano (using DoomStruct v2.14.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -171,6 +171,9 @@ Usage: decohack [--help | -h | --version]
 
     --dump-pointers          Dumps the list of Action Pointers and their
                              parameter types to STDOUT.
+
+    --dump-pointers-html     Dumps the list of Action Pointers and their
+                             parameter types to STDOUT in HTML form.
 
 [filenames]:
     &lt;filename&gt; ...           The input filenames. One or more can be added,
@@ -1961,6 +1964,11 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.30.0
+
+* &#x60;Fixed&#x60; MBF21 pointer &#x60;A_ConsumeAmmo&#x60; had an incorrect signature&#x2F;documentation, despite it compiling properly. (Issue #84)
+
+
 ### Changed for 0.29.0
 
 * &#x60;Added&#x60; &#x60;monstersFightOwnSpecies&#x60; miscellany field. (Enhancement #82)

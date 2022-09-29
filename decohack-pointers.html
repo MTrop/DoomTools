@@ -2073,28 +2073,19 @@
 					<div id="A_ConsumeAmmo" class="dh-pointer">
 						<h3 class="dh-pointer-name">
 							A_ConsumeAmmo(
-							<span class="dh-pointer-parameter">state</span>
-							, 
 							<span class="dh-pointer-parameter">amount</span>
 							)
 						</h3>
 						<div class="instructions">
 							<p>Subtracts ammo from the currently-selected weapon's ammo pool on the calling player.</p>
 							<p>If the amount is 0, the current weapon's AmmoPerShot property is used.</p>
-							<p>If the amount is negative, the ammo is added instead.</p>
+							<p>If the amount is negative, ammo is added to inventory instead.</p>
+							<p>Ammo will never be reduced below 0.</p>
 						</div>
 						<ul class="parameter-list">
 							<li class="parameter">
-								<span class="parameter-name">state</span>
-								<span class="parameter-type">(STATE)</span>
-								<div class="instructions">
-									<p>The state or state label to jump to.</p>
-									<p>It is recommended to use a state label.</p>
-								</div>
-							</li>
-							<li class="parameter">
 								<span class="parameter-name">amount</span>
-								<span class="parameter-type">(UINT)</span>
+								<span class="parameter-type">(INT)</span>
 								<div class="instructions">
 									<p>The amount of ammo to subtract.</p>
 								</div>
@@ -2111,6 +2102,7 @@
 						</h3>
 						<div class="instructions">
 							<p>Jumps to the desired state if the calling player's ammo is STRICTLY less than the provided value.</p>
+							<p>If the amount is 0, the current weapon's AmmoPerShot property is used.</p>
 							<p>If the check does not succeed, this will continue on instead of performing the jump.</p>
 						</div>
 						<ul class="parameter-list">
@@ -2192,8 +2184,7 @@
 					</div>
 				</div>
 			</div>
-			
-						<!-- END Output -->
+			<!-- END Output -->
 		</div>
 		<!-- END DIV -->
 		<div class="nav-section">
