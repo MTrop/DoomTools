@@ -9,8 +9,8 @@ Copyright (c) 2019-2022 Matt Tropiano
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
 [FlatLaF](https://www.formdev.com/flatlaf/) 2.0.2+  
-[RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.2.0+  
-[AutoComplete](https://github.com/bobbylight/AutoComplete) 3.2.0+  
+[RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.3.0+  
+[AutoComplete](https://github.com/bobbylight/AutoComplete) 3.3.0+  
 [CommonMark](https://github.com/commonmark/commonmark-java) 0.19.0+
 
 

@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2022-09-29** Updated RSyntaxTextArea and AutoComplete to `3.3.0`.
+
 - **2022-08-23** New Folders get "new folder" names on directory trees.
 
 - **2022-08-08** Markdown is rendered out in Help dialogs.

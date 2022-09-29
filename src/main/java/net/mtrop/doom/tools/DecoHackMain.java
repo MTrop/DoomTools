@@ -957,6 +957,9 @@ public final class DecoHackMain
 		out.println("    --dump-pointers          Dumps the list of Action Pointers and their");
 		out.println("                             parameter types to STDOUT.");
 		out.println();
+		out.println("    --dump-pointers-html     Dumps the list of Action Pointers and their");
+		out.println("                             parameter types to STDOUT in HTML form.");
+		out.println();
 		out.println("[filenames]:");
 		out.println("    <filename> ...           The input filenames. One or more can be added,");
 		out.println("                             parsed in the order specified.");
