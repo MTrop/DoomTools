@@ -225,12 +225,12 @@ public enum DEHActionPointerMBF21 implements DEHActionPointer
 		).parameter("chance", UINT, "A probability value from 0 to 256, 0 being \"never\" while 256 is \"always.\""
 	)),
 	
-	CONSUMEAMMO         (true,  "ConsumeAmmo", params(SHORT), usage(
+	CONSUMEAMMO         (true,  "ConsumeAmmo", params(INT), usage(
 		"Subtracts ammo from the currently-selected weapon's ammo pool on the calling player.",
 		"If the amount is 0, the current weapon's AmmoPerShot property is used.",
 		"If the amount is negative, ammo is added to inventory instead.",
 		"Ammo will never be reduced below 0."
-		).parameter("amount", UINT, "The amount of ammo to subtract."
+		).parameter("amount", INT, "The amount of ammo to subtract."
 	)),
 	
 	CHECKAMMO           (true,  "CheckAmmo", params(STATE, USHORT), usage(
