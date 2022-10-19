@@ -123,7 +123,7 @@
 #define MTF_DEMON_DEAD            115
 #define MTF_LOSTSOUL_DEAD         116
 #define MTF_IMP_DEAD              117
-#define MTF_DEMON_DEAD            118
+#define MTF_SHOTGUNGUY_DEAD       118
 #define MTF_PLAYER_GUTS           119
 #define MTF_PLAYER_GUTS2          120
 #define MTF_HEAD_SKEWER           121

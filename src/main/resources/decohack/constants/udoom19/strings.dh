@@ -88,8 +88,8 @@
 #define STR_PD_REDO            446
 #define STR_PD_YELLOWO         447
 #define STR_PD_BLUEK           448
-#define STR_PD_REDK            449
-#define STR_PD_YELLOWK         450
+#define STR_PD_YELLOWK         449
+#define STR_PD_REDK            450
 
 #define STR_GOTARMOR           454
 #define STR_GOTMEGA            455
