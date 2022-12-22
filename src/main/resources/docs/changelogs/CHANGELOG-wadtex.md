@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.3.0
+
+* `Fixed` Texture file export wasn't working.
+
+
 ### Changed for 1.2.0
 
 * `Added` The GUI version of WadTex.

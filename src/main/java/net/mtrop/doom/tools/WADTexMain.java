@@ -285,7 +285,7 @@ public final class WADTexMain
 					replaceTextures = true;
 					byte[] data = wad.getData(textureLumpName);
 					
-					if (options.additive)
+					if (options.additive || options.exportMode)
 					{
 						if (TextureUtils.isStrifeTextureData(data))
 						{
