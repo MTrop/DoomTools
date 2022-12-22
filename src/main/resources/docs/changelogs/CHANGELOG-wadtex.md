@@ -3,7 +3,7 @@ WadTex
 
 ### Changed for 1.3.0
 
-* `Fixed` Texture file export wasn't working.
+* `Fixed` Texture file export wasn't working. (Issue #86)
 
 
 ### Changed for 1.2.0
