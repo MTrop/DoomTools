@@ -44,7 +44,7 @@
 	<property name="flatlaf.lib.version" value="2.0.2" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
-	<property name="rsyntaxtextarea.lib.version" value="3.3.0" />
+	<property name="rsyntaxtextarea.lib.version" value="3.3.1" />
 	<property name="rsyntaxtextarea.jar" value="rsyntaxtextarea-${rsyntaxtextarea.lib.version}.jar" />
 
 	<property name="autocomplete.lib.version" value="3.3.0" />

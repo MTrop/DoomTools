@@ -43,6 +43,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 	private JFormField<Boolean> animateBracketMatchingField;
 	private JFormField<Boolean> showMatchedBracketPopupField;
 	private JFormField<Boolean> paintMatchedBracketPairField;
+	private JFormField<Boolean> insertPairedCharactersField;
 	private JFormField<Boolean> codeFoldingEnabledField;
 	private JFormField<Boolean> closeCurlyBracesField;
 	private JFormField<Boolean> closeMarkupTagsField;
@@ -59,7 +60,6 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 	private JFormField<Boolean> useSelectedTextColorField;
 	private JFormField<Integer> parserDelayField;
 	private JFormField<Boolean> hyperlinksEnabledField;
-	
 	
 	/**
 	 * Creates a new panel.
@@ -99,6 +99,9 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 		));
 		this.paintMatchedBracketPairField = checkBoxField(checkBox(codeSettings.isPaintMatchedBracketPair(),
 			(v) -> codeSettings.setPaintMatchedBracketPair(v)
+		));
+		this.insertPairedCharactersField = checkBoxField(checkBox(codeSettings.isInsertPairedCharacters(),
+			(v) -> codeSettings.setInsertPairedCharacters(v)
 		));
 		this.codeFoldingEnabledField = checkBoxField(checkBox(codeSettings.isCodeFoldingEnabled(),
 			(v) -> codeSettings.setCodeFoldingEnabled(v)
@@ -163,6 +166,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 				utils.formField("texteditor.settings.code.codefolding", codeFoldingEnabledField),
 				utils.formField("texteditor.settings.code.closecurlies", closeCurlyBracesField),
 				utils.formField("texteditor.settings.code.closemarkuptags", closeMarkupTagsField),
+				utils.formField("texteditor.settings.code.insertpairedchars", insertPairedCharactersField),
 				utils.formField("texteditor.settings.code.eolvisible", eolMarkersVisibleField),
 				utils.formField("texteditor.settings.code.hilitesecondarylang", highlightSecondaryLanguagesField),
 				utils.formField("texteditor.settings.code.focustips", useFocusableTipsField),
@@ -195,6 +199,7 @@ public class EditorDefaultCodeSettingsPanel extends JPanel
 		animateBracketMatchingField.setValue(defaultSettings.isAnimateBracketMatching());
 		showMatchedBracketPopupField.setValue(defaultSettings.isShowMatchedBracketPopup());
 		paintMatchedBracketPairField.setValue(defaultSettings.isPaintMatchedBracketPair());
+		insertPairedCharactersField.setValue(defaultSettings.isInsertPairedCharacters());
 		codeFoldingEnabledField.setValue(defaultSettings.isCodeFoldingEnabled());
 		closeCurlyBracesField.setValue(defaultSettings.isCloseCurlyBraces());
 		closeMarkupTagsField.setValue(defaultSettings.isCloseMarkupTags());

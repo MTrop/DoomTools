@@ -1584,9 +1584,29 @@ public class EditorMultiFilePanel extends JPanel
 			out.add(menuItem(entry.getKey(), (i) -> changeCurrentEditorStyle(entry.getValue())));
 		out.add(separator());
 		
+		List<MenuNode> categoryAF = new ArrayList<>();
+		List<MenuNode> categoryGL = new ArrayList<>();
+		List<MenuNode> categoryMR = new ArrayList<>();
+		List<MenuNode> categorySZ = new ArrayList<>();
 		List<MenuNode> others = new ArrayList<>();
 		for (Map.Entry<String, String> entry : otherLanguages.entrySet())
-			others.add(menuItem(entry.getKey(), (i) -> changeCurrentEditorStyle(entry.getValue())));
+		{
+			String name = entry.getKey();
+			if (Character.toLowerCase(name.charAt(0)) < 'g')
+				categoryAF.add(menuItem(name, (i) -> changeCurrentEditorStyle(entry.getValue())));
+			else if (Character.toLowerCase(name.charAt(0)) < 'm')
+				categoryGL.add(menuItem(name, (i) -> changeCurrentEditorStyle(entry.getValue())));
+			else if (Character.toLowerCase(name.charAt(0)) < 's')
+				categoryMR.add(menuItem(name, (i) -> changeCurrentEditorStyle(entry.getValue())));
+			else
+				categorySZ.add(menuItem(name, (i) -> changeCurrentEditorStyle(entry.getValue())));
+		}
+		
+		others.add(menuItem("A - F", 'A', categoryAF.toArray(new MenuNode[categoryAF.size()])));
+		others.add(menuItem("G - L", 'G', categoryGL.toArray(new MenuNode[categoryGL.size()])));
+		others.add(menuItem("M - R", 'M', categoryMR.toArray(new MenuNode[categoryMR.size()])));
+		others.add(menuItem("S - Z", 'S', categorySZ.toArray(new MenuNode[categorySZ.size()])));
+		
 		out.add(utils.createItemFromLanguageKey("texteditor.action.languages.other", others.toArray(new MenuNode[others.size()])));
 		return out.toArray(new MenuNode[out.size()]);
 	}
@@ -2429,6 +2449,7 @@ public class EditorMultiFilePanel extends JPanel
 		private boolean markAllOnOccurrenceSearches;
 		private int markOccurrencesDelay;
 		private boolean paintMatchedBracketPair;
+		private boolean insertPairedCharacters;
 		private boolean paintMarkOccurrencesBorder;
 		private boolean useSelectedTextColor;
 		private int parserDelay;
@@ -2455,6 +2476,7 @@ public class EditorMultiFilePanel extends JPanel
 			setShowMatchedBracketPopup(true);
 			setPaintMatchedBracketPair(true);
 			setAnimateBracketMatching(false);
+			setInsertPairedCharacters(true);
 			
 			setMarkOccurrences(true);
 			setMarkAllOnOccurrenceSearches(false);
@@ -2576,6 +2598,11 @@ public class EditorMultiFilePanel extends JPanel
 		public boolean isPaintMatchedBracketPair() 
 		{
 			return paintMatchedBracketPair;
+		}
+
+		public boolean isInsertPairedCharacters() 
+		{
+			return insertPairedCharacters;
 		}
 
 		public boolean isPaintMarkOccurrencesBorder()
@@ -2711,6 +2738,11 @@ public class EditorMultiFilePanel extends JPanel
 		public void setPaintMarkOccurrencesBorder(boolean paintMarkOccurrencesBorder)
 		{
 			this.paintMarkOccurrencesBorder = paintMarkOccurrencesBorder;
+		}
+		
+		public void setInsertPairedCharacters(boolean insertPairedCharacters) 
+		{
+			this.insertPairedCharacters = insertPairedCharacters;
 		}
 
 		public void setUseSelectedTextColor(boolean useSelectedTextColor)

@@ -190,6 +190,7 @@ public final class DoomToolsEditorProvider
 			put("Golang",             SYNTAX_STYLE_GO);
 			put("Groovy",             SYNTAX_STYLE_GROOVY);
 			put("Etc/Hosts",          SYNTAX_STYLE_HOSTS);
+			put("Handlebars",         SYNTAX_STYLE_HANDLEBARS);
 			put("HTAccess",           SYNTAX_STYLE_HTACCESS);
 			put("HTML",               SYNTAX_STYLE_HTML);
 			put("INI",                SYNTAX_STYLE_INI);

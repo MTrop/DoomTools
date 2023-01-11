@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.20.1
 
 * `Changed` [GUI-Studio] "Type unrecognized" on file open message: do not say "unrecognized" if we knew it was a WAD file.
+* `Changed` [GUI-Studio] "Run DoomMake" menu entries to clarify function.
 
 
 ### Changed for 0.20.0
