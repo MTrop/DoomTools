@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.20.1
+
+* `Changed` [GUI-Studio] "Type unrecognized" on file open message: do not say "unrecognized" if we knew it was a WAD file.
+
+
 ### Changed for 0.20.0
 
 * `Added` [GUI-Studio] Project search.

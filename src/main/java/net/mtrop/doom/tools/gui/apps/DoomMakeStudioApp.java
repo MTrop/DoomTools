@@ -654,9 +654,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		final Container parent = getApplicationContainer();
 
-		if (openWadFile(file))
+		Boolean wadHandled = openWadFile(file); 
+		
+		if (wadHandled == Boolean.TRUE)
 			return null;
-		if (openUnknownFile(file))
+		if (openUnknownFile(file, wadHandled == Boolean.FALSE))
 			return null;
 		
 		try {
@@ -679,12 +681,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	}
 
 	// Returns true if handled.
-	private boolean openUnknownFile(File file)
+	private boolean openUnknownFile(File file, boolean recognized)
 	{
 		if (DoomToolsEditorProvider.get().getStyleByFile(file) != null)
 			return false;
 		
-		if (SwingUtils.yesTo(language.getText("doommake.open.system")))
+		if (SwingUtils.yesTo(language.getText(recognized ? "doommake.open.system.recognized" : "doommake.open.system")))
 		{
 			try {
 				SwingUtils.open(file);
@@ -699,14 +701,16 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	}
 	
 	// Returns true if handled.
-	private boolean openWadFile(File file)
+	// Returns false if WAD, and not handled.
+	// Returns null if not a WAD.
+	private Boolean openWadFile(File file)
 	{
 		String[] mapHeaders = null;
 		try {
 			if (Wad.isWAD(file))
 				mapHeaders = WadUtils.openWadAndGet(file, (wad) -> MapUtils.getAllMapHeaders(wad));
 			else
-				return false;
+				return null;
 		} catch (IOException e) {
 			LOG.errorf(e, "Selected file could not be read: %s", file.getAbsolutePath());
 			statusPanel.setErrorMessage(language.getText("doommake.status.message.editor.error", file.getName()));

@@ -343,7 +343,7 @@ public final class DoomToolsEditorProvider
 	/**
 	 * Creates a text area using the file's name as a basis for type.
 	 * @param file the file to use to find a type from.
-	 * @return a new {@link RSyntaxTextArea}.
+	 * @return the style type for {@link RSyntaxTextArea}, or null if unrecognized.
 	 */
 	public String getStyleByFile(File file)
 	{
