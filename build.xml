@@ -69,6 +69,7 @@
 		net.mtrop.doom.tools.decohack.data,
 		net.mtrop.doom.tools.decohack.data.enums,
 		net.mtrop.doom.tools.decohack.patches,
+		net.mtrop.doom.tools.doomfetch,
 		net.mtrop.doom.tools.doommake,
 		net.mtrop.doom.tools.doommake.functions,
 		net.mtrop.doom.tools.doommake.generators,
@@ -107,6 +108,7 @@
 	<property name="dmxconv.version" value="${build.version}" />
 	<property name="dimgconv.version" value="${build.version}" />
 	<property name="doommake.version" value="${build.version}" />
+	<property name="doomfetch.version" value="${build.version}" />
 
 	
 	<!-- Filenames -->
@@ -151,6 +153,7 @@
 		<echo file="${build.versions.dir}/dmxconv.version" message="${dmxconv.version}" />
 		<echo file="${build.versions.dir}/dimgconv.version" message="${dimgconv.version}" />
 		<echo file="${build.versions.dir}/doommake.version" message="${doommake.version}" />
+		<echo file="${build.versions.dir}/doomfetch.version" message="${doomfetch.version}" />
 	</target>
 
 	<target name="javadoc" depends="init.docs" description="Builds the Java documentation.">
@@ -281,6 +284,9 @@
 		<!-- DImgConv -->
 		<shell-cmd  name="dimgconv"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
 		<shell-bash name="dimgconv"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomImageConvertMain" />
+		<!-- DoomFetch -->
+		<shell-cmd  name="doomfetch"       todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomFetchMain" />
+		<shell-bash name="doomfetch"       todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomFetchMain" />
 		<!-- DoomMake -->
 		<shell-cmd  name="doommake"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />
 		<shell-bash name="doommake"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.DoomMakeMain" />

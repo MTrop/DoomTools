@@ -28,6 +28,7 @@ public interface Version
 	String DECOHACK = Common.getVersionString("decohack");
 	String DIMGCONV = Common.getVersionString("dimgconv");
 	String DMXCONV = Common.getVersionString("dmxconv");
+	String DOOMFETCH = Common.getVersionString("doomfetch");
 	String DOOMMAKE = Common.getVersionString("doommake");
 	String WADMERGE = Common.getVersionString("wadmerge");
 	String WADSCRIPT = Common.getVersionString("wadscript");

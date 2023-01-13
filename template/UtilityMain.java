@@ -3,6 +3,7 @@ package net.mtrop.doom.tools;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.InputStream;
 import java.util.concurrent.Callable;
 
 import net.mtrop.doom.tools.WADTexMain.Context;
@@ -86,7 +87,7 @@ public final class UtilityMain
 	/**
 	 * Program context.
 	 */
-	private static class Context
+	private static class Context implements Callable<Integer>
 	{
 		private Options options;
 	

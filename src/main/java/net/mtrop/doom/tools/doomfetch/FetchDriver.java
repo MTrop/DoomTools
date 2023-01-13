@@ -1,0 +1,81 @@
+package net.mtrop.doom.tools.doomfetch;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+
+import com.blackrook.json.JSONObject;
+import com.blackrook.json.JSONReader;
+
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
+
+/**
+ * A DoomFetch Driver descriptor.
+ * @author Matthew Tropiano
+ */
+public abstract class FetchDriver 
+{
+	/** JSON reader. */
+	public static final HTTPReader<JSONObject> JSON_READER = (response, cancel, monitor) -> {
+		return JSONReader.readJSON(response.getContentReader());
+	};
+
+	/** Output stream. */
+	protected PrintStream out; 
+	/** Error stream. */
+	protected PrintStream err;
+	
+	/**
+	 * Creates a fetch driver.
+	 * @param out the output stream.
+	 * @param err the error stream.
+	 */
+	protected FetchDriver(PrintStream out, PrintStream err)
+	{
+		this.out = out;
+		this.err = err;
+	}
+	
+	/**
+	 * Attempts to search for and fetch a file by a specific name.
+	 * @param name the name of the file to find.
+	 * @return an input stream if it was found to use for file read, or null if not found by this driver.
+	 * @throws IOException the exception if any read errors occur.
+	 */
+	public abstract Response getStreamFor(String name) throws IOException;
+	
+	/**
+	 * Response class.
+	 */
+	public static class Response implements AutoCloseable
+	{
+		private String etag;
+		private String date;
+		private InputStream in;
+		
+		public Response(String etag, String date, InputStream in)
+		{
+			this.etag = etag;
+			this.date = date;
+			this.in = in;
+		}
+
+		public String getETag() 
+		{
+			return etag;
+		}
+		
+		public String getDate() 
+		{
+			return date;
+		}
+		
+		@Override
+		public void close() throws Exception
+		{
+			in.close();
+		}
+		
+	}
+	
+}

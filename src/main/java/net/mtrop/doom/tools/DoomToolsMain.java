@@ -64,6 +64,7 @@ public final class DoomToolsMain
 		ObjectUtils.keyValue("decohack",   DecoHackMain.class),
 		ObjectUtils.keyValue("dmxconv",    DMXConvertMain.class),
 		ObjectUtils.keyValue("dimgconv",   DoomImageConvertMain.class),
+		ObjectUtils.keyValue("doomfetch",  DoomFetchMain.class),
 		ObjectUtils.keyValue("doommake",   DoomMakeMain.class),
 		ObjectUtils.keyValue("rookscript", ScriptExecutor.class)
 	);
@@ -503,6 +504,7 @@ public final class DoomToolsMain
 				options.stdout.println("Contains DECOHack v" + Version.DECOHACK);
 				options.stdout.println("Contains DImgConv v" + Version.DIMGCONV);
 				options.stdout.println("Contains DMXConv v" + Version.DMXCONV);
+				options.stdout.println("Contains DoomFetch v" + Version.DOOMFETCH);
 				options.stdout.println("Contains DoomMake v" + Version.DOOMMAKE);
 				options.stdout.println("Contains WadMerge v" + Version.WADMERGE);
 				options.stdout.println("Contains WadScript v" + Version.WADSCRIPT);
