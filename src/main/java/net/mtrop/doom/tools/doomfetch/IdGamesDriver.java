@@ -16,7 +16,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
  */
 public class IdGamesDriver extends FetchDriver 
 {
-	private static final String ROOT_URL = "https://www.gamers.org/pub/idgames/";
+	private static final String ROOT_URL = "https://ftp.fu-berlin.de/pc/games/idgames/";
 	private static final String USER_AGENT = "DoomFetch/" + Version.DOOMFETCH;
 	
 	/**
