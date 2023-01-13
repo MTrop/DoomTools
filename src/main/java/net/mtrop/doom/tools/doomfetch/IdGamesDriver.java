@@ -1,7 +1,6 @@
 package net.mtrop.doom.tools.doomfetch;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 
 import com.blackrook.json.JSONObject;
@@ -17,6 +16,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 public class IdGamesDriver extends FetchDriver 
 {
 	private static final String ROOT_URL = "https://www.gamers.org/pub/idgames/";
+	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36";
 	
 	/**
 	 * Creates a fetch driver.
@@ -51,21 +51,8 @@ public class IdGamesDriver extends FetchDriver
 		JSONObject selectedFile = null;
 		JSONObject files = content.get("file");
 		
-		// Object response.
-		if (files.isObject())
-		{
-			if (!files.hasMember("filename"))
-			{
-				err.println("Response from idGames is malformed!");
-				return null;
-			}
-			else if (FileUtils.getFileNameWithoutExtension(files.get("filename").getString()).equals(name))
-			{
-				selectedFile = files;
-			}
-		}
 		// Array response.
-		else if (files.isArray())
+		if (files.isArray())
 		{
 			JSONObject file;
 			for (int i = 0; i < files.length(); i++)
@@ -78,9 +65,22 @@ public class IdGamesDriver extends FetchDriver
 				}
 				else if (FileUtils.getFileNameWithoutExtension(file.get("filename").getString()).equals(name))
 				{
-					selectedFile = files;
+					selectedFile = file;
 					break;
 				}
+			}
+		}
+		// Object response.
+		else if (files.isObject())
+		{
+			if (!files.hasMember("filename"))
+			{
+				err.println("Response from idGames is malformed!");
+				return null;
+			}
+			else if (FileUtils.getFileNameWithoutExtension(files.get("filename").getString()).equals(name))
+			{
+				selectedFile = files;
 			}
 		}
 		else
@@ -92,11 +92,15 @@ public class IdGamesDriver extends FetchDriver
 		if (selectedFile == null)
 			return null;
 		
-		String uri = selectedFile.get("dir").getString() + selectedFile.get("filename").getString();
+		String filenameStr = selectedFile.get("filename").getString();
 		
-		InputStream in = HTTPRequest.get(ROOT_URL + uri).setAutoRedirect(true).send().getContentStream();
+		String uri = selectedFile.get("dir").getString() + filenameStr;
 		
-		return new Response("", "", in);
+		HTTPRequest request = HTTPRequest.get(ROOT_URL + uri)
+			.setHeader("User-Agent", USER_AGENT)
+			.setAutoRedirect(true);
+		
+		return new Response(filenameStr, "", "", request.send());
 	}
 
 }

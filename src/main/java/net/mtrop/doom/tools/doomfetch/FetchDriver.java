@@ -1,13 +1,13 @@
 package net.mtrop.doom.tools.doomfetch;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 
 /**
  * A DoomFetch Driver descriptor.
@@ -49,17 +49,24 @@ public abstract class FetchDriver
 	 */
 	public static class Response implements AutoCloseable
 	{
+		private String filename;
 		private String etag;
 		private String date;
-		private InputStream in;
+		private HTTPResponse httpResponse;
 		
-		public Response(String etag, String date, InputStream in)
+		public Response(String filename, String etag, String date, HTTPResponse httpResponse)
 		{
+			this.filename = filename;
 			this.etag = etag;
 			this.date = date;
-			this.in = in;
+			this.httpResponse = httpResponse;
 		}
 
+		public String getFilename() 
+		{
+			return filename;
+		}
+		
 		public String getETag() 
 		{
 			return etag;
@@ -70,10 +77,15 @@ public abstract class FetchDriver
 			return date;
 		}
 		
-		@Override
-		public void close() throws Exception
+		public HTTPResponse getHTTPResponse() 
 		{
-			in.close();
+			return httpResponse;
+		}
+		
+		@Override
+		public void close() throws IOException
+		{
+			httpResponse.close();
 		}
 		
 	}

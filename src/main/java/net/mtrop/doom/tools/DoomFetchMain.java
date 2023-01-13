@@ -2,6 +2,7 @@ package net.mtrop.doom.tools;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,15 +13,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 import com.formdev.flatlaf.util.StringUtils;
 
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
+import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
 import net.mtrop.doom.tools.doomfetch.IdGamesDriver;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.struct.TokenScanner;
+import net.mtrop.doom.tools.struct.util.FileUtils;
+import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 
 /**
  * Main class for DoomFetch.
@@ -101,16 +107,6 @@ public final class DoomFetchMain
 		}
 		
 		/**
-		 * Fetches an entry.
-		 * @param name the name of the entry.
-		 * @return the entry if exists, null if not.
-		 */
-		public EntryData get(String name)
-		{
-			return entries.get(name);
-		}
-		
-		/**
 		 * Attempts to load a lock file from a provided file path.
 		 * This lock object contents are replaced.
 		 * @param lockFile the file path.
@@ -147,11 +143,17 @@ public final class DoomFetchMain
 						name = scanner.next();
 						
 						if (!scanner.hasNext())
+						{
 							add(name);
+							continue;
+						}
 	
 						etag = scanner.next();
 						if (!scanner.hasNext())
+						{
 							add(name, etag, date);
+							continue;
+						}
 	
 						date = scanner.next();
 						add(name, etag, date);
@@ -311,22 +313,111 @@ public final class DoomFetchMain
 			this.options = options;
 		}
 		
+		// Returns true if the file was fetched successfully.
 		private boolean fetchFile(LockFile lockFile, String name)
 		{
 			boolean success = false;
 			for (Map.Entry<String, ?> entry : DRIVER_LIST.entrySet())
 			{
-				success = fetchFile(lockFile, entry.getKey(), options.name); 
+				success = fetchFile(lockFile, entry.getKey(), name); 
 				if (success)
 					break;
 			}
 			return success;
 		}
+
+		// Returns true if a file that has a target name is found
+		private static boolean searchForTargetFile(File targetDirectoryPath, String name)
+		{
+			if (!targetDirectoryPath.exists())
+				return false;
+			
+			for (File f : targetDirectoryPath.listFiles())
+			{
+				String fname = FileUtils.getFileNameWithoutExtension(f);
+				if (OSUtils.isWindows() && fname.equalsIgnoreCase(name))
+					return true;
+				else if (fname.equals(name))
+					return true;
+			}
+			
+			return false;
+		}
 		
+		// Prints transfer progress.
+		private static void printProgress(long current, Long max, PrintStream out)
+		{
+			if (max != null)
+				out.print("\r" + (current / 1024) + " KB / " + (max / 1024) + " KB ");
+			else
+				out.print("\r" + (current / 1024) + " KB ");
+		}
+		
+		// Returns true if the file was fetched (or found locally) successfully.
 		private boolean fetchFile(LockFile lockFile, String driver, String name)
 		{
-			// TODO: Finish this.
-			return false;
+			if (!options.update && searchForTargetFile(options.targetDirectory, name))
+			{
+				options.stdout.println("[Skipping] File found in target directory: " + name);
+				return true;
+			}
+			
+			BiFunction<PrintStream, PrintStream, FetchDriver> driverFunc = DRIVER_LIST.get(driver);
+			if (driver == null)
+				options.stderr.println("ERROR: No such driver: " + driver);
+
+			FetchDriver fetcher = driverFunc.apply(options.stdout, options.stderr);
+			
+			Response response = null;
+			try
+			{
+				response = fetcher.getStreamFor(name);
+				if (response == null)
+					return false;
+				
+				File targetFile = new File(options.targetDirectory.getPath() + File.separator + response.getFilename());
+				if (!FileUtils.createPathForFile(targetFile))
+				{
+					options.stderr.println("ERROR: Could not create target directory for file.");
+					return false;
+				}
+				
+				try (HTTPResponse httpResponse = response.getHTTPResponse(); FileOutputStream fos = new FileOutputStream(targetFile))
+				{
+					if (!httpResponse.isSuccess())
+					{
+						options.stderr.println("ERROR: Received " + httpResponse.getStatusCode() + " (" + httpResponse.getStatusMessage() + ") from source.");
+						return false;
+					}
+					
+					options.stdout.println("Downloading " + response.getFilename() + "...");
+					final AtomicLong currentBytes = new AtomicLong(0L);
+					final AtomicLong lastDate = new AtomicLong(System.currentTimeMillis());
+					httpResponse.relayContent(fos, (cur, max) -> 
+					{
+						long next = System.currentTimeMillis();
+						currentBytes.set(cur);
+						if (next > lastDate.get() + 250L)
+						{
+							printProgress(cur, max, options.stdout);
+							lastDate.set(next);
+						}
+					});
+					printProgress(currentBytes.get(), currentBytes.get(), options.stdout);
+					options.stdout.println("\nDone.");
+				}
+			}
+			catch (IOException e)
+			{
+				options.stderr.println("ERROR: Can't read from source: " + driver);
+				return false;
+			}
+			finally
+			{
+				IOUtils.close(response);
+			}
+			
+			return true;
 		}
 		
 		@Override
@@ -386,15 +477,31 @@ public final class DoomFetchMain
 				{
 					success = fetchFile(lock, options.name); 
 				}
+				lock.add(options.name);
 			}
 			// No name. Pull from Lock file.
 			else for (Map.Entry<String, ?> entry : lock.entries())
 			{
-				boolean out = fetchFile(lock, options.name) && success; 
+				boolean out = fetchFile(lock, entry.getKey()) && success;
+				if (out)
+					lock.add(entry.getKey());
+				success = out;
 			}
 			
-			// TODO: Finish.
-
+			if (!success)
+			{
+				options.stdout.println("Some files not fetched.");
+				return ERROR_NOTFOUND;
+			}
+			
+			try {
+				lock.toFile(options.lockFile);
+			} catch (IOException e) {
+				options.stderr.println("ERROR: Could not write to lock file.");
+				return ERROR_IOERROR;
+			}
+			
+			options.stdout.println("All files fetched.");
 			return ERROR_NONE;
 		}
 	}
@@ -414,17 +521,62 @@ public final class DoomFetchMain
 		options.stdout = out;
 		options.stderr = err;
 
-		int i = 0;
-		while (i < args.length)
+		final int STATE_START = 0;
+		final int STATE_LOCKFILE = 1;
+		final int STATE_TARGET = 2;
+		int state = STATE_START;
+
+		for (int i = 0; i < args.length; i++)
 		{
 			String arg = args[i];
-			if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-				options.setHelp(true);
-			else if (arg.equals(SWITCH_VERSION))
-				options.setVersion(true);
-			i++;
+			
+			switch (state)
+			{
+				case STATE_START:
+				{
+					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
+						options.setHelp(true);
+					else if (arg.equals(SWITCH_VERSION))
+						options.setVersion(true);
+					else if (arg.equals(SWITCH_UPDATE))
+						options.setUpdate(true);
+					else if (arg.equals(SWITCH_LOCKFILE))
+						state = STATE_LOCKFILE;
+					else if (arg.equals(SWITCH_TARGET))
+						state = STATE_TARGET;
+					else if (options.name != null)
+					{
+						options.driver = options.name;
+						options.name = arg;
+					}
+					else
+					{
+						options.name = arg;
+					}
+				}
+				break;
+				
+				case STATE_LOCKFILE:
+				{
+					options.lockFile = new File(arg);
+					state = STATE_START;
+				}
+				break;	
+				
+				case STATE_TARGET:
+				{
+					options.targetDirectory = new File(arg);
+					state = STATE_START;
+				}
+				break;
+			}
 		}
-		
+
+		if (state == STATE_LOCKFILE)
+			throw new OptionParseException("ERROR: Expected path to lock file.");
+		if (state == STATE_TARGET)
+			throw new OptionParseException("ERROR: Expected path to target directory.");
+
 		return options;
 	}
 	
@@ -455,14 +607,6 @@ public final class DoomFetchMain
 	
 	public static void main(String[] args)
 	{
-		if (args.length == 0)
-		{
-			splash(System.out);
-			usage(System.out);
-			System.exit(-1);
-			return;
-		}
-		
 		try {
 			System.exit(call(options(System.out, System.err, System.in, args)));
 		} catch (OptionParseException e) {
