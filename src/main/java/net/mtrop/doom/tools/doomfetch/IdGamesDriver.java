@@ -5,6 +5,7 @@ import java.io.PrintStream;
 
 import com.blackrook.json.JSONObject;
 
+import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
@@ -16,7 +17,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 public class IdGamesDriver extends FetchDriver 
 {
 	private static final String ROOT_URL = "https://www.gamers.org/pub/idgames/";
-	private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36";
+	private static final String USER_AGENT = "DoomFetch/" + Version.DOOMFETCH;
 	
 	/**
 	 * Creates a fetch driver.
