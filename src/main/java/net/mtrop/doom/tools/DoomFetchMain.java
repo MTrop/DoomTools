@@ -18,6 +18,7 @@ import java.util.function.BiFunction;
 
 import com.formdev.flatlaf.util.StringUtils;
 
+import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
 import net.mtrop.doom.tools.doomfetch.IdGamesDriver;
@@ -56,6 +57,7 @@ public final class DoomFetchMain
 	{
 		private static final long serialVersionUID = 3458742412979808872L;
 		{
+			put("doomshack", (out, err) -> new DoomShackDriver(out, err));
 			put("idgames", (out, err) -> new IdGamesDriver(out, err));
 		}
 	};
@@ -464,6 +466,7 @@ public final class DoomFetchMain
 			}
 			
 			boolean success = true;
+			boolean atleastone = false;
 			
 			// Provided name.
 			if (!StringUtils.isEmpty(options.name))
@@ -472,12 +475,17 @@ public final class DoomFetchMain
 				if (!StringUtils.isEmpty(options.driver))
 				{
 					success = fetchFile(lock, options.driver, options.name);
+					if (success)
+						atleastone = true;
 				}
 				else
 				{
 					success = fetchFile(lock, options.name); 
+					if (success)
+						atleastone = true;
 				}
-				lock.add(options.name);
+				if (success)
+					lock.add(options.name);
 			}
 			// No name. Pull from Lock file.
 			else for (Map.Entry<String, ?> entry : lock.entries())
@@ -486,11 +494,16 @@ public final class DoomFetchMain
 				if (out)
 					lock.add(entry.getKey());
 				success = out;
+				if (success)
+					atleastone = true;
 			}
 			
 			if (!success)
 			{
-				options.stdout.println("Some files not fetched.");
+				if (atleastone)
+					options.stdout.println("Some files not fetched.");
+				else
+					options.stdout.println("No files found/fetched.");
 				return ERROR_NOTFOUND;
 			}
 			

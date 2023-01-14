@@ -16,6 +16,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
  */
 public class IdGamesDriver extends FetchDriver 
 {
+	private static final String API_URL = "https://www.doomworld.com/idgames/api/api.php";
 	private static final String ROOT_URL = "https://ftp.fu-berlin.de/pc/games/idgames/";
 	private static final String USER_AGENT = "DoomFetch/" + Version.DOOMFETCH;
 	
@@ -32,7 +33,8 @@ public class IdGamesDriver extends FetchDriver
 	@Override
 	public Response getStreamFor(String name) throws IOException
 	{
-		JSONObject json = HTTPRequest.get("https://www.doomworld.com/idgames/api/api.php")
+		out.println("Searching idGames via API...");
+		JSONObject json = HTTPRequest.get(API_URL)
 			.parameters(
 				HTTPUtils.entry("action", "search"),
 				HTTPUtils.entry("type", "filename"),
@@ -52,6 +54,7 @@ public class IdGamesDriver extends FetchDriver
 		JSONObject selectedFile = null;
 		JSONObject files = content.get("file");
 		
+		out.println("Scanning for match...");
 		// Array response.
 		if (files.isArray())
 		{

@@ -39,7 +39,7 @@ public abstract class FetchDriver
 	/**
 	 * Attempts to search for and fetch a file by a specific name.
 	 * @param name the name of the file to find.
-	 * @return an input stream if it was found to use for file read, or null if not found by this driver.
+	 * @return a response if it was found to use for file read, or null if not found by this driver.
 	 * @throws IOException the exception if any read errors occur.
 	 */
 	public abstract Response getStreamFor(String name) throws IOException;
