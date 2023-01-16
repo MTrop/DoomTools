@@ -3,6 +3,7 @@ WadMerge
 
 ### Changed for 1.9.1
 
+* `Fixed` [GUI-Editor] Opening a file filtered the wrong kind of files (WadScript, not WadMerge). (Issue #88)
 * `Changed` [GUI-Executor] The working directory form field will not auto-fill unless it is blank.
 
 

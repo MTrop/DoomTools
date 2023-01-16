@@ -412,7 +412,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			language.getText("wadmerge.open.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.createWadScriptFileFilter()
+			utils.createWadMergeFileFilter()
 		);
 		
 		if (file != null)

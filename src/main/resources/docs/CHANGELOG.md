@@ -7,6 +7,9 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-01-16** Changed WadMerge file filter to include TXT files.
+- **2023-01-16** Changed WadScript file filter to include SCRIPT files.
+
 - **2023-01-14** Updated RSyntaxTextArea to `3.3.2`. [Changes here.](https://github.com/bobbylight/RSyntaxTextArea/releases/tag/3.3.2)
 
 - **2023-01-11** Updated RSyntaxTextArea to `3.3.1`. [Changes here.](https://github.com/bobbylight/RSyntaxTextArea/releases/tag/3.3.1)

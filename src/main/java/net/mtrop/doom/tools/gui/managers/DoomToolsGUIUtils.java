@@ -950,7 +950,7 @@ public final class DoomToolsGUIUtils
 	 */
 	public FileFilter createWadMergeFileFilter()
 	{
-		return fileExtensionFilter(language.getText("doomtools.filter.wadmerge.description") + " (*.wadm/*.wadmerge)", "wadm", "wadmerge");
+		return fileExtensionFilter(language.getText("doomtools.filter.wadmerge.description") + " (*.wadm/*.wadmerge/*.txt)", "wadm", "wadmerge", "txt");
 	}
 	
 	/**
@@ -958,7 +958,7 @@ public final class DoomToolsGUIUtils
 	 */
 	public FileFilter createWadScriptFileFilter()
 	{
-		return fileExtensionFilter(language.getText("doomtools.filter.wadscript.description") + " (*.wscript/*.wscr/*.wsx)", "wscript", "wscr", "wsx");
+		return fileExtensionFilter(language.getText("doomtools.filter.wadscript.description") + " (*.wscript/*.wscr/*.wsx/*.script)", "wscript", "wscr", "wsx", "script");
 	}
 
 	/**
