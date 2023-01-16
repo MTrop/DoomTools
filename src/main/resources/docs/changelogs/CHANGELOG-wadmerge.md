@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.9.1
+
+* `Changed` [GUI-Executor] The working directory form field will not auto-fill unless it is blank.
+
+
 ### Changed for 1.9.0
 
 * `Added` [GUI] Verbose output flag for running scripts.

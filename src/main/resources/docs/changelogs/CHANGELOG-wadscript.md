@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.6.1
+
+* `Changed` [GUI-Executor] The working directory form field will not auto-fill unless it is blank.
+
+
 ### Changed for 1.6.0
 
 * `Added` A directory tree for the GUI.

@@ -94,7 +94,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 			),
 			(selected) -> {
 				if (selected != null)
-					executePanel.setWorkingDirectory(selected.getParentFile());
+					executePanel.setWorkingDirectoryIfBlank(selected.getParentFile());
 				else
 					executePanel.setWorkingDirectory(null);
 			}

@@ -134,6 +134,16 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 	}
 	
 	/**
+	 * Sets the working directory field, if it had nothing in it.
+	 * @param workDir the working directory. 
+	 */
+	public void setWorkingDirectoryIfBlank(File workDir)
+	{
+		if (workingDirFileField.getValue() == null)
+			workingDirFileField.setValue(workDir);
+	}
+
+	/**
 	 * @param workDir the working directory. 
 	 */
 	public void setWorkingDirectory(File workDir)
