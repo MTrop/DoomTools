@@ -45,6 +45,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>DECOHack v").append(Version.DECOHACK).append("</b>").append("<br/>");
 		sb.append("Contains <b>DImgConv v").append(Version.DIMGCONV).append("</b>").append("<br/>");
 		sb.append("Contains <b>DMXConv v").append(Version.DMXCONV).append("</b>").append("<br/>");
+		sb.append("Contains <b>DoomFetch v").append(Version.DOOMFETCH).append("</b>").append("<br/>");
 		sb.append("Contains <b>DoomMake v").append(Version.DOOMMAKE).append("</b>").append("<br/>");
 		sb.append("Contains <b>WadMerge v").append(Version.WADMERGE).append("</b>").append("<br/>");
 		sb.append("Contains <b>WadScript v").append(Version.WADSCRIPT).append("</b>").append("<br/>");
