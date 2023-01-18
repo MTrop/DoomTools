@@ -2,8 +2,8 @@ package net.mtrop.doom.tools.doomfetch;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -53,7 +53,7 @@ public class DoomShackDriver extends FetchDriver
 		 */
 		public synchronized SiteCache build(String listData) throws IOException
 		{
-			this.wadToURI = new HashMap<>(1024, 1f);
+			this.wadToURI = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			
 			Document document = Jsoup.parse(listData);
 
@@ -106,7 +106,7 @@ public class DoomShackDriver extends FetchDriver
 			}
 		}
 		
-		out.println("Searching DoomShack WAD list...");
+		out.println("Searching DoomShack WAD list for match...");
 		String uri = cache.getURI(name);
 		
 		if (uri == null)

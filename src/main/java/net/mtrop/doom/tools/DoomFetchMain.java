@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -18,6 +19,7 @@ import java.util.function.BiFunction;
 
 import com.formdev.flatlaf.util.StringUtils;
 
+import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
 import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
@@ -52,13 +54,15 @@ public final class DoomFetchMain
 	public static final String SWITCH_UPDATE = "--update";
 
 	public static final String DEFAULT_LOCK_FILENAME = "doomfetch.lock";
-	
-	public static final Map<String, BiFunction<PrintStream, PrintStream, FetchDriver>> DRIVER_LIST = new TreeMap<String, BiFunction<PrintStream, PrintStream, FetchDriver>>() 
+
+	// LinkedHashMap to establish priority.
+	public static final Map<String, BiFunction<PrintStream, PrintStream, FetchDriver>> DRIVER_LIST = new LinkedHashMap<String, BiFunction<PrintStream, PrintStream, FetchDriver>>() 
 	{
 		private static final long serialVersionUID = 3458742412979808872L;
 		{
-			put("doomshack", (out, err) -> new DoomShackDriver(out, err));
+		//	put("dogsoft", (out, err) -> new DogSoftDriver(out, err));
 			put("idgames", (out, err) -> new IdGamesDriver(out, err));
+			put("doomshack", (out, err) -> new DoomShackDriver(out, err));
 		}
 	};
 	

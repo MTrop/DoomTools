@@ -54,7 +54,7 @@ public class IdGamesDriver extends FetchDriver
 		JSONObject selectedFile = null;
 		JSONObject files = content.get("file");
 		
-		out.println("Scanning for match...");
+		out.println("Scanning idGames result for match...");
 		// Array response.
 		if (files.isArray())
 		{
@@ -67,7 +67,7 @@ public class IdGamesDriver extends FetchDriver
 					err.println("Response from idGames is malformed!");
 					return null;
 				}
-				else if (FileUtils.getFileNameWithoutExtension(file.get("filename").getString()).equals(name))
+				else if (FileUtils.getFileNameWithoutExtension(file.get("filename").getString()).equalsIgnoreCase(name))
 				{
 					selectedFile = file;
 					break;

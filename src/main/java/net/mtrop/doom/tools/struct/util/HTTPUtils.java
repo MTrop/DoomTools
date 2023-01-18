@@ -1858,7 +1858,7 @@ public final class HTTPUtils
 	{
 		private FormContent(HTTPParameters parameters)
 		{
-			super("x-www-form-urlencoded", UTF8.displayName(), parameters.toString().getBytes(UTF8));
+			super("application/x-www-form-urlencoded", UTF8.displayName(), parameters.toString().getBytes(UTF8));
 		}
 	}
 
