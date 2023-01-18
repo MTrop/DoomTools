@@ -53,11 +53,14 @@
 	<property name="commonmark.lib.version" value="0.19.0" />
 	<property name="commonmark.jar" value="commonmark-${commonmark.lib.version}.jar" />
 
+	<property name="jsoup.lib.version" value="1.15.3" />
+	<property name="jsoup.jar" value="jsoup-${jsoup.lib.version}.jar" />
+	
 	
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}${S}${dev.base}/${commonmark.jar}"/>
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}${S}${dev.base}/${commonmark.jar}${S}${dev.base}/${jsoup.jar}"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -143,6 +146,8 @@
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
 		<echo file="${build.versions.dir}/commonmark.version" message="${commonmark.lib.version}" />
+		<echo file="${build.versions.dir}/jsoup.version" message="${json.lib.version}" />
+		
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbl.version" message="${wswantbl.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
@@ -177,18 +182,35 @@
         </javadoc>
     </target>	
 
+	<macrodef name="jar-lib">
+		<attribute name="destfile" />
+		<attribute name="jar" />
+		<attribute name="update" default="false" />
+		<sequential>
+			<jar destfile="@{destfile}" update="@{update}" filesetmanifest="skip">
+				<zipfileset src="@{jar}">
+					<include name="**/*.class" />
+					<include name="**/*.properties" />
+					<include name="**/*.xml" />
+					<include name="**/*.dtd" />
+					<include name="**/*.dll" />
+					<exclude name="module-info.class" />
+				</zipfileset>
+			</jar>
+		</sequential>
+	</macrodef>
+	
 	<target name="jar.one" depends="init.jar, compile, init.versions">
-		<jar destfile="${jar.dir}/${jar.filename}">
-			<zipgroupfileset file="${dependencies.dir}/${json.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${doom.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${rookscript.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${rookscript.desktop.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${rsyntaxtextarea.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${autocomplete.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${commonmark.jar}"/>
-		</jar>
-		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${json.jar}" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${doom.jar}"               update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rookscript.jar}"         update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rookscript.desktop.jar}" update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rsyntaxtextarea.jar}"    update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${autocomplete.jar}"       update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${commonmark.jar}"         update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${flatlaf.jar}"            update="true" />
+		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${jsoup.jar}"              update="true" />
+		<jar destfile="${jar.dir}/${jar.filename}" basedir="${bin.dir}" update="true" />
 		<jar destfile="${jar.dir}/${jar.filename}" update="true">
 			<zipfileset dir="${build.dir}/versions" prefix="net/mtrop/doom/tools/" />
 		</jar>
@@ -234,7 +256,24 @@
 		<maven-jar-sources-dl group-path="org/commonmark" artifact="commonmark" version="${commonmark.lib.version}" />
 	</target>
 	
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.doom, dependency.rookscript, dependency.rookscript.desktop, dependency.flatlaf, dependency.rsyntaxtextarea, dependency.autocomplete, dependency.commonmark, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.jsoup">
+		<maven-jar-dl group-path="org/jsoup" artifact="jsoup" version="${jsoup.lib.version}" />
+		<maven-jar-sources-dl group-path="org/jsoup" artifact="jsoup" version="${jsoup.lib.version}" />
+	</target>
+
+	<target name="dependencies" depends="
+		init.dependencies, 
+		dependency.json, 
+		dependency.doom, 
+		dependency.rookscript,
+		dependency.rookscript.desktop, 
+		dependency.flatlaf, 
+		dependency.rsyntaxtextarea, 
+		dependency.autocomplete, 
+		dependency.commonmark, 
+		dependency.jsoup, 
+		dependency.properties
+	" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />

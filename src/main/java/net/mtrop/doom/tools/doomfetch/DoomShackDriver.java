@@ -1,11 +1,13 @@
 package net.mtrop.doom.tools.doomfetch;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.struct.SingletonProvider;
@@ -52,28 +54,18 @@ public class DoomShackDriver extends FetchDriver
 		public synchronized SiteCache build(String listData) throws IOException
 		{
 			this.wadToURI = new HashMap<>(1024, 1f);
+			
+			Document document = Jsoup.parse(listData);
 
-			try (BufferedReader br = new BufferedReader(new StringReader(listData)))
+			for (Element e : document.select("li > a"))
 			{
-				final String TAG_LI = "<li>";
-				final String TAG_LI_END = "</li>";
-				final String TAG_A_END = "</a>";
-				final String HREF = "href=\"";
+				String uri = e.attr("href");
+				String filename = e.html();
+				String name = FileUtils.getFileNameWithoutExtension(filename);
 				
-				String line;
-				while ((line = br.readLine()) != null)
-				{
-					if (!line.startsWith(TAG_LI))
-						continue;
-					
-					String data = line.substring(TAG_LI.length(), line.length() - TAG_LI_END.length());
-					String uri = data.substring(data.indexOf(HREF) + HREF.length(), data.lastIndexOf('"'));
-					String filename = data.substring(data.indexOf(uri) + uri.length() + 2, data.indexOf(TAG_A_END));
-					String name = FileUtils.getFileNameWithoutExtension(filename);
-					
-					wadToURI.put(name, uri);
-				}
+				wadToURI.put(name, uri);
 			}
+			
 			return this;
 		}
 		
