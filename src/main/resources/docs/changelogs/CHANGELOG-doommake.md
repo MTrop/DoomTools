@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.21.0
+
+* `Added` TOOL::DOOMFETCH function.
+
+
 ### Changed for 0.20.1
 
 * `Changed` [GUI-Studio] "Type unrecognized" on file open message: do not say "unrecognized" if we knew it was a WAD file.
@@ -9,9 +14,9 @@ DoomMake
 
 ### Changed for 0.20.0
 
-* `Added` [GUI-Studio] Project search.
 * `Fixed` [GUI] Repository managers attempted to call CMD on non-Windows OSes.
 * `Fixed` [GUI] Opening a Terminal on macOS now works as intended.
+* `Added` [GUI-Studio] Project search.
 
 
 ### Changed for 0.19.0

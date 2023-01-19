@@ -73,12 +73,14 @@ public final class DoomFetchMain
 	{
 		private static class EntryData
 		{
+			private String driver;
 			private String etag; // not implemented
 			private String date; // not implemented
 
-			private EntryData(String etag, String date) 
+			private EntryData(String driver, String etag, String date) 
 			{
 				super();
+				this.driver = driver;
 				this.etag = etag;
 				this.date = date;
 			}
@@ -98,18 +100,29 @@ public final class DoomFetchMain
 		 */
 		public void add(String name)
 		{
-			add(name, "", "");
+			add(name, "", "", "");
 		}
 
 		/**
 		 * Adds an entry to this lock.
 		 * @param name the name of the entry.
+		 * @param driver the driver that downloaded it.
+		 */
+		public void add(String name, String driver)
+		{
+			add(name, driver, "", "");
+		}
+
+		/**
+		 * Adds an entry to this lock.
+		 * @param name the name of the entry.
+		 * @param driver the driver that downloaded it.
 		 * @param etag the hash or cache tag for the file.
 		 * @param date the cache date of the file fetched.
 		 */
-		public void add(String name, String etag, String date)
+		public void add(String name, String driver, String etag, String date)
 		{
-			entries.put(name, new EntryData(etag, date));
+			entries.put(name, new EntryData(driver, etag, date));
 		}
 		
 		/**
@@ -138,6 +151,7 @@ public final class DoomFetchMain
 				while ((line = br.readLine()) != null)
 				{
 					String name = "";
+					String driver = "";
 					String etag = "";
 					String date = "";
 					
@@ -147,22 +161,28 @@ public final class DoomFetchMain
 							continue;
 						
 						name = scanner.next();
-						
 						if (!scanner.hasNext())
 						{
 							add(name);
 							continue;
 						}
 	
+						driver = scanner.next();
+						if (!scanner.hasNext())
+						{
+							add(name, driver);
+							continue;
+						}
+	
 						etag = scanner.next();
 						if (!scanner.hasNext())
 						{
-							add(name, etag, date);
+							add(name, driver, etag, date);
 							continue;
 						}
 	
 						date = scanner.next();
-						add(name, etag, date);
+						add(name, driver, etag, date);
 					}
 				}
 			}
@@ -179,25 +199,26 @@ public final class DoomFetchMain
 			{
 				for (Map.Entry<String, EntryData> entry : entries.entrySet())
 				{
-					String name = entry.getKey();
-					String etag = entry.getValue().etag;
-					String date = entry.getValue().date;
+					String name =   entry.getKey();
+					String driver = entry.getValue().driver;
+					String etag =   entry.getValue().etag;
+					String date =   entry.getValue().date;
 					
 					if (StringUtils.isEmpty(etag) && StringUtils.isEmpty(date))
 					{
-						pw.println(name);
+						pw.println(name + " " + driver);
 					}
 					else if (StringUtils.isEmpty(date))
 					{
-						pw.println(name + " " + etag);
+						pw.println(name + " " + driver + " " + etag);
 					}
 					else if (StringUtils.isEmpty(etag))
 					{
-						pw.println(name + " \"\" " + date);
+						pw.println(name + " " + driver + " \"\" " + date);
 					}
 					else
 					{
-						pw.println(name + " " + etag + " " + date);
+						pw.println(name + " " + driver + " " + etag + " " + date);
 					}
 				}
 			}
@@ -300,6 +321,11 @@ public final class DoomFetchMain
 			this.driver = driver;
 		}
 		
+		public void setName(String name) 
+		{
+			this.name = name;
+		}
+		
 		public String getName() 
 		{
 			return name;
@@ -327,38 +353,14 @@ public final class DoomFetchMain
 			{
 				success = fetchFile(lockFile, entry.getKey(), name); 
 				if (success)
+				{
+					lockFile.add(name, entry.getKey());
 					break;
+				}
 			}
 			return success;
 		}
 
-		// Returns true if a file that has a target name is found
-		private static boolean searchForTargetFile(File targetDirectoryPath, String name)
-		{
-			if (!targetDirectoryPath.exists())
-				return false;
-			
-			for (File f : targetDirectoryPath.listFiles())
-			{
-				String fname = FileUtils.getFileNameWithoutExtension(f);
-				if (OSUtils.isWindows() && fname.equalsIgnoreCase(name))
-					return true;
-				else if (fname.equals(name))
-					return true;
-			}
-			
-			return false;
-		}
-		
-		// Prints transfer progress.
-		private static void printProgress(long current, Long max, PrintStream out)
-		{
-			if (max != null)
-				out.print("\r" + (current / 1024) + " KB / " + (max / 1024) + " KB ");
-			else
-				out.print("\r" + (current / 1024) + " KB ");
-		}
-		
 		// Returns true if the file was fetched (or found locally) successfully.
 		private boolean fetchFile(LockFile lockFile, String driver, String name)
 		{
@@ -371,7 +373,7 @@ public final class DoomFetchMain
 			BiFunction<PrintStream, PrintStream, FetchDriver> driverFunc = DRIVER_LIST.get(driver);
 			if (driver == null)
 				options.stderr.println("ERROR: No such driver: " + driver);
-
+		
 			FetchDriver fetcher = driverFunc.apply(options.stdout, options.stderr);
 			
 			Response response = null;
@@ -423,7 +425,35 @@ public final class DoomFetchMain
 				IOUtils.close(response);
 			}
 			
+			lockFile.add(name, driver);
 			return true;
+		}
+
+		// Returns true if a file that has a target name is found
+		private static boolean searchForTargetFile(File targetDirectoryPath, String name)
+		{
+			if (!targetDirectoryPath.exists())
+				return false;
+			
+			for (File f : targetDirectoryPath.listFiles())
+			{
+				String fname = FileUtils.getFileNameWithoutExtension(f);
+				if (OSUtils.isWindows() && fname.equalsIgnoreCase(name))
+					return true;
+				else if (fname.equals(name))
+					return true;
+			}
+			
+			return false;
+		}
+		
+		// Prints transfer progress.
+		private static void printProgress(long current, Long max, PrintStream out)
+		{
+			if (max != null)
+				out.print("\r" + (current / 1024) + " KB / " + (max / 1024) + " KB ");
+			else
+				out.print("\r" + (current / 1024) + " KB ");
 		}
 		
 		@Override
@@ -488,15 +518,16 @@ public final class DoomFetchMain
 					if (success)
 						atleastone = true;
 				}
-				if (success)
-					lock.add(options.name);
 			}
 			// No name. Pull from Lock file.
-			else for (Map.Entry<String, ?> entry : lock.entries())
+			else for (Map.Entry<String, LockFile.EntryData> entry : lock.entries())
 			{
-				boolean out = fetchFile(lock, entry.getKey()) && success;
-				if (out)
-					lock.add(entry.getKey());
+				boolean out;
+				String driver = entry.getValue().driver;
+				if (StringUtils.isEmpty(driver))
+					out = fetchFile(lock, entry.getKey()) && success;
+				else
+					out = fetchFile(lock, driver, entry.getKey()) && success;
 				success = out;
 				if (success)
 					atleastone = true;

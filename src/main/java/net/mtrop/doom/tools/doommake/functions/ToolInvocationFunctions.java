@@ -106,6 +106,77 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 		}
 	},
 
+	DOOMFETCH(1)
+	{
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Calls the DoomFetch tool. Inherits STDOUT/STDERR of this script unless overridden (see options). " +
+					"Make sure you are pointing at a persistent lock file and target directory to avoid re-downloading what is already downloaded."
+				)
+				.parameter("options", 
+					type(Type.MAP, 
+						"{" + StringUtils.joinStrings(", ",
+							"stdout:OBJECTREF(OutputStream)",
+							"stderr:OBJECTREF(OutputStream)",
+							"lockFile:OBJECTREF(File)",
+							"targetDirectory:OBJECTREF(File)",
+							"update:BOOLEAN",
+							"driver:STRING",
+							"name:STRING"
+						) + "}",
+						"Map of options."
+					)
+				)
+				.returns(
+					type(Type.INTEGER, "The normal return of this tool's process."),
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				PrintStream stdout = scriptInstance.getEnvironment().getStandardOut();
+				PrintStream stderr = scriptInstance.getEnvironment().getStandardErr();
+				InputStream stdin = scriptInstance.getEnvironment().getStandardIn();
+				DoomMakeMain.Options options = DoomMakeMain.options(stdout, stderr, stdin);
+				scriptInstance.popStackValue(temp);
+				if (!temp.isNull())
+				{
+					if (!temp.isMap())
+					{
+						returnValue.setError("BadOptions", "Options parameter needs to be a Map type.");
+						return true;
+					}
+					else if (!temp.mapApply(options))
+					{
+						returnValue.setError("BadOptions", "Options Map could not be applied.");
+						return true;
+					}
+				}
+				returnValue.set(DoomMakeMain.call(options));
+				return true;
+			} catch (OptionParseException e) {
+				returnValue.setError("BadOptions", "Option argument parse failed: " + e.getLocalizedMessage());
+				return true;
+			} catch (ClassCastException e) {
+				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+	},
+
 	DOOMMAKE(1)
 	{
 		@Override
