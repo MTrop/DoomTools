@@ -12,6 +12,7 @@ Copyright (c) 2019-2023 Matt Tropiano
 [RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.3.0+  
 [AutoComplete](https://github.com/bobbylight/AutoComplete) 3.3.0+  
 [CommonMark](https://github.com/commonmark/commonmark-java) 0.19.0+
+[Jsoup](https://github.com/jhy/jsoup/) 1.15.3+
 
 
 ### Required Modules

@@ -493,11 +493,7 @@ public final class DoomFetchMain
 			
 			if (lock.isEmpty() && StringUtils.isEmpty(options.name))
 			{
-				options.stderr.println("No work to do.");
-				splash(options.stdout);
-				usage(options.stdout);
-				options.stdout.println();
-				help(options.stdout);
+				options.stdout.println("No work to do.");
 				return ERROR_NONE;
 			}
 			
