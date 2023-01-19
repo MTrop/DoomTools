@@ -175,6 +175,10 @@ A utility that bulk converts images to Doom formats.
 
 A utility that converts all sorts of sounds to DMX digital sounds using either the Java SPI or FFmpeg.
 
+#### DoomFetch
+
+A utility that fetches WAD files from different sources. Can serve as a dependency manager.
+
 #### DoomMake
 
 A project build utility that is agnostic to all operating systems (for the most part).
