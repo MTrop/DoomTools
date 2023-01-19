@@ -19,7 +19,7 @@ import java.util.function.BiFunction;
 
 import com.formdev.flatlaf.util.StringUtils;
 
-import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
+//import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
 import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
@@ -48,6 +48,7 @@ public final class DoomFetchMain
 	public static final String SWITCH_HELP = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERSION = "--version";
+	public static final String SWITCH_CHANGELOG = "--changelog";
 
 	public static final String SWITCH_LOCKFILE = "--lockfile";
 	public static final String SWITCH_TARGET = "--target";
@@ -253,6 +254,7 @@ public final class DoomFetchMain
 		
 		private boolean help;
 		private boolean version;
+		private boolean changelog;
 		
 		private File lockFile;
 		private File targetDirectory;
@@ -268,6 +270,7 @@ public final class DoomFetchMain
 			
 			this.help = false;
 			this.version = false;
+			this.changelog = false;
 			
 			this.lockFile = new File(DEFAULT_LOCK_FILENAME);
 			this.targetDirectory = new File(".");
@@ -289,41 +292,34 @@ public final class DoomFetchMain
 			return this;
 		}
 
-		public Options setHelp(boolean help) 
-		{
-			this.help = help;
-			return this;
-		}
-		
-		public Options setVersion(boolean version) 
-		{
-			this.version = version;
-			return this;
-		}
-		
-		public void setLockFile(File lockFile) 
+		public Options setLockFile(File lockFile) 
 		{
 			this.lockFile = lockFile;
+			return this;
 		}
 		
-		public void setTargetDirectory(File targetDirectory) 
+		public Options setTargetDirectory(File targetDirectory) 
 		{
 			this.targetDirectory = targetDirectory;
+			return this;
 		}
 		
-		public void setUpdate(boolean update) 
+		public Options setUpdate(boolean update) 
 		{
 			this.update = update;
+			return this;
 		}
 		
-		public void setDriver(String driver) 
+		public Options setDriver(String driver) 
 		{
 			this.driver = driver;
+			return this;
 		}
 		
-		public void setName(String name) 
+		public Options setName(String name) 
 		{
 			this.name = name;
+			return this;
 		}
 		
 		public String getName() 
@@ -474,6 +470,12 @@ public final class DoomFetchMain
 				return ERROR_NONE;
 			}
 
+			if (options.changelog)
+			{
+				changelog(options.stdout, "doomfetch");
+				return ERROR_NONE;
+			}
+			
 			if (options.lockFile == null)
 				options.lockFile = new File(DEFAULT_LOCK_FILENAME);
 			
@@ -583,9 +585,11 @@ public final class DoomFetchMain
 				case STATE_START:
 				{
 					if (arg.equals(SWITCH_HELP) || arg.equals(SWITCH_HELP2))
-						options.setHelp(true);
+						options.help = true;
 					else if (arg.equals(SWITCH_VERSION))
-						options.setVersion(true);
+						options.version = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
+						options.changelog = true;
 					else if (arg.equals(SWITCH_UPDATE))
 						options.setUpdate(true);
 					else if (arg.equals(SWITCH_LOCKFILE))
@@ -721,4 +725,27 @@ public final class DoomFetchMain
 			out.println("    " + entry.getKey());
 	}
 
+	/**
+	 * Prints the changelog.
+	 * @param out the print stream to print to.
+	 */
+	private static void changelog(PrintStream out, String name)
+	{
+		String line;
+		int i = 0;
+		try (BufferedReader br = IOUtils.openTextStream(IOUtils.openResource("docs/changelogs/CHANGELOG-" + name + ".md")))
+		{
+			while ((line = br.readLine()) != null)
+			{
+				if (i >= 3) // eat the first three lines
+					out.println(line);
+				i++;
+			}
+		} 
+		catch (IOException e) 
+		{
+			out.println("****** ERROR: Cannot read CHANGELOG ******");
+		}
+	}
+	
 }
