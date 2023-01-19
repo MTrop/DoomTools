@@ -228,8 +228,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.20.0 by Matt Tropiano
-(using DoomStruct v2.14.2 , WadScript v1.6.0, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
+DoomMake v0.21.0 by Matt Tropiano
+(using DoomStruct v2.14.2 , WadScript v1.6.1, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -343,11 +343,22 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.21.0
+
+* &#x60;Added&#x60; TOOL::DOOMFETCH function.
+
+
+### Changed for 0.20.1
+
+* &#x60;Changed&#x60; [GUI-Studio] &quot;Type unrecognized&quot; on file open message: do not say &quot;unrecognized&quot; if we knew it was a WAD file.
+* &#x60;Changed&#x60; [GUI-Studio] &quot;Run DoomMake&quot; menu entries to clarify function.
+
+
 ### Changed for 0.20.0
 
-* &#x60;Added&#x60; [GUI-Studio] Project search.
 * &#x60;Fixed&#x60; [GUI] Repository managers attempted to call CMD on non-Windows OSes.
 * &#x60;Fixed&#x60; [GUI] Opening a Terminal on macOS now works as intended.
+* &#x60;Added&#x60; [GUI-Studio] Project search.
 
 
 ### Changed for 0.19.0
