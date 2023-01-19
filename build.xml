@@ -146,7 +146,7 @@
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
 		<echo file="${build.versions.dir}/commonmark.version" message="${commonmark.lib.version}" />
-		<echo file="${build.versions.dir}/jsoup.version" message="${json.lib.version}" />
+		<echo file="${build.versions.dir}/jsoup.version" message="${jsoup.lib.version}" />
 		
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbl.version" message="${wswantbl.version}" />

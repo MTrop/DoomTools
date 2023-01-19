@@ -24,6 +24,7 @@ public interface Version
 	String RSYNTAXTEXTAREA = Common.getVersionString("rsyntaxtextarea");
 	String AUTOCOMPLETE = Common.getVersionString("autocomplete");
 	String COMMONMARK = Common.getVersionString("commonmark");
+	String JSOUP = Common.getVersionString("jsoup");
 
 	String DECOHACK = Common.getVersionString("decohack");
 	String DIMGCONV = Common.getVersionString("dimgconv");
