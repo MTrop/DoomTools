@@ -23,7 +23,7 @@
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 
-	<property name="json.lib.version" value="1.2.0" />
+	<property name="json.lib.version" value="1.3.0" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />
@@ -47,7 +47,7 @@
 	<property name="rsyntaxtextarea.lib.version" value="3.3.2" />
 	<property name="rsyntaxtextarea.jar" value="rsyntaxtextarea-${rsyntaxtextarea.lib.version}.jar" />
 
-	<property name="autocomplete.lib.version" value="3.3.0" />
+	<property name="autocomplete.lib.version" value="3.3.1" />
 	<property name="autocomplete.jar" value="autocomplete-${autocomplete.lib.version}.jar" />
 
 	<property name="commonmark.lib.version" value="0.19.0" />
@@ -194,6 +194,8 @@
 					<include name="**/*.xml" />
 					<include name="**/*.dtd" />
 					<include name="**/*.dll" />
+					<include name="**/*.png" />
+					<include name="**/*.jpg" />
 					<exclude name="module-info.class" />
 				</zipfileset>
 			</jar>
