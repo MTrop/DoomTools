@@ -7,6 +7,9 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-01-25** Updated Black Rook JSON to `1.3.0`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.3.0-RELEASE)
+- **2023-01-25** Updated AutoComplete to `3.3.1`. [Changes here.](https://github.com/bobbylight/AutoComplete/releases/tag/3.3.1)
+
 - **2023-01-16** Changed WadMerge file filter to include TXT files.
 - **2023-01-16** Changed WadScript file filter to include SCRIPT files.
 
