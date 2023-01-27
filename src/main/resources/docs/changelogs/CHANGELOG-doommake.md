@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.21.1
+
+* `Changed` TOOL::DOOMFETCH documentation to reflect new parameters.
+
+
 ### Changed for 0.21.0
 
 * `Added` TOOL::DOOMFETCH function.

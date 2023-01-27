@@ -19,7 +19,7 @@ import java.util.function.BiFunction;
 
 import com.formdev.flatlaf.util.StringUtils;
 
-//import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
+import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
 import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
@@ -53,6 +53,7 @@ public final class DoomFetchMain
 	public static final String SWITCH_LOCKFILE = "--lockfile";
 	public static final String SWITCH_TARGET = "--target";
 	public static final String SWITCH_UPDATE = "--update";
+	public static final String SWITCH_NOLOCK = "--nolock";
 
 	public static final String DEFAULT_LOCK_FILENAME = "doomfetch.lock";
 
@@ -61,9 +62,9 @@ public final class DoomFetchMain
 	{
 		private static final long serialVersionUID = 3458742412979808872L;
 		{
-		//	put("dogsoft", (out, err) -> new DogSoftDriver(out, err));
 			put("idgames", (out, err) -> new IdGamesDriver(out, err));
 			put("doomshack", (out, err) -> new DoomShackDriver(out, err));
+			put("dogsoft", (out, err) -> new DogSoftDriver(out, err));
 		}
 	};
 	
@@ -259,6 +260,7 @@ public final class DoomFetchMain
 		private File lockFile;
 		private File targetDirectory;
 		private boolean update;
+		private boolean nolock;
 		
 		private String driver;
 		private String name;
@@ -275,6 +277,7 @@ public final class DoomFetchMain
 			this.lockFile = new File(DEFAULT_LOCK_FILENAME);
 			this.targetDirectory = new File(".");
 			this.update = false;
+			this.nolock = false;
 			
 			this.driver = null;
 			this.name = null;
@@ -307,6 +310,12 @@ public final class DoomFetchMain
 		public Options setUpdate(boolean update) 
 		{
 			this.update = update;
+			return this;
+		}
+		
+		public Options setNoLock(boolean nolock) 
+		{
+			this.nolock = nolock;
 			return this;
 		}
 		
@@ -541,7 +550,8 @@ public final class DoomFetchMain
 			}
 			
 			try {
-				lock.toFile(options.lockFile);
+				if (!options.nolock)
+					lock.toFile(options.lockFile);
 			} catch (IOException e) {
 				options.stderr.println("ERROR: Could not write to lock file.");
 				return ERROR_IOERROR;
@@ -588,6 +598,8 @@ public final class DoomFetchMain
 						options.changelog = true;
 					else if (arg.equals(SWITCH_UPDATE))
 						options.setUpdate(true);
+					else if (arg.equals(SWITCH_NOLOCK))
+						options.setNoLock(true);
 					else if (arg.equals(SWITCH_LOCKFILE))
 						state = STATE_LOCKFILE;
 					else if (arg.equals(SWITCH_TARGET))
@@ -715,6 +727,8 @@ public final class DoomFetchMain
 		out.println("                            Default: .");
 		out.println();
 		out.println("    --update            Tells DoomFetch to update even if a file is present.");
+		out.println();
+		out.println("    --nolock            Tells DoomFetch to not update the lock file.");
 		out.println();
 		out.println("Available drivers:");
 		for (Map.Entry<String, ?> entry : DRIVER_LIST.entrySet())

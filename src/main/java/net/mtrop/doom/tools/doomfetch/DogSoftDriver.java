@@ -3,28 +3,21 @@ package net.mtrop.doom.tools.doomfetch;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.Version;
-import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPContent;
-import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 
 /**
- * Doom Shack fetch driver.
+ * DogSoft fetch driver.
  * @author Matthew Tropiano
  */
 public class DogSoftDriver extends FetchDriver 
 {
 	private static final String ROOT_URL = "https://doom.dogsoft.net";
-	private static final String SEARCH_URL = ROOT_URL + "/search.php";
+	private static final String GETWAD_URL = ROOT_URL + "/getwad.php";
 	private static final String USER_AGENT = "DoomFetch/" + Version.DOOMFETCH;
 
 	/**
@@ -44,70 +37,45 @@ public class DogSoftDriver extends FetchDriver
 		if (name.length() < 4)
 			return null;
 		
-		out.println("Searching Doom.DogSoft.Net WAD list...");
+		out.println("Searching Doom.DogSoft.Net...");
 		
-		String data;
 		HTTPResponse searchResponse = null;
 		
-		try {
-			searchResponse = HTTPRequest.post(SEARCH_URL).content(HTTPContent.createFormContent(HTTPUtils.parameters(
-				HTTPUtils.entry("search", name),
-				HTTPUtils.entry("s", "Submit")
-			))).send();
-			
-			if (!searchResponse.isSuccess())
-			{
-				err.println("ERROR: Received status " + searchResponse.getStatusCode() + " Doom.DogSoft.Net: " + searchResponse.getStatusMessage());
-				return null;
-			}
-			
-			data = searchResponse.read(HTTPReader.createStringReader());
-
-		} catch (IOException e) {
-			err.println("ERROR: Read error from Doom.DogSoft.Net.");
-			return null;
-		} finally {
-			IOUtils.close(searchResponse);
-		}
+		// Incoming name has no extension, search for matching extensions.
+		String[] exts = {"wad", "zip", "pk3", "pk7"};
 		
-		out.println("Scanning Doom.DogSoft.Net result for match...");
-
-		// Get table to parse. Second table is the results.
-		Document document = Jsoup.parse(data);
-		Elements tables = document.select("table");
-		Element resultTable;
-		try {
-			resultTable = tables.get(1);
-		} catch (IndexOutOfBoundsException e) {
-			err.println("ERROR: Unexpected return for Doom.DogSoft.Net.");
-			return null;
-		}
-		
-		String uri = null;
-		String filename = null;
-		
-		// Don't select header row, which is not a header.
-		for (Element e : resultTable.select("tr:not(:first-child)"))
+		for (int i = 0; i < exts.length; i++)
 		{
-			Element link = e.selectFirst("td > a");
+			String filename = name + "." + exts[i];
 			
-			filename = link.html();
-			
-			if (FileUtils.getFileNameWithoutExtension(filename).equalsIgnoreCase(name))
-			{
-				uri = link.attr("href");
-				break;
+			try {
+				searchResponse = HTTPRequest.post(GETWAD_URL)
+					.setHeader("User-Agent", USER_AGENT)
+					.content(HTTPContent.createFormContent(HTTPUtils.parameters(
+						HTTPUtils.entry("search", filename)
+					)))
+				.send();
+				
+				// if HTML, we got a null response. Anything else, probably a file.
+				
+				if (!searchResponse.getContentType().endsWith("/html"))
+					return new Response(filename, "", "", searchResponse);
+				
+			} catch (IOException e) {
+				err.println("ERROR: Read error from Doom.DogSoft.Net.");
+			}
+
+			IOUtils.close(searchResponse);
+
+			// Don't flood server.
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// Do nothing.
 			}
 		}
 		
-		if (uri == null)
-			return null;
-		
-		HTTPRequest request = HTTPRequest.get(ROOT_URL + "/" + uri)
-			.setHeader("User-Agent", USER_AGENT)
-			.setAutoRedirect(true);
-		
-		return new Response(filename, "", "", request.send());
+		return null;
 	}
 
 }

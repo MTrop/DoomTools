@@ -124,6 +124,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"lockFile:OBJECTREF(File)",
 							"targetDirectory:OBJECTREF(File)",
 							"update:BOOLEAN",
+							"nolock:BOOLEAN",
 							"driver:STRING",
 							"name:STRING"
 						) + "}",
