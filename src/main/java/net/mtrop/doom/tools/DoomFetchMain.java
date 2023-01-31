@@ -17,8 +17,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
-import com.formdev.flatlaf.util.StringUtils;
-
 import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
 import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
@@ -30,6 +28,7 @@ import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Main class for DoomFetch.
@@ -206,15 +205,15 @@ public final class DoomFetchMain
 					String etag =   entry.getValue().etag;
 					String date =   entry.getValue().date;
 					
-					if (StringUtils.isEmpty(etag) && StringUtils.isEmpty(date))
+					if (ObjectUtils.isEmpty(etag) && ObjectUtils.isEmpty(date))
 					{
 						pw.println(name + " " + driver);
 					}
-					else if (StringUtils.isEmpty(date))
+					else if (ObjectUtils.isEmpty(date))
 					{
 						pw.println(name + " " + driver + " " + etag);
 					}
-					else if (StringUtils.isEmpty(etag))
+					else if (ObjectUtils.isEmpty(etag))
 					{
 						pw.println(name + " " + driver + " \"\" " + date);
 					}
@@ -500,7 +499,7 @@ public final class DoomFetchMain
 				}
 			}
 			
-			if (lock.isEmpty() && StringUtils.isEmpty(options.name))
+			if (lock.isEmpty() && ObjectUtils.isEmpty(options.name))
 			{
 				options.stdout.println("No work to do.");
 				return ERROR_NONE;
@@ -510,10 +509,10 @@ public final class DoomFetchMain
 			boolean atleastone = false;
 			
 			// Provided name.
-			if (!StringUtils.isEmpty(options.name))
+			if (!ObjectUtils.isEmpty(options.name))
 			{
 				// Provided driver.
-				if (!StringUtils.isEmpty(options.driver))
+				if (!ObjectUtils.isEmpty(options.driver))
 				{
 					success = fetchFile(lock, options.driver, options.name);
 					if (success)
@@ -531,7 +530,7 @@ public final class DoomFetchMain
 			{
 				boolean out;
 				String driver = entry.getValue().driver;
-				if (StringUtils.isEmpty(driver))
+				if (ObjectUtils.isEmpty(driver))
 					out = fetchFile(lock, entry.getKey()) && success;
 				else
 					out = fetchFile(lock, driver, entry.getKey()) && success;
