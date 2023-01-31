@@ -33,10 +33,6 @@ public class DogSoftDriver extends FetchDriver
 	@Override
 	public Response getStreamFor(String name) throws IOException 
 	{
-		// DogSoft does not accept searches below 4 characters.
-		if (name.length() < 4)
-			return null;
-		
 		out.println("Searching Doom.DogSoft.Net...");
 		
 		HTTPResponse searchResponse = null;
