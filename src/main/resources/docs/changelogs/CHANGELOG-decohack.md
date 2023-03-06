@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.30.2
+
+* `Fixed` Mass on Things can be negative. (Issue #90)
+
+
 ### Changed for 0.30.1
 
 * `Fixed` Macros for `STR_PD_YELLOWK` and `STR_PD_REDK` were swapped (in doom19 and udoom19), plus `MTF_SHOTGUNGUY_DEAD` was added. (Issue #85)
