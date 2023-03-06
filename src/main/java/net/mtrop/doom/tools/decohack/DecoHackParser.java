@@ -1861,9 +1861,9 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_MASS))
 			{
-				if ((value = matchPositiveInteger()) == null)
+				if ((value = matchInteger()) == null)
 				{
-					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_MASS);
+					addErrorMessage("Expected integer after \"%s\".", KEYWORD_MASS);
 					return false;
 				}
 				thing.setMass(value);
