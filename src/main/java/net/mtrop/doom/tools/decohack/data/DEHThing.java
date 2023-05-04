@@ -689,6 +689,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
+			&& droppedItem == obj.droppedItem
 			&& mbf21Flags == obj.mbf21Flags
 			&& meleeRange == obj.meleeRange
 			&& infightingGroup == obj.infightingGroup

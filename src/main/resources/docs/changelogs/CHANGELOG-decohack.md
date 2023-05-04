@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.30.3
+
+* `Fixed` If DroppedItem was the only change to a Thing, it would not be saved in the patch. (Issue #91)
+
+
 ### Changed for 0.30.2
 
 * `Fixed` Mass on Things can be negative. (Issue #90)
