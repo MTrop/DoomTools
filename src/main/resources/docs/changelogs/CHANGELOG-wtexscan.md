@@ -1,6 +1,11 @@
 WTexScan
 --------
 
+### Changed for 1.2.1
+
+* `Fixed` WTexScan will silently error out (print a message) instead of NPE if a map does 
+  not contain SIDEDEFS or SECTORS, due to faulty map detection from DoomStruct. (Issue #92).
+
 ### Changed for 1.2.0
 
 * `Added` GUI Version of WTexScan.

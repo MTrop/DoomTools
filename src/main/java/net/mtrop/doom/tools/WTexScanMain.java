@@ -326,7 +326,11 @@ public final class WTexScanMain
 					case DOOM:
 					case HEXEN:
 					{
-						inspectSidedefs(wad.getDataAs("SIDEDEFS", wad.lastIndexOf(mapName), DoomSidedef.class, DoomSidedef.LENGTH));
+						DoomSidedef[] sides = wad.getDataAs("SIDEDEFS", wad.lastIndexOf(mapName), DoomSidedef.class, DoomSidedef.LENGTH);
+						if (sides == null)
+							options.println("#            ERROR: No SIDEDEFS lump found! Skipping...");
+						else
+							inspectSidedefs(sides);
 					}
 					break;
 		
@@ -348,7 +352,11 @@ public final class WTexScanMain
 					case DOOM:
 					case HEXEN:
 					{
-						inspectSectors(wad.getDataAs("SECTORS", wad.lastIndexOf(mapName), DoomSector.class, DoomSector.LENGTH));
+						DoomSector[] sectors = wad.getDataAs("SECTORS", wad.lastIndexOf(mapName), DoomSector.class, DoomSector.LENGTH);
+						if (sectors == null)
+							options.println("#            ERROR: No SECTORS lump found! Skipping...");
+						else
+							inspectSectors(sectors);
 					}
 					break;
 		
