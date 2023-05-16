@@ -17,7 +17,7 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.14.2" />
+	<property name="doom.lib.version" value="2.15.0" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
