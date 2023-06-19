@@ -1,0 +1,5 @@
+## Asset WAD
+## Sets the name of the asset WAD. Created in build directory.
+## Leave blank for default.
+doommake.file.assets=
+

@@ -32,7 +32,16 @@ Some directories/files in this project are ignored (or *should* be ignored) by r
 	doommake.properties  Project property override file.
 
 
+## Before You Build This Project
+
+This project may need some local properties filled in by whoever clones this project.
+Make a `doommake.properties` file and look at the properties in `PROPS.txt` for the
+modifiable settings for this project. The `doommake.properties` file that you create should
+NOT BE CHECKED IN TO YOUR REPOSITORY!
+
+
 ## To Build This Project
+
 
 This project requires the [DoomTools](https://github.com/MTrop/DoomTools) toolchain for
 building it. Clone this project to a new folder and type:

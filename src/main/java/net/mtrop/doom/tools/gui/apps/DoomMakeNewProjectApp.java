@@ -12,10 +12,13 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -489,6 +492,28 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			return;
 		}
 		
+		try {
+			File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.md");
+			List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
+			
+			if (!todoList.isEmpty())
+			{
+				try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
+				{
+					todoPrinter.println("# Stuff To Do\n");
+					int i = 1;
+					for (String t : todoList)
+					{
+						todoPrinter.println(i + ") " + t);
+						i++;
+					}
+				}
+			}
+		} catch (IOException e) {
+			SwingUtils.error(e.getLocalizedMessage());
+			return;
+		}
+		
 		String toolKey = studio 
 			? "doommake.newproject.modal.openproject.choice.studio"
 			: "doommake.newproject.modal.openproject.choice.tools"
@@ -504,7 +529,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 			),
 			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.folder", true),
 			utils.createChoiceFromLanguageKey(toolKey, false),
-			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.none", null)
+			utils.createChoiceFromLanguageKey("doommake.newproject.modal.openproject.choice.none", () -> null)
 		).openThenDispose();
 
 		if (result == null)

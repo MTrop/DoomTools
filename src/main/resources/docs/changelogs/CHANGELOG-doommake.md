@@ -1,6 +1,13 @@
 DoomMake
 --------
 
+### Changed for 0.22.0
+
+* `Fixed` [GUI] DoomMake did not output `TODO.md` in new projects.
+* `Fixed` [GUI] "Do Nothing" option after project creation did not close the dialog (it *literally* did nothing).
+* `Added` DoomMake now outputs property usage into the project with documentation. (Enhancement #94)
+
+
 ### Changed for 0.21.1
 
 * `Changed` TOOL::DOOMFETCH documentation to reflect new parameters.

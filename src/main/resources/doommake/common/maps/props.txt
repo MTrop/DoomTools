@@ -1,0 +1,10 @@
+## Map WAD
+## Sets the name of the output maps WAD. Created in build directory.
+## Leave blank for default.
+doommake.file.maps=
+
+## Map Textures WAD
+## Sets the name of the output WAD for extracted textures. Created in build directory.
+## Leave blank for default.
+doommake.file.maptex=
+

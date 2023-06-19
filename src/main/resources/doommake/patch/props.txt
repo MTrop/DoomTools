@@ -1,0 +1,5 @@
+## DeHackEd Patch Output File
+## Sets the name of the DeHackEd file created in the build directory.
+## Leave blank for default.
+doommake.file.patch=
+
