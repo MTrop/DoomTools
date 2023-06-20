@@ -97,7 +97,7 @@ public enum WadMergeCommand
 			out.println("    Buffers are best used for speed, but large merges will consume"); 
 			out.println("    lots of memory during merge."); 
 			out.println("    [symbol]: The symbol for the new buffer.");
-			out.println("    [iwad]:   (Optional) If \"iwad\", the created WAD file is an IWAD.");
+			out.println("    [iwad]:   (Optional) If \"iwad\", the created WAD buffer is an IWAD.");
 			out.println("    ................................");
 			out.println("    Returns: OK if a symbol was created.");
 			out.println("             BAD_SYMBOL if the destination symbol already exists.");
@@ -110,7 +110,52 @@ public enum WadMergeCommand
 			boolean iwad = false;
 			if (scanner.hasNext())
 				iwad = scanner.nextString().equalsIgnoreCase("iwad");
-			return context.create(symbol, iwad);
+			return context.create(symbol, iwad, 8 * 1024 * 1024, 0);
+		}
+	},
+	
+	CREATEBUFFER
+	{
+		@Override
+		public String usage()
+		{
+			return "CREATEBUFFER [symbol] [capacity] [opt:increment] [opt:iwad]";
+		}
+
+		@Override
+		public void help(PrintStream out)
+		{
+			out.println(usage()); 
+			out.println("    Creates a new in-memory buffer, errors out if the symbol exists."); 
+			out.println("    Buffers are best used for speed, but large merges will consume"); 
+			out.println("    lots of memory during merge. This differs from CREATE such that");
+			out.println("    you can control the initial capacity or incremental capacity of");
+			out.println("    the new buffer."); 
+			out.println("    [symbol]:    The symbol for the new buffer.");
+			out.println("    [capacity]:  The buffer capacity in bytes.");
+			out.println("    [increment]: (Optional) The buffer increment (if more bytes are needed)");
+			out.println("                 in bytes. 0 or less doubles the buffer size.");
+			out.println("    [iwad]:      (Optional) If \"iwad\", the created WAD buffer is an IWAD.");
+			out.println("    ................................");
+			out.println("    Returns: OK if a symbol was created.");
+			out.println("             BAD_SYMBOL if the destination symbol already exists.");
+			out.println("             BAD_SIZE if the capacity or increment is an illegal value.");
+		}
+		
+		@Override
+		public Response execute(WadMergeContext context, TokenScanner scanner)
+		{
+			String symbol = scanner.nextString();
+			int capacity = scanner.nextInt();
+
+			boolean iwad = false;
+			int capacityIncrement = 0; // double
+			
+			if (scanner.hasNext())
+				capacityIncrement = scanner.nextInt();
+			if (scanner.hasNext())
+				iwad = scanner.nextString().equalsIgnoreCase("iwad");
+			return context.create(symbol, iwad, capacity, capacityIncrement);
 		}
 	},
 	

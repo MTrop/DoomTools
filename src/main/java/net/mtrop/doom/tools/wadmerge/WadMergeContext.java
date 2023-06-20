@@ -154,15 +154,21 @@ public class WadMergeContext
 	 * Symbol is case-insensitive.
 	 * @param symbol the symbol to associate with the Wad.
 	 * @param iwad if true, created WAD is an IWAD.
+	 * @param capacity the initial capacity of the buffer.
+	 * @param capacityIncrement the capacity increment of the buffer.
 	 * @return OK if a symbol was created, 
-	 * 		or BAD_SYMBOL if the destination symbol already exists.
+	 * 		or BAD_SYMBOL if the destination symbol already exists,
+	 * 		or BAD_SIZE if the capacity is an illegal value.
 	 */
-	public Response create(String symbol, boolean iwad)
+	public Response create(String symbol, boolean iwad, int capacity, int capacityIncrement)
 	{
 		if (currentWads.containsKey(symbol))
 			return Response.BAD_SYMBOL;
 		
-		WadBuffer buffer = new WadBuffer();
+		if (capacity < 1)
+			return Response.BAD_SIZE;
+		
+		WadBuffer buffer = new WadBuffer(capacity, capacityIncrement);
 		if (iwad)
 			buffer.setType(Type.IWAD);
 		currentWads.put(symbol, buffer);
@@ -228,7 +234,7 @@ public class WadMergeContext
 		verbosef("Cleared `%s`.\n", symbol);
 		buffer.close();
 		if (buffer instanceof WadBuffer)
-			return create(symbol, iwad);
+			return create(symbol, iwad, ((WadBuffer)buffer).getCapacity(), ((WadBuffer)buffer).getCapacityIncrement());
 		else if (buffer instanceof WadFile)
 			return createFile(symbol, new File(((WadFile)buffer).getFilePath()), iwad);
 		else
@@ -279,8 +285,10 @@ public class WadMergeContext
 			iwad = wf.isIWAD();
 		}
 		
+		int cap = (int)wadFile.length();
+		
 		Response out;
-		if ((out = create(symbol, iwad)) != Response.OK)
+		if ((out = create(symbol, iwad, cap, cap < (16 * 1024 * 1024) ? 0 : cap / 2)) != Response.OK)
 			return out;
 		if ((out = mergeWad(symbol, wadFile)) != Response.OK)
 			return out;
