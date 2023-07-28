@@ -228,8 +228,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.21.1 by Matt Tropiano
-(using DoomStruct v2.14.2 , WadScript v1.6.1, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
+DoomMake v0.22.0 by Matt Tropiano
+(using DoomStruct v2.15.0 , WadScript v1.6.1, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -343,6 +343,13 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.22.0
+
+* &#x60;Fixed&#x60; [GUI] DoomMake did not output &#x60;TODO.md&#x60; in new projects.
+* &#x60;Fixed&#x60; [GUI] &quot;Do Nothing&quot; option after project creation did not close the dialog (it *literally* did nothing).
+* &#x60;Added&#x60; DoomMake now outputs property usage into the project with documentation. (Enhancement #94)
+
+
 ### Changed for 0.21.1
 
 * &#x60;Changed&#x60; TOOL::DOOMFETCH documentation to reflect new parameters.

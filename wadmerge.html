@@ -89,7 +89,7 @@ end
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WadMerge v1.9.1 by Matt Tropiano (using DoomStruct v2.14.2)
+WadMerge v1.10.0 by Matt Tropiano (using DoomStruct v2.15.0)
 Usage: wadmerge [--help | -h | --version]
                 [switches] [scriptfile] [arguments]
 
@@ -143,10 +143,26 @@ CREATE [symbol] [opt:iwad]
     Buffers are best used for speed, but large merges will consume
     lots of memory during merge.
     [symbol]: The symbol for the new buffer.
-    [iwad]:   (Optional) If &quot;iwad&quot;, the created WAD file is an IWAD.
+    [iwad]:   (Optional) If &quot;iwad&quot;, the created WAD buffer is an IWAD.
     ................................
     Returns: OK if a symbol was created.
              BAD_SYMBOL if the destination symbol already exists.
+
+CREATEBUFFER [symbol] [capacity] [opt:increment] [opt:iwad]
+    Creates a new in-memory buffer, errors out if the symbol exists.
+    Buffers are best used for speed, but large merges will consume
+    lots of memory during merge. This differs from CREATE such that
+    you can control the initial capacity or incremental capacity of
+    the new buffer.
+    [symbol]:    The symbol for the new buffer.
+    [capacity]:  The buffer capacity in bytes.
+    [increment]: (Optional) The buffer increment (if more bytes are needed)
+                 in bytes. 0 or less doubles the buffer size.
+    [iwad]:      (Optional) If &quot;iwad&quot;, the created WAD buffer is an IWAD.
+    ................................
+    Returns: OK if a symbol was created.
+             BAD_SYMBOL if the destination symbol already exists.
+             BAD_SIZE if the capacity or increment is an illegal value.
 
 CREATEFILE [symbol] [path] [opt:iwad]
     Creates a new WAD file (on disk - not in memory), errors out if 
@@ -460,6 +476,11 @@ FILECHARSUB [char] [replacement]
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.10.0
+
+* &#x60;Added&#x60; New command: CREATEBUFFER (Enhancement #93).
+
+
 ### Changed for 1.9.1
 
 * &#x60;Fixed&#x60; [GUI-Editor] Opening a file filtered the wrong kind of files (WadScript, not WadMerge). (Issue #88)
