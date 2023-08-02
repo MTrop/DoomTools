@@ -637,7 +637,8 @@ public final class WTExportMain
 		// Adds a texture to the main list (and associated ones, if possible).
 		private void readAndAddTextures(String textureName)
 		{
-			if (!NameUtils.isValidTextureName(textureName))
+			// Textures can be flats (entries), too.
+			if (!NameUtils.isValidEntryName(textureName))
 			{
 				options.errln("ERROR: Texture \""+textureName+"\" has an invalid name. Skipping.");
 				return;

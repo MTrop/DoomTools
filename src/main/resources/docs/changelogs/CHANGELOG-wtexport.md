@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.5.1
+
+* `Fixed` Textures can also be entry names. (Issue #96)
+
+
 ### Changed for 1.5.0
 
 * `Fixed` Textures/Flats in ANIMATED were added in an incorrect order if the provided texture/flat was not the start of an animation loop. (Issue #75)
