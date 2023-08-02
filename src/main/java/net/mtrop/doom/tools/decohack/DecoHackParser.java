@@ -3714,18 +3714,18 @@ public final class DecoHackParser extends Lexer.Parser
 	// Attempts to fill states from a starting index.
 	// If forceFirst is true, the state index filled MUST be cursor.lastFilledIndex. 
 	// Returns the FIRST INDEX FILLED or null if error.
-	private Integer fillStates(AbstractPatchContext<?> context, FutureLabels labels, ParsedState state, StateFillCursor cursor, boolean forceFirst)
+	private Integer fillStates(AbstractPatchContext<?> context, FutureLabels labels, ParsedState parsedState, StateFillCursor cursor, boolean forceFirst)
 	{
 		Integer out = null;
 		boolean isBoom = context.supports(DEHFeatureLevel.BOOM);
 		
-		while (!state.frameList.isEmpty())
+		while (!parsedState.frameList.isEmpty())
 		{
-			Integer frame = state.frameList.pollFirst();
+			Integer frame = parsedState.frameList.pollFirst();
 			
-			for (int i = 0; i < state.parsedActions.size(); i++)
+			for (int i = 0; i < parsedState.parsedActions.size(); i++)
 			{
-				ParsedAction parsedAction = state.parsedActions.get(i);
+				ParsedAction parsedAction = parsedState.parsedActions.get(i);
 				
 				Integer currentIndex;
 				if ((currentIndex = searchNextState(context, parsedAction, cursor)) == null)
@@ -3752,14 +3752,18 @@ public final class DecoHackParser extends Lexer.Parser
 					parsedAction.applyLabels(currentIndex, labels);
 				
 				fillState
-					.setSpriteIndex(state.spriteIndex)
+					.setSpriteIndex(parsedState.spriteIndex)
 					.setFrameIndex(frame)
-					.setDuration(i == state.parsedActions.size() - 1 ? state.duration : 0) // only write duration to last state.
-					.setBright(state.bright)
+					.setDuration(i == parsedState.parsedActions.size() - 1 ? parsedState.duration : 0) // only write duration to last state.
+					.setBright(parsedState.bright)
 					.setMisc1(parsedAction.misc1)
 					.setMisc2(parsedAction.misc2)
 					.setArgs(parsedAction.args)
 				;
+				
+				if (parsedState.mbf21Flags != null && fillState.getMBF21Flags() != parsedState.mbf21Flags)
+					fillState.setMBF21Flags(parsedState.mbf21Flags);
+
 				cursor.lastStateFilled = fillState;
 		
 				Integer pointerIndex = context.getStateActionPointerIndex(currentIndex);
