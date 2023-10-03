@@ -445,12 +445,12 @@ public final class DoomImageConvertMain
 					{
 						final File dest = outputDir;
 						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
-							(input, pal, info, path)->readFile(input, pal, info, new File(dest.getPath() + FileUtils.getFileNameWithoutExtension(path) + ".lmp"))
+							(input, pal, info, path) -> readFile(input, pal, info, new File(dest.getPath() + FileUtils.getFileNameWithoutExtension(path) + ".lmp"))
 						);
 					}
 					catch (IOException e)
 					{
-						options.stderr.println("ERROR: I/O error on WAD write: " + e.getLocalizedMessage());
+						options.stderr.println("ERROR: I/O error on file write: " + e.getLocalizedMessage());
 						return ERROR_IOERROR;
 					} 
 					catch (SecurityException e) 
@@ -605,6 +605,12 @@ public final class DoomImageConvertMain
 				
 		private int readFile(File input, Palette palette, MetaInfo info, File output) throws IOException, SecurityException
 		{
+			if (!FileUtils.createPathForFile(output))
+			{
+				options.stderr.println("ERROR: Path creation error on file write: " + output.getPath());
+				return ERROR_IOERROR;
+			}
+
 			switch (info.mode)
 			{
 				case PALETTE:

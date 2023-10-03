@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.3.0
+
+* `Fixed` The recursive option now creates recursive directories properly. (Issue #100)
+
+
 ### Changed for 1.2.0
 
 * `Added` The GUI version of DImgConv.
@@ -13,8 +18,7 @@ DImgConv
 
 ### Changed for 1.0.1
 
-* `Fixed` DImgConv did not properly rename files to ".lmp" on convert if both source 
-  and destination were directories. (Issue #39)
+* `Fixed` DImgConv did not properly rename files to ".lmp" on convert if both source and destination were directories. (Issue #39)
 
 
 ### Changed for 1.0.0
