@@ -233,7 +233,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		this.loggingPanel = new DoomToolsTextOutputPanel();
 
-		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, this.loggingPanel, true);		
+		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, this.loggingPanel, true, loggingPanel.getPrintStream());		
 
 		DoomToolsIconManager icons = DoomToolsIconManager.get();
 		

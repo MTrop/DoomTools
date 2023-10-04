@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -86,8 +87,9 @@ public class DoomMakeExecutionPanel extends JPanel
      * @param targetDirectory 
      * @param outputPanel optional output override panel.
      * @param ideMode if true, omit the IDE button.
+     * @param outputStream optional output stream for logging.
 	 */
-	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, DoomToolsTextOutputPanel outputPanel, boolean ideMode)
+	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, DoomToolsTextOutputPanel outputPanel, boolean ideMode, final PrintStream outputStream)
 	{
 		this.language = DoomToolsLanguageManager.get();
 		this.helper = DoomMakeProjectHelper.get();
@@ -103,7 +105,7 @@ public class DoomMakeExecutionPanel extends JPanel
 		);
 		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (v) -> {
 			if (v)
-				startAgent();
+				startAgent(outputStream);
 			else
 				shutDownAgent();
 		});
@@ -207,7 +209,7 @@ public class DoomMakeExecutionPanel extends JPanel
 	}
 	
 	// Starts the agent.
-	private void startAgent()
+	private void startAgent(final PrintStream outputStream)
 	{
 		if (autoBuildAgent != null)
 			throw new IllegalStateException("INTERNAL ERROR: Start agent while agent running!");
@@ -217,45 +219,74 @@ public class DoomMakeExecutionPanel extends JPanel
 			@Override
 			public void onAgentStarted() 
 			{
-				LOG.info("Agent started: " + projectDirectory.getPath());
+				String out = "Agent started: " + projectDirectory.getPath();
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.info(out);
+				
 				updateTargetsEnabled(false);
 			}
 			
 			@Override
 			public void onAgentStartupException(String message, Exception exception) 
 			{
-				LOG.error("Agent startup error: " + message);
+				String out = "Agent startup error: " + message;
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.error(out);
 			}
 
 			@Override
 			public void onAgentStopped() 
 			{
-				LOG.info("Agent stopped: " + projectDirectory.getPath());
+				String out = "Agent stopped: " + projectDirectory.getPath();
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.info(out);
 				updateTargetsEnabled(true);
 			}
 
 			@Override
 			public void onAgentStoppedException(String message, Exception exception) 
 			{
-				LOG.error("Agent stop error: " + message);
+				String out = "Agent stop error: " + message;
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.error(out);
 			}
 
 			@Override
 			public void onBuildPrepared() 
 			{
-				LOG.info("Change detected. Build prepared.");
+				String out = "Change detected. Build prepared.";
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.info(out);
 			}
 
 			@Override
 			public void onBuildStart() 
 			{
-				LOG.info("Build started.");
+				String out = "Build started.";
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.info(out);
 			}
 
 			@Override
 			public void onBuildEnd(int result) 
 			{
-				LOG.info("Build ended.");
+				String out = "Build ended.";
+				if (outputStream != null)
+					outputStream.println("Auto-build: " + out);
+				else
+					LOG.info(out);
 			}
 			
 			@Override
@@ -263,7 +294,7 @@ public class DoomMakeExecutionPanel extends JPanel
 			{
 				try {
 					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
-					int result = appCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, null, null, null).get();
+					int result = appCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, outputStream, outputStream, null).get();
 					if (result != 0)
 						statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
 					else

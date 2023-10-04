@@ -75,7 +75,7 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	{
 		this.settings = DoomMakeSettingsManager.get();
 		this.statusPanel = new DoomToolsStatusPanel();
-		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, null, false);
+		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, null, false, null);
 		this.projectDirectory = targetDirectory;
 	}
 	

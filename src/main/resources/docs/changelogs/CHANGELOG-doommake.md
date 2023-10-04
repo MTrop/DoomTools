@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.23.0
+
+* `Changed` [GUI-Studio] Auto-build output now appears in the main log. (Enhancement #102)
+
+
 ### Changed for 0.22.0
 
 * `Fixed` [GUI] DoomMake did not output `TODO.md` in new projects.
