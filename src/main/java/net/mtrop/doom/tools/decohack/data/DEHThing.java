@@ -351,6 +351,12 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return this;
 	}
 
+	@Override
+	public boolean hasFlag(int bit)
+	{
+		return (this.flags & bit) != 0;
+	}
+
 	public int getMBF21Flags() 
 	{
 		return mbf21Flags;
@@ -374,6 +380,12 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	{
 		this.mbf21Flags &= ~bits;
 		return this;
+	}
+
+	@Override
+	public boolean hasMBF21Flag(int bit) 
+	{
+		return (this.mbf21Flags & bit) != 0;
 	}
 
 	public int getMass() 

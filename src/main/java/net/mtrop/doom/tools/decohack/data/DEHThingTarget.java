@@ -101,12 +101,16 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	SELF addFlag(int bits);
 	
 	SELF removeFlag(int bits);
+	
+	boolean hasFlag(int bit);
 
 	SELF setMBF21Flags(int bits);
 
 	SELF addMBF21Flag(int bits);
 	
 	SELF removeMBF21Flag(int bits);
+
+	boolean hasMBF21Flag(int bit);
 
 	SELF setMass(int mass);
 

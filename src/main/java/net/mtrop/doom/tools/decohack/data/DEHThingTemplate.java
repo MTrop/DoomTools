@@ -422,6 +422,21 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
+	public boolean hasFlag(int bit)
+	{
+		if (this.flags == null)
+		{
+			return (this.addFlags & bit) != 0
+				&& (this.remFlags & bit) == 0
+			;
+		}
+		else
+		{
+			return (this.flags & bit) != 0;
+		}
+	}
+
+	@Override
 	public DEHThingTemplate setMBF21Flags(int bits) 
 	{
 		this.mbf21Flags = bits;
@@ -446,6 +461,21 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		else
 			this.remMBF21Flags |= bits; // removed later
 		return this;
+	}
+
+	@Override
+	public boolean hasMBF21Flag(int bit)
+	{
+		if (this.mbf21Flags == null)
+		{
+			return (this.addMBF21Flags & bit) != 0
+				&& (this.remMBF21Flags & bit) == 0
+			;
+		}
+		else
+		{
+			return (this.mbf21Flags & bit) != 0;
+		}
 	}
 
 	@Override

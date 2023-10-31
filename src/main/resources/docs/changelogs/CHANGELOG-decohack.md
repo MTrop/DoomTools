@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.31.0
+
+* `Added` A warning for when a user makes a Thing that is `SHOOTABLE` with 0 mass. (Enhancement #103)
+
+
 ### Changed for 0.30.4
 
 * `Fixed` `Fast` and other MBF21 flags were not being respected in state bodies. (Issue #95)

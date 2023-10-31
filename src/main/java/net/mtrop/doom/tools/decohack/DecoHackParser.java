@@ -1865,7 +1865,15 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					addErrorMessage("Expected integer after \"%s\".", KEYWORD_MASS);
 					return false;
+				}				
+
+				// zero-mass check
+				if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
+				{
+					addWarningMessage("Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
+					return false;
 				}
+				
 				thing.setMass(value);
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_FLAGS))
@@ -2055,7 +2063,7 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected '}' after \"%s\" section.", KEYWORD_THING);
 			return false;
 		}
-		
+
 		// apply editor keys
 		for (Map.Entry<String, String> entry : editorKeys.entrySet())
 			thing.setEditorKey(entry.getKey(), entry.getValue());
