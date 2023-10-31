@@ -3291,13 +3291,13 @@ public final class DecoHackParser extends Lexer.Parser
 			if (labels.length == 0)
 			{
 				sb = new StringBuilder("Expected a valid thing state label for thing ");
-				sb.append(index);
+				sb.append(index).append("(").append(thing.getName()).append(") ");
 				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
 			}
 			else
 			{
 				sb = new StringBuilder("Expected a valid thing state label for thing ");
-				sb.append(index).append(": ");
+				sb.append(index).append("(").append(thing.getName()).append("): ");
 				sb.append(Arrays.toString(labels));
 				sb.append(".");
 			}
@@ -3333,13 +3333,13 @@ public final class DecoHackParser extends Lexer.Parser
 			if (labels.length == 0)
 			{
 				sb = new StringBuilder("Expected a valid thing state label for weapon ");
-				sb.append(index);
+				sb.append(index).append("(").append(weapon.getName()).append(") ");
 				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
 			}
 			else
 			{
 				sb = new StringBuilder("Expected a valid thing state label for weapon ");
-				sb.append(index).append(": ");
+				sb.append(index).append("(").append(weapon.getName()).append("): ");
 				sb.append(Arrays.toString(labels));
 				sb.append(".");
 			}
@@ -3383,13 +3383,13 @@ public final class DecoHackParser extends Lexer.Parser
 			if (labels.length == 0)
 			{
 				sb = new StringBuilder("Expected a valid weapon state label for weapon ");
-				sb.append(index);
+				sb.append(index).append("(").append(weapon.getName()).append(") ");
 				sb.append(", but it has no state labels. It may be stateless or undefined at this point.");
 			}
 			else
 			{
 				sb = new StringBuilder("Expected a valid weapon state label for weapon ");
-				sb.append(index).append(": ");
+				sb.append(index).append("(").append(weapon.getName()).append("): ");
 				sb.append(Arrays.toString(labels));
 				sb.append(".");
 			}
