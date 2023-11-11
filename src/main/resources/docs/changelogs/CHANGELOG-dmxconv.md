@@ -1,6 +1,12 @@
 DMXConv
 -------
 
+### Changed for 1.2.0
+
+* `Added` Support for directories and recursion. (Enhancement #101)
+* `Fixed` [GUI] Workspace would not save if Output Folder was blank.
+
+
 ### Changed for 1.1.0
 
 * `Added` GUI Version of DMXConv.

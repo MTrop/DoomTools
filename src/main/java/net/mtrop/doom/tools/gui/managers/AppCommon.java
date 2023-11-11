@@ -313,9 +313,10 @@ public final class AppCommon
 	 * @param inputFiles the input sound files (will be exploded into individual files).
 	 * @param ffmpegPath if not null, path to FFmpeg.
 	 * @param ffmpegOnly if null, normal path. True, ffmpeg only. False, JSPI only.
+	 * @param recursive if true, recurse through directories.
 	 * @param outputDir if not null, output directory.
 	 */
-	public void onExecuteDMXConv(Container parent, final DoomToolsStatusPanel statusPanel, File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, File outputDir)
+	public void onExecuteDMXConv(Container parent, final DoomToolsStatusPanel statusPanel, File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, Boolean recursive, File outputDir)
 	{
 		utils.createProcessModal(
 			parent, 
@@ -327,7 +328,7 @@ public final class AppCommon
 				language.getText("dmxconv.status.message.success"), 
 				language.getText("dmxconv.status.message.interrupt"), 
 				language.getText("dmxconv.status.message.error"), 
-				callDMXConv(inputFiles, ffmpegPath, ffmpegOnly, outputDir, stdout, stderr)
+				callDMXConv(inputFiles, ffmpegPath, ffmpegOnly, recursive, outputDir, stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -777,16 +778,16 @@ public final class AppCommon
 	 * @param inputFiles
 	 * @param ffmpegPath 
 	 * @param ffmpegOnly 
+	 * @param recursive
 	 * @param outputDir 
 	 * @param stdout
 	 * @param stderr
 	 * @return the future task
 	 */
-	public InstancedFuture<Integer> callDMXConv(File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, File outputDir, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callDMXConv(File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, Boolean recursive, File outputDir, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(DMXConvertMain.class);
 		
-		inputFiles = FileUtils.explodeFiles(inputFiles);
 		for (int i = 0; i < inputFiles.length; i++) 
 			callable.arg(inputFiles[i].getAbsolutePath());	
 		
@@ -800,6 +801,9 @@ public final class AppCommon
 			else
 				callable.arg(DMXConvertMain.SWITCH_JSPI_ONLY);
 		}
+		
+		if (recursive == Boolean.TRUE)
+			callable.arg(DMXConvertMain.SWITCH_RECURSIVE);
 		
 		if (outputDir != null)
 			callable.arg(DMXConvertMain.SWITCH_OUTPUTDIR).arg(outputDir.getAbsolutePath());

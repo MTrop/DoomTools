@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -44,13 +45,15 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	/** Input sound files. */
 	private FileListPanel inputFileField;
 	/** Output directory. */
-	private JFormField<File> outputDirectory;
+	private JFormField<File> outputDirectoryField;
 	/** Normal conversion. */
 	private JFormField<Boolean> normalConversionField;
 	/** FFmpeg conversion. */
 	private JFormField<Boolean> ffmpegConversionField;
 	/** JSPI conversion. */
 	private JFormField<Boolean> jspiConversionField;
+	/** Recursive option field. */
+	private JFormField<Boolean> recursiveField;
     /** Status message. */
     private DoomToolsStatusPanel statusPanel;
     
@@ -67,7 +70,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 			() -> settings.getLastTouchedFile()
 		);
 		
-		this.outputDirectory = fileField(
+		this.outputDirectoryField = fileField(
 			(current) -> utils.chooseDirectory(
 				getApplicationContainer(), 
 				language.getText("dmxconv.outputdir.browse.title"), 
@@ -81,11 +84,15 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		JRadioButton ffmpegOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.ffmpegonly", false);
 		JRadioButton jspiOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.jspionly", false);
 		
+		JCheckBox recursive = utils.createCheckboxFromLanguageKey("dmxconv.recursive", false);
+		
 		group(normalButton, ffmpegOnly, jspiOnly);
 		
 		this.normalConversionField = radioField(normalButton);
 		this.ffmpegConversionField = radioField(ffmpegOnly);
 		this.jspiConversionField = radioField(jspiOnly);
+		
+		this.recursiveField = checkBoxField(recursive); 
 		
 		this.statusPanel = new DoomToolsStatusPanel();
     }
@@ -107,7 +114,8 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 						node(normalConversionField), node(ffmpegConversionField), node(jspiConversionField)
 					))),
 					node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("dmxconv.label.width")),
-						utils.formField("dmxconv.outputdir", outputDirectory)
+						utils.formField(recursiveField),
+						utils.formField("dmxconv.outputdir", outputDirectoryField)
 					)),
 					node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING), 
 						node(utils.createButtonFromLanguageKey("dmxconv.convert", (i) -> onDoConversion())
@@ -144,18 +152,21 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 		
 		File[] inputFiles = inputFileField.getFiles();
-		File outputFile = outputDirectory.getValue();
+		File outputFile = outputDirectoryField.getValue();
 		Boolean conversionType = getConversionType();
+		Boolean recursive = recursiveField.getValue();
 		
 		state.put("files.length", String.valueOf(inputFiles.length));
 		for (int i = 0; i < inputFiles.length; i++) 
 			state.put("files." + i, inputFiles[i].getAbsolutePath());
 		
-		state.put("output", outputFile.getAbsolutePath());
+		state.put("output", outputFile != null ? outputFile.getAbsolutePath() : "");
 		
 		if (conversionType != null)
 			state.put("conversiontype", String.valueOf(conversionType));
 
+		state.put("recursive", String.valueOf(recursive));
+		
 		return state;
 	}
 
@@ -170,13 +181,16 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 			inputFiles[i] = ValueUtils.parse(state.get("files." + i), parseFile);
 		File outputFile = ValueUtils.parse(state.get("output"), parseFile);
 		Boolean conversionType = ValueUtils.parse(state.get("conversiontype"), parseBoolean);
+		Boolean recursive = ValueUtils.parse(state.get("recursive"), parseBoolean);
 
 		inputFileField.setFiles(inputFiles);
-		outputDirectory.setValue(outputFile);
+		outputDirectoryField.setValue(outputFile);
 		
 		normalConversionField.setValue(conversionType == null);
 		ffmpegConversionField.setValue(conversionType == Boolean.TRUE);
 		jspiConversionField.setValue(conversionType == Boolean.FALSE);
+		
+		recursiveField.setValue(recursive == Boolean.TRUE);
 	}
 
 	@Override
@@ -212,11 +226,12 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	private void onDoConversion() 
 	{
 		File[] inputFile = inputFileField.getFiles();
-		File outputDir = outputDirectory.getValue();
+		File outputDir = outputDirectoryField.getValue();
 		File ffmpegPath = settings.getFFmpegPath();
 		Boolean ffmpegOnly = getConversionType();
+		Boolean recursive = recursiveField.getValue();
 		
-		appCommon.onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, outputDir);
+		appCommon.onExecuteDMXConv(getApplicationContainer(), statusPanel, inputFile, ffmpegPath, ffmpegOnly, recursive, outputDir);
 	}
 
 	private Boolean getConversionType()

@@ -16,6 +16,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -58,6 +59,8 @@ public final class DMXConvertMain
 	public static final String SWITCH_FFMPEG_PATH = "--ffmpeg";
 	public static final String SWITCH_OUTPUTDIR = "--output-dir";
 	public static final String SWITCH_OUTPUTDIR2 = "-o";
+	public static final String SWITCH_RECURSIVE = "--recursive";
+	public static final String SWITCH_RECURSIVE2 = "-r";
 
 	/**
 	 * Program options.
@@ -77,6 +80,7 @@ public final class DMXConvertMain
 		private boolean onlyJSPI;
 		private File ffmpegPath;
 		private File outputDirectory;
+		private boolean recursive;
 		
 		private Options()
 		{
@@ -92,6 +96,7 @@ public final class DMXConvertMain
 			this.onlyJSPI = false;
 			this.ffmpegPath = null;
 			this.outputDirectory = null;
+			this.recursive = false;
 		}
 
 		public Options setStdout(OutputStream out) 
@@ -127,6 +132,12 @@ public final class DMXConvertMain
 		public Options setOutputDirectory(File outputDirectory) 
 		{
 			this.outputDirectory = outputDirectory;
+			return this;
+		}
+		
+		public Options setRecursive(boolean recursive) 
+		{
+			this.recursive = recursive;
 			return this;
 		}
 		
@@ -219,81 +230,130 @@ public final class DMXConvertMain
 			
 			boolean searchSPI = !options.onlyFFMpeg;
 			boolean searchFFmpeg = !options.onlyJSPI && useFFmpeg;
+			AtomicInteger filesFound = new AtomicInteger(0);
 			int convertedCount = 0;
 			
 			for (File f : options.sourceFiles)
 			{
-				AudioInputStream ais = null;
-				if (searchSPI)
+				if (f.isDirectory())
+					convertedCount += convertDirectory(f, f, searchSPI, searchFFmpeg, filesFound, options.recursive);
+				else if (convertFile(f.getParentFile(), f, searchSPI, searchFFmpeg))
 				{
-					try {
-						ais = openSPIAudioStreamForFile(f);
-					} catch (IOException e) {
-						options.stderr.printf("ERROR: Could not read %s.\n", f.getPath());
-					}
-				}
-
-				if (ais == null && searchFFmpeg)
-				{
-					try {
-						ais = openFFmpegAudioStreamForFile(options.ffmpegPath, f);
-					} catch (IOException e) {
-						options.stderr.printf("I/O ERROR: FFmpeg: %s\n", e.getLocalizedMessage());
-						options.stderr.printf("ERROR: Could not read %s.\n", f.getPath());
-						IOUtils.close(ais);
-					}
-				}
-				
-				if (ais == null)
-				{
-					options.stderr.printf("ERROR: Could not find decoder for %s. Skipping...\n", f.getPath());
-					continue;
-				}
-				
-				String outName = FileUtils.getFileNameWithoutExtension(f) + ".dmx";
-				File outputFile = options.outputDirectory != null
-					? new File(options.outputDirectory + File.separator + outName) 
-					: new File((f.getParent() == null ? "." + File.separator : f.getParent() + File.separator) + outName);
-				
-				if (!FileUtils.createPathForFile(outputFile))
-				{
-					options.stderr.printf("ERROR: Could not create path for %s. Skipping...\n", outputFile);
-					continue;
-				}
-					
-				try (AudioInputStream decoded = getDecoderStream(ais))
-				{
-					AudioFormat format = decoded.getFormat();
-					byte[] sample = new byte[1];
-					
-					DMXSound dmx = new DMXSound((int)format.getSampleRate());
-					
-					while (decoded.read(sample) > 0)
-						dmx.addSample((double)((sample[0] & 0x0ff) - 128) / 128.0);
-					
-					try (FileOutputStream fos = new FileOutputStream(outputFile))
-					{
-						dmx.writeBytes(fos);
-						options.stdout.printf("Wrote %s.\n", outputFile.getPath());
-						convertedCount++;
-					} 
-					catch (IOException e) 
-					{
-						options.stderr.printf("ERROR: Could not write %s.\n", outputFile.getPath());
-					}
-					catch (SecurityException e) 
-					{
-						options.stderr.printf("ERROR: Could not write %s (ACCESS DENIED).\n", outputFile.getPath());
-					}
-				} 
-				catch (IOException e) 
-				{
-					options.stderr.printf("ERROR: Could not open decoder for %s.\n", f.getPath());
+					convertedCount++;
+					filesFound.incrementAndGet();
 				}
 			}
 
-			options.stdout.printf("%d of %d file(s) converted.\n", convertedCount, options.sourceFiles.size());
-			return convertedCount == options.sourceFiles.size() ? ERROR_NONE : ERROR_CONVERSION_SKIPPED;
+			options.stdout.printf("%d of %d file(s) converted.\n", convertedCount, filesFound.get());
+			return convertedCount == filesFound.get() ? ERROR_NONE : ERROR_CONVERSION_SKIPPED;
+		}
+		
+		// Converts a directory.
+		private int convertDirectory(File base, File dir, boolean searchSPI, boolean searchFFmpeg, AtomicInteger filesFound, boolean recurse)
+		{
+			int convertedCount = 0;
+			for (File f : dir.listFiles())
+			{
+				if (f.isDirectory())
+				{ 
+					if (recurse)
+						convertedCount += convertDirectory(base, f, searchSPI, searchFFmpeg, filesFound, true);
+					//else, skip
+				}
+				else if (convertFile(base, f, searchSPI, searchFFmpeg))
+				{
+					convertedCount++;
+					filesFound.incrementAndGet();
+				}
+			}
+			return convertedCount;
+		}
+
+		// Converts a single file.
+		private boolean convertFile(File base, File f, boolean searchSPI, boolean searchFFmpeg)
+		{
+			AudioInputStream ais = null;
+			if (searchSPI)
+			{
+				try {
+					ais = openSPIAudioStreamForFile(f);
+				} catch (IOException e) {
+					options.stderr.printf("ERROR: Could not read %s.\n", f.getPath());
+				}
+			}
+
+			if (ais == null && searchFFmpeg)
+			{
+				try {
+					ais = openFFmpegAudioStreamForFile(options.ffmpegPath, f);
+				} catch (IOException e) {
+					options.stderr.printf("I/O ERROR: FFmpeg: %s\n", e.getLocalizedMessage());
+					options.stderr.printf("ERROR: Could not read %s.\n", f.getPath());
+					IOUtils.close(ais);
+				}
+			}
+			
+			if (ais == null)
+			{
+				options.stderr.printf("ERROR: Could not find decoder for %s. Skipping...\n", f.getPath());
+				return false;
+			}
+			
+			File outputFile;
+			
+			if (options.outputDirectory != null)
+			{
+				String treeName = f.getPath().substring(base.getPath().length());
+				String outName = FileUtils.getFileNameWithoutExtension(treeName) + ".dmx";
+				outputFile = new File(options.outputDirectory + outName);
+			}
+			else
+			{
+				String outName = FileUtils.getFileNameWithoutExtension(f) + ".dmx";
+				String parent = f.getParent();
+				if (parent != null)
+					outputFile = new File(parent + File.separator + outName);
+				else
+					outputFile = new File("." + File.separator + outName);
+			}
+			
+			if (!FileUtils.createPathForFile(outputFile))
+			{
+				options.stderr.printf("ERROR: Could not create path for %s. Skipping...\n", outputFile);
+				return false;
+			}
+				
+			try (AudioInputStream decoded = getDecoderStream(ais))
+			{
+				AudioFormat format = decoded.getFormat();
+				byte[] sample = new byte[1];
+				
+				DMXSound dmx = new DMXSound((int)format.getSampleRate());
+				
+				while (decoded.read(sample) > 0)
+					dmx.addSample((double)((sample[0] & 0x0ff) - 128) / 128.0);
+				
+				try (FileOutputStream fos = new FileOutputStream(outputFile))
+				{
+					dmx.writeBytes(fos);
+					options.stdout.printf("Wrote %s.\n", outputFile.getPath());
+					return true;
+				} 
+				catch (IOException e) 
+				{
+					options.stderr.printf("ERROR: Could not write %s.\n", outputFile.getPath());
+				}
+				catch (SecurityException e) 
+				{
+					options.stderr.printf("ERROR: Could not write %s (ACCESS DENIED).\n", outputFile.getPath());
+				}
+			} 
+			catch (IOException e) 
+			{
+				options.stderr.printf("ERROR: Could not open decoder for %s.\n", f.getPath());
+			}
+
+			return false;
 		}
 		
 		// Wraps an audio stream into a decoder. 
@@ -397,6 +457,8 @@ public final class DMXConvertMain
 						options.setOnlyFFMpeg(true);
 					else if (arg.equals(SWITCH_JSPI_ONLY))
 						options.setOnlyJSPI(true);
+					else if (arg.equals(SWITCH_RECURSIVE) || arg.equals(SWITCH_RECURSIVE2))
+						options.setRecursive(true);
 					else if (arg.equals(SWITCH_FFMPEG_PATH))
 						state = STATE_FFMPEG;
 					else if (arg.equals(SWITCH_OUTPUTDIR) || arg.equals(SWITCH_OUTPUTDIR2))
@@ -534,7 +596,8 @@ public final class DMXConvertMain
 		out.println("                        name (\"ffmpeg\") on the current PATH, and exits.");
 		out.println();
 		out.println("[files]:");
-		out.println("    <filenames>         The input sound files (wildcard expansion will work!).");
+		out.println("    <filenames>         The input sound files/directories (wildcard expansion");
+		out.println("                        will work!).");
 		out.println();
 		out.println("[switches]:");
 		out.println("    --output-dir [dir]  Sets the output directory path. If not set, each");
@@ -551,6 +614,10 @@ public final class DMXConvertMain
 		out.println("    --jspi-only         If set, DMXConv does not attempt to read the incoming");
 		out.println("                        sound files using FFmpeg, only Java SPI and the");
 		out.println("                        classpath.");
+		out.println();
+		out.println("    --recursive         If directories are found, then DMXConv will recurse");
+		out.println("    -r                  through them looking for files.");
+		out.println();
 	}
 
 }

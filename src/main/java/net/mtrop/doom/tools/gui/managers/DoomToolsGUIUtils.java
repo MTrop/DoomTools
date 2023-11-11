@@ -35,6 +35,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JMenu;
@@ -426,6 +427,50 @@ public final class DoomToolsGUIUtils
 	public JRadioButton createRadioButtonFromLanguageKey(String keyPrefix, boolean checked)
 	{
 		return createRadioButtonFromLanguageKey(null, keyPrefix, checked, null);
+	}
+
+	/**
+	 * Creates a checkbox from a language key, getting the necessary pieces to assemble it.
+	 * @param icon the checkbox icon.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JCheckBox createCheckboxFromLanguageKey(Icon icon, String keyPrefix, boolean checked, ToggleHandler handler)
+	{
+		String tipKey = keyPrefix + ".tip";
+		final String tip =  language.hasKey(tipKey) ? language.getText(tipKey) : null;
+		return ObjectUtils.apply(checkBox(
+			icon,
+			language.getText(keyPrefix),
+			language.getMnemonicValue(keyPrefix + ".mnemonic"),
+			checked,
+			handler
+		), (button) -> button.setToolTipText(tip));
+	}
+
+	/**
+	 * Creates a checkbox from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @param handler the action to take on selection.
+	 * @return the new menu item node.
+	 */
+	public JCheckBox createCheckboxFromLanguageKey(String keyPrefix, boolean checked, ToggleHandler handler)
+	{
+		return createCheckboxFromLanguageKey(null, keyPrefix, checked, null);
+	}
+
+	/**
+	 * Creates a checkbox from a language key, getting the necessary pieces to assemble it.
+	 * @param keyPrefix the key prefix.
+	 * @param checked initial checked value.
+	 * @return the new menu item node.
+	 */
+	public JCheckBox createCheckboxFromLanguageKey(String keyPrefix, boolean checked)
+	{
+		return createCheckboxFromLanguageKey(keyPrefix, checked, null);
 	}
 
 	/**
