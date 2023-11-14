@@ -4,6 +4,7 @@ DImgConv
 ### Changed for 1.3.0
 
 * `Fixed` The recursive option now creates recursive directories properly. (Issue #100)
+* `Fixed` [GUI] Some blank fields would NPE on workspace export.
 
 
 ### Changed for 1.2.0

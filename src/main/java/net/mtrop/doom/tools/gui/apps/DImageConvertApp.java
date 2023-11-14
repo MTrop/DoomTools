@@ -178,10 +178,14 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		GraphicsMode graphicsMode = getGraphicsMode();
 		String infoFile = infoFileNameField.getValue();
 
-		state.put("input", inputFile.getAbsolutePath());
-		state.put("output", outputFile.getAbsolutePath());
+		if (inputFile != null)
+			state.put("input", inputFile.getAbsolutePath());
+		if (outputFile != null)
+			state.put("output", outputFile.getAbsolutePath());
+		if (paletteSource != null)
+			state.put("palettesource", paletteSource.getAbsolutePath());
+		
 		state.put("recursive", String.valueOf(recursive));
-		state.put("palettesource", paletteSource.getAbsolutePath());
 		state.put("mode", String.valueOf(graphicsMode.name()));
 		state.put("infofilename", infoFile);
 		

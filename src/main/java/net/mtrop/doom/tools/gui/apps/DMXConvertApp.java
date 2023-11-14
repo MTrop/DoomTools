@@ -160,7 +160,8 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		for (int i = 0; i < inputFiles.length; i++) 
 			state.put("files." + i, inputFiles[i].getAbsolutePath());
 		
-		state.put("output", outputFile != null ? outputFile.getAbsolutePath() : "");
+		if (outputFile != null)
+			state.put("output", outputFile.getAbsolutePath());
 		
 		if (conversionType != null)
 			state.put("conversiontype", String.valueOf(conversionType));
