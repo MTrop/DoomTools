@@ -37,8 +37,6 @@ public final class ValueUtils
 	
 	/**
 	 * Attempts to parse a string to another object.
-	 * If the string is empty or null, this returns null.
-	 * If the string does not equal "true" (case ignored), this returns false.
 	 * @param s the input string.
 	 * @param parseFunction the parsing function.
 	 * @return the interpreted object.

@@ -114,7 +114,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 
 		File[] texScanFiles = new File[texScanCount];
 		
-		final Function<String, File> fileParse = (input) -> new File(input);
+		final Function<String, File> fileParse = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input);
 		final Function<String, TexScanOutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, TexScanOutputMode.class);
 		
 		for (int i = 0; i < texScanFiles.length; i++) 
