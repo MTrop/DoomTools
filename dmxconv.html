@@ -67,7 +67,7 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DMXConv v1.1.0 by Matt Tropiano (using DoomStruct v2.15.0)
+DMXConv v1.2.0 by Matt Tropiano (using DoomStruct v2.15.1)
 Usage: dmxconv [--help | -h | --version | --try-ffmpeg]
                [files] [switches]
 
@@ -84,7 +84,8 @@ Usage: dmxconv [--help | -h | --version | --try-ffmpeg]
                         name (&quot;ffmpeg&quot;) on the current PATH, and exits.
 
 [files]:
-    &lt;filenames&gt;         The input sound files (wildcard expansion will work!).
+    &lt;filenames&gt;         The input sound files&#x2F;directories (wildcard expansion
+                        will work!).
 
 [switches]:
     --output-dir [dir]  Sets the output directory path. If not set, each
@@ -101,12 +102,22 @@ Usage: dmxconv [--help | -h | --version | --try-ffmpeg]
     --jspi-only         If set, DMXConv does not attempt to read the incoming
                         sound files using FFmpeg, only Java SPI and the
                         classpath.
+
+    --recursive         If directories are found, then DMXConv will recurse
+    -r                  through them looking for files.
+
 		</pre>
     <!-- VVV CHANGELOG VVV -->
 		<div>
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.2.0
+
+* &#x60;Added&#x60; Support for directories and recursion. (Enhancement #101)
+* &#x60;Fixed&#x60; [GUI] Workspace would not save if Output Folder was blank.
+
+
 ### Changed for 1.1.0
 
 * &#x60;Added&#x60; GUI Version of DMXConv.

@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.30.3 by Matt Tropiano (using DoomStruct v2.15.0)
+DECOHack v0.31.0 by Matt Tropiano (using DoomStruct v2.15.1)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1964,6 +1964,17 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.31.0
+
+* &#x60;Fixed&#x60; [GUI] Editor would error out on workspace load with no files open.
+* &#x60;Added&#x60; A warning for when a user makes a Thing that is &#x60;SHOOTABLE&#x60; with 0 mass. (Enhancement #103)
+* &#x60;Changed&#x60; Slightly improved some error messages.
+
+### Changed for 0.30.4
+
+* &#x60;Fixed&#x60; &#x60;Fast&#x60; and other MBF21 flags were not being respected in state bodies. (Issue #95)
+
+
 ### Changed for 0.30.3
 
 * &#x60;Fixed&#x60; If DroppedItem was the only change to a Thing, it would not be saved in the patch. (Issue #91)
