@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.10.1
+
+* `Fixed` [GUI] Editor would error out on workspace load with no files open.
+
+
 ### Changed for 1.10.0
 
 * `Added` New command: CREATEBUFFER (Enhancement #93).

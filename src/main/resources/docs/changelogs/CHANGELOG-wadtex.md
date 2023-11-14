@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.3.1
+
+* `Fixed` [GUI] Editor would error out on workspace load with no files open.
+
+
 ### Changed for 1.3.0
 
 * `Fixed` Texture file export wasn't working. (Issue #86)

@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.6.2
+
+* `Fixed` [GUI] Editor would error out on workspace load with no files open.
+
+
 ### Changed for 1.6.1
 
 * `Changed` [GUI-Executor] The working directory form field will not auto-fill unless it is blank.

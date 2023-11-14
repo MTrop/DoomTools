@@ -360,8 +360,9 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 		handleToSettingsMap.clear();
 		editorPanel.loadState("wadtex", state);
 		
-		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), 0);
-		editorPanel.setEditorByIndex(selectedIndex);
+		int selectedIndex = ValueUtils.parseInt(state.get("editor.selected"), -1);
+		if (selectedIndex >= 0)
+			editorPanel.setEditorByIndex(selectedIndex);
 
 		for (int i = 0; i < editorPanel.getEditorCount(); i++)
 		{

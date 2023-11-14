@@ -1,6 +1,11 @@
 WSwAnTbl
 --------
 
+### Changed for 1.1.1
+
+* `Fixed` [GUI] Editor would error out on workspace load with no files open.
+
+
 ### Changed for 1.1.0
 
 * `Added` The GUI version of WSwAnTbl.

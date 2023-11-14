@@ -3,9 +3,9 @@ DECOHack
 
 ### Changed for 0.31.0
 
+* `Fixed` [GUI] Editor would error out on workspace load with no files open.
 * `Added` A warning for when a user makes a Thing that is `SHOOTABLE` with 0 mass. (Enhancement #103)
 * `Changed` Slightly improved some error messages.
-
 
 ### Changed for 0.30.4
 
