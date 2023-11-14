@@ -283,7 +283,7 @@ public class FileListPanel extends JPanel
 	 */
 	public File[] getFiles()
 	{
-		return model.fileSet.toArray(new File[model.fileSet.size()]);
+		return model.fileList.toArray(new File[model.fileList.size()]);
 	}
 
 	/**

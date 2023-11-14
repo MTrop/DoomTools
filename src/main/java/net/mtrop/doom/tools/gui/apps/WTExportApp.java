@@ -88,14 +88,18 @@ public class WTExportApp extends DoomToolsApplicationInstance
 		boolean noAnim = parametersPanel.getNoAnimated();
 		boolean noSwitch = parametersPanel.getNoSwitches();
 
-		state.put("input", inputFile.getAbsolutePath());
+		if (inputFile != null)
+			state.put("input", inputFile.getAbsolutePath());
 		
 		state.put("files.count", String.valueOf(textureWads.length));
 		for (int i = 0; i < textureWads.length; i++) 
 			state.put("files." + i, textureWads[i].getAbsolutePath());
-			
-		state.put("basewad", baseWad.getAbsolutePath());
-		state.put("outputwad", outputWad.getAbsolutePath());
+		
+		if (baseWad != null)
+			state.put("basewad", baseWad.getAbsolutePath());
+		if (outputWad != null)
+			state.put("outputwad", outputWad.getAbsolutePath());
+		
 		state.put("create", String.valueOf(create));
 		state.put("nulltexture", nullTexture != null ? nullTexture : "");
 		state.put("noanim", String.valueOf(noAnim));
@@ -111,13 +115,14 @@ public class WTExportApp extends DoomToolsApplicationInstance
 
 		File[] files = new File[count];
 		
-		final Function<String, File> fileParse = (input) -> new File(input);
+		final Function<String, File> fileParse = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input);
 		
 		inputFileField.setValue(ValueUtils.parse(state.get("input"), fileParse));
 		
 		for (int i = 0; i < files.length; i++) 
 			files[i] = ValueUtils.parse(state.get("files." + i), fileParse);
 
+		parametersPanel.setTextureWads(files);
 		parametersPanel.setBaseWad(ValueUtils.parse(state.get("basewad"), fileParse));
 		parametersPanel.setOutputWad(ValueUtils.parse(state.get("outputwad"), fileParse));
 		parametersPanel.setCreate(ValueUtils.parseBoolean(state.get("create"), false));

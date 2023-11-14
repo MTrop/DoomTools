@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.5.2
+
+* `Fixed` [GUI] Texture list was not set properly from workspace state. (Issue #104)
+
+
 ### Changed for 1.5.1
 
 * `Fixed` Textures can also be entry names. (Issue #96)
