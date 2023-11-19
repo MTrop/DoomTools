@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-11-19** Editors will now load file contents from disk on workspace load if the file contents are newer than what's in the buffer. (Correction #108)
+
 - **2023-11-18** The "About" dialog now has a button to copy all version numbers to the clipboard. (Enhancement #105)
 - **2023-11-18** Applications will now ask the user to close to avoid accidental close. (Enhancement #106)
 

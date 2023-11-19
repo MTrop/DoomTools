@@ -469,22 +469,56 @@ public class EditorMultiFilePanel extends JPanel
 				ObjectUtils.isEmpty(input) ? "text/plain" : input
 			);
 			
-			String originalContent = ValueUtils.parse(stateMap.get(keyPrefix + ".content"), (input) -> {
-				if (!ObjectUtils.isEmpty(input))
+			long contentLastModified = ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentLastModified"), -1L);
+
+			long contentSourceFileLastModified = ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentSourceFileLastModified"), -1L);
+			
+			String originalContent;
+			
+			// If attached file date is later than content date, load from disk.
+			
+			try {
+				long fileModified = attachedFile != null ? attachedFile.lastModified() : -1L;
+				if (fileModified > contentSourceFileLastModified)
 				{
-					try {
-						return new String(EncodingUtils.gunzipBytes(EncodingUtils.fromBase64(input)), UTF8);
-					} catch (IOException e) {
-						LOG.error(e, "Could not decode content.");
-						return "";
+					try (InputStream in = new FileInputStream(attachedFile))
+					{
+						originalContent = IOUtils.getTextualContents(in, fileCharset);
+						// set dates to reflect file.
+						contentLastModified = fileModified;
+						contentSourceFileLastModified = fileModified;
+					}
+					catch (FileNotFoundException e) 
+					{
+						originalContent = "**** ERROR: " + e.getLocalizedMessage();
+					} 
+					catch (IOException e) 
+					{
+						originalContent = "**** ERROR: " + e.getLocalizedMessage();
 					}
 				}
 				else
 				{
-					return "";
+					originalContent = ValueUtils.parse(stateMap.get(keyPrefix + ".content"), (input) -> {
+						if (!ObjectUtils.isEmpty(input))
+						{
+							try {
+								return new String(EncodingUtils.gunzipBytes(EncodingUtils.fromBase64(input)), UTF8);
+							} catch (IOException e) {
+								LOG.error(e, "Could not decode content.");
+								return "**** ERROR: Could not decode content!";
+							}
+						}
+						else
+						{
+							return "";
+						}
+					});
 				}
-			});
-			
+				
+			} catch (SecurityException e) {
+				originalContent = "**** ERROR: " + e.getLocalizedMessage();
+			}
 			
 			int caretPosition = ValueUtils.parseInt(stateMap.get(keyPrefix + ".caretPosition"), 0);
 			
@@ -493,13 +527,7 @@ public class EditorMultiFilePanel extends JPanel
 					? (OSUtils.isWindows() ? LineEnding.CRLF : LineEnding.LF) 
 					: LineEnding.VALUE_MAP.get(input)
 			);
-			
-			long contentLastModified = ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentLastModified"), -1L);
-
-			long contentSourceFileLastModified = attachedFile != null 
-				? attachedFile.lastModified() 
-				: ValueUtils.parseLong(stateMap.get(keyPrefix + ".contentSourceFileLastModified"), -1L);
-			
+						
 			createNewTab(title, attachedFile, fileCharset, styleName, originalContent, caretPosition, ending, contentLastModified, contentSourceFileLastModified);
 		}
 		
