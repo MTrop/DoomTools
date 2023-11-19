@@ -183,7 +183,7 @@ public abstract class DoomToolsApplicationInstance
 	}
 	
 	/**
-	 * Called when the application is closed (after {@link #shouldClose(Object)} is called and returns true).
+	 * Called when the application is closed (after {@link #shouldClose(Object, boolean)} is called and returns true).
 	 * The parent frame that houses this application is hidden by the time this is called.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that "closed" - which is usually a window container of some kind.
@@ -198,9 +198,10 @@ public abstract class DoomToolsApplicationInstance
 	 * By default, this returns true. You may ask the user if they wish to close it, here.
 	 * <p> This should NEVER be called by the application itself.
 	 * @param frame the source object that is going to be closed - which is usually a window container of some kind.
+	 * @param fromWorkspaceClear if true, this was issued from a "workspace clear" command.
 	 * @return true if the application should close, false if not.
 	 */
-	public boolean shouldClose(Object frame)
+	public boolean shouldClose(Object frame, boolean fromWorkspaceClear)
 	{
 		return true;
 	}

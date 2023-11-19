@@ -154,7 +154,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 			@Override
 			public void internalFrameClosing(InternalFrameEvent e) 
 			{
-				attemptCloseApplication(instance);
+				attemptCloseApplication(instance, false);
 			}
 		});
 		frame.addComponentListener(frameMovementListener);
@@ -223,7 +223,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 	{
 		Set<DoomToolsApplicationInstance> instanceSet = new HashSet<>(instances.keySet()); // copy set
 		for (DoomToolsApplicationInstance instance : instanceSet)
-			if (!attemptCloseApplication(instance))
+			if (!attemptCloseApplication(instance, true))
 				return false;
 		return true;
 	}
@@ -295,12 +295,12 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		}
 	}
 	
-	private boolean attemptCloseApplication(DoomToolsApplicationInstance instance)
+	private boolean attemptCloseApplication(DoomToolsApplicationInstance instance, boolean fromWorkspaceClear)
 	{
 		if (!instances.containsKey(instance))
 			return true;
 		
-		if (instance.shouldClose(instances.get(instance)))
+		if (instance.shouldClose(instances.get(instance), fromWorkspaceClear))
 		{
 			closeApplication(instance);
 			return true;

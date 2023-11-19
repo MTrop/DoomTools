@@ -316,9 +316,9 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public boolean shouldClose(Object frame) 
+	public boolean shouldClose(Object frame, boolean fromWorkspaceClear) 
 	{
-		if (!SwingUtils.yesTo(language.getText("doomtools.application.close")))
+		if (!fromWorkspaceClear && !SwingUtils.yesTo(language.getText("doomtools.application.close")))
 			return false;
 		if (editorPanel.getUnsavedEditorCount() > 0)
 			return editorPanel.closeAllEditors(false);

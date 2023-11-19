@@ -233,9 +233,9 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
-	public boolean shouldClose(Object frame) 
+	public boolean shouldClose(Object frame, boolean fromWorkspaceClear) 
 	{
-		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
+		return fromWorkspaceClear || SwingUtils.yesTo(language.getText("doomtools.application.close"));
 	}
 
 	@Override
