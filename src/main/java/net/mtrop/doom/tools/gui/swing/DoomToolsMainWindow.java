@@ -552,10 +552,12 @@ public class DoomToolsMainWindow extends JFrame
 				return;
 		}
 		
+		File lastUsed = currentWorkspace != null ? currentWorkspace : settings.getLastProjectDirectory();
+		
 		File workspaceFile = chooseFile(
 			this,
 			language.getText("doomtools.workspace.open.browse.title"),
-			currentWorkspace,
+			lastUsed,
 			language.getText("doomtools.workspace.open.browse.accept"),
 			FileFilters.WORKSPACES
 		);
