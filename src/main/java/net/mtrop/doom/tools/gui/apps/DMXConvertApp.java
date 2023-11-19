@@ -12,7 +12,6 @@ import java.io.File;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -85,15 +84,13 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		JRadioButton ffmpegOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.ffmpegonly", false);
 		JRadioButton jspiOnly = utils.createRadioButtonFromLanguageKey("dmxconv.programs.jspionly", false);
 		
-		JCheckBox recursive = utils.createCheckboxFromLanguageKey("dmxconv.recursive", false);
-		
 		group(normalButton, ffmpegOnly, jspiOnly);
 		
 		this.normalConversionField = radioField(normalButton);
 		this.ffmpegConversionField = radioField(ffmpegOnly);
 		this.jspiConversionField = radioField(jspiOnly);
 		
-		this.recursiveField = checkBoxField(recursive); 
+		this.recursiveField = checkBoxField(checkBox()); 
 		
 		this.statusPanel = new DoomToolsStatusPanel();
     }
@@ -115,7 +112,7 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 						node(normalConversionField), node(ffmpegConversionField), node(jspiConversionField)
 					))),
 					node(BorderLayout.CENTER, utils.createForm(form(language.getInteger("dmxconv.label.width")),
-						utils.formField(recursiveField),
+						utils.formField("dmxconv.recursive", recursiveField),
 						utils.formField("dmxconv.outputdir", outputDirectoryField)
 					)),
 					node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING), 
