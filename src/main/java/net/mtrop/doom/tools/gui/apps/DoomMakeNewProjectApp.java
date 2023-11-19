@@ -203,6 +203,12 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		return menuBar(createHelpMenu());
 	}
 	
+	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
+	}
+
 	// The title panel.
 	private static Container titlePanel(String title, Container container)
 	{

@@ -23,6 +23,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.AppCommon.GraphicsMode;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -229,6 +230,12 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("dmxconv.status.message.ready"));
+	}
+
+	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
 	}
 
 	@Override

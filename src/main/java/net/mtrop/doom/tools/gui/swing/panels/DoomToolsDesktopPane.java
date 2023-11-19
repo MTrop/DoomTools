@@ -300,7 +300,7 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		if (!instances.containsKey(instance))
 			return true;
 		
-		if (instance.shouldClose())
+		if (instance.shouldClose(instances.get(instance)))
 		{
 			closeApplication(instance);
 			return true;

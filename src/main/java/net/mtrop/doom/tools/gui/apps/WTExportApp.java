@@ -186,6 +186,12 @@ public class WTExportApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
+	}
+
+	@Override
 	public void onClose(Object frame) 
 	{
 		if (frame instanceof JFrame)

@@ -23,6 +23,7 @@ import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.FileListPanel;
 import net.mtrop.doom.tools.gui.swing.panels.settings.DMXConvertSettingsPanel;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
@@ -212,6 +213,12 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("dmxconv.status.message.ready"));
+	}
+
+	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.settings.WadScriptExecutorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadScriptExecuteWithArgsPanel;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -166,6 +167,12 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("wadscript.status.message.ready"));
+	}
+
+	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
 	}
 
 	@Override

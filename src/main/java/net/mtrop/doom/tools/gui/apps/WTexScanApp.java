@@ -21,6 +21,7 @@ import net.mtrop.doom.tools.gui.managers.AppCommon.TexScanOutputMode;
 import net.mtrop.doom.tools.gui.managers.settings.WTexScanSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WTexScanParametersPanel;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
@@ -151,6 +152,12 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	public void onOpen(Object frame) 
 	{
 		statusPanel.setSuccessMessage(language.getText("wtexscan.status.message.ready"));
+	}
+
+	@Override
+	public boolean shouldClose(Object frame) 
+	{
+		return SwingUtils.yesTo(language.getText("doomtools.application.close"));
 	}
 
 	@Override

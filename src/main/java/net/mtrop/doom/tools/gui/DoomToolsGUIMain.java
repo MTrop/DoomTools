@@ -210,7 +210,7 @@ public final class DoomToolsGUIMain
 			@Override
 			public void windowClosing(WindowEvent e) 
 			{
-				if (applicationInstance.shouldClose())
+				if (applicationInstance.shouldClose(e.getSource()))
 				{
 					frame.setVisible(false);
 					applicationInstance.onClose(e.getSource());

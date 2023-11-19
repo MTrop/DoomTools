@@ -351,8 +351,10 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 	}
 	
 	@Override
-	public boolean shouldClose() 
+	public boolean shouldClose(Object frame) 
 	{
+		if (!SwingUtils.yesTo(language.getText("doomtools.application.close")))
+			return false;
 		if (editorPanel.getUnsavedEditorCount() > 0)
 			return editorPanel.closeAllEditors(false);
 		return true;
