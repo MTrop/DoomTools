@@ -8,11 +8,14 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.Version;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 
 import java.awt.BorderLayout;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 /**
  * A DoomMake panel for About info.
@@ -22,11 +25,42 @@ public class DoomToolsAboutPanel extends JPanel
 {
 	private static final long serialVersionUID = 8389287671690217978L;
 
+    /** Language manager. */
+    private DoomToolsLanguageManager language;
+
+	private static final String VERSION_TEXT = (new StringBuilder())
+		.append("DoomTools v").append(Version.DOOMTOOLS).append("\n")
+		.append("\n")
+		.append("DoomStruct v").append(Version.DOOMSTRUCT).append("\n")
+		.append("Black Rook JSON v").append(Version.JSON).append("\n")
+		.append("Rookscript v").append(Version.ROOKSCRIPT).append("\n")
+		.append("Rookscript-Desktop v").append(Version.ROOKSCRIPT_DESKTOP).append("\n")
+		.append("FlatLaf v").append(Version.FLATLAF).append("\n")
+		.append("RSyntaxTextArea v").append(Version.RSYNTAXTEXTAREA).append("\n")
+		.append("AutoComplete v").append(Version.AUTOCOMPLETE).append("\n")
+		.append("CommonMark v").append(Version.COMMONMARK).append("\n")
+		.append("Jsoup v").append(Version.JSOUP).append("\n")
+		.append("\n")
+		.append("DECOHack v").append(Version.DECOHACK).append("\n")
+		.append("DImgConv v").append(Version.DIMGCONV).append("\n")
+		.append("DMXConv v").append(Version.DMXCONV).append("\n")
+		.append("DoomFetch v").append(Version.DOOMFETCH).append("\n")
+		.append("DoomMake v").append(Version.DOOMMAKE).append("\n")
+		.append("WadMerge v").append(Version.WADMERGE).append("\n")
+		.append("WadScript v").append(Version.WADSCRIPT).append("\n")
+		.append("WADTex v").append(Version.WADTEX).append("\n")
+		.append("WSwAnTBL v").append(Version.WSWANTBL).append("\n")
+		.append("WTExport v").append(Version.WTEXPORT).append("\n")
+		.append("WTexScan v").append(Version.WTEXSCAN).append("\n")
+	.toString();
+	
 	/**
 	 * Creates the About panel.
 	 */
 	public DoomToolsAboutPanel()
 	{
+		this.language = DoomToolsLanguageManager.get();
+		
 		String versionString = Version.DOOMTOOLS;
 		
 		StringBuilder sb = new StringBuilder("<html>");
@@ -65,7 +99,14 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("<b>Thank you for using DoomTools!</b>");
 		sb.append("</html>");
 		
-		containerOf(this, node(BorderLayout.CENTER, label(sb.toString())));
+		containerOf(this, 
+			node(BorderLayout.CENTER, label(sb.toString())),
+			node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING),
+				node(button(language.getText("doomtools.about.copy"), (b) -> {
+					ClipboardUtils.sendStringToClipboard(VERSION_TEXT);
+				}))
+			))
+		);
 	}
 	
 }

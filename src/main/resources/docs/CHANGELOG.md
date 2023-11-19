@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-11-18** The "About" dialog now has a button to copy all version numbers to the clipboard. (Enhancement #105)
 - **2023-11-18** Applications will now ask the user to close to avoid accidental close. (Enhancement #106)
 
 - **2023-01-25** Updated Black Rook JSON to `1.3.0`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.3.0-RELEASE)
