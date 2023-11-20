@@ -285,6 +285,8 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	{
 		return HTTPRequest.get(url)
 			.setHeader("User-Agent", USER_AGENT_STRING)
+			.setHeader("Accept", "application/json")
+			.setHeader("Accept-Language", "en-US,en;q=0.5")
 		.send(JSON_READER);
 	}
 	
