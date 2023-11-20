@@ -25,6 +25,7 @@ import com.blackrook.json.JSONReader;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.DoomToolsMain;
+import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPReader;
@@ -42,6 +43,8 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	public static final String UPDATE_REPO_NAME = "DoomTools";
 	public static final String UPDATE_REPO_OWNER = "MTrop";
 
+	private static final String USER_AGENT_STRING = "DoomTools/" + Version.DOOMTOOLS;
+	
 	private static final FileFilter JAR_FILES = (f) -> {
 		return FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
@@ -280,7 +283,9 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	
 	private static JSONObject getJSONResponse(String url) throws IOException
 	{
-		return HTTPRequest.get(url).send(JSON_READER);
+		return HTTPRequest.get(url)
+			.setHeader("User-Agent", USER_AGENT_STRING)
+		.send(JSON_READER);
 	}
 	
 	/**
