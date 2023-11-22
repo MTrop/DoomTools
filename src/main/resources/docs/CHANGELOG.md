@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-11-22** Updated DoomStruct to `2.15.2`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.2-RELEASE)
+
 - **2023-11-19** Editors will now load file contents from disk on workspace load if the file contents are newer than what's in the buffer. (Correction #108)
 - **2023-11-19** Workspaces now remember the last directory used for saving. (Issue #107)
 
