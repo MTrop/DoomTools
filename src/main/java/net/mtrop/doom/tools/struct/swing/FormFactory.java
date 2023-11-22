@@ -983,7 +983,7 @@ public final class FormFactory
 			), 
 			changeListener
 		);
-		out.setTransferHandler(new FileDropTransferHandler(out));
+		((JComponent)(out.getFormComponent())).setTransferHandler(new FileDropTransferHandler(out));
 		return out;
 	}
 	
