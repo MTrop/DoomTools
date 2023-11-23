@@ -8,6 +8,7 @@ Changes
 -------
 
 - **2023-11-22** Made all file-browse fields drag-and-drop with files/strings.
+- **2023-11-22** Updated DoomStruct to `2.15.3`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.3-RELEASE)
 - **2023-11-22** Updated DoomStruct to `2.15.2`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.2-RELEASE)
 
 - **2023-11-19** Editors will now load file contents from disk on workspace load if the file contents are newer than what's in the buffer. (Correction #108)
