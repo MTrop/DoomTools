@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.struct.util.HTTPUtils;
+import net.mtrop.doom.tools.struct.util.ThreadUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPContent;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPRequest;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
@@ -64,11 +65,7 @@ public class DogSoftDriver extends FetchDriver
 			IOUtils.close(searchResponse);
 
 			// Don't flood server.
-			try {
-				Thread.sleep(250);
-			} catch (InterruptedException e) {
-				// Do nothing.
-			}
+			ThreadUtils.sleep(250);
 		}
 		
 		return null;

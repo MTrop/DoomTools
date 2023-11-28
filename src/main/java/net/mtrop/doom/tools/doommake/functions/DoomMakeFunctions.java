@@ -316,45 +316,45 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 					returnValue.setError("BadZip", "Target file is a directory.");
 					return true;
 				}
-				
-				ZipOutputStream zos = null;
-				try 
-				{
-					zos = append && zipFile.exists() ? reopenZipFile(zipFile, returnValue) : new ZipOutputStream(new FileOutputStream(zipFile));
-					if (returnValue.isError())
-					{
-						IOUtils.close(zos);
-						return true;
-					}
-					
-					if (files.isList()) for (int i = 0; i < files.length(); i++)
-					{
-						files.listGetByIndex(i, temp);
-						File file = getFile(temp);
-						if (file == null)
-							returnValue.setError("BadFile", "Target file is a directory.");
-						else
-							zipFile(zos, file, file.getName(), compressed, returnValue);
-						
-						if (returnValue.isError())
-							break;
-					}
 
-					if (!returnValue.isError())
+				// attempt append
+				if (append && zipFile.exists())
+				{
+					try (ZipOutputStream zos = reopenZipFile(zipFile, returnValue))
 					{
-						if (wasString)
-							returnValue.set(zipFile.getPath());
-						else
-							returnValue.set(zipFile);
+						if (returnValue.isError())
+							return true;
+						
+						zipFileList(zos, zipFile, temp, files, compressed, wasString, returnValue);
+					} 
+					catch (IOException e) 
+					{
+						returnValue.setError("IOError", "Could not close zip stream.");
 					}
-				} 
-				catch (FileNotFoundException e) 
+				}
+				// not append
+				else
 				{
-					returnValue.setError("BadZip", "Target file is a directory.");
-				} 
-				finally 
+					try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile)))
+					{
+						zipFileList(zos, zipFile, temp, files, compressed, wasString, returnValue);
+					} 
+					catch (FileNotFoundException e) 
+					{
+						returnValue.setError("BadZip", "Target file is a directory.");
+					} 
+					catch (IOException e) 
+					{
+						returnValue.setError("IOError", "Could not close zip stream.");
+					}
+				}
+
+				if (!returnValue.isError())
 				{
-					IOUtils.close(zos);
+					if (wasString)
+						returnValue.set(zipFile.getPath());
+					else
+						returnValue.set(zipFile);
 				}
 				return true;
 			}
@@ -362,6 +362,22 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			{
 				temp.setNull();
 				files.setNull();
+			}
+		}
+
+		private void zipFileList(ZipOutputStream zos, File zipFile, ScriptValue temp, ScriptValue files, boolean compressed, boolean wasString, ScriptValue returnValue)
+		{
+			if (files.isList()) for (int i = 0; i < files.length(); i++)
+			{
+				files.listGetByIndex(i, temp);
+				File file = getFile(temp);
+				if (file == null)
+					returnValue.setError("BadFile", "Target file is a directory.");
+				else
+					zipFile(zos, file, file.getName(), compressed, returnValue);
+				
+				if (returnValue.isError())
+					break;
 			}
 		}
 	},
@@ -452,33 +468,47 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 					}
 				}
 				
-				ZipOutputStream zos = null;
-				try 
+				// attempt append
+				if (append && zipFile.exists())
 				{
-					zos = append && zipFile.exists() ? reopenZipFile(zipFile, returnValue) : new ZipOutputStream(new FileOutputStream(zipFile, true));
-					if (returnValue.isError())
+					try (ZipOutputStream zos = reopenZipFile(zipFile, returnValue))
 					{
-						IOUtils.close(zos);
-						return true;
-					}
+						if (returnValue.isError())
+							return true;
 
-					zipDir(zos, dir, dir, prefix, compressed, filter, returnValue);
-
-					if (!returnValue.isError())
+						zipDir(zos, dir, dir, prefix, compressed, filter, returnValue);
+					} 
+					catch (IOException e) 
 					{
-						if (wasString)
-							returnValue.set(zipFile.getPath());
-						else
-							returnValue.set(zipFile);
+						returnValue.setError("IOError", "Could not close zip stream.");
 					}
-				} 
-				catch (FileNotFoundException e) 
+				}
+				// not append
+				else
 				{
-					returnValue.setError("BadZip", "Target file could not be opened.");
-				} 
-				finally 
+					try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile)))
+					{
+						if (returnValue.isError())
+							return true;
+
+						zipDir(zos, dir, dir, prefix, compressed, filter, returnValue);
+					} 
+					catch (FileNotFoundException e) 
+					{
+						returnValue.setError("BadZip", "Target file could not be opened.");
+					} 
+					catch (IOException e) 
+					{
+						returnValue.setError("IOError", "Could not close zip stream.");
+					}
+				}
+				
+				if (!returnValue.isError())
 				{
-					IOUtils.close(zos);
+					if (wasString)
+						returnValue.set(zipFile.getPath());
+					else
+						returnValue.set(zipFile);
 				}
 				return true;
 			}
@@ -921,9 +951,15 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 
 	private static ZipOutputStream reopenZipFile(File zipFile, ScriptValue returnValue)
 	{
-		File newZipFile = new File(zipFile.getPath());
 		File oldZipFile = new File(zipFile.getPath() + "._tmp");
-		if (!zipFile.renameTo(oldZipFile))
+		
+		if (!zipFile.exists())
+		{
+			returnValue.setError("IOError", "Cannot append: Zip file does not exist.");
+			return null;
+		}
+		
+		if (!FileUtils.renameTimeout(zipFile, oldZipFile, 1000))
 		{
 			returnValue.setError("IOError", "Could not rename zip for reopen.");
 			return null;
@@ -931,9 +967,9 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		
 		// Need to keep ZipOutputStream open if successful, and close in the "finally" if error.
 		ZipOutputStream zout = null;
-		try 
+		try
 		{
-			zout = new ZipOutputStream(new FileOutputStream(newZipFile));
+			zout = new ZipOutputStream(new FileOutputStream(zipFile));
 			try (ZipFile zf = new ZipFile(oldZipFile))
 			{
 				ZipEntry entry;
@@ -947,9 +983,10 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 					}
 					catch (IOException e)
 					{
-						returnValue.setError("IOError", "Could read from reopened zip.");
+						returnValue.setError("IOError", "Could not read from reopened zip.");
 						return null;
 					}
+					zout.closeEntry();
 				}
 			} 
 			catch (ZipException e) 
@@ -973,8 +1010,8 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			if (returnValue.isError())
 			{
 				IOUtils.close(zout);
-				newZipFile.delete();
-				oldZipFile.renameTo(newZipFile);
+				FileUtils.renameTimeout(oldZipFile, zipFile, 1000);
+				oldZipFile.delete();
 			}
 			else
 			{
@@ -987,6 +1024,12 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	
 	private static void zipDir(ZipOutputStream zos, File base, File srcDir, String prefix, boolean compressed, FileFilter filter, ScriptValue returnValue)
 	{
+		if (!srcDir.exists())
+		{
+			returnValue.setError("BadDir", "Directory " + srcDir.getPath() + " does not exist.");
+			return;
+		}
+		
 		for (File f : srcDir.listFiles())
 		{
 			String treeName = prefix + "/" + f.getPath().substring(base.getPath().length() + 1);
@@ -1010,6 +1053,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		{
 			zos.putNextEntry(entry);
 			IOUtils.relay(fis, zos);
+			zos.closeEntry();
 		} 
 		catch (FileNotFoundException e) 
 		{

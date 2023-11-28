@@ -992,6 +992,30 @@ public final class FileUtils
 	}
 	
 	/**
+	 * Attempts to rename a file, waiting to do so since the file's handle may not be relinquished.
+	 * Guaranteed to at least wait the amount of the timeout in milliseconds.
+	 * @param oldName the file name.
+	 * @param newName the file's new name.
+	 * @param timeout the timeout in milliseconds.
+	 * @return true if the file was renamed, false if not.
+	 */
+	public static boolean renameTimeout(File oldName, File newName, final int timeout)
+	{
+		int t = 0;
+		while (!oldName.renameTo(newName) && t <= timeout)
+		{
+			t++;
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// Do nothing.
+			}
+		}
+		
+		return t < timeout;
+	}
+
+	/**
 	 * A path to a temporary file that is deleted on close.
 	 */
 	public static final class TempFile extends File implements AutoCloseable

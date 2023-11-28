@@ -533,7 +533,7 @@ public final class IOUtils
 	public static void close(Closeable c)
 	{
 		if (c == null) return;
-		try { c.close(); } catch (IOException e){}
+		try { c.close(); } catch (IOException e){ throw new RuntimeException("Could not close closeable."); }
 	}
 
 	/**
@@ -544,7 +544,7 @@ public final class IOUtils
 	public static void close(AutoCloseable c)
 	{
 		if (c == null) return;
-		try { c.close(); } catch (Exception e){}
+		try { c.close(); } catch (Exception e){ throw new RuntimeException("Could not close closeable."); }
 	}
 	
 }
