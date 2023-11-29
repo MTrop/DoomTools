@@ -1,11 +1,16 @@
 DoomMake
 --------
 
+### Changed for 0.24.0
+
+* `Added` COPYWITHREPLACE function added to DoomMake.
+
+
 ### Changed for 0.23.1
 
 * `Fixed` Corrected an IOError message for reopening a zip file.
 * `Fixed` Potential NPE in ZIPDIR function if the source directory did not exist.
-* `Fixed` Promlems when appending to an existing Zip in ZIPFILES/ZIPDIR.
+* `Fixed` Problems when appending to an existing Zip in ZIPFILES/ZIPDIR.
 
 
 ### Changed for 0.23.0

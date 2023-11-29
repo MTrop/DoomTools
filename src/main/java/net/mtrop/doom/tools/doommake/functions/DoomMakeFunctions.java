@@ -12,6 +12,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
@@ -30,6 +33,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import com.blackrook.rookscript.ScriptInstance;
+import com.blackrook.rookscript.ScriptIteratorType.IteratorPair;
 import com.blackrook.rookscript.ScriptValue;
 import com.blackrook.rookscript.ScriptValue.BufferType;
 import com.blackrook.rookscript.ScriptValue.Type;
@@ -39,8 +43,10 @@ import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
 import com.blackrook.rookscript.resolvers.hostfunction.EnumFunctionResolver;
 import com.blackrook.rookscript.struct.PatternUtils;
 
+import net.mtrop.doom.tools.struct.ReplacerReader;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.common.Common;
 
 import static com.blackrook.rookscript.lang.ScriptFunctionUsage.type;
@@ -173,7 +179,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			return ScriptFunctionUsage.create()
 				.instructions(
 					"Copies a series of files from one directory to another, replicating the tree in the destination. " +
-					"If the destination file exists, it is overwritten."
+					"If a destination file exists, it is overwritten."
 				)
 				.parameter("srcDir",
 					type(Type.STRING, "Path to source directory (base path)."),
@@ -222,12 +228,12 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 
 				if (!srcDir.isDirectory())
 				{
-					returnValue.setError("BadFile", "Source directory does not exist.");
+					returnValue.setError("BadFile", "Source directory does not exist: " + srcDir.getPath());
 					return true;
 				}
 				if (!destDir.isDirectory())
 				{
-					returnValue.setError("BadFile", "Destination directory does not exist.");
+					returnValue.setError("BadFile", "Destination directory does not exist: " + destDir.getPath());
 					return true;
 				}
 				
@@ -252,6 +258,120 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				temp.setNull();
 			}
 		}
+	},
+	
+	COPYWITHREPLACE(6)
+	{
+
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Copies a text-based file, replacing the contents of the file with replace key " +
+					"delimited tokens with other text data. If the destination file exists, it is overwritten."
+				)
+				.parameter("srcFile", 
+					type(Type.STRING, "Path to source file."),
+					type(Type.OBJECTREF, "File", "Path to source file.")
+				)
+				.parameter("destFile", 
+					type(Type.STRING, "Path to destination file."),
+					type(Type.OBJECTREF, "File", "Path to destination file.")
+				)
+				.parameter("keys",
+					type(Type.MAP, "String:String", "The mapping of key to text value, string to string.")
+				)
+				.parameter("createDirs", 
+					type(Type.BOOLEAN, "If true, create the directories for the destination, if not made.")
+				)
+				.parameter("delimStart",
+					type(Type.NULL, "Use default: \"%\""),
+					type(Type.STRING, "The token delimiter start string.")
+				)
+				.parameter("delimEnd",
+					type(Type.NULL, "Use default: \"%\""),
+					type(Type.STRING, "The token delimiter ending string.")
+				)
+				.returns(
+					type(Type.NULL, "If either file is null."),
+					type(Type.OBJECTREF, "File", "The created destination file."),
+					type(Type.ERROR, "BadFile", "If the source file does not exist."),
+					type(Type.ERROR, "IOError", "If a read or write error occurs."),
+					type(Type.ERROR, "Security", "If the OS is preventing the read or write.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue keys = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String delimEnd = temp.isNull() ? "%" : temp.asString();
+				scriptInstance.popStackValue(temp);
+				String delimStart = temp.isNull() ? "%" : temp.asString();
+				scriptInstance.popStackValue(temp);
+				boolean createDirs = temp.asBoolean();
+				scriptInstance.popStackValue(keys);
+				File destFile = popFile(scriptInstance, temp);
+				File srcFile = popFile(scriptInstance, temp);
+				
+				if (createDirs && !FileUtils.createPathForFile(destFile))
+				{
+					returnValue.setError("IOError", "Could not create directories for target file: " + destFile.getPath());
+					return true;
+				}
+				
+				String projectCharset = System.getProperty("doommake.project.encoding");
+				if (ObjectUtils.isEmpty(projectCharset))
+					projectCharset = Charset.defaultCharset().displayName();
+				
+				try (ReplacerReader reader = new ReplacerReader(new InputStreamReader(new FileInputStream(srcFile), projectCharset), delimStart, delimEnd))
+				{
+					if (keys.isMap()) for (IteratorPair p : keys)
+					{
+						reader.replace(p.getKey().asString(), p.getValue().asString());
+					}
+					
+					try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(destFile), projectCharset))
+					{
+						IOUtils.relay(reader, writer);
+					}
+				} 
+				catch (UnsupportedEncodingException e) 
+				{
+					returnValue.setError("IOError", "Project encoding is not supported: " + projectCharset);
+					return true;
+				} 
+				catch (FileNotFoundException e) 
+				{
+					returnValue.setError("BadFile", "Source file could not be found: " + srcFile.getPath());
+					return true;
+				} 
+				catch (IOException e) 
+				{
+					returnValue.setError("IOError", "Error occurred: " + e.getLocalizedMessage());
+					return true;
+				}
+				catch (SecurityException e) 
+				{
+					returnValue.setError("Security", "Security error occurred: " + e.getLocalizedMessage());
+					return true;
+				}
+				
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				keys.setNull();
+			}
+		}
+		
 	},
 	
 	ZIPFILES(4)
