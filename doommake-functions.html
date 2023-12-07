@@ -27938,7 +27938,7 @@
 						</div>
 						<div id="function-content-copydir" class="function-content">
 							<div class="function-description">
-								<p>Copies a series of files from one directory to another, replicating the tree in the destination. If the destination file exists, it is overwritten.</p>
+								<p>Copies a series of files from one directory to another, replicating the tree in the destination. If a destination file exists, it is overwritten.</p>
 							</div>
 							<div class="parameter-section">
 								<div class="parameter-title">
@@ -28095,6 +28095,242 @@
 										<div class="parameter-description">
 											<p>
 												If the input RegEx pattern is malformed.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">ERROR</span>
+											<span class="parameter-subtype-name">IOError</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If a read or write error occurs.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">ERROR</span>
+											<span class="parameter-subtype-name">Security</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If the OS is preventing the read or write.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="function-copywithreplace" class="function-section">
+						<div class="function-title" section-code="copywithreplace">
+							<h2 class="function-name">
+								COPYWITHREPLACE
+								<span class="function-parameters">
+									(srcFile, destFile, keys, createDirs, delimStart, delimEnd)
+								</span>
+								<a href="#top" class="function-navigation">TOP</a>
+							</h2>
+						</div>
+						<div id="function-content-copywithreplace" class="function-content">
+							<div class="function-description">
+								<p>Copies a text-based file, replacing the contents of the file with replace key delimited tokens with other text data. If the destination file exists, it is overwritten.</p>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										srcFile
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">STRING</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Path to source file.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">OBJECTREF</span>
+											<span class="parameter-subtype-name">File</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Path to source file.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										destFile
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">STRING</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Path to destination file.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">OBJECTREF</span>
+											<span class="parameter-subtype-name">File</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Path to destination file.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										keys
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">MAP</span>
+											<span class="parameter-subtype-name">String:String</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												The mapping of key to text value, string to string.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										createDirs
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">BOOLEAN</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If true, create the directories for the destination, if not made.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										delimStart
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">NULL</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Use default: "%"
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">STRING</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												The token delimiter start string.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										delimEnd
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">NULL</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Use default: "%"
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">STRING</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												The token delimiter ending string.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title return">
+									<h4 class="parameter-name">
+										RETURNS
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">NULL</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If either file is null.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">OBJECTREF</span>
+											<span class="parameter-subtype-name">File</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												The created destination file.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">ERROR</span>
+											<span class="parameter-subtype-name">BadFile</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If the source file does not exist.
 											</p>
 										</div>
 									</div>
@@ -29915,7 +30151,7 @@
 				</div>
 			</div>
 		</div>
-		<!-- END DIV -->
+				<!-- END DIV -->
 		<div class="nav-section">
 			<a href="index.html">Go Back to Home</a>
 		</div>
