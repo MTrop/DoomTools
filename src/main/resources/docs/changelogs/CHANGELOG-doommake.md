@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.25.0
+
+* `Changed` Added Doom Builder autosave ignores to Git and Mercurial ignore files.
+
+
 ### Changed for 0.24.0
 
 * `Added` COPYWITHREPLACE function added to DoomMake.

@@ -43,6 +43,8 @@ dist/
 *.o
 *.bak
 *.backup*
+*.autosave*
+
 
 # Local WhackEd Config for Patch  
 *.whacked
