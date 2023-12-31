@@ -278,7 +278,7 @@
 	" description="Downloads and compiles the dependencies.">
 	</target>
 
-	<property name="jvm.options.common" value="-Xms64M -Xmx768M" />
+	<property name="jvm.options.common" value="-Xms64M -Xmx4G" />
 
 	<target name="scripts.gui.exe.build" if="natives.windows.dir">
 	</target>

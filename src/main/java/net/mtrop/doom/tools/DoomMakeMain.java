@@ -115,7 +115,7 @@ public final class DoomMakeMain
 	public static final String SWITCH_STACKDEPTH1 = "--stack-depth";
 	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
-	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx4G";
 	private static final String SHELL_RESOURCE_CMD = "shell/embed/app-name.cmd";
 	private static final String SHELL_RESOURCE_SH = "shell/embed/app-name.sh";
 	

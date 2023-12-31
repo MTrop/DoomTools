@@ -159,7 +159,7 @@ public final class Common
 	 */
 	public static ProcessCallable spawnJava(Class<?> mainClass)
 	{
-		return ProcessCallable.java(mainClass, "-Xms64M", "-Xmx768M");
+		return ProcessCallable.java(mainClass, "-Xms64M", "-Xmx4G");
 	}
 	
 	/**

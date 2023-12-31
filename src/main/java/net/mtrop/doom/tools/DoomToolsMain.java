@@ -51,7 +51,7 @@ public final class DoomToolsMain
 	public static final int ERROR_TASK_CANCELLED = 8;
 	public static final int ERROR_UNKNOWN = -1;
 
-	private static final String SHELL_OPTIONS = "-Xms64M -Xmx768M";
+	private static final String SHELL_OPTIONS = "-Xms64M -Xmx4G";
 	
 	private static final Map<String, Class<?>> SHELL_DATA = ObjectUtils.createMap(
 		ObjectUtils.keyValue("doomtools",  DoomToolsMain.class),
