@@ -226,6 +226,12 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		boolean noAnim = texportParametersPanel.getNoAnimated();
 		boolean noSwitch = texportParametersPanel.getNoSwitches();
 		
+		if (outputWad == null)
+		{
+			SwingUtils.info(getApplicationContainer(), language.getText("wtexport.nooutwad.message"));
+			return;
+		}
+		
 		if (outputWad.exists() && create)
 		{
 			if (SwingUtils.noTo(getApplicationContainer(), language.getText("wtexport.overwrite.message", outputWad.getName())))

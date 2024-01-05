@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.5.3
+
+* `Fixed` [GUI] Added message for requiring an output WAD file.
+
+
 ### Changed for 1.5.2
 
 * `Fixed` [GUI] Texture list was not set properly from workspace state. (Issue #104)

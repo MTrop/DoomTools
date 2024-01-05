@@ -5,7 +5,9 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -15,6 +17,7 @@ import java.net.ServerSocket;
 import java.util.Map;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
@@ -47,7 +50,13 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.StringUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
+import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
 
 /**
@@ -191,7 +200,31 @@ public final class DoomToolsGUIMain
 	private static void setExceptionHandler()
 	{
 		Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
-			LOG.errorf(exception, "Thread [%s] threw an uncaught exception!", thread.getName());
+			String threadName = thread.getName();
+			LOG.errorf(exception, "Thread [%s] threw an uncaught exception!", threadName);
+			
+			DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
+			
+			JScrollPane exceptionPane = scroll(ObjectUtils.apply(textArea(StringUtils.getJREExceptionString(exception), 20, 80), (area) -> {
+				area.setEditable(false);
+			}));
+			
+			Toolkit.getDefaultToolkit().beep();
+			Boolean choice = modal(language.getText("doomtools.exception.title", threadName),
+				containerOf(borderLayout(),
+					node(BorderLayout.NORTH, label(language.getText("doomtools.exception.content"))),
+					node(BorderLayout.CENTER, exceptionPane)
+				),
+				choice(language.getText("doomtools.exception.continue"), Boolean.FALSE),
+				choice(language.getText("doomtools.exception.shutdown"), Boolean.TRUE)
+			).openThenDispose();
+			
+			if (choice == Boolean.TRUE)
+			{
+		    	LOG.info("Forcing JVM shutdown...");
+				System.exit(2);
+			}
+			
 		});
 	}
 
