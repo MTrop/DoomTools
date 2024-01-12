@@ -46,7 +46,7 @@ WizardStyle=modern
 WizardImageFile=installer-image.bmp
 WizardImageStretch=yes
 
-AppCopyright=(C) 2019-2022 Matt Tropiano
+AppCopyright=(C) 2019-2024 Matt Tropiano
 
 
 [Languages]
