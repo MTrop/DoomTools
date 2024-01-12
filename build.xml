@@ -41,7 +41,7 @@
 	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
 	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
 
-	<property name="flatlaf.lib.version" value="3.3" />
+	<property name="flatlaf.lib.version" value="2.0.2" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
 	<property name="rsyntaxtextarea.lib.version" value="3.3.2" />
