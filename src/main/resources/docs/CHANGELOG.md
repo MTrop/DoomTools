@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-01-12** Updated FlatLaF to version `3.3`.
+
 - **2024-01-05** Added an uncaught exception modal.
 
 - **2023-12-31** Increased maximum memory allocation for shell scripts to 4 GB.
