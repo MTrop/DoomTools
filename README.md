@@ -1,5 +1,5 @@
 ![DoomTools Logo Banner](https://mtrop.github.io/DoomTools/images/doomtools-banner-darkened.png "DoomTools Logo Banner")  
-Copyright (c) 2019-2023 Matt Tropiano  
+Copyright (c) 2019-2024 Matt Tropiano  
 
 ### Required Libraries
 
