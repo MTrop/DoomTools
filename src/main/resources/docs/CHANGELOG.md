@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-02-13** Updated DoomStruct to `2.15.4`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.4-RELEASE)
+
 - **2024-01-05** Added an uncaught exception modal.
 
 - **2023-12-31** Increased maximum memory allocation for shell scripts to 4 GB.

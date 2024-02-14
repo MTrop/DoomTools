@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.3.1
+
+* `Fixed` Tall patches not being exported/converted correctly.
+
+
 ### Changed for 1.3.0
 
 * `Fixed` The recursive option now creates recursive directories properly. (Issue #100)

@@ -17,7 +17,7 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.15.3" />
+	<property name="doom.lib.version" value="2.15.4" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
@@ -194,6 +194,8 @@
 					<include name="**/*.xml" />
 					<include name="**/*.dtd" />
 					<include name="**/*.dll" />
+					<include name="**/*.dynlib" />
+					<include name="**/*.so" />
 					<include name="**/*.png" />
 					<include name="**/*.jpg" />
 					<exclude name="module-info.class" />
