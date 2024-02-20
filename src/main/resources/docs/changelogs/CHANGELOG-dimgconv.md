@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.3.2
+
+* `Changed` Patches are not split at the first 128 pixels anymore.
+
+
 ### Changed for 1.3.1
 
 * `Fixed` Tall patches not being exported/converted correctly.
