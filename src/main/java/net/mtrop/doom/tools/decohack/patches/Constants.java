@@ -2735,7 +2735,8 @@ interface Constants
 			.setPainChance(0)
 			.setFlags(DEHFlag.flags(
 				DEHThingFlag.SPECIAL,
-				DEHThingFlag.COUNTITEM
+				DEHThingFlag.COUNTITEM,
+				DEHThingFlag.TRANSLUCENT
 			))
 			.setMass(100)
 			.setSpawnFrameIndex(842)
@@ -2762,7 +2763,8 @@ interface Constants
 			.setPainChance(0)
 			.setFlags(DEHFlag.flags(
 				DEHThingFlag.SPECIAL,
-				DEHThingFlag.COUNTITEM
+				DEHThingFlag.COUNTITEM,
+				DEHThingFlag.TRANSLUCENT
 			))
 			.setMass(100)
 			.setSpawnFrameIndex(848)
@@ -2816,7 +2818,8 @@ interface Constants
 			.setPainChance(0)
 			.setFlags(DEHFlag.flags(
 				DEHThingFlag.SPECIAL,
-				DEHThingFlag.COUNTITEM
+				DEHThingFlag.COUNTITEM,
+				DEHThingFlag.TRANSLUCENT
 			))
 			.setMass(100)
 			.setSpawnFrameIndex(853)
@@ -2923,7 +2926,8 @@ interface Constants
 			.setPainChance(0)
 			.setFlags(DEHFlag.flags(
 				DEHThingFlag.SPECIAL,
-				DEHThingFlag.COUNTITEM
+				DEHThingFlag.COUNTITEM,
+				DEHThingFlag.TRANSLUCENT
 			))
 			.setMass(100)
 			.setSpawnFrameIndex(857)

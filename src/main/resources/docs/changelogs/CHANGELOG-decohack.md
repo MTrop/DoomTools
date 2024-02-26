@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.31.1
+
+* `Fixed` The Soulsphere, Megasphere, Blur Sphere, and Invulnerability didn't have their `TRANSLUCENT` flag set. (Issue #112)
+
+
 ### Changed for 0.31.0
 
 * `Fixed` [GUI] Editor would error out on workspace load with no files open.
