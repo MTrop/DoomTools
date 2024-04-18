@@ -59,7 +59,7 @@ public interface DoomToolsApplicationStarter
 	 */
 	default <A extends DoomToolsApplicationInstance> void startApplication(Class<A> applicationClass, Map<String, String> state) 
 	{
-		startApplication(createApplication(applicationClass, null));
+		startApplication(createApplication(applicationClass, state));
 	}
     
 	/**
