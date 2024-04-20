@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.31.2
+
+* `Added` `TRANSLATION1` as a valid bit flag for Things.
+
+
 ### Changed for 0.31.1
 
 * `Fixed` The Soulsphere, Megasphere, Blur Sphere, and Invulnerability didn't have their `TRANSLUCENT` flag set. (Issue #112)
