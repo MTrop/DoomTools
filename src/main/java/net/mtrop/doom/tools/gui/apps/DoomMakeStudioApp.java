@@ -660,7 +660,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		if (wadHandled == Boolean.TRUE)
 			return null;
-		if (openUnknownFile(file, wadHandled == Boolean.FALSE))
+		
+		Boolean openUnknown = openUnknownFile(file, wadHandled == Boolean.FALSE); 
+		if (openUnknown == Boolean.TRUE)
+			return null;
+		else if (openUnknown == null) // unopenable
 			return null;
 		
 		try {
@@ -683,7 +687,9 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	}
 
 	// Returns true if handled.
-	private boolean openUnknownFile(File file, boolean recognized)
+	// Returns false if not, but still is an editor file.
+	// Returns null if unrecognized (non-text?) file.
+	private Boolean openUnknownFile(File file, boolean recognized)
 	{
 		if (DoomToolsEditorProvider.get().getStyleByFile(file) != null)
 			return false;
@@ -699,7 +705,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				SwingUtils.error(language.getText("doommake.open.system.security"));
 			}
 		}
-		return false;
+		return null;
 	}
 	
 	// Returns true if handled.
@@ -708,6 +714,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private Boolean openWadFile(File file)
 	{
 		String[] mapHeaders = null;
+		
+		// Some text files may start with "IWAD," which will result in a false positive (and maybe a crash).
+		// Check for .WAD extension to be safe.
+		if (!file.getName().toLowerCase().endsWith(".wad"))
+			return null;
+		
 		try {
 			if (Wad.isWAD(file))
 				mapHeaders = WadUtils.openWadAndGet(file, (wad) -> MapUtils.getAllMapHeaders(wad));

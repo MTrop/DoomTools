@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.25.1
+
+* `Fixed` [GUI-Studio] Fix WAD detection on opened files.
+* `Fixed` [GUI-Studio] Studio will no longer try to open binary files as text.
+
+
 ### Changed for 0.25.0
 
 * `Changed` Added Doom Builder autosave ignores to Git and Mercurial ignore files.
