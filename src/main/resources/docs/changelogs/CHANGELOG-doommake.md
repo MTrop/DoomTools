@@ -3,6 +3,7 @@ DoomMake
 
 ### Changed for 0.25.1
 
+* `Fixed` [GUI-Studio] Fixed a potential NPE on the file watch service.
 * `Fixed` [GUI-Studio] Fix WAD detection on opened files.
 * `Fixed` [GUI-Studio] Studio will no longer try to open binary files as text.
 

@@ -136,7 +136,10 @@ public class WatchServiceThread extends Thread
 			{
 				for (WatchEvent<?> event : key.pollEvents())
 				{
-					Path p = ((Path)key.watchable()).resolve(((Path)event.context()));
+					Path eventPath = (Path)event.context();
+					if (eventPath == null)
+						continue;
+					Path p = ((Path)key.watchable()).resolve(eventPath);
 					File f = p.toFile();
 					switch (event.kind().name())
 					{
