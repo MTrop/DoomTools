@@ -229,7 +229,7 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
 DoomMake v0.25.0 by Matt Tropiano
-(using DoomStruct v2.15.6 , WadScript v1.6.2, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
+(using DoomStruct v2.15.8 , WadScript v1.6.2, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -343,6 +343,13 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.25.1
+
+* &#x60;Fixed&#x60; [GUI-Studio] Fixed a potential NPE on the file watch service.
+* &#x60;Fixed&#x60; [GUI-Studio] Fix WAD detection on opened files.
+* &#x60;Fixed&#x60; [GUI-Studio] Studio will no longer try to open binary files as text.
+
+
 ### Changed for 0.25.0
 
 * &#x60;Changed&#x60; Added Doom Builder autosave ignores to Git and Mercurial ignore files.

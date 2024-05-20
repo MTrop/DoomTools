@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.31.1 by Matt Tropiano (using DoomStruct v2.15.6)
+DECOHack v0.31.2 by Matt Tropiano (using DoomStruct v2.15.8)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1389,6 +1389,7 @@ Things (Doom+):
     SKULLFLY &#x3D;       0x01000000
     NOTDMATCH &#x3D;      0x02000000
     TRANSLATION &#x3D;    0x04000000
+    TRANSLATION1 &#x3D;   0x04000000
     UNUSED1 &#x3D;        0x08000000
     TRANSLATION2 &#x3D;   0x08000000
     TOUCHY &#x3D;         0x10000000
@@ -1964,6 +1965,11 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.31.2
+
+* &#x60;Added&#x60; &#x60;TRANSLATION1&#x60; as a valid bit flag for Things.
+
+
 ### Changed for 0.31.1
 
 * &#x60;Fixed&#x60; The Soulsphere, Megasphere, Blur Sphere, and Invulnerability didn&#39;t have their &#x60;TRANSLUCENT&#x60; flag set. (Issue #112)
