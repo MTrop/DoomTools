@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-05-19** Updated DoomStruct to `2.15.8`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.8-RELEASE)
+
 - **2024-03-12** Updated DoomStruct to `2.15.6`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.6-RELEASE)
 
 - **2024-02-19** Updated DoomStruct to `2.15.5`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.5-RELEASE)
