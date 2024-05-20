@@ -19,12 +19,12 @@ public interface Version
 	String DOOMSTRUCT = Common.getVersionString("doom");
 	String ROOKSCRIPT = Common.getVersionString("rookscript");
 	String ROOKSCRIPT_DESKTOP = Common.getVersionString("rookscript-desktop");
+	String JSOUP = Common.getVersionString("jsoup");
 
 	String FLATLAF = Common.getVersionString("flatlaf");
 	String RSYNTAXTEXTAREA = Common.getVersionString("rsyntaxtextarea");
 	String AUTOCOMPLETE = Common.getVersionString("autocomplete");
 	String COMMONMARK = Common.getVersionString("commonmark");
-	String JSOUP = Common.getVersionString("jsoup");
 
 	String DECOHACK = Common.getVersionString("decohack");
 	String DIMGCONV = Common.getVersionString("dimgconv");

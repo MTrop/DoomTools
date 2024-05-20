@@ -500,6 +500,7 @@ public final class DoomToolsMain
 				options.stdout.println("Using Black Rook JSON v" + Version.JSON);
 				options.stdout.println("Using Rookscript v" + Version.ROOKSCRIPT);
 				options.stdout.println("Using Rookscript-Desktop v" + Version.ROOKSCRIPT_DESKTOP);
+				options.stdout.println("Using JSoup v" + Version.JSOUP);
 				options.stdout.println();
 				options.stdout.println("Contains DECOHack v" + Version.DECOHACK);
 				options.stdout.println("Contains DImgConv v" + Version.DIMGCONV);
