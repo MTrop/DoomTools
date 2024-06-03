@@ -321,7 +321,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 		"\n* If E4M6, checks if the caller is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, opens the sector tagged 666 like a fast door.",
 		"\n* If E4M8, checks if the caller is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.",
 		"\n* If MAP07, checks if the caller is an MT_FATSO (slot 9), then checks if all MT_FATSO things are dead, and if so, lowers the sector tagged 666 to the lowest floor.",
-		"\n* If MAP07, checks if the caller is an MT_BABY (slot 9), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.",
+		"\n* If MAP07, checks if the caller is an MT_BABY (slot 21), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.",
 		"\nThis does nothing if no players are alive by the time this triggers.",
 		"\nSome engines allow you to change this function's behavior via MAPINFO or some other mechanism."
 	)),

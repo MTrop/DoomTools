@@ -93,7 +93,7 @@ public interface DEHPatch
 	DEHThing getThing(int index);
 	
 	/**
-	 * @return the amount of things in the patch.
+	 * @return the amount of weapons in the patch.
 	 */
 	int getWeaponCount();
 

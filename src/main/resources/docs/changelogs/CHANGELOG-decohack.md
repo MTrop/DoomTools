@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.31.3
+
+* `Fixed` [GUI] Some autocomplete docs fixes/changes.
+
+
 ### Changed for 0.31.2
 
 * `Added` `TRANSLATION1` as a valid bit flag for Things.

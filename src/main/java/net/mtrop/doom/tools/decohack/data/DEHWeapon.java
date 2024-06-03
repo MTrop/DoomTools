@@ -21,8 +21,6 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<DEHWeapon>
 {
-	static final float BUTT = ((-360 << 16) + 1) / 65536f;
-	
 	public static enum Ammo
 	{
 		BULLETS,
