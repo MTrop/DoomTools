@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------ */
 
-#define SRC_DIR_ASSETS     "/assets" 
 #define SRC_DIR_CONVERT    "/convert" 
 
 /**
@@ -12,7 +11,7 @@ check function doConvertSounds() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sounds";
-	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sounds";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/sounds";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 		
@@ -40,7 +39,7 @@ check function doConvertGraphics() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/graphics";
-	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/graphics";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/graphics";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			
@@ -68,7 +67,7 @@ check function doConvertSprites() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/sprites";
-	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/sprites";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/sprites";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			
@@ -96,7 +95,7 @@ check function doConvertColormaps() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/colormaps";
-	targetDir = getSourceDirectory() + SRC_DIR_ASSETS + "/colormaps";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/colormaps";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			

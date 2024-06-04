@@ -21,16 +21,20 @@ mergeswantbls      out $1/textures/defswani.txt
 marker             out ff_start
 mergenamespacefile out $1/textures/animflats.wad ff
 mergedir           out $1/textures/flats
+mergedir           out $0/convert/flats
 marker             out ff_end
 
 # Merge Patches
 marker             out pp_start
 mergedir           out $1/textures/patches
+mergedir           out $0/convert/patches
 marker             out pp_end
 
 # Merge Additional Single-Patch Textures
 mergetexturedir    out $1/textures/texture1 texture1
+mergetexturedir    out $0/convert/texture1 texture1
 mergetexturedir    out $1/textures/texture2 texture2
+mergetexturedir    out $0/convert/texture2 texture2
 
 finish out $0/$2
 end

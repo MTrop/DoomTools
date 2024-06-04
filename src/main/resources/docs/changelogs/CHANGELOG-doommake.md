@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.26.0
+
+* `Changed` New projects that convert assets and textures will build them into the project build directory, and merged from there.
+
+
 ### Changed for 0.25.1
 
 * `Fixed` [GUI-Studio] Fixed a potential NPE on the file watch service.

@@ -46,7 +46,7 @@ check function doAssets() {
 	verifydirs(sourceDir + "/sounds");
 	verifydirs(sourceDir + "/sprites");
 		
-	if (checkFileExistenceAndBuildStatuses(outWad)) {
+	if (checkFileExistenceAndBuildStatuses(outWad, ["convert-sound", "convert-graphics", "convert-sprites", "convert-colormaps"])) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Assets directory (" + sourceDir + ") up to date.");

@@ -1,7 +1,6 @@
 /* ------------------------------------------------------------------------ */
 
 #define SRC_DIR_CONVERT    "/convert" 
-#define SRC_DIR_TEXTURES   "/textures"
 
 /**
  * Converts flat assets in the conversion directories.
@@ -12,7 +11,7 @@ check function doConvertFlats() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/flats";
-	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/flats";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/flats";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			
@@ -40,7 +39,7 @@ check function doConvertPatches() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/patches";
-	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/patches";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/patches";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			
@@ -64,7 +63,7 @@ check function doConvertTextureDirectory(sourceDir, targetDir) {
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
 		println("[Skipped] Texture conversion directory (" + sourceDir + ") up to date.");
-		return;
+		return false;
 	}
 
 	println("Converting textures...");
@@ -73,6 +72,7 @@ check function doConvertTextureDirectory(sourceDir, targetDir) {
 
 	storeDirectoryChanged(sourceDir, hash);
 	println("Textures converted from `" + sourceDir + "` to `" + targetDir + "`.");
+	return true;
 }
 
 /**
@@ -84,17 +84,19 @@ check function doConvertTextures() {
 	initBuild();
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/texture1";
-	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/texture1";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/texture1";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
-	doConvertTextureDirectory(sourceDir, targetDir);
-	setBuilt("convert-texture1");
+	if (doConvertTextureDirectory(sourceDir, targetDir)) {
+		setBuilt("convert-texture1");
+	}
 	
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/texture2";
-	targetDir = getSourceDirectory() + SRC_DIR_TEXTURES + "/texture2";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/texture2";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
-	doConvertTextureDirectory(sourceDir, targetDir);
-	setBuilt("convert-texture2");
+	if (doConvertTextureDirectory(sourceDir, targetDir)) {
+		setBuilt("convert-texture2");
+	}
 }
 
