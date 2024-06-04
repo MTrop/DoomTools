@@ -23,7 +23,7 @@ check function doPatch() {
 			return;
 		}
 	} else {
-		hash = directoryHasChanged(sourceDir);
+		hash = getDirectoryHash(sourceDir);
 	}
 
 	println("Copying patch...");

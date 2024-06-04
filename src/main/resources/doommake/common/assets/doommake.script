@@ -53,7 +53,7 @@ check function doAssets() {
 			return;
 		}
 	} else {
-		hash = directoryHasChanged(sourceDir);
+		hash = getDirectoryHash(sourceDir);
 	}
 	
 	println("Building assets...");

@@ -148,6 +148,14 @@ check function initBuildLock() {
 }
 
 /**
+ * Gets the directory hash string.
+ * Returns a string of hexadecimal characters.
+ */
+check function getDirectoryHash(dirpath) {
+	return hashdir(dirpath, true)->bufstr();
+}
+
+/**
  * Checks if a directory changed since last build.
  * Returns error if an error happened.
  * Returns null if no change.
@@ -155,7 +163,7 @@ check function initBuildLock() {
  */
 check function directoryHasChanged(dirpath) {
 	lockhash = initBuildLock().dirHashes->mapget(dirpath);
-	dirhash = hashdir(dirpath, true)->bufstr();
+	dirhash = getDirectoryHash(dirpath);
 	return (lockhash === null || lockhash !== dirhash) ? dirhash : null;
 }
 
