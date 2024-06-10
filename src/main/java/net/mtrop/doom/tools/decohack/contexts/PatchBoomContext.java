@@ -186,17 +186,17 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 		
 		// STRINGS
 		boolean stringsHeader = false;
-		for (String keys : getStringKeys())
+		for (String key : getStringKeys())
 		{
 			String value;
-			if (!Objects.equals(value = getString(keys), getSourcePatch().getString(keys)))
+			if (!Objects.equals(value = getString(key), getSourcePatch().getString(key)))
 			{
 				if (!stringsHeader)
 				{
 					writer.append("[STRINGS]").append(CRLF);
 					stringsHeader = true;
 				}
-				writer.append(keys)
+				writer.append(key)
 					.append(" = ")
 					.append(StringUtils.withEscChars(value)).append(CRLF);
 			}
