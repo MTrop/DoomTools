@@ -1,10 +1,10 @@
 DECOHack
 --------
 
-### Changed for 0.31.3
+### Changed for 0.32.0
 
 * `Fixed` [GUI] Some autocomplete docs fixes/changes.
-
+* `Added` Added more valid string mnemonics to Boom patches (notably, Woof/ZDoom obituaries).
 
 ### Changed for 0.31.2
 

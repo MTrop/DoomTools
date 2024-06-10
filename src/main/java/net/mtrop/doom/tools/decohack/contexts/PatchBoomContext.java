@@ -90,7 +90,7 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 	@Override
 	public Set<String> getStringKeys()
 	{
-		return getSourcePatch().getStringKeys();
+		return strings.keySet();
 	}
 
 	@Override
