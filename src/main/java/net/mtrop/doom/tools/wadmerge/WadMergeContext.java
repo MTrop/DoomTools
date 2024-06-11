@@ -972,7 +972,9 @@ public class WadMergeContext
 			verbosef("Found existing `PNAMES`.\n");
 		}
 		else
+		{
 			pout = new PatchNames();
+		}
 
 		CommonTextureList<?> tout;
 		if (buffer.contains(textureEntryName))
@@ -994,6 +996,11 @@ public class WadMergeContext
 		{
 			insertIndex = buffer.lastIndexOf("PP_END");
 			verbosef("Found existing `PP_END` for insertion point.\n");
+		}
+		else if (buffer.contains("P_END"))
+		{
+			insertIndex = buffer.lastIndexOf("P_END");
+			verbosef("Found existing `P_END` for insertion point.\n");
 		}
 		else
 		{

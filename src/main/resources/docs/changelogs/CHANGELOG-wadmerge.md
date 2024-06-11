@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.11.0
+
+* `Changed` MERGETEXTUREDIR now works on a "P" namespace if it exists in the target buffer.
+
+
 ### Changed for 1.10.1
 
 * `Fixed` [GUI] Editor would error out on workspace load with no files open.

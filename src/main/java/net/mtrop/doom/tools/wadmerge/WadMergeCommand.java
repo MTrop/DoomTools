@@ -1154,7 +1154,7 @@ public enum WadMergeCommand
 		{
 			out.println(usage());
 			out.println("    Imports a directory's files as Doom Patches (or PNGs) and adds them");
-			out.println("    to either a new or already-existing PP namespace and texture set entry");
+			out.println("    to either a new or already-existing P or PP namespace and texture set entry");
 			out.println("    (plus PNAMES).");
 			out.println("    [symbol]: The symbol to add to.");
 			out.println("    [path]:   The directory to read.");
