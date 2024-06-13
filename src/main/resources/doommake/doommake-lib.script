@@ -9,7 +9,7 @@
 /* ------------------------------------------------------------------------ */
 
 /**
- * Return a property by its key, or def if null.
+ * Return a property by its key, or def if empty.
  */
 function prop(key, def) {
 	out = properties(key);
