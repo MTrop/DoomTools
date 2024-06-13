@@ -77,6 +77,7 @@ public final class DoomMakeMain
 	private static final int ERROR_BAD_TOOL_PATH = 6;
 	private static final int ERROR_IOERROR = 7;
 	private static final int ERROR_AGENT_RUNNING = 8;
+	private static final int ERROR_ALREADY_EMBEDDED = 9;
 	private static final int ERROR_UNKNOWN = -1;
 
 	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
@@ -703,6 +704,13 @@ public final class DoomMakeMain
 			File targetJARFile = new File("tools/" + (new File(jarName)).getName());
 			File targetShellCmdFile = new File("doommake.cmd");
 			File targetShellBashFile = new File("doommake.sh");
+			
+			// test for already embedded
+			if (targetJARFile.exists())
+			{
+				options.stderr.println("ERROR: DoomMake is already embedded in this project.");
+				return ERROR_ALREADY_EMBEDDED;
+			}
 			
 			try 
 			{
