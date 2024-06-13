@@ -72,6 +72,15 @@ function getProjectZip() {
 	return getProjectName() + ".zip"; 
 }
 
+/* ------------------------------------------------------------------------ */
+// Library file (trimmed IWAD for CI).
+
+#define PROP_LIBWAD         "doommake.lib"
+
+function getLibWAD() {
+	return prop(PROP_LIBWAD, null); 
+}
+
 
 /* ------------------------------------------------------------------------ */
 // Local-specific.
@@ -106,10 +115,11 @@ function getSourceDirectory() {
 }
 
 /**
- * Return the IWAD from properties.
+ * Return the IWAD from properties, or fall back to the LIB IWAD if not
+ * specified.
  */
 function getIWAD() {
-	return prop(PROP_IWADPATH, null); 
+	return prop(PROP_IWADPATH, null) ?? getLibWAD(); 
 }
 
 

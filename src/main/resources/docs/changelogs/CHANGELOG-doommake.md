@@ -3,6 +3,7 @@ DoomMake
 
 ### Changed for 0.26.0
 
+* `Added` Code in base projects for specifying a "library" IWAD file for CI builds.
 * `Changed` New projects that convert assets and textures will build them into the project build directory, and merged from there.
 * `Changed` Fixed documentation/comments in the created build scripts.
 
