@@ -228,7 +228,7 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.25.0 by Matt Tropiano
+DoomMake v0.26.0 by Matt Tropiano
 (using DoomStruct v2.15.8 , WadScript v1.6.2, RookScript v1.15.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
@@ -343,6 +343,14 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.26.0
+
+* &#x60;Added&#x60; DoomMake will check to see if it is already embedded in a project if &#x60;--embed&#x60; is used.
+* &#x60;Added&#x60; Code in base projects for specifying a &quot;library&quot; IWAD file for CI builds.
+* &#x60;Changed&#x60; New projects that convert assets and textures will build them into the project build directory, and merged from there.
+* &#x60;Changed&#x60; Fixed documentation&#x2F;comments in the created build scripts.
+
+
 ### Changed for 0.25.1
 
 * &#x60;Fixed&#x60; [GUI-Studio] Fixed a potential NPE on the file watch service.
