@@ -481,7 +481,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	@Override
 	public DEHThingTemplate setMass(int mass) 
 	{
-		RangeUtils.checkRange("Mass", 0, Integer.MAX_VALUE, mass);
+		RangeUtils.checkRange("Mass", Integer.MIN_VALUE, Integer.MAX_VALUE, mass);
 		this.mass = mass;
 		return this;
 	}

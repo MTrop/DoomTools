@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.32.1
+
+* `Fixed` Mass on Things can be negative, for real this time. (Issue #114)
+
+
 ### Changed for 0.32.0
 
 * `Fixed` [GUI] Some autocomplete docs fixes/changes.
