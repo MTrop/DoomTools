@@ -395,7 +395,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 
 	public DEHThing setMass(int mass) 
 	{
-		RangeUtils.checkRange("Mass", Integer.MIN_VALUE, Integer.MAX_VALUE, mass);
 		this.mass = mass;
 		return this;
 	}
