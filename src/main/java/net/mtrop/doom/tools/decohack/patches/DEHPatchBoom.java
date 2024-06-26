@@ -80,7 +80,7 @@ public interface DEHPatchBoom extends DEHPatch
 	/**
 	 * Gets a string by its macro key.
 	 * @param key the key.
-	 * @return the corresponding string.
+	 * @return the corresponding string, or null if not a valid string.
 	 */
 	String getString(String key);
 	

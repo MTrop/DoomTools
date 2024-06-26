@@ -18,6 +18,7 @@ import net.mtrop.doom.tools.decohack.contexts.PatchMBFContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchExtendedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchMBF21Context;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchID24Context;
 
 /**
  * Enumeration of Patch types.
@@ -32,7 +33,8 @@ public enum DecoHackPatchType
 	MBF("mbf", PatchMBFContext.class),
 	EXTENDED("extended", PatchExtendedContext.class),
 	MBF21("mbf21", PatchMBF21Context.class),
-	DSDHACKED("dsdhacked", PatchDSDHackedContext.class);
+	DSDHACKED("dsdhacked", PatchDSDHackedContext.class),
+	ID24("id24", PatchID24Context.class);
 	
 	private final String keyword;
 	private final Class<?> patchClass;

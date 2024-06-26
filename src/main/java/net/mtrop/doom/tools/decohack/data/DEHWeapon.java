@@ -17,6 +17,7 @@ import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single weapon entry.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<DEHWeapon>

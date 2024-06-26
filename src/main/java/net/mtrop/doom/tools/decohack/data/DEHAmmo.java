@@ -13,6 +13,7 @@ import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single ammo entry.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHAmmo extends DEHObject<DEHAmmo>

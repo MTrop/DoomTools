@@ -9,6 +9,7 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 
 /**
  * An interface that describes a Weapon whose information can be set.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  * @param <SELF> This object type.
  */

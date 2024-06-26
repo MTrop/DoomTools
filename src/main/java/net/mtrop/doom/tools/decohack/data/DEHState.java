@@ -15,6 +15,7 @@ import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single state.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHState extends DEHObject<DEHState>

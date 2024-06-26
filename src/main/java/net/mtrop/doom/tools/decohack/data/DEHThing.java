@@ -18,6 +18,7 @@ import net.mtrop.doom.util.RangeUtils;
 /**
  * A single thing entry.
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHThing>

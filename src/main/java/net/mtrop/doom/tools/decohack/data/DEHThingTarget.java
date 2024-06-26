@@ -8,6 +8,7 @@ package net.mtrop.doom.tools.decohack.data;
 /**
  * An interface that describes a Thing whose information can be set.
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  * @param <SELF> This object type.
  */

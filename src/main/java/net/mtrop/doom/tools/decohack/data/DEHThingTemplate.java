@@ -17,6 +17,7 @@ import net.mtrop.doom.util.RangeUtils;
  * The purpose of this object is to prepare a thing where its values 
  * can be applied to many Thing entries. 
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>

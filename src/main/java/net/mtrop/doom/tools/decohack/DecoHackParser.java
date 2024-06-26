@@ -61,6 +61,7 @@ import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * The DecoHack parser.
+ * TODO: Add ID24 patch parsing.
  * @author Matthew Tropiano
  */
 public final class DecoHackParser extends Lexer.Parser

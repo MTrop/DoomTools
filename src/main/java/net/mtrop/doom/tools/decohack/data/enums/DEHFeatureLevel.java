@@ -18,6 +18,7 @@ public enum DEHFeatureLevel
 	EXTENDED,
 	MBF21,
 	DSDHACKED,
+	ID24,
 	;
 	
 	/**

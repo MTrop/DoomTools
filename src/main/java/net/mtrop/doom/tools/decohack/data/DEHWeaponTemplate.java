@@ -16,6 +16,7 @@ import net.mtrop.doom.util.RangeUtils;
  * A single weapon entry where all of its fields are nulled out.
  * The purpose of this object is to prepare a weapon where its values 
  * can be applied to many Weapon entries.
+ * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>

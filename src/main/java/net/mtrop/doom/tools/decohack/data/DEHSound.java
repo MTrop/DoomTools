@@ -22,8 +22,6 @@ public class DEHSound extends DEHObject<DEHSound>
 	/** Sound is singular. */
 	private boolean singular;
 	
-	// TODO: Add DSDA-Doom fields.
-	
 	/**
 	 * Creates a new DEHSound.
 	 * @throws IllegalArgumentException if a provided value is out of range.
