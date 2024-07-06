@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.32.2
+
+* `Fixed` CLEAR STATES in an Each Thing clause did not clear states. (Issue #115)
+
+
 ### Changed for 0.32.1
 
 * `Fixed` Mass on Things can be negative, for real this time. (Issue #114)
