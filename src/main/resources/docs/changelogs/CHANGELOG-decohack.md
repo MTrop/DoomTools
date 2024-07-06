@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.32.2
 
 * `Fixed` CLEAR STATES in an Each Thing clause did not clear states. (Issue #115)
+* `Fixed` CLEAR STATES in an Each Weapon clause did not clear states.
 
 
 ### Changed for 0.32.1
