@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.33.0
 
 * `Added` `set next` clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
+* `Added` `set next` clause for manipulating the next thing index used in `auto thing`.
 
 
 ### Changed for 0.32.2
