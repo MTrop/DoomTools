@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
+import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
@@ -88,6 +89,9 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private static final String KEYWORD_PARS = "pars";
 	
+	private static final String KEYWORD_SET = "set";
+	private static final String KEYWORD_NEXT = "next";
+	private static final String KEYWORD_INDEX = "index";
 	private static final String KEYWORD_CLEAR = "clear";
 	private static final String KEYWORD_STATE = "state";
 	private static final String KEYWORD_FILL = "fill";
@@ -117,6 +121,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_SOUNDS = "sounds";
 	private static final String KEYWORD_SINGULAR = "singular";
 	private static final String KEYWORD_PRIORITY = "priority";
+
+	private static final String KEYWORD_SPRITE = "sprite";
 
 	private static final String KEYWORD_AMMO = "ammo";
 	private static final String KEYWORD_PICKUP = "pickup";
@@ -392,6 +398,10 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_SET))
+		{
+			return parseSetClause(context);
+		}
 		else if (currentToken() != null)
 		{
 			addErrorMessage("Unknown section or command \"%s\".", currentLexeme());
@@ -399,6 +409,90 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 			return true;
+	}
+
+	// Parses a "set" clause.
+	private boolean parseSetClause(AbstractPatchContext<?> context) 
+	{
+		if (matchIdentifierIgnoreCase(KEYWORD_NEXT))
+		{
+			if (matchIdentifierIgnoreCase(KEYWORD_SPRITE))
+			{
+				if (matchIdentifierIgnoreCase(KEYWORD_INDEX))
+				{
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_INDEX, KEYWORD_SPRITE);
+						return false;
+					}
+					
+					// are we able to set the index?
+					if (!(context instanceof PatchDSDHackedContext))
+					{
+						addErrorMessage("Index can only be set if patch type is DSDHACKED or later.");
+						return false;
+					}
+					
+					try {
+						((PatchDSDHackedContext)context).setNextSpriteIndex(idx);
+					} catch (IllegalArgumentException e) {
+						addErrorMessage(e.getLocalizedMessage());
+						return false;
+					}
+					
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_INDEX, KEYWORD_SPRITE);
+					return false;
+				}
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_SOUND))
+			{
+				if (matchIdentifierIgnoreCase(KEYWORD_INDEX))
+				{
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_INDEX, KEYWORD_SOUND);
+						return false;
+					}
+					
+					// are we able to set the index?
+					if (!(context instanceof PatchDSDHackedContext))
+					{
+						addErrorMessage("Index can only be set if patch type is DSDHACKED or later.");
+						return false;
+					}
+					
+					try {
+						((PatchDSDHackedContext)context).setNextSoundIndex(idx);
+					} catch (IllegalArgumentException e) {
+						addErrorMessage(e.getLocalizedMessage());
+						return false;
+					}
+					
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_INDEX, KEYWORD_SOUND);
+					return false;
+				}
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_SPRITE, KEYWORD_SOUND, KEYWORD_NEXT);
+				return false;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_NEXT, KEYWORD_SET);
+			return false;
+		}
 	}
 
 	// Parses a string block.

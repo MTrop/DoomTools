@@ -1441,7 +1441,19 @@ identifier, you need to wrap the name in quotes:
 
 
 NOTE: These features are only enabled for patches that employ a DSDHACKED 
-feature set!
+(or better) feature set!
+
+You can also affect what the next available sprite or sound index is with the 
+following clauses:
+
+    set next sound index [INTEGER]
+    set next sprite index [INTEGER]
+
+...where [INTEGER] is a positive integer GREATER THAN OR EQUAL TO the current
+sprite or sound index (for safety reasons). For example:
+
+    set next sound index 1000
+    set next sprite index 350
 
 
 ==============================================================================

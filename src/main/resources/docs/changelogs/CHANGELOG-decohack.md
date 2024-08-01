@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.33.0
+
+* `Added` `set next` clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
+
+
 ### Changed for 0.32.2
 
 * `Fixed` CLEAR STATES in an Each Thing clause did not clear states. (Issue #115)
