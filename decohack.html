@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.32.1 by Matt Tropiano (using DoomStruct v2.15.8)
+DECOHack v0.33.0 by Matt Tropiano (using DoomStruct v2.15.8)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1332,6 +1332,15 @@ writing a normal Thing definition body:
  &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
 
 
+You can also influence the next &quot;auto thing&quot; index&#x2F;slot to be used via a 
+special clause:
+
+    set next auto thing index [INTEGER]
+
+...where [INTEGER] is a positive integer for setting the next seek index for
+&quot;auto&quot; things. This may not write to the exact slot for the next thing, 
+however - it will still seek to the next &quot;free&quot; slot from that provided index! 
+
 ------------------------------------------------------------------------------
 Thing Editor Keys
 ------------------------------------------------------------------------------
@@ -1647,7 +1656,19 @@ identifier, you need to wrap the name in quotes:
 
 
 NOTE: These features are only enabled for patches that employ a DSDHACKED 
-feature set!
+(or better) feature set!
+
+You can also affect what the next available sprite or sound index is with the 
+following clauses:
+
+    set next sound index [INTEGER]
+    set next sprite index [INTEGER]
+
+...where [INTEGER] is a positive integer GREATER THAN OR EQUAL TO the current
+sprite or sound index (for safety reasons). For example:
+
+    set next sound index 1000
+    set next sprite index 350
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1965,6 +1986,18 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.33.0
+
+* &#x60;Added&#x60; &#x60;set next&#x60; clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
+* &#x60;Added&#x60; &#x60;set next&#x60; clause for manipulating the next thing index used in &#x60;auto thing&#x60;.
+
+
+### Changed for 0.32.2
+
+* &#x60;Fixed&#x60; CLEAR STATES in an Each Thing clause did not clear states. (Issue #115)
+* &#x60;Fixed&#x60; CLEAR STATES in an Each Weapon clause did not clear states.
+
+
 ### Changed for 0.32.1
 
 * &#x60;Fixed&#x60; Mass on Things can be negative, for real this time. (Issue #114)
