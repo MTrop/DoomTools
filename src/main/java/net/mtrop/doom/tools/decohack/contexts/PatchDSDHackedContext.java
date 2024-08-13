@@ -63,6 +63,20 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		return DEHFeatureLevel.DSDHACKED;
 	}
 
+	/**
+	 * Sets the next sound index for new sound names.
+	 * Can only set a value greater than or equal to the current "next" index value, for safety.
+	 * @param nextSoundIndex the next sound index.
+	 * @throws IllegalArgumentException if nextSoundIndex &lt; current next sound index.
+	 */
+	public void setNextSoundIndex(int nextSoundIndex) 
+	{
+		if (nextSoundIndex < this.nextSoundIndex)
+			throw new IllegalArgumentException("Next sound index " + nextSoundIndex + " is less than the current sound index of " + this.nextSoundIndex);
+		
+		this.nextSoundIndex = nextSoundIndex;
+	}
+	
 	@Override
 	public Integer getSoundIndex(String name)
 	{
@@ -72,6 +86,20 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		return out;
 	}
 
+	/**
+	 * Sets the next sprite index for new sprite names.
+	 * Can only set a value greater than or equal to the current "next" index value, for safety.
+	 * @param nextSpriteIndex the next sprite index.
+	 * @throws IllegalArgumentException if nextSpriteIndex &lt; current next sprite index.
+	 */
+	public void setNextSpriteIndex(int nextSpriteIndex) 
+	{
+		if (nextSpriteIndex < this.nextSpriteIndex)
+			throw new IllegalArgumentException("Next sprite index " + nextSpriteIndex + " is less than the current sprite index of " + this.nextSpriteIndex);
+		
+		this.nextSpriteIndex = nextSpriteIndex;
+	}
+	
 	@Override
 	public Integer getSpriteIndex(String name)
 	{

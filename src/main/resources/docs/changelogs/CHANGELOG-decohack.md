@@ -1,6 +1,18 @@
 DECOHack
 --------
 
+### Changed for 0.33.0
+
+* `Added` `set next` clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
+* `Added` `set next` clause for manipulating the next thing index used in `auto thing`.
+
+
+### Changed for 0.32.2
+
+* `Fixed` CLEAR STATES in an Each Thing clause did not clear states. (Issue #115)
+* `Fixed` CLEAR STATES in an Each Weapon clause did not clear states.
+
+
 ### Changed for 0.32.1
 
 * `Fixed` Mass on Things can be negative, for real this time. (Issue #114)

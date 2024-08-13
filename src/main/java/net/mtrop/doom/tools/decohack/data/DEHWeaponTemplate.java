@@ -245,10 +245,8 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	
 	public DEHWeaponTemplate setLabel(String label, int index)
 	{
-		if (index == 0)
-			stateIndexMap.remove(label);
-		else
-			stateIndexMap.put(label, index);
+		// 0 is a valid index for applying to weapons - preserve in map.
+		stateIndexMap.put(label, index);
 		return this;
 	}
 

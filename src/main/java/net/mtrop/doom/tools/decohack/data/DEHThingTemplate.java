@@ -596,10 +596,8 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		if (index < 0)
 			throw new IllegalArgumentException("index cannot be < 0");
 		
-		if (index == 0)
-			stateIndexMap.remove(label);
-		else
-			stateIndexMap.put(label, index);
+		// 0 is a valid index for applying to things - preserve in map.
+		stateIndexMap.put(label, index);
 		return this;
 	}
 

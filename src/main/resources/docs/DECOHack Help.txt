@@ -1126,6 +1126,15 @@ writing a normal Thing definition body:
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 
+You can also influence the next "auto thing" index/slot to be used via a 
+special clause:
+
+    set next auto thing index <INTEGER>
+
+...where <INTEGER> is a positive integer for setting the next seek index for
+"auto" things. This may not write to the exact slot for the next thing, 
+however - it will still seek to the next "free" slot from that provided index! 
+
 ------------------------------------------------------------------------------
 Thing Editor Keys
 ------------------------------------------------------------------------------
@@ -1441,7 +1450,19 @@ identifier, you need to wrap the name in quotes:
 
 
 NOTE: These features are only enabled for patches that employ a DSDHACKED 
-feature set!
+(or better) feature set!
+
+You can also affect what the next available sprite or sound index is with the 
+following clauses:
+
+    set next sound index <INTEGER>
+    set next sprite index <INTEGER>
+
+...where <INTEGER> is a positive integer GREATER THAN OR EQUAL TO the current
+sprite or sound index (for safety reasons). For example:
+
+    set next sound index 1000
+    set next sprite index 350
 
 
 ==============================================================================
