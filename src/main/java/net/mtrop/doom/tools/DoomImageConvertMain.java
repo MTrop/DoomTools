@@ -746,7 +746,7 @@ public final class DoomImageConvertMain
 						if ((argb & 0xff000000) != 0xff000000)
 							picture.setPixel(x, y, Picture.PIXEL_TRANSLUCENT);
 						else
-							picture.setPixel(x, y, palette.getNearestColorIndex(argb));
+							picture.setPixel(x, y, palette.getNearestColorIndex(argb, true));
 					}
 				}
 				picture.setOffsetX(png.getOffsetX());
@@ -808,7 +808,7 @@ public final class DoomImageConvertMain
 					if ((argb & 0xff000000) != 0xff000000)
 						out.setPixel(x, y, Picture.PIXEL_TRANSLUCENT);
 					else
-						out.setPixel(x, y, pal.getNearestColorIndex(argb));
+						out.setPixel(x, y, pal.getNearestColorIndex(argb, true));
 				}
 			return out;
 		}
