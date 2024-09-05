@@ -433,7 +433,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				
 				// are we able to set the index?
-				if (!(context instanceof PatchDSDHackedContext))
+				if (!context.supports(DEHFeatureLevel.DSDHACKED))
 				{
 					addErrorMessage("Index can only be set if patch type is DSDHACKED or later.");
 					return false;
@@ -464,7 +464,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				
 				// are we able to set the index?
-				if (!(context instanceof PatchDSDHackedContext))
+				if (!context.supports(DEHFeatureLevel.DSDHACKED))
 				{
 					addErrorMessage("Index can only be set if patch type is DSDHACKED or later.");
 					return false;
