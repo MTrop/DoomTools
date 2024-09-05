@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.33.0 by Matt Tropiano (using DoomStruct v2.15.8)
+DECOHack v0.33.0 by Matt Tropiano (using DoomStruct v2.16.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1335,9 +1335,9 @@ writing a normal Thing definition body:
 You can also influence the next &quot;auto thing&quot; index&#x2F;slot to be used via a 
 special clause:
 
-    set next auto thing index [INTEGER]
+    set next auto thing index &lt;INTEGER&gt;
 
-...where [INTEGER] is a positive integer for setting the next seek index for
+...where &lt;INTEGER&gt; is a positive integer for setting the next seek index for
 &quot;auto&quot; things. This may not write to the exact slot for the next thing, 
 however - it will still seek to the next &quot;free&quot; slot from that provided index! 
 
@@ -1661,10 +1661,10 @@ NOTE: These features are only enabled for patches that employ a DSDHACKED
 You can also affect what the next available sprite or sound index is with the 
 following clauses:
 
-    set next sound index [INTEGER]
-    set next sprite index [INTEGER]
+    set next sound index &lt;INTEGER&gt;
+    set next sprite index &lt;INTEGER&gt;
 
-...where [INTEGER] is a positive integer GREATER THAN OR EQUAL TO the current
+...where &lt;INTEGER&gt; is a positive integer GREATER THAN OR EQUAL TO the current
 sprite or sound index (for safety reasons). For example:
 
     set next sound index 1000
