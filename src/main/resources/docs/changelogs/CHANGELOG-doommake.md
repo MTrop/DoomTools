@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.26.1
+
+* `Fixed` Fixed a typo in utility-created `doommake.properties` files.
+
+
 ### Changed for 0.26.0
 
 * `Added` DoomMake will check to see if it is already embedded in a project if `--embed` is used.
