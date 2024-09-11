@@ -409,7 +409,7 @@ public final class WTExportMain
 				else
 				{
 					textureList2 = BinaryObject.create(DoomTextureList.class, textureData);
-					unit.strife = true;
+					unit.strife = false;
 				}
 				
 				options.printf("        %d entries in TEXTURE2.\n", textureList2.size());
