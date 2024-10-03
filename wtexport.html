@@ -68,7 +68,7 @@ wtexscan maps.wad | wtexport texturepack.wad --base-wad doom2.wad --output mapst
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WTEXport v1.5.3 by Matt Tropiano (using DoomStruct v2.16.0)
+WTEXport v1.6.0 by Matt Tropiano (using DoomStruct v2.17.0)
 Usage: wtexport [--help | -h | --version]
                 [files] --base-wad [base] --output [target] [--create | --add] [switches]
 
@@ -154,6 +154,16 @@ The utility WTEXSCAN already produces a list formatted this way.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.6.0
+
+* &#x60;Fixed&#x60; Some new textures that &quot;existed&quot; but had different patch ordering or no new patches were not copied over. (Issue #118)
+
+
+### Changed for 1.5.4
+
+* &#x60;Fixed&#x60; Some texture sets were being erroneously classified as STRIFE-formatted texture sets due to a typo.
+
+
 ### Changed for 1.5.3
 
 * &#x60;Fixed&#x60; [GUI] Added message for requiring an output WAD file.
