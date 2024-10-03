@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.6.0
+
+* `Fixed` Some new textures that "existed" but had different patch ordering or no new patches were not copied over. (Issue #118)
+
+
 ### Changed for 1.5.4
 
 * `Fixed` Some texture sets were being erroneously classified as STRIFE-formatted texture sets due to a typo.
