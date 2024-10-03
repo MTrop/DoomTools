@@ -821,9 +821,12 @@ public final class WTExportMain
 			{
 				WadUnit unit = null;
 				
-				// found texture in texture WADs.
+				// found texture.
 				if ((unit = searchForTexture(wadPriority, textureName)) != null)
 				{
+					// for figuring out if we've found a replaced/added patch.
+					boolean foundPatches = false;
+					
 					TextureSet.Texture unitEntry = unit.textureSet.getTextureByName(textureName);
 					
 					for (int i = 0; i < unitEntry.getPatchCount(); i++)
@@ -834,6 +837,7 @@ public final class WTExportMain
 						// does a matching patch exist?
 						if (unit.patchIndices.containsKey(pname))
 						{
+							foundPatches = true;
 							Integer pidx = unit.patchIndices.get(pname);
 							if (pidx != null && !exportSet.patchHash.contains(pname))
 							{
@@ -849,14 +853,25 @@ public final class WTExportMain
 							}
 						}
 					}
-		
-					// if the texture is new, better extract the texture.
-					if (!exportSet.textureSet.contains(textureName))
+					
+					// if we've found patches, extract the texture.
+					if (foundPatches)
+					{
+						options.printf("        Copying texture %s (%s)...\n", textureName, unit.wad.getFileName());
+						
+						// check if potential overwrite.
+						if (exportSet.textureSet.contains(textureName))
+							exportSet.textureSet.removeTextureByName(textureName);
+						
+						moveTextureAndPatches(exportSet, textureName, exportSet.textureSet.createTexture(textureName), unitEntry);
+					}
+					// if texture is new, extract the texture.
+					else if (!exportSet.textureSet.contains(textureName))
 					{
 						options.printf("        Copying texture %s (%s)...\n", textureName, unit.wad.getFileName());
 						moveTextureAndPatches(exportSet, textureName, exportSet.textureSet.createTexture(textureName), unitEntry);
 					}
-					// if the texture "exists", and it differs from the original texture, replace the texture.
+					// if texture is not new, do a compare and replace.
 					else if (!texturesAreEqual(exportSet.textureSet.getTextureByName(textureName), unitEntry))
 					{
 						options.printf("        Replacing texture %s (%s)...\n", textureName, unit.wad.getFileName());
