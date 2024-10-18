@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.swing.Action;
@@ -145,7 +146,7 @@ public final class DoomToolsGUIUtils
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor, choices);
 	}
@@ -163,7 +164,7 @@ public final class DoomToolsGUIUtils
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor);
 	}
