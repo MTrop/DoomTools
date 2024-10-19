@@ -61,6 +61,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutJavaPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
@@ -343,6 +344,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.help", ArrayUtils.joinArrays(
 				ArrayUtils.arrayOf(
 					utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (i) -> openAboutModal()),
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.about.java", (i) -> openAboutJavaModal()),
 					utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (i) -> openLicensesModal()),
 					separator()
 				),
@@ -361,6 +363,15 @@ public class DoomToolsMainWindow extends JFrame
 		modal(this, utils.getWindowIcons(), 
 			language.getText("doomtools.about.title"), 
 			new DoomToolsAboutPanel(), 
+			choice("OK", KeyEvent.VK_O)
+		).openThenDispose();
+	}
+	
+	private void openAboutJavaModal()
+	{
+		modal(this, utils.getWindowIcons(), 
+			language.getText("doomtools.about.java.title"), 
+			new DoomToolsAboutJavaPanel(), 
 			choice("OK", KeyEvent.VK_O)
 		).openThenDispose();
 	}

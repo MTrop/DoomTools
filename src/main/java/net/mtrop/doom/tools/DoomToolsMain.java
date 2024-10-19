@@ -79,6 +79,7 @@ public final class DoomToolsMain
 	public static final String SWITCH_DOCS = "--docs";
 	public static final String SWITCH_WHERE = "--where";
 	public static final String SWITCH_SETTINGS = "--settings";
+	public static final String SWITCH_JAVA = "--java";
 	public static final String SWITCH_UPDATE = "--update";
 	public static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
 	public static final String SWITCH_UPDATE_SHELL = "--update-shell";
@@ -96,6 +97,7 @@ public final class DoomToolsMain
 		private boolean update;
 		private boolean updateCleanup;
 		private boolean updateShell;
+		private boolean javaStats;
 		private boolean openWebsite;
 		private boolean openDocs;
 		private boolean where;
@@ -109,6 +111,7 @@ public final class DoomToolsMain
 			this.update = false;
 			this.updateCleanup = false;
 			this.updateShell = false;
+			this.javaStats = false;
 			this.openWebsite = false;
 			this.where = false;
 			this.openSettings = false;
@@ -391,6 +394,17 @@ public final class DoomToolsMain
 			{
 				return doUpdate();
 			}
+			else if (options.javaStats)
+			{
+				options.stdout.println("Java Vendor:     " + System.getProperty("java.vendor"));
+				options.stdout.println("Java Vendor URL: " + System.getProperty("java.vendor.url"));
+				options.stdout.println("Java Version:    " + System.getProperty("java.version"));
+				options.stdout.println("Java Home:       " + System.getProperty("java.home"));
+				options.stdout.println("OS Name:         " + System.getProperty("os.name"));
+				options.stdout.println("OS Version:      " + System.getProperty("os.version"));
+				options.stdout.println("OS Architecture: " + System.getProperty("os.arch"));
+				return ERROR_NONE;
+			}
 			else if (options.where)
 			{
 				String path; 
@@ -573,6 +587,8 @@ public final class DoomToolsMain
 						options.openDocs = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
 						options.where = true;
+					else if (arg.equalsIgnoreCase(SWITCH_JAVA))
+						options.javaStats = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE))
 						options.update = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_CLEANUP))
@@ -640,6 +656,8 @@ public final class DoomToolsMain
 		out.println("    --website            Opens DoomTools's main website.");
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
+		out.println();
+		out.println("    --java               Displays Java runtime information.");
 		out.println();
 		out.println("    --update             Attempts to update DoomTools (may require permission");
 		out.println("                             elevation on some operating systems).");

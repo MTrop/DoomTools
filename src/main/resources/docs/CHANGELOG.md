@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-10-19** Added `--java` switch to DoomTools (and About Java dialog to GUI).
+
 - **2024-10-03** Updated DoomStruct to `2.17.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.17.0-RELEASE)
 
 - **2024-09-05** Updated DoomStruct to `2.16.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.16.0-RELEASE)
