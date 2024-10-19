@@ -7,7 +7,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 
 import java.awt.BorderLayout;
@@ -24,9 +24,6 @@ public class DoomToolsAboutJavaPanel extends JPanel
 {
 	private static final long serialVersionUID = 8389287671690217978L;
 
-    /** Language manager. */
-    private DoomToolsLanguageManager language;
-
 	private static final String VERSION_TEXT = (new StringBuilder())
 		.append("Java Vendor: ").append(System.getProperty("java.vendor")).append("\n")
 		.append("Java Vendor URL: ").append(System.getProperty("java.vendor.url")).append("\n")
@@ -42,7 +39,7 @@ public class DoomToolsAboutJavaPanel extends JPanel
 	 */
 	public DoomToolsAboutJavaPanel()
 	{
-		this.language = DoomToolsLanguageManager.get();
+	    DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
 		StringBuilder sb = new StringBuilder("<html>");
 		sb.append("<h2>About Java</h2>");
@@ -58,7 +55,7 @@ public class DoomToolsAboutJavaPanel extends JPanel
 		containerOf(this, 
 			node(BorderLayout.CENTER, label(sb.toString())),
 			node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING),
-				node(button(language.getText("doomtools.about.copy"), (b) -> {
+				node(utils.createButtonFromLanguageKey("doomtools.about.copy", (b) -> {
 					ClipboardUtils.sendStringToClipboard(VERSION_TEXT);
 				}))
 			))

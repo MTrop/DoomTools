@@ -363,7 +363,7 @@ public class DoomToolsMainWindow extends JFrame
 		modal(this, utils.getWindowIcons(), 
 			language.getText("doomtools.about.title"), 
 			new DoomToolsAboutPanel(), 
-			choice("OK", KeyEvent.VK_O)
+			choice("OK", KeyEvent.VK_O, (Object)null)
 		).openThenDispose();
 	}
 	
@@ -372,7 +372,7 @@ public class DoomToolsMainWindow extends JFrame
 		modal(this, utils.getWindowIcons(), 
 			language.getText("doomtools.about.java.title"), 
 			new DoomToolsAboutJavaPanel(), 
-			choice("OK", KeyEvent.VK_O)
+			choice("OK", KeyEvent.VK_O, (Object)null)
 		).openThenDispose();
 	}
 	
