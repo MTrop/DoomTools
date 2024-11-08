@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.34.0
 
 * `Fixed` Any clause that sets intervals (freeing things, protecting states) may create a condition that causes an endless loop. (Issue. #119)
+* `Fixed` Sound entries were off by 1 due to a misunderstanding of what index sound entries started at. (Issue #120)
 
 
 ### Changed for 0.33.0
