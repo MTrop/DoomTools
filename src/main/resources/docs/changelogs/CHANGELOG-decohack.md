@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.34.0
+
+* `Fixed` Any clause that sets intervals (freeing things, protecting states) may create a condition that causes an endless loop. (Issue. #119)
+
+
 ### Changed for 0.33.0
 
 * `Added` `set next` clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
