@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.33.0 by Matt Tropiano (using DoomStruct v2.17.0)
+DECOHack v0.34.0 by Matt Tropiano (using DoomStruct v2.17.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1986,6 +1986,12 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.34.0
+
+* &#x60;Fixed&#x60; Any clause that sets intervals (freeing things, protecting states) may create a condition that causes an endless loop. (Issue. #119)
+* &#x60;Fixed&#x60; Sound entries were off by 1 due to a misunderstanding of what index sound entries started at. (Issue #120)
+
+
 ### Changed for 0.33.0
 
 * &#x60;Added&#x60; &#x60;set next&#x60; clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)
