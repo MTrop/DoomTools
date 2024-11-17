@@ -535,7 +535,7 @@ function wadscript(scriptFilePath, entryPoint, args) {
 		scriptCharsetName: getProjectEncoding(),
 		entryPointName: entryPoint,
 		args: args
-	})) return error("ToolError", "WadMerge threw an error.");
+	})) return error("ToolError", "WadScript threw an error.");
 }
 
 /****************************************************************************

@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.26.2
+
+* `Fixed` Fixed a typo in utility-created `doommake-lib.script` files.
+
+
 ### Changed for 0.26.1
 
 * `Fixed` Fixed a typo in utility-created `doommake.properties` files.
