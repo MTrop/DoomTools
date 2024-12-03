@@ -1923,12 +1923,24 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_SPEED))
 			{
-				if ((value = matchInteger()) == null)
+				if (thing.hasFlag(DEHThingFlag.MISSILE.getValue()))
 				{
-					addErrorMessage("Expected integer after \"%s\".", KEYWORD_SPEED);
-					return false;
+					if ((value = matchFixed(false)) == null)
+					{
+						addErrorMessage("Expected integer or fixed-point value after \"%s\".", KEYWORD_SPEED);
+						return false;
+					}
+					thing.setFixedSpeed(value);
 				}
-				thing.setSpeed(value);
+				else
+				{
+					if ((value = matchInteger()) == null)
+					{
+						addErrorMessage("Expected integer after \"%s\".", KEYWORD_SPEED);
+						return false;
+					}
+					thing.setSpeed(value);
+				}
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_RADIUS))
 			{
@@ -4497,7 +4509,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			case FIXED:
 			{
-				if ((out = matchFixed()) == null)
+				if ((out = matchFixed(true)) == null)
 				{
 					addErrorMessage("Expected fixed-point value.");
 					return null;
@@ -4694,7 +4706,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches a positive fixed-point number.
-	private Integer matchPositiveFixed()
+	private Integer matchPositiveFixed(boolean typeCheck)
 	{
 		if (!currentType(DecoHackKernel.TYPE_NUMBER))
 			return null;
@@ -4723,7 +4735,8 @@ public final class DecoHackParser extends Lexer.Parser
 		// Whole number - coerce to fixed.
 		else
 		{
-			addWarningMessage("Found integer, but will be converted to fixed-point.");
+			if (typeCheck)
+				addWarningMessage("Found integer, but will be converted to fixed-point.");
 			long v = Long.parseLong(lexeme);
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
@@ -4746,16 +4759,16 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Matches a fixed-point value.
-	private Integer matchFixed()
+	private Integer matchFixed(boolean typeCheck)
 	{
 		if (matchType(DecoHackKernel.TYPE_DASH))
 		{
 			Integer out;
-			if ((out = matchPositiveFixed()) == null)
+			if ((out = matchPositiveFixed(typeCheck)) == null)
 				return null;
 			return -out;
 		}
-		return matchPositiveFixed();
+		return matchPositiveFixed(typeCheck);
 	}
 
 	// Matches a boolean.

@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.35.0
+
+* `Changed` Speed on MISSILE Things can now take an explicit fixed-point value (instead of a coerced one).
+
+
 ### Changed for 0.34.0
 
 * `Fixed` Any clause that sets intervals (freeing things, protecting states) may create a condition that causes an endless loop. (Issue. #119)

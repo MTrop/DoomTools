@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.26.2
 
 * `Fixed` Fixed a typo in utility-created `doommake-lib.script` files.
+* `Added` An output line for telling the user what IWAD it is grabbing textures from for `rebuildtextures` target (in new projects).
 
 
 ### Changed for 0.26.1

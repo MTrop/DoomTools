@@ -84,6 +84,8 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 
 	SELF setSpeed(int speed);
 
+	SELF setFixedSpeed(Integer fixedSpeed);
+
 	SELF setFastSpeed(int fastSpeed);
 
 	SELF setRadius(int radius);
