@@ -79,7 +79,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	 */
 	public DEHAmmo setMax(int max) 
 	{
-		RangeUtils.checkRange("Ammo maximum", 0, 999999, max);
+		RangeUtils.checkRange("Ammo maximum", 0, Integer.MAX_VALUE, max);
 		this.max = max;
 		return this;
 	}
@@ -100,7 +100,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	 */
 	public DEHAmmo setPickup(int pickup) 
 	{
-		RangeUtils.checkRange("Ammo pickup", 0, 999999, pickup);
+		RangeUtils.checkRange("Ammo pickup", 0, Integer.MAX_VALUE, pickup);
 		this.pickup = pickup;
 		return this;
 	}

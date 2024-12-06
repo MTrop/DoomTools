@@ -163,7 +163,6 @@ public class DEHState extends DEHObject<DEHState>
 	
 	public DEHState setDuration(int duration) 
 	{
-		RangeUtils.checkRange("Duration", -1, 9999, duration);
 		this.duration = duration;
 		return this;
 	}

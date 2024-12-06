@@ -3,7 +3,13 @@ DECOHack
 
 ### Changed for 0.35.0
 
+* `Fixed` Soulsphere health misc value did not check the correct property range.
+* `Changed` Some Thing bit documentation for Doom19.
 * `Changed` Speed on MISSILE Things can now take an explicit fixed-point value (instead of a coerced one).
+* `Changed` Thing Health property can go up to a max integer value.
+* `Changed` Thing Damage property can go up to an integer value.
+* `Changed` Ammo max and pickup properties can go up to a max integer value.
+* `Changed` State duration property can go up to an integer value.
 
 
 ### Changed for 0.34.0

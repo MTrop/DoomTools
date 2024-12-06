@@ -242,7 +242,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setHealth(int health)
 	{
-		RangeUtils.checkRange("Health", 0, 999999, health);
+		RangeUtils.checkRange("Health", 0, Integer.MAX_VALUE, health);
 		this.health = health;
 		return this;
 	}
@@ -320,7 +320,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setDamage(int damage) 
 	{
-		RangeUtils.checkRange("Damage", -999999, 999999, damage);
 		this.damage = damage;
 		return this;
 	}
@@ -725,6 +724,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return editorNumber == obj.editorNumber
 			&& health == obj.health
 			&& speed == obj.speed
+			&& fixedSpeed == obj.fixedSpeed
 			&& fastSpeed == obj.fastSpeed
 			&& radius == obj.radius
 			&& height == obj.height
