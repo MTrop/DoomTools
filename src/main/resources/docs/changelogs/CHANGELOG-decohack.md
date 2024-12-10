@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.35.1
+
+* `Fixed` Setting a Thing's Pain state explicitly (not via States block) would set Pain Chance instead. (Issue #121).
+
+
 ### Changed for 0.35.0
 
 * `Fixed` Soulsphere health misc value did not check the correct property range.

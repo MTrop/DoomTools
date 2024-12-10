@@ -2234,7 +2234,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(KEYWORD_THINGSTATE_PAIN))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setPainChance(value);
+				thing.setPainFrameIndex(value);
 			else
 				return false;
 		}
