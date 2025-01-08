@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.35.2
+
+* `Added` Attempting to use `using` a second time will give the user a better error message.
+
+
 ### Changed for 0.35.1
 
 * `Fixed` Setting a Thing's Pain state explicitly (not via States block) would set Pain Chance instead. (Issue #121).

@@ -402,6 +402,11 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			return parseSetClause(context);
 		}
+		else if (currentIdentifierIgnoreCase(KEYWORD_USING))
+		{
+			addErrorMessage("Keyword \"%s\" already seen. Did you use an #include that declared it already?", KEYWORD_USING);
+			return false;
+		}
 		else if (currentToken() != null)
 		{
 			addErrorMessage("Unknown section or command \"%s\".", currentLexeme());
