@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2024 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -441,8 +441,9 @@ public final class DoomToolsMain
 					return desktopError;
 				
 				try {
-					options.stdout.println("Opening the DoomTools documentation folder...");
-					Desktop.getDesktop().open(new File(path + File.separator + "docs"));
+					File docsPath = new File(path + File.separator + "docs");
+					options.stdout.printf("Opening the DoomTools documentation folder (%s)...\n", docsPath.toString());
+					Desktop.getDesktop().open(docsPath);
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Cannot open documentation folder. I/O Error.");
 					return ERROR_DESKTOP_ERROR;
@@ -459,12 +460,12 @@ public final class DoomToolsMain
 				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "settings folder")) != ERROR_NONE)
 					return desktopError;
 
-				options.stdout.println("Opening the DoomTools settings folder...");
 				File settingsDir = new File(Paths.APPDATA_PATH);
+				options.stdout.printf("Opening the DoomTools settings folder (%s)...\n", settingsDir.toString());
 				if (!settingsDir.exists())
 				{
 					options.stdout.println("Creating the missing DoomTools settings folder...");
-					if( !settingsDir.mkdirs())
+					if (!settingsDir.mkdirs())
 					{
 						options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
 						return ERROR_DESKTOP_ERROR;
@@ -490,7 +491,7 @@ public final class DoomToolsMain
 					return desktopError;
 				
 				try {
-					options.stdout.println("Opening the DoomTools website...");
+					options.stdout.printf("Opening the DoomTools website (%s)...\n", DOOMTOOLS_WEBSITE);
 					Desktop.getDesktop().browse(new URI(DOOMTOOLS_WEBSITE));
 				} catch (URISyntaxException e) {
 					options.stderr.println("ERROR: INTERNAL ERROR: " + e.getLocalizedMessage());
