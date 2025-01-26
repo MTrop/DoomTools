@@ -234,6 +234,11 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return editorKeyMap.get(key);
 	}
 	
+	public boolean hasEditorKeys()
+	{
+		return !editorKeyMap.isEmpty();
+	}
+	
 	public int getHealth() 
 	{
 		return health;
@@ -721,7 +726,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	
 	public boolean equals(DEHThing obj) 
 	{
-		return editorNumber == obj.editorNumber
+		return name == obj.name
+			&& editorNumber == obj.editorNumber
 			&& health == obj.health
 			&& speed == obj.speed
 			&& fixedSpeed == obj.fixedSpeed

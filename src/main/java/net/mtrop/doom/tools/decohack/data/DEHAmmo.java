@@ -115,7 +115,8 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	
 	public boolean equals(DEHAmmo obj) 
 	{
-		return max == obj.max
+		return name == obj.name
+			&& max == obj.max
 			&& pickup == obj.pickup
 		;
 	}	

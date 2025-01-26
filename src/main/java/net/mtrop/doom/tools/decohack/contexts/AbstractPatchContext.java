@@ -826,7 +826,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHThing original = getSourcePatch().getThing(i);
 			if (thing == null)
 				continue;
-			if (!thing.equals(original) || thing.hasCustomProperties())
+			if (!thing.equals(original) || thing.hasCustomProperties() || thing.hasEditorKeys())
 			{
 				writer.append("Thing ")
 					.append(String.valueOf(i))
