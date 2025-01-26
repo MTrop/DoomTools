@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.35.3
+
+* `Added` `NOTDMATCH` as a Thing flag mnemonic. It was in the docs, but originally added as `NOTDEATHMATCH`.
+
+
 ### Changed for 0.35.2
 
 * `Added` Attempting to use `using` a second time will give the user a better error message.

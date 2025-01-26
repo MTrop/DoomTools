@@ -41,6 +41,7 @@ public enum DEHThingDoom19Flag implements DEHFlag
 	COUNTKILL     (0x00400000, "Thing counts towards kill count."),
 	COUNTITEM     (0x00800000, "Thing counts towards item count."),
 	SKULLFLY      (0x01000000, "Thing is currently in a lost soul charge attack (should never be set)."),
+	NOTDMATCH     (0x02000000, "Thing never appears in DeathMatch game modes."),
 	NOTDEATHMATCH (0x02000000, "Thing never appears in DeathMatch game modes."),
 	TRANSLATION   (0x04000000, "Thing palette translation bit 0. If set, palette range 112-127 (green) is now 96-111 (gray). If set with TRANSLATION2, it is 32-47 (red)."),
 	TRANSLATION1  (0x04000000, "Thing palette translation bit 0. If set, palette range 112-127 (green) is now 96-111 (gray). If set with TRANSLATION2, it is 32-47 (red)."),
