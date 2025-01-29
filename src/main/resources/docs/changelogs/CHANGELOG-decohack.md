@@ -3,7 +3,7 @@ DECOHack
 
 ### Changed for 0.35.3
 
-* `Added` `NOTDMATCH` as a Thing flag mnemonic. It was in the docs, but originally added as `NOTDEATHMATCH`.
+* `Added` `NOTDMATCH` as a Thing flag mnemonic. It was in the docs, but originally added as `NOTDEATHMATCH`. Oops.
 * `Changed` Things, Ammo, and Weapons with changed names will be included in the output DeHackEd patch.
 * `Changed` Things with editor keys only will be included in the output DeHackEd patch.
 
