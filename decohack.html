@@ -711,14 +711,14 @@ subsequently filled in, so be careful! You can enable &quot;state safety&quot; i
 patches in order to detect this, though - just add the following clause to
 your code:
 
-    set state safety on
+    set state free safety on
 
 
 ...and from that line on, every freed state will incur a check to see if it
 has been freed before, and if so, it will throw an error the moment it 
 happens. To turn this behavior off from a particular point, add:
 
-    set state safety off
+    set state free safety off
 
 
 For best results, you should add &quot;set state safety on&quot; to the beginning of 
@@ -2009,7 +2009,7 @@ block.
 		<pre class="text-changelog">
 ### Changed for 0.36.0
 
-* &#x60;Added&#x60; State re-use safety for freed states in patches, but only if opted-in by the &#x60;set state safety&#x60; clause.
+* &#x60;Added&#x60; State re-use safety for freed states in patches, but only if opted-in by the &#x60;set state free safety on&#x60; clause.
 * &#x60;Added&#x60; &#x60;NOTDMATCH&#x60; as a Thing flag mnemonic. It was in the docs, but originally added as &#x60;NOTDEATHMATCH&#x60;. Oops.
 * &#x60;Changed&#x60; Things, Ammo, and Weapons with changed names will be included in the output DeHackEd patch.
 * &#x60;Changed&#x60; Things with editor keys only will be included in the output DeHackEd patch.
