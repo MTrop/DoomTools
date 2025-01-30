@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.35.2 by Matt Tropiano (using DoomStruct v2.17.0)
+DECOHack v0.36.0 by Matt Tropiano (using DoomStruct v2.17.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -705,6 +705,26 @@ Examples:
 Each state altered directly (via &quot;state X&quot;) or filled in this manner are no 
 longer &quot;free.&quot;
 
+
+IMPORTANT: It is possible to re-free a state that was freed before and 
+subsequently filled in, so be careful! You can enable &quot;state safety&quot; in your 
+patches in order to detect this, though - just add the following clause to
+your code:
+
+    set state safety on
+
+
+...and from that line on, every freed state will incur a check to see if it
+has been freed before, and if so, it will throw an error the moment it 
+happens. To turn this behavior off from a particular point, add:
+
+    set state safety off
+
+
+For best results, you should add &quot;set state safety on&quot; to the beginning of 
+your code.
+ 
+ 
 You can protect a state from being freed (or an inclusive range of them) by 
 writing the following:
 
@@ -1397,6 +1417,7 @@ Things (Doom+):
     COUNTITEM &#x3D;      0x00800000
     SKULLFLY &#x3D;       0x01000000
     NOTDMATCH &#x3D;      0x02000000
+    NOTDEATHMATCH &#x3D;  0x02000000
     TRANSLATION &#x3D;    0x04000000
     TRANSLATION1 &#x3D;   0x04000000
     UNUSED1 &#x3D;        0x08000000
@@ -1986,6 +2007,14 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.36.0
+
+* &#x60;Added&#x60; State re-use safety for freed states in patches, but only if opted-in by the &#x60;set state safety&#x60; clause.
+* &#x60;Added&#x60; &#x60;NOTDMATCH&#x60; as a Thing flag mnemonic. It was in the docs, but originally added as &#x60;NOTDEATHMATCH&#x60;. Oops.
+* &#x60;Changed&#x60; Things, Ammo, and Weapons with changed names will be included in the output DeHackEd patch.
+* &#x60;Changed&#x60; Things with editor keys only will be included in the output DeHackEd patch.
+
+
 ### Changed for 0.35.2
 
 * &#x60;Added&#x60; Attempting to use &#x60;using&#x60; a second time will give the user a better error message.
