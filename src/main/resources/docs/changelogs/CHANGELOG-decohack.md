@@ -1,8 +1,9 @@
 DECOHack
 --------
 
-### Changed for 0.35.3
+### Changed for 0.36.0
 
+* `Added` State re-use safety for freed states in patches, but only if opted-in by the `set state free safety on` clause.
 * `Added` `NOTDMATCH` as a Thing flag mnemonic. It was in the docs, but originally added as `NOTDEATHMATCH`. Oops.
 * `Changed` Things, Ammo, and Weapons with changed names will be included in the output DeHackEd patch.
 * `Changed` Things with editor keys only will be included in the output DeHackEd patch.

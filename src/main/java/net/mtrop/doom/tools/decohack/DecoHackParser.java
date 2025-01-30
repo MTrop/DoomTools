@@ -90,6 +90,9 @@ public final class DecoHackParser extends Lexer.Parser
 	private static final String KEYWORD_PARS = "pars";
 	
 	private static final String KEYWORD_SET = "set";
+	private static final String KEYWORD_SAFETY = "safety";
+	private static final String KEYWORD_ON = "on";
+	private static final String KEYWORD_OFF = "off";
 	private static final String KEYWORD_NEXT = "next";
 	private static final String KEYWORD_INDEX = "index";
 	private static final String KEYWORD_CLEAR = "clear";
@@ -419,7 +422,37 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a "set" clause.
 	private boolean parseSetClause(AbstractPatchContext<?> context) 
 	{
-		if (matchIdentifierIgnoreCase(KEYWORD_NEXT))
+		if (matchIdentifierIgnoreCase(KEYWORD_STATE))
+		{
+			if (!matchIdentifierIgnoreCase(KEYWORD_FREE))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_FREE, KEYWORD_STATE);
+				return false;
+			}
+			
+			if (!matchIdentifierIgnoreCase(KEYWORD_SAFETY))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_SAFETY, KEYWORD_FREE);
+				return false;
+			}
+			
+			if (matchIdentifierIgnoreCase(KEYWORD_ON))
+			{
+				context.setStateSafetySwitch(true);
+				return true;
+			}
+			else if (matchIdentifierIgnoreCase(KEYWORD_OFF))
+			{
+				context.setStateSafetySwitch(false);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_ON, KEYWORD_OFF, KEYWORD_SAFETY);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(KEYWORD_NEXT))
 		{
 			if (matchIdentifierIgnoreCase(KEYWORD_SPRITE))
 			{
@@ -485,29 +518,27 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(KEYWORD_AUTO))
 			{
-				if (matchIdentifierIgnoreCase(KEYWORD_THING))
-				{
-					if (!matchIdentifierIgnoreCase(KEYWORD_INDEX))
-					{
-						addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_INDEX, KEYWORD_THING);
-						return false;
-					}
-
-					Integer idx;
-					if ((idx = matchPositiveInteger()) == null)
-					{
-						addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_INDEX, KEYWORD_SOUND);
-						return false;
-					}
-					
-					lastAutoThingIndex = idx;
-					return true;
-				}
-				else
+				if (!matchIdentifierIgnoreCase(KEYWORD_THING))
 				{
 					addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_THING, KEYWORD_AUTO);
 					return false;
 				}
+
+				if (!matchIdentifierIgnoreCase(KEYWORD_INDEX))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_INDEX, KEYWORD_THING);
+					return false;
+				}
+
+				Integer idx;
+				if ((idx = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", KEYWORD_INDEX, KEYWORD_SOUND);
+					return false;
+				}
+				
+				lastAutoThingIndex = idx;
+				return true;
 			}
 			else
 			{
@@ -517,7 +548,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected \"%s\" after \"%s\".", KEYWORD_NEXT, KEYWORD_SET);
+			addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", KEYWORD_NEXT, KEYWORD_STATE, KEYWORD_SET);
 			return false;
 		}
 	}

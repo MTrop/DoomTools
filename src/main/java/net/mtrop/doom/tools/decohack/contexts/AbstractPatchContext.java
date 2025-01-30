@@ -53,6 +53,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	private int freePointerStateCount;
 	private int freeThingCount;
 
+	protected boolean stateSafetySwitch;
+	protected IntervalMap<Boolean> alreadyFreeStatesMap;
+
 	protected IntervalMap<Boolean> freeStatesMap;
 	protected IntervalMap<Boolean> protectedStatesMap;
 	protected IntervalMap<Boolean> freeThingsMap;
@@ -122,6 +125,10 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.miscellany = (new DEHMiscellany()).copyFrom(source.getMiscellany());
 		
 		this.freeStateCount = 0;
+		
+		this.stateSafetySwitch = false;
+		this.alreadyFreeStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
+		
 		this.freeStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 		this.protectedStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 
@@ -148,6 +155,15 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @return the Doom Version.
 	 */
 	public abstract int getVersion();
+	
+	/**
+	 * Sets or unsets the state safety switch.
+	 * @param stateSafetySwitch true it set, false to unset.
+	 */
+	public void setStateSafetySwitch(boolean stateSafetySwitch) 
+	{
+		this.stateSafetySwitch = stateSafetySwitch;
+	}
 	
 	@Override
 	public DEHMiscellany getMiscellany() 
@@ -420,7 +436,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * Marks a state as "free" or not.
 	 * @param index the state index to mark as free.
 	 * @param state true to set as "free", false to unset.
-	 * @throws IllegalStateException if the target state is protected.
+	 * @throws IllegalStateException if the target state is protected, or state safety detects that the state was already freed before.
 	 * @throws IndexOutOfBoundsException if the index is out of bounds.
 	 * @see #isProtectedState(int)
 	 */
@@ -431,7 +447,16 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		
 		checkIndexRange(index, freeStatesMap);
 
-		boolean prev = freeStatesMap.get(index); 
+		boolean prev = freeStatesMap.get(index);
+		
+		if (stateSafetySwitch)
+		{
+			if (state && alreadyFreeStatesMap.get(index))
+				throw new IllegalStateException("Operation would free a state that was freed before: state index " + index);
+			if (state)
+				alreadyFreeStatesMap.set(index, state);
+		}
+		
 		freeStatesMap.set(index, state);
 		if (prev && !state)
 		{
