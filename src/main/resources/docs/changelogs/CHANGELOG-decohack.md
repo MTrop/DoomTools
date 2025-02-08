@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.36.1
+
+* `Added` [GUI] Some keywords to the syntax highlighter.
+
+
 ### Changed for 0.36.0
 
 * `Added` State re-use safety for freed states in patches, but only if opted-in by the `set state free safety on` clause.
