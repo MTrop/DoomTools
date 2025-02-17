@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2019-2025 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -331,7 +331,6 @@ public class PreprocessorLexer extends Lexer
 			{
 				lineBeginning = false;
 				preprocess();
-				return readChar();
 			}
 			else if (lineBeginning && Character.isWhitespace(c))
 			{
@@ -479,6 +478,9 @@ public class PreprocessorLexer extends Lexer
 		// #Include
 		else if (directiveName.equalsIgnoreCase(DIRECTIVE_INCLUDE))
 		{
+			if (!ifStack.isEmpty() && !ifStack.peek())
+				return;
+			
 			String path = parser.scanNext(directiveLine);
 			
 			String includePath;
@@ -500,6 +502,9 @@ public class PreprocessorLexer extends Lexer
 		// #Define
 		else if (directiveName.equalsIgnoreCase(DIRECTIVE_DEFINE))
 		{
+			if (!ifStack.isEmpty() && !ifStack.peek())
+				return;
+			
 			String defineToken = parser.scanNext(directiveLine);
 			
 			if (defineToken == null)
@@ -514,6 +519,9 @@ public class PreprocessorLexer extends Lexer
 		// #Undefine
 		else if (directiveName.equalsIgnoreCase(DIRECTIVE_UNDEFINE))
 		{
+			if (!ifStack.isEmpty() && !ifStack.peek())
+				return;
+			
 			String defineToken = parser.scanNext(directiveLine);
 			
 			if (defineToken == null)
@@ -526,6 +534,9 @@ public class PreprocessorLexer extends Lexer
 		// #IfDef
 		else if (directiveName.equalsIgnoreCase(DIRECTIVE_IFDEF))
 		{
+			if (!ifStack.isEmpty() && !ifStack.peek())
+				return;
+			
 			String defineToken = parser.scanNext(directiveLine);
 			
 			if (defineToken == null)
@@ -538,6 +549,9 @@ public class PreprocessorLexer extends Lexer
 		// #IfNDef
 		else if (directiveName.equalsIgnoreCase(DIRECTIVE_IFNDEF))
 		{
+			if (!ifStack.isEmpty() && !ifStack.peek())
+				return;
+			
 			String defineToken = parser.scanNext(directiveLine);
 			
 			if (defineToken == null)

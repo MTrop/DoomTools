@@ -1,8 +1,9 @@
 DECOHack
 --------
 
-### Changed for 0.36.1
+### Changed for 0.37.0
 
+* `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
 * `Added` [GUI] Some keywords to the syntax highlighter.
 
 

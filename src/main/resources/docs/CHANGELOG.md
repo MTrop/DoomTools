@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2025-02-16** Updated RookScript to `1.15.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.15.1-RELEASE)
+
 - **2025-01-25** Added additional helpful info to DoomTools switches.
 
 - **2024-10-19** Added `--java` switch to DoomTools (and About Java dialog to GUI).

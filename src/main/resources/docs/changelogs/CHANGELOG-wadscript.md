@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.7.0
+
+* `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
+
+
 ### Changed for 1.6.2
 
 * `Fixed` [GUI] Editor would error out on workspace load with no files open.
