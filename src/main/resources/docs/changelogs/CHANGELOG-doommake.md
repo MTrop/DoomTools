@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.27.0
+
+* `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
+
+
 ### Changed for 0.26.2
 
 * `Fixed` Fixed a typo in utility-created `doommake-lib.script` files.
