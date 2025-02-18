@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.4.0
+
+* `Fixed` PNAMES lumps with duplicate entries would have caused an exception on export.
+
+
 ### Changed for 1.3.1
 
 * `Fixed` [GUI] Editor would error out on workspace load with no files open.
