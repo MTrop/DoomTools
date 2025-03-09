@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.38.0
+
+* `Changed` DECOHack now accepts any valid mnemonic for string entries in Boom patches or higher (alphanumeric plus underscore).
+
+
 ### Changed for 0.37.0
 
 * `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
