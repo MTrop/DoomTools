@@ -55,6 +55,7 @@ public final class DoomImageConvertMain
 	private static final int ERROR_BAD_OUTPUT = 5;
 	private static final int ERROR_IOERROR = 6;
 	private static final int ERROR_PARSE = 7;
+	private static final int ERROR_BAD_FORMAT = 8;
 	private static final int ERROR_UNKNOWN = -1;
 
 	public static final String SWITCH_CHANGELOG = "--changelog";
@@ -616,6 +617,11 @@ public final class DoomImageConvertMain
 				case PALETTE:
 				{
 					Palette[] palettes = readPalette(input);
+					if (palettes == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						for (Palette p : palettes)
@@ -632,6 +638,11 @@ public final class DoomImageConvertMain
 						return ERROR_NO_PALETTE;
 					}
 					Colormap[] colormaps = readColormaps(palette, input);
+					if (colormaps == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						for (Colormap c : colormaps)
@@ -648,6 +659,11 @@ public final class DoomImageConvertMain
 						return ERROR_NO_PALETTE;
 					}
 					Flat flat = readFlat(palette, input);
+					if (flat == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						flat.writeBytes(fos);
@@ -664,6 +680,11 @@ public final class DoomImageConvertMain
 						return ERROR_NO_PALETTE;
 					}
 					Picture picture = readPictureFile(input, palette, info);
+					if (picture == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
 					try (FileOutputStream fos = new FileOutputStream(output))
 					{
 						picture.writeBytes(fos);
@@ -682,7 +703,13 @@ public final class DoomImageConvertMain
 			{
 				case PALETTE:
 				{
-					output.addData(entryName, readPalette(input));
+					Palette[] playpal = readPalette(input);
+					if (playpal == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
+					output.addData(entryName, playpal);
 				}
 				break;
 				
@@ -693,7 +720,13 @@ public final class DoomImageConvertMain
 						options.stderr.println("ERROR: Attempt to convert COLORMAP " + input.getPath() + " without a provided palette!");
 						return ERROR_NO_PALETTE;
 					}
-					output.addData(entryName, readColormaps(palette, input));
+					Colormap[] colormap = readColormaps(palette, input);
+					if (colormap == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
+					output.addData(entryName, colormap);
 				}
 				break;
 	
@@ -704,7 +737,13 @@ public final class DoomImageConvertMain
 						options.stderr.println("ERROR: Attempt to convert FLAT " + input.getPath() + " without a provided palette!");
 						return ERROR_NO_PALETTE;
 					}
-					output.addData(entryName, readFlat(palette, input));
+					Flat flat = readFlat(palette, input);
+					if (flat == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
+					output.addData(entryName, flat);
 				}
 				break;
 				
@@ -717,6 +756,11 @@ public final class DoomImageConvertMain
 						return ERROR_NO_PALETTE;
 					}
 					Picture picture = readPictureFile(input, palette, info);
+					if (picture == null)
+					{
+						options.stderr.println("ERROR: File " + input.getPath() + " is not in a recognized format.");
+						return ERROR_BAD_FORMAT;
+					}
 					output.addData(entryName, picture);
 				}
 				break;
@@ -755,6 +799,8 @@ public final class DoomImageConvertMain
 			else
 			{
 				picture = readPicture(palette, input);
+				if (picture == null)
+					return null;
 			}
 			
 			if (info.x != null)
@@ -765,10 +811,14 @@ public final class DoomImageConvertMain
 			return picture;
 		}
 		
+		// Returns null if the image could not be read via ImageIO.
 		private Palette[] readPalette(File f) throws IOException
 		{
 			options.verboseln("Reading " + f.getPath() + " as palette...");
 			BufferedImage image = ImageIO.read(f);
+			if (image == null)
+				return null;
+			
 			Palette[] out = new Palette[image.getHeight()];
 			int maxWidth = Math.min(Math.max(image.getWidth(), 0), 256);
 			for (int i = 0; i < out.length; i++)
@@ -780,10 +830,14 @@ public final class DoomImageConvertMain
 			return out;
 		}
 		
+		// Returns null if the image could not be read via ImageIO.
 		private Colormap[] readColormaps(Palette pal, File f) throws IOException
 		{
 			options.verboseln("Reading " + f.getPath() + " as colormap...");
 			BufferedImage image = ImageIO.read(f);
+			if (image == null)
+				return null;
+
 			Colormap[] out = new Colormap[image.getHeight()];
 			int maxWidth = Math.min(Math.max(image.getWidth(), 0), 256);
 			for (int i = 0; i < out.length; i++)
@@ -795,10 +849,14 @@ public final class DoomImageConvertMain
 			return out;
 		}
 		
+		// Returns null if the image could not be read via ImageIO.
 		private Picture readPicture(Palette pal, File f) throws IOException
 		{
 			options.verboseln("Reading " + f.getPath() + " as graphic...");
 			BufferedImage image = ImageIO.read(f);
+			if (image == null)
+				return null;
+			
 			Picture out = new Picture(image.getWidth(), image.getHeight());
 			for (int x = 0; x < image.getWidth(); x++)
 				for (int y = 0; y < image.getHeight(); y++)
@@ -813,10 +871,14 @@ public final class DoomImageConvertMain
 			return out;
 		}
 		
+		// Returns null if the image could not be read via ImageIO.
 		private Flat readFlat(Palette pal, File f) throws IOException
 		{
 			options.verboseln("Reading " + f.getPath() + " as flat...");
 			BufferedImage image = ImageIO.read(f);
+			if (image == null)
+				return null;
+			
 			Flat out = new Flat(image.getWidth(), image.getHeight());
 			for (int x = 0; x < image.getWidth(); x++)
 				for (int y = 0; y < image.getHeight(); y++)

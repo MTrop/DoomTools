@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.4.1
+
+* `Fixed` Unrecognized image formats will no longer NullPointerException out.
+
+
 ### Changed for 1.4.0
 
 * `Fixed` Palette index 255 was considered for color matching. This is incorrect on patches/graphics (but correct on flats).
