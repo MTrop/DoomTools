@@ -663,7 +663,7 @@ public final class DecoHackMain
 				
 				if (isWad)
 				{
-					try (WadFile wad = new WadFile(options.outSourceFile)) 
+					try (WadFile wad = new WadFile(options.outFile)) 
 					{
 						ByteArrayOutputStream bos = new ByteArrayOutputStream();
 						try (Writer writer = new OutputStreamWriter(bos, options.outCharset)) 
@@ -677,7 +677,7 @@ public final class DecoHackMain
 						else
 							wad.addData("DEHACKED", bos.toByteArray());
 						
-						options.stdout.printf("Wrote patch into %s as `DEHACKED`.\n", options.outSourceFile.getPath());
+						options.stdout.printf("Wrote patch into %s as `DEHACKED`.\n", options.outFile.getPath());
 					} 
 					catch (IOException e) 
 					{

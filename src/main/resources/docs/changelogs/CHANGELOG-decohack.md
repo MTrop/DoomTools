@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.38.1
+
+* `Fixed` DECOHack wrote to the wrong WAD file if output was an existing WAD file (Issue #126).
+
+
 ### Changed for 0.38.0
 
 * `Changed` DECOHack now accepts any valid mnemonic for string entries in Boom patches or higher (alphanumeric plus underscore).
