@@ -1839,7 +1839,7 @@ public final class WTExportMain
 		out.println();
 		out.println(":end");
 		out.println();
-		out.println("The utility WTEXSCAN already produces a list formatted this way.");
+		out.println("The utilities WTEXLIST and WTEXSCAN already produce a list formatted this way.");
 	}
 
 }

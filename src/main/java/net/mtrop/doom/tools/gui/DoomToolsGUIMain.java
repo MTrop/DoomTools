@@ -100,10 +100,14 @@ public final class DoomToolsGUIMain
 		String WSWANTBL = "wswantbl";
 		/** WSwAnTbl Compiler. */
 		String WSWANTBL_COMPILER = "wswantbl-compiler";
+		/** WTexList. */
+		String WTEXLIST = "wtexlist";
 		/** WTexScan. */
 		String WTEXSCAN = "wtexscan";
 		/** WTExport. */
 		String WTEXPORT = "wtexport";
+		/** WTexList/WTExport. */
+		String WTEXLIST_WTEXPORT = "wtexlist-wtexport";
 		/** WTexScan/WTExport. */
 		String WTEXSCAN_WTEXPORT = "wtexscan-wtexport";
 	}

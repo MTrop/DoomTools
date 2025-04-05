@@ -59,6 +59,7 @@ public final class DoomToolsMain
 		ObjectUtils.keyValue("wswantbl",   WSwAnTablesMain.class),
 		ObjectUtils.keyValue("wadtex",     WADTexMain.class),
 		ObjectUtils.keyValue("wtexscan",   WTexScanMain.class),
+		ObjectUtils.keyValue("wtexlist",   WTexListMain.class),
 		ObjectUtils.keyValue("wtexport",   WTExportMain.class),
 		ObjectUtils.keyValue("wadscript",  WadScriptMain.class),
 		ObjectUtils.keyValue("decohack",   DecoHackMain.class),

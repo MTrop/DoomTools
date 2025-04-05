@@ -31,6 +31,7 @@ import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.WADTexMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WTExportMain;
+import net.mtrop.doom.tools.WTexListMain;
 import net.mtrop.doom.tools.WTexScanMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
@@ -535,6 +536,31 @@ public final class AppCommon
 	 * @param statusPanel the status panel
 	 * @param sourceFiles 
 	 * @param outputMode 
+	 * @param noMessages 
+	 */
+	public void onExecuteWTexList(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noMessages)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wtexlist.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wtexlist.status.message.running"), 
+				language.getText("wtexlist.status.message.success"), 
+				language.getText("wtexlist.status.message.interrupt"), 
+				language.getText("wtexlist.status.message.error"), 
+				callWTexList(sourceFiles, outputMode, noMessages, stdout, stderr)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param sourceFiles 
+	 * @param outputMode 
 	 * @param noSkies 
 	 * @param noMessages 
 	 * @param mapName 
@@ -934,6 +960,42 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDERR."));
 		
 		LOG.infof("Calling WSwAnTbl (%s).", sourceFile);
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+	
+	public InstancedFuture<Integer> callWTexList(File[] sourceFiles, TexScanOutputMode outputMode, boolean noMessages, PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(WTexListMain.class);
+		
+		sourceFiles = FileUtils.explodeFiles(sourceFiles);
+		
+		for (int i = 0; i < sourceFiles.length; i++) 
+			callable.arg(sourceFiles[i].getAbsolutePath());	
+
+		switch (outputMode)
+		{
+			default:
+			case BOTH:
+				break;
+			case TEXTURES:
+				callable.arg(WTexListMain.SWITCH_TEXTURES);
+				break;
+			case FLATS:
+				callable.arg(WTexListMain.SWITCH_FLATS);
+				break;
+		}
+		
+		if (noMessages)
+			callable.arg(WTexListMain.SWITCH_QUIET);
+
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(IOUtils.getNullInputStream())
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexList STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexList STDERR."));
+		
+		LOG.infof("Calling WTexList.");
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
