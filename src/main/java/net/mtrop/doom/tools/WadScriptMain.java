@@ -934,6 +934,7 @@ public final class WadScriptMain
 
 			if (options.mode == Mode.HELP)
 			{
+				splash(options.stdout);
 				usage(options.stdout);
 				printHelp(options.stdout);
 				return ERROR_NONE;

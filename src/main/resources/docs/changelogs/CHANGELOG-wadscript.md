@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.7.1
+
+* `Changed` Splash is now printed on `--help`.
+
+
 ### Changed for 1.7.0
 
 * `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
