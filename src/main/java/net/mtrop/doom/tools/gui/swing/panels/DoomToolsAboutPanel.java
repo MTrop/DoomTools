@@ -48,6 +48,7 @@ public class DoomToolsAboutPanel extends JPanel
 		.append("WADTex v").append(Version.WADTEX).append("\n")
 		.append("WSwAnTBL v").append(Version.WSWANTBL).append("\n")
 		.append("WTExport v").append(Version.WTEXPORT).append("\n")
+		.append("WTexList v").append(Version.WTEXLIST).append("\n")
 		.append("WTexScan v").append(Version.WTEXSCAN).append("\n")
 	.toString();
 	
@@ -84,6 +85,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WADTex v").append(Version.WADTEX).append("</b>").append("<br/>");
 		sb.append("Contains <b>WSwAnTBL v").append(Version.WSWANTBL).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTExport v").append(Version.WTEXPORT).append("</b>").append("<br/>");
+		sb.append("Contains <b>WTexList v").append(Version.WTEXLIST).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
