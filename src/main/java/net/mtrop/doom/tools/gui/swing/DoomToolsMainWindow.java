@@ -46,6 +46,8 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
+import net.mtrop.doom.tools.gui.apps.WTexListApp;
+import net.mtrop.doom.tools.gui.apps.WTexListTExportApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanTExportApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
@@ -327,8 +329,10 @@ public class DoomToolsMainWindow extends JFrame
 						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.editor", (i) -> addApplication(new WadTexEditorApp())),
 						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.compile", (i) -> addApplication(new WadTexCompilerApp()))
 					),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (i) -> addApplication(new WTExportApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexlist", (i) -> addApplication(new WTexListApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.listexport", (i) -> addApplication(new WTexListTExportApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (i) -> addApplication(new WTexScanTExportApp()))
 				)
 			),

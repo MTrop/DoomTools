@@ -1024,6 +1024,14 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
+	 * @return the WAD archive file filter.
+	 */
+	public FileFilter createWADArchiveFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.archive.description") + " (*.wad/*.zip)", "wad", "zip");
+	}
+	
+	/**
 	 * @return the WAD container file filter.
 	 */
 	public FileFilter createWADContainerFilter()
