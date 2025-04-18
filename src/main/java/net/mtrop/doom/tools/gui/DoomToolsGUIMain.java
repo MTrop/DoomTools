@@ -400,6 +400,10 @@ public final class DoomToolsGUIMain
 			String path = ArrayUtils.arrayElement(args, 1);
 			startApplication(new WSwAnTablesCompilerApp(path));
 		}
+		else if (ApplicationNames.WTEXLIST.equals(args[0]))
+		{
+			startApplication(new WTexListApp());
+		}
 		else if (ApplicationNames.WTEXSCAN.equals(args[0]))
 		{
 			startApplication(new WTexScanApp());
@@ -407,6 +411,10 @@ public final class DoomToolsGUIMain
 		else if (ApplicationNames.WTEXPORT.equals(args[0]))
 		{
 			startApplication(new WTExportApp());
+		}
+		else if (ApplicationNames.WTEXLIST_WTEXPORT.equals(args[0]))
+		{
+			startApplication(new WTexListTExportApp());
 		}
 		else if (ApplicationNames.WTEXSCAN_WTEXPORT.equals(args[0]))
 		{

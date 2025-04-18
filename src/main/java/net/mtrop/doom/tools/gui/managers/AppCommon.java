@@ -67,7 +67,7 @@ public final class AppCommon
     private static final SingletonProvider<AppCommon> INSTANCE = new SingletonProvider<>(() -> new AppCommon());
 	
 	/**
-	 * @return the singleton instance of this settings object.
+	 * @return the singleton instance of this common object.
 	 */
 	public static AppCommon get()
 	{
@@ -608,6 +608,50 @@ public final class AppCommon
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"), 
 				callWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, stdin)
+			)
+		).start(tasks);
+	}
+
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel
+	 * @param sourceFiles 
+	 * @param outputMode 
+	 * @param noMessages 
+	 * @param baseFile 
+	 * @param outputFile 
+	 * @param create 
+	 * @param noAnim 
+	 * @param noSwitch 
+	 * @param nullTex 
+	 */
+	public void onExecuteWTexListToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noMessages, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("wtexport.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("wtexport.status.message.running"), 
+				language.getText("wtexport.status.message.success"), 
+				language.getText("wtexport.status.message.interrupt"), 
+				language.getText("wtexport.status.message.error"),
+				InstancedFuture.spawn(() -> {
+					int result;
+					
+					ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
+					PrintStream byteOut = new PrintStream(bos);
+					
+					result = callWTexList(sourceFiles, outputMode, noMessages, byteOut, stderr).result();
+					if (result != 0)
+						return result;
+					
+					ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+					
+					return callWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, bis).result();
+				})
 			)
 		).start(tasks);
 	}

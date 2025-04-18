@@ -562,7 +562,7 @@ public final class WTexScanMain
 			{
 				if (textureList.isEmpty())
 				{
-					options.stdout.println("# No textures.");
+					options.println("# No textures.");
 				}
 				else
 				{

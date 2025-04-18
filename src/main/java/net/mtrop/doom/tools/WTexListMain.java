@@ -35,7 +35,7 @@ import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.util.TextureUtils;
 
 /**
- * Main class for TexScan.
+ * Main class for TexList.
  * @author Matthew Tropiano
  */
 public final class WTexListMain
@@ -345,7 +345,7 @@ public final class WTexListMain
 			{
 				if (textureList.isEmpty())
 				{
-					options.stdout.println("# No textures.");
+					options.println("# No textures.");
 				}
 				else
 				{
