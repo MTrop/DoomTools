@@ -528,6 +528,7 @@ public final class DoomToolsMain
 				options.stdout.println("Contains WADTex v" + Version.WADTEX);
 				options.stdout.println("Contains WSwAnTBL v" + Version.WSWANTBL);
 				options.stdout.println("Contains WTExport v" + Version.WTEXPORT);
+				options.stdout.println("Contains WTexList v" + Version.WTEXLIST);
 				options.stdout.println("Contains WTexScan v" + Version.WTEXSCAN);
 				return ERROR_NONE;
 			}
