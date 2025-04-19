@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="%%description%%" />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="%%title%%" />
+		<meta itemprop="description" content="%%description%%" />
+		<meta itemprop="image" content="%%imageurl%%" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="%%pageurl%%" />
+		<meta name="twitter:title" content="%%title%%" />
+		<meta name="twitter:description" content="%%description%%" />
+		<meta name="twitter:image:src" content="%%imageurl%%" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="%%pageurl%%" />
+		<meta property="og:title" content="%%title%%" />
+		<meta property="og:image" content="%%imageurl%%" />
+		<meta property="og:description" content="%%description%%" />
+
+		<title>%%title%%</title>
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<link rel="StyleSheet" type="text/css" href="css/ipscode.css" />
+	</head>
+	<body>
+		<div>
+			<img class="site-logo" src="images/doomtools-banner-adjusted.png"/>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="index.html">Go Back to Home</a>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row main-title">
+			<h1 class="main-title-name w3-center">%%maintitle%%</h1>
+		</div>
+		<div class="nav-section w3-center">
+			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
+		</div>
+		<div>
+			<p>
+				WTexList is a program that just lists all of the textures and flats in one or more WAD files (or archives)
+				and outputs the list in a format that WTEXport can read. If piped into WTEXPort, along with the same list 
+				of WAD files to make the list, WTEXport will effectively merge all of the texture sets into one.
+			</p>
+			<pre class="ipsCode">wtexlist tex1.wad tex2.wad tex3.wad | wtexport tex1.wad tex2.wad tex3.wad --base-wad DOOM2.WAD --output newtex.wad --create</pre>
+		</div>
+		<div>
+			<h3 class="main-title-name w3-center">Full Command Help</h3>
+		</div>
+    <!-- ^^^ HEADER ^^^ -->
+        <pre id="readme" class="text-documentation">

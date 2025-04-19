@@ -4,30 +4,30 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		
 		<!-- Standard -->
-		<meta name="description" content="The generated WTexScan Help Page" />
+		<meta name="description" content="The generated WTexList Help Page" />
 		<meta name="generator" content="VSCode" />
 		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
 
 		<!-- Schema.org markup for Google+ -->
-		<meta itemprop="name" content="DoomTools - WTexScan Help" />
-		<meta itemprop="description" content="The generated WTexScan Help Page" />
+		<meta itemprop="name" content="DoomTools - WTexList Help" />
+		<meta itemprop="description" content="The generated WTexList Help Page" />
 		<meta itemprop="image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
 
 		<!-- Twitter -->
 		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/wtexscan.html" />
-		<meta name="twitter:title" content="DoomTools - WTexScan Help" />
-		<meta name="twitter:description" content="The generated WTexScan Help Page" />
+		<meta name="twitter:url" content="https://mtrop.github.io/DoomTools/wtexlist.html" />
+		<meta name="twitter:title" content="DoomTools - WTexList Help" />
+		<meta name="twitter:description" content="The generated WTexList Help Page" />
 		<meta name="twitter:image:src" content="https://mtrop.github.io/DoomTools/images/logo.png" />
 
 		<!-- Open Graph -->
 		<meta property="og:type" content="article" />
-		<meta property="og:url" content="https://mtrop.github.io/DoomTools/wtexscan.html" />
-		<meta property="og:title" content="DoomTools - WTexScan Help" />
+		<meta property="og:url" content="https://mtrop.github.io/DoomTools/wtexlist.html" />
+		<meta property="og:title" content="DoomTools - WTexList Help" />
 		<meta property="og:image" content="https://mtrop.github.io/DoomTools/images/logo.png" />
-		<meta property="og:description" content="The generated WTexScan Help Page" />
+		<meta property="og:description" content="The generated WTexList Help Page" />
 
-		<title>DoomTools - WTexScan Help</title>
+		<title>DoomTools - WTexList Help</title>
 
 		<!-- Style and Scripts -->
 		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
@@ -43,31 +43,26 @@
 		</div>
 		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
 		<div class="w3-row main-title">
-			<h1 class="main-title-name w3-center">WTexScan Help</h1>
+			<h1 class="main-title-name w3-center">WTexList Help</h1>
 		</div>
 		<div class="nav-section w3-center">
 			<a href="#readme">README</a> | <a href="#changelog">CHANGELOG</a>
 		</div>
 		<div>
 			<p>
-				A utility that scans one or more WAD files for maps and dumps the list of flats and textures 
-				that it finds. Works for DOOM, ZDOOM/HEXEN, and UDMF maps.
+				WTexList is a program that just lists all of the textures and flats in one or more WAD files (or archives)
+				and outputs the list in a format that WTEXport can read. If piped into WTEXPort, along with the same list 
+				of WAD files to make the list, WTEXport will effectively merge all of the texture sets into one.
 			</p>
-			<pre class="ipsCode">wtexscan maps.wad</pre>
-			<p>
-				The output may look strange, because it is best used with....
-			</p>
-			<p>
-				 <a href="wtexport.html">WTExport!</a>
-			</p>
+			<pre class="ipsCode">wtexlist tex1.wad tex2.wad tex3.wad | wtexport tex1.wad tex2.wad tex3.wad --base-wad DOOM2.WAD --output newtex.wad --create</pre>
 		</div>
 		<div>
 			<h3 class="main-title-name w3-center">Full Command Help</h3>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WTexScan v1.2.2 by Matt Tropiano (using DoomStruct v2.18.1)
-Usage: wtexscan [--help | -h | --version] [files] [switches]
+WTexList v1.0.0 by Matt Tropiano (using DoomStruct v2.18.1)
+Usage: wtexlist [--help | -h | --version] [files] [switches]
 
     --help              Prints help and exits.
     -h
@@ -90,44 +85,12 @@ Usage: wtexscan [--help | -h | --version] [files] [switches]
 
     --quiet             Output no comment-messages.
     -q
-
-    --no-skies          Skip adding associated skies by map header.
-
-    --map [mapname]     Map to scan. If not specified, all maps will be scanned.
-    -m
 		</pre>
     <!-- VVV CHANGELOG VVV -->
 		<div>
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
-### Changed for 1.2.2
-
-* &#x60;Fixed&#x60; &quot;Quiet mode&quot; still output a comment line for textures when it shouldn&#39;t have.
-
-
-### Changed for 1.2.1
-
-* &#x60;Fixed&#x60; WTexScan will silently error out (print a message) instead of NPE if a map does 
-  not contain SIDEDEFS or SECTORS, due to faulty map detection from DoomStruct. (Issue #92).
-
-
-### Changed for 1.2.0
-
-* &#x60;Added&#x60; GUI Version of WTexScan.
-
-
-### Changed for 1.1.1
-
-* &#x60;Added&#x60; Autodetect PKE.
-* &#x60;Changed&#x60; Temp file name for PK3&#x2F;PKEs extracted from an archive altered slightly.
-
-
-### Changed for 1.1.0
-
-* &#x60;Added&#x60; Map filtering switch feature (by @XaserAcheron).
-
-
 ### Changed for 1.0.0
 
 * Initial Release.

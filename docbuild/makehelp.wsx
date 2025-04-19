@@ -202,6 +202,13 @@ check entry main()
         "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
         "pageurl": "https://mtrop.github.io/DoomTools/wtexport.html"
     }, "wtexport-header.html");
+    dumpUtil("wtexlist",  "--help", file("wtexlist.html"), {
+        "title": "DoomTools - WTexList Help",
+        "maintitle": "WTexList Help",
+        "description": "The generated WTexList Help Page",
+        "imageurl": "https://mtrop.github.io/DoomTools/images/logo.png",
+        "pageurl": "https://mtrop.github.io/DoomTools/wtexlist.html"
+    }, "wtexlist-header.html");
     dumpUtil("wtexscan",  "--help", file("wtexscan.html"), {
         "title": "DoomTools - WTexScan Help",
         "maintitle": "WTexScan Help",
