@@ -9,7 +9,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
@@ -52,7 +51,7 @@ public class DMXConvertSettingsPanel extends JPanel
 						language.getText("dmxconv.settings.ffmpeg.title"), 
 						currentFile, 
 						language.getText("dmxconv.settings.browse.open"),
-						FileFilters.EXECUTABLES
+						utils.createExecutableFilter()
 					), 
 					settings::setFFmpegPath
 				))

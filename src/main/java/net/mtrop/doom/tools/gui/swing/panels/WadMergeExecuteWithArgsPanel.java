@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsConstants;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -69,7 +68,7 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 				language.getText("wadmerge.run.workdir.browse.title"), 
 				current, 
 				language.getText("wadmerge.run.workdir.browse.accept"), 
-				DoomToolsConstants.FileFilters.DIRECTORIES
+				utils.createDirectoryFilter()
 			)
 		);
 		

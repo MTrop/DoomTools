@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.filechooser.FileFilter;
 
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
@@ -34,7 +35,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
@@ -574,7 +574,7 @@ public class DoomToolsMainWindow extends JFrame
 			language.getText("doomtools.workspace.open.browse.title"),
 			lastUsed,
 			language.getText("doomtools.workspace.open.browse.accept"),
-			FileFilters.WORKSPACES
+			utils.createWorkspaceFilter()
 		);
 		
 		if (workspaceFile == null)
@@ -607,14 +607,16 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
+		final FileFilter workspaceFilter = utils.createWorkspaceFilter();
+		
 		File workspaceFile = utils.chooseFile(
 			this,
 			language.getText("doomtools.workspace.saveas.browse.title"),
 			language.getText("doomtools.workspace.saveas.browse.accept"),
 			settings::getLastProjectDirectory,
 			settings::setLastProjectDirectory,
-			(filter, file) -> filter == FileFilters.WORKSPACES ? FileUtils.addMissingExtension(file, "dtw") : file,
-			FileFilters.WORKSPACES
+			(filter, file) -> filter == workspaceFilter ? FileUtils.addMissingExtension(file, "dtw") : file,
+			workspaceFilter
 		);
 		
 		if (workspaceFile == null)

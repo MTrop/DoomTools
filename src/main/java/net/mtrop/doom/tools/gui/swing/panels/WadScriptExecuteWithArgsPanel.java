@@ -14,7 +14,6 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsConstants;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -72,7 +71,7 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 				language.getText("wadscript.run.workdir.browse.title"), 
 				current, 
 				language.getText("wadscript.run.workdir.browse.accept"), 
-				DoomToolsConstants.FileFilters.DIRECTORIES
+				utils.createDirectoryFilter()
 			)
 		);
 		
