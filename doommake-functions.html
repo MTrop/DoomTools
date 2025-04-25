@@ -30082,6 +30082,72 @@
 							</div>
 						</div>
 					</div>
+					<div id="function-tool-wtexlist" class="function-section">
+						<div class="function-title" section-code="tool-wtexlist">
+							<h2 class="function-name">
+								TOOL::WTEXLIST
+								<span class="function-parameters">
+									(options)
+								</span>
+								<a href="#top" class="function-navigation">TOP</a>
+							</h2>
+						</div>
+						<div id="function-content-tool-wtexlist" class="function-content">
+							<div class="function-description">
+								<p>Calls the WTexList tool. Inherits STDOUT/STDERR of this script unless overridden (see options).</p>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title">
+									<h4 class="parameter-name">
+										options
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">MAP</span>
+											<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), wadfiles:LIST[STRING, ...], quiet:BOOLEAN, outputtextures:BOOLEAN, outputflats:BOOLEAN}</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												Map of options.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="parameter-section">
+								<div class="parameter-title return">
+									<h4 class="parameter-name">
+										RETURNS
+									</h4>
+								</div>
+								<div class="parameter-content">
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">INTEGER</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												The normal return of this tool's process.
+											</p>
+										</div>
+									</div>
+									<div class="parameter-usage">
+										<div class="parameter-type">
+											<span class="parameter-type-name">ERROR</span>
+											<span class="parameter-subtype-name">BadOptions</span>
+										</div>
+										<div class="parameter-description">
+											<p>
+												If the options map could not be applied.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
 					<div id="function-tool-wtexscan" class="function-section">
 						<div class="function-title" section-code="tool-wtexscan">
 							<h2 class="function-name">
@@ -30151,7 +30217,7 @@
 				</div>
 			</div>
 		</div>
-				<!-- END DIV -->
+		<!-- END DIV -->
 		<div class="nav-section">
 			<a href="index.html">Go Back to Home</a>
 		</div>
