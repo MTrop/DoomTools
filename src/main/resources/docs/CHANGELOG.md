@@ -7,9 +7,9 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-04-26** Updated JSON to `1.4.1`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.1-RELEASE)
 - **2024-04-25** Moved `DECOHack Constants.txt`to Docs.
 - **2024-04-25** Added `--update-docs` switch to DoomTools.
-- **2024-04-25** Updated JSON to `1.4.0`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.0-RELEASE)
 
 - **2024-02-18** Updated DoomStruct to `2.18.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.18.0-RELEASE)
 
