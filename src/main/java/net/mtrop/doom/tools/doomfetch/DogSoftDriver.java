@@ -10,6 +10,7 @@ import java.io.PrintStream;
 
 import net.mtrop.doom.struct.io.IOUtils;
 import net.mtrop.doom.tools.Version;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils;
 import net.mtrop.doom.tools.struct.util.ThreadUtils;
 import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPContent;
@@ -61,7 +62,12 @@ public class DogSoftDriver extends FetchDriver
 				// if HTML, we got a null response. Anything else, probably a file.
 				
 				if (!searchResponse.getContentType().endsWith("/html"))
+				{
+					if (searchResponse.getContentType().endsWith("/zip"))
+						filename = FileUtils.getFileNameWithoutExtension(filename) + ".zip";
+					
 					return new Response(filename, "", "", searchResponse);
+				}
 				
 			} catch (IOException e) {
 				err.println("ERROR: Read error from Doom.DogSoft.Net.");
