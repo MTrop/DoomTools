@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.38.2
+
+* `Changed` DECOHack writes sprites and sound index sections in index order instead of name order. (Issue #130).
+
+
 ### Changed for 0.38.1
 
 * `Fixed` DECOHack wrote to the wrong WAD file if output was an existing WAD file (Issue #126).
