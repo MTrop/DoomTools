@@ -356,7 +356,8 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	
 	public boolean equals(DEHWeapon obj) 
 	{
-		return ammoType == obj.ammoType
+		return name == obj.name
+			&& ammoType == obj.ammoType
 			&& ammoPerShot == obj.ammoPerShot
 			&& mbf21Flags == obj.mbf21Flags
 			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()

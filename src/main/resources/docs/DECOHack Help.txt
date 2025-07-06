@@ -499,6 +499,26 @@ Examples:
 Each state altered directly (via "state X") or filled in this manner are no 
 longer "free."
 
+
+IMPORTANT: It is possible to re-free a state that was freed before and 
+subsequently filled in, so be careful! You can enable "state safety" in your 
+patches in order to detect this, though - just add the following clause to
+your code:
+
+    set state free safety on
+
+
+...and from that line on, every freed state will incur a check to see if it
+has been freed before, and if so, it will throw an error the moment it 
+happens. To turn this behavior off from a particular point, add:
+
+    set state free safety off
+
+
+For best results, you should add "set state safety on" to the beginning of 
+your code.
+ 
+ 
 You can protect a state from being freed (or an inclusive range of them) by 
 writing the following:
 
@@ -1191,6 +1211,7 @@ Things (Doom+):
     COUNTITEM =      0x00800000
     SKULLFLY =       0x01000000
     NOTDMATCH =      0x02000000
+    NOTDEATHMATCH =  0x02000000
     TRANSLATION =    0x04000000
     TRANSLATION1 =   0x04000000
     UNUSED1 =        0x08000000

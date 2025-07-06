@@ -9,7 +9,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
@@ -53,7 +52,7 @@ public class DoomMakeSettingsPanel extends JPanel
 						language.getText("doommake.settings.vscode.title"), 
 						currentFile, 
 						language.getText("doommake.settings.browse.open"),
-						FileFilters.EXECUTABLES
+						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToIDE(value)
 				)),
@@ -64,7 +63,7 @@ public class DoomMakeSettingsPanel extends JPanel
 						language.getText("doommake.settings.slade.title"), 
 						currentFile, 
 						language.getText("doommake.settings.browse.open"),
-						FileFilters.EXECUTABLES
+						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToSlade(value)
 				)),
@@ -75,7 +74,7 @@ public class DoomMakeSettingsPanel extends JPanel
 						language.getText("doommake.settings.maps.title"),
 						currentFile, 
 						language.getText("doommake.settings.browse.open"),
-						FileFilters.EXECUTABLES
+						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToMapEditor(value)
 				))

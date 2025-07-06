@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2024 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -235,6 +235,7 @@ public class IntervalMap<V>
 				// absorb into first interval.
 				else if (Objects.equals(newInterval.value, firstInterval.value))
 				{
+					firstInterval.max = newInterval.max;
 					secondInterval.min = newInterval.max + 1;
 				}
 				// absorb into second interval.
@@ -266,6 +267,7 @@ public class IntervalMap<V>
 				else if (Objects.equals(newInterval.value, secondInterval.value))
 				{
 					firstInterval.max = newInterval.min - 1;
+					secondInterval.min = newInterval.min;
 				}
 				else
 				{
@@ -281,12 +283,14 @@ public class IntervalMap<V>
 				// absorb into first interval.
 				if (Objects.equals(newInterval.value, firstInterval.value))
 				{
+					firstInterval.max = newInterval.max;
 					secondInterval.min = newInterval.max + 1;
 				}
 				// absorb into second interval.
 				else if (Objects.equals(newInterval.value, secondInterval.value))
 				{
-					firstInterval.min = newInterval.min - 1;
+					firstInterval.max = newInterval.min;
+					secondInterval.min = newInterval.min + 1;
 				}
 				// adjust and insert.
 				else

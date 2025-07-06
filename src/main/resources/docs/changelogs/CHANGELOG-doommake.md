@@ -1,6 +1,22 @@
 DoomMake
 --------
 
+### Changed for 0.27.0
+
+* `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
+
+
+### Changed for 0.26.2
+
+* `Fixed` Fixed a typo in utility-created `doommake-lib.script` files.
+* `Added` An output line for telling the user what IWAD it is grabbing textures from for `rebuildtextures` target (in new projects).
+
+
+### Changed for 0.26.1
+
+* `Fixed` Fixed a typo in utility-created `doommake.properties` files.
+
+
 ### Changed for 0.26.0
 
 * `Added` DoomMake will check to see if it is already embedded in a project if `--embed` is used.

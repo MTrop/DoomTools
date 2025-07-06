@@ -1,6 +1,62 @@
 DECOHack
 --------
 
+### Changed for 0.38.2
+
+* `Changed` DECOHack writes sprites and sound index sections in index order instead of name order. (Issue #130).
+
+
+### Changed for 0.38.1
+
+* `Fixed` DECOHack wrote to the wrong WAD file if output was an existing WAD file (Issue #126).
+
+
+### Changed for 0.38.0
+
+* `Changed` DECOHack now accepts any valid mnemonic for string entries in Boom patches or higher (alphanumeric plus underscore).
+
+
+### Changed for 0.37.0
+
+* `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.
+* `Added` [GUI] Some keywords to the syntax highlighter.
+
+
+### Changed for 0.36.0
+
+* `Added` State re-use safety for freed states in patches, but only if opted-in by the `set state free safety on` clause.
+* `Added` `NOTDMATCH` as a Thing flag mnemonic. It was in the docs, but originally added as `NOTDEATHMATCH`. Oops.
+* `Changed` Things, Ammo, and Weapons with changed names will be included in the output DeHackEd patch.
+* `Changed` Things with editor keys only will be included in the output DeHackEd patch.
+
+
+### Changed for 0.35.2
+
+* `Added` Attempting to use `using` a second time will give the user a better error message.
+
+
+### Changed for 0.35.1
+
+* `Fixed` Setting a Thing's Pain state explicitly (not via States block) would set Pain Chance instead. (Issue #121).
+
+
+### Changed for 0.35.0
+
+* `Fixed` Soulsphere health misc value did not check the correct property range.
+* `Changed` Some Thing bit documentation for Doom19.
+* `Changed` Speed on MISSILE Things can now take an explicit fixed-point value (instead of a coerced one).
+* `Changed` Thing Health property can go up to a max integer value.
+* `Changed` Thing Damage property can go up to an integer value.
+* `Changed` Ammo max and pickup properties can go up to a max integer value.
+* `Changed` State duration property can go up to an integer value.
+
+
+### Changed for 0.34.0
+
+* `Fixed` Any clause that sets intervals (freeing things, protecting states) may create a condition that causes an endless loop. (Issue. #119)
+* `Fixed` Sound entries were off by 1 due to a misunderstanding of what index sound entries started at. (Issue #120)
+
+
 ### Changed for 0.33.0
 
 * `Added` `set next` clauses for manipulating the next sprite or sound index used in DSDHACKED patches. (Enh. #116)

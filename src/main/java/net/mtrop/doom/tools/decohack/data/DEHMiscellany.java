@@ -177,7 +177,7 @@ public class DEHMiscellany extends DEHObject<DEHMiscellany>
 	
 	public DEHMiscellany setSoulsphereHealth(int soulsphereHealth)
 	{
-		RangeUtils.checkRange("Soulsphere health", 0, 255, blueArmorClass);
+		RangeUtils.checkRange("Soulsphere health", 0, 255, soulsphereHealth);
 		this.soulsphereHealth = soulsphereHealth;
 		return this;
 	}

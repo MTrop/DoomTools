@@ -15,6 +15,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom;
 import net.mtrop.doom.tools.decohack.patches.PatchDSDHacked;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
  * Patch context for DSDHacked.
@@ -237,9 +238,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 		
 		// SPRITES
 		boolean spritesHeader = false;
-		for (Map.Entry<String, Integer> entry : spriteIndexMap.entrySet())
+		for (Map.Entry<Integer, String> entry : ObjectUtils.reverseSortedMap(spriteIndexMap).entrySet())
 		{
-			if (entry.getValue() == getSourcePatch().getSpriteIndex(entry.getKey()))
+			if (entry.getKey() == getSourcePatch().getSpriteIndex(entry.getValue()))
 				continue;
 			
 			if (!spritesHeader)
@@ -248,9 +249,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 				spritesHeader = true;
 			}
 
-			writer.append(String.valueOf(entry.getValue()))
+			writer.append(String.valueOf(entry.getKey()))
 				.append(" = ")
-				.append(String.valueOf(entry.getKey().toUpperCase()))
+				.append(String.valueOf(entry.getValue().toUpperCase()))
 				.append(CRLF);
 		}
 		if (spritesHeader)
@@ -258,9 +259,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 
 		// SOUNDS
 		boolean soundHeader = false;
-		for (Map.Entry<String, Integer> entry : soundIndexMap.entrySet())
+		for (Map.Entry<Integer, String> entry :  ObjectUtils.reverseSortedMap(soundIndexMap).entrySet())
 		{
-			if (entry.getValue() == getSourcePatch().getSoundIndex(entry.getKey()))
+			if (entry.getKey() == getSourcePatch().getSoundIndex(entry.getValue()))
 				continue;
 
 			if (!soundHeader)
@@ -269,9 +270,9 @@ public class PatchDSDHackedContext extends PatchMBF21Context
 				soundHeader = true;
 			}
 
-			writer.append(String.valueOf(entry.getValue()))
+			writer.append(String.valueOf(entry.getKey()))
 				.append(" = ")
-				.append(String.valueOf(entry.getKey().toUpperCase()))
+				.append(String.valueOf(entry.getValue().toUpperCase()))
 				.append(CRLF);
 		}
 		if (soundHeader)

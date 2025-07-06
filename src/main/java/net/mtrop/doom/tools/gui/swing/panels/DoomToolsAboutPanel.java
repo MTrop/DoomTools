@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.Version;
-import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 
 import java.awt.BorderLayout;
@@ -24,9 +24,6 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 public class DoomToolsAboutPanel extends JPanel
 {
 	private static final long serialVersionUID = 8389287671690217978L;
-
-    /** Language manager. */
-    private DoomToolsLanguageManager language;
 
 	private static final String VERSION_TEXT = (new StringBuilder())
 		.append("DoomTools v").append(Version.DOOMTOOLS).append("\n")
@@ -51,6 +48,7 @@ public class DoomToolsAboutPanel extends JPanel
 		.append("WADTex v").append(Version.WADTEX).append("\n")
 		.append("WSwAnTBL v").append(Version.WSWANTBL).append("\n")
 		.append("WTExport v").append(Version.WTEXPORT).append("\n")
+		.append("WTexList v").append(Version.WTEXLIST).append("\n")
 		.append("WTexScan v").append(Version.WTEXSCAN).append("\n")
 	.toString();
 	
@@ -59,7 +57,7 @@ public class DoomToolsAboutPanel extends JPanel
 	 */
 	public DoomToolsAboutPanel()
 	{
-		this.language = DoomToolsLanguageManager.get();
+	    DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
 		String versionString = Version.DOOMTOOLS;
 		
@@ -87,6 +85,7 @@ public class DoomToolsAboutPanel extends JPanel
 		sb.append("Contains <b>WADTex v").append(Version.WADTEX).append("</b>").append("<br/>");
 		sb.append("Contains <b>WSwAnTBL v").append(Version.WSWANTBL).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTExport v").append(Version.WTEXPORT).append("</b>").append("<br/>");
+		sb.append("Contains <b>WTexList v").append(Version.WTEXLIST).append("</b>").append("<br/>");
 		sb.append("Contains <b>WTexScan v").append(Version.WTEXSCAN).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
@@ -102,7 +101,7 @@ public class DoomToolsAboutPanel extends JPanel
 		containerOf(this, 
 			node(BorderLayout.CENTER, label(sb.toString())),
 			node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.TRAILING),
-				node(button(language.getText("doomtools.about.copy"), (b) -> {
+				node(utils.createButtonFromLanguageKey("doomtools.about.copy", (b) -> {
 					ClipboardUtils.sendStringToClipboard(VERSION_TEXT);
 				}))
 			))

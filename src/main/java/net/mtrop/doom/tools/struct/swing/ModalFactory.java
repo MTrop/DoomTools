@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractAction;
@@ -60,7 +61,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		Boolean out = modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices).openThenDispose();
 		if (out == Boolean.TRUE)
@@ -104,7 +105,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(Container owner, List<Image> icons, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(owner, icons, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
@@ -144,7 +145,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		Boolean out = modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices).openThenDispose();
 		if (out == Boolean.TRUE)
@@ -188,7 +189,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(Container owner, Image icon, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(owner, icon, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
@@ -227,7 +228,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(owner, (Image)null, title, contentPane, validator, settingExtractor, choices);
 	}
@@ -265,7 +266,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(Container owner, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(owner, (Image)null, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
@@ -303,7 +304,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(null, icons, title, contentPane, validator, settingExtractor, choices);
 	}
@@ -341,7 +342,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(List<Image> icons, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(null, icons, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
@@ -379,7 +380,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(null, icon, title, contentPane, validator, settingExtractor, choices);
 	}	
@@ -417,7 +418,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(Image icon, String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(null, icon, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}	
@@ -454,7 +455,7 @@ public final class ModalFactory
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(null, (Image)null, title, contentPane, validator, settingExtractor, choices);
 	}
@@ -490,7 +491,7 @@ public final class ModalFactory
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public static <C extends Container, T> T settingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public static <C extends Container, T> T settingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(null, (Image)null, title, contentPane, validator, settingExtractor, choice("OK", KeyEvent.VK_O, true));
 	}
@@ -533,7 +534,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		Modal<T> out = new Modal<>(owner);
 		out.setModalityType(modality);
@@ -578,7 +579,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, List<Image> icons, String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(owner, icons, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -617,7 +618,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, Image icon, String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, Image icon, String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		Modal<T> out = new Modal<>(owner);
 		out.setModalityType(modality);
@@ -661,7 +662,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, Image icon, String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, Image icon, String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(owner, icon, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -700,7 +701,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(owner, (Image)null, title, modality, contentPane, validator, choices);
 	}
@@ -737,7 +738,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Container owner, String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Container owner, String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(owner, (Image)null, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -774,7 +775,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(List<Image> icons, String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(List<Image> icons, String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(null, icons, title, modality, contentPane, validator, choices);
 	}
@@ -811,7 +812,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(List<Image> icons, String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(List<Image> icons, String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(null, icons, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -848,7 +849,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Image icon, String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Image icon, String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(null, icon, title, modality, contentPane, validator, choices);
 	}
@@ -885,7 +886,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(Image icon, String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(Image icon, String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal(null, icon, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -922,7 +923,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(String title, ModalityType modality, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(String title, ModalityType modality, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal((Container)null, title, modality, contentPane, validator, choices);
 	}
@@ -957,7 +958,7 @@ public final class ModalFactory
 	 * @return a new modal dialog.
 	 */
 	@SafeVarargs
-	public static <T> Modal<T> modal(String title, Container contentPane, Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	public static <T> Modal<T> modal(String title, Container contentPane, Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		return modal((Container)null, title, ModalityType.APPLICATION_MODAL, contentPane, validator, choices);
 	}
@@ -979,7 +980,7 @@ public final class ModalFactory
 	}
 
 	@SafeVarargs
-	private static <T> Modal<T> modal(final Modal<T> modal, final Container contentPane, final Function<T, Boolean> validator, final ModalChoice<T> ... choices)
+	private static <T> Modal<T> modal(final Modal<T> modal, final Container contentPane, final Predicate<T> validator, final ModalChoice<T> ... choices)
 	{
 		JButton[] buttons = new JButton[choices.length];
 		for (int i = 0; i < buttons.length; i++)
@@ -995,7 +996,7 @@ public final class ModalFactory
 					T value = choice.onClick.get();
 					if (validator != null && choice.validate)
 					{
-						if (validator.apply(value))
+						if (validator.test(value))
 						{
 							modal.setValue(value);
 							modal.setVisible(false);

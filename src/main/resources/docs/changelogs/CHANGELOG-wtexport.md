@@ -1,6 +1,21 @@
 WTEXport
 --------
 
+### Changed for 1.7.0
+
+* `Fixed` PNAMES lumps with duplicate entries would have caused an exception on read.
+
+
+### Changed for 1.6.0
+
+* `Fixed` Some new textures that "existed" but had different patch ordering or no new patches were not copied over. (Issue #118)
+
+
+### Changed for 1.5.4
+
+* `Fixed` Some texture sets were being erroneously classified as STRIFE-formatted texture sets due to a typo.
+
+
 ### Changed for 1.5.3
 
 * `Fixed` [GUI] Added message for requiring an output WAD file.

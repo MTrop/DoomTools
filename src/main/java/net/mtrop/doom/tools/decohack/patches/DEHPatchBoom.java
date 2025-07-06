@@ -85,11 +85,6 @@ public interface DEHPatchBoom extends DEHPatch
 	String getString(String key);
 	
 	/**
-	 * @return all possible string lookup keys.
-	 */
-	Set<String> getStringKeys();
-
-	/**
 	 * @return all added par entries.
 	 */
 	Set<EpisodeMap> getParEntries();

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
+import javax.swing.filechooser.FileFilter;
 
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
@@ -34,7 +35,6 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
@@ -46,6 +46,8 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
+import net.mtrop.doom.tools.gui.apps.WTexListApp;
+import net.mtrop.doom.tools.gui.apps.WTexListTExportApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanTExportApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
@@ -61,6 +63,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutJavaPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsAboutPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsDesktopPane;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsProgressPanel;
@@ -326,8 +329,10 @@ public class DoomToolsMainWindow extends JFrame
 						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.editor", (i) -> addApplication(new WadTexEditorApp())),
 						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.compile", (i) -> addApplication(new WadTexCompilerApp()))
 					),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (i) -> addApplication(new WTExportApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexlist", (i) -> addApplication(new WTexListApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.listexport", (i) -> addApplication(new WTexListTExportApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexscan", (i) -> addApplication(new WTexScanApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.scanexport", (i) -> addApplication(new WTexScanTExportApp()))
 				)
 			),
@@ -343,6 +348,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.help", ArrayUtils.joinArrays(
 				ArrayUtils.arrayOf(
 					utils.createItemFromLanguageKey("doomtools.menu.help.item.about", (i) -> openAboutModal()),
+					utils.createItemFromLanguageKey("doomtools.menu.help.item.about.java", (i) -> openAboutJavaModal()),
 					utils.createItemFromLanguageKey("doomtools.menu.help.item.licenses", (i) -> openLicensesModal()),
 					separator()
 				),
@@ -361,7 +367,16 @@ public class DoomToolsMainWindow extends JFrame
 		modal(this, utils.getWindowIcons(), 
 			language.getText("doomtools.about.title"), 
 			new DoomToolsAboutPanel(), 
-			choice("OK", KeyEvent.VK_O)
+			choice("OK", KeyEvent.VK_O, (Object)null)
+		).openThenDispose();
+	}
+	
+	private void openAboutJavaModal()
+	{
+		modal(this, utils.getWindowIcons(), 
+			language.getText("doomtools.about.java.title"), 
+			new DoomToolsAboutJavaPanel(), 
+			choice("OK", KeyEvent.VK_O, (Object)null)
 		).openThenDispose();
 	}
 	
@@ -559,7 +574,7 @@ public class DoomToolsMainWindow extends JFrame
 			language.getText("doomtools.workspace.open.browse.title"),
 			lastUsed,
 			language.getText("doomtools.workspace.open.browse.accept"),
-			FileFilters.WORKSPACES
+			utils.createWorkspaceFilter()
 		);
 		
 		if (workspaceFile == null)
@@ -592,14 +607,16 @@ public class DoomToolsMainWindow extends JFrame
 			return;
 		}
 		
+		final FileFilter workspaceFilter = utils.createWorkspaceFilter();
+		
 		File workspaceFile = utils.chooseFile(
 			this,
 			language.getText("doomtools.workspace.saveas.browse.title"),
 			language.getText("doomtools.workspace.saveas.browse.accept"),
 			settings::getLastProjectDirectory,
 			settings::setLastProjectDirectory,
-			(filter, file) -> filter == FileFilters.WORKSPACES ? FileUtils.addMissingExtension(file, "dtw") : file,
-			FileFilters.WORKSPACES
+			(filter, file) -> filter == workspaceFilter ? FileUtils.addMissingExtension(file, "dtw") : file,
+			workspaceFilter
 		);
 		
 		if (workspaceFile == null)

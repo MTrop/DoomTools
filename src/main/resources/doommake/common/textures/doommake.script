@@ -82,6 +82,8 @@ check function doRebuildTextures() {
 		return err;
 	}
 	
+	println("Using IWAD: " + baseIwadPath);
+	
 	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
 	tex1filename = sourceDir + "/texture1.txt";
 	tex2filename = sourceDir + "/texture2.txt";

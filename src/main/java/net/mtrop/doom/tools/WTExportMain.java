@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +31,7 @@ import net.mtrop.doom.WadFile;
 import net.mtrop.doom.exception.TextureException;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.object.BinaryObject;
+import net.mtrop.doom.struct.io.SerializerUtils;
 import net.mtrop.doom.texture.Animated;
 import net.mtrop.doom.texture.CommonTexture;
 import net.mtrop.doom.texture.CommonTextureList;
@@ -409,7 +412,7 @@ public final class WTExportMain
 				else
 				{
 					textureList2 = BinaryObject.create(DoomTextureList.class, textureData);
-					unit.strife = true;
+					unit.strife = false;
 				}
 				
 				options.printf("        %d entries in TEXTURE2.\n", textureList2.size());
@@ -824,11 +827,11 @@ public final class WTExportMain
 					// for figuring out if we've found a replaced/added patch.
 					boolean foundPatches = false;
 					
-					TextureSet.Texture entry = unit.textureSet.getTextureByName(textureName);
+					TextureSet.Texture unitEntry = unit.textureSet.getTextureByName(textureName);
 					
-					for (int i = 0; i < entry.getPatchCount(); i++)
+					for (int i = 0; i < unitEntry.getPatchCount(); i++)
 					{
-						TextureSet.Patch p = entry.getPatch(i);
+						TextureSet.Patch p = unitEntry.getPatch(i);
 						String pname = p.getName();
 						
 						// does a matching patch exist?
@@ -850,9 +853,9 @@ public final class WTExportMain
 							}
 						}
 					}
-		
-					// if we've found patches or the texture is new, better extract the texture.
-					if (foundPatches || !exportSet.textureSet.contains(textureName))
+					
+					// if we've found patches, extract the texture.
+					if (foundPatches)
 					{
 						options.printf("        Copying texture %s (%s)...\n", textureName, unit.wad.getFileName());
 						
@@ -860,17 +863,19 @@ public final class WTExportMain
 						if (exportSet.textureSet.contains(textureName))
 							exportSet.textureSet.removeTextureByName(textureName);
 						
-						TextureSet.Texture newtex = exportSet.textureSet.createTexture(textureName);
-						newtex.setHeight(entry.getHeight());
-						newtex.setWidth(entry.getWidth());
-						for (TextureSet.Patch p : entry)
-						{
-							TextureSet.Patch newpatch = newtex.createPatch(p.getName());
-							newpatch.setOriginX(p.getOriginX());
-							newpatch.setOriginY(p.getOriginY());
-						}
-						
-						exportSet.textureHash.add(textureName);
+						moveTextureAndPatches(exportSet, textureName, exportSet.textureSet.createTexture(textureName), unitEntry);
+					}
+					// if texture is new, extract the texture.
+					else if (!exportSet.textureSet.contains(textureName))
+					{
+						options.printf("        Copying texture %s (%s)...\n", textureName, unit.wad.getFileName());
+						moveTextureAndPatches(exportSet, textureName, exportSet.textureSet.createTexture(textureName), unitEntry);
+					}
+					// if texture is not new, do a compare and replace.
+					else if (!texturesAreEqual(exportSet.textureSet.getTextureByName(textureName), unitEntry))
+					{
+						options.printf("        Replacing texture %s (%s)...\n", textureName, unit.wad.getFileName());
+						moveTextureAndPatches(exportSet, textureName, exportSet.textureSet.replaceTextureByName(textureName), unitEntry);
 					}
 					
 				}
@@ -897,6 +902,77 @@ public final class WTExportMain
 			}
 			
 			return true;
+		}
+
+		/**
+		 * Moves a texture entry over to the export set. 
+		 * @param exportSet the export set.
+		 * @param textureName the texture name.
+		 * @param newTexture the new texture entry.
+		 * @param entry the texture entry.
+		 */
+		private void moveTextureAndPatches(ExportSet exportSet, String textureName, TextureSet.Texture newTexture, TextureSet.Texture entry)
+		{
+			newTexture.setHeight(entry.getHeight());
+			newTexture.setWidth(entry.getWidth());
+			for (TextureSet.Patch p : entry)
+			{
+				TextureSet.Patch newpatch = newTexture.createPatch(p.getName());
+				newpatch.setOriginX(p.getOriginX());
+				newpatch.setOriginY(p.getOriginY());
+			}
+			
+			exportSet.textureHash.add(textureName);
+		}
+		
+		/**
+		 * Creates a hash of a texture entry.
+		 * The purpose of this is to quickly (enough) determine texture composition equality between two textures.
+		 * @param entry the entry to hash.
+		 * @param algorithm the algorithm to hash with.
+		 * @return the hash array of the result.
+		 * @throws NoSuchAlgorithmException if the provided algorithm is unavailable or invalid. 
+		 */
+		private byte[] hashTextureEntry(TextureSet.Texture entry, String algorithm) throws NoSuchAlgorithmException
+		{
+			MessageDigest digest = MessageDigest.getInstance(algorithm);
+						
+			byte[] intbytes = new byte[4];
+			
+			// Digest texture itself.
+			digest.update(entry.getName().getBytes());
+			SerializerUtils.intToBytes(entry.getWidth(), SerializerUtils.LITTLE_ENDIAN, intbytes, 0);
+			digest.update(intbytes);
+			SerializerUtils.intToBytes(entry.getHeight(), SerializerUtils.LITTLE_ENDIAN, intbytes, 0);
+			digest.update(intbytes);
+			
+			for (TextureSet.Patch p : entry)
+			{
+				// Digest patch.
+				digest.update(p.getName().getBytes());
+				SerializerUtils.intToBytes(p.getOriginX(), SerializerUtils.LITTLE_ENDIAN, intbytes, 0);
+				digest.update(intbytes);
+				SerializerUtils.intToBytes(p.getOriginY(), SerializerUtils.LITTLE_ENDIAN, intbytes, 0);
+				digest.update(intbytes);
+			}
+			
+			return digest.digest();
+		}
+		
+		/**
+		 * Checks if two texture entries are equal. 
+		 * @param entry1 the first entry.
+		 * @param entry2 the second entry.
+		 * @return true if so, false if not.
+		 */
+		private boolean texturesAreEqual(TextureSet.Texture entry1, TextureSet.Texture entry2)
+		{
+			try {
+				return MessageDigest.isEqual(hashTextureEntry(entry1, "MD5"), hashTextureEntry(entry2, "MD5"));
+			} catch (NoSuchAlgorithmException e) {
+				// Will not happen. MD5 is in all implementations of the JRE.
+				return false;
+			}
 		}
 
 		/**
@@ -1763,7 +1839,7 @@ public final class WTExportMain
 		out.println();
 		out.println(":end");
 		out.println();
-		out.println("The utility WTEXSCAN already produces a list formatted this way.");
+		out.println("The utilities WTEXLIST and WTEXSCAN already produce a list formatted this way.");
 	}
 
 }

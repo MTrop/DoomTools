@@ -1,10 +1,16 @@
 WTexScan
 --------
 
+### Changed for 1.2.2
+
+* `Fixed` "Quiet mode" still output a comment line for textures when it shouldn't have.
+
+
 ### Changed for 1.2.1
 
 * `Fixed` WTexScan will silently error out (print a message) instead of NPE if a map does 
   not contain SIDEDEFS or SECTORS, due to faulty map detection from DoomStruct. (Issue #92).
+
 
 ### Changed for 1.2.0
 

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.swing.Action;
@@ -44,9 +45,7 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkEvent.EventType;
-import javax.swing.event.HyperlinkListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
@@ -58,7 +57,6 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.common.Common;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.gui.managers.settings.EditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -82,7 +80,9 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileDirectoryFilter;
 import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileExtensionFilter;
+import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.fileFilter;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
@@ -145,7 +145,7 @@ public final class DoomToolsGUIUtils
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
 	@SafeVarargs
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor, final ModalChoice<Boolean> ... choices)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor, choices);
 	}
@@ -163,7 +163,7 @@ public final class DoomToolsGUIUtils
 	 * @param settingExtractor the function to use to extract settings from the content pane (called if the modal returned <code>true</code>).
 	 * @return the fetched settings object, or null if the modal returned <code>false</code> or <code>null</code> on close.
 	 */
-	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Function<Boolean, Boolean> validator, Function<C, T> settingExtractor)
+	public final <C extends Container, T> T createSettingsModal(String title, C contentPane, Predicate<Boolean> validator, Function<C, T> settingExtractor)
 	{
 		return settingsModal(getWindowIcons(), title, contentPane, validator, settingExtractor);
 	}
@@ -599,7 +599,7 @@ public final class DoomToolsGUIUtils
 	public File chooseDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver)
 	{
 		File selected;
-		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPathSupplier.get(), approveText, FileFilters.DIRECTORIES)) != null)
+		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPathSupplier.get(), approveText, createDirectoryFilter())) != null)
 			lastPathSaver.accept(selected);
 		return selected;
 	}
@@ -803,7 +803,9 @@ public final class DoomToolsGUIUtils
 				else
 					path = src.path.substring(idx + 1);
 				
-				tabs[i] = tab(path, src.path, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))));
+				tabs[i] = tab(path, src.path, containerOf(borderLayout(),
+					node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))
+				));
 			}
 			
 			out = modal(language.getText("doomtools.help.title"), 
@@ -827,7 +829,9 @@ public final class DoomToolsGUIUtils
 			out = modal(path, 
 				modalityType, 
 				containerOf(borderLayout(), 
-					node(BorderLayout.CENTER, containerOf(borderLayout(), node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))))
+					node(BorderLayout.CENTER, containerOf(borderLayout(), 
+						node(BorderLayout.CENTER, scroll(createComponentForHelpModal(src.getText(), src.path.endsWith(".md"))))
+					))
 				)
 			);
 		}
@@ -885,22 +889,18 @@ public final class DoomToolsGUIUtils
 		sheet.addRule("code { font-size: 100% }");
 		sheet.addRule("kbd { font-size: 100% }");
 		sheet.addRule("pre { font-size: 100%; padding-left:2em }");
-		editorPane.addHyperlinkListener(new HyperlinkListener()
+		editorPane.addHyperlinkListener((e) -> 
 		{
-			@Override
-			public void hyperlinkUpdate(HyperlinkEvent e)
+			if (e.getEventType() == EventType.ACTIVATED)
 			{
-				if (e.getEventType() == EventType.ACTIVATED)
-				{
-					URI uri = null;
-					try {
-						uri = new URI(e.getDescription());
-						SwingUtils.browse(uri);
-					} catch (URISyntaxException ex) {
-						// Do nothing.
-					} catch (IOException ex) {
-						// Do nothing.
-					}
+				URI uri = null;
+				try {
+					uri = new URI(e.getDescription());
+					SwingUtils.browse(uri);
+				} catch (URISyntaxException ex) {
+					// Do nothing.
+				} catch (IOException ex) {
+					// Do nothing.
 				}
 			}
 		});
@@ -1023,11 +1023,51 @@ public final class DoomToolsGUIUtils
 	}
 	
 	/**
+	 * @return the WAD archive file filter.
+	 */
+	public FileFilter createWADArchiveFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.archive.description") + " (*.wad/*.zip)", "wad", "zip");
+	}
+	
+	/**
 	 * @return the WAD container file filter.
 	 */
 	public FileFilter createWADContainerFilter()
 	{
 		return fileExtensionFilter(language.getText("doomtools.filter.container.description") + " (*.wad/*.pk3/*.pke/*.zip)", "wad", "pk3", "pke", "zip");
+	}
+	
+	/**
+	 * @return the executable file filter.
+	 */
+	public FileFilter createExecutableFilter()
+	{
+		return fileFilter(language.getText("doomtools.filter.executables"), (f) -> f.canExecute());
+	}
+	
+	/**
+	 * @return the directory file filter.
+	 */
+	public FileFilter createDirectoryFilter()
+	{
+		return fileDirectoryFilter(language.getText("doomtools.filter.directories"));
+	}
+	
+	/**
+	 * @return the workspace file filter.
+	 */
+	public FileFilter createWorkspaceFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.workspaces") + " (*.dtw)", "dtw");
+	}
+	
+	/**
+	 * @return the all files file filter.
+	 */
+	public FileFilter createAllFilesFilter()
+	{
+		return fileFilter(language.getText("doomtools.filter.allfiles"), (f) -> true);
 	}
 	
 	/**

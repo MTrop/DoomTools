@@ -1,9 +1,9 @@
 ![DoomTools Logo Banner](https://mtrop.github.io/DoomTools/images/doomtools-banner-darkened.png "DoomTools Logo Banner")  
-Copyright (c) 2019-2024 Matt Tropiano  
+Copyright (c) 2019-2025 Matt Tropiano  
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.15.1+  
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.18.1+  
 [Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.3.0+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.15.0+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
@@ -196,6 +196,10 @@ Can also export a set of ANIMATED and SWITCHES lumps to a definition file.
 
 A utility that reads a DEUTEX-style texture file and imports it into a WAD file as TEXTUREx and PNAMES lumps.
 Can also export TEXTUREx/PNAMES in the same way. 
+
+#### WTexList
+
+A utility that scans textures in a WAD and outputs a list of found textures and flats, suitable for import into one of the next programs...
 
 #### WTexScan
 

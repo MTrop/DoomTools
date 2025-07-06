@@ -29,6 +29,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 
 	private Integer health;
 	private Integer speed; // written as fixed point 16.16 if MISSILE
+	private Integer fixedSpeed; // used instead of speed if non-null.
 	private Integer radius; // written as fixed point 16.16
 	private Integer height; // written as fixed point 16.16
 	private Integer damage;
@@ -91,6 +92,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		
 		this.health = null;
 		this.speed = null;
+		this.fixedSpeed = null;
 		this.radius = null;
 		this.height = null;
 		this.damage = null;
@@ -141,6 +143,8 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		
 		if (health != null)
 			destination.setHealth(health);
+		if (fixedSpeed != null)
+			destination.setFixedSpeed(fixedSpeed);
 		if (speed != null)
 			destination.setSpeed(speed);
 		if (fastSpeed != null)
@@ -242,6 +246,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		setEditorNumber(EDITORNUMBER_NONE);
 		setHealth(0);
 		setSpeed(0);
+		setFixedSpeed(null);
 		setRadius(0);
 		setHeight(0);
 		setDamage(0);
@@ -344,6 +349,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	{
 		RangeUtils.checkRange("Speed", -32768, 32767, speed);
 		this.speed = speed;
+		this.fixedSpeed = null; // set fixed speed to null if this is set.
+		return this;
+	}
+
+	@Override
+	public DEHThingTemplate setFixedSpeed(Integer fixedSpeed)
+	{
+		this.fixedSpeed = fixedSpeed;
 		return this;
 	}
 

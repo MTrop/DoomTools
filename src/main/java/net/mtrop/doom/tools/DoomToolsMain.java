@@ -1,21 +1,27 @@
 /*******************************************************************************
- * Copyright (c) 2020-2024 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doom.tools;
 
 import java.awt.Desktop;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -59,6 +65,7 @@ public final class DoomToolsMain
 		ObjectUtils.keyValue("wswantbl",   WSwAnTablesMain.class),
 		ObjectUtils.keyValue("wadtex",     WADTexMain.class),
 		ObjectUtils.keyValue("wtexscan",   WTexScanMain.class),
+		ObjectUtils.keyValue("wtexlist",   WTexListMain.class),
 		ObjectUtils.keyValue("wtexport",   WTExportMain.class),
 		ObjectUtils.keyValue("wadscript",  WadScriptMain.class),
 		ObjectUtils.keyValue("decohack",   DecoHackMain.class),
@@ -68,7 +75,41 @@ public final class DoomToolsMain
 		ObjectUtils.keyValue("doommake",   DoomMakeMain.class),
 		ObjectUtils.keyValue("rookscript", ScriptExecutor.class)
 	);
-		
+	
+	private static final List<String> DOCS_DATA = ObjectUtils.createList(
+		"docs/AUTHORS.txt",
+		"docs/CHANGELOG.md",
+		"docs/DECOHack Constants.txt",
+		"docs/DECOHack Help.txt",
+		"docs/DeHackEd Hardcodings.txt",
+		"docs/DoomMake Help.txt",
+		"docs/RookScript Quick Guide.md",
+		"docs/WadMerge Help.txt",
+		"docs/WadScript Help.txt",
+		"docs/changelogs/CHANGELOG-decohack.md",
+		"docs/changelogs/CHANGELOG-dimgconv.md",
+		"docs/changelogs/CHANGELOG-dmxconv.md",
+		"docs/changelogs/CHANGELOG-doomfetch.md",
+		"docs/changelogs/CHANGELOG-doommake.md",
+		"docs/changelogs/CHANGELOG-wadmerge.md",
+		"docs/changelogs/CHANGELOG-wadscript.md",
+		"docs/changelogs/CHANGELOG-wadtex.md",
+		"docs/changelogs/CHANGELOG-wswantbl.md",
+		"docs/changelogs/CHANGELOG-wtexlist.md",
+		"docs/changelogs/CHANGELOG-wtexport.md",
+		"docs/changelogs/CHANGELOG-wtexscan.md",
+		"docs/licenses/LICENSE-AutoComplete.txt",
+		"docs/licenses/LICENSE-BlackRookBase.txt",
+		"docs/licenses/LICENSE-BlackRookJSON.txt",
+		"docs/licenses/LICENSE-CommonMark.txt",
+		"docs/licenses/LICENSE-DoomStruct.txt",
+		"docs/licenses/LICENSE-FlatLaF.txt",
+		"docs/licenses/LICENSE-RookScript.txt",
+		"docs/licenses/LICENSE-RookScript-Desktop.txt",
+		"docs/licenses/LICENSE-RSyntaxTextArea.txt",
+		"docs/licenses/LICENSE-Silk Icons.txt"
+	);
+	
 	private static final FileFilter JAR_FILES = (f) -> {
 		return FileUtils.getFileExtension(f.getName()).equalsIgnoreCase("jar");
 	};
@@ -79,9 +120,11 @@ public final class DoomToolsMain
 	public static final String SWITCH_DOCS = "--docs";
 	public static final String SWITCH_WHERE = "--where";
 	public static final String SWITCH_SETTINGS = "--settings";
+	public static final String SWITCH_JAVA = "--java";
 	public static final String SWITCH_UPDATE = "--update";
 	public static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
 	public static final String SWITCH_UPDATE_SHELL = "--update-shell";
+	public static final String SWITCH_UPDATE_DOCS = "--update-docs";
 	public static final String SWITCH_GUI = "--gui";
 	
 	/**
@@ -96,6 +139,8 @@ public final class DoomToolsMain
 		private boolean update;
 		private boolean updateCleanup;
 		private boolean updateShell;
+		private boolean updateDocs;
+		private boolean javaStats;
 		private boolean openWebsite;
 		private boolean openDocs;
 		private boolean where;
@@ -109,6 +154,8 @@ public final class DoomToolsMain
 			this.update = false;
 			this.updateCleanup = false;
 			this.updateShell = false;
+			this.updateDocs = false;
+			this.javaStats = false;
 			this.openWebsite = false;
 			this.where = false;
 			this.openSettings = false;
@@ -182,6 +229,50 @@ public final class DoomToolsMain
 			}
 		}
 
+		public int doUpdateDocs()
+		{
+			final String path; 
+			try {
+				path = Environment.getDoomToolsPath();
+			} catch (SecurityException e) {
+				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
+				return ERROR_SECURITY;
+			}
+			if (ObjectUtils.isEmpty(path))
+			{
+				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
+				return ERROR_NOWHERE;
+			}
+			
+			for (String docFileResourcePath : DOCS_DATA)
+			{
+				File outputFilePath = new File(path + "/" + docFileResourcePath);
+				
+				if (!(outputFilePath.getParentFile().exists() || outputFilePath.mkdirs()))
+				{
+					options.stderr.println("ERROR: Could not create directories for: " + docFileResourcePath);
+					return ERROR_IOERROR;
+				}
+				
+				try (
+					Reader reader = Common.openResourceReader(docFileResourcePath);
+					Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilePath)))
+				){
+					IOUtils.relay(reader, writer);
+					writer.flush();
+				} catch (FileNotFoundException e) {
+					options.stderr.println("ERROR: Could not create file for: " + docFileResourcePath);
+					return ERROR_IOERROR;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not write to: " + docFileResourcePath);
+					return ERROR_IOERROR;
+				}
+			}
+			
+			options.stdout.println("Done!");
+			return ERROR_NONE;
+		}
+		
 		public int doUpdateShell()
 		{
 			final String path; 
@@ -379,6 +470,10 @@ public final class DoomToolsMain
 					return ERROR_NONE;
 				}
 			}
+			else if (options.updateDocs)
+			{
+				return doUpdateDocs();
+			}
 			else if (options.updateShell)
 			{
 				return doUpdateShell();
@@ -390,6 +485,17 @@ public final class DoomToolsMain
 			else if (options.update)
 			{
 				return doUpdate();
+			}
+			else if (options.javaStats)
+			{
+				options.stdout.println("Java Vendor:     " + System.getProperty("java.vendor"));
+				options.stdout.println("Java Vendor URL: " + System.getProperty("java.vendor.url"));
+				options.stdout.println("Java Version:    " + System.getProperty("java.version"));
+				options.stdout.println("Java Home:       " + System.getProperty("java.home"));
+				options.stdout.println("OS Name:         " + System.getProperty("os.name"));
+				options.stdout.println("OS Version:      " + System.getProperty("os.version"));
+				options.stdout.println("OS Architecture: " + System.getProperty("os.arch"));
+				return ERROR_NONE;
 			}
 			else if (options.where)
 			{
@@ -427,8 +533,9 @@ public final class DoomToolsMain
 					return desktopError;
 				
 				try {
-					options.stdout.println("Opening the DoomTools documentation folder...");
-					Desktop.getDesktop().open(new File(path + File.separator + "docs"));
+					File docsPath = new File(path + File.separator + "docs");
+					options.stdout.printf("Opening the DoomTools documentation folder (%s)...\n", docsPath.toString());
+					Desktop.getDesktop().open(docsPath);
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Cannot open documentation folder. I/O Error.");
 					return ERROR_DESKTOP_ERROR;
@@ -445,12 +552,12 @@ public final class DoomToolsMain
 				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "settings folder")) != ERROR_NONE)
 					return desktopError;
 
-				options.stdout.println("Opening the DoomTools settings folder...");
 				File settingsDir = new File(Paths.APPDATA_PATH);
+				options.stdout.printf("Opening the DoomTools settings folder (%s)...\n", settingsDir.toString());
 				if (!settingsDir.exists())
 				{
 					options.stdout.println("Creating the missing DoomTools settings folder...");
-					if( !settingsDir.mkdirs())
+					if (!settingsDir.mkdirs())
 					{
 						options.stderr.println("ERROR: Cannot open settings folder. Not created nor found.");
 						return ERROR_DESKTOP_ERROR;
@@ -476,7 +583,7 @@ public final class DoomToolsMain
 					return desktopError;
 				
 				try {
-					options.stdout.println("Opening the DoomTools website...");
+					options.stdout.printf("Opening the DoomTools website (%s)...\n", DOOMTOOLS_WEBSITE);
 					Desktop.getDesktop().browse(new URI(DOOMTOOLS_WEBSITE));
 				} catch (URISyntaxException e) {
 					options.stderr.println("ERROR: INTERNAL ERROR: " + e.getLocalizedMessage());
@@ -512,6 +619,7 @@ public final class DoomToolsMain
 				options.stdout.println("Contains WADTex v" + Version.WADTEX);
 				options.stdout.println("Contains WSwAnTBL v" + Version.WSWANTBL);
 				options.stdout.println("Contains WTExport v" + Version.WTEXPORT);
+				options.stdout.println("Contains WTexList v" + Version.WTEXLIST);
 				options.stdout.println("Contains WTexScan v" + Version.WTEXSCAN);
 				return ERROR_NONE;
 			}
@@ -573,12 +681,16 @@ public final class DoomToolsMain
 						options.openDocs = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
 						options.where = true;
+					else if (arg.equalsIgnoreCase(SWITCH_JAVA))
+						options.javaStats = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE))
 						options.update = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_CLEANUP))
 						options.updateCleanup = true;
 					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_SHELL))
 						options.updateShell = true;
+					else if (arg.equalsIgnoreCase(SWITCH_UPDATE_DOCS))
+						options.updateDocs = true;
 				}
 				break;
 			}
@@ -641,6 +753,8 @@ public final class DoomToolsMain
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
 		out.println();
+		out.println("    --java               Displays Java runtime information.");
+		out.println();
 		out.println("    --update             Attempts to update DoomTools (may require permission");
 		out.println("                             elevation on some operating systems).");
 		out.println();
@@ -651,6 +765,8 @@ public final class DoomToolsMain
 		out.println("    --update-shell       Updates the shell commands that invoke the tools.");
 		out.println("                             If you are missing one, run DoomTools with this");
 		out.println("                             switch.");
+		out.println();
+		out.println("    --update-docs        Updates the documentation folder.");
 		out.println();
 		out.println("    --gui                Starts the DoomTools GUI.");
 	}

@@ -71,12 +71,6 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 		return DEHFeatureLevel.BOOM;
 	}
 
-	@Override
-	public String getString(String key)
-	{
-		return strings.getOrDefault(key, getSourcePatch().getString(key));
-	}
-
 	/**
 	 * Sets a new string.
 	 * @param key the string key to replace.
@@ -86,11 +80,19 @@ public class PatchBoomContext extends AbstractPatchContext<DEHPatchBoom> impleme
 	{
 		strings.put(key, value);
 	}
-	
-	@Override
+
+	/**
+	 * @return the set of string mnemonics in this patch.
+	 */
 	public Set<String> getStringKeys()
 	{
 		return strings.keySet();
+	}
+
+	@Override
+	public String getString(String key)
+	{
+		return strings.getOrDefault(key, getSourcePatch().getString(key));
 	}
 
 	@Override

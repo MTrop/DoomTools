@@ -32,6 +32,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	
 	private int health;
 	private int speed; // written as fixed point 16.16 if MISSILE
+	private Integer fixedSpeed; // used instead of speed if non-null.
 	private int radius; // written as fixed point 16.16
 	private int height; // written as fixed point 16.16
 	private int damage;
@@ -104,6 +105,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 
 		setHealth(source.health);
 		setSpeed(source.speed);
+		setFixedSpeed(source.fixedSpeed);
 		setFastSpeed(source.fastSpeed);
 		setRadius(source.radius);
 		setHeight(source.height);
@@ -143,6 +145,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		editorKeyMap.clear();
 		setHealth(0);
 		setSpeed(0);
+		setFixedSpeed(null);
 		setRadius(0);
 		setHeight(0);
 		setDamage(0);
@@ -195,6 +198,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return editorNumber;
 	}
 
+	@Override
 	public DEHThing setEditorNumber(int editorNumber)
 	{
 		if (editorNumber == 0)
@@ -231,14 +235,20 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return editorKeyMap.get(key);
 	}
 	
+	public boolean hasEditorKeys()
+	{
+		return !editorKeyMap.isEmpty();
+	}
+	
 	public int getHealth() 
 	{
 		return health;
 	}
 
+	@Override
 	public DEHThing setHealth(int health)
 	{
-		RangeUtils.checkRange("Health", 0, 999999, health);
+		RangeUtils.checkRange("Health", 0, Integer.MAX_VALUE, health);
 		this.health = health;
 		return this;
 	}
@@ -248,10 +258,24 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return speed;
 	}
 
+	@Override
 	public DEHThing setSpeed(int speed) 
 	{
 		RangeUtils.checkRange("Speed", -32768, 32767, speed);
 		this.speed = speed;
+		this.fixedSpeed = null; // reset fixed speed if set.
+		return this;
+	}
+	
+	public Integer getFixedSpeed() 
+	{
+		return fixedSpeed;
+	}
+	
+	@Override
+	public DEHThing setFixedSpeed(Integer fixedSpeed)
+	{
+		this.fixedSpeed = fixedSpeed;
 		return this;
 	}
 
@@ -260,6 +284,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return fastSpeed;
 	}
 
+	@Override
 	public DEHThing setFastSpeed(int fastSpeed) 
 	{
 		RangeUtils.checkRange("Fast speed", -1, 65535, fastSpeed);
@@ -272,6 +297,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return radius;
 	}
 
+	@Override
 	public DEHThing setRadius(int radius) 
 	{
 		RangeUtils.checkRange("Radius", 0, 65535, radius);
@@ -284,6 +310,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return height;
 	}
 
+	@Override
 	public DEHThing setHeight(int height) 
 	{
 		RangeUtils.checkRange("Height", 0, 65535, height);
@@ -296,9 +323,9 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return damage;
 	}
 
+	@Override
 	public DEHThing setDamage(int damage) 
 	{
-		RangeUtils.checkRange("Damage", -999999, 999999, damage);
 		this.damage = damage;
 		return this;
 	}
@@ -308,6 +335,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return reactionTime;
 	}
 
+	@Override
 	public DEHThing setReactionTime(int reactionTime)
 	{
 		RangeUtils.checkRange("Reaction time", 0, Integer.MAX_VALUE, reactionTime);
@@ -320,6 +348,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return painChance;
 	}
 
+	@Override
 	public DEHThing setPainChance(int painChance)
 	{
 		RangeUtils.checkRange("Pain chance", 0, Integer.MAX_VALUE, painChance);
@@ -332,6 +361,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return flags;
 	}
 
+	@Override
 	public DEHThing setFlags(int bits) 
 	{
 		this.flags = bits;
@@ -394,6 +424,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return mass;
 	}
 
+	@Override
 	public DEHThing setMass(int mass) 
 	{
 		this.mass = mass;
@@ -405,6 +436,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return meleeRange;
 	}
 
+	@Override
 	public DEHThing setMeleeRange(int meleeRange) 
 	{
 		RangeUtils.checkRange("Melee range", 0, 65535, meleeRange);
@@ -417,6 +449,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return infightingGroup;
 	}
 	
+	@Override
 	public DEHThing setInfightingGroup(int infightingGroup) 
 	{
 		RangeUtils.checkRange("Infighting group", 0, Integer.MAX_VALUE, infightingGroup);
@@ -429,6 +462,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return projectileGroup;
 	}
 	
+	@Override
 	public DEHThing setProjectileGroup(int projectileGroup) 
 	{
 		RangeUtils.checkRange("Projectile group", -1, Integer.MAX_VALUE, projectileGroup);
@@ -441,6 +475,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return splashGroup;
 	}
 	
+	@Override
 	public DEHThing setSplashGroup(int splashGroup) 
 	{
 		RangeUtils.checkRange("Splash group", 0, Integer.MAX_VALUE, splashGroup);
@@ -453,6 +488,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return droppedItem;
 	}
 	
+	@Override
 	public DEHThing setDroppedItem(int droppedItem) 
 	{
 		RangeUtils.checkRange("Dropped item", 0, Integer.MAX_VALUE, droppedItem);
@@ -465,6 +501,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_SPAWN);
 	}
 
+	@Override
 	public DEHThing setSpawnFrameIndex(int spawnFrameIndex)
 	{
 		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
@@ -477,6 +514,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_SEE);
 	}
 
+	@Override
 	public DEHThing setWalkFrameIndex(int walkFrameIndex) 
 	{
 		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
@@ -489,6 +527,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_PAIN);
 	}
 
+	@Override
 	public DEHThing setPainFrameIndex(int painFrameIndex) 
 	{
 		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
@@ -501,6 +540,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_MELEE);
 	}
 
+	@Override
 	public DEHThing setMeleeFrameIndex(int meleeFrameIndex)
 	{
 		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
@@ -513,6 +553,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_MISSILE);
 	}
 
+	@Override
 	public DEHThing setMissileFrameIndex(int missileFrameIndex) 
 	{
 		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
@@ -525,6 +566,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_DEATH);
 	}
 
+	@Override
 	public DEHThing setDeathFrameIndex(int deathFrameIndex) 
 	{
 		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
@@ -537,6 +579,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_XDEATH);
 	}
 
+	@Override
 	public DEHThing setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
 		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
@@ -549,6 +592,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return getLabel(STATE_LABEL_RAISE);
 	}
 
+	@Override
 	public DEHThing setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
@@ -600,6 +644,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return seeSoundPosition;
 	}
 
+	@Override
 	public DEHThing setSeeSoundPosition(int seeSoundPosition)
 	{
 		RangeUtils.checkRange("Alert sound position", 0, Integer.MAX_VALUE, seeSoundPosition);
@@ -612,6 +657,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return attackSoundPosition;
 	}
 
+	@Override
 	public DEHThing setAttackSoundPosition(int attackSoundPosition)
 	{
 		RangeUtils.checkRange("Attack sound position", 0, Integer.MAX_VALUE, attackSoundPosition);
@@ -624,6 +670,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return painSoundPosition;
 	}
 
+	@Override
 	public DEHThing setPainSoundPosition(int painSoundPosition) 
 	{
 		RangeUtils.checkRange("Pain sound position", 0, Integer.MAX_VALUE, painSoundPosition);
@@ -636,6 +683,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return deathSoundPosition;
 	}
 
+	@Override
 	public DEHThing setDeathSoundPosition(int deathSoundPosition) 
 	{
 		RangeUtils.checkRange("Death sound position", 0, Integer.MAX_VALUE, deathSoundPosition);
@@ -648,6 +696,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return activeSoundPosition;
 	}
 
+	@Override
 	public DEHThing setActiveSoundPosition(int activeSoundPosition)
 	{
 		RangeUtils.checkRange("Active sound position", 0, Integer.MAX_VALUE, activeSoundPosition);
@@ -660,6 +709,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return ripSoundPosition;
 	}
 
+	@Override
 	public DEHThing setRipSoundPosition(int ripSoundPosition)
 	{
 		RangeUtils.checkRange("Rip sound position", 0, Integer.MAX_VALUE, ripSoundPosition);
@@ -677,9 +727,11 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	
 	public boolean equals(DEHThing obj) 
 	{
-		return editorNumber == obj.editorNumber
+		return name == obj.name
+			&& editorNumber == obj.editorNumber
 			&& health == obj.health
 			&& speed == obj.speed
+			&& fixedSpeed == obj.fixedSpeed
 			&& fastSpeed == obj.fastSpeed
 			&& radius == obj.radius
 			&& height == obj.height
@@ -717,7 +769,13 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0;
 		boolean thingIsProjectile = (thing.flags & DEHThingFlag.MISSILE.getValue()) != 0;
 
-		int speedVal = isProjectile ? speed << 16 : speed;
+		int speedVal;
+		if (fixedSpeed != null)
+			speedVal = fixedSpeed;
+		else
+			speedVal = isProjectile ? speed << 16 : speed;
+		
+		
 		int thingSpeedVal = thingIsProjectile ? thing.speed << 16 : thing.speed;
 		int fastSpeedVal = isProjectile && fastSpeed != DEFAULT_FASTSPEED ? fastSpeed << 16 : fastSpeed;
 		int thingFastSpeedVal = thingIsProjectile && thing.fastSpeed != DEFAULT_FASTSPEED ? thing.fastSpeed << 16 : thing.fastSpeed;

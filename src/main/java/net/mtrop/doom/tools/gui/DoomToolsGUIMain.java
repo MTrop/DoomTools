@@ -30,6 +30,8 @@ import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WSwAnTablesEditorApp;
 import net.mtrop.doom.tools.gui.apps.WTExportApp;
+import net.mtrop.doom.tools.gui.apps.WTexListApp;
+import net.mtrop.doom.tools.gui.apps.WTexListTExportApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanApp;
 import net.mtrop.doom.tools.gui.apps.WTexScanTExportApp;
 import net.mtrop.doom.tools.gui.apps.WadMergeEditorApp;
@@ -100,10 +102,14 @@ public final class DoomToolsGUIMain
 		String WSWANTBL = "wswantbl";
 		/** WSwAnTbl Compiler. */
 		String WSWANTBL_COMPILER = "wswantbl-compiler";
+		/** WTexList. */
+		String WTEXLIST = "wtexlist";
 		/** WTexScan. */
 		String WTEXSCAN = "wtexscan";
 		/** WTExport. */
 		String WTEXPORT = "wtexport";
+		/** WTexList/WTExport. */
+		String WTEXLIST_WTEXPORT = "wtexlist-wtexport";
 		/** WTexScan/WTExport. */
 		String WTEXSCAN_WTEXPORT = "wtexscan-wtexport";
 	}
@@ -396,6 +402,10 @@ public final class DoomToolsGUIMain
 			String path = ArrayUtils.arrayElement(args, 1);
 			startApplication(new WSwAnTablesCompilerApp(path));
 		}
+		else if (ApplicationNames.WTEXLIST.equals(args[0]))
+		{
+			startApplication(new WTexListApp());
+		}
 		else if (ApplicationNames.WTEXSCAN.equals(args[0]))
 		{
 			startApplication(new WTexScanApp());
@@ -403,6 +413,10 @@ public final class DoomToolsGUIMain
 		else if (ApplicationNames.WTEXPORT.equals(args[0]))
 		{
 			startApplication(new WTExportApp());
+		}
+		else if (ApplicationNames.WTEXLIST_WTEXPORT.equals(args[0]))
+		{
+			startApplication(new WTexListTExportApp());
 		}
 		else if (ApplicationNames.WTEXSCAN_WTEXPORT.equals(args[0]))
 		{

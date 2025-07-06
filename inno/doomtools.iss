@@ -80,6 +80,7 @@ Name: "{group}\Utilities\WADTex Editor";            Filename: "{app}\{#DTAppExeN
 Name: "{group}\Utilities\WadMerge Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wadmerge"
 Name: "{group}\Utilities\WadScript Editor";         Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
 Name: "{group}\Utilities\WSwAnTbl Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wswantbl"
+Name: "{group}\Utilities\WTexList-WTExport";        Filename: "{app}\{#DTAppExeName}"; Parameters: "wtexlist-wtexport"
 Name: "{group}\Utilities\WTexScan-WTExport";        Filename: "{app}\{#DTAppExeName}"; Parameters: "wtexscan-wtexport"
 Name: "{group}\{cm:UninstallProgram,{#DTAppName}}"; Filename: {uninstallexe}
 Name: "{autodesktop}\{#DTAppName}";                 Filename: "{app}\{#DTAppExeName}"; Tasks: desktopicon

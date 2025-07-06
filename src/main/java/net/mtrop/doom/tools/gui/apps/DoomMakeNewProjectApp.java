@@ -43,7 +43,6 @@ import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.FileFilters;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -164,7 +163,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 					language.getText("doommake.newproject.directory.browse.title"), 
 					current, 
 					language.getText("doommake.newproject.directory.browse.accept"), 
-					FileFilters.DIRECTORIES
+					utils.createDirectoryFilter()
 				), 
 				(selected) -> { 
 					targetDirectory = selected;

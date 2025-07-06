@@ -59,7 +59,6 @@ import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.HTMLWriter;
-import net.mtrop.doom.tools.struct.PreprocessorLexer;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -73,6 +72,7 @@ import com.blackrook.rookscript.functions.DigestFunctions;
 import com.blackrook.rookscript.functions.FileSystemFunctions;
 import com.blackrook.rookscript.functions.JSONFunctions;
 import com.blackrook.rookscript.functions.PrintFunctions;
+import com.blackrook.rookscript.struct.PreprocessorLexer;
 
 /**
  * Main class for executing scripts.
@@ -934,6 +934,7 @@ public final class WadScriptMain
 
 			if (options.mode == Mode.HELP)
 			{
+				splash(options.stdout);
 				usage(options.stdout);
 				printHelp(options.stdout);
 				return ERROR_NONE;

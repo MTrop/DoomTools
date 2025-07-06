@@ -28,6 +28,7 @@ import net.mtrop.doom.tools.DoomToolsMain;
 import net.mtrop.doom.tools.WADTexMain;
 import net.mtrop.doom.tools.WSwAnTablesMain;
 import net.mtrop.doom.tools.WTExportMain;
+import net.mtrop.doom.tools.WTexListMain;
 import net.mtrop.doom.tools.WTexScanMain;
 import net.mtrop.doom.tools.WadMergeMain;
 import net.mtrop.doom.tools.WadScriptMain;
@@ -865,6 +866,89 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 				}
 
 				returnValue.set(WTExportMain.call(options));
+				return true;
+			} catch (OptionParseException e) {
+				returnValue.setError("BadOptions", "Option argument parse failed: " + e.getLocalizedMessage());
+				return true;
+			} catch (ClassCastException e) {
+				returnValue.setError("BadOptions", "Options Map could not be applied: " + e.getLocalizedMessage());
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				args.setNull();
+			}
+		}
+	},
+
+	WTEXLIST(1)
+	{
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Calls the WTexList tool. Inherits STDOUT/STDERR of this script unless overridden (see options)."
+				)
+				.parameter("options", 
+					type(Type.MAP, 
+						"{" + StringUtils.joinStrings(", ",
+							"stdout:OBJECTREF(OutputStream)",
+							"stderr:OBJECTREF(OutputStream)",
+							"wadfiles:LIST[STRING, ...]",
+							"quiet:BOOLEAN",
+							"outputtextures:BOOLEAN",
+							"outputflats:BOOLEAN"
+						) + "}",
+						"Map of options."
+					)
+				)
+				.returns(
+					type(Type.INTEGER, "The normal return of this tool's process."),
+					type(Type.ERROR, "BadOptions", "If the options map could not be applied.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue args = CACHEVALUE2.get();
+			try 
+			{
+				PrintStream stdout = scriptInstance.getEnvironment().getStandardOut();
+				PrintStream stderr = scriptInstance.getEnvironment().getStandardErr();
+				WTexListMain.Options options = WTexListMain.options(stdout, stderr);
+				scriptInstance.popStackValue(temp);
+				if (!temp.isNull())
+				{
+					if (!temp.isMap())
+					{
+						returnValue.setError("BadOptions", "Options parameter needs to be a Map type.");
+						return true;
+					}
+					else if (!temp.mapApply(options))
+					{
+						returnValue.setError("BadOptions", "Options Map could not be applied.");
+						return true;
+					}
+				}
+				temp.mapGet("wadfiles", args);
+				if (!args.isNull() && args.isList())
+				{
+					for (ScriptIteratorType.IteratorPair pair : args)
+					{
+						ScriptValue value = pair.getValue();
+						if (value.isObjectRef(File.class))
+							options.addWadFile(value.asObjectType(File.class));
+						else
+							options.addWadFile(new File(value.asString()));
+					}
+				}
+
+				returnValue.set(WTexListMain.call(options));
 				return true;
 			} catch (OptionParseException e) {
 				returnValue.setError("BadOptions", "Option argument parse failed: " + e.getLocalizedMessage());

@@ -69,10 +69,12 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("fill",       Token.RESERVED_WORD);
 		targetMap.put("alias",      Token.RESERVED_WORD);
 
+		targetMap.put("set",        Token.RESERVED_WORD);
 		targetMap.put("clear",      Token.RESERVED_WORD);
 		targetMap.put("properties", Token.RESERVED_WORD);
 		targetMap.put("sounds",     Token.RESERVED_WORD);
 		targetMap.put("states",     Token.RESERVED_WORD);
+		targetMap.put("sprite",     Token.RESERVED_WORD);
 
 		targetMap.put("goto",       Token.RESERVED_WORD);
 		targetMap.put("loop",       Token.RESERVED_WORD);
@@ -82,6 +84,8 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("free",       Token.RESERVED_WORD);
 		targetMap.put("protect",    Token.RESERVED_WORD);
 		targetMap.put("unprotect",  Token.RESERVED_WORD);
+		targetMap.put("safety",     Token.RESERVED_WORD);
+		targetMap.put("index",      Token.RESERVED_WORD);
 
 		targetMap.put("each",       Token.RESERVED_WORD);
 		targetMap.put("in",         Token.RESERVED_WORD);
@@ -89,6 +93,9 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("from",       Token.RESERVED_WORD);
 		targetMap.put("with",       Token.RESERVED_WORD);
 		targetMap.put("swap",       Token.RESERVED_WORD);
+		targetMap.put("on",         Token.RESERVED_WORD);
+		targetMap.put("off",        Token.RESERVED_WORD);
+		targetMap.put("next",       Token.RESERVED_WORD);
 
 		targetMap.put("null",       Token.LITERAL_NUMBER_DECIMAL_INT);
 		targetMap.put("true",       Token.LITERAL_BOOLEAN);

@@ -17,19 +17,19 @@
 	<property name="dist.dir" value="dist" />
 
 	<!-- Project Libs -->
-	<property name="doom.lib.version" value="2.15.8" />
+	<property name="doom.lib.version" value="2.18.1" />
 	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
 	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
 	<property name="doom.jar" value="${doom.project}.jar" />
 	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
 
-	<property name="json.lib.version" value="1.3.0" />
+	<property name="json.lib.version" value="1.4.1" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />
 	<property name="json.jar.src" value="${json.project}-sources.jar" />
 
-	<property name="rookscript.lib.version" value="1.15.0" />
+	<property name="rookscript.lib.version" value="1.15.1" />
 	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
 	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
 	<property name="rookscript.jar" value="${rookscript.project}.jar" />
@@ -105,6 +105,7 @@
 	<property name="wswantbl.version" value="${build.version}" />
 	<property name="wadtex.version" value="${build.version}" />
 	<property name="wtexscan.version" value="${build.version}" />
+	<property name="wtexlist.version" value="${build.version}" />
 	<property name="wtexport.version" value="${build.version}" />
 	<property name="wadscript.version" value="${build.version}" />
 	<property name="decohack.version" value="${build.version}" />
@@ -151,6 +152,7 @@
 		<echo file="${build.versions.dir}/wadmerge.version" message="${wadmerge.version}" />
 		<echo file="${build.versions.dir}/wswantbl.version" message="${wswantbl.version}" />
 		<echo file="${build.versions.dir}/wadtex.version" message="${wadtex.version}" />
+		<echo file="${build.versions.dir}/wtexlist.version" message="${wtexlist.version}" />
 		<echo file="${build.versions.dir}/wtexscan.version" message="${wtexscan.version}" />
 		<echo file="${build.versions.dir}/wtexport.version" message="${wtexport.version}" />
 		<echo file="${build.versions.dir}/wadscript.version" message="${wadscript.version}" />
@@ -312,6 +314,9 @@
 		<!-- WTexScan -->
 		<shell-cmd  name="wtexscan"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
 		<shell-bash name="wtexscan"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexScanMain" />
+		<!-- WTexList -->
+		<shell-cmd  name="wtexlist"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexListMain" />
+		<shell-bash name="wtexlist"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTexListMain" />
 		<!-- WTexport -->
 		<shell-cmd  name="wtexport"        todir="${build.dir}/shell/cmd"  options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />
 		<shell-bash name="wtexport"        todir="${build.dir}/shell/bash" options="${jvm.options.common}" mainclass="net.mtrop.doom.tools.WTExportMain" />

@@ -36,5 +36,6 @@ public interface Version
 	String WADTEX = Common.getVersionString("wadtex");
 	String WSWANTBL = Common.getVersionString("wswantbl");
 	String WTEXPORT = Common.getVersionString("wtexport");
+	String WTEXLIST = Common.getVersionString("wtexlist");
 	String WTEXSCAN = Common.getVersionString("wtexscan");
 }

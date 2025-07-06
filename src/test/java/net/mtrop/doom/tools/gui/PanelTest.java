@@ -30,7 +30,7 @@ public final class PanelTest
 		try {
 			obj = Common.create(Class.forName(args[0]));
 		} catch (Exception e) {
-			System.err.println(e.getLocalizedMessage());
+			e.printStackTrace(System.err);
 			return;
 		}
 

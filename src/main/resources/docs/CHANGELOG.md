@@ -7,6 +7,22 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-04-26** Updated JSON to `1.4.1`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.1-RELEASE)
+- **2024-04-25** Moved `DECOHack Constants.txt`to Docs.
+- **2024-04-25** Added `--update-docs` switch to DoomTools.
+
+- **2024-02-18** Updated DoomStruct to `2.18.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.18.0-RELEASE)
+
+- **2025-02-16** Updated RookScript to `1.15.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.15.1-RELEASE)
+
+- **2025-01-25** Added additional helpful info to DoomTools switches.
+
+- **2024-10-19** Added `--java` switch to DoomTools (and About Java dialog to GUI).
+
+- **2024-10-03** Updated DoomStruct to `2.17.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.17.0-RELEASE)
+
+- **2024-09-05** Updated DoomStruct to `2.16.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.16.0-RELEASE)
+
 - **2024-05-19** Updated DoomStruct to `2.15.8`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.8-RELEASE)
 
 - **2024-03-12** Updated DoomStruct to `2.15.6`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.15.6-RELEASE)
