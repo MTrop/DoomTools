@@ -1007,15 +1007,78 @@ interface Constants
 
 	static final DEHWeapon[] DEHWEAPON = 
 	{
-		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.AUTOSWITCHFROM, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)),
-		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.AUTOSWITCHFROM)),
-		DEHWeapon.create("Shotgun",         Ammo.SHELLS,   S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
-		DEHWeapon.create("Chaingun",        Ammo.BULLETS,  S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
-		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE)),
-		DEHWeapon.create("Plasma rifle",    Ammo.CELLS,    S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0),
-		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE)),
-		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOTHRUST, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)),
+		DEHWeapon.create("Fist",            Ammo.INFINITE, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.AUTOSWITCHFROM, DEHWeaponMBF21Flag.NOAUTOSWITCHTO))
+			.setSlot(1)
+			.setSlotPriority(0)
+			.setSwitchPriority(0)
+			.setInitialOwned(true)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMFIST")
+		,
+		DEHWeapon.create("Pistol",          Ammo.BULLETS,  S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.AUTOSWITCHFROM))
+			.setSlot(2)
+			.setSlotPriority(0)
+			.setSwitchPriority(6)
+			.setInitialOwned(true)
+			.setInitialRaised(true)
+			.setCarouselIcon("SMPISG")
+		,
+		DEHWeapon.create("Shotgun",         Ammo.SHELLS,   S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+			.setSlot(3)
+			.setSlotPriority(0)
+			.setSwitchPriority(7)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMSHOT")
+		,
+		DEHWeapon.create("Chaingun",        Ammo.BULLETS,  S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+			.setSlot(4)
+			.setSlotPriority(0)
+			.setSwitchPriority(8)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMMGUN")
+		,
+		DEHWeapon.create("Rocket launcher", Ammo.ROCKETS,  S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE))
+			.setSlot(5)
+			.setSlotPriority(0)
+			.setSwitchPriority(4)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMLAUN")
+		,
+		DEHWeapon.create("Plasma rifle",    Ammo.CELLS,    S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+			.setSlot(6)
+			.setSlotPriority(0)
+			.setSwitchPriority(10)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMPLAS")
+		,
+		DEHWeapon.create("BFG9000",         Ammo.CELLS,    S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE))
+			.setSlot(7)
+			.setSlotPriority(0)
+			.setSwitchPriority(2)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMBFGG")
+		,
+		DEHWeapon.create("Chainsaw",        Ammo.INFINITE, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOTHRUST, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.NOAUTOSWITCHTO))
+			.setSlot(1)
+			.setSlotPriority(1)
+			.setSwitchPriority(5)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMCSAW")
+		,
 		DEHWeapon.create("Super-shotgun",   Ammo.SHELLS,   S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+			.setSlot(3)
+			.setSlotPriority(1)
+			.setSwitchPriority(9)
+			.setInitialOwned(false)
+			.setInitialRaised(false)
+			.setCarouselIcon("SMSGN2")
+		,
 	};
 
 	static final DEHSound[] DEHSOUND = 

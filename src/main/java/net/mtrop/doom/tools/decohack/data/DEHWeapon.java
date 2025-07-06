@@ -17,7 +17,6 @@ import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single weapon entry.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<DEHWeapon>
@@ -38,11 +37,27 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	private String name;
 	/** Ammo type. */
 	private Ammo ammoType;
+
+	// MBF21
+	
 	/** Ammo per shot. */
 	private int ammoPerShot;
 	/** Flags. */
 	private int mbf21Flags;
 
+	// ID24
+	
+	private int slot;
+	private int slotPriority;
+	private int switchPriority;
+	private boolean initialOwned;
+	private boolean initialRaised;
+	private String carouselIcon;
+	private int allowSwitchWithOwnedWeapon;
+	private int noSwitchWithOwnedWeapon;
+	private int allowSwitchWithOwnedItem;
+	private int noSwitchWithOwnedItem;
+	
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
 	
@@ -80,8 +95,21 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 		out.setReadyFrameIndex(ready);
 		out.setFireFrameIndex(fire);
 		out.setFlashFrameIndex(flash);
+
 		out.setAmmoPerShot(ammoPerShot);
 		out.setMBF21Flags(flags);
+		
+		out.setSlot(DEFAULT_SLOT);
+		out.setSlotPriority(DEFAULT_SLOT_PRIORITY);
+		out.setSwitchPriority(DEFAULT_SWITCH_PRIORITY);
+		out.setInitialOwned(DEFAULT_INITIAL_OWNED);
+		out.setInitialRaised(DEFAULT_INITIAL_RAISED);
+		out.setCarouselIcon(DEFAULT_CAROUSEL_ICON);
+		out.setAllowSwitchWithOwnedWeapon(DEFAULT_ALLOW_SWITCH_WITH_OWNED_WEAPON);
+		out.setNoSwitchWithOwnedWeapon(DEFAULT_NO_SWITCH_WITH_OWNED_WEAPON);
+		out.setAllowSwitchWithOwnedItem(DEFAULT_ALLOW_SWITCH_WITH_OWNED_ITEM);
+		out.setNoSwitchWithOwnedItem(DEFAULT_NO_SWITCH_WITH_OWNED_ITEM);
+		
 		return out;
 	}
 	
@@ -93,13 +121,24 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 		
 		setName(source.name);
 		setAmmoType(source.ammoType);
-		setAmmoPerShot(source.ammoPerShot);
-		
-		setMBF21Flags(source.mbf21Flags);
-		
 		clearLabels();
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
+
+		setAmmoPerShot(source.ammoPerShot);
+		setMBF21Flags(source.mbf21Flags);
+		
+		setSlot(source.slot);
+		setSlotPriority(source.slotPriority);
+		setSwitchPriority(source.switchPriority);
+		setInitialOwned(source.initialOwned);
+		setInitialRaised(source.initialRaised);
+		setCarouselIcon(source.carouselIcon);
+		setAllowSwitchWithOwnedWeapon(source.allowSwitchWithOwnedWeapon);
+		setNoSwitchWithOwnedWeapon(source.noSwitchWithOwnedWeapon);
+		setAllowSwitchWithOwnedItem(source.allowSwitchWithOwnedItem);
+		setNoSwitchWithOwnedItem(source.noSwitchWithOwnedItem);
+		
 		return this;
 	}
 	
@@ -347,6 +386,126 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	}
 
 	@Override
+	public DEHWeapon setSlot(int slot)
+	{
+		this.slot = slot; 
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setSlotPriority(int priority) 
+	{
+		this.slotPriority = priority;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setSwitchPriority(int priority) 
+	{
+		this.switchPriority = priority;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setInitialOwned(boolean owned)
+	{
+		this.initialOwned = owned;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setInitialRaised(boolean raised) 
+	{
+		this.initialRaised = raised;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setCarouselIcon(String icon) 
+	{
+		this.carouselIcon = icon;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setAllowSwitchWithOwnedWeapon(int weaponId) 
+	{
+		this.allowSwitchWithOwnedWeapon = weaponId;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setNoSwitchWithOwnedWeapon(int weaponId) 
+	{
+		this.noSwitchWithOwnedWeapon = weaponId;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setAllowSwitchWithOwnedItem(int itemId) 
+	{
+		this.allowSwitchWithOwnedItem = itemId;
+		return this;
+	}
+
+	@Override
+	public DEHWeapon setNoSwitchWithOwnedItem(int itemId) 
+	{
+		this.noSwitchWithOwnedItem = itemId;
+		return this;
+	}
+
+	public int getSlot() 
+	{
+		return slot;
+	}
+
+	public int getSlotPriority() 
+	{
+		return slotPriority;
+	}
+
+	public int getSwitchPriority()
+	{
+		return switchPriority;
+	}
+
+	public boolean isInitialOwned()
+	{
+		return initialOwned;
+	}
+
+	public boolean isInitialRaised() 
+	{
+		return initialRaised;
+	}
+
+	public String getCarouselIcon() 
+	{
+		return carouselIcon;
+	}
+
+	public int getAllowSwitchWithOwnedWeapon()
+	{
+		return allowSwitchWithOwnedWeapon;
+	}
+
+	public int getNoSwitchWithOwnedWeapon() 
+	{
+		return noSwitchWithOwnedWeapon;
+	}
+
+	public int getAllowSwitchWithOwnedItem() 
+	{
+		return allowSwitchWithOwnedItem;
+	}
+
+	public int getNoSwitchWithOwnedItem() 
+	{
+		return noSwitchWithOwnedItem;
+	}
+
+	@Override
 	public boolean equals(Object obj) 
 	{
 		if (obj instanceof DEHWeapon)
@@ -358,13 +517,25 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	{
 		return name == obj.name
 			&& ammoType == obj.ammoType
-			&& ammoPerShot == obj.ammoPerShot
-			&& mbf21Flags == obj.mbf21Flags
 			&& getRaiseFrameIndex() == obj.getRaiseFrameIndex()
 			&& getLowerFrameIndex() == obj.getLowerFrameIndex()
 			&& getReadyFrameIndex() == obj.getReadyFrameIndex()
 			&& getFireFrameIndex() == obj.getFireFrameIndex()
 			&& getFlashFrameIndex() == obj.getFlashFrameIndex()
+			// MBF21
+			&& ammoPerShot == obj.ammoPerShot
+			&& mbf21Flags == obj.mbf21Flags
+			// ID24
+			&& slot == obj.slot
+			&& slotPriority == obj.slotPriority
+			&& switchPriority == obj.switchPriority
+			&& initialOwned == obj.initialOwned
+			&& initialRaised == obj.initialRaised
+			&& carouselIcon.equalsIgnoreCase(obj.carouselIcon)
+			&& allowSwitchWithOwnedWeapon == obj.allowSwitchWithOwnedWeapon
+			&& noSwitchWithOwnedWeapon == obj.noSwitchWithOwnedWeapon
+			&& allowSwitchWithOwnedItem == obj.allowSwitchWithOwnedItem
+			&& noSwitchWithOwnedItem == obj.noSwitchWithOwnedItem
 		;
 	}	
 	
@@ -387,14 +558,39 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 		if (getFlashFrameIndex() != weapon.getFlashFrameIndex())
 			writer.append("Firing frame = ").append(String.valueOf(getFlashFrameIndex())).append("\r\n");
 
-		if (ammoPerShot != weapon.ammoPerShot)
-			writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
-		
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
+			if (ammoPerShot != weapon.ammoPerShot)
+				writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
+			
 			if (mbf21Flags != weapon.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
+		
+		if (level.supports(DEHFeatureLevel.ID24))
+		{
+			if (slot != weapon.slot)
+				writer.append("Slot = ").append(String.valueOf(slot)).append("\r\n");
+			if (slotPriority != weapon.slotPriority)
+				writer.append("Slot Priority = ").append(String.valueOf(slotPriority)).append("\r\n");
+			if (switchPriority != weapon.switchPriority)
+				writer.append("Switch Priority = ").append(String.valueOf(switchPriority)).append("\r\n");
+			if (initialOwned != weapon.initialOwned)
+				writer.append("Initial Owned = ").append(String.valueOf(initialOwned)).append("\r\n");
+			if (initialRaised != weapon.initialRaised)
+				writer.append("Initial Raised = ").append(String.valueOf(initialRaised)).append("\r\n");
+			if (!carouselIcon.equalsIgnoreCase(weapon.carouselIcon))
+				writer.append("Carousel icon = ").append(carouselIcon).append("\r\n");
+			if (allowSwitchWithOwnedWeapon != weapon.allowSwitchWithOwnedWeapon)
+				writer.append("Allow switch with owned weapon = ").append(String.valueOf(allowSwitchWithOwnedWeapon)).append("\r\n");
+			if (noSwitchWithOwnedWeapon != weapon.noSwitchWithOwnedWeapon)
+				writer.append("No switch with owned weapon = ").append(String.valueOf(noSwitchWithOwnedWeapon)).append("\r\n");
+			if (allowSwitchWithOwnedItem != weapon.allowSwitchWithOwnedItem)
+				writer.append("Allow switch with owned item = ").append(String.valueOf(allowSwitchWithOwnedItem)).append("\r\n");
+			if (noSwitchWithOwnedItem != weapon.noSwitchWithOwnedItem)
+				writer.append("No switch with owned item = ").append(String.valueOf(noSwitchWithOwnedItem)).append("\r\n");
+		}
+		
 		writeCustomProperties(writer);
 		writer.flush();
 	}

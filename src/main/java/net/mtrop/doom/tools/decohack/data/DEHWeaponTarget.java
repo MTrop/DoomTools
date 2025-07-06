@@ -9,7 +9,6 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 
 /**
  * An interface that describes a Weapon whose information can be set.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  * @param <SELF> This object type.
  */
@@ -23,6 +22,17 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 	static final String STATE_LABEL_LIGHTDONE = "lightdone";
 
 	static final int DEFAULT_AMMO_PER_SHOT = -1;
+	
+	static final int DEFAULT_SLOT = -1;
+	static final int DEFAULT_SLOT_PRIORITY = -1;
+	static final int DEFAULT_SWITCH_PRIORITY = -1;
+	static final boolean DEFAULT_INITIAL_OWNED = false;
+	static final boolean DEFAULT_INITIAL_RAISED = false;
+	static final String DEFAULT_CAROUSEL_ICON = "SMUNKN";
+	static final int DEFAULT_ALLOW_SWITCH_WITH_OWNED_WEAPON = -1;
+	static final int DEFAULT_NO_SWITCH_WITH_OWNED_WEAPON = -1;
+	static final int DEFAULT_ALLOW_SWITCH_WITH_OWNED_ITEM = -1;
+	static final int DEFAULT_NO_SWITCH_WITH_OWNED_ITEM = -1;
 
 	/**
 	 * Clears the properties.
@@ -71,6 +81,76 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 	 */
 	SELF removeMBF21Flag(int bits);
 
+	/**
+	 * Sets the slot binding for this weapon.
+	 * @param slot the new slot.
+	 * @return this object.
+	 */
+	SELF setSlot(int slot);
+	
+	/**
+	 * Sets the slot priority for this weapon.
+	 * @param priority the new slot priority.
+	 * @return this object.
+	 */
+	SELF setSlotPriority(int priority);
+	
+	/**
+	 * Sets the switch priority for this weapon.
+	 * @param priority the new switch priority.
+	 * @return this object.
+	 */
+	SELF setSwitchPriority(int priority);
+	
+	/**
+	 * Sets if this weapon is initially owned.
+	 * @param owned true if so, false if not.
+	 * @return this object.
+	 */
+	SELF setInitialOwned(boolean owned);
+	
+	/**
+	 * Sets if this weapon is initially raised on respawn.
+	 * @param raised true if so, false if not.
+	 * @return this object.
+	 */
+	SELF setInitialRaised(boolean raised);
+	
+	/**
+	 * Sets this weapon's carousel icon.
+	 * @param icon the graphic name of the icon.
+	 * @return this object.
+	 */
+	SELF setCarouselIcon(String icon);
+	
+	/**
+	 * Sets if this weapon, if picked up, is switched to with an owned weapon.
+	 * @param weaponId the weapon id.
+	 * @return this object.
+	 */
+	SELF setAllowSwitchWithOwnedWeapon(int weaponId);
+	
+	/**
+	 * Sets if this weapon, if picked up, is never switched to with an owned weapon.
+	 * @param weaponId the weapon id.
+	 * @return this object.
+	 */
+	SELF setNoSwitchWithOwnedWeapon(int weaponId);
+	
+	/**
+	 * Sets if this weapon, if picked up, is switched to with an owned item.
+	 * @param itemId the item id.
+	 * @return this object.
+	 */
+	SELF setAllowSwitchWithOwnedItem(int itemId);
+	
+	/**
+	 * Sets if this weapon, if picked up, is never switched to with an owned item.
+	 * @param itemId the item id.
+	 * @return this object.
+	 */
+	SELF setNoSwitchWithOwnedItem(int itemId);
+	
 	/**
 	 * Sets the raise frame index.
 	 * @param raiseFrameIndex the index.

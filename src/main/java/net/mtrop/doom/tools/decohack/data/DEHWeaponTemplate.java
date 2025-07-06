@@ -16,22 +16,38 @@ import net.mtrop.doom.util.RangeUtils;
  * A single weapon entry where all of its fields are nulled out.
  * The purpose of this object is to prepare a weapon where its values 
  * can be applied to many Weapon entries.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 {
 	/** Ammo type. */
 	private Ammo ammoType;	
-	/** Ammo per shot. */
-	private Integer ammoPerShot;
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
+
+	// MBF21
+	
+	/** Ammo per shot. */
+	private Integer ammoPerShot;
 	/** Flags. */
 	private Integer mbf21Flags;
 	private int addMBF21Flags;
 	private int remMBF21Flags;
 
+	// ID24
+	
+	private Integer slot;
+	private Integer slotPriority;
+	private Integer switchPriority;
+	private Boolean initialOwned;
+	private Boolean initialRaised;
+	private String carouselIcon;
+	private Integer allowSwitchWithOwnedWeapon;
+	private Integer noSwitchWithOwnedWeapon;
+	private Integer allowSwitchWithOwnedItem;
+	private Integer noSwitchWithOwnedItem;
+
+	
 	/** Custom properties. */
 	private Map<DEHProperty, String> customProperties;
 	
@@ -58,6 +74,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	{
 		if (ammoType != null)
 			destination.setAmmoType(ammoType);
+
 		if (ammoPerShot != null)
 			destination.setAmmoPerShot(ammoPerShot);
 		// if flags altered, replace.
@@ -69,6 +86,27 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 			destination.addMBF21Flag(addMBF21Flags);
 			destination.removeMBF21Flag(remMBF21Flags);
 		}
+		
+		if (slot != null)
+			destination.setSlot(slot);
+		if (slotPriority != null)
+			destination.setSlot(slot);
+		if (switchPriority != null)
+			destination.setSwitchPriority(switchPriority);
+		if (initialOwned != null)
+			destination.setInitialOwned(initialOwned);
+		if (initialRaised != null)
+			destination.setInitialRaised(initialRaised);
+		if (carouselIcon != null)
+			destination.setCarouselIcon(carouselIcon);
+		if (allowSwitchWithOwnedWeapon != null)
+			destination.setAllowSwitchWithOwnedWeapon(allowSwitchWithOwnedWeapon);
+		if (noSwitchWithOwnedWeapon != null)
+			destination.setNoSwitchWithOwnedWeapon(noSwitchWithOwnedWeapon);
+		if (allowSwitchWithOwnedItem != null)
+			destination.setAllowSwitchWithOwnedItem(allowSwitchWithOwnedItem);
+		if (noSwitchWithOwnedItem != null)
+			destination.setNoSwitchWithOwnedItem(noSwitchWithOwnedItem);
 		
 		for (String label : getLabels())
 			destination.setLabel(label, getLabel(label));
@@ -105,7 +143,20 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	public DEHWeaponTemplate clearProperties()
 	{
 		setAmmoType(Ammo.BULLETS);
+
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		
+		setSlot(DEFAULT_SLOT);
+		setSlotPriority(DEFAULT_SLOT_PRIORITY);
+		setSwitchPriority(DEFAULT_SWITCH_PRIORITY);
+		setInitialOwned(DEFAULT_INITIAL_OWNED);
+		setInitialRaised(DEFAULT_INITIAL_RAISED);
+		setCarouselIcon(DEFAULT_CAROUSEL_ICON);
+		setAllowSwitchWithOwnedWeapon(DEFAULT_ALLOW_SWITCH_WITH_OWNED_WEAPON);
+		setNoSwitchWithOwnedWeapon(DEFAULT_NO_SWITCH_WITH_OWNED_WEAPON);
+		setAllowSwitchWithOwnedItem(DEFAULT_ALLOW_SWITCH_WITH_OWNED_ITEM);
+		setNoSwitchWithOwnedItem(DEFAULT_NO_SWITCH_WITH_OWNED_ITEM);
+		
 		clearCustomPropertyValues();
 		return this;
 	}
@@ -266,6 +317,76 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	public int getLabel(String label)
 	{
 		return stateIndexMap.getOrDefault(label, 0);
+	}
+
+	@Override
+	public DEHWeaponTemplate setSlot(int slot)
+	{
+		this.slot = slot; 
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setSlotPriority(int priority) 
+	{
+		this.slotPriority = priority;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setSwitchPriority(int priority) 
+	{
+		this.switchPriority = priority;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setInitialOwned(boolean owned)
+	{
+		this.initialOwned = owned;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setInitialRaised(boolean raised) 
+	{
+		this.initialRaised = raised;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setCarouselIcon(String icon) 
+	{
+		this.carouselIcon = icon;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setAllowSwitchWithOwnedWeapon(int weaponId) 
+	{
+		this.allowSwitchWithOwnedWeapon = weaponId;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setNoSwitchWithOwnedWeapon(int weaponId) 
+	{
+		this.noSwitchWithOwnedWeapon = weaponId;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setAllowSwitchWithOwnedItem(int itemId) 
+	{
+		this.allowSwitchWithOwnedItem = itemId;
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setNoSwitchWithOwnedItem(int itemId) 
+	{
+		this.noSwitchWithOwnedItem = itemId;
+		return this;
 	}
 
 }
