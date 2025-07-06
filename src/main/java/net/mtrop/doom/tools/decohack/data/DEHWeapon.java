@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
@@ -531,7 +532,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 			&& switchPriority == obj.switchPriority
 			&& initialOwned == obj.initialOwned
 			&& initialRaised == obj.initialRaised
-			&& carouselIcon.equalsIgnoreCase(obj.carouselIcon)
+			&& ObjectUtils.areEqual(carouselIcon, obj.carouselIcon)
 			&& allowSwitchWithOwnedWeapon == obj.allowSwitchWithOwnedWeapon
 			&& noSwitchWithOwnedWeapon == obj.noSwitchWithOwnedWeapon
 			&& allowSwitchWithOwnedItem == obj.allowSwitchWithOwnedItem
