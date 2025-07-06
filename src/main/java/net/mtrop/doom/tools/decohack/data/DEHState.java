@@ -11,11 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single state.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHState extends DEHObject<DEHState>
@@ -27,8 +27,13 @@ public class DEHState extends DEHObject<DEHState>
 	private int duration;
 	private int misc1;
 	private int misc2;
+
+	// MBF21
 	private int[] args;
 	private int mbf21Flags;
+	
+	// ID24
+	private String tranmap;
 	
 	/**
 	 * Creates a new state.
@@ -46,6 +51,7 @@ public class DEHState extends DEHObject<DEHState>
 			new int[0],
 			0x00
 		);
+		setTranmap(null);
 	}
 	
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
@@ -70,7 +76,7 @@ public class DEHState extends DEHObject<DEHState>
 			misc2,
 			args,
 			mbfFlags
-		);
+		).setTranmap(null);
 	}
 
 	@Override
@@ -86,8 +92,14 @@ public class DEHState extends DEHObject<DEHState>
 		setDuration(source.duration);
 		setMisc1(source.misc1);
 		setMisc2(source.misc2);
+		
+		// MBF21
 		setArgs(source.args);
 		setMBF21Flags(source.mbf21Flags);
+
+		// ID24
+		setTranmap(source.tranmap);
+		
 		return this;
 	}
 	
@@ -105,8 +117,11 @@ public class DEHState extends DEHObject<DEHState>
 		setDuration(duration);
 		setMisc1(misc1);
 		setMisc2(misc2);
+		
+		// MBF21
 		setArgs(args);
 		setMBF21Flags(mbfFlags);
+		
 		return this;
 	}
 	
@@ -225,6 +240,17 @@ public class DEHState extends DEHObject<DEHState>
 		return this;
 	}
 	
+	public String getTranmap() 
+	{
+		return tranmap;
+	}
+	
+	public DEHState setTranmap(String tranmap) 
+	{
+		this.tranmap = tranmap;
+		return this;
+	}
+	
 	@Override
 	public boolean equals(Object obj) 
 	{
@@ -242,8 +268,11 @@ public class DEHState extends DEHObject<DEHState>
 			&& duration == obj.duration
 			&& misc1 == obj.misc1
 			&& misc2 == obj.misc2
+			// MBF21
 			&& Arrays.equals(args, obj.args)
 			&& mbf21Flags == obj.mbf21Flags
+			// ID24
+			&& ObjectUtils.areEqual(tranmap, obj.tranmap)
 		;
 	}	
 		
@@ -262,6 +291,7 @@ public class DEHState extends DEHObject<DEHState>
 			writer.append("Unknown 1 = ").append(String.valueOf(misc1)).append("\r\n");
 		if (misc2 != frame.misc2)
 			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
+
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
 			for (int i = 0; i < args.length; i++)
@@ -270,6 +300,13 @@ public class DEHState extends DEHObject<DEHState>
 			if (mbf21Flags != frame.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
+
+		if (level.supports(DEHFeatureLevel.ID24))
+		{
+			if (!ObjectUtils.areEqual(tranmap, frame.tranmap))
+				writer.append("Tranmap = ").append(tranmap).append("\r\n");
+		}
+		
 		writeCustomProperties(writer);
 		writer.flush();
 	}
