@@ -13,6 +13,7 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingID24Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 
@@ -2599,7 +2600,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Red keycard")
 			.setEditorNumber(13)
 			.setHealth(1000)
@@ -2626,7 +2630,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Yellow keycard")
 			.setEditorNumber(6)
 			.setHealth(1000)
@@ -2653,7 +2660,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Yellow skull key")
 			.setEditorNumber(39)
 			.setHealth(1000)
@@ -2680,7 +2690,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Red skull key")
 			.setEditorNumber(38)
 			.setHealth(1000)
@@ -2707,7 +2720,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Blue skull key")
 			.setEditorNumber(40)
 			.setHealth(1000)
@@ -2734,7 +2750,10 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setID24Flags(DEHFlag.flags(
+				DEHThingID24Flag.SPECIALSTAYSCOOP
+			)),
 		(new DEHThing()).setName("Stimpack")
 			.setEditorNumber(2011)
 			.setHealth(1000)

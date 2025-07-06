@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2024 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -13,12 +13,12 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single thing entry.
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  */
 public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHThing>
@@ -74,6 +74,20 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	/** Ripper sound position. */
 	private int ripSoundPosition;
 
+	/** ID24 flags. */
+	private int id24Flags;
+	private int minRespawnTics;
+	private int respawnDice;
+	private int pickupAmmoType;
+	private int pickupAmmoCategory;
+	private int pickupWeaponType;
+	private int pickupItemType;
+	private int pickupBonusCount;
+	private String pickupMessage;
+	private String translation;
+	
+	private int pickupSoundPosition;
+	
 	/**
 	 * Creates a new blank thing.
 	 */
@@ -121,8 +135,14 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setDeathSoundPosition(source.deathSoundPosition);
 		setActiveSoundPosition(source.activeSoundPosition);
 		
+		clearLabels();
+		for (String label : source.getLabels())
+			setLabel(label, source.getLabel(label));
+
+		// EXTENDED
 		setDroppedItem(source.droppedItem);
 
+		// MBF21
 		setMBF21Flags(source.mbf21Flags);
 		setInfightingGroup(source.infightingGroup);
 		setProjectileGroup(source.projectileGroup);
@@ -131,9 +151,18 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setMeleeRange(source.meleeRange);
 		setRipSoundPosition(source.ripSoundPosition);
 
-		clearLabels();
-		for (String label : source.getLabels())
-			setLabel(label, source.getLabel(label));
+		// ID24
+		setID24Flags(source.id24Flags);
+		setMinRespawnTics(source.minRespawnTics);
+		setRespawnDice(source.respawnDice);
+		setPickupAmmoType(source.pickupAmmoType);
+		setPickupAmmoCategory(source.pickupAmmoCategory);
+		setPickupWeaponType(source.pickupWeaponType);
+		setPickupItemType(source.pickupItemType);
+		setPickupBonusCount(source.pickupBonusCount);
+		setPickupSoundPosition(source.pickupSoundPosition);
+		setPickupMessage(source.pickupMessage);
+		setTranslation(source.translation);
 
 		return this;
 	}
@@ -152,12 +181,28 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setReactionTime(0);
 		setPainChance(0);
 		setMass(0);
+		
+		// EXTENDED
 		setDroppedItem(NO_ITEM);
+		
+		// MBF21
 		setInfightingGroup(DEFAULT_GROUP);
 		setProjectileGroup(DEFAULT_GROUP);
 		setSplashGroup(DEFAULT_GROUP);
 		setFastSpeed(DEFAULT_FASTSPEED);
 		setMeleeRange(DEFAULT_MELEE_RANGE);
+		
+		// ID24
+		setMinRespawnTics(DEFAULT_MIN_RESPAWN_TICS);
+		setRespawnDice(DEFAULT_RESPAWN_DICE);
+		setPickupAmmoType(DEFAULT_PICKUP_AMMO_TYPE);
+		setPickupAmmoCategory(DEFAULT_PICKUP_AMMO_CATEGORY);
+		setPickupWeaponType(DEFAULT_PICKUP_WEAPON_TYPE);
+		setPickupItemType(DEFAULT_PICKUP_ITEM_TYPE);
+		setPickupBonusCount(DEFAULT_PICKUP_BONUS_COUNT);
+		setPickupMessage(DEFAULT_PICKUP_MESSAGE);
+		setTranslation(DEFAULT_TRANSLATION);
+		
 		clearCustomPropertyValues();
 		return this;
 	}
@@ -171,6 +216,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setDeathSoundPosition(SOUND_NONE);
 		setActiveSoundPosition(SOUND_NONE);
 		setRipSoundPosition(SOUND_NONE);
+		setPickupSoundPosition(SOUND_NONE);
 		return this;
 	}
 
@@ -179,6 +225,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	{
 		setFlags(0x00000000);
 		setMBF21Flags(0x00000000);
+		setID24Flags(0x00000000);
 		return this;
 	}
 
@@ -718,6 +765,153 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	}
 
 	@Override
+	public DEHThing setID24Flags(int bits) 
+	{
+		id24Flags = bits;
+		return this;
+	}
+
+	@Override
+	public DEHThing addID24Flag(int bits) 
+	{
+		id24Flags |= bits;
+		return this;
+	}
+
+	@Override
+	public DEHThing removeID24Flag(int bits) 
+	{
+		id24Flags &= ~bits;
+		return this;
+	}
+
+	@Override
+	public boolean hasID24Flag(int bit) 
+	{
+		return (this.id24Flags & bit) != 0;
+	}
+
+	@Override
+	public DEHThing setMinRespawnTics(int tics) 
+	{
+		this.minRespawnTics = tics;
+		return this;
+	}
+
+	@Override
+	public DEHThing setRespawnDice(int dice) 
+	{
+		this.respawnDice = dice;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupAmmoType(int typeId) 
+	{
+		this.pickupAmmoType = typeId;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupAmmoCategory(int categoryBits) 
+	{
+		this.pickupAmmoCategory = categoryBits;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupWeaponType(int weaponTypeId) 
+	{
+		this.pickupWeaponType = weaponTypeId;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupItemType(int itemTypeId) 
+	{
+		this.pickupItemType = itemTypeId;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupBonusCount(int count) 
+	{
+		this.pickupBonusCount = count;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupSoundPosition(int soundPosition) 
+	{
+		this.pickupSoundPosition = soundPosition;
+		return this;
+	}
+
+	@Override
+	public DEHThing setPickupMessage(String message) 
+	{
+		this.pickupMessage = message;
+		return this;
+	}
+
+	@Override
+	public DEHThing setTranslation(String name) 
+	{
+		this.translation = name;
+		return this;
+	}
+
+	public int getMinRespawnTics() 
+	{
+		return minRespawnTics;
+	}
+
+	public int getRespawnDice() 
+	{
+		return respawnDice;
+	}
+
+	public int getPickupAmmoType() 
+	{
+		return pickupAmmoType;
+	}
+
+	public int getPickupAmmoCategory() 
+	{
+		return pickupAmmoCategory;
+	}
+
+	public int getPickupWeaponType() 
+	{
+		return pickupWeaponType;
+	}
+
+	public int getPickupItemType() 
+	{
+		return pickupItemType;
+	}
+
+	public int getPickupBonusCount() 
+	{
+		return pickupBonusCount;
+	}
+
+	public String getPickupMessage() 
+	{
+		return pickupMessage;
+	}
+
+	public String getTranslation()
+	{
+		return translation;
+	}
+
+	public int getPickupSoundPosition() 
+	{
+		return pickupSoundPosition;
+	}
+
+	@Override
 	public boolean equals(Object obj) 
 	{
 		if (obj instanceof DEHThing)
@@ -753,13 +947,27 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			&& attackSoundPosition == obj.attackSoundPosition
 			&& painSoundPosition == obj.painSoundPosition
 			&& deathSoundPosition == obj.deathSoundPosition
+			// EXTENDED
 			&& droppedItem == obj.droppedItem
+			// MBF21
 			&& mbf21Flags == obj.mbf21Flags
 			&& meleeRange == obj.meleeRange
 			&& infightingGroup == obj.infightingGroup
 			&& projectileGroup == obj.projectileGroup
 			&& splashGroup == obj.splashGroup
 			&& ripSoundPosition == obj.ripSoundPosition
+			// ID24
+			&& id24Flags == obj.id24Flags
+			&& minRespawnTics == obj.minRespawnTics
+			&& respawnDice == obj.respawnDice
+			&& pickupAmmoType == obj.pickupAmmoType
+			&& pickupAmmoCategory == obj.pickupAmmoCategory
+			&& pickupWeaponType == obj.pickupWeaponType
+			&& pickupItemType == obj.pickupItemType
+			&& pickupBonusCount == obj.pickupBonusCount
+			&& ObjectUtils.areEqual(pickupMessage, obj.pickupMessage)
+			&& ObjectUtils.areEqual(translation, obj.translation)
+			&& pickupSoundPosition == obj.pickupSoundPosition
 		;
 	}	
 	
@@ -887,6 +1095,34 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			if (ripSoundPosition != thing.ripSoundPosition)
 				writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 		}
+		
+		// ID24 features
+		if (level.supports(DEHFeatureLevel.ID24))
+		{
+			if (id24Flags != thing.id24Flags)
+				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags)).append("\r\n");
+			if (minRespawnTics != thing.minRespawnTics)
+				writer.append("Min respawn tics = ").append(String.valueOf(minRespawnTics)).append("\r\n");
+			if (respawnDice != thing.respawnDice)
+				writer.append("Respawn dice = ").append(String.valueOf(respawnDice)).append("\r\n");
+			if (pickupAmmoType != thing.pickupAmmoType)
+				writer.append("Pickup ammo type = ").append(String.valueOf(pickupAmmoType)).append("\r\n");
+			if (pickupAmmoCategory != thing.pickupAmmoCategory)
+				writer.append("Pickup ammo category = ").append(String.valueOf(pickupAmmoCategory)).append("\r\n");
+			if (pickupWeaponType != thing.pickupWeaponType)
+				writer.append("Pickup weapon type = ").append(String.valueOf(pickupWeaponType)).append("\r\n");
+			if (pickupItemType != thing.pickupItemType)
+				writer.append("Pickup item type = ").append(String.valueOf(pickupItemType)).append("\r\n");
+			if (pickupBonusCount != thing.pickupBonusCount)
+				writer.append("Pickup bonus count = ").append(String.valueOf(pickupBonusCount)).append("\r\n");
+			if (!ObjectUtils.areEqual(pickupMessage, thing.pickupMessage))
+				writer.append("Pickup message = ").append(pickupMessage).append("\r\n");
+			if (!ObjectUtils.areEqual(translation, thing.translation))
+				writer.append("Translation = ").append(translation).append("\r\n");
+			if (pickupSoundPosition != thing.pickupSoundPosition)
+				writer.append("Pickup sound = ").append(String.valueOf(pickupSoundPosition)).append("\r\n");
+		}
+		
 		writeCustomProperties(writer);
 		writer.flush();
 	}

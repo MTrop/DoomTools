@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2024 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -8,7 +8,6 @@ package net.mtrop.doom.tools.decohack.data;
 /**
  * An interface that describes a Thing whose information can be set.
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
- * TODO: Add ID24 entries.
  * @author Matthew Tropiano
  * @param <SELF> This object type.
  */
@@ -26,10 +25,23 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	static final int EDITORNUMBER_NONE = -1;
 	static final int SOUND_NONE = 0;
 	static final int FRAME_NULL = 0;
-	static final int NO_ITEM = 0;
+	static final int NO_ITEM = -1;
+	
 	static final int DEFAULT_GROUP = 0;
 	static final int DEFAULT_FASTSPEED = -1;
 	static final int DEFAULT_MELEE_RANGE = 64;
+	
+	static final int DEFAULT_ID24BITS = 0;
+	static final int DEFAULT_MIN_RESPAWN_TICS = 420;
+	static final int DEFAULT_RESPAWN_DICE = 4;
+	static final int DEFAULT_PICKUP_AMMO_TYPE = -1;
+	static final int DEFAULT_PICKUP_AMMO_CATEGORY = -1;
+	static final int DEFAULT_PICKUP_WEAPON_TYPE = -1;
+	static final int DEFAULT_PICKUP_ITEM_TYPE = -1;
+	static final int DEFAULT_PICKUP_BONUS_COUNT = 6;
+	static final int DEFAULT_PICKUP_SOUND = 0;
+	static final String DEFAULT_PICKUP_MESSAGE = null;
+	static final String DEFAULT_TRANSLATION = null;
 	
 	/**
 	 * Clears the properties.
@@ -157,4 +169,32 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 
 	SELF setRipSoundPosition(int ripSoundPosition);
 
+	SELF setID24Flags(int bits);
+
+	SELF addID24Flag(int bits);
+
+	SELF removeID24Flag(int bits);
+
+	boolean hasID24Flag(int bit);
+	
+	SELF setMinRespawnTics(int tics);
+	
+	SELF setRespawnDice(int dice);
+	
+	SELF setPickupAmmoType(int typeId);
+	
+	SELF setPickupAmmoCategory(int categoryBits);
+	
+	SELF setPickupWeaponType(int weaponTypeId);
+	
+	SELF setPickupItemType(int itemTypeId);
+	
+	SELF setPickupBonusCount(int count);
+	
+	SELF setPickupSoundPosition(int soundPosition);
+	
+	SELF setPickupMessage(String message);
+	
+	SELF setTranslation(String name);
+	
 }
