@@ -28,8 +28,9 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingBoomFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingDoom19Flag;
-import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBFFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingID24Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.HTMLWriter;
@@ -375,6 +376,8 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addDefineCompletions(DecoHackPatchType.MBF,      "State Slot", "decohack/constants/mbf/states.dh",      STATE_HARDCODE_DOCS);
 		addDefineCompletions(DecoHackPatchType.EXTENDED, "State Slot", "decohack/constants/extended/states.dh", STATE_HARDCODE_DOCS);
 
+		addDefineCompletions(DecoHackPatchType.ID24,     "Pickup Type", "decohack/constants/id24/pickups.dh", null);
+
 		addDefineCompletions(DecoHackPatchType.DOOM19,   "Ammo Type", "decohack/constants/doom19/ammo.dh", null);
 
 		addStringDefineCompletions("decohack/constants/doom19/strings.dh", "decohack/constants/boom/strings.dh");
@@ -389,6 +392,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addFlagCompletions(DecoHackPatchType.BOOM,   "Thing",  DEHThingBoomFlag.values());
 		addFlagCompletions(DecoHackPatchType.MBF,    "Thing",  DEHThingMBFFlag.values());
 		addFlagCompletions(DecoHackPatchType.MBF21,  "Thing",  DEHThingMBF21Flag.values());
+		addFlagCompletions(DecoHackPatchType.ID24,   "Thing",  DEHThingID24Flag.values());
 		addFlagCompletions(DecoHackPatchType.MBF21,  "Weapon", DEHWeaponMBF21Flag.values());
 
 	}

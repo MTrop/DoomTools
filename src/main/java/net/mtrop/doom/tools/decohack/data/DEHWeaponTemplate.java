@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
@@ -21,7 +20,7 @@ import net.mtrop.doom.util.RangeUtils;
 public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 {
 	/** Ammo type. */
-	private Ammo ammoType;	
+	private Integer ammoType;	
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
 
@@ -54,7 +53,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 
 	public DEHWeaponTemplate()
 	{
-		this.ammoType = null;
+		this.ammoType = 0;
 		this.ammoPerShot = null;
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
@@ -142,7 +141,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	@Override
 	public DEHWeaponTemplate clearProperties()
 	{
-		setAmmoType(Ammo.BULLETS);
+		setAmmoType(0);
 
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
 		
@@ -186,7 +185,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param ammoType the type.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setAmmoType(Ammo ammoType) 
+	public DEHWeaponTemplate setAmmoType(int ammoType) 
 	{
 		this.ammoType = ammoType;
 		return this;

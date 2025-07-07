@@ -1,0 +1,29 @@
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_PICKUPS__
+#define __DECOHACK_CONSTANTS_ID24_PICKUPS__
+
+#define PICKUP_NONE            -1 
+#define PICKUP_MESSAGE         0 
+#define PICKUP_KEYCARD_BLUE    1 
+#define PICKUP_KEYCARD_YELLOW  2 
+#define PICKUP_KEYCARD_RED     3 
+#define PICKUP_SKULL_BLUE      4 
+#define PICKUP_SKULL_YELLOW    5 
+#define PICKUP_SKULL_RED       6 
+#define PICKUP_BACKPACK        7 
+#define PICKUP_HEALTH_BONUS    8 
+#define PICKUP_STIMPACK        9 
+#define PICKUP_MEDIKIT         10 
+#define PICKUP_SOULSPHERE      11 
+#define PICKUP_MEGASPHERE      12 
+#define PICKUP_ARMOR_BONUS     13 
+#define PICKUP_ARMOR_GREEN     14 
+#define PICKUP_ARMOR_BLUE      15 
+#define PICKUP_AUTOMAP         16 
+#define PICKUP_LITEAMP         17 
+#define PICKUP_BERSERK         18 
+#define PICKUP_INVISIBILITY    19 
+#define PICKUP_RADSUIT         20 
+#define PICKUP_INVULNERABILITY 21 
+
+#endif

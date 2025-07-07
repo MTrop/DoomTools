@@ -35,7 +35,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	private int droppedBoxAmmo;
 	private int droppedBackpackAmmo;
 	private int droppedWeaponAmmo;
-	private int deachmatchWeaponAmmo;
+	private int deathmatchWeaponAmmo;
 
 	private int skill1Multiplier; // stored as 16.16 fixed
 	private int skill2Multiplier; // stored as 16.16 fixed
@@ -59,7 +59,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 		setDroppedBoxAmmo(0);
 		setDroppedBackpackAmmo(0);
 		setDroppedWeaponAmmo(0);
-		setDeachmatchWeaponAmmo(0);
+		setDeathmatchWeaponAmmo(0);
 		setSkill1Multiplier(2 << 16);
 		setSkill2Multiplier(1 << 16);
 		setSkill3Multiplier(1 << 16);
@@ -87,7 +87,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 		setDroppedBoxAmmo(source.droppedBoxAmmo);
 		setDroppedBackpackAmmo(source.droppedBackpackAmmo);
 		setDroppedWeaponAmmo(source.droppedWeaponAmmo);
-		setDeachmatchWeaponAmmo(source.deachmatchWeaponAmmo);
+		setDeathmatchWeaponAmmo(source.deathmatchWeaponAmmo);
 		setSkill1Multiplier(source.skill1Multiplier);
 		setSkill2Multiplier(source.skill2Multiplier);
 		setSkill3Multiplier(source.skill3Multiplier);
@@ -203,9 +203,9 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 		return droppedWeaponAmmo;
 	}
 
-	public int getDeachmatchWeaponAmmo() 
+	public int getDeathmatchWeaponAmmo() 
 	{
-		return deachmatchWeaponAmmo;
+		return deathmatchWeaponAmmo;
 	}
 
 	public int getSkill1Multiplier() 
@@ -287,9 +287,9 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 		return this;
 	}
 
-	public DEHAmmo setDeachmatchWeaponAmmo(int deachmatchWeaponAmmo)
+	public DEHAmmo setDeathmatchWeaponAmmo(int deachmatchWeaponAmmo)
 	{
-		this.deachmatchWeaponAmmo = deachmatchWeaponAmmo;
+		this.deathmatchWeaponAmmo = deachmatchWeaponAmmo;
 		return this;
 	}
 
@@ -346,7 +346,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 			&& droppedBoxAmmo == obj.droppedBoxAmmo
 			&& droppedBackpackAmmo == obj.droppedBackpackAmmo
 			&& droppedWeaponAmmo == obj.droppedWeaponAmmo
-			&& deachmatchWeaponAmmo == obj.deachmatchWeaponAmmo
+			&& deathmatchWeaponAmmo == obj.deathmatchWeaponAmmo
 			&& skill1Multiplier == obj.skill1Multiplier
 			&& skill2Multiplier == obj.skill2Multiplier
 			&& skill3Multiplier == obj.skill3Multiplier
@@ -383,8 +383,8 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 				writer.append("Dropped backpack ammo = ").append(String.valueOf(droppedBackpackAmmo)).append("\r\n");
 			if (droppedWeaponAmmo != ammo.droppedWeaponAmmo)
 				writer.append("Dropped weapon ammo = ").append(String.valueOf(droppedWeaponAmmo)).append("\r\n");
-			if (deachmatchWeaponAmmo != ammo.deachmatchWeaponAmmo)
-				writer.append("Deathmatch weapon ammo = ").append(String.valueOf(deachmatchWeaponAmmo)).append("\r\n");
+			if (deathmatchWeaponAmmo != ammo.deathmatchWeaponAmmo)
+				writer.append("Deathmatch weapon ammo = ").append(String.valueOf(deathmatchWeaponAmmo)).append("\r\n");
 			if (skill1Multiplier != ammo.skill1Multiplier)
 				writer.append("Skill 1 multiplier = ").append(String.valueOf(skill1Multiplier)).append("\r\n");
 			if (skill2Multiplier != ammo.skill2Multiplier)

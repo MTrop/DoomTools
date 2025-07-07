@@ -41,12 +41,12 @@ import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
 import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
-import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
 import net.mtrop.doom.tools.decohack.data.enums.DEHValueType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingID24Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHValueType.Type;
@@ -133,6 +133,21 @@ public final class DecoHackParser extends Lexer.Parser
 		String AMMO = "ammo";
 		String PICKUP = "pickup";
 		String MAX = "max";
+		String INITIALAMMO = "initialAmmo";
+		String MAXUPGRADEDAMMO = "maxUpgradedAmmo";
+		String BOXAMMO = "boxAmmo";
+		String BACKPACKAMMO = "backpackAmmo";
+		String WEAPONAMMO = "weaponAmmo";
+		String DROPPEDAMMO = "droppedAmmo";
+		String DROPPEDBOXAMMO = "droppedBoxAmmo";
+		String DROPPEDBACKPACKAMMO = "droppedBackpackAmmo";
+		String DROPPEDWEAPONAMMO = "droppedWeaponAmmo";
+		String DEATHMATCHWEAPONAMMO = "deathmatchWeaponAmmo";
+		String SKILL1MULTIPLIER = "skill1Multiplier";
+		String SKILL2MULTIPLIER = "skill2Multiplier";
+		String SKILL3MULTIPLIER = "skill3Multiplier";
+		String SKILL4MULTIPLIER = "skill4Multiplier";
+		String SKILL5MULTIPLIER = "skill5Multiplier";
 		
 		String STRINGS = "strings";
 		
@@ -140,12 +155,22 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		String WEAPON = "weapon";
 		String AMMOTYPE = "ammotype";
-		String AMMOPERSHOT = "ammopershot";
 		String WEAPONSTATE_READY = DEHWeapon.STATE_LABEL_READY;
 		String WEAPONSTATE_SELECT = DEHWeapon.STATE_LABEL_SELECT;
 		String WEAPONSTATE_DESELECT = DEHWeapon.STATE_LABEL_DESELECT;
 		String WEAPONSTATE_FIRE = DEHWeapon.STATE_LABEL_FIRE;
 		String WEAPONSTATE_FLASH = DEHWeapon.STATE_LABEL_FLASH;
+		String AMMOPERSHOT = "ammopershot";
+		String SLOT = "slot";
+		String SLOTPRIORITY = "slotPriority";
+		String SWITCHPRIORITY = "switchPriority";
+		String INITIALOWNED = "initialOwned";
+		String INITIALRAISED = "initialRaised";
+		String CAROUSELICON = "carouselIcon";
+		String ALLOWSWITCHWITHOWNEDWEAPON = "allowSwitchWithOwnedWeapon";
+		String NOSWITCHWITHOWNEDWEAPON = "noSwitchWithOwnedWeapon";
+		String ALLOWSWITCHWITHOWNEDITEM = "allowSwitchWithOwnedItem";
+		String NOSWITCHWITHOWNEDITEM = "noSwitchWithOwnedItem";
 		
 		String THING = "thing";
 		String THINGSTATE_SPAWN = DEHThing.STATE_LABEL_SPAWN;
@@ -178,18 +203,30 @@ public final class DecoHackParser extends Lexer.Parser
 		String DEATHSOUND = "deathsound";
 		String ACTIVESOUND = "activesound";
 		String RIPSOUND = "ripsound";
+		String MINRESPAWNTICS = "minRespawnTics";
+		String RESPAWNDICE = "respawnDice";
+		String PICKUPAMMOTYPE = "pickupAmmoType";
+		String PICKUPAMMOCATEGORY = "pickupAmmoCategory";
+		String PICKUPWEAPONTYPE = "pickupWeaponType";
+		String PICKUPITEMTYPE = "pickupItemType";
+		String PICKUPBONUSCOUNT = "pickupBonusCount";
+		String PICKUPMESSAGE = "pickupMessage";
+		String TRANSLATION = "translation";
+		String PICKUPSOUND = "pickupSound";
 
 		String OFFSET = "offset";
 		String STATE_BRIGHT = "bright";
 		String STATE_NOTBRIGHT = "notbright";
 		String STATE_FAST = "fast";
 		String STATE_NOTFAST = "notfast";
+		String TRANMAP = "tranmap";
 		
 		String WITH = "with";
 		String SWAP = "swap";
 
 		String USING = "using";
 		String MBF21 = "mbf21";
+		String ID24 = "id24";
 
 		String CUSTOM = "custom";
 		
@@ -700,6 +737,248 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				ammo.setPickup(value);
 			}
+			// ================ ID24
+			else if (matchIdentifierIgnoreCase(Keyword.INITIALAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.INITIALAMMO);
+					return false;
+				}
+				ammo.setInitialAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.MAXUPGRADEDAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.MAXUPGRADEDAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MAXUPGRADEDAMMO);
+					return false;
+				}
+				ammo.setMaxUpgradedAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.BOXAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.BOXAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.BOXAMMO);
+					return false;
+				}
+				ammo.setBoxAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.BACKPACKAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.BACKPACKAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.BACKPACKAMMO);
+					return false;
+				}
+				ammo.setBackpackAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.WEAPONAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.WEAPONAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.WEAPONAMMO);
+					return false;
+				}
+				ammo.setWeaponAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDAMMO);
+					return false;
+				}
+				ammo.setDroppedAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBOXAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDBOXAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBOXAMMO);
+					return false;
+				}
+				ammo.setDroppedBoxAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBACKPACKAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDBACKPACKAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBACKPACKAMMO);
+					return false;
+				}
+				ammo.setDroppedBackpackAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDWEAPONAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDWEAPONAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDWEAPONAMMO);
+					return false;
+				}
+				ammo.setDroppedWeaponAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.DEATHMATCHWEAPONAMMO))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DEATHMATCHWEAPONAMMO);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DEATHMATCHWEAPONAMMO);
+					return false;
+				}
+				ammo.setDeathmatchWeaponAmmo(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SKILL1MULTIPLIER))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL1MULTIPLIER);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveFixed(true)) == null)
+				{
+					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL1MULTIPLIER);
+					return false;
+				}
+				ammo.setSkill1Multiplier(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SKILL2MULTIPLIER))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL2MULTIPLIER);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveFixed(true)) == null)
+				{
+					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL2MULTIPLIER);
+					return false;
+				}
+				ammo.setSkill2Multiplier(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SKILL3MULTIPLIER))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL3MULTIPLIER);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveFixed(true)) == null)
+				{
+					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL3MULTIPLIER);
+					return false;
+				}
+				ammo.setSkill3Multiplier(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SKILL4MULTIPLIER))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL4MULTIPLIER);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveFixed(true)) == null)
+				{
+					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL4MULTIPLIER);
+					return false;
+				}
+				ammo.setSkill4Multiplier(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SKILL5MULTIPLIER))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL5MULTIPLIER);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveFixed(true)) == null)
+				{
+					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL5MULTIPLIER);
+					return false;
+				}
+				ammo.setSkill5Multiplier(value);
+			}
+			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHAmmo.class))
 			{
 				String propertyName = matchIdentifier(); 
@@ -1827,6 +2106,10 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					thing.addMBF21Flag(value);
 				}
+				else if ((value = matchThingID24FlagMnemonic(context)) != null)
+				{
+					thing.addID24Flag(value);
+				}
 				else if (matchIdentifierIgnoreCase(Keyword.MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
@@ -1836,6 +2119,18 @@ public final class DecoHackParser extends Lexer.Parser
 					else
 					{
 						addErrorMessage("Expected integer after \"+ mbf21\".");
+						return false;
+					}
+				}
+				else if (matchIdentifierIgnoreCase(Keyword.ID24))
+				{
+					if ((value = matchPositiveInteger()) != null)
+					{
+						thing.addID24Flag(value);
+					}
+					else
+					{
+						addErrorMessage("Expected integer after \"+ id24\".");
 						return false;
 					}
 				}
@@ -1859,6 +2154,10 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					thing.removeMBF21Flag(value);
 				}
+				else if ((value = matchThingID24FlagMnemonic(context)) != null)
+				{
+					thing.removeID24Flag(value);
+				}
 				else if (matchIdentifierIgnoreCase(Keyword.MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
@@ -1868,6 +2167,18 @@ public final class DecoHackParser extends Lexer.Parser
 					else
 					{
 						addErrorMessage("Expected integer after \"- mbf21\".");
+						return false;
+					}
+				}
+				else if (matchIdentifierIgnoreCase(Keyword.ID24))
+				{
+					if ((value = matchPositiveInteger()) != null)
+					{
+						thing.removeID24Flag(value);
+					}
+					else
+					{
+						addErrorMessage("Expected integer after \"- id24\".");
 						return false;
 					}
 				}
@@ -1944,8 +2255,14 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 				
+				if (value < -1 && !context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("A negative editor number is only valid for ID24 patches or better.");
+					return false;
+				}
+				
 				// bad or reserved ednums.
-				if (value < -1 || value == 0 || value == 1 || value == 2 || value == 3 || value == 4 || value == 11)
+				if (value == 0 || value == 1 || value == 2 || value == 3 || value == 4 || value == 11)
 				{
 					addErrorMessage("The editor number %d is either invalid or reserved.", value);
 					return false;
@@ -2206,6 +2523,157 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				thing.setSplashGroup(value);
 			}
+			// ================= ID24
+			else if (matchIdentifierIgnoreCase(Keyword.MINRESPAWNTICS))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.MINRESPAWNTICS);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MINRESPAWNTICS);
+					return false;
+				}
+				thing.setMinRespawnTics(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.RESPAWNDICE))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.RESPAWNDICE);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.RESPAWNDICE);
+					return false;
+				}
+				thing.setRespawnDice(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOTYPE))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPAMMOTYPE);
+					return false;
+				}
+				
+				if ((value = matchAmmoIndex(context)) == null)
+				{
+					return false;
+				}
+				thing.setPickupAmmoType(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOCATEGORY))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPAMMOCATEGORY);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPAMMOCATEGORY);
+					return false;
+				}
+				thing.setPickupAmmoCategory(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPWEAPONTYPE))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPWEAPONTYPE);
+					return false;
+				}
+				
+				if ((value = matchWeaponIndex(context)) == null)
+				{
+					return false;
+				}
+				thing.setPickupWeaponType(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPITEMTYPE))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPITEMTYPE);
+					return false;
+				}
+				
+				if ((value = matchPickupItemType()) == null)
+				{
+					return false;
+				}
+				thing.setPickupItemType(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPBONUSCOUNT))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPBONUSCOUNT);
+					return false;
+				}
+				
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPBONUSCOUNT);
+					return false;
+				}
+				thing.setPickupBonusCount(value);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPMESSAGE))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPMESSAGE);
+					return false;
+				}
+				
+				String str;
+				if ((str = matchString()) == null)
+				{
+					addErrorMessage("Expected string after \"%s\".", Keyword.PICKUPMESSAGE);
+					return false;
+				}
+				thing.setPickupMessage(str);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.TRANSLATION))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.TRANSLATION);
+					return false;
+				}
+				
+				String str;
+				if ((str = matchString()) == null)
+				{
+					addErrorMessage("Expected string after \"%s\".", Keyword.TRANSLATION);
+					return false;
+				}
+				thing.setTranslation(str);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PICKUPSOUND))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPSOUND);
+					return false;
+				}
+				
+				if ((value = matchSoundIndexName(context)) == null)
+				{
+					addErrorMessage("Expected valid sound after \"%s\".", Keyword.PICKUPSOUND);
+					return false;
+				}
+				thing.setPickupSoundPosition(value);
+			}
+			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHThing.class))
 			{
 				String propertyName = matchIdentifier(); 
@@ -2699,31 +3167,20 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.AMMOTYPE))
 			{
-				Ammo ammo;
 				Integer ammoIndex;
-				if ((ammoIndex = matchPositiveInteger()) == null)
+				if ((ammoIndex = matchAmmoIndex(context)) == null)
 				{
-					addErrorMessage("Expected ammo type: an integer from 0 to %d, or 5.", context.getAmmoCount() - 1);
 					return false;
 				}
-				else if (ammoIndex < 0 || ammoIndex > 5  || ammoIndex == 4)
-				{
-					addErrorMessage("Expected ammo type: an integer from 0 to %d, or 5.", context.getAmmoCount() - 1);
-					return false;
-				}
-				else
-				{
-					ammo = Ammo.VALUES.get(ammoIndex);
-				}
-
-				weapon.setAmmoType(ammo);
+				
+				weapon.setAmmoType(ammoIndex);
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.AMMOPERSHOT))
 			{
 				Integer ammoPerShot;
 				if ((ammoPerShot = matchPositiveInteger()) == null)
 				{
-					addErrorMessage("Expected ammo per shot: a positive integer.");
+					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.AMMOPERSHOT);
 					return false;
 				}
 				else
@@ -2731,6 +3188,7 @@ public final class DecoHackParser extends Lexer.Parser
 					weapon.setAmmoPerShot(ammoPerShot);
 				}
 			}
+			// ================= MBF21
 			else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
 			{
 				if (!context.supports(DEHFeatureLevel.MBF21))
@@ -2756,6 +3214,194 @@ public final class DecoHackParser extends Lexer.Parser
 					weapon.setMBF21Flags(flags);
 				}
 			}
+			// ================= ID24
+			else if (matchIdentifierIgnoreCase(Keyword.SLOT))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SLOT);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOT);
+					return false;
+				}
+				else
+				{
+					weapon.setSlot(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SLOTPRIORITY))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SLOTPRIORITY);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOTPRIORITY);
+					return false;
+				}
+				else
+				{
+					weapon.setSlotPriority(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.SWITCHPRIORITY))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SWITCHPRIORITY);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SWITCHPRIORITY);
+					return false;
+				}
+				else
+				{
+					weapon.setSwitchPriority(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.INITIALOWNED))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALOWNED);
+					return false;
+				}
+				
+				Boolean value;
+				if ((value = matchBoolean()) == null)
+				{
+					addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALOWNED);
+					return false;
+				}
+				else
+				{
+					weapon.setInitialOwned(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.INITIALRAISED))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALRAISED);
+					return false;
+				}
+				
+				Boolean value;
+				if ((value = matchBoolean()) == null)
+				{
+					addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALRAISED);
+					return false;
+				}
+				else
+				{
+					weapon.setInitialRaised(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.CAROUSELICON))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.CAROUSELICON);
+					return false;
+				}
+				
+				String value;
+				if ((value = matchString()) == null)
+				{
+					addErrorMessage("Expected a string after \"%s\".", Keyword.CAROUSELICON);
+					return false;
+				}
+				else
+				{
+					weapon.setCarouselIcon(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDWEAPON))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.ALLOWSWITCHWITHOWNEDWEAPON);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchWeaponIndex(context)) == null)
+				{
+					return false;
+				}
+				else
+				{
+					weapon.setAllowSwitchWithOwnedWeapon(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDWEAPON))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.NOSWITCHWITHOWNEDWEAPON);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchWeaponIndex(context)) == null)
+				{
+					return false;
+				}
+				else
+				{
+					weapon.setNoSwitchWithOwnedWeapon(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDITEM))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.ALLOWSWITCHWITHOWNEDITEM);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPickupItemType()) == null)
+				{
+					return false;
+				}
+				else
+				{
+					weapon.setAllowSwitchWithOwnedItem(value);
+				}
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDITEM))
+			{
+				if (!context.supports(DEHFeatureLevel.ID24))
+				{
+					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.NOSWITCHWITHOWNEDITEM);
+					return false;
+				}
+				
+				Integer value;
+				if ((value = matchPickupItemType()) == null)
+				{
+					return false;
+				}
+				else
+				{
+					weapon.setNoSwitchWithOwnedItem(value);
+				}
+			}
+			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHWeapon.class))
 			{
 				String propertyName = matchIdentifier(); 
@@ -3224,6 +3870,15 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				notModified = false;
 			}
+			else if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
+			{
+				ParsedAction action = new ParsedAction();
+				if (!parseTranmapClause(action))
+					return false;
+				
+				state.setTranmap(action.tranmap);
+				notModified = false;
+			}
 			else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
 			{
 				state.setBright(true);
@@ -3367,6 +4022,8 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			state.parsedActions.add(action = new ParsedAction());
 			if (!parseOffsetClause(action))
+				return false;
+			if (!parseTranmapClause(action))
 				return false;
 			if (!parseActionClause(context, actor, action, requireAction))
 				return false;
@@ -3584,7 +4241,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return value;
 	}
 	
-	// Parses and Offset clause.
+	// Parses an Offset clause.
 	private boolean parseOffsetClause(ParsedAction parsedAction)
 	{
 		if (matchIdentifierIgnoreCase(Keyword.OFFSET))
@@ -3631,6 +4288,38 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	// Parses a Tranmap clause.
+	private boolean parseTranmapClause(ParsedAction parsedAction)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.TRANMAP))
+		{
+			if (matchType(DecoHackKernel.TYPE_LPAREN))
+			{
+				String name;
+				if ((name = matchString()) == null)
+				{
+					addErrorMessage("Expected a string for tranmap name.");
+					return false;
+				}
+				
+				parsedAction.tranmap = name;
+				
+				if (!matchType(DecoHackKernel.TYPE_RPAREN))
+				{
+					addErrorMessage("Expected a ')' after tranmap name.");
+					return false;
+				}
+			}
+			else
+			{
+				addErrorMessage("Expected a '(' after \"tranmap\".");
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	// Parse an action into a parsed action.
 	private boolean parseActionClause(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedAction action, Boolean requireAction) 
 	{
@@ -4235,7 +4924,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if ((slot = matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected positive integer or alias for the weapon slot.");
+			addErrorMessage("Expected positive integer or alias for the weapon index.");
 			return null;
 		}
 
@@ -4260,6 +4949,49 @@ public final class DecoHackParser extends Lexer.Parser
 		return slot;
 	}
 
+	// Mqtches a valid ammo type.
+	private Integer matchAmmoIndex(AbstractPatchContext<?> context)
+	{
+		Integer ammoType;
+		if ((ammoType = matchInteger()) == null)
+		{
+			addErrorMessage("Expected integer for ammo type.");
+			return null;
+		}
+		else if (ammoType == 4)
+		{
+			addErrorMessage("Ammo type %d is reserved.", ammoType);
+			return null;
+		}
+		
+		if (context.getAmmo(ammoType) == null)
+		{
+			addErrorMessage("Expected valid ammo type index.");
+			return null;
+		}
+		
+		return ammoType;
+	}
+	
+	// Mqtches a valid pickup item type.
+	private Integer matchPickupItemType()
+	{
+		Integer itemType;
+		if ((itemType = matchInteger()) == null)
+		{
+			addErrorMessage("Expected integer for item type.");
+			return null;
+		}
+		
+		if (itemType < -1 || itemType > 21)
+		{
+			addErrorMessage("Expected valid item type index (%d to %d).", -1, 21);
+			return null;
+		}
+		
+		return itemType;
+	}
+	
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.
@@ -4397,6 +5129,32 @@ public final class DecoHackParser extends Lexer.Parser
 			if (!context.supports(DEHFeatureLevel.MBF21))
 			{
 				addErrorMessage("MBF21 thing flags are not available. Not an MBF21 patch.");
+				return null;
+			}
+
+			nextToken();
+		}
+		
+		return out;
+	}
+	
+	// Matches an identifier that references an MBF thing flag mnemonic.
+	// If match, advance token and return bitflags.
+	// Else, return null.
+	private Integer matchThingID24FlagMnemonic(AbstractPatchContext<?> context)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+
+		Integer out = null;
+		DEHThingID24Flag flag;
+		if ((flag = DEHThingID24Flag.getByMnemonic(currentLexeme())) != null)
+		{
+			out = flag.getValue();
+
+			if (!context.supports(DEHFeatureLevel.ID24))
+			{
+				addErrorMessage("ID24 thing flags are not available. Not an ID24 patch.");
 				return null;
 			}
 
@@ -4567,6 +5325,7 @@ public final class DecoHackParser extends Lexer.Parser
 				final int FIM_THING_DOOM19 = 0x01;
 				final int FIM_THING_MBF21 = 0x02;
 				final int FIM_WEAPON_MBF21 = 0x04;
+				final int FIM_THING_ID24 = 0x08;
 				
 				while (currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
 				{
@@ -4599,6 +5358,17 @@ public final class DecoHackParser extends Lexer.Parser
 
 						flagInclusionMask |= FIM_THING_MBF21;
 						if ((flagInclusionMask & ~FIM_THING_MBF21) != 0)
+						{
+							addErrorMessage("Attempted to mix different flag mnemonic types!");
+							return null;
+						}
+					}
+					else if ((value = matchThingID24FlagMnemonic(context)) != null)
+					{
+						out |= value;
+
+						flagInclusionMask |= FIM_THING_ID24;
+						if ((flagInclusionMask & ~FIM_THING_ID24) != 0)
 						{
 							addErrorMessage("Attempted to mix different flag mnemonic types!");
 							return null;
@@ -5142,7 +5912,8 @@ public final class DecoHackParser extends Lexer.Parser
 		private int misc2;
 		private List<Integer> args;
 		private Deque<FieldSet> labelFields;
-
+		private String tranmap;
+		
 		private ParsedAction()
 		{
 			this.args = new LinkedList<>();
@@ -5158,6 +5929,7 @@ public final class DecoHackParser extends Lexer.Parser
 			this.misc2 = 0;
 			this.args.clear();
 			this.labelFields.clear();
+			this.tranmap = null;
 		}
 		
 		void applyLabels(int stateIndex, FutureLabels labels)

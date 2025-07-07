@@ -106,10 +106,10 @@ public class WADProjectGenerator extends ProjectGenerator
 
 	/** DECOHack base type replacer. */
 	private static final ProjectTokenReplacer REPLACER_PROJECT_DECOHACK = ProjectTokenReplacer.create(
-		"DECOHACK_BASE", "DECOHack Patch type (doom19, udoom19, doomunity, boom, mbf, extended, mbf21, dsdhacked)\n(blank for \"doom19\")?", "doom19", (type) -> {
+		"DECOHACK_BASE", "DECOHack Patch type (doom19, udoom19, doomunity, boom, mbf, extended, mbf21, dsdhacked, id24)\n(blank for \"doom19\")?", "doom19", (type) -> {
 			if (type.trim().length() == 0)
 				return null;
-			if (!set("doom19", "udoom19", "doomunity", "boom", "mbf", "extended", "mbf21", "dsdhacked").contains(type))
+			if (!set("doom19", "udoom19", "doomunity", "boom", "mbf", "extended", "mbf21", "dsdhacked", "id24").contains(type))
 				return "Bad type name.";
 			return null;
 		}

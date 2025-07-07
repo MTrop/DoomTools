@@ -250,7 +250,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	{
 		if (editorNumber == 0)
 			throw new IllegalArgumentException("Editor number can not be 0.");
-		RangeUtils.checkRange("Editor number", -1, 0x10000, editorNumber);
+		RangeUtils.checkRange("Editor number", 0, 65535, editorNumber);
 		this.editorNumber = editorNumber;
 		return this;
 	}

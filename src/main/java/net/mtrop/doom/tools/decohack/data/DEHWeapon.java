@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
-import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
@@ -22,32 +21,18 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<DEHWeapon>
 {
-	public static enum Ammo
-	{
-		BULLETS,
-		SHELLS,
-		CELLS,
-		ROCKETS,
-		UNUSED,
-		INFINITE;
-		
-		public static final Map<Integer, Ammo> VALUES = EnumUtils.createOrdinalMap(Ammo.class);
-	}
-	
 	/** Weapon name. */
 	private String name;
 	/** Ammo type. */
-	private Ammo ammoType;
+	private int ammoType;
 
 	// MBF21
-	
 	/** Ammo per shot. */
 	private int ammoPerShot;
 	/** Flags. */
 	private int mbf21Flags;
 
 	// ID24
-	
 	private int slot;
 	private int slotPriority;
 	private int switchPriority;
@@ -75,7 +60,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	/**
 	 * Creates a weapon entry.
 	 * @param name the name.
-	 * @param ammo the ammo type.
+	 * @param ammoType the ammo type.
 	 * @param raise the raise frame index
 	 * @param lower the lower frame index
 	 * @param ready the ready frame index.
@@ -85,11 +70,11 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 * @param flags weapon flags.
 	 * @return a weapon entry.
 	 */
-	public static DEHWeapon create(String name, Ammo ammo, int raise, int lower, int ready, int fire, int flash, int ammoPerShot, int flags)
+	public static DEHWeapon create(String name, int ammoType, int raise, int lower, int ready, int fire, int flash, int ammoPerShot, int flags)
 	{
 		DEHWeapon out = new DEHWeapon(); 
 		out.setName(name);
-		out.setAmmoType(ammo);
+		out.setAmmoType(ammoType);
 		out.clearLabels();
 		out.setRaiseFrameIndex(raise);
 		out.setLowerFrameIndex(lower);
@@ -146,7 +131,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	@Override
 	public DEHWeapon clearProperties()
 	{
-		setAmmoType(Ammo.BULLETS);
+		setAmmoType(0);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
 		clearCustomPropertyValues();
 		return this;
@@ -189,7 +174,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	/**
 	 * @return the ammo type.
 	 */
-	public Ammo getAmmoType() 
+	public int getAmmoType() 
 	{
 		return ammoType;
 	}
@@ -199,7 +184,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 * @param ammoType the type.
 	 * @return this object.
 	 */
-	public DEHWeapon setAmmoType(Ammo ammoType) 
+	public DEHWeapon setAmmoType(int ammoType) 
 	{
 		this.ammoType = ammoType;
 		return this;
@@ -544,7 +529,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	public void writeObject(Writer writer, DEHWeapon weapon, DEHFeatureLevel level) throws IOException 
 	{
 		if (ammoType != weapon.ammoType)
-			writer.append("Ammo type = ").append(String.valueOf(ammoType.ordinal())).append("\r\n");
+			writer.append("Ammo type = ").append(String.valueOf(ammoType)).append("\r\n");
 		
 		// These look backwards. They are not.
 		if (getRaiseFrameIndex() != weapon.getRaiseFrameIndex())

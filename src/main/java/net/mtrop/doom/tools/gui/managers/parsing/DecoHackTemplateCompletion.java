@@ -172,7 +172,8 @@ public enum DecoHackTemplateCompletion
         "painchance 0\n" +
         "mass 0\n" +
         "\n" +
-        "clear flags\n"
+        "clear flags\n" +
+		"${cursor}"
 	)),
 
 	THINGPROPERTIESEXT("Adds a Thing's EXTENDED properties and their default values.", (
@@ -189,7 +190,8 @@ public enum DecoHackTemplateCompletion
         "\n" +
         "dropitem MT_NULL\n" +
         "\n" +
-        "clear flags\n"
+        "clear flags\n" +
+		"${cursor}"
 	)),
 
 	THINGPROPERTIESMBF21("Adds a Thing's MBF21 properties and their default values.", (
@@ -212,7 +214,42 @@ public enum DecoHackTemplateCompletion
         "projectilegroup 0\n" +
         "splashgroup 0\n" +
         "\n" +
-        "clear flags\n"
+        "clear flags\n" +
+		"${cursor}"
+	)),
+
+	THINGPROPERTIESID24("Adds a Thing's ID24 properties and their default values.", (
+        "ednum -1\n" +
+        "\n" +
+        "health 0\n" +
+        "speed 0\n" +
+        "radius 0\n" +
+        "height 0\n" +
+        "damage 0\n" +
+        "reactiontime 0\n" +
+        "painchance 0\n" +
+        "mass 0\n" +
+        "\n" +
+        "dropitem MT_NULL\n" +
+        "\n" +
+        "fastspeed -1\n" +
+        "meleerange 64\n" +
+        "infightinggroup 0\n" +
+        "projectilegroup 0\n" +
+        "splashgroup 0\n" +
+        "\n" +
+		"minrespawntics 420\n" +
+		"respawndice 6\n" +
+		"pickupammotype 0\n" +
+		"pickupammocategory 0\n" +
+		"pickupweapontype 0\n" +
+		"pickupitemtype PICKUP_NONE\n" +
+		"pickupbonuscount 0\n" +
+		"pickupmessage \"\"\n" +
+		"translation \"\"\n" +
+        "\n" +
+        "clear flags\n" +
+		"${cursor}"
 	)),
 
 	THINGSOUNDS("Adds a Thing's sound properties and their default values.", (
@@ -220,7 +257,8 @@ public enum DecoHackTemplateCompletion
         "attacksound \"\"\n" +
         "painsound \"\"\n" +
         "deathsound \"\"\n" +
-        "activesound \"\"\n"
+        "activesound \"\"\n" +
+		"${cursor}"
 	)),
 
 	THINGSOUNDSMBF21("Adds a Thing's MBF21 sound properties and their default values.", (
@@ -229,7 +267,19 @@ public enum DecoHackTemplateCompletion
         "painsound \"\"\n" +
         "deathsound \"\"\n" +
         "activesound \"\"\n" +
-        "ripsound \"\"\n"
+        "ripsound \"\"\n" +
+		"${cursor}"
+	)),
+
+	THINGSOUNDSID24("Adds a Thing's ID24 sound properties and their default values.", (
+        "seesound \"\"\n" +
+        "attacksound \"\"\n" +
+        "painsound \"\"\n" +
+        "deathsound \"\"\n" +
+        "activesound \"\"\n" +
+        "ripsound \"\"\n" +
+        "pickupsound \"\"\n" +
+		"${cursor}"
 	)),
 
 	THINGSTATES("Adds a skeleton states block for Things (all significant labels).", (
@@ -286,14 +336,35 @@ public enum DecoHackTemplateCompletion
 	)),
 
 	WEAPONPROPERTIES("Adds a Weapon's properties and their blank values.", (
-        "ammotype AM_CLIP\n"
+        "ammotype AM_CLIP\n" +
+        "${cursor}"
 	)),
 
 	WEAPONPROPERTIESMBF21("Adds a Weapon's MBF21 properties and their blank values.", (
         "ammotype AM_CLIP\n" +
         "ammopershot -1\n" +
         "\n" +
-        "clear flags\n"
+        "clear flags\n" +
+        "${cursor}"
+	)),
+
+	WEAPONPROPERTIESID24("Adds a Weapon's ID24 properties and their blank values.", (
+        "ammotype AM_CLIP\n" +
+        "ammopershot -1\n" +
+        "\n" +
+		"slot 0\n" +
+		"slotpriority 0\n" +
+		"switchpriority 0\n" +
+		"initialowned false\n" +
+		"initialraised false\n" +
+		"carouselicon \"SMUNKN\"\n" +
+		"allowswitchwithownedweapon MT_NULL\n" +
+		"noswitchwithownedweapon MT_NULL\n" +
+		"allowswitchwithowneditem MT_NULL\n" +
+		"noswitchwithowneditem MT_NULL\n" +
+        "\n" +
+        "clear flags\n" +
+        "${cursor}"
 	)),
 
 	WEAPONSTATES("Adds a skeleton states block for Weapons (all significant labels).", (

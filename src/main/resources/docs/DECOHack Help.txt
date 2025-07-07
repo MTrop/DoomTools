@@ -114,10 +114,27 @@ DeHackEd specs.
 Changes an ammo entry. `ammo` plus an index, and an optional string for the 
 new name. 
 
-    ammo ( 0 | 1 | 2 | 3 ) <STRING>
+    ammo <INTEGER> <STRING>
     {
         max <INTEGER>
         pickup <INTEGER>
+        
+        // ID24 Properties (ID24 feature set and later)
+        initialAmmo <INTEGER>
+        maxUpgradedAmmo <INTEGER>
+        boxAmmo <INTEGER>
+        backpackAmmo <INTEGER>
+        weaponAmmo <INTEGER>
+        droppedAmmo <INTEGER>
+        droppedBoxAmmo <INTEGER>
+        droppedBackpackAmmo <INTEGER>
+        droppedWeaponAmmo <INTEGER>
+        deathmatchWeaponAmmo <INTEGER>
+        skill1Multiplier <FIXED>
+        skill2Multiplier <FIXED>
+        skill3Multiplier <FIXED>
+        skill4Multiplier <FIXED>
+        skill5Multiplier <FIXED>
     }
 
 
@@ -271,6 +288,12 @@ argument is nonzero).
     Offset(1, 32)
 
 
+ID24 patches add an additional field to states called "tranmap" that allows
+you to add a translucency mapping (usually "TRANMAP") to TRANSLUCENT things:
+
+    Tranmap("TADDMAP")
+
+
 Action pointers understand what is expected in each parameter - you can just
 refer to thing aliases, labels, and sounds or what-have-you as-is and it
 will attempt to figure it out:
@@ -365,6 +388,7 @@ instead of using a full state definition line:
         [NotBright]
         [Fast]      // MBF21 Only
         [NotFast]   // MBF21 Only 
+        [<TranmapClause>]  // ID24 Only
         [<OffsetClause>]
         pointer [ <ActionPointer> | null ]
         nextstate <StateIndex>
@@ -594,6 +618,18 @@ associated Thing for pickups.
         + <MBF21WeaponFlagName>     // set flag
         - <MBF21WeaponFlagName>     // unset flag
         
+        // ID24 Properties (ID24 feature set only)
+        slot <INTEGER>
+        slotPriority <INTEGER>
+        switchPriority <INTEGER>
+        initialOwned <BOOLEAN>
+        initialRaised <BOOLEAN>
+        carouselIcon <STRING>
+        allowSwitchWithOwnedWeapon <INTEGER or WeaponAlias>
+        noSwitchWithOwnedWeapon <INTEGER or WeaponAlias>
+        allowSwitchWithOwnedItem <INTEGER>
+        noSwitchWithOwnedItem <INTEGER>
+        
         // specific state assignment.
         state <WeaponStateName> <INTEGER>
         
@@ -806,6 +842,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
 
         flags mbf21 <INTEGER-EXPRESSION> // MBF21 Only
 
+        flags id24 <INTEGER-EXPRESSION> // ID24 Only
+
         clear flags // If present, clear all flags (both sets, if available)
 
         + <INTEGER>                  // set flag(s)
@@ -818,6 +856,12 @@ the thing state indices. Other labels are used for arbitrary jump points.
         - mbf21 <INTEGER>            // unset flag(s)
         + <MBF21ThingFlagName>       // set MBF21 flag
         - <MBF21ThingFlagName>       // unset MBF21 flag
+
+        // ID24 Flags (ID24 feature set only)
+        + id24 <INTEGER>            // set flag(s)
+        - id24 <INTEGER>            // unset flag(s)
+        + <ID24ThingFlagName>       // set MBF21 flag
+        - <ID24ThingFlagName>       // unset MBF21 flag
 
         clear sounds // if present, clear all sounds.
             
@@ -837,6 +881,19 @@ the thing state indices. Other labels are used for arbitrary jump points.
         projectilegroup <INTEGER>
         splashgroup <INTEGER>
         ripsound <STRING>
+
+        // ID24 Properties (ID24 feature set and later)
+        minRespawnTics <INTEGER>
+        respawnDice <INTEGER>
+        pickupAmmoType <INTEGER>
+        pickupAmmoCategory <INTEGER>
+        pickupWeaponType <INTEGER or WeaponAlias>
+        pickupItemType <INTEGER>
+        pickupBonusCount <INTEGER>
+        pickupMessage <STRING>
+        translation <STRING>
+        pickupSound <STRING>
+
 
         // specific state assignment.
         state <ThingStateName> <INTEGER>
@@ -1185,76 +1242,83 @@ List of valid mnemonics and their values:
 
 Things (Doom+):
 
-    SPECIAL =        0x00000001
-    SOLID =          0x00000002
-    SHOOTABLE =      0x00000004
-    NOSECTOR =       0x00000008
-    NOBLOCKMAP =     0x00000010
-    AMBUSH =         0x00000020
-    JUSTHIT =        0x00000040
-    JUSTATTACKED =   0x00000080
-    SPAWNCEILING =   0x00000100
-    NOGRAVITY =      0x00000200
-    DROPOFF =        0x00000400
-    PICKUP =         0x00000800
-    NOCLIP =         0x00001000
-    SLIDE =          0x00002000
-    FLOAT =          0x00004000
-    TELEPORT =       0x00008000
-    MISSILE =        0x00010000
-    DROPPED =        0x00020000
-    SHADOW =         0x00040000
-    NOBLOOD =        0x00080000
-    CORPSE =         0x00100000
-    INFLOAT =        0x00200000
-    COUNTKILL =      0x00400000
-    COUNTITEM =      0x00800000
-    SKULLFLY =       0x01000000
-    NOTDMATCH =      0x02000000
-    NOTDEATHMATCH =  0x02000000
-    TRANSLATION =    0x04000000
-    TRANSLATION1 =   0x04000000
-    UNUSED1 =        0x08000000
-    TRANSLATION2 =   0x08000000
-    TOUCHY =         0x10000000
-    UNUSED2 =        0x10000000
-    BOUNCES =        0x20000000
-    UNUSED3 =        0x20000000
-    FRIEND =         0x40000000
-    FRIENDLY =       0x40000000
-    UNUSED4 =        0x40000000
-    TRANSLUCENT =    0x80000000
+    SPECIAL =            0x00000001
+    SOLID =              0x00000002
+    SHOOTABLE =          0x00000004
+    NOSECTOR =           0x00000008
+    NOBLOCKMAP =         0x00000010
+    AMBUSH =             0x00000020
+    JUSTHIT =            0x00000040
+    JUSTATTACKED =       0x00000080
+    SPAWNCEILING =       0x00000100
+    NOGRAVITY =          0x00000200
+    DROPOFF =            0x00000400
+    PICKUP =             0x00000800
+    NOCLIP =             0x00001000
+    SLIDE =              0x00002000
+    FLOAT =              0x00004000
+    TELEPORT =           0x00008000
+    MISSILE =            0x00010000
+    DROPPED =            0x00020000
+    SHADOW =             0x00040000
+    NOBLOOD =            0x00080000
+    CORPSE =             0x00100000
+    INFLOAT =            0x00200000
+    COUNTKILL =          0x00400000
+    COUNTITEM =          0x00800000
+    SKULLFLY =           0x01000000
+    NOTDMATCH =          0x02000000
+    NOTDEATHMATCH =      0x02000000
+    TRANSLATION =        0x04000000
+    TRANSLATION1 =       0x04000000
+    UNUSED1 =            0x08000000
+    TRANSLATION2 =       0x08000000
+    TOUCHY =             0x10000000
+    UNUSED2 =            0x10000000
+    BOUNCES =            0x20000000
+    UNUSED3 =            0x20000000
+    FRIEND =             0x40000000
+    FRIENDLY =           0x40000000
+    UNUSED4 =            0x40000000
+    TRANSLUCENT =        0x80000000
 
 Things (MBF21+):
 
-    LOGRAV =         0x00000001
-    SHORTMRANGE =    0x00000002
-    DMGIGNORED =     0x00000004
-    NORADIUSDMG =    0x00000008
-    FORCERADIUSDMG = 0x00000010
-    HIGHERMPROB =    0x00000020
-    RANGEHALF =      0x00000040
-    NOTHRESHOLD =    0x00000080
-    LONGMELEE =      0x00000100
-    BOSS =           0x00000200
-    MAP07BOSS1 =     0x00000400
-    MAP07BOSS2 =     0x00000800
-    E1M8BOSS =       0x00001000
-    E2M8BOSS =       0x00002000
-    E3M8BOSS =       0x00004000
-    E4M6BOSS =       0x00008000
-    E4M8BOSS =       0x00010000
-    RIP =            0x00020000
-    FULLVOLSOUNDS =  0x00040000
+    LOGRAV =             0x00000001
+    SHORTMRANGE =        0x00000002
+    DMGIGNORED =         0x00000004
+    NORADIUSDMG =        0x00000008
+    FORCERADIUSDMG =     0x00000010
+    HIGHERMPROB =        0x00000020
+    RANGEHALF =          0x00000040
+    NOTHRESHOLD =        0x00000080
+    LONGMELEE =          0x00000100
+    BOSS =               0x00000200
+    MAP07BOSS1 =         0x00000400
+    MAP07BOSS2 =         0x00000800
+    E1M8BOSS =           0x00001000
+    E2M8BOSS =           0x00002000
+    E3M8BOSS =           0x00004000
+    E4M6BOSS =           0x00008000
+    E4M8BOSS =           0x00010000
+    RIP =                0x00020000
+    FULLVOLSOUNDS =      0x00040000
+
+Things (ID24+):
+
+    NORESPAWN =          0x00000001
+    SPECIALSTAYSSINGLE = 0x00000002
+    SPECIALSTAYSCOOP =   0x00000004
+    SPECIALSTAYSDM =     0x00000008
 
 Weapons (MBF21+):
 
-    NOTHRUST =       0x00000001
-    SILENT =         0x00000002
-    NOAUTOFIRE =     0x00000004
-    FLEEMELEE =      0x00000008
-    AUTOSWITCHFROM = 0x00000010
-    NOAUTOSWITCHTO = 0x00000020
+    NOTHRUST =           0x00000001
+    SILENT =             0x00000002
+    NOAUTOFIRE =         0x00000004
+    FLEEMELEE =          0x00000008
+    AUTOSWITCHFROM =     0x00000010
+    NOAUTOSWITCHTO =     0x00000020
 
 
 Monsters tend to have 0x00400006 set (SOLID, SHOOTABLE, COUNTKILL).
@@ -1522,6 +1586,7 @@ There are a few #include paths that are aliased in DECOHack for convenience:
     <extended>  "classpath:decohack/extended.dh"
     <mbf21>     "classpath:decohack/mbf21.dh"
     <dsdhacked> "classpath:decohack/dsdhacked.dh"
+    <id24>      "classpath:decohack/id24.dh"
     <friendly>  "classpath:decohack/constants/friendly_things.dh"
 
 For example:

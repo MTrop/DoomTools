@@ -5,8 +5,6 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
-import net.mtrop.doom.tools.decohack.data.DEHWeapon.Ammo;
-
 /**
  * An interface that describes a Weapon whose information can be set.
  * @author Matthew Tropiano
@@ -51,7 +49,7 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 	 * @param ammoType the type.
 	 * @return this object.
 	 */
-	SELF setAmmoType(Ammo ammoType);
+	SELF setAmmoType(int ammoType);
 	
 	/**
 	 * Sets the ammo per shot.
