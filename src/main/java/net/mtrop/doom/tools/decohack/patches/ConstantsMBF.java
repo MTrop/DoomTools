@@ -286,6 +286,6 @@ interface ConstantsMBF
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE),
-	};
+		};
 	
 }

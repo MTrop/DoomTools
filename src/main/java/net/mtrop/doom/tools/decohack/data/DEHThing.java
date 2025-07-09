@@ -85,6 +85,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	private int pickupBonusCount;
 	private String pickupMessage;
 	private String translation;
+	private int selfDamageFactor; // stored as fixed 16.16
 	
 	private int pickupSoundPosition;
 	
@@ -161,8 +162,9 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setPickupItemType(source.pickupItemType);
 		setPickupBonusCount(source.pickupBonusCount);
 		setPickupSoundPosition(source.pickupSoundPosition);
-		setPickupMessage(source.pickupMessage);
+		setPickupMessageMnemonic(source.pickupMessage);
 		setTranslation(source.translation);
+		setSelfDamageFactor(source.selfDamageFactor);
 
 		return this;
 	}
@@ -200,8 +202,9 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setPickupWeaponType(DEFAULT_PICKUP_WEAPON_TYPE);
 		setPickupItemType(DEFAULT_PICKUP_ITEM_TYPE);
 		setPickupBonusCount(DEFAULT_PICKUP_BONUS_COUNT);
-		setPickupMessage(DEFAULT_PICKUP_MESSAGE);
+		setPickupMessageMnemonic(DEFAULT_PICKUP_MESSAGE);
 		setTranslation(DEFAULT_TRANSLATION);
+		setSelfDamageFactor(DEFAULT_SELF_DAMAGE_FACTOR);
 		
 		clearCustomPropertyValues();
 		return this;
@@ -848,7 +851,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	}
 
 	@Override
-	public DEHThing setPickupMessage(String message) 
+	public DEHThing setPickupMessageMnemonic(String message) 
 	{
 		this.pickupMessage = message;
 		return this;
@@ -858,6 +861,13 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	public DEHThing setTranslation(String name) 
 	{
 		this.translation = name;
+		return this;
+	}
+	
+	@Override
+	public DEHThing setSelfDamageFactor(int selfDamageFactor)
+	{
+		this.selfDamageFactor = selfDamageFactor;
 		return this;
 	}
 
@@ -909,6 +919,11 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	public int getPickupSoundPosition() 
 	{
 		return pickupSoundPosition;
+	}
+	
+	public int getSelfDamageFactor()
+	{
+		return selfDamageFactor;
 	}
 
 	@Override
@@ -968,6 +983,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			&& ObjectUtils.areEqual(pickupMessage, obj.pickupMessage)
 			&& ObjectUtils.areEqual(translation, obj.translation)
 			&& pickupSoundPosition == obj.pickupSoundPosition
+			&& selfDamageFactor == obj.selfDamageFactor
 		;
 	}	
 	
@@ -1121,6 +1137,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 				writer.append("Translation = ").append(translation).append("\r\n");
 			if (pickupSoundPosition != thing.pickupSoundPosition)
 				writer.append("Pickup sound = ").append(String.valueOf(pickupSoundPosition)).append("\r\n");
+			if (selfDamageFactor != thing.selfDamageFactor)
+				writer.append("Self damage factor = ").append(String.valueOf(selfDamageFactor)).append("\r\n");
 		}
 		
 		writeCustomProperties(writer);

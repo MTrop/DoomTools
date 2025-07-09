@@ -11,5 +11,4 @@ package net.mtrop.doom.tools.decohack.patches;
  */
 public class PatchMBF21 extends PatchExtended
 {
-	// [XA] Just a stub for now.
 }

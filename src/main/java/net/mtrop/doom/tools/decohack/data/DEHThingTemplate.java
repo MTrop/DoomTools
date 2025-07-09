@@ -93,6 +93,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	private Integer pickupSound;
 	private String pickupMessage;
 	private String translation;
+	private Integer selfDamageFactor; // stored as fixed point 16.16 
 
 	/** Custom properties. */
 	private Map<DEHProperty, String> customProperties;
@@ -158,6 +159,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.pickupSound = null;
 		this.pickupMessage = null;
 		this.translation = null;
+		this.selfDamageFactor = null;
 
 		this.customProperties = new HashMap<>();
 	}
@@ -279,10 +281,12 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		if (pickupSound != null)
 			destination.setPickupSoundPosition(pickupSound);
 		if (pickupMessage != null)
-			destination.setPickupMessage(pickupMessage);
+			destination.setPickupMessageMnemonic(pickupMessage);
 		if (translation != null)
 			destination.setTranslation(translation);
-
+		if (selfDamageFactor != null)
+			destination.setSelfDamageFactor(selfDamageFactor);
+		
 		for (Map.Entry<DEHProperty, String> property : customProperties.entrySet())
 			destination.setCustomPropertyValue(property.getKey(), property.getValue());
 
@@ -343,8 +347,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		setPickupWeaponType(DEFAULT_PICKUP_WEAPON_TYPE);
 		setPickupItemType(DEFAULT_PICKUP_ITEM_TYPE);
 		setPickupBonusCount(DEFAULT_PICKUP_BONUS_COUNT);
-		setPickupMessage(DEFAULT_PICKUP_MESSAGE);
+		setPickupMessageMnemonic(DEFAULT_PICKUP_MESSAGE);
 		setTranslation(DEFAULT_TRANSLATION);
+		setSelfDamageFactor(DEFAULT_SELF_DAMAGE_FACTOR);
 		
 		clearCustomPropertyValues();
 		return this;
@@ -870,7 +875,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupMessage(String message)
+	public DEHThingTemplate setPickupMessageMnemonic(String message)
 	{
 		this.pickupMessage = message;
 		return this;
@@ -882,6 +887,12 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		this.translation = name;
 		return this;
 	}
-	
+
+	@Override
+	public DEHThingTemplate setSelfDamageFactor(int selfDamageFactor)
+	{
+		this.selfDamageFactor = selfDamageFactor;
+		return this;
+	}
 
 }

@@ -79,6 +79,21 @@ public class DEHState extends DEHObject<DEHState>
 		).setTranmap(null);
 	}
 
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags, String tranmap)
+	{
+		return (new DEHState()).set(
+			spriteIndex,
+			frameIndex, 
+			bright,
+			nextStateIndex, 
+			duration,
+			misc1,
+			misc2,
+			args,
+			mbfFlags
+		).setTranmap(tranmap);
+	}
+
 	@Override
 	public DEHState copyFrom(DEHState source) 
 	{

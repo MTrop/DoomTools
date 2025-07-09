@@ -42,6 +42,7 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	static final int DEFAULT_PICKUP_SOUND = 0;
 	static final String DEFAULT_PICKUP_MESSAGE = null;
 	static final String DEFAULT_TRANSLATION = null;
+	static final int DEFAULT_SELF_DAMAGE_FACTOR = (1 << 16); // fixed 1.0
 	
 	/**
 	 * Clears the properties.
@@ -193,8 +194,10 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	
 	SELF setPickupSoundPosition(int soundPosition);
 	
-	SELF setPickupMessage(String message);
+	SELF setPickupMessageMnemonic(String message);
 	
 	SELF setTranslation(String name);
+	
+	SELF setSelfDamageFactor(int selfDamageFactor);
 	
 }

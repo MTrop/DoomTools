@@ -2639,7 +2639,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected string after \"%s\".", Keyword.PICKUPMESSAGE);
 					return false;
 				}
-				thing.setPickupMessage(str);
+				thing.setPickupMessageMnemonic(str);
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.TRANSLATION))
 			{
