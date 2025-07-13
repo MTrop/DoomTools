@@ -808,7 +808,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	// Throws IndexOutOfBoundsException if out of range.
-	protected void checkIndexRange(int index, int count)
+	protected void checkIndexRange(int index, long count)
 	{
 		if (index < 0 || index >= count)
 			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + (count - 1));

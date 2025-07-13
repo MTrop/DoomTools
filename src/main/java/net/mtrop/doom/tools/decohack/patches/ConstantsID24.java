@@ -3,10 +3,12 @@ package net.mtrop.doom.tools.decohack.patches;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF.*;
@@ -15,7 +17,6 @@ import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerMBF21.*;
 
 /**
  * Constants for ID24.
- * TODO: For ID24, make maps of things.
  */
 interface ConstantsID24 
 {
@@ -70,6 +71,8 @@ interface ConstantsID24
 		}
 	};
 
+	static final Map<String, Integer> DEHSPRITENAMESID24 = ObjectUtils.reverseMap(DEHSPRITEID24);
+	
 	static final Map<Integer, PatchBoom.State> DEHSTATEID24 = new TreeMap<Integer, PatchBoom.State>() 
 	{
 		private static final long serialVersionUID = 8516432365864911888L;
@@ -907,7 +910,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048184, (new DEHThing()).setName("Incinerator Flame")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(40)
 				.setRadius(13)
@@ -952,7 +955,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048183, (new DEHThing()).setName("Heatwave Spawner")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(0)
 				.setRadius(16)
@@ -997,7 +1000,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048182, (new DEHThing()).setName("Heatwave Ripper")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(20)
 				.setRadius(16)
@@ -1042,7 +1045,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048181, (new DEHThing()).setName("Ghoul Ball")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(15)
 				.setRadius(6)
@@ -1067,7 +1070,7 @@ interface ConstantsID24
 				.setActiveSoundPosition(0)
 				.setDroppedItem(-1)
 				.setMBF21Flags(0)
-				.setFastSpeed(1310720)
+				.setFastSpeed(1310720 >> 16)
 				.setMeleeRange(64)
 				.setInfightingGroup(0)
 				.setProjectileGroup(0)
@@ -1087,7 +1090,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048180, (new DEHThing()).setName("Shocktrooper Head")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(8)
 				.setRadius(6)
@@ -1132,7 +1135,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048179, (new DEHThing()).setName("Shocktrooper Torso")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(8)
 				.setRadius(6)
@@ -1177,7 +1180,7 @@ interface ConstantsID24
 			);
 
 			put(-1879048178, (new DEHThing()).setName("Vassago Flame")
-				.setEditorNumber(0)
+				.setEditorNumber(-1)
 				.setHealth(0)
 				.setSpeed(15)
 				.setRadius(6)
@@ -1202,7 +1205,7 @@ interface ConstantsID24
 				.setActiveSoundPosition(0)
 				.setDroppedItem(-1)
 				.setMBF21Flags(0)
-				.setFastSpeed(1310720)
+				.setFastSpeed(1310720 >> 16)
 				.setMeleeRange(64)
 				.setInfightingGroup(0)
 				.setProjectileGroup(0)
@@ -3111,8 +3114,185 @@ interface ConstantsID24
 				.setTranslation(null)
 			);
 			
-			// TODO: Finish Weapons/Ammo
+			put(-1879048135, (new DEHThing()).setName("Fuel Can")
+				.setEditorNumber(-28622)
+				.setHealth(1000)
+				.setSpeed(0)
+				.setRadius(20)
+				.setHeight(16)
+				.setDamage(0)
+				.setReactionTime(8)
+				.setPainChance(0)
+				.setFlags(1)
+				.setMass(100)
+				.setSpawnFrameIndex(-1879047729)
+				.setWalkFrameIndex(0)
+				.setPainFrameIndex(0)
+				.setMeleeFrameIndex(0)
+				.setMissileFrameIndex(0)
+				.setDeathFrameIndex(0)
+				.setExtremeDeathFrameIndex(0)
+				.setRaiseFrameIndex(0)
+				.setSeeSoundPosition(0)
+				.setAttackSoundPosition(0)
+				.setPainSoundPosition(0)
+				.setDeathSoundPosition(0)
+				.setActiveSoundPosition(0)
+				.setDroppedItem(-1)
+				.setMBF21Flags(0)
+				.setFastSpeed(-1)
+				.setMeleeRange(64)
+				.setInfightingGroup(0)
+				.setProjectileGroup(0)
+				.setSplashGroup(0)
+				.setRipSoundPosition(0)
+				.setID24Flags(0)
+				.setMinRespawnTics(420)
+				.setRespawnDice(4)
+				.setPickupAmmoType(-1879048192)
+				.setPickupAmmoCategory(0)
+				.setPickupWeaponType(-1)
+				.setPickupItemType(-1)
+				.setPickupBonusCount(6)
+				.setPickupSoundPosition(0)
+				.setPickupMessageMnemonic("ID24_GOTFUELCAN")
+				.setTranslation(null)
+			);
+
+			put(-1879048134, (new DEHThing()).setName("Fuel Tank")
+				.setEditorNumber(-28621)
+				.setHealth(1000)
+				.setSpeed(0)
+				.setRadius(20)
+				.setHeight(16)
+				.setDamage(0)
+				.setReactionTime(8)
+				.setPainChance(0)
+				.setFlags(1)
+				.setMass(100)
+				.setSpawnFrameIndex(-1879047728)
+				.setWalkFrameIndex(0)
+				.setPainFrameIndex(0)
+				.setMeleeFrameIndex(0)
+				.setMissileFrameIndex(0)
+				.setDeathFrameIndex(0)
+				.setExtremeDeathFrameIndex(0)
+				.setRaiseFrameIndex(0)
+				.setSeeSoundPosition(0)
+				.setAttackSoundPosition(0)
+				.setPainSoundPosition(0)
+				.setDeathSoundPosition(0)
+				.setActiveSoundPosition(0)
+				.setDroppedItem(-1)
+				.setMBF21Flags(0)
+				.setFastSpeed(-1)
+				.setMeleeRange(64)
+				.setInfightingGroup(0)
+				.setProjectileGroup(0)
+				.setSplashGroup(0)
+				.setRipSoundPosition(0)
+				.setID24Flags(0)
+				.setMinRespawnTics(420)
+				.setRespawnDice(4)
+				.setPickupAmmoType(-1879048192)
+				.setPickupAmmoCategory(1)
+				.setPickupWeaponType(-1)
+				.setPickupItemType(-1)
+				.setPickupBonusCount(6)
+				.setPickupSoundPosition(0)
+				.setPickupMessageMnemonic("ID24_GOTFUELTANK")
+				.setTranslation(null)
+			);
 			
+			put(-1879048133, (new DEHThing()).setName("Heatwave Generator")
+				.setEditorNumber(-28620)
+				.setHealth(1000)
+				.setSpeed(0)
+				.setRadius(20)
+				.setHeight(16)
+				.setDamage(0)
+				.setReactionTime(8)
+				.setPainChance(0)
+				.setFlags(1)
+				.setMass(100)
+				.setSpawnFrameIndex(-1879047730)
+				.setWalkFrameIndex(0)
+				.setPainFrameIndex(0)
+				.setMeleeFrameIndex(0)
+				.setMissileFrameIndex(0)
+				.setDeathFrameIndex(0)
+				.setExtremeDeathFrameIndex(0)
+				.setRaiseFrameIndex(0)
+				.setSeeSoundPosition(0)
+				.setAttackSoundPosition(0)
+				.setPainSoundPosition(0)
+				.setDeathSoundPosition(0)
+				.setActiveSoundPosition(0)
+				.setDroppedItem(-1)
+				.setMBF21Flags(0)
+				.setFastSpeed(-1)
+				.setMeleeRange(64)
+				.setInfightingGroup(0)
+				.setProjectileGroup(0)
+				.setSplashGroup(0)
+				.setRipSoundPosition(0)
+				.setID24Flags(0)
+				.setMinRespawnTics(420)
+				.setRespawnDice(4)
+				.setPickupAmmoType(-1)
+				.setPickupAmmoCategory(-1)
+				.setPickupWeaponType(-1879048191)
+				.setPickupItemType(-1)
+				.setPickupBonusCount(6)
+				.setPickupSoundPosition(33)
+				.setPickupMessageMnemonic("ID24_GOTCALAMITYBLADE")
+				.setTranslation(null)
+			);
+
+			put(-1879048132, (new DEHThing()).setName("Incinerator")
+				.setEditorNumber(-28619)
+				.setHealth(1000)
+				.setSpeed(0)
+				.setRadius(20)
+				.setHeight(16)
+				.setDamage(0)
+				.setReactionTime(8)
+				.setPainChance(0)
+				.setFlags(1)
+				.setMass(100)
+				.setSpawnFrameIndex(-1879047842)
+				.setWalkFrameIndex(0)
+				.setPainFrameIndex(0)
+				.setMeleeFrameIndex(0)
+				.setMissileFrameIndex(0)
+				.setDeathFrameIndex(0)
+				.setExtremeDeathFrameIndex(0)
+				.setRaiseFrameIndex(0)
+				.setSeeSoundPosition(0)
+				.setAttackSoundPosition(0)
+				.setPainSoundPosition(0)
+				.setDeathSoundPosition(0)
+				.setActiveSoundPosition(0)
+				.setDroppedItem(-1)
+				.setMBF21Flags(0)
+				.setFastSpeed(-1)
+				.setMeleeRange(64)
+				.setInfightingGroup(0)
+				.setProjectileGroup(0)
+				.setSplashGroup(0)
+				.setRipSoundPosition(0)
+				.setID24Flags(0)
+				.setMinRespawnTics(420)
+				.setRespawnDice(4)
+				.setPickupAmmoType(-1)
+				.setPickupAmmoCategory(-1)
+				.setPickupWeaponType(-1879048192)
+				.setPickupItemType(-1)
+				.setPickupBonusCount(6)
+				.setPickupSoundPosition(33)
+				.setPickupMessageMnemonic("ID24_GOTINCINERATOR")
+				.setTranslation(null)
+			);
 		}
 	};
 
@@ -3120,18 +3300,147 @@ interface ConstantsID24
 	{
 		private static final long serialVersionUID = -2091378296841110122L;
 		{
-			// TODO: Finish.
+			put(-1879048192, DEHSound.create(127, false));
+			put(-1879048191, DEHSound.create(127, false));
+			put(-1879048190, DEHSound.create(127, false));
+			put(-1879048189, DEHSound.create(127, false));
+			put(-1879048188, DEHSound.create(127, false));
+			put(-1879048187, DEHSound.create(127, false));
+			put(-1879048186, DEHSound.create(127, false));
+			put(-1879048185, DEHSound.create(127, false));
+			put(-1879048184, DEHSound.create(127, false));
+			put(-1879048183, DEHSound.create(127, false));
+			put(-1879048182, DEHSound.create(127, false));
+			put(-1879048181, DEHSound.create(127, false));
+			put(-1879048180, DEHSound.create(127, false));
+			put(-1879048179, DEHSound.create(127, false));
+			put(-1879048178, DEHSound.create(127, false));
+			put(-1879048177, DEHSound.create(127, false));
+			put(-1879048176, DEHSound.create(127, false));
+			put(-1879048175, DEHSound.create(127, false));
+			put(-1879048174, DEHSound.create(127, false));
+			put(-1879048173, DEHSound.create(127, false));
+			put(-1879048172, DEHSound.create(127, false));
+			put(-1879048171, DEHSound.create(127, false));
+			put(-1879048170, DEHSound.create(127, false));
+			put(-1879048169, DEHSound.create(127, false));
+			put(-1879048168, DEHSound.create(127, false));
+			put(-1879048167, DEHSound.create(127, false));
+			put(-1879048166, DEHSound.create(127, false));
+			put(-1879048165, DEHSound.create(127, false));
+			put(-1879048164, DEHSound.create(127, false));
+			put(-1879048163, DEHSound.create(127, false));
+			put(-1879048162, DEHSound.create(127, false));
+			put(-1879048161, DEHSound.create(127, false));
+			put(-1879048160, DEHSound.create(127, false));
+			put(-1879048159, DEHSound.create(127, false));
+			put(-1879048158, DEHSound.create(127, false));
+			put(-1879048157, DEHSound.create(127, false));
+			put(-1879048156, DEHSound.create(127, false));
 		}
 	};
 
+	static final Map<String, Integer> DEHSOUNDNAMESID24 = new TreeMap<String, Integer>()
+	{
+		private static final long serialVersionUID = 5395496773714125538L;
+		{
+			put("BANACT", -1879048192);
+			put("BANDTH", -1879048191);
+			put("BANPAI", -1879048190);
+			put("BREAK",  -1879048189);
+			put("CSPACT", -1879048188);
+			put("CSPDTH", -1879048187);
+			put("CSPSIT", -1879048186);
+			put("CSPWLK", -1879048185);
+			put("GATCLS", -1879048184);
+			put("GATLOP", -1879048183);
+			put("GATOPN", -1879048182);
+			put("GHLACT", -1879048181);
+			put("GHLDTH", -1879048180);
+			put("GHLPAI", -1879048179);
+			put("GHLSIT", -1879048178);
+			put("HETCHG", -1879048177);
+			put("HETSHT", -1879048176);
+			put("HETXPL", -1879048175);
+			put("INCBRN", -1879048174);
+			put("INCFI1", -1879048173);
+			put("INCFI2", -1879048172);
+			put("INCHT1", -1879048171);
+			put("INCHT2", -1879048170);
+			put("INCHT3", -1879048169);
+			put("KLAXON", -1879048168);
+			put("PPOACT", -1879048167);
+			put("PPODTH", -1879048166);
+			put("PPOHED", -1879048165);
+			put("PPOPAI", -1879048164);
+			put("TYRDTH", -1879048163);
+			put("TYRSIT", -1879048162);
+			put("TYRWLK", -1879048161);
+			put("VASACT", -1879048160);
+			put("VASATK", -1879048159);
+			put("VASDTH", -1879048158);
+			put("VASPAI", -1879048157);
+			put("VASSIT", -1879048156);
+		}
+	};
+	
 	static final Map<Integer, DEHWeapon> DEHWEAPONID24 = new TreeMap<Integer, DEHWeapon>() 
 	{
 		private static final long serialVersionUID = -3304640552185670385L;
 		{
-			// TODO: Finish.
+			put(-1879048192, (new DEHWeapon()).setName("Incinerator")
+				.setAmmoType(-1879048192)
+				.setAmmoPerShot(1)
+				.setMBF21Flags(4)
+				.setSlot(8)
+				.setSlotPriority(0)
+				.setSwitchPriority(3)
+				.setInitialOwned(false)
+				.setInitialRaised(false)
+				.setCarouselIcon("SMFLAM")
+				.setAllowSwitchWithOwnedWeapon(-1)
+				.setNoSwitchWithOwnedWeapon(-1)
+				.setAllowSwitchWithOwnedItem(-1)
+				.setNoSwitchWithOwnedItem(-1)
+				.setRaiseFrameIndex(-1879047888)
+				.setLowerFrameIndex(-1879047889)
+				.setReadyFrameIndex(-1879047890)
+				.setFireFrameIndex(-1879047887)
+				.setFlashFrameIndex(-1879047878)
+			);
+
+			put(-1879048191, (new DEHWeapon()).setName("Calamity blade")
+				.setAmmoType(-1879048192)
+				.setAmmoPerShot(10)
+				.setMBF21Flags(4)
+				.setSlot(9)
+				.setSlotPriority(0)
+				.setSwitchPriority(1)
+				.setInitialOwned(false)
+				.setInitialRaised(false)
+				.setCarouselIcon("SMHEAT")
+				.setAllowSwitchWithOwnedWeapon(-1)
+				.setNoSwitchWithOwnedWeapon(-1)
+				.setAllowSwitchWithOwnedItem(-1)
+				.setNoSwitchWithOwnedItem(-1)
+				.setRaiseFrameIndex(-1879047839)
+				.setLowerFrameIndex(-1879047840)
+				.setReadyFrameIndex(-1879047841)
+				.setFireFrameIndex(-1879047838)
+				.setFlashFrameIndex(-1879047743)
+			);
 		}
 	};
 
-	// TODO: Finish me.
-	
+	static final Map<Integer, DEHAmmo> DEHAMMOID24 = new TreeMap<Integer, DEHAmmo>() 
+	{
+		private static final long serialVersionUID = -7734652085449204438L;
+		{
+			put(-1, (new DEHAmmo()).setName("None")
+				.setMax(0).setPickup(0));
+			put(-1879048192, (new DEHAmmo()).setName("Fuel")
+					.setMax(0).setPickup(0));
+		}
+	};
+
 }

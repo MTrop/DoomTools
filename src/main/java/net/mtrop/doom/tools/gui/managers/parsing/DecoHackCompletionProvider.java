@@ -379,14 +379,17 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addDefineCompletions(DecoHackPatchType.ID24,     "Pickup Type", "decohack/constants/id24/pickups.dh", null);
 
 		addDefineCompletions(DecoHackPatchType.DOOM19,   "Ammo Type", "decohack/constants/doom19/ammo.dh", null);
+		addDefineCompletions(DecoHackPatchType.ID24,     "Ammo Type", "decohack/constants/id24/ammo.dh", null);
 
 		addStringDefineCompletions("decohack/constants/doom19/strings.dh", "decohack/constants/boom/strings.dh");
 
 		addAliasCompletions("thing", DecoHackPatchType.DOOM19, "Thing Slot Alias", "decohack/constants/doom19/things_aliases.dh", THING_HARDCODE_DOCS);
 		addAliasCompletions("thing", DecoHackPatchType.BOOM,   "Thing Slot Alias", "decohack/constants/boom/things_aliases.dh",   THING_HARDCODE_DOCS);
 		addAliasCompletions("thing", DecoHackPatchType.MBF,    "Thing Slot Alias", "decohack/constants/mbf/things_aliases.dh",    THING_HARDCODE_DOCS);
+		addAliasCompletions("thing", DecoHackPatchType.ID24,   "Thing Slot Alias", "decohack/constants/id24/things_aliases.dh",   THING_HARDCODE_DOCS);
 
 		addAliasCompletions("weapon", DecoHackPatchType.DOOM19, "Weapon Slot Alias", "decohack/constants/doom19/weapons_aliases.dh", WEAPON_HARDCODE_DOCS);
+		addAliasCompletions("weapon", DecoHackPatchType.ID24,   "Weapon Slot Alias", "decohack/constants/id24/weapons_aliases.dh", WEAPON_HARDCODE_DOCS);
 
 		addFlagCompletions(DecoHackPatchType.DOOM19, "Thing",  DEHThingDoom19Flag.values());
 		addFlagCompletions(DecoHackPatchType.BOOM,   "Thing",  DEHThingBoomFlag.values());

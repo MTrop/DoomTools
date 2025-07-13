@@ -10,5 +10,6 @@
 #include "boom/friendly_things.dh"
 #include "mbf/friendly_things.dh"
 #include "extended/friendly_things.dh"
+#include "id24/friendly_things.dh"
 
 #endif

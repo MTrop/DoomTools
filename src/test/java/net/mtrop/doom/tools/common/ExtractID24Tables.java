@@ -15,7 +15,9 @@ public final class ExtractID24Tables
 	{
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(IOUtils.openResource("decohack/id24junk.txt"))))
 		{
-			System.out.println((new Parser(br)).go());
+			Parser p = new Parser(br);
+			if (!p.go())
+				System.out.println(p.getTokenInfoLine("Error!"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -76,9 +78,143 @@ public final class ExtractID24Tables
 					return false;
 			}
 
+			if (!matchType(Kernel.TYPE_SEMI))
+				return false;
+
+			if (!matchIdents("static", "const", "sfxinfo_t", "id24sounds"))
+				return false;
+			
+			if (!matchTypeSequence(Kernel.TYPE_LBRACK, Kernel.TYPE_RBRACK, Kernel.TYPE_EQUAL))
+				return false;
+
+			if (matchType(Kernel.TYPE_LBRACE))
+			{
+				if (!matchSoundList())
+					return false;
+			}
+
+			if (!matchType(Kernel.TYPE_SEMI))
+				return false;
+
+			if (!matchIdents("static", "const", "weaponinfo_t", "id24weapons"))
+				return false;
+			
+			if (!matchTypeSequence(Kernel.TYPE_LBRACK, Kernel.TYPE_RBRACK, Kernel.TYPE_EQUAL))
+				return false;
+
+			if (matchType(Kernel.TYPE_LBRACE))
+			{
+				if (!matchWeaponList())
+					return false;
+			}
+
 			return true;
 		}
 
+		private boolean matchWeaponList()
+		{
+			System.out.println("// [WEAPONS]");
+
+			do {
+				if (currentType(Kernel.TYPE_RBRACE))
+					break;
+				
+				if (!matchType(Kernel.TYPE_LBRACE))
+					return false;
+				
+				Integer weaponnum = matchNumber(true);
+				matchString(true); // features_id24
+				Integer ammo = matchNumber(true);
+				Integer upstate = matchNumber(true);
+				Integer downstate = matchNumber(true);
+				Integer readystate = matchNumber(true);
+				Integer atkstate = matchNumber(true);
+				Integer flashstate = matchNumber(true);
+				Integer mbf21flags = matchNumber(true);
+				Integer ammopershot = matchNumber(true);
+				Integer slot = matchNumber(true);
+				Integer slotpriority = matchNumber(true);
+				Integer switchpriority = matchNumber(true);
+				Boolean initialowned = matchBoolean(true);
+				Boolean initialraised = matchBoolean(true);
+				String carouselicon = matchString(true);
+				Integer allowswitchifownedweapon = matchNumber(true);
+				Integer noswitchifownedweapon = matchNumber(true);
+				Integer allowswitchifowneditem = matchNumber(true);
+				Integer noswitchifowneditem = matchNumber(true);
+
+				if (!matchType(Kernel.TYPE_RBRACE))
+					return false;
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("put(").append(weaponnum).append(", (new DEHWeapon()).setName(\"UNNAMED\")\n");
+				sb.append("\t.setAmmoType(").append(ammo).append(")\n");
+				sb.append("\t.setAmmoPerShot(").append(ammopershot).append(")\n");
+				sb.append("\t.setMBF21Flags(").append(mbf21flags).append(")\n");
+				sb.append("\t.setSlot(").append(slot).append(")\n");
+				sb.append("\t.setSlotPriority(").append(slotpriority).append(")\n");
+				sb.append("\t.setSwitchPriority(").append(switchpriority).append(")\n");
+				sb.append("\t.setInitialOwned(").append(initialowned).append(")\n");
+				sb.append("\t.setInitialRaised(").append(initialraised).append(")\n");
+				sb.append("\t.setCarouselIcon(\"").append(carouselicon).append("\")\n");
+				sb.append("\t.setAllowSwitchWithOwnedWeapon(").append(allowswitchifownedweapon).append(")\n");
+				sb.append("\t.setNoSwitchWithOwnedWeapon(").append(noswitchifownedweapon).append(")\n");
+				sb.append("\t.setAllowSwitchWithOwnedItem(").append(allowswitchifowneditem).append(")\n");
+				sb.append("\t.setNoSwitchWithOwnedItem(").append(noswitchifowneditem).append(")\n");
+				sb.append("\t.setRaiseFrameIndex(").append(upstate).append(")\n");
+				sb.append("\t.setLowerFrameIndex(").append(downstate).append(")\n");
+				sb.append("\t.setReadyFrameIndex(").append(readystate).append(")\n");
+				sb.append("\t.setFireFrameIndex(").append(atkstate).append(")\n");
+				sb.append("\t.setFlashFrameIndex(").append(flashstate).append(")\n");
+				sb.append(");\n");
+
+				System.out.println(sb.toString());
+				
+			} while (matchType(Kernel.TYPE_COMMA));
+			
+			return matchType(Kernel.TYPE_RBRACE);
+		}
+
+		private boolean matchSoundList()
+		{
+			System.out.println("// [SOUNDS]");
+			
+			do {
+				if (currentType(Kernel.TYPE_RBRACE))
+					break;
+				
+				if (!matchType(Kernel.TYPE_LBRACE))
+					return false;
+
+				Integer soundnum = matchNumber(true);
+				matchString(true); // features_id24
+				String name = matchString(true);
+				Integer singular = matchNumber(true);
+				Integer priority = matchNumber(true);
+				
+				@SuppressWarnings("unused")
+				String unused0 = matchString(true);
+				@SuppressWarnings("unused")
+				Integer unused1 = matchNumber(true);
+				@SuppressWarnings("unused")
+				Integer unused2 = matchNumber(true);
+				@SuppressWarnings("unused")
+				String unused3 = matchString(false);
+				
+				if (!matchType(Kernel.TYPE_RBRACE))
+					return false;
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("// put(\"").append(name).append("\", ").append(soundnum).append(");\n");
+				sb.append("put(").append(soundnum).append(", DEHSound.create(" + priority + ", " + (singular != 0 ? true : false) + "));");
+
+				System.out.println(sb.toString());
+				
+			} while (matchType(Kernel.TYPE_COMMA));
+			
+			return matchType(Kernel.TYPE_RBRACE);
+		}
+		
 		private boolean matchThingList()
 		{
 			System.out.println("// [THINGS]");
@@ -146,7 +282,7 @@ public final class ExtractID24Tables
 					return false;
 
 				StringBuilder sb = new StringBuilder();
-				sb.append("put(").append(thingnum).append(", (new DEHThing()).name(\"UNNAMED\")\n");
+				sb.append("put(").append(thingnum).append(", (new DEHThing()).setName(\"UNNAMED\")\n");
 				sb.append("\t.setEditorNumber(").append(doomednum).append(")\n");
 				sb.append("\t.setHealth(").append(spawnhealth).append(")\n");
 				sb.append("\t.setSpeed(").append(speed).append(")\n");
@@ -171,7 +307,7 @@ public final class ExtractID24Tables
 				sb.append("\t.setDeathSoundPosition(").append(deathsound).append(")\n");
 				sb.append("\t.setActiveSoundPosition(").append(activesound).append(")\n");
 
-				sb.append("\t.setDropThing(").append(dropthing).append(")\n");
+				sb.append("\t.setDroppedItem(").append(dropthing).append(")\n");
 				
 				sb.append("\t.setMBF21Flags(").append(mbf21flags).append(")\n");
 				sb.append("\t.setFastSpeed(").append(fastspeed).append(")\n");
@@ -191,7 +327,7 @@ public final class ExtractID24Tables
 				sb.append("\t.setPickupBonusCount(").append(pickupbonuscount).append(")\n");
 				sb.append("\t.setPickupSoundPosition(").append(pickupsound).append(")\n");
 
-				sb.append("\t.setPickupStringMnemonic(").append(pickupstringmnemonic != null ? '"' + pickupstringmnemonic + '"' : null).append(")\n");
+				sb.append("\t.setPickupMessageMnemonic(").append(pickupstringmnemonic != null ? '"' + pickupstringmnemonic + '"' : null).append(")\n");
 				sb.append("\t.setTranslation(").append(translationlump != null ? '"' + translationlump + '"' : null).append(")\n");
 
 				sb.append(");\n");
@@ -333,6 +469,22 @@ public final class ExtractID24Tables
 			return out;
 		}
 		
+		private Boolean matchBoolean(boolean comma)
+		{
+			if (currentType(Kernel.TYPE_IDENTIFIER))
+			{
+				Boolean out = currentLexeme().equalsIgnoreCase("true");
+				nextToken();
+
+				if (comma)
+					if (!matchType(Kernel.TYPE_COMMA))
+						return null;
+				
+				return out;
+			}
+			return null;
+		}
+
 		private String matchString(boolean comma)
 		{
 			if (currentType(Kernel.TYPE_IDENTIFIER, Kernel.TYPE_STRING))
@@ -382,6 +534,45 @@ public final class ExtractID24Tables
 
 		private Integer matchNumber(boolean comma)
 		{
+			if (currentType(Kernel.TYPE_IDENTIFIER))
+			{
+				Integer value;
+				switch (currentLexeme())
+				{
+				case "WF21_NOAUTOFIRE":
+					value = 0x04;
+					break;
+				case "wp_incinerator":
+					value = -1879048192;
+					break;
+				case "wp_calamityblade":
+					value = -1879048191;
+					break;
+				case "am_fuel":
+					value = -1879048192;
+					break;
+				case "ac_clip":
+					value = 0x0000;
+					break;
+				case "ac_box":
+					value = 0x0001;
+					break;
+				case "sfx_wpnup":
+					value = 33;
+					break;
+				default:
+					return null;
+				}
+				
+				nextToken();
+				
+				if (comma)
+					if (!matchType(Kernel.TYPE_COMMA))
+						return null;
+				
+				return value;
+			}
+			
 			Integer value = null;
 			if (matchType(Kernel.TYPE_MINUS))
 			{

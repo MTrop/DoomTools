@@ -362,13 +362,21 @@ public class PatchExtended extends PatchMBF
 	@Override
 	public Integer getSoundIndex(String name)
 	{
-		return MAP_SOUNDINDEX.getOrDefault(name.toUpperCase(), super.getSoundIndex(name));
+		Integer out = MAP_SOUNDINDEX.get(name.toUpperCase());
+		if (out == null)
+			return super.getSoundIndex(name);
+		else
+			return out;
 	}
 
 	@Override
 	public Integer getSpriteIndex(String name)
 	{
-		return MAP_SPRITEINDEX.getOrDefault(name.toUpperCase(), super.getSpriteIndex(name));
+		Integer out = MAP_SPRITEINDEX.get(name.toUpperCase());
+		if (out == null)
+			return super.getSpriteIndex(name);
+		else
+			return out;
 	}
 
 	@Override

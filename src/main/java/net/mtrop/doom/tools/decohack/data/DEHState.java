@@ -147,7 +147,6 @@ public class DEHState extends DEHObject<DEHState>
 	
 	public DEHState setSpriteIndex(int spriteIndex)
 	{
-		RangeUtils.checkRange("Sprite index", 0, Integer.MAX_VALUE, spriteIndex);
 		this.spriteIndex = spriteIndex;
 		return this;
 	}
@@ -182,7 +181,6 @@ public class DEHState extends DEHObject<DEHState>
 	
 	public DEHState setNextStateIndex(int nextStateIndex)
 	{
-		RangeUtils.checkRange("Next state index", 0, Integer.MAX_VALUE, nextStateIndex);
 		this.nextStateIndex = nextStateIndex;
 		return this;
 	}

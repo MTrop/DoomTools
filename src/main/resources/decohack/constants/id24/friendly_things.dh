@@ -1,0 +1,71 @@
+/*****************************************************************************
+ * DECOHack Thing Slot "Friendly" Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_FRIENDLY_THINGS__
+#define __DECOHACK_CONSTANTS_ID24_FRIENDLY_THINGS__
+
+#define MTF_GHOUL                              -1879048192
+#define MTF_BANSHEE                            -1879048191
+#define MTF_MINDWEAVER                         -1879048190
+#define MTF_SHOCKTROOPER                       -1879048189
+#define MTF_VASSAGO                            -1879048188
+#define MTF_TYRANT                             -1879048187
+#define MTF_TYRANT_BOSS_1                      -1879048186
+#define MTF_TYRANT_BOSS_2                      -1879048185
+#define MTF_INCINERATOR_FLAME                  -1879048184
+#define MTF_HEATWAVE_SPAWNER                   -1879048183
+#define MTF_HEATWAVE_RIPPER                    -1879048182
+#define MTF_GHOUL_BALL                         -1879048181
+#define MTF_SHOCKTROOPER_HEAD                  -1879048180
+#define MTF_SHOCKTROOPER_TORSO                 -1879048179
+#define MTF_VASSAGO_FLAME                      -1879048178
+#define MTF_STALAGMITE_GRAY                    -1879048177
+#define MTF_LARGE_CORPSE_PILE                  -1879048176
+#define MTF_HUMAN_BBQ_1                        -1879048175
+#define MTF_HUMAN_BBQ_2                        -1879048174
+#define MTF_HANGING_VICTIM_BOTH_LEGS           -1879048173
+#define MTF_HANGING_VICTIM_BOTH_LEGS_BLOCKING  -1879048172
+#define MTF_HANGING_VICTIM_CRUCIFIED           -1879048171
+#define MTF_HANGING_VICTIM_CRUCIFIED_BLOCKING  -1879048170
+#define MTF_HANGING_VICTIM_ARMS_BOUND          -1879048169
+#define MTF_HANGING_VICTIM_ARMS_BOUND_BLOCKING -1879048168
+#define MTF_HANGING_BARON_OF_HELL              -1879048167
+#define MTF_HANGING_BARON_OF_HELL_BLOCKING     -1879048166
+#define MTF_HANGING_VICTIM_CHAINED             -1879048165
+#define MTF_HANGING_VICTIM_CHAINED_BLOCKING    -1879048164
+#define MTF_HANGING_TORSO_CHAINED              -1879048163
+#define MTF_HANGING_TORSO_CHAINED_BLOCKING     -1879048162
+#define MTF_SKULL_POLE_TRIO                    -1879048161
+#define MTF_SKULL_GIBS                         -1879048160
+#define MTF_BUSH_SHORT                         -1879048159
+#define MTF_BUSH_SHORT_BURNED_1                -1879048158
+#define MTF_BUSH_SHORT_BURNED_2                -1879048157
+#define MTF_BUSH_TALL                          -1879048156
+#define MTF_BUSH_TALL_BURNED_1                 -1879048155
+#define MTF_BUSH_TALL_BURNED_2                 -1879048154
+#define MTF_CAVE_ROCK_COLUMN                   -1879048153
+#define MTF_CAVE_STALAGMITE_LARGE              -1879048152
+#define MTF_CAVE_STALAGMITE_MEDIUM             -1879048151
+#define MTF_CAVE_STALAGMITE_SMALL              -1879048150
+#define MTF_CAVE_STALACTITE_LARGE              -1879048149
+#define MTF_CAVE_STALACTITE_LARGE_BLOCKING     -1879048148
+#define MTF_CAVE_STALACTITE_MEDIUM             -1879048147
+#define MTF_CAVE_STALACTITE_MEDIUM_BLOCKING    -1879048146
+#define MTF_CAVE_STALACTITE_SMALL              -1879048145
+#define MTF_CAVE_STALACTITE_SMALL_BLOCKING     -1879048144
+#define MTF_OFFICE_CHAIR                       -1879048143
+#define MTF_OFFICE_LAMP_BREAKABLE              -1879048142
+#define MTF_CEILING_LAMP                       -1879048141
+#define MTF_CANDELABRA_SHORT                   -1879048140
+#define MTF_AMBIENT_KLAXON                     -1879048139
+#define MTF_AMBIENT_PORTAL_OPEN                -1879048138
+#define MTF_AMBIENT_PORTAL_LOOP                -1879048137
+#define MTF_AMBIENT_PORTAL_CLOSE               -1879048136
+#define MTF_FUEL_CAN                           -1879048135
+#define MTF_FUEL_TANK                          -1879048134
+#define MTF_CALAMITY_BLADE                     -1879048133
+#define MTF_INCINERATOR                        -1879048132
+
+#endif

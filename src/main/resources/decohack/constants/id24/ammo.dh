@@ -1,0 +1,12 @@
+/*****************************************************************************
+ * DECOHack ID24 Ammo Type Mnemonics
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_AMMO__
+#define __DECOHACK_CONSTANTS_ID24_AMMO__
+
+#define AM_NONE      -1
+#define AM_FUEL      -1879048192
+
+#endif

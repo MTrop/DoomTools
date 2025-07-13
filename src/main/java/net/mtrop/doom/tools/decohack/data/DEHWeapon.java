@@ -13,7 +13,6 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
-import net.mtrop.doom.util.RangeUtils;
 
 /**
  * A single weapon entry.
@@ -257,7 +256,6 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 */
 	public DEHWeapon setRaiseFrameIndex(int raiseFrameIndex) 
 	{
-		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		setLabel(STATE_LABEL_SELECT, raiseFrameIndex);
 		return this;
 	}
@@ -277,7 +275,6 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 */
 	public DEHWeapon setLowerFrameIndex(int lowerFrameIndex) 
 	{
-		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
 		setLabel(STATE_LABEL_DESELECT, lowerFrameIndex);
 		return this;
 	}
@@ -297,7 +294,6 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 */
 	public DEHWeapon setReadyFrameIndex(int readyFrameIndex) 
 	{
-		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
 		setLabel(STATE_LABEL_READY, readyFrameIndex);
 		return this;
 	}
@@ -317,7 +313,6 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 */
 	public DEHWeapon setFireFrameIndex(int fireFrameIndex) 
 	{
-		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
 		setLabel(STATE_LABEL_FIRE, fireFrameIndex);
 		return this;
 	}
@@ -337,7 +332,6 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 */
 	public DEHWeapon setFlashFrameIndex(int flashFrameIndex) 
 	{
-		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
 		setLabel(STATE_LABEL_FLASH, flashFrameIndex);
 		return this;
 	}

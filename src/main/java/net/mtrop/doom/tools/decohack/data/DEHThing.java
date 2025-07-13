@@ -253,7 +253,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	{
 		if (editorNumber == 0)
 			throw new IllegalArgumentException("Editor number can not be 0.");
-		RangeUtils.checkRange("Editor number", 0, 65535, editorNumber);
 		this.editorNumber = editorNumber;
 		return this;
 	}
@@ -541,7 +540,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setDroppedItem(int droppedItem) 
 	{
-		RangeUtils.checkRange("Dropped item", 0, Integer.MAX_VALUE, droppedItem);
 		this.droppedItem = droppedItem;
 		return this;
 	}
@@ -554,7 +552,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setSpawnFrameIndex(int spawnFrameIndex)
 	{
-		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
 		setLabel(STATE_LABEL_SPAWN, spawnFrameIndex);
 		return this;
 	}
@@ -567,7 +564,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setWalkFrameIndex(int walkFrameIndex) 
 	{
-		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
 		setLabel(STATE_LABEL_SEE, walkFrameIndex);
 		return this;
 	}
@@ -580,7 +576,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setPainFrameIndex(int painFrameIndex) 
 	{
-		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
 		setLabel(STATE_LABEL_PAIN, painFrameIndex);
 		return this;
 	}
@@ -593,7 +588,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setMeleeFrameIndex(int meleeFrameIndex)
 	{
-		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
 		setLabel(STATE_LABEL_MELEE, meleeFrameIndex);
 		return this;
 	}
@@ -606,7 +600,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setMissileFrameIndex(int missileFrameIndex) 
 	{
-		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
 		setLabel(STATE_LABEL_MISSILE, missileFrameIndex);
 		return this;
 	}
@@ -619,7 +612,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setDeathFrameIndex(int deathFrameIndex) 
 	{
-		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
 		setLabel(STATE_LABEL_DEATH, deathFrameIndex);
 		return this;
 	}
@@ -632,7 +624,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
-		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
 		setLabel(STATE_LABEL_XDEATH, extremeDeathFrameIndex);
 		return this;
 	}
@@ -645,7 +636,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setRaiseFrameIndex(int raiseFrameIndex) 
 	{
-		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		setLabel(STATE_LABEL_RAISE, raiseFrameIndex);
 		return this;
 	}
@@ -672,9 +662,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setLabel(String label, int index)
 	{
-		if (index < 0)
-			throw new IllegalArgumentException("index cannot be < 0");
-		
 		if (index == 0)
 			stateIndexMap.remove(label);
 		else
@@ -697,7 +684,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setSeeSoundPosition(int seeSoundPosition)
 	{
-		RangeUtils.checkRange("Alert sound position", 0, Integer.MAX_VALUE, seeSoundPosition);
 		this.seeSoundPosition = seeSoundPosition;
 		return this;
 	}
@@ -710,7 +696,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setAttackSoundPosition(int attackSoundPosition)
 	{
-		RangeUtils.checkRange("Attack sound position", 0, Integer.MAX_VALUE, attackSoundPosition);
 		this.attackSoundPosition = attackSoundPosition;
 		return this;
 	}
@@ -723,7 +708,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setPainSoundPosition(int painSoundPosition) 
 	{
-		RangeUtils.checkRange("Pain sound position", 0, Integer.MAX_VALUE, painSoundPosition);
 		this.painSoundPosition = painSoundPosition;
 		return this;
 	}
@@ -736,7 +720,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setDeathSoundPosition(int deathSoundPosition) 
 	{
-		RangeUtils.checkRange("Death sound position", 0, Integer.MAX_VALUE, deathSoundPosition);
 		this.deathSoundPosition = deathSoundPosition;
 		return this;
 	}
@@ -749,7 +732,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setActiveSoundPosition(int activeSoundPosition)
 	{
-		RangeUtils.checkRange("Active sound position", 0, Integer.MAX_VALUE, activeSoundPosition);
 		this.activeSoundPosition = activeSoundPosition;
 		return this;
 	}
@@ -762,7 +744,6 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing setRipSoundPosition(int ripSoundPosition)
 	{
-		RangeUtils.checkRange("Rip sound position", 0, Integer.MAX_VALUE, ripSoundPosition);
 		this.ripSoundPosition = ripSoundPosition;
 		return this;
 	}

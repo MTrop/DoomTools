@@ -1,0 +1,12 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Weapon Aliases
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_WEAPONS_ALIASES__
+#define __DECOHACK_CONSTANTS_ID24_WEAPONS_ALIASES__
+
+alias weapon Incinerator   -1879048192
+alias weapon CalamityBlade -1879048191
+
+#endif

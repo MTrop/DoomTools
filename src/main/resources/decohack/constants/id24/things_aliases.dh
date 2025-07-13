@@ -1,0 +1,71 @@
+/*****************************************************************************
+ * DECOHack Doom 1.9 Thing Aliases
+ *****************************************************************************/
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_THINGS_ALIASES__
+#define __DECOHACK_CONSTANTS_ID24_THINGS_ALIASES__
+
+alias thing Ghoul                          -1879048192
+alias thing Banshee                        -1879048191
+alias thing Mindweaver                     -1879048190
+alias thing Shocktrooper                   -1879048189
+alias thing Vassago                        -1879048188
+alias thing Tyrant                         -1879048187
+alias thing TyrantBoss1                    -1879048186
+alias thing TyrantBoss2                    -1879048185
+alias thing IncineratorFlame               -1879048184
+alias thing HeatwaveSpawner                -1879048183
+alias thing HeatwaveRipper                 -1879048182
+alias thing GhoulBall                      -1879048181
+alias thing ShocktrooperHead               -1879048180
+alias thing ShocktrooperTorso              -1879048179
+alias thing VassagoFlame                   -1879048178
+alias thing StalagmiteGray                 -1879048177
+alias thing LargeCorpsePile                -1879048176
+alias thing HumanBbq1                      -1879048175
+alias thing HumanBbq2                      -1879048174
+alias thing HangingVictimBothLegs          -1879048173
+alias thing HangingVictimBothLegsBlocking  -1879048172
+alias thing HangingVictimCrucified         -1879048171
+alias thing HangingVictimCrucifiedBlocking -1879048170
+alias thing HangingVictimArmsBound         -1879048169
+alias thing HangingVictimArmsBoundBlocking -1879048168
+alias thing HangingBaronOfHell             -1879048167
+alias thing HangingBaronOfHellBlocking     -1879048166
+alias thing HangingVictimChained           -1879048165
+alias thing HangingVictimChainedBlocking   -1879048164
+alias thing HangingTorsoChained            -1879048163
+alias thing HangingTorsoChainedBlocking    -1879048162
+alias thing SkullPoleTrio                  -1879048161
+alias thing SkullGibs                      -1879048160
+alias thing BushShort                      -1879048159
+alias thing BushShortBurned1               -1879048158
+alias thing BushShortBurned2               -1879048157
+alias thing BushTall                       -1879048156
+alias thing BushTallBurned1                -1879048155
+alias thing BushTallBurned2                -1879048154
+alias thing CaveRockColumn                 -1879048153
+alias thing CaveStalagmiteLarge            -1879048152
+alias thing CaveStalagmiteMedium           -1879048151
+alias thing CaveStalagmiteSmall            -1879048150
+alias thing CaveStalactiteLarge            -1879048149
+alias thing CaveStalactiteLargeBlocking    -1879048148
+alias thing CaveStalactiteMedium           -1879048147
+alias thing CaveStalactiteMediumBlocking   -1879048146
+alias thing CaveStalactiteSmall            -1879048145
+alias thing CaveStalactiteSmallBlocking    -1879048144
+alias thing OfficeChair                    -1879048143
+alias thing OfficeLampBreakable            -1879048142
+alias thing CeilingLamp                    -1879048141
+alias thing CandelabraShort                -1879048140
+alias thing AmbientKlaxon                  -1879048139
+alias thing AmbientPortalOpen              -1879048138
+alias thing AmbientPortalLoop              -1879048137
+alias thing AmbientPortalClose             -1879048136
+alias thing FuelCan                        -1879048135
+alias thing FuelTank                       -1879048134
+alias thing CalamityBlade                  -1879048133
+alias thing Incinerator                    -1879048132 
+
+#endif
