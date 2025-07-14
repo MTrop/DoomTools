@@ -1,23 +1,18 @@
 #ifndef __DECOHACK_CONSTANTS_ID24__
 #define __DECOHACK_CONSTANTS_ID24__
 
-// "Unlimited" things and states.
+// "Unlimited" stuff.
 #define THINGS_MAX 0x7ffffffe
 #define STATES_MAX 0x7ffffffe
+#define WEAPONS_MAX 0x7ffffffe
+#define AMMO_MAX 0x7ffffffe
 
-// Overlap with Boom for weapons/ammo.
-#include "doom19/weapons.dh"
-#include "doom19/ammo.dh"
+#include "id24/states.dh"
+#include "id24/things.dh"
+#include "id24/weapons.dh"
 #include "id24/ammo.dh"
-
-// ...but not strings...
-#include "boom/strings.dh"
-
-// ...and not states nor things
-#include "extended/states.dh"
-#include "extended/things.dh"
-
-// ...add pickup item types
 #include "id24/pickups.dh"
+
+#include "boom/strings.dh"
 
 #endif

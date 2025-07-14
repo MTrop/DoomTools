@@ -4,13 +4,13 @@
 using id24
 
 #include "constants/id24.dh"
-#include "constants/mbf/things_aliases.dh"
-#include "constants/doom19/weapons_aliases.dh"
 
 #include "constants/id24/things_aliases.dh"
 #include "constants/id24/weapons_aliases.dh"
 
-state free S_FREE_START to STATES_MAX // free the "free" states immediately
-thing free MT_EXTRA00 to THINGS_MAX   // free the "free" things immediately
+state free S_FREE_START to STATES_MAX    // free the "free" states immediately
+thing free MT_EXTRA00 to THINGS_MAX      // free the "free" things immediately
+weapon free WP_FREE_START to WEAPONS_MAX // free the "free" weapons immediately
+ammo free AM_FREE_START to AMMO_MAX      // free the "free" ammo types immediately
 
 #endif

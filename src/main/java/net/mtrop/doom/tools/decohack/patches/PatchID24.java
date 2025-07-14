@@ -13,13 +13,27 @@ import net.mtrop.doom.tools.decohack.data.DEHWeapon;
  */
 public class PatchID24 extends PatchDSDHacked
 {
+	private static final DEHWeapon DEFAULT_WEAPON = new DEHWeapon();
+	private static final DEHAmmo DEFAULT_AMMO = new DEHAmmo();
+
+	
+	@Override
+	public int getAmmoCount() 
+	{
+		return Integer.MAX_VALUE;
+	}
 
 	@Override
 	public DEHAmmo getAmmo(int index) 
 	{
 		DEHAmmo out = DEHAMMOID24.get(index);
 		if (out == null)
-			return super.getAmmo(index);
+		{
+			if (index >= 6)
+				return DEFAULT_AMMO;
+			else
+				return super.getAmmo(index);
+		}
 		else
 			return out;
 	}
@@ -65,11 +79,22 @@ public class PatchID24 extends PatchDSDHacked
 	}
 
 	@Override
+	public int getWeaponCount() 
+	{
+		return Integer.MAX_VALUE;
+	}
+
+	@Override
 	public DEHWeapon getWeapon(int index)
 	{
 		DEHWeapon out = DEHWEAPONID24.get(index);
 		if (out == null)
-			return super.getWeapon(index);
+		{
+			if (index >= 9)
+				return DEFAULT_WEAPON;
+			else
+				return super.getWeapon(index);
+		}
 		else
 			return out;
 	}

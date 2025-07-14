@@ -424,9 +424,13 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (matchIdentifierIgnoreCase(Keyword.THING))
 				return parseThingAutoBlock(context);
+			else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
+				return parseWeaponAutoBlock(context);
+			else if (matchIdentifierIgnoreCase(Keyword.AMMO))
+				return parseAmmoAutoBlock(context);
 			else
 			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.THING, Keyword.AUTO);
+				addErrorMessage("Expected \"%s\", \"%s\", or \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.AUTO);
 				return false;
 			}
 		}
@@ -436,9 +440,11 @@ public final class DecoHackParser extends Lexer.Parser
 				return parseThingAliasLine(context);
 			else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
 				return parseWeaponAliasLine(context);
+			else if (matchIdentifierIgnoreCase(Keyword.AMMO))
+				return parseAmmoAliasLine(context);
 			else
 			{
-				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.ALIAS);
+				addErrorMessage("Expected \"%s\" or \"%s\" or \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.ALIAS);
 				return false;
 			}
 		}
@@ -559,26 +565,63 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.AUTO))
 			{
-				if (!matchIdentifierIgnoreCase(Keyword.THING))
+				if (matchIdentifierIgnoreCase(Keyword.THING))
 				{
-					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.THING, Keyword.AUTO);
+					if (!matchIdentifierIgnoreCase(Keyword.INDEX))
+					{
+						addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.INDEX, Keyword.THING);
+						return false;
+					}
+
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", Keyword.INDEX);
+						return false;
+					}
+					
+					lastAutoThingIndex = idx;
+				}
+				else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
+				{
+					if (!matchIdentifierIgnoreCase(Keyword.INDEX))
+					{
+						addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.INDEX, Keyword.WEAPON);
+						return false;
+					}
+
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", Keyword.INDEX);
+						return false;
+					}
+					
+					lastAutoWeaponIndex = idx;
+				}
+				else if (matchIdentifierIgnoreCase(Keyword.AMMO))
+				{
+					if (!matchIdentifierIgnoreCase(Keyword.INDEX))
+					{
+						addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.INDEX, Keyword.AMMO);
+						return false;
+					}
+
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", Keyword.INDEX);
+						return false;
+					}
+					
+					lastAutoAmmoIndex = idx;
+				}
+				else
+				{
+					addErrorMessage("Expected \"%s\", \"%s\", \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.AUTO);
 					return false;
 				}
 
-				if (!matchIdentifierIgnoreCase(Keyword.INDEX))
-				{
-					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.INDEX, Keyword.THING);
-					return false;
-				}
-
-				Integer idx;
-				if ((idx = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.INDEX, Keyword.SOUND);
-					return false;
-				}
-				
-				lastAutoThingIndex = idx;
 				return true;
 			}
 			else
@@ -683,9 +726,117 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parses an ammo type alias line.
+	private boolean parseAmmoAliasLine(AbstractPatchContext<?> context)
+	{
+		String ammoName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected ammo name after \"%s\".", Keyword.AMMO);
+			return false;			
+		}
+		
+		if ((ammoName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR AMMO.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getAmmoAlias(ammoName)) != null)
+		{
+			addErrorMessage("Expected valid ammo identifier for alias: \"%s\" is already in use!", ammoName);
+			return false;
+		}
+		
+		if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected a valid integer for the ammo slot number after \"%s\".", ammoName);
+			return false;
+		}
+		else if ((slot = verifyAmmoIndex(context, slot)) == null)
+		{
+			return false;
+		}
+		
+		context.setAmmoAlias(ammoName, slot);
+		return true;
+	}
+	
+	// Parses an "auto ammo" block.
+	private boolean parseAmmoAutoBlock(final AbstractPatchContext<?> context)
+	{
+		String ammoName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected ammo name after \"%s\".", Keyword.AMMO);
+			return false;			
+		}
+		
+		if ((ammoName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR AMMO.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getAmmoAlias(ammoName)) != null)
+		{
+			addErrorMessage("Expected valid ammo identifier for new auto-ammo: \"%s\" is already in use!", ammoName);
+			return false;
+		}
+		
+		if ((slot = context.findNextFreeAmmo(lastAutoAmmoIndex)) == null)
+		{
+			addErrorMessage("No more free ammo types for a new auto-ammo.");
+			return false;
+		}
+		
+		// Save hint.
+		lastAutoAmmoIndex = slot;
+
+		// set thing.
+		context.setAmmoAlias(ammoName, slot);
+		
+		String optionalName;
+		if ((optionalName = matchString()) != null)
+			context.getAmmo(slot).setName(optionalName);
+
+		return parseAmmoBodyBlock(context, slot);
+	}
+	
 	// Parses an ammo block.
 	private boolean parseAmmoBlock(AbstractPatchContext<?> context)
 	{
+		// free things?
+		if (matchIdentifierIgnoreCase(Keyword.FREE))
+		{
+			Integer min;
+			if ((min = matchPositiveInteger()) != null)
+			{
+				if ((min = verifyAmmoIndex(context, min)) == null)
+					return false;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.TO))
+				{
+					context.setFreeAmmo(min, true);
+					return true;
+				}
+				
+				Integer max;
+				if ((max = matchAmmoIndex(context)) == null)
+					return false;
+				
+				context.setFreeAmmo(min, max, true);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected ammo index after \"%s\".", Keyword.FREE);
+				return false;
+			}
+		}
+		
 		DEHAmmo ammo;
 		Integer ammoIndex;
 		if ((ammoIndex = matchPositiveInteger()) == null)
@@ -708,6 +859,14 @@ public final class DecoHackParser extends Lexer.Parser
 		if ((optionalName = matchString()) != null)
 			ammo.setName(optionalName);
 		
+		return parseAmmoBodyBlock(context, ammoIndex);
+	}
+	
+	// Parses an ammo body block.
+	private boolean parseAmmoBodyBlock(AbstractPatchContext<?> context, int slot)
+	{
+		DEHAmmo ammo = context.getAmmo(slot);
+
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.AMMO);
@@ -1004,7 +1163,7 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.AMMO);
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -1765,9 +1924,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		if ((slot = matchPositiveInteger()) == null)
+		if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected a positive integer for the thing slot number after \"%s\".", thingName);
+			addErrorMessage("Expected a valid integer for the thing slot number after \"%s\".", thingName);
 			return false;
 		}
 		else if ((slot = verifyThingIndex(context, slot)) == null)
@@ -2813,7 +2972,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String weaponName;
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			addErrorMessage("Expected weapon name after \"%s\".", Keyword.THING);
+			addErrorMessage("Expected weapon name after \"%s\".", Keyword.WEAPON);
 			return false;			
 		}
 		
@@ -2830,9 +2989,9 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		if ((slot = matchPositiveInteger()) == null)
+		if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected a positive integer for the weapon slot number after \"%s\".", weaponName);
+			addErrorMessage("Expected a valid integer for the weapon slot number after \"%s\".", weaponName);
 			return false;
 		}
 		else if ((slot = verifyWeaponIndex(context, slot)) == null)
@@ -2847,6 +3006,35 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a weapon block.
 	private boolean parseWeaponBlock(AbstractPatchContext<?> context)
 	{
+		// free things?
+		if (matchIdentifierIgnoreCase(Keyword.FREE))
+		{
+			Integer min;
+			if ((min = matchPositiveInteger()) != null)
+			{
+				if ((min = verifyWeaponIndex(context, min)) == null)
+					return false;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.TO))
+				{
+					context.setFreeWeapon(min, true);
+					return true;
+				}
+				
+				Integer max;
+				if ((max = matchWeaponIndex(context)) == null)
+					return false;
+				
+				context.setFreeWeapon(min, max, true);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected weapon index after \"%s\".", Keyword.FREE);
+				return false;
+			}
+		}
+		
 		Integer slot;
 		if ((slot = matchWeaponIndex(context)) == null)
 			return false;
@@ -3035,6 +3223,44 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		return true;
+	}
+	
+	// Parses an "auto weapon" block.
+	private boolean parseWeaponAutoBlock(final AbstractPatchContext<?> context)
+	{
+		String weaponName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected weapon name after \"%s\".", Keyword.WEAPON);
+			return false;			
+		}
+		
+		if ((weaponName = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR WEAPON.");
+			return false;
+		}
+		
+		Integer slot;
+		if ((slot = context.getWeaponAlias(weaponName)) != null)
+		{
+			addErrorMessage("Expected valid weapon identifier for new auto-weapon: \"%s\" is already in use!", weaponName);
+			return false;
+		}
+		
+		if ((slot = context.findNextFreeWeapon(lastAutoWeaponIndex)) == null)
+		{
+			addErrorMessage("No more free weapons for a new auto-weapon.");
+			return false;
+		}
+		
+		// Save hint.
+		lastAutoWeaponIndex = slot;
+
+		// set thing.
+		context.setWeaponAlias(weaponName, slot);
+		
+		return parseWeaponDefinitionBlock(context, slot);
 	}
 	
 	// Parses the weapon copy clauses, marks the weapon as not free, and parses the body.
@@ -4624,6 +4850,7 @@ public final class DecoHackParser extends Lexer.Parser
 					.setMisc1(parsedAction.misc1)
 					.setMisc2(parsedAction.misc2)
 					.setArgs(parsedAction.args)
+					.setTranmap(parsedAction.tranmap)
 				;
 				
 				if (parsedState.mbf21Flags != null && fillState.getMBF21Flags() != parsedState.mbf21Flags)
@@ -4863,7 +5090,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return slot;
 			}
 		}
-		else if ((slot = matchPositiveInteger()) != null)
+		else if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) != null)
 		{
 			if (allowZero && slot == 0)
 				return 0;
@@ -4921,9 +5148,9 @@ public final class DecoHackParser extends Lexer.Parser
 				return slot;
 			}
 		}
-		else if ((slot = matchPositiveInteger()) == null)
+		else if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
 		{
-			addErrorMessage("Expected positive integer or alias for the weapon index.");
+			addErrorMessage("Expected valid integer or alias for the weapon index.");
 			return null;
 		}
 
@@ -4952,6 +5179,21 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer matchAmmoIndex(AbstractPatchContext<?> context)
 	{
 		Integer ammoType;
+		String autoAmmoName;
+		
+		if ((autoAmmoName = matchIdentifier()) != null)
+		{
+			if ((ammoType = context.getAmmoAlias(autoAmmoName)) == null)
+			{
+				addErrorMessage("Expected valid ammo identifier: \"%s\" is not a valid alias.", autoAmmoName);
+				return null;
+			}
+			else
+			{
+				return ammoType;
+			}
+		}
+		
 		if ((ammoType = matchInteger()) == null)
 		{
 			addErrorMessage("Expected integer for ammo type.");
@@ -4969,9 +5211,39 @@ public final class DecoHackParser extends Lexer.Parser
 			return null;
 		}
 		
-		return ammoType;
+		return verifyAmmoIndex(context, ammoType);
 	}
-	
+
+	// Verifies a valid ammo index number.
+	private Integer verifyAmmoIndex(AbstractPatchContext<?> context, int slot)
+	{
+		if (slot == -1)
+		{
+			addErrorMessage("Invalid ammo index: %d.", slot);
+			return null;
+		}
+
+		if (slot == 4)
+		{
+			addErrorMessage("Invalid ammo index: %d.", slot);
+			return null;
+		}
+
+		if (slot >= context.getAmmoCount())
+		{
+			addErrorMessage("Invalid ammo index: %d. Max is %d.", slot, context.getAmmoCount() - 1);
+			return null;
+		}
+
+		if (context.getAmmo(slot) == null)
+		{
+			addErrorMessage("Invalid ammo index: %d. Max is %d.", slot, context.getAmmoCount() - 1);
+			return null;
+		}
+
+		return slot;
+	}
+
 	// Mqtches a valid pickup item type.
 	private Integer matchPickupItemType()
 	{
@@ -5638,6 +5910,10 @@ public final class DecoHackParser extends Lexer.Parser
 	private Map<String, String> editorKeys;
 	/** Last auto thing index (for slightly better search continuation). */
 	private int lastAutoThingIndex;
+	/** Last auto weapon index (for slightly better search continuation). */
+	private int lastAutoWeaponIndex;
+	/** Last auto ammo index (for slightly better search continuation). */
+	private int lastAutoAmmoIndex;
 
 	// Return the exporter for the patch.
 	private DecoHackParser(String streamName, InputStream in, Charset inputCharset)
@@ -5647,6 +5923,8 @@ public final class DecoHackParser extends Lexer.Parser
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.lastAutoThingIndex = 0;
+		this.lastAutoWeaponIndex = 0;
+		this.lastAutoAmmoIndex = 0;
 	}
 	
 	private void addWarningMessage(String message, Object... args)
@@ -6041,6 +6319,7 @@ public final class DecoHackParser extends Lexer.Parser
 						put("<extended>", "classpath:decohack/extended.dh");
 						put("<mbf21>", "classpath:decohack/mbf21.dh");
 						put("<dsdhacked>", "classpath:decohack/dsdhacked.dh");
+						put("<id24>", "classpath:decohack/id24.dh");
 						put("<friendly>", "classpath:decohack/constants/friendly_things.dh");
 					}
 				};

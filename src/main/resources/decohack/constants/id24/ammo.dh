@@ -2,6 +2,8 @@
  * DECOHack ID24 Ammo Type Mnemonics
  *****************************************************************************/
 
+#include "classpath:decohack/constants/doom19/ammo.dh"
+
 // include once!
 #ifndef __DECOHACK_CONSTANTS_ID24_AMMO__
 #define __DECOHACK_CONSTANTS_ID24_AMMO__

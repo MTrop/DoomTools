@@ -153,6 +153,113 @@ Examples:
     }
 
 
+------------------------------------------------------------------------------
+Ammo Aliases
+------------------------------------------------------------------------------
+
+You can specify identifier aliases for weapon slots by using the following:
+
+    alias ammo Bullets 0
+
+
+...so the next time you refer to it, you can write:
+
+    ammo Bullets
+    {
+        // ... code
+    }
+
+
+The alias works in every place you can use an ammo reference:  
+
+    weapon 4 : weapon Shotgun "Shotgun Copy"
+    {
+        ammotype Bullets
+    }
+
+
+Ammo alias identifiers are case-insensitive. There are a few internal 
+"#includes" that will add these names by default. 
+
+
+------------------------------------------------------------------------------
+Auto-Ammo
+------------------------------------------------------------------------------
+
+Ammo types can be freed and filled automatically like states. To free a single
+ammo slot:
+
+    ammo free <INTEGER>
+
+
+To free an explicit range (inclusive):
+
+    ammo free <INTEGER> to <INTEGER>
+
+
+Examples:
+
+    ammo free 6
+    ammo free 6 to 10
+
+
+In order to fill the next free Ammo, you need to define ammo types using the 
+"auto" keyword:  
+
+    auto ammo <IDENTIFIER> [ <STRING> ]
+    {
+        // ... same ammo body like always ...
+    }
+
+
+Note that you'll need to use an unused identifier (or alias) to represent the 
+new Ammo when you need to refer to its index later. The identifiers are 
+case-insensitive.
+
+Examples:
+
+    auto ammo RifleRounds "RifleRounds"
+    {
+        // ... code ...
+    }
+
+
+Any place that would ordinarily use an Ammo index can use an auto-ammo 
+identifier in place of the index.
+
+Ammo types that are edited directly or auto-filled this way are not "free" 
+anymore, similar to how "free" states work (more on that later).
+
+You can modify auto-filled ammo types later (remember, definitions cascade!) by
+writing a normal Ammo definition body:
+
+    ammo RifleRounds
+    {
+        // ... code ...
+    }
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack will not warn you about Ammo slots with a
+      special purpose being filled this way! Most of the time, auto-
+      things are useful for ID24 and higher patch types. Be
+      VERY careful if you use this feature in Vanilla or Boom!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+You can also influence the next "auto ammo" index/slot to be used via a 
+special clause:
+
+    set next auto ammo index <INTEGER>
+
+...where <INTEGER> is a positive integer for setting the next seek index for
+"auto" ammo types. This may not write to the exact slot for the next ammo 
+type, however - it will still seek to the next "free" slot from that provided 
+index! 
+
+
 ==============================================================================
 ===== Sound
 ==============================================================================
@@ -810,6 +917,88 @@ The alias works in every place you can use a weapon reference:
 
 Weapon alias identifiers are case-insensitive. There are a few internal 
 "#includes" that will add these common ZDoom weapon names by default. 
+
+
+------------------------------------------------------------------------------
+Auto-Weapons
+------------------------------------------------------------------------------
+
+Weapons can be freed and filled automatically like states. To free a single
+weapon slot:
+
+    weapon free <INTEGER>
+
+
+To free an explicit range (inclusive):
+
+    weapon free <INTEGER> to <INTEGER>
+
+
+Examples:
+
+    weapon free 8
+    weapon free 9 to 20
+
+
+In order to fill the next free Weapon, you need to define Weapons using the 
+"auto" keyword:  
+
+    auto weapon <IDENTIFIER> [ : weapon ( <INTEGER> | <IDENTIFIER> ) ] [ <STRING> ]
+    {
+        // ... same weapon body like always ...
+    }
+
+
+Note that you'll need to use an unused identifier (or alias) to represent the 
+new Weapon when you need to refer to its index later. The identifiers are 
+case-insensitive.
+
+Examples:
+
+    auto weapon NewShotgun "New Shotgun"
+    {
+        // ... code ...
+    }
+
+    auto weapon BetterShotgun : thing NewShotgun "Better Shotgun"
+    {
+        // ... code ...
+    }
+
+
+Any place that would ordinarily use a Weapon index can use an auto-weapon 
+identifier in place of the index.
+
+Weapons that are edited directly or auto-filled this way are not "free" 
+anymore, similar to how "free" states work.
+
+You can modify auto-filled Weapons later (remember, definitions cascade!) by
+writing a normal Weapon definition body:
+
+    weapon BetterShotgun
+    {
+        // ... code ...
+    }
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+      IMPORTANT: DECOHack will not warn you about Weapon slots with a
+      special purpose being filled this way! Most of the time, auto-
+      things are useful for ID24 and higher patch types. Be
+      VERY careful if you use this feature in Vanilla or Boom!
+ 
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+You can also influence the next "auto weapon" index/slot to be used via a 
+special clause:
+
+    set next auto weapon index <INTEGER>
+
+...where <INTEGER> is a positive integer for setting the next seek index for
+"auto" weapons. This may not write to the exact slot for the next weapon, 
+however - it will still seek to the next "free" slot from that provided index! 
 
 
 ==============================================================================

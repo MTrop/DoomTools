@@ -51,7 +51,6 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 
 	private int freeStateCount;
 	private int freePointerStateCount;
-	private int freeThingCount;
 
 	protected boolean stateSafetySwitch;
 	protected IntervalMap<Boolean> alreadyFreeStatesMap;
@@ -59,9 +58,12 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected IntervalMap<Boolean> freeStatesMap;
 	protected IntervalMap<Boolean> protectedStatesMap;
 	protected IntervalMap<Boolean> freeThingsMap;
+	protected IntervalMap<Boolean> freeWeaponsMap;
+	protected IntervalMap<Boolean> freeAmmoMap;
 
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
+	protected Map<String, Integer> ammoAliasMap;
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
 
@@ -132,10 +134,15 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.freeStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 		this.protectedStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 
-		this.freeThingCount = 0;
 		this.freeThingsMap = new IntervalMap<>(0, getThingCount() - 1, false);
+
+		this.freeWeaponsMap = new IntervalMap<>(0, getWeaponCount() - 1, false);
+
+		this.freeAmmoMap = new IntervalMap<>(0, getWeaponCount() - 1, false);
+
 		this.thingAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.ammoAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.customPropertyMap = new HashMap<>();
 		
@@ -648,15 +655,6 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 
 	/**
-	 * Gets how many free things there are.
-	 * @return the amount of things flagged as "free."
-	 */
-	public int getFreeThingCount() 
-	{
-		return freeThingCount;
-	}
-	
-	/**
 	 * Gets if a thing is flagged as "free".
 	 * @param thingIndex the index.
 	 * @return true if so, false if not.
@@ -677,13 +675,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public void setFreeThing(int index, boolean state)
 	{
 		checkIndexRange(index, freeThingsMap);
-		
-		boolean prev = freeThingsMap.get(index); 
 		freeThingsMap.set(index, state);
-		if (prev && !state)
-			freeThingCount--;
-		else if (!prev && state)
-			freeThingCount++;
 	}
 
 	/**
@@ -697,11 +689,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		checkIndexRange(min, freeThingsMap);
 		checkIndexRange(max, freeThingsMap);
-		
-		int a = Math.min(min, max);
-		int b = Math.max(min, max);
-		while (a <= b)
-			setFreeThing(a++, state);
+		freeThingsMap.set(min, max, state);
 	}
 
 	/**
@@ -754,6 +742,58 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Gets if a weapon is flagged as "free".
+	 * @param weaponIndex the index.
+	 * @return true if so, false if not.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public boolean isFreeWeapon(int weaponIndex)
+	{
+		checkIndexRange(weaponIndex, freeWeaponsMap);
+		return freeWeaponsMap.get(weaponIndex);
+	}
+
+	/**
+	 * Sets a weapon as "free" or not. 
+	 * @param index the weapon index.
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeWeapon(int index, boolean state)
+	{
+		checkIndexRange(index, freeWeaponsMap);
+		freeWeaponsMap.set(index, state);
+	}
+
+	/**
+	 * Sets a contiguous set of weapons as "free" or not. 
+	 * @param min the minimum weapon index.
+	 * @param max the maximum weapon index (inclusive).
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeWeapon(int min, int max, boolean state)
+	{
+		checkIndexRange(min, freeWeaponsMap);
+		checkIndexRange(max, freeWeaponsMap);
+		freeWeaponsMap.set(min, max, state);
+	}
+
+	/**
+	 * Searches linearly for the next free weapon in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free weapon index, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeWeapon(int startingIndex)
+	{
+		return searchNextFree(startingIndex, getWeaponCount(), (i) -> 
+			isFreeWeapon(i)
+		);
+	}
+	
+	/**
 	 * Sets an auto-allocated weapon index via an identifier (case-insensitive).
 	 * @param identifier the identifier.
 	 * @param index the corresponding index.
@@ -789,6 +829,93 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Gets if an ammo type is flagged as "free".
+	 * @param weaponIndex the index.
+	 * @return true if so, false if not.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public boolean isFreeAmmo(int weaponIndex)
+	{
+		checkIndexRange(weaponIndex, freeAmmoMap);
+		return freeAmmoMap.get(weaponIndex);
+	}
+
+	/**
+	 * Sets an ammo type as "free" or not. 
+	 * @param index the ammo type index.
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeAmmo(int index, boolean state)
+	{
+		checkIndexRange(index, freeAmmoMap);
+		freeAmmoMap.set(index, state);
+	}
+
+	/**
+	 * Sets a contiguous set of ammo types as "free" or not. 
+	 * @param min the minimum ammo type index.
+	 * @param max the maximum ammo type index (inclusive).
+	 * @param state true to set as "free", false to unset.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setFreeAmmo(int min, int max, boolean state)
+	{
+		checkIndexRange(min, freeAmmoMap);
+		checkIndexRange(max, freeAmmoMap);
+		freeAmmoMap.set(min, max, state);
+	}
+
+	/**
+	 * Searches linearly for the next free ammo type in this context from a starting index.
+	 * If the start index is free, it is returned. If a full search completes without finding
+	 * a free index, <code>null</code> is returned.
+	 * @param startingIndex the starting index.
+	 * @return the next free ammo type index, or <code>null</code> if none found.
+	 */
+	public Integer findNextFreeAmmo(int startingIndex)
+	{
+		return searchNextFree(startingIndex, getAmmoCount(), (i) -> 
+			isFreeAmmo(i)
+		);
+	}
+
+	/**
+	 * Sets an auto-allocated ammo index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @param index the corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public void setAmmoAlias(String identifier, int index)
+	{
+		checkIndexRange(index, getAmmoCount());
+		ammoAliasMap.put(identifier, index);
+	}
+	
+	/**
+	 * Gets an auto-allocated ammo index via an identifier (case-insensitive).
+	 * @param identifier the identifier.
+	 * @return the corresponding index, or null if no corresponding index.
+	 * @throws IndexOutOfBoundsException if the index is out of bounds.
+	 */
+	public Integer getAmmoAlias(String identifier)
+	{
+		return ammoAliasMap.get(identifier);
+	}
+
+	/**
+	 * Gets the set of available ammo aliases.
+	 * The returned set is a copy and can be manipulated without affecting the main set.
+	 * @return the set of thing alias names.
+	 */
+	public SortedSet<String> getAmmoAliases()
+	{
+		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		out.addAll(ammoAliasMap.keySet());
+		return out;
+	}
+	
+	/**
 	 * Writes the patch data to a writer.
 	 * @param writer the output writer.
 	 * @param comment a comment line (containing the version line).
@@ -803,15 +930,21 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	// Throws IndexOutOfBoundsException if out of range.
 	protected void checkIndexRange(int index, IntervalMap<?> map)
 	{
-		if (index < 0 || index > map.getMaxIndex())
-			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + map.getMaxIndex());
+		if (!supports(DEHFeatureLevel.ID24))
+		{
+			if (index < 0 || index > map.getMaxIndex())
+				throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + map.getMaxIndex());
+		}
 	}
 
 	// Throws IndexOutOfBoundsException if out of range.
 	protected void checkIndexRange(int index, long count)
 	{
-		if (index < 0 || index >= count)
-			throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + (count - 1));
+		if (!supports(DEHFeatureLevel.ID24))
+		{
+			if (index < 0 || index >= count)
+				throw new IndexOutOfBoundsException("Index cannot be less than 0 or greater than " + (count - 1));
+		}
 	}
 
 	/**

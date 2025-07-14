@@ -1,0 +1,14 @@
+/*****************************************************************************
+ * DECOHack ID24 Weapon Slot Mnemonics
+ *****************************************************************************/
+
+#include "classpath:decohack/constants/doom19/weapons.dh"
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_WEAPONS__
+#define __DECOHACK_CONSTANTS_ID24_WEAPONS__
+
+#define WP_INCINERATOR   -1879048192
+#define WP_CALAMITYBLADE -1879048191
+
+#endif

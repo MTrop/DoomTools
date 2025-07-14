@@ -1,3 +1,7 @@
+/*****************************************************************************
+ * DECOHack ID24 Pickup Type Mnemonics
+ *****************************************************************************/
+
 // include once!
 #ifndef __DECOHACK_CONSTANTS_ID24_PICKUPS__
 #define __DECOHACK_CONSTANTS_ID24_PICKUPS__

@@ -132,6 +132,18 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	{
 		setAmmoType(0);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
+		
+		setSlot(DEFAULT_SLOT);
+		setSlotPriority(DEFAULT_SLOT_PRIORITY);
+		setSwitchPriority(DEFAULT_SWITCH_PRIORITY);
+		setInitialOwned(DEFAULT_INITIAL_OWNED);
+		setInitialRaised(DEFAULT_INITIAL_RAISED);
+		setCarouselIcon(DEFAULT_CAROUSEL_ICON);
+		setAllowSwitchWithOwnedWeapon(DEFAULT_ALLOW_SWITCH_WITH_OWNED_WEAPON);
+		setNoSwitchWithOwnedWeapon(DEFAULT_NO_SWITCH_WITH_OWNED_WEAPON);
+		setAllowSwitchWithOwnedItem(DEFAULT_ALLOW_SWITCH_WITH_OWNED_ITEM);
+		setNoSwitchWithOwnedItem(DEFAULT_NO_SWITCH_WITH_OWNED_ITEM);
+		
 		clearCustomPropertyValues();
 		return this;
 	}

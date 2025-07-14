@@ -27,11 +27,11 @@ public enum DEHValueType
 	ANGLEUINT     (Type.INTEGER,       0, 359),
 	ANGLEFIXED    (Type.FIXED,         (-360 << 16) + 1, (360 << 16) - 1),
 	FIXED         (Type.FIXED,         Integer.MIN_VALUE, Integer.MAX_VALUE),
-	STATE         (Type.STATE,         0, Integer.MAX_VALUE),
-	THING         (Type.THING,         0, Integer.MAX_VALUE),
-	THINGMISSILE  (Type.THINGMISSILE,  0, Integer.MAX_VALUE),
-	WEAPON        (Type.WEAPON,        0, Integer.MAX_VALUE),
-	SOUND         (Type.SOUND,         0, Integer.MAX_VALUE),
+	STATE         (Type.STATE,         Integer.MIN_VALUE, Integer.MAX_VALUE),
+	THING         (Type.THING,         Integer.MIN_VALUE, Integer.MAX_VALUE),
+	THINGMISSILE  (Type.THINGMISSILE,  Integer.MIN_VALUE, Integer.MAX_VALUE),
+	WEAPON        (Type.WEAPON,        Integer.MIN_VALUE, Integer.MAX_VALUE),
+	SOUND         (Type.SOUND,         Integer.MIN_VALUE, Integer.MAX_VALUE),
 	FLAGS         (Type.FLAGS,         Integer.MIN_VALUE, Integer.MAX_VALUE),
 
 	// For custom properties ONLY.

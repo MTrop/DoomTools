@@ -16,4 +16,6 @@
 #define WP_CHAINSAW     7
 #define WP_SUPERSHOTGUN 8
 
+#define WP_FREE_START   9
+
 #endif

@@ -2,6 +2,8 @@
  * DECOHack Doom 1.9 Thing Aliases
  *****************************************************************************/
 
+#include "classpath:decohack/constants/mbf/things_aliases.dh"
+
 // include once!
 #ifndef __DECOHACK_CONSTANTS_ID24_THINGS_ALIASES__
 #define __DECOHACK_CONSTANTS_ID24_THINGS_ALIASES__

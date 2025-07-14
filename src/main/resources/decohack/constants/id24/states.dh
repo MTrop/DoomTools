@@ -1,0 +1,13 @@
+/*****************************************************************************
+ * DECOHack ID24 State Mnemonics
+ *****************************************************************************/
+
+#include "classpath:decohack/constants/extended/states.dh"
+
+// include once!
+#ifndef __DECOHACK_CONSTANTS_ID24_STATES__
+#define __DECOHACK_CONSTANTS_ID24_STATES__
+
+
+
+#endif

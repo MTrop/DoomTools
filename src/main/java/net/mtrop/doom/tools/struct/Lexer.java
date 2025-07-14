@@ -2295,6 +2295,54 @@ public class Lexer
 		/**
 		 * Attempts to match the type of the current token. If matched, this returns true.
 		 * This DOES NOT ADVANCE to the next token.
+		 * @param tokenType the token type.
+		 * @return true if matched, false if not.
+		 */
+		protected boolean currentType(int tokenType)
+		{
+			if (currentToken != null)
+			{
+				return currentToken.getType() == tokenType;
+			}
+			return false;
+		}
+		
+		/**
+		 * Attempts to match the type of the current token. If matched, this returns true.
+		 * This DOES NOT ADVANCE to the next token.
+		 * @param tokenType1 the first token type.
+		 * @param tokenType2 the second token type.
+		 * @return true if one was matched, false if not.
+		 */
+		protected boolean currentType(int tokenType1, int tokenType2)
+		{
+			if (currentToken != null)
+			{
+				return currentToken.getType() == tokenType1 || currentToken.getType() == tokenType2;
+			}
+			return false;
+		}
+		
+		/**
+		 * Attempts to match the type of the current token. If matched, this returns true.
+		 * This DOES NOT ADVANCE to the next token.
+		 * @param tokenType1 the first token type.
+		 * @param tokenType2 the second token type.
+		 * @param tokenType3 the third token type.
+		 * @return true if one was matched, false if not.
+		 */
+		protected boolean currentType(int tokenType1, int tokenType2, int tokenType3)
+		{
+			if (currentToken != null)
+			{
+				return currentToken.getType() == tokenType1 || currentToken.getType() == tokenType2 || currentToken.getType() == tokenType3;
+			}
+			return false;
+		}
+		
+		/**
+		 * Attempts to match the type of the current token. If matched, this returns true.
+		 * This DOES NOT ADVANCE to the next token.
 		 * @param tokenTypes the list of types.
 		 * @return true if one was matched, false if not.
 		 */

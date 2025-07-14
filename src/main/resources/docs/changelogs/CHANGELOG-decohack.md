@@ -1,8 +1,9 @@
 DECOHack
 --------
 
-### Changed for 0.38.2
+### Changed for 0.39.0
 
+* `Added` Support for ID24 patches.
 * `Changed` DECOHack writes sprites and sound index sections in index order instead of name order. (Issue #130).
 
 

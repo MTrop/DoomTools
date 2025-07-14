@@ -2,6 +2,8 @@
  * DECOHack Doom 1.9 Weapon Aliases
  *****************************************************************************/
 
+#include "classpath:decohack/constants/doom19/things_aliases.dh"
+
 // include once!
 #ifndef __DECOHACK_CONSTANTS_ID24_WEAPONS_ALIASES__
 #define __DECOHACK_CONSTANTS_ID24_WEAPONS_ALIASES__

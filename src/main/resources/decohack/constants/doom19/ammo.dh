@@ -12,4 +12,6 @@
 #define AM_MISL         3
 #define AM_NOAMMO       5
 
+#define AM_FREE_START   6
+
 #endif
