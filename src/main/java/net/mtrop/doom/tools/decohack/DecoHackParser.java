@@ -5217,12 +5217,6 @@ public final class DecoHackParser extends Lexer.Parser
 	// Verifies a valid ammo index number.
 	private Integer verifyAmmoIndex(AbstractPatchContext<?> context, int slot)
 	{
-		if (slot == -1)
-		{
-			addErrorMessage("Invalid ammo index: %d.", slot);
-			return null;
-		}
-
 		if (slot == 4)
 		{
 			addErrorMessage("Invalid ammo index: %d.", slot);

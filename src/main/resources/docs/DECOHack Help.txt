@@ -157,7 +157,7 @@ Examples:
 Ammo Aliases
 ------------------------------------------------------------------------------
 
-You can specify identifier aliases for weapon slots by using the following:
+You can specify identifier aliases for ammo slots by using the following:
 
     alias ammo Bullets 0
 
@@ -960,7 +960,7 @@ Examples:
         // ... code ...
     }
 
-    auto weapon BetterShotgun : thing NewShotgun "Better Shotgun"
+    auto weapon BetterShotgun : weapon NewShotgun "Better Shotgun"
     {
         // ... code ...
     }
@@ -1945,12 +1945,24 @@ block.
     auto-thing fill, and allows new sound and sprite definitions 
     automatically. Also adds ZDoom thing and weapon aliases.
 
+#include <id24>
+#include "classpath:decohack/id24.dh"
+
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    ID24-compliant ports (which includes DSDHACKED), plus the 
+    "using id24" line, AND freeing up the states from 1100 to the
+    state max, freeing the things from 151 to the thing max for 
+    auto-thing fill, freeing all weapons at index 9 and higher,
+    freeing all ammo types from index 6 and higher, and allows new sound and 
+    sprite definitions automatically. Also adds ZDoom thing and weapon 
+    aliases.
+
 ..............................................................................
 
 #include <friendly>
 #include "classpath:decohack/constants/friendly_things.dh"
 
-    "Friendly" names for Doom things, all the way up through extended.
+    "Friendly" names for Doom things, all the way up through ID24.
 
 ..............................................................................
 

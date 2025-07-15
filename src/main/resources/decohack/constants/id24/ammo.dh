@@ -8,7 +8,9 @@
 #ifndef __DECOHACK_CONSTANTS_ID24_AMMO__
 #define __DECOHACK_CONSTANTS_ID24_AMMO__
 
-#define AM_NONE      -1
-#define AM_FUEL      -1879048192
+#define AM_NONE       -1
+#define AM_FUEL       -1879048192
+
+#define AM_FREE_START 6
 
 #endif
