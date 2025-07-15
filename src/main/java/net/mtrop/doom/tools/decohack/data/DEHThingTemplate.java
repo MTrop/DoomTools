@@ -400,7 +400,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	{
 		if (editorNumber == 0)
 			throw new IllegalArgumentException("Editor number can not be 0.");
-		RangeUtils.checkRange("Editor number", -1, 0x10000, editorNumber);
+		RangeUtils.checkShort("Editor number", editorNumber);
 		this.editorNumber = editorNumber;
 		return this;
 	}
