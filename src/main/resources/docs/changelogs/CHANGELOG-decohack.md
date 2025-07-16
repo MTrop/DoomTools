@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.39.1
+
+* `Fixed` The `--dump-constants` switch pointed to the wrong resource (Issue #131).
+
+
 ### Changed for 0.39.0
 
 * `Added` Support for ID24 patches.

@@ -61,7 +61,7 @@ public final class DecoHackMain
 	private static final String SPLASH_VERSION = VERSION_LINE + " (using DoomStruct v" + Version.DOOMSTRUCT + ")";
 
 	private static final String DEFAULT_OUTFILENAME = "dehacked.deh";
-	private static final String RESOURCE_HELP_CONSTANTS = "decohack/help-constants.txt";
+	private static final String RESOURCE_HELP_CONSTANTS = "docs/DECOHack Constants.txt";
 	
 	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_OPTIONS = 1;
@@ -429,7 +429,7 @@ public final class DecoHackMain
 			
 			if (options.dumpResource != null)
 			{
-				if (!options.dumpResource.startsWith("decohack/"))
+				if (!options.dumpResource.equals(RESOURCE_HELP_CONSTANTS) && !options.dumpResource.startsWith("decohack/"))
 				{
 					options.stderr.println("ERROR: Bad resource path (must start with \"decohack/\").");
 					return ERROR_MISSING_RESOURCE;

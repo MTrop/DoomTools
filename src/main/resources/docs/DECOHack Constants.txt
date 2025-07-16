@@ -2040,7 +2040,7 @@ UnholyBible     144
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/constants/mbf/things_aliases.dh
+---- classpath:decohack/constants/id24/things_aliases.dh
 ------------------------------------------------------------------------------
 
 Ghoul                          -1879048192
