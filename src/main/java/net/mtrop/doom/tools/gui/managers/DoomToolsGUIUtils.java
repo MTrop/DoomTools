@@ -564,8 +564,12 @@ public final class DoomToolsGUIUtils
 	 */
 	public File chooseFile(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
 	{
+		File lastPath = lastPathSupplier.get();
+		if (lastPath == null)
+			lastPath = settings.getFileChooserDefault();
+		
 		File selected;
-		if ((selected = FileChooserFactory.chooseFile(parent, title, lastPathSupplier.get(), approveText, transformFileFunction, choosableFilters)) != null)
+		if ((selected = FileChooserFactory.chooseFile(parent, title, lastPath, approveText, transformFileFunction, choosableFilters)) != null)
 			lastPathSaver.accept(selected);
 		return selected;
 	}
@@ -598,8 +602,12 @@ public final class DoomToolsGUIUtils
 	 */
 	public File chooseDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver)
 	{
+		File lastPath = lastPathSupplier.get();
+		if (lastPath == null)
+			lastPath = settings.getFileChooserDefault();
+		
 		File selected;
-		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPathSupplier.get(), approveText, createDirectoryFilter())) != null)
+		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPath, approveText, createDirectoryFilter())) != null)
 			lastPathSaver.accept(selected);
 		return selected;
 	}
@@ -618,8 +626,12 @@ public final class DoomToolsGUIUtils
 	 */
 	public File chooseFileOrDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
 	{
+		File lastPath = lastPathSupplier.get();
+		if (lastPath == null)
+			lastPath = settings.getFileChooserDefault();
+		
 		File selected;
-		if ((selected = FileChooserFactory.chooseFileOrDirectory(parent, title, lastPathSupplier.get(), approveText, transformFileFunction, choosableFilters)) != null)
+		if ((selected = FileChooserFactory.chooseFileOrDirectory(parent, title, lastPath, approveText, transformFileFunction, choosableFilters)) != null)
 			lastPathSaver.accept(selected);
 		return selected;
 	}
@@ -653,8 +665,12 @@ public final class DoomToolsGUIUtils
 	 */
 	public File[] chooseFilesOrDirectories(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, FileFilter ... choosableFilters)
 	{
+		File lastPath = lastPathSupplier.get();
+		if (lastPath == null)
+			lastPath = settings.getFileChooserDefault();
+		
 		File[] selected;
-		if ((selected = FileChooserFactory.chooseFilesOrDirectories(parent, title, lastPathSupplier.get(), approveText, choosableFilters)) != null)
+		if ((selected = FileChooserFactory.chooseFilesOrDirectories(parent, title, lastPath, approveText, choosableFilters)) != null)
 			lastPathSaver.accept(selected[selected.length - 1]);
 		return selected;
 	}

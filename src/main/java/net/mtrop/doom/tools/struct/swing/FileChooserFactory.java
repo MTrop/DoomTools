@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -36,7 +36,12 @@ public final class FileChooserFactory
 		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		jfc.setMultiSelectionEnabled(true);
 		if (initPath != null)
-			jfc.setSelectedFile(initPath);
+		{
+			if (initPath.isDirectory())
+				jfc.setCurrentDirectory(initPath);
+			else
+				jfc.setSelectedFile(initPath);
+		}
 		if (title != null)
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
@@ -157,7 +162,12 @@ public final class FileChooserFactory
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		if (initPath != null)
-			jfc.setSelectedFile(initPath);
+		{
+			if (initPath.isDirectory())
+				jfc.setCurrentDirectory(initPath);
+			else
+				jfc.setSelectedFile(initPath);
+		}
 		if (title != null)
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
@@ -384,7 +394,12 @@ public final class FileChooserFactory
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		if (initPath != null)
-			jfc.setSelectedFile(initPath);
+		{
+			if (initPath.isDirectory())
+				jfc.setCurrentDirectory(initPath);
+			else
+				jfc.setSelectedFile(initPath);
+		}
 		if (title != null)
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
@@ -457,7 +472,12 @@ public final class FileChooserFactory
 		JFileChooser jfc = new JFileChooser();
 		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		if (initPath != null)
-			jfc.setSelectedFile(initPath);
+		{
+			if (initPath.isDirectory())
+				jfc.setCurrentDirectory(initPath);
+			else
+				jfc.setSelectedFile(initPath);
+		}
 		if (title != null)
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();

@@ -7,12 +7,14 @@ package net.mtrop.doom.tools.gui.swing.panels.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.GUIThemeType;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 
@@ -80,9 +82,26 @@ public class DoomToolsSettingsPanel extends JPanel
 		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (i) -> settings.setThemeName((String)i)));
 		themeField.setValue(settings.getThemeName());
 		
+		final DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		
+		JFormField<File> chooserDirectoryField = fileField(
+			settings.getFileChooserDefault(), 
+			(current) -> {
+				return utils.chooseDirectory(
+					this,
+					language.getText("wadtex.export.source.browse.title"), 
+					language.getText("wadtex.export.source.browse.accept"),
+					() -> current != null ? current : settings.getLastFileSave(),
+					settings::setLastFileSave
+				);
+			},
+			settings::setFileChooserDefault
+		);
+		
 		return containerOf(
 			node(BorderLayout.NORTH, form(language.getInteger("doomtools.settings.label.width"))
 				.addField(language.getText("doomtools.settings.theme"), themeField)
+				.addField(language.getText("doomtools.settings.chooser.default"), chooserDirectoryField)
 			),
 			node(BorderLayout.CENTER, containerOf()),
 			node(BorderLayout.SOUTH, containerOf(createEmptyBorder(4, 4, 4, 4),

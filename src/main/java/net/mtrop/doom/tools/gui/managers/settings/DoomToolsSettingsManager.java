@@ -39,6 +39,7 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
     private static final String DOOMTOOLS_THEME = "theme";
     private static final String PATH_LAST_PROJECT = "path.lastProject";
     private static final String PATH_LAST_SAVE = "path.lastSave";
+    private static final String PATH_CHOOSER_DEFAULT = "path.chooser.default";
 
 	/* ==================================================================== */
 
@@ -126,6 +127,24 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
 	public File getLastFileSave() 
 	{
 		return getFile(PATH_LAST_SAVE);
+	}
+
+	/**
+	 * Sets the file chooser default path, if no good paths.
+	 * @param path the last file saved.
+	 */
+	public void setFileChooserDefault(File path) 
+	{
+		setFile(PATH_CHOOSER_DEFAULT, path);
+		commit();
+	}
+
+	/**
+	 * @return the file chooser default path.
+	 */
+	public File getFileChooserDefault() 
+	{
+		return getFile(PATH_CHOOSER_DEFAULT);
 	}
 
 }

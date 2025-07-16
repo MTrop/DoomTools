@@ -91,7 +91,7 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 					utils.createTextFileFilter()
 				);
 			},
-			(selected) -> settings.setLastTouchedFile(selected)
+			settings::setLastTouchedFile
 		);
 
 		this.exportPanel = new WadTexExportPanel(exportSettings);
