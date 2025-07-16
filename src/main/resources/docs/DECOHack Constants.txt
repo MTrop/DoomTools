@@ -559,7 +559,7 @@ WP_FREE_START   9
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/constants/doom19/weapons_aliases.dh
+---- classpath:decohack/constants/id24/weapons_aliases.dh
 ------------------------------------------------------------------------------
 
 Everything in:
