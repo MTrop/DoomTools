@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.38.1 by Matt Tropiano (using DoomStruct v2.18.1)
+DECOHack v0.39.1 by Matt Tropiano (using DoomStruct v2.18.1)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -320,10 +320,27 @@ DeHackEd specs.
 Changes an ammo entry. &#x60;ammo&#x60; plus an index, and an optional string for the 
 new name. 
 
-    ammo ( 0 | 1 | 2 | 3 ) &lt;STRING&gt;
+    ammo &lt;INTEGER&gt; &lt;STRING&gt;
     {
         max &lt;INTEGER&gt;
         pickup &lt;INTEGER&gt;
+        
+        &#x2F;&#x2F; ID24 Properties (ID24 feature set and later)
+        initialAmmo &lt;INTEGER&gt;
+        maxUpgradedAmmo &lt;INTEGER&gt;
+        boxAmmo &lt;INTEGER&gt;
+        backpackAmmo &lt;INTEGER&gt;
+        weaponAmmo &lt;INTEGER&gt;
+        droppedAmmo &lt;INTEGER&gt;
+        droppedBoxAmmo &lt;INTEGER&gt;
+        droppedBackpackAmmo &lt;INTEGER&gt;
+        droppedWeaponAmmo &lt;INTEGER&gt;
+        deathmatchWeaponAmmo &lt;INTEGER&gt;
+        skill1Multiplier &lt;FIXED&gt;
+        skill2Multiplier &lt;FIXED&gt;
+        skill3Multiplier &lt;FIXED&gt;
+        skill4Multiplier &lt;FIXED&gt;
+        skill5Multiplier &lt;FIXED&gt;
     }
 
 
@@ -340,6 +357,113 @@ Examples:
         max 5000
         pickup 100
     }
+
+
+------------------------------------------------------------------------------
+Ammo Aliases
+------------------------------------------------------------------------------
+
+You can specify identifier aliases for ammo slots by using the following:
+
+    alias ammo Bullets 0
+
+
+...so the next time you refer to it, you can write:
+
+    ammo Bullets
+    {
+        &#x2F;&#x2F; ... code
+    }
+
+
+The alias works in every place you can use an ammo reference:  
+
+    weapon 4 : weapon Shotgun &quot;Shotgun Copy&quot;
+    {
+        ammotype Bullets
+    }
+
+
+Ammo alias identifiers are case-insensitive. There are a few internal 
+&quot;#includes&quot; that will add these names by default. 
+
+
+------------------------------------------------------------------------------
+Auto-Ammo
+------------------------------------------------------------------------------
+
+Ammo types can be freed and filled automatically like states. To free a single
+ammo slot:
+
+    ammo free &lt;INTEGER&gt;
+
+
+To free an explicit range (inclusive):
+
+    ammo free &lt;INTEGER&gt; to &lt;INTEGER&gt;
+
+
+Examples:
+
+    ammo free 6
+    ammo free 6 to 10
+
+
+In order to fill the next free Ammo, you need to define ammo types using the 
+&quot;auto&quot; keyword:  
+
+    auto ammo &lt;IDENTIFIER&gt; [ &lt;STRING&gt; ]
+    {
+        &#x2F;&#x2F; ... same ammo body like always ...
+    }
+
+
+Note that you&#39;ll need to use an unused identifier (or alias) to represent the 
+new Ammo when you need to refer to its index later. The identifiers are 
+case-insensitive.
+
+Examples:
+
+    auto ammo RifleRounds &quot;RifleRounds&quot;
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+Any place that would ordinarily use an Ammo index can use an auto-ammo 
+identifier in place of the index.
+
+Ammo types that are edited directly or auto-filled this way are not &quot;free&quot; 
+anymore, similar to how &quot;free&quot; states work (more on that later).
+
+You can modify auto-filled ammo types later (remember, definitions cascade!) by
+writing a normal Ammo definition body:
+
+    ammo RifleRounds
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+      IMPORTANT: DECOHack will not warn you about Ammo slots with a
+      special purpose being filled this way! Most of the time, auto-
+      things are useful for ID24 and higher patch types. Be
+      VERY careful if you use this feature in Vanilla or Boom!
+ 
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+
+You can also influence the next &quot;auto ammo&quot; index&#x2F;slot to be used via a 
+special clause:
+
+    set next auto ammo index &lt;INTEGER&gt;
+
+...where &lt;INTEGER&gt; is a positive integer for setting the next seek index for
+&quot;auto&quot; ammo types. This may not write to the exact slot for the next ammo 
+type, however - it will still seek to the next &quot;free&quot; slot from that provided 
+index! 
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -477,6 +601,12 @@ argument is nonzero).
     Offset(1, 32)
 
 
+ID24 patches add an additional field to states called &quot;tranmap&quot; that allows
+you to add a translucency mapping (usually &quot;TRANMAP&quot;) to TRANSLUCENT things:
+
+    Tranmap(&quot;TADDMAP&quot;)
+
+
 Action pointers understand what is expected in each parameter - you can just
 refer to thing aliases, labels, and sounds or what-have-you as-is and it
 will attempt to figure it out:
@@ -571,6 +701,7 @@ instead of using a full state definition line:
         [NotBright]
         [Fast]      &#x2F;&#x2F; MBF21 Only
         [NotFast]   &#x2F;&#x2F; MBF21 Only 
+        [&lt;TranmapClause&gt;]  &#x2F;&#x2F; ID24 Only
         [&lt;OffsetClause&gt;]
         pointer [ &lt;ActionPointer&gt; | null ]
         nextstate &lt;StateIndex&gt;
@@ -800,6 +931,18 @@ associated Thing for pickups.
         + &lt;MBF21WeaponFlagName&gt;     &#x2F;&#x2F; set flag
         - &lt;MBF21WeaponFlagName&gt;     &#x2F;&#x2F; unset flag
         
+        &#x2F;&#x2F; ID24 Properties (ID24 feature set only)
+        slot &lt;INTEGER&gt;
+        slotPriority &lt;INTEGER&gt;
+        switchPriority &lt;INTEGER&gt;
+        initialOwned &lt;BOOLEAN&gt;
+        initialRaised &lt;BOOLEAN&gt;
+        carouselIcon &lt;STRING&gt;
+        allowSwitchWithOwnedWeapon &lt;INTEGER or WeaponAlias&gt;
+        noSwitchWithOwnedWeapon &lt;INTEGER or WeaponAlias&gt;
+        allowSwitchWithOwnedItem &lt;INTEGER&gt;
+        noSwitchWithOwnedItem &lt;INTEGER&gt;
+        
         &#x2F;&#x2F; specific state assignment.
         state &lt;WeaponStateName&gt; &lt;INTEGER&gt;
         
@@ -982,6 +1125,88 @@ Weapon alias identifiers are case-insensitive. There are a few internal
 &quot;#includes&quot; that will add these common ZDoom weapon names by default. 
 
 
+------------------------------------------------------------------------------
+Auto-Weapons
+------------------------------------------------------------------------------
+
+Weapons can be freed and filled automatically like states. To free a single
+weapon slot:
+
+    weapon free &lt;INTEGER&gt;
+
+
+To free an explicit range (inclusive):
+
+    weapon free &lt;INTEGER&gt; to &lt;INTEGER&gt;
+
+
+Examples:
+
+    weapon free 8
+    weapon free 9 to 20
+
+
+In order to fill the next free Weapon, you need to define Weapons using the 
+&quot;auto&quot; keyword:  
+
+    auto weapon &lt;IDENTIFIER&gt; [ : weapon ( &lt;INTEGER&gt; | &lt;IDENTIFIER&gt; ) ] [ &lt;STRING&gt; ]
+    {
+        &#x2F;&#x2F; ... same weapon body like always ...
+    }
+
+
+Note that you&#39;ll need to use an unused identifier (or alias) to represent the 
+new Weapon when you need to refer to its index later. The identifiers are 
+case-insensitive.
+
+Examples:
+
+    auto weapon NewShotgun &quot;New Shotgun&quot;
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+    auto weapon BetterShotgun : weapon NewShotgun &quot;Better Shotgun&quot;
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+Any place that would ordinarily use a Weapon index can use an auto-weapon 
+identifier in place of the index.
+
+Weapons that are edited directly or auto-filled this way are not &quot;free&quot; 
+anymore, similar to how &quot;free&quot; states work.
+
+You can modify auto-filled Weapons later (remember, definitions cascade!) by
+writing a normal Weapon definition body:
+
+    weapon BetterShotgun
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+      IMPORTANT: DECOHack will not warn you about Weapon slots with a
+      special purpose being filled this way! Most of the time, auto-
+      things are useful for ID24 and higher patch types. Be
+      VERY careful if you use this feature in Vanilla or Boom!
+ 
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+
+You can also influence the next &quot;auto weapon&quot; index&#x2F;slot to be used via a 
+special clause:
+
+    set next auto weapon index &lt;INTEGER&gt;
+
+...where &lt;INTEGER&gt; is a positive integer for setting the next seek index for
+&quot;auto&quot; weapons. This may not write to the exact slot for the next weapon, 
+however - it will still seek to the next &quot;free&quot; slot from that provided index! 
+
+
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Thing
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1012,6 +1237,8 @@ the thing state indices. Other labels are used for arbitrary jump points.
 
         flags mbf21 &lt;INTEGER-EXPRESSION&gt; &#x2F;&#x2F; MBF21 Only
 
+        flags id24 &lt;INTEGER-EXPRESSION&gt; &#x2F;&#x2F; ID24 Only
+
         clear flags &#x2F;&#x2F; If present, clear all flags (both sets, if available)
 
         + &lt;INTEGER&gt;                  &#x2F;&#x2F; set flag(s)
@@ -1024,6 +1251,12 @@ the thing state indices. Other labels are used for arbitrary jump points.
         - mbf21 &lt;INTEGER&gt;            &#x2F;&#x2F; unset flag(s)
         + &lt;MBF21ThingFlagName&gt;       &#x2F;&#x2F; set MBF21 flag
         - &lt;MBF21ThingFlagName&gt;       &#x2F;&#x2F; unset MBF21 flag
+
+        &#x2F;&#x2F; ID24 Flags (ID24 feature set only)
+        + id24 &lt;INTEGER&gt;            &#x2F;&#x2F; set flag(s)
+        - id24 &lt;INTEGER&gt;            &#x2F;&#x2F; unset flag(s)
+        + &lt;ID24ThingFlagName&gt;       &#x2F;&#x2F; set MBF21 flag
+        - &lt;ID24ThingFlagName&gt;       &#x2F;&#x2F; unset MBF21 flag
 
         clear sounds &#x2F;&#x2F; if present, clear all sounds.
             
@@ -1043,6 +1276,19 @@ the thing state indices. Other labels are used for arbitrary jump points.
         projectilegroup &lt;INTEGER&gt;
         splashgroup &lt;INTEGER&gt;
         ripsound &lt;STRING&gt;
+
+        &#x2F;&#x2F; ID24 Properties (ID24 feature set and later)
+        minRespawnTics &lt;INTEGER&gt;
+        respawnDice &lt;INTEGER&gt;
+        pickupAmmoType &lt;INTEGER&gt;
+        pickupAmmoCategory &lt;INTEGER&gt;
+        pickupWeaponType &lt;INTEGER or WeaponAlias&gt;
+        pickupItemType &lt;INTEGER&gt;
+        pickupBonusCount &lt;INTEGER&gt;
+        pickupMessage &lt;STRING&gt;
+        translation &lt;STRING&gt;
+        pickupSound &lt;STRING&gt;
+
 
         &#x2F;&#x2F; specific state assignment.
         state &lt;ThingStateName&gt; &lt;INTEGER&gt;
@@ -1391,76 +1637,83 @@ List of valid mnemonics and their values:
 
 Things (Doom+):
 
-    SPECIAL &#x3D;        0x00000001
-    SOLID &#x3D;          0x00000002
-    SHOOTABLE &#x3D;      0x00000004
-    NOSECTOR &#x3D;       0x00000008
-    NOBLOCKMAP &#x3D;     0x00000010
-    AMBUSH &#x3D;         0x00000020
-    JUSTHIT &#x3D;        0x00000040
-    JUSTATTACKED &#x3D;   0x00000080
-    SPAWNCEILING &#x3D;   0x00000100
-    NOGRAVITY &#x3D;      0x00000200
-    DROPOFF &#x3D;        0x00000400
-    PICKUP &#x3D;         0x00000800
-    NOCLIP &#x3D;         0x00001000
-    SLIDE &#x3D;          0x00002000
-    FLOAT &#x3D;          0x00004000
-    TELEPORT &#x3D;       0x00008000
-    MISSILE &#x3D;        0x00010000
-    DROPPED &#x3D;        0x00020000
-    SHADOW &#x3D;         0x00040000
-    NOBLOOD &#x3D;        0x00080000
-    CORPSE &#x3D;         0x00100000
-    INFLOAT &#x3D;        0x00200000
-    COUNTKILL &#x3D;      0x00400000
-    COUNTITEM &#x3D;      0x00800000
-    SKULLFLY &#x3D;       0x01000000
-    NOTDMATCH &#x3D;      0x02000000
-    NOTDEATHMATCH &#x3D;  0x02000000
-    TRANSLATION &#x3D;    0x04000000
-    TRANSLATION1 &#x3D;   0x04000000
-    UNUSED1 &#x3D;        0x08000000
-    TRANSLATION2 &#x3D;   0x08000000
-    TOUCHY &#x3D;         0x10000000
-    UNUSED2 &#x3D;        0x10000000
-    BOUNCES &#x3D;        0x20000000
-    UNUSED3 &#x3D;        0x20000000
-    FRIEND &#x3D;         0x40000000
-    FRIENDLY &#x3D;       0x40000000
-    UNUSED4 &#x3D;        0x40000000
-    TRANSLUCENT &#x3D;    0x80000000
+    SPECIAL &#x3D;            0x00000001
+    SOLID &#x3D;              0x00000002
+    SHOOTABLE &#x3D;          0x00000004
+    NOSECTOR &#x3D;           0x00000008
+    NOBLOCKMAP &#x3D;         0x00000010
+    AMBUSH &#x3D;             0x00000020
+    JUSTHIT &#x3D;            0x00000040
+    JUSTATTACKED &#x3D;       0x00000080
+    SPAWNCEILING &#x3D;       0x00000100
+    NOGRAVITY &#x3D;          0x00000200
+    DROPOFF &#x3D;            0x00000400
+    PICKUP &#x3D;             0x00000800
+    NOCLIP &#x3D;             0x00001000
+    SLIDE &#x3D;              0x00002000
+    FLOAT &#x3D;              0x00004000
+    TELEPORT &#x3D;           0x00008000
+    MISSILE &#x3D;            0x00010000
+    DROPPED &#x3D;            0x00020000
+    SHADOW &#x3D;             0x00040000
+    NOBLOOD &#x3D;            0x00080000
+    CORPSE &#x3D;             0x00100000
+    INFLOAT &#x3D;            0x00200000
+    COUNTKILL &#x3D;          0x00400000
+    COUNTITEM &#x3D;          0x00800000
+    SKULLFLY &#x3D;           0x01000000
+    NOTDMATCH &#x3D;          0x02000000
+    NOTDEATHMATCH &#x3D;      0x02000000
+    TRANSLATION &#x3D;        0x04000000
+    TRANSLATION1 &#x3D;       0x04000000
+    UNUSED1 &#x3D;            0x08000000
+    TRANSLATION2 &#x3D;       0x08000000
+    TOUCHY &#x3D;             0x10000000
+    UNUSED2 &#x3D;            0x10000000
+    BOUNCES &#x3D;            0x20000000
+    UNUSED3 &#x3D;            0x20000000
+    FRIEND &#x3D;             0x40000000
+    FRIENDLY &#x3D;           0x40000000
+    UNUSED4 &#x3D;            0x40000000
+    TRANSLUCENT &#x3D;        0x80000000
 
 Things (MBF21+):
 
-    LOGRAV &#x3D;         0x00000001
-    SHORTMRANGE &#x3D;    0x00000002
-    DMGIGNORED &#x3D;     0x00000004
-    NORADIUSDMG &#x3D;    0x00000008
-    FORCERADIUSDMG &#x3D; 0x00000010
-    HIGHERMPROB &#x3D;    0x00000020
-    RANGEHALF &#x3D;      0x00000040
-    NOTHRESHOLD &#x3D;    0x00000080
-    LONGMELEE &#x3D;      0x00000100
-    BOSS &#x3D;           0x00000200
-    MAP07BOSS1 &#x3D;     0x00000400
-    MAP07BOSS2 &#x3D;     0x00000800
-    E1M8BOSS &#x3D;       0x00001000
-    E2M8BOSS &#x3D;       0x00002000
-    E3M8BOSS &#x3D;       0x00004000
-    E4M6BOSS &#x3D;       0x00008000
-    E4M8BOSS &#x3D;       0x00010000
-    RIP &#x3D;            0x00020000
-    FULLVOLSOUNDS &#x3D;  0x00040000
+    LOGRAV &#x3D;             0x00000001
+    SHORTMRANGE &#x3D;        0x00000002
+    DMGIGNORED &#x3D;         0x00000004
+    NORADIUSDMG &#x3D;        0x00000008
+    FORCERADIUSDMG &#x3D;     0x00000010
+    HIGHERMPROB &#x3D;        0x00000020
+    RANGEHALF &#x3D;          0x00000040
+    NOTHRESHOLD &#x3D;        0x00000080
+    LONGMELEE &#x3D;          0x00000100
+    BOSS &#x3D;               0x00000200
+    MAP07BOSS1 &#x3D;         0x00000400
+    MAP07BOSS2 &#x3D;         0x00000800
+    E1M8BOSS &#x3D;           0x00001000
+    E2M8BOSS &#x3D;           0x00002000
+    E3M8BOSS &#x3D;           0x00004000
+    E4M6BOSS &#x3D;           0x00008000
+    E4M8BOSS &#x3D;           0x00010000
+    RIP &#x3D;                0x00020000
+    FULLVOLSOUNDS &#x3D;      0x00040000
+
+Things (ID24+):
+
+    NORESPAWN &#x3D;          0x00000001
+    SPECIALSTAYSSINGLE &#x3D; 0x00000002
+    SPECIALSTAYSCOOP &#x3D;   0x00000004
+    SPECIALSTAYSDM &#x3D;     0x00000008
 
 Weapons (MBF21+):
 
-    NOTHRUST &#x3D;       0x00000001
-    SILENT &#x3D;         0x00000002
-    NOAUTOFIRE &#x3D;     0x00000004
-    FLEEMELEE &#x3D;      0x00000008
-    AUTOSWITCHFROM &#x3D; 0x00000010
-    NOAUTOSWITCHTO &#x3D; 0x00000020
+    NOTHRUST &#x3D;           0x00000001
+    SILENT &#x3D;             0x00000002
+    NOAUTOFIRE &#x3D;         0x00000004
+    FLEEMELEE &#x3D;          0x00000008
+    AUTOSWITCHFROM &#x3D;     0x00000010
+    NOAUTOSWITCHTO &#x3D;     0x00000020
 
 
 Monsters tend to have 0x00400006 set (SOLID, SHOOTABLE, COUNTKILL).
@@ -1728,6 +1981,7 @@ There are a few #include paths that are aliased in DECOHack for convenience:
     &lt;extended&gt;  &quot;classpath:decohack&#x2F;extended.dh&quot;
     &lt;mbf21&gt;     &quot;classpath:decohack&#x2F;mbf21.dh&quot;
     &lt;dsdhacked&gt; &quot;classpath:decohack&#x2F;dsdhacked.dh&quot;
+    &lt;id24&gt;      &quot;classpath:decohack&#x2F;id24.dh&quot;
     &lt;friendly&gt;  &quot;classpath:decohack&#x2F;constants&#x2F;friendly_things.dh&quot;
 
 For example:
@@ -1897,12 +2151,24 @@ block.
     auto-thing fill, and allows new sound and sprite definitions 
     automatically. Also adds ZDoom thing and weapon aliases.
 
+#include &lt;id24&gt;
+#include &quot;classpath:decohack&#x2F;id24.dh&quot;
+
+    Adds ammo, state, weapon slot, thing slot, and string mnemonics for 
+    ID24-compliant ports (which includes DSDHACKED), plus the 
+    &quot;using id24&quot; line, AND freeing up the states from 1100 to the
+    state max, freeing the things from 151 to the thing max for 
+    auto-thing fill, freeing all weapons at index 9 and higher,
+    freeing all ammo types from index 6 and higher, and allows new sound and 
+    sprite definitions automatically. Also adds ZDoom thing and weapon 
+    aliases.
+
 ..............................................................................
 
 #include &lt;friendly&gt;
 #include &quot;classpath:decohack&#x2F;constants&#x2F;friendly_things.dh&quot;
 
-    &quot;Friendly&quot; names for Doom things, all the way up through extended.
+    &quot;Friendly&quot; names for Doom things, all the way up through ID24.
 
 ..............................................................................
 
@@ -2007,6 +2273,17 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.39.1
+
+* &#x60;Fixed&#x60; The &#x60;--dump-constants&#x60; switch pointed to the wrong resource (Issue #131).
+
+
+### Changed for 0.39.0
+
+* &#x60;Added&#x60; Support for ID24 patches.
+* &#x60;Changed&#x60; DECOHack writes sprites and sound index sections in index order instead of name order. (Issue #130).
+
+
 ### Changed for 0.38.1
 
 * &#x60;Fixed&#x60; DECOHack wrote to the wrong WAD file if output was an existing WAD file (Issue #126).
