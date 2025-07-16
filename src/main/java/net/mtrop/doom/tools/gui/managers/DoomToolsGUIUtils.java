@@ -641,6 +641,25 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * Brings up the file chooser to select multiple files, but on successful selection, returns the file
+	 * and sets the last file path used in settings. Initial file is also the last file used.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param lastPathSupplier the supplier to call for the last path used.
+	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public File[] chooseFilesOrDirectories(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, FileFilter ... choosableFilters)
+	{
+		File[] selected;
+		if ((selected = FileChooserFactory.chooseFilesOrDirectories(parent, title, lastPathSupplier.get(), approveText, choosableFilters)) != null)
+			lastPathSaver.accept(selected[selected.length - 1]);
+		return selected;
+	}
+
+	/**
 	 * Creates a process modal, prepped to start and open.
 	 * @param parent the parent owner.
 	 * @param title the title of the modal.

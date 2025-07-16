@@ -43,6 +43,7 @@ import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -51,7 +52,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
@@ -156,14 +156,16 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		// Set default.
 		handler.onChange(projectWad);
 		
+		final DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
+		
 		Container projectDirectoryPanel = titlePanel(language.getText("doommake.newproject.directory"),
 			containerOf(node(fileField(targetDirectory,
-				(current) -> chooseDirectory(
+				(current) -> utils.chooseDirectory(
 					getApplicationContainer(), 
 					language.getText("doommake.newproject.directory.browse.title"), 
-					current, 
 					language.getText("doommake.newproject.directory.browse.accept"), 
-					utils.createDirectoryFilter()
+					() -> current != null ? current : settings.getLastTouchedFile(),
+					settings::setLastTouchedFile
 				), 
 				(selected) -> { 
 					targetDirectory = selected;
@@ -376,6 +378,8 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		Function<String, String> validator = replacer.getValidator(); 
 		GUIHint guiHint = replacer.getGUIHint();
 		
+		final DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
+		
 		Component field;
 		switch (guiHint)
 		{
@@ -385,10 +389,12 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 				break;
 			case FILE:
 				field = fileField(
-					(current) -> chooseFile(
+					(current) -> utils.chooseFile(
+						getApplicationContainer(),
 						language.getText("doommake.newproject.directory.browse.title"), 
-						current, 
-						language.getText("doommake.newproject.directory.browse.accept")
+						language.getText("doommake.newproject.directory.browse.accept"),
+						() -> current != null ? current : settings.getLastTouchedFile(),
+						settings::setLastTouchedFile
 					), 
 					(selected) -> { 
 						stringValue.set(selected == null ? "" : selected.getAbsolutePath());

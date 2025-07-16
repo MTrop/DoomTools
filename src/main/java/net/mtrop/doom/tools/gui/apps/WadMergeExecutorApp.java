@@ -30,7 +30,6 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.chooseFile;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -72,25 +71,26 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		this.editorProvider = DoomToolsEditorProvider.get();
 		
 		File scriptFile;
-		MergeSettings settings;
+		MergeSettings mergeSettings;
 		if (scriptPath != null)
 		{
 			scriptFile = FileUtils.canonizeFile(new File(scriptPath));
-			settings = new MergeSettings(scriptFile.getParentFile());
+			mergeSettings = new MergeSettings(scriptFile.getParentFile());
 		}
 		else
 		{
 			scriptFile = null;
-			settings = new MergeSettings();
+			mergeSettings = new MergeSettings();
 		}
 		
 		this.sourceFileField = fileField(
 			scriptFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(),
 				language.getText("wadmerge.run.source.browse.title"), 
-				current, 
 				language.getText("wadmerge.run.source.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
 				utils.createWadMergeFileFilter() 
 			),
 			(selected) -> {
@@ -104,7 +104,7 @@ public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 		this.charsetField = comboField(comboBox(editorProvider.getAvailableCommonCharsets()));
 		this.charsetField.setValue(Charset.defaultCharset());
 		
-		this.executePanel = new WadMergeExecuteWithArgsPanel(settings);
+		this.executePanel = new WadMergeExecuteWithArgsPanel(mergeSettings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
 	

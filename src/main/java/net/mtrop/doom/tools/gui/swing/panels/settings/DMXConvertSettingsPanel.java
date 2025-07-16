@@ -15,7 +15,6 @@ import net.mtrop.doom.tools.gui.managers.settings.DMXConvertSettingsManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 /**
@@ -46,11 +45,12 @@ public class DMXConvertSettingsPanel extends JPanel
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("dmxconv.settings.label.width")),
 				utils.formField("dmxconv.settings.ffmpeg.label", fileField(
 					settings.getFFmpegPath(), 
-					(currentFile) -> chooseFile(
+					(currentFile) -> utils.chooseFile(
 						this, 
 						language.getText("dmxconv.settings.ffmpeg.title"), 
-						currentFile, 
 						language.getText("dmxconv.settings.browse.open"),
+						() -> currentFile != null ? currentFile : settings.getLastTouchedFile(),
+						settings::setLastTouchedFile,
 						utils.createExecutableFilter()
 					), 
 					settings::setFFmpegPath

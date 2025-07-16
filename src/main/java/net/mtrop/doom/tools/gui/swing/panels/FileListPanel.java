@@ -33,10 +33,11 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.filechooser.FileFilter;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 import net.mtrop.doom.tools.struct.Loader.LoaderFuture;
-import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -399,19 +400,24 @@ public class FileListPanel extends JPanel
 
 	private void onAddFiles()
 	{
-		File initPath = initialFileSupplier != null ? initialFileSupplier.get() : null;
+		final DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		final DoomToolsSettingsManager settings = DoomToolsSettingsManager.get();
 		
-		File[] files = fileFilter != null ? FileChooserFactory.chooseFilesOrDirectories(
+		final File initPath = initialFileSupplier != null ? initialFileSupplier.get() : null;
+		
+		File[] files = fileFilter != null ? utils.chooseFilesOrDirectories(
 			this,
 			language.getText("filelist.add.modal.title"),
-			initPath,
 			language.getText("filelist.add.modal.choice"),
+			() -> initPath != null ? initPath : settings.getLastFileSave(),
+			settings::setLastFileSave,
 			fileFilter
-		) : FileChooserFactory.chooseFilesOrDirectories(
+		) : utils.chooseFilesOrDirectories(
 			this, 
 			language.getText("filelist.add.modal.title"),
-			initPath,
-			language.getText("filelist.add.modal.choice")
+			language.getText("filelist.add.modal.choice"),
+			() -> initPath != null ? initPath : settings.getLastFileSave(),
+			settings::setLastFileSave
 		);
 		
 		if (files != null)

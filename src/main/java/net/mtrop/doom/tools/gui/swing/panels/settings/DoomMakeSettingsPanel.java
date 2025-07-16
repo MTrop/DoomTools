@@ -16,7 +16,6 @@ import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 /**
@@ -47,33 +46,36 @@ public class DoomMakeSettingsPanel extends JPanel
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.settings.label.width")),
 				utils.formField("doommake.settings.vscode.label", fileField(
 					settings.getPathToIDE(), 
-					(currentFile) -> chooseFile(
+					(currentFile) -> utils.chooseFile(
 						this, 
 						language.getText("doommake.settings.vscode.title"), 
-						currentFile, 
 						language.getText("doommake.settings.browse.open"),
+						() -> currentFile != null ? currentFile : settings.getLastTouchedFile(), 
+						settings::setLastTouchedFile,
 						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToIDE(value)
 				)),
 				utils.formField("doommake.settings.slade.label", fileField(
 					settings.getPathToSlade(), 
-					(currentFile) -> chooseFile(
+					(currentFile) -> utils.chooseFile(
 						this, 
 						language.getText("doommake.settings.slade.title"), 
-						currentFile, 
 						language.getText("doommake.settings.browse.open"),
+						() -> currentFile != null ? currentFile : settings.getLastTouchedFile(), 
+						settings::setLastTouchedFile,
 						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToSlade(value)
 				)),
 				utils.formField("doommake.settings.maps.label", fileField(
 					settings.getPathToMapEditor(), 
-					(currentFile) -> chooseFile(
+					(currentFile) -> utils.chooseFile(
 						this, 
 						language.getText("doommake.settings.maps.title"),
-						currentFile, 
 						language.getText("doommake.settings.browse.open"),
+						() -> currentFile != null ? currentFile : settings.getLastTouchedFile(), 
+						settings::setLastTouchedFile,
 						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToMapEditor(value)

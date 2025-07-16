@@ -13,10 +13,10 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.DecoHackSettingsManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 
@@ -35,32 +35,36 @@ public class DecoHackExportPanel extends JPanel
 	private JFormField<File> sourceOutputField;
 	private JFormField<Boolean> budgetField;
 	
-	public DecoHackExportPanel(PatchExportSettings settings)
+	public DecoHackExportPanel(PatchExportSettings exportSettings)
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
-		final File patchOutputFile = settings.getOutputFile();
-		final File sourceOutputFile = settings.getSourceOutputFile();
-		final boolean budget = settings.isOutputBudget();
+		final File patchOutputFile = exportSettings.getOutputFile();
+		final File sourceOutputFile = exportSettings.getSourceOutputFile();
+		final boolean budget = exportSettings.isOutputBudget();
+		
+		final DecoHackSettingsManager settings = DecoHackSettingsManager.get();
 		
 		this.patchOutputField = fileField(
 			patchOutputFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("decohack.export.patch.browse.title"), 
-				current, 
-				language.getText("decohack.export.patch.browse.accept") 
+				language.getText("decohack.export.patch.browse.accept"),
+				() -> current != null ? current : settings.getLastExportFile(),
+				settings::setLastExportFile
 			)
 		);
 		
 		this.sourceOutputField = fileField(
 			sourceOutputFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("decohack.export.outsource.browse.title"), 
-				current, 
-				language.getText("decohack.export.outsource.browse.accept") 
+				language.getText("decohack.export.outsource.browse.accept"),
+				() -> current != null ? current : settings.getLastExportSourceFile(),
+				settings::setLastExportSourceFile
 			)
 		);
 		

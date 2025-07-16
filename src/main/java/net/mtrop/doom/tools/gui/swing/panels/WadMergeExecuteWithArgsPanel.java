@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.WadMergeSettingsManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -24,7 +25,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
@@ -61,14 +61,16 @@ public class WadMergeExecuteWithArgsPanel extends JPanel
 		final File workingDirectory = mergeSettings.getWorkingDirectory();
 		final String[] initArgs = mergeSettings.getArgs();
 		
+		final WadMergeSettingsManager settings = WadMergeSettingsManager.get();
+		
 		this.workingDirFileField = fileField(
 			workingDirectory, 
-			(current) -> chooseDirectory(
+			(current) -> utils.chooseDirectory(
 				this,
 				language.getText("wadmerge.run.workdir.browse.title"), 
-				current, 
 				language.getText("wadmerge.run.workdir.browse.accept"), 
-				utils.createDirectoryFilter()
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile
 			)
 		);
 		

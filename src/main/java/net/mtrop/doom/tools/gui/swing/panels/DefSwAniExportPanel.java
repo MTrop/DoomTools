@@ -13,10 +13,10 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomToolsSettingsManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 
@@ -34,21 +34,24 @@ public class DefSwAniExportPanel extends JPanel
 	private JFormField<File> outputWADField;
 	private JFormField<Boolean> outputSourceField;
 	
-	public DefSwAniExportPanel(DefSwAniExportSettings settings)
+	public DefSwAniExportPanel(DefSwAniExportSettings exportSettings)
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
-		final File outputWAD = settings.getOutputWAD();
-		final boolean outputSource = settings.isOutputSource();
+		final File outputWAD = exportSettings.getOutputWAD();
+		final boolean outputSource = exportSettings.isOutputSource();
+
+		final DoomToolsSettingsManager settings = DoomToolsSettingsManager.get();
 		
 		this.outputWADField = fileField(
 			outputWAD, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("wswantbl.export.browse.title"), 
-				current, 
 				language.getText("wswantbl.export.browse.accept"),
+				() -> current != null ? current : settings.getLastFileSave(),
+				settings::setLastFileSave,
 				utils.createWADFileFilter()
 			)
 		);

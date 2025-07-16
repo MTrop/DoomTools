@@ -28,7 +28,6 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -67,7 +66,7 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		this.settings = WSwAnTablesCompilerSettingsManager.get();
 		
 		File scriptFile;
-		DefSwAniExportSettings settings = new DefSwAniExportSettings();
+		DefSwAniExportSettings exportSettings = new DefSwAniExportSettings();
 		if (sourcePath != null)
 			scriptFile = FileUtils.canonizeFile(new File(sourcePath));
 		else
@@ -75,16 +74,17 @@ public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 		
 		this.sourceFileField = fileField(
 			scriptFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(),
 				language.getText("wswantbl.export.source.browse.title"), 
-				current, 
 				language.getText("wswantbl.export.source.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
 				utils.createDEFSWANIFileFilter()
 			)
 		);
 
-		this.exportPanel = new DefSwAniExportPanel(settings);
+		this.exportPanel = new DefSwAniExportPanel(exportSettings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
 	

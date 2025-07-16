@@ -30,7 +30,6 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -72,25 +71,26 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		this.editorProvider = DoomToolsEditorProvider.get();
 		
 		File scriptFile;
-		PatchExportSettings settings;
+		PatchExportSettings pes;
 		if (sourcePath != null)
 		{
 			scriptFile = FileUtils.canonizeFile(new File(sourcePath));
-			settings = new PatchExportSettings(scriptFile.getParentFile());
+			pes = new PatchExportSettings(scriptFile.getParentFile());
 		}
 		else
 		{
 			scriptFile = null;
-			settings = new PatchExportSettings();
+			pes = new PatchExportSettings();
 		}
 		
 		this.sourceFileField = fileField(
 			scriptFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(),
 				language.getText("decohack.export.source.browse.title"), 
-				current, 
 				language.getText("decohack.export.source.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
 				utils.createDecoHackFileFilter() 
 			),
 			(selected) -> {
@@ -104,7 +104,7 @@ public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 		this.charsetField = comboField(comboBox(editorProvider.getAvailableCommonCharsets()));
 		this.charsetField.setValue(Charset.defaultCharset());
 		
-		this.exportPanel = new DecoHackExportPanel(settings);
+		this.exportPanel = new DecoHackExportPanel(pes);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
 	

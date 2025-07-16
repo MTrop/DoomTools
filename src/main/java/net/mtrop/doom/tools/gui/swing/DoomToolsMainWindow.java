@@ -79,7 +79,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 
@@ -567,13 +566,12 @@ public class DoomToolsMainWindow extends JFrame
 				return;
 		}
 		
-		File lastUsed = currentWorkspace != null ? currentWorkspace : settings.getLastProjectDirectory();
-		
-		File workspaceFile = chooseFile(
+		File workspaceFile = utils.chooseFile(
 			this,
 			language.getText("doomtools.workspace.open.browse.title"),
-			lastUsed,
 			language.getText("doomtools.workspace.open.browse.accept"),
+			() -> currentWorkspace != null ? currentWorkspace : settings.getLastProjectDirectory(),
+			settings::setLastProjectDirectory,
 			utils.createWorkspaceFilter()
 		);
 		

@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -24,7 +25,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
@@ -62,13 +62,16 @@ public class DoomMakeExecuteWithArgsPanel extends JPanel
 		final String entryPoint = executionSettings.getEntryPoint();
 		final String[] initArgs = executionSettings.getArgs();
 		
+		final DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
+		
 		this.standardInPathField = fileField(
 			standardInPath, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("doommake.run.stdin.browse.title"), 
-				current, 
-				language.getText("doommake.run.stdin.browse.accept") 
+				language.getText("doommake.run.stdin.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile
 			)
 		);
 		

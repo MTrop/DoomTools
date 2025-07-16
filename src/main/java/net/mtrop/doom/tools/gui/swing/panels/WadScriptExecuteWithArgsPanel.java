@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.WadScriptSettingsManager;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 
@@ -24,7 +25,6 @@ import static javax.swing.BorderFactory.*;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
 
@@ -64,24 +64,27 @@ public class WadScriptExecuteWithArgsPanel extends JPanel
 		final String entryPoint = executionSettings.getEntryPoint();
 		final String[] initArgs = executionSettings.getArgs();
 		
+		final WadScriptSettingsManager settings = WadScriptSettingsManager.get();
+		
 		this.workingDirFileField = fileField(
 			workingDirectory, 
-			(current) -> chooseDirectory(
+			(current) -> utils.chooseDirectory(
 				this,
 				language.getText("wadscript.run.workdir.browse.title"), 
-				current, 
 				language.getText("wadscript.run.workdir.browse.accept"), 
-				utils.createDirectoryFilter()
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile
 			)
 		);
 		
 		this.standardInPathField = fileField(
 			standardInPath, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("wadscript.run.stdin.browse.title"), 
-				current, 
-				language.getText("wadscript.run.stdin.browse.accept") 
+				language.getText("wadscript.run.stdin.browse.accept"), 
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile
 			)
 		);
 		

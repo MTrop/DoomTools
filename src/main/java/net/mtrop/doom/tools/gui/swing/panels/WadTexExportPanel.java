@@ -13,10 +13,10 @@ import javax.swing.JPanel;
 import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.settings.WadTexSettingsManager;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 
 
@@ -36,23 +36,26 @@ public class WadTexExportPanel extends JPanel
 	private JFormField<Boolean> appendModeField;
 	private JFormField<Boolean> forceStrifeField;
 
-	public WadTexExportPanel(WadTexExportSettings settings)
+	public WadTexExportPanel(WadTexExportSettings exportSettings)
 	{
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		
-		final File outputWAD = settings.getOutputWAD();
-		final String nameOverride = settings.getNameOverride();
-		final boolean appendMode = settings.getAppendMode();
-		final boolean forceStrife = settings.getForceStrife();
+		final File outputWAD = exportSettings.getOutputWAD();
+		final String nameOverride = exportSettings.getNameOverride();
+		final boolean appendMode = exportSettings.getAppendMode();
+		final boolean forceStrife = exportSettings.getForceStrife();
+		
+		final WadTexSettingsManager settings = WadTexSettingsManager.get();
 		
 		this.outputWADField = fileField(
 			outputWAD, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				this,
 				language.getText("wadtex.export.wad.browse.title"), 
-				current, 
 				language.getText("wadtex.export.wad.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
 				utils.createWADFileFilter()
 			)
 		);

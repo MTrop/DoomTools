@@ -30,7 +30,6 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.chooseFile;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -72,25 +71,26 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		this.editorProvider = DoomToolsEditorProvider.get();
 		
 		File scriptFile;
-		ScriptExecutionSettings settings;
+		ScriptExecutionSettings executionSettings;
 		if (scriptPath != null)
 		{
 			scriptFile = FileUtils.canonizeFile(new File(scriptPath));
-			settings = new ScriptExecutionSettings(scriptFile.getParentFile());
+			executionSettings = new ScriptExecutionSettings(scriptFile.getParentFile());
 		}
 		else
 		{
 			scriptFile = null;
-			settings = new ScriptExecutionSettings();
+			executionSettings = new ScriptExecutionSettings();
 		}
 		
 		this.sourceFileField = fileField(
 			scriptFile, 
-			(current) -> chooseFile(
+			(current) -> utils.chooseFile(
 				getApplicationContainer(),
 				language.getText("wadscript.run.source.browse.title"), 
-				current, 
 				language.getText("wadscript.run.source.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
 				utils.createWadScriptFileFilter()
 			),
 			(selected) -> {
@@ -104,7 +104,7 @@ public class WadScriptExecutorApp extends DoomToolsApplicationInstance
 		this.charsetField = comboField(comboBox(editorProvider.getAvailableCommonCharsets()));
 		this.charsetField.setValue(Charset.defaultCharset());
 		
-		this.executePanel = new WadScriptExecuteWithArgsPanel(settings);
+		this.executePanel = new WadScriptExecuteWithArgsPanel(executionSettings);
 		this.statusPanel = new DoomToolsStatusPanel();
 	}
 	

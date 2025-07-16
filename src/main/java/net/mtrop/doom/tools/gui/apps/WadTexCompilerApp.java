@@ -29,7 +29,6 @@ import net.mtrop.doom.tools.struct.util.ValueUtils;
 import net.mtrop.doom.util.NameUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
-import static net.mtrop.doom.tools.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
@@ -83,12 +82,12 @@ public class WadTexCompilerApp extends DoomToolsApplicationInstance
 		this.sourceFileField = fileField(
 			scriptFile, 
 			(current) -> {
-				current = current != null ? current : settings.getLastTouchedFile();
-				return chooseFile(
+				return utils.chooseFile(
 					getApplicationContainer(),
 					language.getText("wadtex.export.source.browse.title"), 
-					current, 
 					language.getText("wadtex.export.source.browse.accept"),
+					() -> current != null ? current : settings.getLastTouchedFile(),
+					settings::setLastTouchedFile,
 					utils.createTextFileFilter()
 				);
 			},
