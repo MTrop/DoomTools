@@ -218,7 +218,7 @@ case-insensitive.
 
 Examples:
 
-    auto ammo RifleRounds "RifleRounds"
+    auto ammo RifleRounds "Rifle Rounds"
     {
         // ... code ...
     }
@@ -985,7 +985,7 @@ writing a normal Weapon definition body:
 
       IMPORTANT: DECOHack will not warn you about Weapon slots with a
       special purpose being filled this way! Most of the time, auto-
-      things are useful for ID24 and higher patch types. Be
+      weapoons are useful for ID24 and higher patch types. Be
       VERY careful if you use this feature in Vanilla or Boom!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
