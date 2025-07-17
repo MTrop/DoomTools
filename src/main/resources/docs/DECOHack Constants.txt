@@ -540,6 +540,16 @@ AM_NOAMMO       5
 
 AM_FREE_START   6
 
+------------------------------------------------------------------------------
+---- classpath:decohack/constants/id24/weapons.dh
+------------------------------------------------------------------------------
+
+Everything in:
+    decohack/constants/doom19/weapons.dh
+
+WP_INCINERATOR   -1879048192
+WP_CALAMITYBLADE -1879048191
+
 
 ------------------------------------------------------------------------------
 ---- classpath:decohack/constants/doom19/weapons.dh
@@ -559,7 +569,7 @@ WP_FREE_START   9
 
 
 ------------------------------------------------------------------------------
----- classpath:decohack/constants/doom19/weapons_aliases.dh
+---- classpath:decohack/constants/id24/weapons_aliases.dh
 ------------------------------------------------------------------------------
 
 Everything in:
