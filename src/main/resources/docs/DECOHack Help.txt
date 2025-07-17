@@ -243,7 +243,7 @@ writing a normal Ammo definition body:
 
       IMPORTANT: DECOHack will not warn you about Ammo slots with a
       special purpose being filled this way! Most of the time, auto-
-      things are useful for ID24 and higher patch types. Be
+      ammo types are useful for ID24 and higher patch types. Be
       VERY careful if you use this feature in Vanilla or Boom!
  
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\

@@ -21,6 +21,7 @@ import javax.swing.JScrollPane;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
+import net.mtrop.doom.tools.gui.apps.DImageConvertOffsetterApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
@@ -78,6 +79,8 @@ public final class DoomToolsGUIMain
 		String DECOHACK_COMPILER = "decohack-compiler";
 		/** DImageConvert. */
 		String DIMGCONVERT = "dimgconv";
+		/** DImageConvert Offsetter. */
+		String DIMGCONVERT_OFFSETTER = "dimgconv-offsetter";
 		/** DMXConvert. */
 		String DMXCONVERT = "dmxconv";
 		/** DoomMake - New Project. */
@@ -310,6 +313,23 @@ public final class DoomToolsGUIMain
 		else if (ApplicationNames.DIMGCONVERT.equals(args[0]))
 		{
 			startApplication(new DImageConvertApp());
+		}
+		else if (ApplicationNames.DIMGCONVERT_OFFSETTER.equals(args[0]))
+		{
+			File projectDirectory;
+			String path = ArrayUtils.arrayElement(args, 1);
+			
+			// No path. Open file.
+			if (ObjectUtils.isEmpty(path) || !(projectDirectory = new File(path)).isDirectory())
+			{
+				DImageConvertOffsetterApp app;
+				if ((app = DImageConvertOffsetterApp.openAndCreate(null)) != null)
+					startApplication(app);
+			}
+			else
+			{
+				startApplication(new DImageConvertOffsetterApp(projectDirectory));
+			}
 		}
 		else if (ApplicationNames.DMXCONVERT.equals(args[0]))
 		{

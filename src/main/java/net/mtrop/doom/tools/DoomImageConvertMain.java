@@ -37,6 +37,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.struct.TokenScanner;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
+import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.util.NameUtils;
 
 /**
@@ -87,6 +88,8 @@ public final class DoomImageConvertMain
 	public static final String SWITCH_PALETTE = "--palette";
 	public static final String SWITCH_PALETTE2 = "-p";
 
+	public static final String SWITCH_OFFSETTER = "--offsetter";
+
 	public enum Mode
 	{
 		PALETTE,
@@ -114,6 +117,7 @@ public final class DoomImageConvertMain
 		private boolean verbose;
 		private boolean changelog;
 		private boolean gui;
+		private boolean guiOffsetter;
 		
 		// Palette source for conversion.
 		private File paletteSourcePath;
@@ -138,6 +142,7 @@ public final class DoomImageConvertMain
 			this.version = false;
 			this.verbose = false;
 			this.gui = false;
+			this.guiOffsetter = false;
 			this.changelog = false;
 
 			this.sourcePath = null;
@@ -245,6 +250,17 @@ public final class DoomImageConvertMain
 					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT);
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start DImgConv GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
+			if (options.guiOffsetter)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, OSUtils.getWorkingDirectoryPath());
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DImgConv Offsetter GUI!");
 					return ERROR_IOERROR;
 				}
 				return ERROR_NONE;
@@ -979,6 +995,8 @@ public final class DoomImageConvertMain
 						options.version = true;
 					else if (arg.equalsIgnoreCase(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equalsIgnoreCase(SWITCH_OFFSETTER))
+						options.guiOffsetter = true;
 					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
 						options.changelog = true;
 					else if (arg.equalsIgnoreCase(SWITCH_VERBOSE) || arg.equalsIgnoreCase(SWITCH_VERBOSE2))

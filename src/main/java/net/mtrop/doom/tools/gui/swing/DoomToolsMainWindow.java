@@ -37,6 +37,7 @@ import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
+import net.mtrop.doom.tools.gui.apps.DImageConvertOffsetterApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
@@ -300,7 +301,8 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (i) -> addApplication(new DMXConvertApp())),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DImageConvertApp()))
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DImageConvertApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv.offsetter", (i) -> openDImageConvertOffsetter())
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.decohack.item.editor", (i) -> addApplication(new DecoHackEditorApp())),
@@ -633,6 +635,13 @@ public class DoomToolsMainWindow extends JFrame
 		}
 	}
 	
+	private void openDImageConvertOffsetter()
+	{
+		DImageConvertOffsetterApp app;
+		if ((app = DImageConvertOffsetterApp.openAndCreate(this)) != null)
+			addApplication(app);
+	}
+
 	private void openDoomMakeProject()
 	{
 		DoomMakeOpenProjectApp app;
