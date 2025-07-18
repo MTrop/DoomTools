@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.swing.panels.DirectoryTreePanel.DirectoryTreeListener;
+import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -55,7 +56,16 @@ public class EditorDirectoryTreePanel extends JPanel
 		this.icons = DoomToolsIconManager.get();
 		
 		this.textLabel = label();
-		this.treePanel = new DirectoryTreePanel(FileUtils.NULL_FILE);
+		this.treePanel = new DirectoryTreePanel(FileUtils.NULL_FILE) 
+		{
+			private static final long serialVersionUID = -7791199076763197595L;
+
+			@Override
+			protected MenuNode[] getAdditionalDirectoryActions() 
+			{
+				return getDirectoryActions();
+			}
+		};
 
 		JButton resetButton = button(icons.getImage("folder.png"), (b) -> onResetTop());
 
@@ -134,6 +144,23 @@ public class EditorDirectoryTreePanel extends JPanel
 		treePanel.setSelectedFile(file);
 	}
 
+	/**
+	 * @return the first selected file, or null if no files selected.
+	 */
+	public File getSelectedFile() 
+	{
+		return treePanel.getSelectedFile();
+	}
+	
+	/**
+	 * Gets additional directory actions for the directory pop-up menu.
+	 * @return the additional actions to add to the menu.
+	 */
+	protected MenuNode[] getDirectoryActions()
+	{
+		return new MenuNode[]{};
+	}
+	
 	private void onResetTop()
 	{
 		if (rootDirectory != null)

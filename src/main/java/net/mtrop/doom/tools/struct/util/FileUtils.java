@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2025 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -46,11 +46,10 @@ public final class FileUtils
 
 	static
 	{
-		final Comparator<File> fileNameComparator = (a, b) -> (
-			System.getProperty("os.name").contains("Windows")
-				? String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
-			    : a.getPath().compareTo(b.getPath())
-		);
+		final Comparator<File> fileNameComparator = System.getProperty("os.name").contains("Windows")
+				? (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
+			    : (a, b) -> a.getPath().compareTo(b.getPath())
+		;
 		
 		FILELIST_COMPARATOR = (a, b) -> (
 			a.isDirectory() 
@@ -1015,6 +1014,25 @@ public final class FileUtils
 		return t < timeout;
 	}
 
+	/**
+	 * Attempts to match a file's magic number (initial bytes).
+	 * @param f the file to test.
+	 * @param magicNumber the magic number bytes to test for.
+	 * @return true if matched, false if not.
+	 * @throws IOException if a read error occurs.
+	 */
+	public static boolean matchMagicNumber(File f, byte[] magicNumber) throws IOException
+	{
+		try (RandomAccessFile raf = new RandomAccessFile(f, "r"))
+		{
+			byte[] buf = new byte[magicNumber.length];
+			int len = raf.read(buf);
+			if (len != magicNumber.length)
+				return false;
+			return Arrays.equals(magicNumber, buf);
+		}
+	}
+	
 	/**
 	 * A path to a temporary file that is deleted on close.
 	 */

@@ -887,6 +887,19 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		File primaryScript = new File(projectDirectory.getAbsolutePath() + File.separator + "doommake.script");
 		executeDoomMakeWithArgs(primaryScript, projectDirectory);
 	}
+	
+	private void onOpenOffsetterApp()
+	{
+		File selected = treePanel.getSelectedFile();
+		if (selected == null)
+			return;
+		try {
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, selected.getCanonicalPath());
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doommake.offsetter.ioerror"));
+			LOG.error(e, "I/O Error running graphic offsetter program.");
+		}
+	}
 
 	private boolean saveBeforeExecute()
 	{
@@ -1143,6 +1156,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 					onOpenFile(confirmedFile);
 				}
 			});
+		}
+		
+		@Override
+		protected MenuNode[] getDirectoryActions()
+		{
+			return new MenuNode[]{
+				utils.createItemFromLanguageKey("doommake.dirtree.popup.menu.item.offsetter", (item) -> onOpenOffsetterApp())
+			};
 		}
 	}
 
