@@ -4,8 +4,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
@@ -13,10 +11,13 @@ import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
+import java.util.Map;
 
 import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
+import net.mtrop.doom.tools.struct.swing.ImageUtils;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.GraphicUtils;
 
@@ -37,7 +38,7 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	/** Blank renedered image. */
 	private static final Image BLANK_IMAGE = ObjectUtils.apply(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), (image) -> 
 	{
-		image.setRGB(0, 0, 0xff0ff000);
+		image.setRGB(0, 0, 0x00000000);
 	});
 	/** Fill image for background. */
 	private static final Image FILL_IMAGE = ObjectUtils.apply(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), (image) -> 
@@ -59,30 +60,36 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	{
 		SPRITE,
 		HUD;
+		
+		public static final Map<String, GuideMode> MAP_VALUES = EnumUtils.createCaseInsensitiveNameMap(GuideMode.class);
 	}
 	
-	/** The image buffer to write to during the current frame. */
-	private VolatileImage writableBuffer;
-	/** Graphics context. */
-	private Graphics2D writableGraphics;
-
-	private int zoomFactor;
+	private float zoomFactor;
 	private Palette palette;
 	private Picture picture;
 	private PNGPicture pngPicture;
 	private Point currentOffset;
+	private Point originalOffset;
 	private GuideMode guideMode;
 	
+	private VolatileImage canvasImage;
+	private BufferedImage backgroundImage;
 	private Image renderedImage;
 	
 	public DImageConvertOffsetterCanvas()
 	{
-		this.zoomFactor = 1;
+		this.zoomFactor = 1.0f;
 		this.palette = BLACK_PALETTE;
 		this.picture = null;
 		this.pngPicture = null;
 		this.currentOffset = new Point();
+		this.originalOffset = new Point();
 		this.guideMode = GuideMode.SPRITE;
+		
+		this.backgroundImage = null;
+		this.renderedImage = null;
+		
+		clearPicture();
 		rebuildImage();
 	}
 	
@@ -90,7 +97,7 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	 * Sets this canvas's zoom factor.
 	 * @param zoomFactor the new zoom factor.
 	 */
-	public void setZoomFactor(int zoomFactor) 
+	public void setZoomFactor(float zoomFactor) 
 	{
 		this.zoomFactor = zoomFactor;
 		repaint();
@@ -99,7 +106,7 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	/**
 	 * @return this canvas's zoom factor.
 	 */
-	public int getZoomFactor() 
+	public float getZoomFactor() 
 	{
 		return zoomFactor;
 	}
@@ -127,8 +134,20 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	{
 		picture = p;
 		pngPicture = null;
+		originalOffset.x = picture.getOffsetX();
+		originalOffset.y = picture.getOffsetY();
+		currentOffset.x = picture.getOffsetX();
+		currentOffset.y = picture.getOffsetY();
 		rebuildImage();
 		repaint();
+	}
+	
+	/**
+	 * @return the current Picture, if any set.
+	 */
+	public Picture getPicture() 
+	{
+		return picture;
 	}
 	
 	/**
@@ -140,10 +159,37 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	{
 		pngPicture = p;
 		picture = null;
+		originalOffset.x = pngPicture.getOffsetX();
+		originalOffset.y = pngPicture.getOffsetY();
+		currentOffset.x = pngPicture.getOffsetX();
+		currentOffset.y = pngPicture.getOffsetY();
 		rebuildImage();
 		repaint();
 	}
 	
+	/**
+	 * @return the current PNGPicture, if any set.
+	 */
+	public PNGPicture getPNGPicture() 
+	{
+		return pngPicture;
+	}
+	
+	/**
+	 * Set no picture.
+	 */
+	public void clearPicture()
+	{
+		picture = null;
+		pngPicture = null;
+		originalOffset.x = 0;
+		originalOffset.y = 0;
+		currentOffset.x = 0;
+		currentOffset.y = 0;
+		rebuildImage();
+		repaint();
+	}
+
 	/**
 	 * Sets the current offsets for the image.
 	 * @param x the x offset.
@@ -176,20 +222,25 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		repaint();
 	}
 	
+	/**
+	 * Tests if the current offsets are different than the original ones.
+	 * @return true if so, false if not.
+	 */
+	public boolean offsetsDiffer()
+	{
+		return !originalOffset.equals(currentOffset);
+	}
+	
 	// Rebuilds the renderable image and starting offsets.
 	private void rebuildImage()
 	{
 		if (picture != null)
 		{
 			renderedImage = GraphicUtils.createImage(picture, palette);
-			currentOffset.x = picture.getOffsetX();
-			currentOffset.y = picture.getOffsetY();
 		}
 		else if (pngPicture != null)
 		{
 			renderedImage = pngPicture.getImage();
-			currentOffset.x = pngPicture.getOffsetX();
-			currentOffset.y = pngPicture.getOffsetY();
 		}
 		else
 		{
@@ -209,33 +260,27 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	@Override
 	public void paint(Graphics g) 
 	{
-		if (writableGraphics != null)
-		{
-			writableGraphics.dispose();
-			writableGraphics = null;
-		}
+		Graphics2D graphics = (Graphics2D)g;
+
+		canvasImage = ImageUtils.recreateVolatileImage(canvasImage, getWidth(), getHeight(), Transparency.OPAQUE);
 		
-		// 2D accelerated buffer
-		writableBuffer = recreateVolatileImage(writableBuffer, getWidth(), getHeight(), Transparency.TRANSLUCENT);
-		
-		Graphics2D g2d = writableBuffer.createGraphics();
+		Graphics2D canvasGraphics = canvasImage.createGraphics();
 		
 		// force nearest rendering mode.
-		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		canvasGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+		canvasGraphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+		canvasGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		
-		AffineTransform prevTransform = g2d.getTransform();
+		AffineTransform prevTransform = canvasGraphics.getTransform();
 		
-		drawBackground(g2d);
-		drawGuides(g2d);
-		drawImage(g2d);
+		drawBackground(canvasGraphics);
+		drawGuides(canvasGraphics);
+		drawImage(canvasGraphics);
 		
-		g2d.setTransform(prevTransform);
+		canvasGraphics.setTransform(prevTransform);
+		canvasGraphics.dispose();
 		
-		Graphics2D thisCanvasGraphics = (Graphics2D)g;
-		thisCanvasGraphics.drawImage(writableBuffer, 0, 0, getWidth(), getHeight(), null);
-		g2d.dispose();
+		graphics.drawImage(canvasImage, 0, 0, null);
 	}
 	
 	protected void drawBackground(Graphics2D g2d)
@@ -243,9 +288,16 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		int canvasWidth = getWidth();
 		int canvasHeight = getHeight();
 		
-		for (int y = 0; y < canvasHeight; y += FILL_IMAGE.getHeight(null))
-			for (int x = 0; x < canvasWidth; x += FILL_IMAGE.getWidth(null))
-				g2d.drawImage(FILL_IMAGE, x, y, null);
+		if (backgroundImage == null || backgroundImage.getWidth(null) != canvasWidth || backgroundImage.getHeight(null) != canvasHeight)
+		{
+			backgroundImage = new BufferedImage(canvasWidth, canvasHeight, BufferedImage.TYPE_INT_ARGB);
+			Graphics2D image2D = backgroundImage.createGraphics();
+			for (int y = 0; y < canvasHeight; y += FILL_IMAGE.getHeight(null))
+				for (int x = 0; x < canvasWidth; x += FILL_IMAGE.getWidth(null))
+					image2D.drawImage(FILL_IMAGE, x, y, null);
+		}
+		
+		g2d.drawImage(backgroundImage, 0, 0, null);
 	}
 
 	protected void drawGuides(Graphics2D g2d)
@@ -257,11 +309,11 @@ public class DImageConvertOffsetterCanvas extends Canvas
 			case HUD:
 			{
 				// start at midpoint, then draw HUD rectangle.
-				int originX = getWidth() / 2 - (160 * zoomFactor);
-				int originY = getHeight() / 2 - (100 * zoomFactor);
+				int originX = (int)(getWidth() / 2 - (160 * zoomFactor));
+				int originY = (int)(getHeight() / 2 - (100 * zoomFactor));
 				
 				g2d.setColor(Color.BLACK);
-				g2d.drawRect(originX, originY, 320 * zoomFactor, 200 * zoomFactor);
+				g2d.drawRect(originX, originY,(int)(320 * zoomFactor), (int)(200 * zoomFactor));
 			}
 			// fall through, draw midpoint guides.
 			
@@ -283,23 +335,31 @@ public class DImageConvertOffsetterCanvas extends Canvas
 
 	protected void drawImage(Graphics g2d)
 	{
+		Color prevColor = g2d.getColor();
+		
 		switch (guideMode)
 		{
 			case HUD:
 			{
 				// start top-left corner at HUD edge.
-				int originX = getWidth() / 2 - (160 * zoomFactor);
-				int originY = getHeight() / 2 - (100 * zoomFactor);
+				int originX = (int)(getWidth() / 2 - (160 * zoomFactor));
+				int originY = (int)(getHeight() / 2 - (100 * zoomFactor));
 				
 				originX -= currentOffset.x * zoomFactor;
 				originY -= currentOffset.y * zoomFactor;
 
 				if (zoomFactor > 0)
 				{
+					g2d.setColor(Color.BLACK);
+					g2d.drawRect( 
+						originX, originY, 
+						(int)(renderedImage.getWidth(null) * zoomFactor), 
+						(int)(renderedImage.getHeight(null) * zoomFactor) 
+					);
 					g2d.drawImage(renderedImage, 
 						originX, originY, 
-						renderedImage.getWidth(null) * zoomFactor, 
-						renderedImage.getHeight(null) * zoomFactor, 
+						(int)(renderedImage.getWidth(null) * zoomFactor), 
+						(int)(renderedImage.getHeight(null) * zoomFactor), 
 						null
 					);
 				}
@@ -318,62 +378,24 @@ public class DImageConvertOffsetterCanvas extends Canvas
 
 				if (zoomFactor > 0)
 				{
+					g2d.setColor(Color.BLACK);
+					g2d.drawRect( 
+						originX, originY, 
+						(int)(renderedImage.getWidth(null) * zoomFactor), 
+						(int)(renderedImage.getHeight(null) * zoomFactor) 
+					);
 					g2d.drawImage(renderedImage, 
 						originX, originY, 
-						renderedImage.getWidth(null) * zoomFactor, 
-						renderedImage.getHeight(null) * zoomFactor, 
+						(int)(renderedImage.getWidth(null) * zoomFactor), 
+						(int)(renderedImage.getHeight(null) * zoomFactor), 
 						null
 					);
 				}
 			}
 			break;
 		}
+		
+		g2d.setColor(prevColor);
 	}
 	
-	/**
-	 * Creates/Recreates a new volatile image.
-	 * A new VolatileImage, compatible with the current local graphics environment is returned
-	 * if the current image passed into the method is invalid or incompatible. The image is deallocated
-	 * if it is incompatible. If it is compatible or has different dimensions, nothing is reallocated, and
-	 * it is returned.
-	 * @param currentImage the previous VolatileImage to validate.
-	 * @param width the width of the new image.
-	 * @param height the height of the new image.
-	 * @param transparency the transparency mode (from {@link Transparency}).
-	 * @return a new or same volatile image. if null, can't be created for some reason.
-	 */
-	private static VolatileImage recreateVolatileImage(VolatileImage currentImage, int width, int height, int transparency)
-	{
-		GraphicsConfiguration gconfig = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
-		if (!revalidate(gconfig, currentImage, width, height))
-		{
-			if (currentImage != null)
-				currentImage.flush();
-			currentImage = null; // expedite Garbage Collection maybe why not
-			
-			if (width > 0 && height > 0)
-				currentImage = gconfig.createCompatibleVolatileImage(width, height, transparency);
-		}
-		
-		return currentImage;
-	}
-	
-	// Revalidates a VolatileImage.
-	private static boolean revalidate(GraphicsConfiguration gc, VolatileImage currentImage, int width, int height)
-	{
-		if (currentImage == null)
-			return false;
-		
-		int valid = currentImage.validate(gc);
-		
-		switch (valid)
-		{
-			default:
-			case VolatileImage.IMAGE_INCOMPATIBLE:
-				return false;
-			case VolatileImage.IMAGE_RESTORED:
-			case VolatileImage.IMAGE_OK:
-				return currentImage.getWidth() == width && currentImage.getHeight() == height;
-		}
-	}
 }

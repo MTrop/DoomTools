@@ -318,6 +318,7 @@ public final class DoomToolsGUIMain
 		{
 			File projectDirectory;
 			String path = ArrayUtils.arrayElement(args, 1);
+			String paletteWadPath = ArrayUtils.arrayElement(args, 2);
 			
 			// No path. Open file.
 			if (ObjectUtils.isEmpty(path) || !(projectDirectory = new File(path)).isDirectory())
@@ -328,7 +329,7 @@ public final class DoomToolsGUIMain
 			}
 			else
 			{
-				startApplication(new DImageConvertOffsetterApp(projectDirectory));
+				startApplication(new DImageConvertOffsetterApp(projectDirectory, paletteWadPath));
 			}
 		}
 		else if (ApplicationNames.DMXCONVERT.equals(args[0]))

@@ -214,22 +214,31 @@ public class DirectoryTreePanel extends JPanel
 	private JPopupMenu createSingleDirectoryPopupMenu()
 	{
 		return popupMenu(
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.file", (i) -> onAddNewFile()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.directory", (i) -> onAddNewDirectory()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.directory", (i) -> onRenameSelectedFile()),
-			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
-			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.terminal", (i) -> onOpenTerminalHere()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.root", (i) -> onMakeSelectedDirectoryRoot()),
-			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (i) -> onCopySelectedRelativeFilePath()),
-			separator(),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (i) -> onPasteClipboardFilesIntoSelectedDirectory()),
-			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
+			ArrayUtils.joinArrays(
+				new MenuNode[] {
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.file", (i) -> onAddNewFile()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.new.directory", (i) -> onAddNewDirectory()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.rename.directory", (i) -> onRenameSelectedFile()),
+					separator(),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.refresh", (i) -> onRefreshSelectedFiles()),
+					separator()
+				},
+				new MenuNode[] {
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.terminal", (i) -> onOpenTerminalHere()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.root", (i) -> onMakeSelectedDirectoryRoot())
+				},
+				getAdditionalDirectoryActions(),
+				new MenuNode[] {
+					separator(),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path.rel", (i) -> onCopySelectedRelativeFilePath()),
+					separator(),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (i) -> onPasteClipboardFilesIntoSelectedDirectory()),
+					utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
+				}
+			)
 		);
 	}
 	
@@ -244,6 +253,15 @@ public class DirectoryTreePanel extends JPanel
 			separator(),
 			utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles())
 		);
+	}
+	
+	/**
+	 * Gets additional directory actions for the directory pop-up menu.
+	 * @return the additional actions to add to the menu.
+	 */
+	protected MenuNode[] getAdditionalDirectoryActions()
+	{
+		return new MenuNode[]{};
 	}
 	
 	/**
