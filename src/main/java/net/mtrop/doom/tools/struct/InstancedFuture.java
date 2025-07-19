@@ -438,8 +438,8 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	/**
 	 * Performs a {@link #get()} and on success, calls the success function, or calls the exception function on an exception.
 	 * @param <R> the return type after the function.
-     * @param time the maximum time to wait.
-     * @param unit the time unit of the timeout argument.
+	 * @param time the maximum time to wait.
+	 * @param unit the time unit of the timeout argument.
 	 * @param onSuccess the function to call on success with the result object, returning the return object.
 	 * @param onTimeout the function to call on wait timeout. First Parameter is the timeout in milliseconds. If null when this would be called, this returns null.
 	 * @param onException the function to call on exception. If null when this would be called, this returns null.
@@ -501,14 +501,14 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		}
 	}
 
-    /**
-     * Convenience method for: <code>cancel(false)</code>.
-     * @return {@code false} if the task could not be cancelled,
-     * typically because it has already completed normally;
-     * {@code true} otherwise
-     * @see #cancel(boolean)
-     * @see Future#cancel(boolean)
-     */
+	/**
+	 * Convenience method for: <code>cancel(false)</code>.
+	 * @return {@code false} if the task could not be cancelled,
+	 * typically because it has already completed normally;
+	 * {@code true} otherwise
+	 * @see #cancel(boolean)
+	 * @see Future#cancel(boolean)
+	 */
 	public final boolean cancel()
 	{
 		return cancel(false);

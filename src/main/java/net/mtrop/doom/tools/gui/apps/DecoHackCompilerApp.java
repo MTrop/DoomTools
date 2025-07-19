@@ -41,7 +41,7 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class DecoHackCompilerApp extends DoomToolsApplicationInstance
 {
-    // Singletons
+	// Singletons
 
 	private DecoHackCompilerSettingsManager settings;
 	private DoomToolsEditorProvider editorProvider;

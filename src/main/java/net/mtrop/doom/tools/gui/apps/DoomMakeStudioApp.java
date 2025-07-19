@@ -87,16 +87,16 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 {
-    private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
+	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeStudioApp.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeStudioApp.class); 
 
-    // Singletons
+	// Singletons
 
-    private final DoomMakeStudioApp SELF = this;
-    
-    /** Settings manager. */
+	private final DoomMakeStudioApp SELF = this;
+	
+	/** Settings manager. */
 	private DoomMakeSettingsManager settings;
 	private DoomMakeStudioSettingsManager studioSettings;
 
@@ -121,13 +121,13 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private Action runDoomMakeParametersAction;
 	
 	// Fields
-    
-    /** Project directory. */
-    private File projectDirectory;
+	
+	/** Project directory. */
+	private File projectDirectory;
 
 	// State
 
-    private EditorHandle currentHandle;
+	private EditorHandle currentHandle;
 	private Map<EditorHandle, ScriptExecutionSettings> handleToWadScriptSettingsMap;
 	private Map<EditorHandle, MergeSettings> handleToWadMergeSettingsMap;
 	private ScriptExecutionSettings doomMakeSettings;
@@ -142,9 +142,9 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this(null);
 	}
 	
-    /**
+	/**
 	 * Creates a new open project application from a project directory.
-     * @param targetDirectory 
+	 * @param targetDirectory 
 	 */
 	public DoomMakeStudioApp(File targetDirectory)
 	{

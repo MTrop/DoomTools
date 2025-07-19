@@ -20,13 +20,13 @@ import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
  */
 public final class DoomToolsLogger 
 {
-    /** Logging filename. */
-    private static final String LOG_FILENAME = "doomtools.log";
-    /** Configuration file. */
-    private static final File LOG_FILE = new File(Paths.APPDATA_PATH + LOG_FILENAME);
+	/** Logging filename. */
+	private static final String LOG_FILENAME = "doomtools.log";
+	/** Configuration file. */
+	private static final File LOG_FILE = new File(Paths.APPDATA_PATH + LOG_FILENAME);
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsLogger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLogger()); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsLogger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLogger()); 
 
 	/**
 	 * @return the singleton instance of this settings object.

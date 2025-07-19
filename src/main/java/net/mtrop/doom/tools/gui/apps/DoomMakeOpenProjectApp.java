@@ -39,14 +39,14 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  */
 public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 {
-    private static final String STATE_PROJECT_DIRECTORY = "projectDirectory";
+	private static final String STATE_PROJECT_DIRECTORY = "projectDirectory";
 
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeOpenProjectApp.class); 
 
-    // Singletons
+	// Singletons
 
-    /** Settings manager. */
+	/** Settings manager. */
 	private DoomMakeSettingsManager settings;
 
 	// Components
@@ -55,11 +55,11 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 	private DoomToolsStatusPanel statusPanel;
 	
 	// Fields
-    
-    /** Project directory. */
-    private File projectDirectory;
+	
+	/** Project directory. */
+	private File projectDirectory;
 
-    /**
+	/**
 	 * Creates a new open project application.
 	 */
 	public DoomMakeOpenProjectApp()
@@ -67,9 +67,9 @@ public class DoomMakeOpenProjectApp extends DoomToolsApplicationInstance
 		this(null);
 	}
 	
-    /**
+	/**
 	 * Creates a new open project application from a project directory.
-     * @param targetDirectory 
+	 * @param targetDirectory 
 	 */
 	public DoomMakeOpenProjectApp(File targetDirectory)
 	{

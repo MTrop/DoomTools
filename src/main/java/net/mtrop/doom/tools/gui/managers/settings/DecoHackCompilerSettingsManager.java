@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DecoHackCompilerSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "decohack-compiler.properties";
+	private static final String SETTINGS_FILENAME = "decohack-compiler.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DecoHackCompilerSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DecoHackCompilerSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DecoHackCompilerSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DecoHackCompilerSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class DecoHackCompilerSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

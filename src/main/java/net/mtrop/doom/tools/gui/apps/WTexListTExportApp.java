@@ -40,13 +40,13 @@ public class WTexListTExportApp extends DoomToolsApplicationInstance
 {
 	private WTexListSettingsManager settings;
 	
-    /** Parameter panel. */
-    private WTexListParametersPanel texListParametersPanel;
-    /** Parameter panel. */
-    private WTExportParameterFieldsPanel texportParameterFieldsPanel;
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
+	/** Parameter panel. */
+	private WTexListParametersPanel texListParametersPanel;
+	/** Parameter panel. */
+	private WTExportParameterFieldsPanel texportParameterFieldsPanel;
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
 	/**
 	 * Creates a new WTexScan app instance.
 	 */

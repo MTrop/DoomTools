@@ -130,8 +130,8 @@ public final class SwingUtils
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent, message, "Alert",
-			    JOptionPane.ERROR_MESSAGE);
+				parent, message, "Alert",
+				JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
@@ -143,8 +143,8 @@ public final class SwingUtils
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent, message, "Warning",
-			    JOptionPane.WARNING_MESSAGE);
+				parent, message, "Warning",
+				JOptionPane.WARNING_MESSAGE);
 	}
 
 	/**
@@ -156,8 +156,8 @@ public final class SwingUtils
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent, message, "Info",
-			    JOptionPane.INFORMATION_MESSAGE);
+				parent, message, "Info",
+				JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
@@ -169,11 +169,11 @@ public final class SwingUtils
 	public static boolean yesTo(Component parent, String message)
 	{
 		int c = JOptionPane.showConfirmDialog(
-			    parent, 
-			    message,
-			    "Confirm",
-			    JOptionPane.YES_NO_OPTION,
-			    JOptionPane.QUESTION_MESSAGE);
+				parent, 
+				message,
+				"Confirm",
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.QUESTION_MESSAGE);
 		boolean out = c == JOptionPane.YES_OPTION;
 		return out;
 	}

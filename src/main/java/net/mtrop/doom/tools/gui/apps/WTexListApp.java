@@ -38,11 +38,11 @@ public class WTexListApp extends DoomToolsApplicationInstance
 {
 	private WTexListSettingsManager settings;
 	
-    /** Parameter panel. */
-    private WTexListParametersPanel parametersPanel;
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
+	/** Parameter panel. */
+	private WTexListParametersPanel parametersPanel;
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
 	/**
 	 * Creates a new WTexList app instance.
 	 */

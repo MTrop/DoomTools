@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DoomToolsSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "settings.properties";
+	private static final String SETTINGS_FILENAME = "settings.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,10 +36,10 @@ public final class DoomToolsSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String DOOMTOOLS_THEME = "theme";
-    private static final String PATH_LAST_PROJECT = "path.lastProject";
-    private static final String PATH_LAST_SAVE = "path.lastSave";
-    private static final String PATH_CHOOSER_DEFAULT = "path.chooser.default";
+	private static final String DOOMTOOLS_THEME = "theme";
+	private static final String PATH_LAST_PROJECT = "path.lastProject";
+	private static final String PATH_LAST_SAVE = "path.lastSave";
+	private static final String PATH_CHOOSER_DEFAULT = "path.chooser.default";
 
 	/* ==================================================================== */
 

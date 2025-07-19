@@ -89,48 +89,48 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  */
 public class DoomToolsMainWindow extends JFrame 
 {
-    private static final long serialVersionUID = -8837485206120777188L;
+	private static final long serialVersionUID = -8837485206120777188L;
 
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMainWindow.class); 
 
-    private static final Options JSON_OPTIONS = ObjectUtils.apply(new Options(), (options) -> {
-    	options.setIndentation("\t");
-    });
-    
+	private static final Options JSON_OPTIONS = ObjectUtils.apply(new Options(), (options) -> {
+		options.setIndentation("\t");
+	});
+	
 	/** Utils. */
 	private DoomToolsGUIUtils utils;
 	/** Task manager. */
 	private DoomToolsTaskManager tasks;
-    /** Language manager. */
-    private DoomToolsLanguageManager language;
-    /** Settings manager. */
-    private DoomToolsSettingsManager settings;
+	/** Language manager. */
+	private DoomToolsLanguageManager language;
+	/** Settings manager. */
+	private DoomToolsSettingsManager settings;
 
 	/* ==================================================================== */
 
-    /** Desktop pane. */
+	/** Desktop pane. */
 	private DoomToolsDesktopPane desktop;
 
 	/** Shutdown hook. */
 	private Runnable shutDownHook;
 	
-    /** Application starter linker. */
-    private DoomToolsApplicationStarter applicationStarter;
+	/** Application starter linker. */
+	private DoomToolsApplicationStarter applicationStarter;
 
 	/* ==================================================================== */
 
-    // State
-    
-    /** Current workspace. */
-    private File currentWorkspace;
-    /** Save Workspace action. */
-    private Action actionSaveWorkspace;
-    /** Save Workspace As action. */
-    private Action actionSaveWorkspaceAs;
-    /** Clear workspace action. */
-    private Action actionClearWorkspace;
-    
+	// State
+	
+	/** Current workspace. */
+	private File currentWorkspace;
+	/** Save Workspace action. */
+	private Action actionSaveWorkspace;
+	/** Save Workspace As action. */
+	private Action actionSaveWorkspaceAs;
+	/** Clear workspace action. */
+	private Action actionClearWorkspace;
+	
 	/**
 	 * Creates the DoomTools main window.
 	 * @param shutDownHook the application shutdown hook.

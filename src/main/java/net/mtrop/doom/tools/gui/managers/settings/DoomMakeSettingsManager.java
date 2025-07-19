@@ -19,11 +19,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DoomMakeSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "doommake.properties";
+	private static final String SETTINGS_FILENAME = "doommake.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomMakeSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomMakeSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomMakeSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -34,11 +34,11 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
-    private static final String DOOMMAKE_PATH_SLADE = "path.slade";
-    private static final String DOOMMAKE_PATH_IDE = "path.vscode";
-    private static final String DOOMMAKE_PATH_MAPEDITOR = "path.map.editor";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
+	private static final String DOOMMAKE_PATH_SLADE = "path.slade";
+	private static final String DOOMMAKE_PATH_IDE = "path.vscode";
+	private static final String DOOMMAKE_PATH_MAPEDITOR = "path.map.editor";
 
 	/* ==================================================================== */
 

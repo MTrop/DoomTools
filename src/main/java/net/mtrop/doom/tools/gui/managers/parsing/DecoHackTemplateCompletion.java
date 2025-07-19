@@ -76,22 +76,22 @@ public enum DecoHackTemplateCompletion
 	)),
 			
 	MISCPROPERTIES("Adds the miscellaneous block properties and their defaults.", (
-        "monstersFightOwnSpecies false\n" +
-        "initialBullets 50\n" +
-        "initialHealth 100\n" +
-        "greenArmorClass 1\n" +
-        "blueArmorClass 2\n" +
-        "soulsphereHealth 100\n" +
-        "maxSoulsphereHealth 200\n" +
-        "megasphereHealth 200\n" +
-        "godModeHealth 100\n" +
-        "idfaArmor 200\n" +
-        "idfaArmorClass 2\n" +
-        "idkfaArmor 200\n" +
-        "idkfaArmorClass 2\n" +
-        "bfgCellsPerShot 40\n" +
-        "maxHealth 200\n" +
-        "maxArmor 200\n" +
+		"monstersFightOwnSpecies false\n" +
+		"initialBullets 50\n" +
+		"initialHealth 100\n" +
+		"greenArmorClass 1\n" +
+		"blueArmorClass 2\n" +
+		"soulsphereHealth 100\n" +
+		"maxSoulsphereHealth 200\n" +
+		"megasphereHealth 200\n" +
+		"godModeHealth 100\n" +
+		"idfaArmor 200\n" +
+		"idfaArmorClass 2\n" +
+		"idkfaArmor 200\n" +
+		"idkfaArmorClass 2\n" +
+		"bfgCellsPerShot 40\n" +
+		"maxHealth 200\n" +
+		"maxArmor 200\n" +
 		"${cursor}"
 	)),
 			
@@ -161,83 +161,83 @@ public enum DecoHackTemplateCompletion
 	)),
 
 	THINGPROPERTIES("Adds a Thing's properties and their default values.", (
-        "ednum -1\n" +
-        "\n" +
-        "health 0\n" +
-        "speed 0\n" +
-        "radius 0\n" +
-        "height 0\n" +
-        "damage 0\n" +
-        "reactiontime 0\n" +
-        "painchance 0\n" +
-        "mass 0\n" +
-        "\n" +
-        "clear flags\n" +
+		"ednum -1\n" +
+		"\n" +
+		"health 0\n" +
+		"speed 0\n" +
+		"radius 0\n" +
+		"height 0\n" +
+		"damage 0\n" +
+		"reactiontime 0\n" +
+		"painchance 0\n" +
+		"mass 0\n" +
+		"\n" +
+		"clear flags\n" +
 		"${cursor}"
 	)),
 
 	THINGPROPERTIESEXT("Adds a Thing's EXTENDED properties and their default values.", (
-        "ednum -1\n" +
-        "\n" +
-        "health 0\n" +
-        "speed 0\n" +
-        "radius 0\n" +
-        "height 0\n" +
-        "damage 0\n" +
-        "reactiontime 0\n" +
-        "painchance 0\n" +
-        "mass 0\n" + 
-        "\n" +
-        "dropitem MT_NULL\n" +
-        "\n" +
-        "clear flags\n" +
+		"ednum -1\n" +
+		"\n" +
+		"health 0\n" +
+		"speed 0\n" +
+		"radius 0\n" +
+		"height 0\n" +
+		"damage 0\n" +
+		"reactiontime 0\n" +
+		"painchance 0\n" +
+		"mass 0\n" + 
+		"\n" +
+		"dropitem MT_NULL\n" +
+		"\n" +
+		"clear flags\n" +
 		"${cursor}"
 	)),
 
 	THINGPROPERTIESMBF21("Adds a Thing's MBF21 properties and their default values.", (
-        "ednum -1\n" +
-        "\n" +
-        "health 0\n" +
-        "speed 0\n" +
-        "radius 0\n" +
-        "height 0\n" +
-        "damage 0\n" +
-        "reactiontime 0\n" +
-        "painchance 0\n" +
-        "mass 0\n" +
-        "\n" +
-        "dropitem MT_NULL\n" +
-        "\n" +
-        "fastspeed -1\n" +
-        "meleerange 64\n" +
-        "infightinggroup 0\n" +
-        "projectilegroup 0\n" +
-        "splashgroup 0\n" +
-        "\n" +
-        "clear flags\n" +
+		"ednum -1\n" +
+		"\n" +
+		"health 0\n" +
+		"speed 0\n" +
+		"radius 0\n" +
+		"height 0\n" +
+		"damage 0\n" +
+		"reactiontime 0\n" +
+		"painchance 0\n" +
+		"mass 0\n" +
+		"\n" +
+		"dropitem MT_NULL\n" +
+		"\n" +
+		"fastspeed -1\n" +
+		"meleerange 64\n" +
+		"infightinggroup 0\n" +
+		"projectilegroup 0\n" +
+		"splashgroup 0\n" +
+		"\n" +
+		"clear flags\n" +
 		"${cursor}"
 	)),
 
 	THINGPROPERTIESID24("Adds a Thing's ID24 properties and their default values.", (
-        "ednum -1\n" +
-        "\n" +
-        "health 0\n" +
-        "speed 0\n" +
-        "radius 0\n" +
-        "height 0\n" +
-        "damage 0\n" +
-        "reactiontime 0\n" +
-        "painchance 0\n" +
-        "mass 0\n" +
-        "\n" +
-        "dropitem MT_NULL\n" +
-        "\n" +
-        "fastspeed -1\n" +
-        "meleerange 64\n" +
-        "infightinggroup 0\n" +
-        "projectilegroup 0\n" +
-        "splashgroup 0\n" +
-        "\n" +
+		"ednum -1\n" +
+		"\n" +
+		"health 0\n" +
+		"speed 0\n" +
+		"radius 0\n" +
+		"height 0\n" +
+		"damage 0\n" +
+		"reactiontime 0\n" +
+		"painchance 0\n" +
+		"mass 0\n" +
+		"\n" +
+		"dropitem MT_NULL\n" +
+		"\n" +
+		"fastspeed -1\n" +
+		"meleerange 64\n" +
+		"infightinggroup 0\n" +
+		"projectilegroup 0\n" +
+		"splashgroup 0\n" +
+		"\n" +
 		"minrespawntics 420\n" +
 		"respawndice 6\n" +
 		"pickupammotype 0\n" +
@@ -247,38 +247,38 @@ public enum DecoHackTemplateCompletion
 		"pickupbonuscount 0\n" +
 		"pickupmessage \"\"\n" +
 		"translation \"\"\n" +
-        "\n" +
-        "clear flags\n" +
+		"\n" +
+		"clear flags\n" +
 		"${cursor}"
 	)),
 
 	THINGSOUNDS("Adds a Thing's sound properties and their default values.", (
-        "seesound \"\"\n" +
-        "attacksound \"\"\n" +
-        "painsound \"\"\n" +
-        "deathsound \"\"\n" +
-        "activesound \"\"\n" +
+		"seesound \"\"\n" +
+		"attacksound \"\"\n" +
+		"painsound \"\"\n" +
+		"deathsound \"\"\n" +
+		"activesound \"\"\n" +
 		"${cursor}"
 	)),
 
 	THINGSOUNDSMBF21("Adds a Thing's MBF21 sound properties and their default values.", (
-        "seesound \"\"\n" +
-        "attacksound \"\"\n" +
-        "painsound \"\"\n" +
-        "deathsound \"\"\n" +
-        "activesound \"\"\n" +
-        "ripsound \"\"\n" +
+		"seesound \"\"\n" +
+		"attacksound \"\"\n" +
+		"painsound \"\"\n" +
+		"deathsound \"\"\n" +
+		"activesound \"\"\n" +
+		"ripsound \"\"\n" +
 		"${cursor}"
 	)),
 
 	THINGSOUNDSID24("Adds a Thing's ID24 sound properties and their default values.", (
-        "seesound \"\"\n" +
-        "attacksound \"\"\n" +
-        "painsound \"\"\n" +
-        "deathsound \"\"\n" +
-        "activesound \"\"\n" +
-        "ripsound \"\"\n" +
-        "pickupsound \"\"\n" +
+		"seesound \"\"\n" +
+		"attacksound \"\"\n" +
+		"painsound \"\"\n" +
+		"deathsound \"\"\n" +
+		"activesound \"\"\n" +
+		"ripsound \"\"\n" +
+		"pickupsound \"\"\n" +
 		"${cursor}"
 	)),
 
@@ -336,22 +336,22 @@ public enum DecoHackTemplateCompletion
 	)),
 
 	WEAPONPROPERTIES("Adds a Weapon's properties and their blank values.", (
-        "ammotype AM_CLIP\n" +
-        "${cursor}"
+		"ammotype AM_CLIP\n" +
+		"${cursor}"
 	)),
 
 	WEAPONPROPERTIESMBF21("Adds a Weapon's MBF21 properties and their blank values.", (
-        "ammotype AM_CLIP\n" +
-        "ammopershot -1\n" +
-        "\n" +
-        "clear flags\n" +
-        "${cursor}"
+		"ammotype AM_CLIP\n" +
+		"ammopershot -1\n" +
+		"\n" +
+		"clear flags\n" +
+		"${cursor}"
 	)),
 
 	WEAPONPROPERTIESID24("Adds a Weapon's ID24 properties and their blank values.", (
-        "ammotype AM_CLIP\n" +
-        "ammopershot -1\n" +
-        "\n" +
+		"ammotype AM_CLIP\n" +
+		"ammopershot -1\n" +
+		"\n" +
 		"slot 0\n" +
 		"slotpriority 0\n" +
 		"switchpriority 0\n" +
@@ -362,9 +362,9 @@ public enum DecoHackTemplateCompletion
 		"noswitchwithownedweapon MT_NULL\n" +
 		"allowswitchwithowneditem MT_NULL\n" +
 		"noswitchwithowneditem MT_NULL\n" +
-        "\n" +
-        "clear flags\n" +
-        "${cursor}"
+		"\n" +
+		"clear flags\n" +
+		"${cursor}"
 	)),
 
 	WEAPONSTATES("Adds a skeleton states block for Weapons (all significant labels).", (

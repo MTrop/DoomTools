@@ -1346,12 +1346,12 @@ public final class ModalFactory
 
 		private static Window getWindowForComponent(Component parent) throws HeadlessException 
 		{
-	        if (parent == null)
-	            return null;
-	        if (parent instanceof Frame || parent instanceof Dialog)
-	            return (Window)parent;
-	        return getWindowForComponent(parent.getParent());
-	    }
+			if (parent == null)
+				return null;
+			if (parent instanceof Frame || parent instanceof Dialog)
+				return (Window)parent;
+			return getWindowForComponent(parent.getParent());
+		}
 
 		
 		@Override

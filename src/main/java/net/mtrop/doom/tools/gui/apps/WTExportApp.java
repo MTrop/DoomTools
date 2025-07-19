@@ -39,13 +39,13 @@ public class WTExportApp extends DoomToolsApplicationInstance
 {
 	private WTExportSettingsManager settings;
 	
-    /** Input file. */
-    private JFormField<File> inputFileField;
-    /** Parameter panel. */
-    private WTExportParametersPanel parametersPanel;
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
+	/** Input file. */
+	private JFormField<File> inputFileField;
+	/** Parameter panel. */
+	private WTExportParametersPanel parametersPanel;
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
 	/**
 	 * Creates a new WTExport app instance.
 	 */

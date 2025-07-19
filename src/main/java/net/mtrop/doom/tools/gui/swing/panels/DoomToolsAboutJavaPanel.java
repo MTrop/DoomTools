@@ -39,7 +39,7 @@ public class DoomToolsAboutJavaPanel extends JPanel
 	 */
 	public DoomToolsAboutJavaPanel()
 	{
-	    DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
 		StringBuilder sb = new StringBuilder("<html>");
 		sb.append("<b>Java Vendor:</b> ").append(System.getProperty("java.vendor")).append("<br/>");

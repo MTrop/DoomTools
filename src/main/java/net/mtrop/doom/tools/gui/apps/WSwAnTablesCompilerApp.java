@@ -39,7 +39,7 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WSwAnTablesCompilerApp extends DoomToolsApplicationInstance
 {
-    // Singletons
+	// Singletons
 
 	private WSwAnTablesCompilerSettingsManager settings;
 	

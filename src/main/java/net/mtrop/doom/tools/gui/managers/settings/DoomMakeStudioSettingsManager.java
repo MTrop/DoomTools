@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DoomMakeStudioSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "doommake-studio.properties";
+	private static final String SETTINGS_FILENAME = "doommake-studio.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeStudioSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomMakeStudioSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomMakeStudioSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DoomMakeStudioSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,9 +36,9 @@ public final class DoomMakeStudioSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
-    private static final String SIDEBAR_WIDTH = "sidebar.width";
-    private static final String TREE_HEIGHT = "tree.height";
+	private static final String DOOMMAKE_PATH_LAST_PROJECT = "path.lastProject";
+	private static final String SIDEBAR_WIDTH = "sidebar.width";
+	private static final String TREE_HEIGHT = "tree.height";
 
 	/* ==================================================================== */
 

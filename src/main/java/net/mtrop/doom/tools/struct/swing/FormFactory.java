@@ -2011,9 +2011,9 @@ public final class FormFactory
 
 		private static String convertToText(boolean alpha, Color color)
 		{
-	        StringBuilder sb = new StringBuilder(Integer.toHexString(color.getRGB() & 0xffffffff));
+			StringBuilder sb = new StringBuilder(Integer.toHexString(color.getRGB() & 0xffffffff));
 			while (sb.length() < 8) 
-	            sb.insert(0, "0");
+				sb.insert(0, "0");
 			return sb.toString();
 		}
 		

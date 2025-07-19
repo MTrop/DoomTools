@@ -83,8 +83,8 @@ public class DirectoryTreePanel extends JPanel
 {
 	private static final long serialVersionUID = 5496698746549135647L;
 	
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DirectoryTreePanel.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DirectoryTreePanel.class); 
 
 	private static final Comparator<FileNode> CHILD_COMPARATOR;
 

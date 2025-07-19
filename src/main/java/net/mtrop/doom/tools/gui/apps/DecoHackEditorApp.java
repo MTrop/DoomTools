@@ -64,7 +64,7 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 public class DecoHackEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackEditorApp.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -78,7 +78,7 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 		.append("\n")
 	.toString();
 	
-    // Singletons
+	// Singletons
 
 	private DecoHackSettingsManager settings;
 

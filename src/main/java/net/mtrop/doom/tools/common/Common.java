@@ -36,7 +36,7 @@ public final class Common
 	
 	private static final ThreadLocal<byte[]> BYTE_THRESHOLD = ThreadLocal.withInitial(() -> new byte[1024]);
 	
-    /**
+	/**
 	 * Gets the embedded version string for a tool name.
 	 * If there is no embedded version, this returns "SNAPSHOT".
 	 * @param name the name of the tool. 

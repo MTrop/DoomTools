@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DImageConvertSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "dimgconv.properties";
+	private static final String SETTINGS_FILENAME = "dimgconv.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DImageConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DImageConvertSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DImageConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DImageConvertSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class DImageConvertSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

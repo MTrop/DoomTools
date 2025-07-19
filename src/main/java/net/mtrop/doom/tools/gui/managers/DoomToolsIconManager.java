@@ -22,10 +22,10 @@ import net.mtrop.doom.tools.struct.util.IOUtils;
  */
 public final class DoomToolsIconManager 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsIconManager.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsIconManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsIconManager());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsIconManager.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsIconManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsIconManager());
 	
 	/**
 	 * @return the singleton instance of this settings object.

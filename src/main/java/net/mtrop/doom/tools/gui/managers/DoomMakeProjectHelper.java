@@ -29,12 +29,12 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
  */
 public final class DoomMakeProjectHelper 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeProjectHelper.class); 
-    
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomMakeProjectHelper> INSTANCE = new SingletonProvider<>(() -> new DoomMakeProjectHelper());
-    
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeProjectHelper.class); 
+	
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomMakeProjectHelper> INSTANCE = new SingletonProvider<>(() -> new DoomMakeProjectHelper());
+	
 	/**
 	 * @return the singleton instance of this object.
 	 */

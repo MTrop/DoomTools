@@ -62,9 +62,9 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 public final class AppCommon 
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(AppCommon.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<AppCommon> INSTANCE = new SingletonProvider<>(() -> new AppCommon());
+	private static final Logger LOG = DoomToolsLogger.getLogger(AppCommon.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<AppCommon> INSTANCE = new SingletonProvider<>(() -> new AppCommon());
 	
 	/**
 	 * @return the singleton instance of this common object.

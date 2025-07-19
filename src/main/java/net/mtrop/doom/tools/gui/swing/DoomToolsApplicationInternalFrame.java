@@ -29,7 +29,7 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 {
 	private static final long serialVersionUID = 7311434945898035762L;
 
-    /** Image manager. */
+	/** Image manager. */
 	private DoomToolsGUIUtils utils;
 	/** The application instance. */
 	private DoomToolsApplicationInstance instance;

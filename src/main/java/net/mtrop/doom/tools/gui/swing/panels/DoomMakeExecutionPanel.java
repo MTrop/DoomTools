@@ -42,52 +42,52 @@ public class DoomMakeExecutionPanel extends JPanel
 
 	private static final String STATE_PROJECT_DIRECTORY = "execution.projectDirectory";
 
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeExecutionPanel.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomMakeExecutionPanel.class); 
 
-    private static final String[] NO_ARGS = new String[0];
+	private static final String[] NO_ARGS = new String[0];
 
-    // Singletons
+	// Singletons
 
-    /** Language. */
-    private DoomToolsLanguageManager language;
-    /** Project helper. */
-    private DoomMakeProjectHelper helper;
-    /** Project helper. */
-    private AppCommon appCommon;
+	/** Language. */
+	private DoomToolsLanguageManager language;
+	/** Project helper. */
+	private DoomMakeProjectHelper helper;
+	/** Project helper. */
+	private AppCommon appCommon;
 
 	// Components
 	
-    /** Targets component. */
-    private DoomMakeProjectTargetListPanel listPanel;
-    /** Checkbox for flagging auto-build. */
-    private JCheckBox autoBuildCheckbox;
-    /** Target run action. */
-    private Action targetRunAction;
+	/** Targets component. */
+	private DoomMakeProjectTargetListPanel listPanel;
+	/** Checkbox for flagging auto-build. */
+	private JCheckBox autoBuildCheckbox;
+	/** Target run action. */
+	private Action targetRunAction;
 
 	// Fields
-    
-    /** Project directory. */
-    private File projectDirectory;
-    /** Status messages. */
-    private DoomToolsStatusPanel statusPanel;
-    /** Logging panel override. */
-    private DoomToolsTextOutputPanel outputPanel;
+	
+	/** Project directory. */
+	private File projectDirectory;
+	/** Status messages. */
+	private DoomToolsStatusPanel statusPanel;
+	/** Logging panel override. */
+	private DoomToolsTextOutputPanel outputPanel;
 
-    // State
-    
-    /** Current target. */
-    private String currentTarget;
-    /** Auto build agent. */
-    private AutoBuildAgent autoBuildAgent;
+	// State
+	
+	/** Current target. */
+	private String currentTarget;
+	/** Auto build agent. */
+	private AutoBuildAgent autoBuildAgent;
 
-    /**
+	/**
 	 * Creates a new panel from a project directory.
-     * @param statusPanel the status panel to talk to.
-     * @param targetDirectory 
-     * @param outputPanel optional output override panel.
-     * @param ideMode if true, omit the IDE button.
-     * @param outputStream optional output stream for logging.
+	 * @param statusPanel the status panel to talk to.
+	 * @param targetDirectory 
+	 * @param outputPanel optional output override panel.
+	 * @param ideMode if true, omit the IDE button.
+	 * @param outputStream optional output stream for logging.
 	 */
 	public DoomMakeExecutionPanel(DoomToolsStatusPanel statusPanel, File targetDirectory, DoomToolsTextOutputPanel outputPanel, boolean ideMode, final PrintStream outputStream)
 	{

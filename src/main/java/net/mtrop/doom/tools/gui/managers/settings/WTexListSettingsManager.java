@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WTexListSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wtexlist.properties";
+	private static final String SETTINGS_FILENAME = "wtexlist.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WTexListSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WTexListSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WTexListSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WTexListSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class WTexListSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

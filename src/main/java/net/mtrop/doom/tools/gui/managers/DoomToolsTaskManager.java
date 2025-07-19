@@ -22,10 +22,10 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  */
 public final class DoomToolsTaskManager 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsTaskManager.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsTaskManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsTaskManager());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsTaskManager.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsTaskManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsTaskManager());
 	
 	/**
 	 * @return the singleton instance of this settings object.

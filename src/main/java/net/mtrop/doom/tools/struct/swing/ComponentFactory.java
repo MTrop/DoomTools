@@ -182,7 +182,7 @@ public final class ComponentFactory
 		 * Called when an action event happens.
 		 * @param e the ActionEvent.
 		 */
-	    void handleActionEvent(ActionEvent e);
+		void handleActionEvent(ActionEvent e);
 	}
 
 	/**
@@ -625,16 +625,16 @@ public final class ComponentFactory
 	public static JTextArea wrappedLabel(String label)
 	{
 		JTextArea out = textArea();
-	    out.setBackground(UIManager.getColor("Label.background"));
-	    out.setFont(UIManager.getFont("Label.font"));
-	    out.setBorder(UIManager.getBorder("Label.border"));
-	    out.setOpaque(false);
-	    out.setEditable(false);
-	    out.setFocusable(false);
-	    out.setWrapStyleWord(true);
-	    out.setLineWrap(true);
-	    out.setText(label);
-	    return out;
+		out.setBackground(UIManager.getColor("Label.background"));
+		out.setFont(UIManager.getFont("Label.font"));
+		out.setBorder(UIManager.getBorder("Label.border"));
+		out.setOpaque(false);
+		out.setEditable(false);
+		out.setFocusable(false);
+		out.setWrapStyleWord(true);
+		out.setLineWrap(true);
+		out.setText(label);
+		return out;
 	}
 
 	/* ==================================================================== */
@@ -2753,8 +2753,8 @@ public final class ComponentFactory
 	 */
 	public static abstract class MenuNode
 	{
-	    protected abstract void addTo(JMenu menu);
-	    protected abstract void addTo(JPopupMenu menu);
+		protected abstract void addTo(JMenu menu);
+		protected abstract void addTo(JPopupMenu menu);
 	}
 
 	/** Menu item node. */
@@ -3008,16 +3008,16 @@ public final class ComponentFactory
 		
 		private ActionEventHandler handler;
 	
-	    private HandledAction(Icon icon, String label, ActionEventHandler handler)
-	    {
-	    	super(label, icon);
-	    	this.handler = handler;
-	    }
-	    
+		private HandledAction(Icon icon, String label, ActionEventHandler handler)
+		{
+			super(label, icon);
+			this.handler = handler;
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e)
-	    {
-	    	handler.handleActionEvent(e);
+		{
+			handler.handleActionEvent(e);
 		}
 		
 	}

@@ -37,12 +37,12 @@ import net.mtrop.doom.tools.struct.util.ValueUtils;
 public class DoomToolsSettings
 {
 	private static final String EDITOR_VIEW = ".editor.view";
-    private static final String EDITOR_CODE = ".editor.code";
-    private static final String EDITOR_AUTOCOMPLETE = ".editor.autocomplete";
-    private static final String EDITOR_THEME = ".editor.theme";
+	private static final String EDITOR_CODE = ".editor.code";
+	private static final String EDITOR_AUTOCOMPLETE = ".editor.autocomplete";
+	private static final String EDITOR_THEME = ".editor.theme";
 
-    private static final String VIEW_ENCODING = ".encoding";
-    private static final String VIEW_TABSIZE = ".tabsize";
+	private static final String VIEW_ENCODING = ".encoding";
+	private static final String VIEW_TABSIZE = ".tabsize";
 	private static final String VIEW_SOFTTABS = ".softtabs";
 	private static final String VIEW_WRAPPING = ".wrapping";
 	private static final String VIEW_WRAPWORDS = ".wrapwords";
@@ -118,21 +118,21 @@ public class DoomToolsSettings
 	private static final String THEME_FOLD_BG = ".foldBG";
 	private static final String THEME_ARMED_FOLD_BG = ".armedFoldBG";
 	
-    private static final String WINDOW_X = ".window.x";
-    private static final String WINDOW_Y = ".window.y";
-    private static final String WINDOW_WIDTH = ".window.width";
-    private static final String WINDOW_HEIGHT = ".window.height";
-    private static final String WINDOW_MAXIMIZED = ".window.max";
+	private static final String WINDOW_X = ".window.x";
+	private static final String WINDOW_Y = ".window.y";
+	private static final String WINDOW_WIDTH = ".window.width";
+	private static final String WINDOW_HEIGHT = ".window.height";
+	private static final String WINDOW_MAXIMIZED = ".window.max";
 
-    private File propertiesFile;
-    private Logger logger;
-    private Properties properties;
+	private File propertiesFile;
+	private Logger logger;
+	private Properties properties;
 	
-    /**
-     * 
-     * @param propertiesFilePath
-     * @param logger
-     */
+	/**
+	 * 
+	 * @param propertiesFilePath
+	 * @param logger
+	 */
 	public DoomToolsSettings(File propertiesFilePath, Logger logger)
 	{
 		this.propertiesFile = propertiesFilePath;
@@ -332,9 +332,9 @@ public class DoomToolsSettings
 		}
 		else
 		{
-	        StringBuilder sb = new StringBuilder(Integer.toHexString(value.getRGB() & 0xffffffff));
+			StringBuilder sb = new StringBuilder(Integer.toHexString(value.getRGB() & 0xffffffff));
 			while (sb.length() < 8) 
-	            sb.insert(0, "0");
+				sb.insert(0, "0");
 			properties.setProperty(keyName, sb.toString());
 		}
 	}

@@ -48,10 +48,10 @@ public final class DoomToolsLanguageManager
 	/** Class loader. */
 	private static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
 	
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsLanguageManager.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsLanguageManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLanguageManager());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsLanguageManager.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsLanguageManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLanguageManager());
 
 	/**
 	 * @return the singleton instance of this settings object.

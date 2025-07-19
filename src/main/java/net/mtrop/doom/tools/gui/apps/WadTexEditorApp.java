@@ -74,11 +74,11 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 public class WadTexEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadTexEditorApp.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(WadTexEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
-    // Singletons
+	// Singletons
 
 	private WadTexSettingsManager settings;
 

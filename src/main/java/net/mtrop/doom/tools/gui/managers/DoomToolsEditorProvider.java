@@ -49,8 +49,8 @@ import static org.fife.ui.rsyntaxtextarea.SyntaxConstants.*;
  */
 public final class DoomToolsEditorProvider 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsEditorProvider.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsEditorProvider.class); 
 	
 	public static final String SYNTAX_STYLE_DECOHACK =   "text/decohack";
 	public static final String SYNTAX_STYLE_DOOMMAKE =   "text/doommake";
@@ -60,12 +60,12 @@ public final class DoomToolsEditorProvider
 	public static final String SYNTAX_STYLE_WADMERGE =   "text/wadmerge";
 	public static final String SYNTAX_STYLE_WADSCRIPT =  "text/wadscript";
 	
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsEditorProvider> INSTANCE = new SingletonProvider<>(() -> new DoomToolsEditorProvider());
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsEditorProvider> INSTANCE = new SingletonProvider<>(() -> new DoomToolsEditorProvider());
 
-    // For specific files.
-    private static final Map<String, String> FILENAME_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
-    {
+	// For specific files.
+	private static final Map<String, String> FILENAME_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
+	{
 		private static final long serialVersionUID = -2713345708437194651L;
 		{
 			put("defswani.txt",         SYNTAX_STYLE_DEFSWANI);
@@ -79,10 +79,10 @@ public final class DoomToolsEditorProvider
 			put("texture1.txt",         SYNTAX_STYLE_DEUTEX);
 			put("texture2.txt",         SYNTAX_STYLE_DEUTEX);
 		}
-    };
-    
-    private static final Map<String, String> EXTENSION_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
-    {
+	};
+	
+	private static final Map<String, String> EXTENSION_TO_STYLE_MAP = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
+	{
 		private static final long serialVersionUID = -1713345708437194651L;
 		{
 			put("asc",        SYNTAX_STYLE_ACTIONSCRIPT);
@@ -152,10 +152,10 @@ public final class DoomToolsEditorProvider
 			put("wscript",    SYNTAX_STYLE_WADSCRIPT);
 			put("wsx",        SYNTAX_STYLE_WADSCRIPT);
 		}
-    };
+	};
 
-    private static final Map<String, String> NAME_TO_STYLE_MAP = Collections.unmodifiableMap(new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
-    {
+	private static final Map<String, String> NAME_TO_STYLE_MAP = Collections.unmodifiableMap(new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
+	{
 		private static final long serialVersionUID = -2069191041359249343L;
 		{
 			put("Plain Text",          SYNTAX_STYLE_NONE);
@@ -167,10 +167,10 @@ public final class DoomToolsEditorProvider
 			put("WadMerge",            SYNTAX_STYLE_WADMERGE);
 			put("WadScript",           SYNTAX_STYLE_WADSCRIPT);
 		}
-    });
-    
-    private static final Map<String, String> OTHER_NAME_TO_STYLE_MAP = Collections.unmodifiableMap(new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
-    {
+	});
+	
+	private static final Map<String, String> OTHER_NAME_TO_STYLE_MAP = Collections.unmodifiableMap(new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER) 
+	{
 		private static final long serialVersionUID = -2069191041359249342L;
 		{
 			put("ActionScript",       SYNTAX_STYLE_ACTIONSCRIPT);
@@ -223,10 +223,10 @@ public final class DoomToolsEditorProvider
 			put("XML",                SYNTAX_STYLE_XML);
 			put("YAML",               SYNTAX_STYLE_YAML);
 		}
-    });
-    
-    private static final Set<Charset> COMMON_CHARSETS = Collections.unmodifiableSet(new TreeSet<Charset>() 
-    {
+	});
+	
+	private static final Set<Charset> COMMON_CHARSETS = Collections.unmodifiableSet(new TreeSet<Charset>() 
+	{
 		private static final long serialVersionUID = -4915381545931926947L;
 		{
 			if (OSUtils.isWindows())
@@ -246,10 +246,10 @@ public final class DoomToolsEditorProvider
 			add(Charset.forName("EUC-KR"));     // Korean
 			add(Charset.forName("KOI8-R"));     // Cyrillic
 		}
-    });
-    
-    private static final Map<String, Supplier<CompletionProvider>> COMPLETION_PROVIDERS = Collections.unmodifiableMap(new TreeMap<String, Supplier<CompletionProvider>>() 
-    {
+	});
+	
+	private static final Map<String, Supplier<CompletionProvider>> COMPLETION_PROVIDERS = Collections.unmodifiableMap(new TreeMap<String, Supplier<CompletionProvider>>() 
+	{
 		private static final long serialVersionUID = 1638202185490860804L;
 		{
 			put(SYNTAX_STYLE_DECOHACK,   () -> new DecoHackCompletionProvider());
@@ -258,17 +258,17 @@ public final class DoomToolsEditorProvider
 			put(SYNTAX_STYLE_WADMERGE,   () -> new WadMergeCompletionProvider());
 			put(SYNTAX_STYLE_WADSCRIPT,  () -> new WadScriptCompletionProvider());
 		}
-    });
-    
-    private static final FactoryMap<String, CompletionProvider> FACTORY = new FactoryMap<String, CompletionProvider>()
-    {
+	});
+	
+	private static final FactoryMap<String, CompletionProvider> FACTORY = new FactoryMap<String, CompletionProvider>()
+	{
 		@Override
 		protected Supplier<CompletionProvider> getSupplierForKey(String key)
 		{
 			return COMPLETION_PROVIDERS.getOrDefault(key, () -> new DefaultCompletionProvider());
 		}
-    };
-    
+	};
+	
 	/**
 	 * @return the singleton instance of this object.
 	 */

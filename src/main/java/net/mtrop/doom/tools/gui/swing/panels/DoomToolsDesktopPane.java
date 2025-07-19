@@ -45,8 +45,8 @@ public class DoomToolsDesktopPane extends JDesktopPane
 {
 	private static final long serialVersionUID = -4832880176282917356L;
 
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsDesktopPane.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsDesktopPane.class); 
 
 	/** Image manager. */
 	private DoomToolsImageManager images;
@@ -107,34 +107,34 @@ public class DoomToolsDesktopPane extends JDesktopPane
 		int height = getHeight();
 		int imageWidth = backgroundImage.getIconWidth();
 		int imageHeight = backgroundImage.getIconHeight();
-        
-        // scale with aspect if needed
-        if (width < imageWidth || height < imageHeight)
-        {
-    		double panelWidthRatio = ((double)width) / height;
-    		double imageWidthRatio = ((double)imageWidth) / imageHeight;
-    		double imageHeightRatio = ((double)imageHeight) / imageWidth;
-            if (panelWidthRatio < imageWidthRatio)
-            {
-            	imageWidth = width;
-            	imageHeight = (int)(width * imageHeightRatio);
-            	x = 0;
-            	y = (height - imageHeight) / 2;
-            }
-            else
-            {
-            	imageWidth = (int)(height * imageWidthRatio);
-            	imageHeight = height;
-            	x = (width - imageWidth) / 2;
-            	y = 0;
-            }
-        }
-        else
-        {
-    		x = (width - imageWidth) / 2;
-            y = (height - imageHeight) / 2;
-        }
-        
+		
+		// scale with aspect if needed
+		if (width < imageWidth || height < imageHeight)
+		{
+			double panelWidthRatio = ((double)width) / height;
+			double imageWidthRatio = ((double)imageWidth) / imageHeight;
+			double imageHeightRatio = ((double)imageHeight) / imageWidth;
+			if (panelWidthRatio < imageWidthRatio)
+			{
+				imageWidth = width;
+				imageHeight = (int)(width * imageHeightRatio);
+				x = 0;
+				y = (height - imageHeight) / 2;
+			}
+			else
+			{
+				imageWidth = (int)(height * imageWidthRatio);
+				imageHeight = height;
+				x = (width - imageWidth) / 2;
+				y = 0;
+			}
+		}
+		else
+		{
+			x = (width - imageWidth) / 2;
+			y = (height - imageHeight) / 2;
+		}
+		
 		g.drawImage(backgroundImage.getImage(), x, y, imageWidth, imageHeight, null);
 	}
 	

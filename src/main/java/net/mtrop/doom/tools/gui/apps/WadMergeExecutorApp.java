@@ -41,7 +41,7 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WadMergeExecutorApp extends DoomToolsApplicationInstance
 {
-    // Singletons
+	// Singletons
 
 	private WadMergeExecutorSettingsManager settings;
 	private DoomToolsEditorProvider editorProvider;

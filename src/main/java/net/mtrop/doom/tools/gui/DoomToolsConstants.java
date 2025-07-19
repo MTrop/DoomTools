@@ -15,7 +15,7 @@ public interface DoomToolsConstants
 	interface Paths
 	{
 		/** DoomTools Config folder base. */
-	    String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + File.separator + "DoomTools" + File.separator;
+		String APPDATA_PATH = OSUtils.getApplicationSettingsPath() + File.separator + "DoomTools" + File.separator;
 	}
 	
 }

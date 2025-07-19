@@ -25,7 +25,7 @@ public interface DoomToolsApplicationStarter
 	{
 		return createApplication(applicationClass, null);
 	}
-    
+	
 	/**
 	 * Starts a new application instance by class.
 	 * @param <A> the instance type.
@@ -40,7 +40,7 @@ public interface DoomToolsApplicationStarter
 			instance.setApplicationState(state);
 		return instance;
 	}
-    
+	
 	/**
 	 * Starts a new application instance by class.
 	 * @param <A> the instance type.
@@ -50,7 +50,7 @@ public interface DoomToolsApplicationStarter
 	{
 		startApplication(createApplication(applicationClass));
 	}
-    
+	
 	/**
 	 * Starts a new application instance by class.
 	 * @param <A> the instance type.
@@ -61,11 +61,11 @@ public interface DoomToolsApplicationStarter
 	{
 		startApplication(createApplication(applicationClass, state));
 	}
-    
+	
 	/**
 	 * Starts a new application instance.
 	 * @param instance the application instance.
 	 */
 	void startApplication(DoomToolsApplicationInstance instance);
-    
+	
 }

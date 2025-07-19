@@ -721,12 +721,12 @@ public class Loader<T>
 			}
 		}
 
-	    /**
-	     * Convenience method for: <code>cancel(false)</code>.
-	     * @return {@code false} if the task could not be cancelled,
-	     * typically because it has already completed normally;
-	     * {@code true} otherwise
-	     */
+		/**
+		 * Convenience method for: <code>cancel(false)</code>.
+		 * @return {@code false} if the task could not be cancelled,
+		 * typically because it has already completed normally;
+		 * {@code true} otherwise
+		 */
 		public final boolean cancel()
 		{
 			return cancel(false);

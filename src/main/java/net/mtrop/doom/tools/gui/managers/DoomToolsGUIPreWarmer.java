@@ -17,10 +17,10 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  */
 public final class DoomToolsGUIPreWarmer 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIPreWarmer.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsGUIPreWarmer> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIPreWarmer());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIPreWarmer.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsGUIPreWarmer> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIPreWarmer());
 
 	/**
 	 * @return the singleton instance of this settings object.
@@ -34,10 +34,10 @@ public final class DoomToolsGUIPreWarmer
 	
 	private DoomToolsGUIPreWarmer()
 	{
-    	preWarmCompletionProviders();
-    	preWarmCommonImages();
-    	preWarmCommonIcons();
-    	preWarmCommonComponents();
+		preWarmCompletionProviders();
+		preWarmCommonImages();
+		preWarmCommonIcons();
+		preWarmCommonComponents();
 	}
 
 	/**

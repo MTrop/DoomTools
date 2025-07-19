@@ -21,10 +21,10 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  */
 public final class DoomToolsMessenger 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMessenger.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsMessenger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsMessenger());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsMessenger.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsMessenger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsMessenger());
 
 	/**
 	 * @return the singleton instance of this settings object.

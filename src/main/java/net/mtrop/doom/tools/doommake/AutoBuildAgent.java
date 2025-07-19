@@ -36,24 +36,24 @@ public class AutoBuildAgent
 	/** The project directory. */
 	private File projectDirectory;
 	/** Agent listener. */
-    private Listener listener;
-    
-    /** Properties. */
-    private Properties mergedProperties;
-    /** Local Project properties path. */
-    private File propertiesPath;
-    /** Project properties path. */
-    private File projectPropertiesPath;
-    /** Source directory. */
-    private File sourceDirectory;
-    
-    /** "Currently building" internal flag. */
-    private volatile boolean currentlyBuilding;
-    /** Watcher thread. */
-    private volatile WatchThread watchThread;
-    /** Watcher thread. */
-    private volatile BuildThread buildThread;
-    
+	private Listener listener;
+	
+	/** Properties. */
+	private Properties mergedProperties;
+	/** Local Project properties path. */
+	private File propertiesPath;
+	/** Project properties path. */
+	private File projectPropertiesPath;
+	/** Source directory. */
+	private File sourceDirectory;
+	
+	/** "Currently building" internal flag. */
+	private volatile boolean currentlyBuilding;
+	/** Watcher thread. */
+	private volatile WatchThread watchThread;
+	/** Watcher thread. */
+	private volatile BuildThread buildThread;
+	
 	/**
 	 * Creates an auto-build agent class.
 	 * @param projectDirectory the project directory to listen to.

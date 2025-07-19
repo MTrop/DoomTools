@@ -22,11 +22,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class EditorSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "editor.properties";
+	private static final String SETTINGS_FILENAME = "editor.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<EditorSettingsManager> INSTANCE = new SingletonProvider<>(() -> new EditorSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<EditorSettingsManager> INSTANCE = new SingletonProvider<>(() -> new EditorSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */

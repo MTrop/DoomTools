@@ -434,10 +434,10 @@ public class TextureProjectGenerator extends ProjectGenerator
 				"\t\treturn;",
 				"\t}\n",
 				"\twadmerge(file(MERGESCRIPT_RELEASE), [",
-        		"\t\tgetBuildDirectory()",
-        		"\t\t,getSourceDirectory()",
-        		"\t\t,getProjectWad()"
-        	)
+				"\t\tgetBuildDirectory()",
+				"\t\t,getSourceDirectory()",
+				"\t\t,getProjectWad()"
+			)
 		).createIn(targetDirectory, replacerMap);
 		
 		// Add merge script.
@@ -472,7 +472,7 @@ public class TextureProjectGenerator extends ProjectGenerator
 		descriptor(
 			fileContentAppend("doommake.script", 
 				"\t]);"
-        	)
+			)
 		).createIn(targetDirectory, replacerMap);
 		
 		// Add release script footer.

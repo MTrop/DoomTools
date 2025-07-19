@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WadScriptExecutorSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wadscript-executor.properties";
+	private static final String SETTINGS_FILENAME = "wadscript-executor.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WadScriptExecutorSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadScriptExecutorSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WadScriptExecutorSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadScriptExecutorSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class WadScriptExecutorSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

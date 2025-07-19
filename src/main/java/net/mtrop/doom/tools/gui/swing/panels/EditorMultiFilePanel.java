@@ -105,10 +105,10 @@ public class EditorMultiFilePanel extends JPanel
 {
 	private static final long serialVersionUID = -3208735521175265227L;
 	
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(EditorMultiFilePanel.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(EditorMultiFilePanel.class); 
 
-    private static final FileFilter[] NO_FILTERS = new FileFilter[0];
+	private static final FileFilter[] NO_FILTERS = new FileFilter[0];
 
 	private static final Set<WeakReference<EditorMultiFilePanel>> ACTIVE_PANELS = new HashSet<>(8);
 

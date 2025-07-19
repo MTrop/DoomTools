@@ -94,8 +94,8 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
  */
 public final class DoomToolsGUIUtils 
 {
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsGUIUtils> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIUtils());
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsGUIUtils> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIUtils());
 	
 	/**
 	 * @return the singleton instance of this object.

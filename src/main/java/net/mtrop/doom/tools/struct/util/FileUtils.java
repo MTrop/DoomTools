@@ -41,14 +41,14 @@ public final class FileUtils
 
 	private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 	
-    private static final Comparator<File> FILELIST_COMPARATOR;
+	private static final Comparator<File> FILELIST_COMPARATOR;
 	private static final Comparator<File> FILE_COMPARATOR;
 
 	static
 	{
 		final Comparator<File> fileNameComparator = System.getProperty("os.name").contains("Windows")
 				? (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
-			    : (a, b) -> a.getPath().compareTo(b.getPath())
+				: (a, b) -> a.getPath().compareTo(b.getPath())
 		;
 		
 		FILELIST_COMPARATOR = (a, b) -> (

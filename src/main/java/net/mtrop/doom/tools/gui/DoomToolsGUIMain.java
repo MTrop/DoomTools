@@ -137,15 +137,15 @@ public final class DoomToolsGUIMain
 		}
 	}
 	
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIMain.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIMain.class); 
 
-    /** Instance socket. */
+	/** Instance socket. */
 	private static final int INSTANCE_SOCKET_PORT = 54666;
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsGUIMain> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIMain());
-    /** Application starter linker. */
-    private static final DoomToolsApplicationStarter STARTER = new DoomToolsApplicationStarter()
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsGUIMain> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIMain());
+	/** Application starter linker. */
+	private static final DoomToolsApplicationStarter STARTER = new DoomToolsApplicationStarter()
 	{
 		@Override
 		public void startApplication(DoomToolsApplicationInstance applicationInstance) 
@@ -153,11 +153,11 @@ public final class DoomToolsGUIMain
 			DoomToolsGUIMain.startApplication(applicationInstance);
 		}
 	};
-    
-    /** Instance socket. */
-    @SuppressWarnings("unused")
+	
+	/** Instance socket. */
+	@SuppressWarnings("unused")
 	private static ServerSocket instanceSocket;
-    
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -230,7 +230,7 @@ public final class DoomToolsGUIMain
 			
 			if (choice == Boolean.TRUE)
 			{
-		    	LOG.info("Forcing JVM shutdown...");
+				LOG.info("Forcing JVM shutdown...");
 				System.exit(2);
 			}
 			
@@ -275,7 +275,7 @@ public final class DoomToolsGUIMain
 	}
 	
 
-    /* ==================================================================== */
+	/* ==================================================================== */
 
 	/**
 	 * Main method - check for running local instance. If running, do nothing.
@@ -289,13 +289,13 @@ public final class DoomToolsGUIMain
 		// no args - run main application.
 		if (args.length == 0)
 		{
-	    	if (isAlreadyRunning())
-	    	{
-	    		System.err.println("DoomTools is already running.");
-	    		System.exit(1);
-	    		return;
-	    	}
-	    	DoomToolsGUIPreWarmer.get();
+			if (isAlreadyRunning())
+			{
+				System.err.println("DoomTools is already running.");
+				System.exit(1);
+				return;
+			}
+			DoomToolsGUIPreWarmer.get();
 			get().createAndDisplayMainWindow();
 		}
 
@@ -445,87 +445,87 @@ public final class DoomToolsGUIMain
 		}
 		else
 		{
-    		SwingUtils.error("Expected valid application name.");
-    		System.err.println("ERROR: Expected valid application name.");
-    		System.exit(-1);
-        	return;
+			SwingUtils.error("Expected valid application name.");
+			System.err.println("ERROR: Expected valid application name.");
+			System.exit(-1);
+			return;
 		}
 	}
 
 	/** Settings singleton. */
 	private DoomToolsSettingsManager settings;
 	/** Language manager. */
-    private DoomToolsLanguageManager language;
-    /** The main window. */
-    private DoomToolsMainWindow window;
-    
-    private DoomToolsGUIMain()
-    {
-    	this.settings = DoomToolsSettingsManager.get();
-    	this.language = DoomToolsLanguageManager.get();
-    	this.window = null;
-    }
+	private DoomToolsLanguageManager language;
+	/** The main window. */
+	private DoomToolsMainWindow window;
+	
+	private DoomToolsGUIMain()
+	{
+		this.settings = DoomToolsSettingsManager.get();
+		this.language = DoomToolsLanguageManager.get();
+		this.window = null;
+	}
 
-    /**
-     * Creates and displays the main window.
-     */
-    public void createAndDisplayMainWindow()
-    {
-    	LOG.info("Creating main window...");
-    	window = new DoomToolsMainWindow(this::attemptShutDown);
-    	window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-    	window.addWindowListener(new WindowAdapter()
-    	{
-    		@Override
-    		public void windowClosing(WindowEvent e) 
-    		{
-    			attemptShutDown();
-    		}
+	/**
+	 * Creates and displays the main window.
+	 */
+	public void createAndDisplayMainWindow()
+	{
+		LOG.info("Creating main window...");
+		window = new DoomToolsMainWindow(this::attemptShutDown);
+		window.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		window.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e) 
+			{
+				attemptShutDown();
+			}
 		});
-    	
-    	Rectangle windowBounds;
-    	if ((windowBounds = settings.getBounds()) != null)
-    		window.setBounds(windowBounds);
-    	
-    	window.setVisible(true);
+		
+		Rectangle windowBounds;
+		if ((windowBounds = settings.getBounds()) != null)
+			window.setBounds(windowBounds);
+		
+		window.setVisible(true);
 		if (settings.getBoundsMaximized())
 			window.setExtendedState(window.getExtendedState() | DoomToolsMainWindow.MAXIMIZED_BOTH);
 		
-    	LOG.info("Window created.");
-    }
+		LOG.info("Window created.");
+	}
 
-    // Attempts a shutdown, prompting the user first.
-    private boolean attemptShutDown()
-    {
-    	LOG.debug("Shutdown attempted.");
+	// Attempts a shutdown, prompting the user first.
+	private boolean attemptShutDown()
+	{
+		LOG.debug("Shutdown attempted.");
 		if (SwingUtils.yesTo(window, language.getText("doomtools.quit")))
 		{
 			shutDown();
 			return true;
 		}
 		return false;
-    }
+	}
 
-    // Saves and quits.
-    private void shutDown()
-    {
-    	LOG.info("Shutting down DoomTools GUI...");
-    	
-    	LOG.info("Sending close to all open apps...");
-    	if (!window.shutDownApps())
-    	{
-        	LOG.info("Shutdown aborted. All apps could not be closed!");
-    		return;
-    	}
-    	
-    	LOG.debug("Disposing main window...");
-    	settings.setBounds(window);
-    	window.setVisible(false);
-    	window.dispose();
-    	LOG.debug("Main window disposed.");
-    	
-    	LOG.info("Exiting JVM...");
-    	System.exit(0);
-    }
-    
+	// Saves and quits.
+	private void shutDown()
+	{
+		LOG.info("Shutting down DoomTools GUI...");
+		
+		LOG.info("Sending close to all open apps...");
+		if (!window.shutDownApps())
+		{
+			LOG.info("Shutdown aborted. All apps could not be closed!");
+			return;
+		}
+		
+		LOG.debug("Disposing main window...");
+		settings.setBounds(window);
+		window.setVisible(false);
+		window.dispose();
+		LOG.debug("Main window disposed.");
+		
+		LOG.info("Exiting JVM...");
+		System.exit(0);
+	}
+	
 }

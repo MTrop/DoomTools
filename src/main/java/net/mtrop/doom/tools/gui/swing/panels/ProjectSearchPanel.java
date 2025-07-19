@@ -53,8 +53,8 @@ public class ProjectSearchPanel extends JPanel
 {
 	private static final long serialVersionUID = 4260115080161777455L;
 
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(ProjectSearchPanel.class); 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(ProjectSearchPanel.class); 
 
 	private DoomToolsTaskManager tasks;
 	private DoomToolsLanguageManager language;

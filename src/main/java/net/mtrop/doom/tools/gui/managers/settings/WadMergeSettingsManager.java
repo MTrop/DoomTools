@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WadMergeSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wadmerge.properties";
+	private static final String SETTINGS_FILENAME = "wadmerge.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WadMergeSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadMergeSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WadMergeSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadMergeSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class WadMergeSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

@@ -60,7 +60,7 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 public class WadScriptEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptEditorApp.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(WadScriptEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -77,7 +77,7 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 		.append("}\n")
 	.toString();
 	
-    // Singletons
+	// Singletons
 
 	private WadScriptSettingsManager settings;
 	

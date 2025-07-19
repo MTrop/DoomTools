@@ -46,9 +46,9 @@ import net.mtrop.doom.tools.struct.util.ObjectUtils;
 public class DecoHackCompletionProvider extends CommonCompletionProvider
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackCompletionProvider.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(DecoHackCompletionProvider.class); 
 
-    private static final Map<String, Consumer<HTMLWriter>> THING_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
+	private static final Map<String, Consumer<HTMLWriter>> THING_HARDCODE_DOCS = ObjectUtils.apply(new HashMap<>(), (map) -> {
 		map.put("1", (html) -> {
 			html.tag("div", "This is the player actor. It is created several times per player, especially during deathmatch and co-op.");
 		});

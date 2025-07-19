@@ -451,11 +451,11 @@ public final class ImageUtils
 		 */
 		protected static void checkRaster(ColorModel colorModel, Raster raster) 
 		{
-	        if (!colorModel.isCompatibleRaster(raster))
-	            throw new UnsupportedOperationException("ColorModel is not compatible with raster.");
-	        if (raster.getSampleModel().getDataType() != DataBuffer.TYPE_INT)
-	            throw new UnsupportedOperationException("Expected integer data type from raster.");
-	    }
+			if (!colorModel.isCompatibleRaster(raster))
+				throw new UnsupportedOperationException("ColorModel is not compatible with raster.");
+			if (raster.getSampleModel().getDataType() != DataBuffer.TYPE_INT)
+				throw new UnsupportedOperationException("Expected integer data type from raster.");
+		}
 		
 		/**
 		 * Mixes two pixels together.

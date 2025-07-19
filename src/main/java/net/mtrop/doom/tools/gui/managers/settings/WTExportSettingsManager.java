@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WTExportSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wtexport.properties";
+	private static final String SETTINGS_FILENAME = "wtexport.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WTExportSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WTExportSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WTExportSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WTExportSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,7 +36,7 @@ public final class WTExportSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
 
 	/* ==================================================================== */
 

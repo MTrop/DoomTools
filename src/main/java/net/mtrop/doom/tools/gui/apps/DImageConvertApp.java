@@ -62,13 +62,13 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 	/** Info file name. */
 	private JFormField<String> infoFileNameField;
 	
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
-    public DImageConvertApp()
-    {
-    	this.settings = DImageConvertSettingsManager.get();
-    	
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
+	public DImageConvertApp()
+	{
+		this.settings = DImageConvertSettingsManager.get();
+		
 		this.inputFileField = fileField(
 			(current) -> utils.chooseFileOrDirectory(
 				getApplicationContainer(), 
@@ -116,8 +116,8 @@ public class DImageConvertApp extends DoomToolsApplicationInstance
 		);
 
 		this.statusPanel = new DoomToolsStatusPanel();
-    }
-    
+	}
+	
 	@Override
 	public String getTitle() 
 	{

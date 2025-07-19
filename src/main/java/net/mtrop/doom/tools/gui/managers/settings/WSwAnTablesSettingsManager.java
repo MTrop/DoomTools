@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WSwAnTablesSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wswantbl.properties";
+	private static final String SETTINGS_FILENAME = "wswantbl.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WSwAnTablesSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WSwAnTablesSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WSwAnTablesSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WSwAnTablesSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,10 +36,10 @@ public final class WSwAnTablesSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
-    private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
-    private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
+	private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
+	private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
 
 	/* ==================================================================== */
 

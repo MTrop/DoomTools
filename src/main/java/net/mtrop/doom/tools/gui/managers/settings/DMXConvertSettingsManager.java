@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DMXConvertSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "dmxconv.properties";
+	private static final String SETTINGS_FILENAME = "dmxconv.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DMXConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DMXConvertSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DMXConvertSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DMXConvertSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,8 +36,8 @@ public final class DMXConvertSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String PATH_FFMPEG = "path.ffmpeg";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_FFMPEG = "path.ffmpeg";
 
 	/* ==================================================================== */
 

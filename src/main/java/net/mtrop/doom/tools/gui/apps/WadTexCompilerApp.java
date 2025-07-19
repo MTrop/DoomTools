@@ -40,7 +40,7 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class WadTexCompilerApp extends DoomToolsApplicationInstance
 {
-    // Singletons
+	// Singletons
 
 	private WadTexCompilerSettingsManager settings;
 	

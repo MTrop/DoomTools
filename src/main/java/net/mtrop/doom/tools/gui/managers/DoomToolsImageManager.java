@@ -21,10 +21,10 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
  */
 public final class DoomToolsImageManager 
 {
-    /** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsImageManager.class); 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DoomToolsImageManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsImageManager());
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsImageManager.class); 
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DoomToolsImageManager> INSTANCE = new SingletonProvider<>(() -> new DoomToolsImageManager());
 	
 	/**
 	 * @return the singleton instance of this settings object.

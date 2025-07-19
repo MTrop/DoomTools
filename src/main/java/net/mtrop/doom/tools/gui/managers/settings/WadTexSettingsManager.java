@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WadTexSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wadtex.properties";
+	private static final String SETTINGS_FILENAME = "wadtex.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WadTexSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadTexSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WadTexSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadTexSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,11 +36,11 @@ public final class WadTexSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
-    private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
-    private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
-    private static final String SHOW_BUDGET = "show.budget";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
+	private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
+	private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
+	private static final String SHOW_BUDGET = "show.budget";
 
 	/* ==================================================================== */
 

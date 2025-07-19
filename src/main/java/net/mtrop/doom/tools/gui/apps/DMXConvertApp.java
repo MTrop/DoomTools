@@ -54,13 +54,13 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 	private JFormField<Boolean> jspiConversionField;
 	/** Recursive option field. */
 	private JFormField<Boolean> recursiveField;
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
-    public DMXConvertApp()
-    {
-    	this.settings = DMXConvertSettingsManager.get();
-    	
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
+	public DMXConvertApp()
+	{
+		this.settings = DMXConvertSettingsManager.get();
+		
 		this.inputFileField = new FileListPanel(language.getText("dmxconv.input"), 
 			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
 			(files) -> {
@@ -93,8 +93,8 @@ public class DMXConvertApp extends DoomToolsApplicationInstance
 		this.recursiveField = checkBoxField(checkBox()); 
 		
 		this.statusPanel = new DoomToolsStatusPanel();
-    }
-    
+	}
+	
 	@Override
 	public String getTitle() 
 	{

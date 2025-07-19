@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class WadScriptSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "wadscript.properties";
+	private static final String SETTINGS_FILENAME = "wadscript.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<WadScriptSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadScriptSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<WadScriptSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadScriptSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,8 +36,8 @@ public final class WadScriptSettingsManager extends DoomToolsSettings
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String TREE_WIDTH = "tree.width";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String TREE_WIDTH = "tree.width";
 
 	/* ==================================================================== */
 

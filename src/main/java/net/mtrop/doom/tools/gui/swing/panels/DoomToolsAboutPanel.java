@@ -57,7 +57,7 @@ public class DoomToolsAboutPanel extends JPanel
 	 */
 	public DoomToolsAboutPanel()
 	{
-	    DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
 		String versionString = Version.DOOMTOOLS;
 		

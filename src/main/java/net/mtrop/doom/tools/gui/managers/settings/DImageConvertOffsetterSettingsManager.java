@@ -21,11 +21,11 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 public final class DImageConvertOffsetterSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-    private static final String SETTINGS_FILENAME = "dimgconv-offsetter.properties";
+	private static final String SETTINGS_FILENAME = "dimgconv-offsetter.properties";
 
-    /** The instance encapsulator. */
-    private static final SingletonProvider<DImageConvertOffsetterSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DImageConvertOffsetterSettingsManager());
-    
+	/** The instance encapsulator. */
+	private static final SingletonProvider<DImageConvertOffsetterSettingsManager> INSTANCE = new SingletonProvider<>(() -> new DImageConvertOffsetterSettingsManager());
+	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
@@ -36,8 +36,8 @@ public final class DImageConvertOffsetterSettingsManager extends DoomToolsSettin
 	
 	/* ==================================================================== */
 	
-    private static final String PATH_LAST_FILE = "path.lastFile";
-    private static final String PATH_PALETTE_LAST_FILE = "path.palette.lastFile";
+	private static final String PATH_LAST_FILE = "path.lastFile";
+	private static final String PATH_PALETTE_LAST_FILE = "path.palette.lastFile";
 
 	/* ==================================================================== */
 

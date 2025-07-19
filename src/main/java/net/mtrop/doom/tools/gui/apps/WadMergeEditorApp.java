@@ -56,7 +56,7 @@ import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 public class WadMergeEditorApp extends DoomToolsApplicationInstance
 {
 	/** Logger. */
-    private static final Logger LOG = DoomToolsLogger.getLogger(WadMergeEditorApp.class); 
+	private static final Logger LOG = DoomToolsLogger.getLogger(WadMergeEditorApp.class); 
 
 	private static final AtomicLong NEW_COUNTER = new AtomicLong(1L);
 
@@ -74,7 +74,7 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 		.append("end\n")
 	.toString();
 	
-    // Singletons
+	// Singletons
 
 	private WadMergeSettingsManager settings;
 	

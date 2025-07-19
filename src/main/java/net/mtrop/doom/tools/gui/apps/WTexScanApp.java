@@ -38,11 +38,11 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 {
 	private WTexScanSettingsManager settings;
 	
-    /** Parameter panel. */
-    private WTexScanParametersPanel parametersPanel;
-    /** Status message. */
-    private DoomToolsStatusPanel statusPanel;
-    
+	/** Parameter panel. */
+	private WTexScanParametersPanel parametersPanel;
+	/** Status message. */
+	private DoomToolsStatusPanel statusPanel;
+	
 	/**
 	 * Creates a new WTexScan app instance.
 	 */
