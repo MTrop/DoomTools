@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.27.1
+
+* `Added` [GUI-Studio] Added DImgConv graphics offsetter to directory context menu.
+
+
 ### Changed for 0.27.0
 
 * `Fixed` Updated Preprocessor - some directives were not ignored on false code blocks when they should have been.

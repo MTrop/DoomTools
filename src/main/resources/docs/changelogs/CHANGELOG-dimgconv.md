@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.5.0
+
+* `Added` [GUI] A graphics offsetter for bulk offsetting a directory of patches. Accessible via GUI or in DoomMake Studio.
+
+
 ### Changed for 1.4.1
 
 * `Fixed` Unrecognized image formats will no longer NullPointerException out.
