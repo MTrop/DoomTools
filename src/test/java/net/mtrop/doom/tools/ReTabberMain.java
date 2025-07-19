@@ -73,7 +73,7 @@ public final class ReTabberMain
 			if (Character.isWhitespace(c))
 			{
 				if (c == '\t')
-					spaces += SPACE_AMOUNT;
+					spaces = retabAmount(spaces, SPACE_AMOUNT);
 				else
 					spaces++;
 			}
@@ -116,6 +116,11 @@ public final class ReTabberMain
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private static int retabAmount(int count, int tabAmount)
+	{
+		return (count + tabAmount) / tabAmount * tabAmount;
 	}
 	
 	/**
