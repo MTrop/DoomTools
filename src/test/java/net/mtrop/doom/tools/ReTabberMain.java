@@ -73,7 +73,7 @@ public final class ReTabberMain
 			if (Character.isWhitespace(c))
 			{
 				if (c == '\t')
-					sb.append('\t');
+					spaces += SPACE_AMOUNT;
 				else
 					spaces++;
 			}
