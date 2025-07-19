@@ -1115,6 +1115,8 @@ public final class DoomImageConvertMain
 	private static void usage(PrintStream out)
 	{
 		out.println("Usage: dimgconv [--help | -h | --version]");
+		out.println("                --gui");
+		out.println("                --offsetter");
 		out.println("                [source] [switches]");
 	}
 	
@@ -1155,6 +1157,9 @@ public final class DoomImageConvertMain
 		out.println("    --changelog         Prints the changelog, and exits.");
 		out.println();
 		out.println("    --gui               Starts the GUI version of this program.");
+		out.println();
+		out.println("    --offsetter         Starts the graphic offsetter program in the");
+		out.println("                        current directory.");
 		out.println();
 		out.println("[source]:");
 		out.println("    The source file or directory to read from.");
