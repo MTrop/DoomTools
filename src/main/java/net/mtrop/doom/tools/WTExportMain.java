@@ -678,8 +678,14 @@ public final class WTExportMain
 			if (unit.animatedTexture.containsKey(textureName))
 			{
 				for (String s : unit.animatedTexture.get(textureName))
-					if (addToLists(textureSet, textureList, s) && !options.noSwitches)
+					addToLists(textureSet, textureList, s);
+
+				// iterate again for associated switches.
+				if (!options.noSwitches)
+				{
+					for (String s : unit.animatedTexture.get(textureName))
 						readAndAddSwitchTextures(unit, s);
+				}
 			}
 		}
 
