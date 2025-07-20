@@ -264,6 +264,8 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			editorPanel.getChangeSpacingMenuItem(),
 			editorPanel.getChangeLineEndingMenuItem(),
 			separator(),
+			utils.createItemFromLanguageKey("texteditor.transformer.menu.name", editorPanel.createTextTransformerMenuItems()),
+			separator(),
 			editorPanel.getEditorPreferencesMenuItem()
 		);
 	}

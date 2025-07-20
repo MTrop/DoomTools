@@ -871,6 +871,35 @@ public class EditorMultiFilePanel extends JPanel
 	}
 	
 	/**
+	 * Creates this editor panel's text transformer menu items.
+	 * @return the list of text transformer actions.
+	 */
+	public MenuNode[] createTextTransformerMenuItems()
+	{
+		TextTransformer[] transformers  = TextTransformer.values();
+		MenuNode[] out = new MenuNode[transformers.length];
+		int i = 0;
+		for (TextTransformer tf : transformers)
+		{
+			out[i++] = utils.createItemFromLanguageKey(tf.getNameKeyPrefix(), (item) -> 
+			{
+				forCurrentEditor((handle) -> 
+				{
+					RSyntaxTextArea textArea = handle.editorPanel.textArea;
+					String text = textArea.getSelectedText();
+					if (text != null)
+					{
+						String outText = tf.transformString(handle, text);
+						textArea.replaceSelection(outText);
+					}
+				});
+			});
+		}
+		
+		return out;
+	}
+	
+	/**
 	 * Gets the amount of open editors.
 	 * @return the amount of editors still open.
 	 */
@@ -3097,4 +3126,223 @@ public class EditorMultiFilePanel extends JPanel
 		
 	}
 
+	/**
+	 * Text transformers.
+	 */
+	public enum TextTransformer
+	{
+		UPPERCASE("texteditor.transformer.uppercase.name")
+		{
+			@Override
+			public String transformString(EditorHandle handle, String input)
+			{
+				return input.toUpperCase();
+			}
+		},
+		
+		LOWERCASE("texteditor.transformer.lowercase.name")
+		{
+			@Override
+			public String transformString(EditorHandle handle, String input)
+			{
+				return input.toLowerCase();
+			}
+		},
+		
+		INVERT("texteditor.transformer.invert.name")
+		{
+			@Override
+			public String transformString(EditorHandle handle, String input)
+			{
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < input.length(); i++)
+				{
+					char c = input.charAt(i);
+					sb.append(Character.isUpperCase(c) ? Character.toLowerCase(c) : Character.toUpperCase(c));
+				}
+				return sb.toString();
+			}
+		},
+		
+		HARDTABS("texteditor.transformer.hardtabs.name")
+		{
+			@Override
+			public String transformString(EditorHandle handle, String input)
+			{
+				return respaceText(handle, input);
+			}
+			
+			private String respaceText(EditorHandle handle, String text)
+			{
+				StringBuilder sb = new StringBuilder();
+				final int tabSize = handle.editorPanel.textArea.getTabSize();
+				
+				try (BufferedReader br = new BufferedReader(new StringReader(text)))
+				{
+					String line;
+					while ((line = br.readLine()) != null)
+					{
+						sb.append(respaceLine(handle, line, tabSize)).append('\n');
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+				}
+				
+				// delete last newline
+				sb.delete(sb.length() - 1, sb.length());
+				
+				return sb.toString();
+			}
+
+			private String respaceLine(EditorHandle handle, String line, int tabSize)
+			{
+				char c;
+				int i = 0;
+				int spaces = 0;
+				char[] lineChars = line.toCharArray();
+				StringBuilder sb = new StringBuilder();
+				
+				while (i < lineChars.length)
+				{
+					c = lineChars[i];
+					
+					if (Character.isWhitespace(c))
+					{
+						if (c == '\t')
+							spaces = retabAmount(spaces, tabSize);
+						else
+							spaces++;
+					}
+					else
+					{
+						break;
+					}
+					i++;
+				}
+				
+				while (spaces >= tabSize)
+				{
+					sb.append('\t');
+					spaces -= tabSize;
+				}
+
+				while (spaces-- > 0)
+					sb.append(' ');
+
+				while (i < lineChars.length)
+					sb.append(lineChars[i++]);
+				
+				return sb.toString();
+			}
+			
+			private int retabAmount(int count, int tabAmount)
+			{
+				return (count + tabAmount) / tabAmount * tabAmount;
+			}
+
+		},
+		
+		SOFTSPACES("texteditor.transformer.softspaces.name")
+		{
+			@Override
+			public String transformString(EditorHandle handle, String input)
+			{
+				return respaceText(handle, input);
+			}
+			
+			private String respaceText(EditorHandle handle, String text)
+			{
+				StringBuilder sb = new StringBuilder();
+				StringBuilder spaces = new StringBuilder();
+				final int tabSize = handle.editorPanel.textArea.getTabSize();
+
+				for (int i = 0; i < tabSize; i++)
+					spaces.append(' ');
+				
+				try (BufferedReader br = new BufferedReader(new StringReader(text)))
+				{
+					String line;
+					while ((line = br.readLine()) != null)
+					{
+						sb.append(respaceLine(handle, line, spaces.toString(), tabSize)).append('\n');
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+				}
+				
+				// delete last newline
+				sb.delete(sb.length() - 1, sb.length());
+
+				return sb.toString();
+			}
+
+			private String respaceLine(EditorHandle handle, String line, String spaceChunk, int tabSize)
+			{
+				char c;
+				int i = 0;
+				int spaces = 0;
+				char[] lineChars = line.toCharArray();
+				StringBuilder sb = new StringBuilder();
+				
+				while (i < lineChars.length)
+				{
+					c = lineChars[i];
+					
+					if (Character.isWhitespace(c))
+					{
+						if (c == '\t')
+							spaces = retabAmount(spaces, tabSize);
+						else
+							spaces++;
+					}
+					else
+					{
+						break;
+					}
+					i++;
+				}
+				
+				while (spaces >= tabSize)
+				{
+					sb.append(spaceChunk);
+					spaces -= tabSize;
+				}
+
+				while (spaces-- > 0)
+					sb.append(' ');
+
+				while (i < lineChars.length)
+					sb.append(lineChars[i++]);
+				
+				return sb.toString();
+			}
+			
+			private int retabAmount(int count, int tabAmount)
+			{
+				return (count + tabAmount) / tabAmount * tabAmount;
+			}
+
+		},
+		
+		;
+		
+		private final String nameKeyPrefix;
+		
+		private TextTransformer(String nameKeyPrefix)
+		{
+			this.nameKeyPrefix = nameKeyPrefix;
+		}
+		
+		public String getNameKeyPrefix()
+		{
+			return nameKeyPrefix;
+		}
+		
+		public abstract String transformString(EditorHandle handle, String input);
+	}
+	
 }

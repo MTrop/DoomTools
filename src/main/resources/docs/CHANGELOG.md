@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-07-20** [GUI] Text Transformation shortcuts added to editors.
+
 - **2024-07-15** [GUI] You can now set the default folder for file path browsing, if other apps do not.
 
 - **2024-04-26** Updated JSON to `1.4.1`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.1-RELEASE)
