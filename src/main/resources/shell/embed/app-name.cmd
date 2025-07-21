@@ -60,4 +60,4 @@ REM =========================
 "%JAVAEXE%" -cp "%DOOMTOOLS_PATH%\%DOOMTOOLS_JAR%" %JAVAOPTS% %MAINCLASS% %*
 
 :_end
-ENDLOCAL
+ENDLOCAL && exit /B %ERRORLEVEL%
