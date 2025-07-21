@@ -203,7 +203,6 @@ public final class ImageUtils
 			}
 		},
 		
-		/** @since 1.10.2.1 */
 		DESATURATE
 		{
 			@Override
@@ -375,7 +374,6 @@ public final class ImageUtils
 	/**
 	 * A composite that multiplies pixel color together.
 	 * The scalar amount for the multiply per pixel is taken from the alpha component.  
-	 * @since 1.10.2.1
 	 */
 	public static final class DesaturationComposite implements Composite
 	{
@@ -617,7 +615,6 @@ public final class ImageUtils
 
 	/**
 	 * The composite context for {@link DesaturationComposite}s.
-	 * @since 1.10.2.1
 	 */
 	public static class DesaturationCompositeContext extends ARGBCompositeContext
 	{

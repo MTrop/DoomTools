@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -267,9 +266,7 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		Graphics2D canvasGraphics = canvasImage.createGraphics();
 		
 		// force nearest rendering mode.
-		canvasGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-		canvasGraphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		canvasGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		ImageUtils.ResamplingType.NEAREST.setHints(canvasGraphics);
 		
 		AffineTransform prevTransform = canvasGraphics.getTransform();
 		
