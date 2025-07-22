@@ -484,7 +484,7 @@ public class GitRepositoryPanel extends JPanel
 		}		
 		
 		setActionsEnabled(false);
-		String[] paragraphs = content.split("\\n\\n+");
+		String[] paragraphs = content.split("\\n+");
 		
 		int result;
 		if ((result = client.commit(paragraphs)) != 0)
