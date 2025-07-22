@@ -251,7 +251,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			))
 		);
 				
-		return containerOf(borderLayout(4, 0),
+		return containerOf(borderLayout(4, 4),
 			node(BorderLayout.WEST, dimension(150, 1), directoryPanel), 
 			node(BorderLayout.CENTER, dimension(512, 400), canvasPanel),
 			node(BorderLayout.SOUTH, statusPanel)
