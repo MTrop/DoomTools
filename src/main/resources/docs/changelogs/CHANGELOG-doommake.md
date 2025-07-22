@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.27.2
+
+* `Fixed` [GUI-Studio] Fixed multi-line commit message logging.
+
+
 ### Changed for 0.27.1
 
 * `Added` [GUI-Studio] Added DImgConv graphics offsetter to directory context menu.
