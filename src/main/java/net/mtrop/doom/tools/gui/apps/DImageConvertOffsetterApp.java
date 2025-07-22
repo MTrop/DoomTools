@@ -43,6 +43,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertOffsetterSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas.GuideMode;
+import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -71,6 +72,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private JFormField<Short> offsetXField;
 	private JFormField<Short> offsetYField;
 	private JComboBox<GuideMode> guideModeField;
+	private JFormField<Boolean> autosaveField;
 	
 	private JList<File> fileList;
 	private DirectoryListModel fileListModel;
@@ -78,7 +80,10 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private File currentDirectory;
 	private JLabel currentDirectoryLabel;
 	private File currentFile;
+	private boolean autoSave;
 
+	private DoomToolsStatusPanel statusPanel;
+	
 	public DImageConvertOffsetterApp()
 	{
 		this.icons = DoomToolsIconManager.get();
@@ -99,10 +104,11 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		onPaletteFileSelect(paletteSourceField.getValue());
 
 		this.zoomFactorField = spinnerField(spinner(spinnerModel(1, 1, 4, .5), (c) -> onZoomFactorChanged((Double)c.getValue())));
-		this.offsetXField = shortField((short)0, (value) -> onOffsetXChanged(value));
-		this.offsetYField = shortField((short)0, (value) -> onOffsetYChanged(value));
+		this.offsetXField = shortField((short)0, this::onOffsetXChanged);
+		this.offsetYField = shortField((short)0, this::onOffsetYChanged);
 		this.guideModeField = comboBox(ObjectUtils.createList(GuideMode.SPRITE, GuideMode.HUD), this::onGuideModeChange);
-
+		this.autosaveField = checkBoxField(checkBox(language.getText("dimgconv.offsetter.autosave"), false, this::onAutoSaveChange));
+		
 		this.fileListModel = new DirectoryListModel();
 		this.fileList = list(fileListModel, ListSelectionMode.SINGLE, this::onFileSelect);
 		this.fileList.setCellRenderer(new FileListRenderer());
@@ -110,6 +116,10 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.currentDirectory = null;
 		this.currentDirectoryLabel = label("");
 		this.currentFile = null;
+		this.autoSave = false;
+		
+		this.statusPanel = new DoomToolsStatusPanel();
+		this.statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.ready"));
 
 		MouseControlAdapter canvasMouseAdapter = new MouseControlAdapter()
 		{
@@ -208,7 +218,10 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				node(BorderLayout.WEST, button(icons.getImage("folder.png"), (b) -> onDirectorySelect())),
 				node(BorderLayout.CENTER, currentDirectoryLabel)
 			)),
-			node(BorderLayout.CENTER, scroll(fileList))
+			node(BorderLayout.CENTER, scroll(fileList)),
+			node(BorderLayout.SOUTH, containerOf(flowLayout(Flow.LEFT),
+				node(autosaveField)
+			))
 		);
 		
 		JComponent canvasPanel = containerOf(borderLayout(0, 4),
@@ -240,7 +253,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				
 		return containerOf(borderLayout(4, 0),
 			node(BorderLayout.WEST, dimension(150, 1), directoryPanel), 
-			node(BorderLayout.CENTER, dimension(512, 400), canvasPanel)
+			node(BorderLayout.CENTER, dimension(512, 400), canvasPanel),
+			node(BorderLayout.SOUTH, statusPanel)
 		);
 	}
 	
@@ -258,6 +272,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		state.put("offset.y", String.valueOf(offsetYField.getValue()));
 		state.put("guide.mode", String.valueOf(guideModeField.getSelectedItem()));
 		
+		state.put("autosave", String.valueOf(autosaveField.getValue()));
+		
 		return state;
 	}
 	
@@ -273,7 +289,9 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		zoomFactorField.setValue(ValueUtils.parseDouble(state.get("zoom.factor"), 1));
 		offsetXField.setValue(ValueUtils.parseShort(state.get("offset.x"), (short)0));
 		offsetYField.setValue(ValueUtils.parseShort(state.get("offset.y"), (short)0));
-		guideModeField.setSelectedItem(ValueUtils.parse(state.get("guide.mode"), (s) -> s == null ? GuideMode.SPRITE : GuideMode.MAP_VALUES.get(s)));		
+		guideModeField.setSelectedItem(ValueUtils.parse(state.get("guide.mode"), (s) -> s == null ? GuideMode.SPRITE : GuideMode.MAP_VALUES.get(s)));
+		
+		autosaveField.setValue(ValueUtils.parseBoolean("autosave", false));
 	}
 
 	@Override
@@ -400,6 +418,11 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		canvas.setGuideMode(mode);
 	}
 	
+	private void onAutoSaveChange(boolean selected)
+	{
+		autoSave = selected;
+	}
+	
 	private void onFileSelect(List<File> file, boolean adjusting)
 	{
 		// one should be selected.
@@ -408,8 +431,9 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		// save previous
 		if (currentFile != null && canvas.offsetsDiffer())
 		{
-			if (SwingUtils.yesTo(language.getText("dimgconv.offsetter.save.changes", currentFile.getName())))
+			if (autoSave || SwingUtils.yesTo(language.getText("dimgconv.offsetter.save.changes", currentFile.getName())))
 			{
+				statusPanel.setActivityMessage(language.getText("dimgconv.offsetter.status.savingfile"));
 				if (canvas.getPicture() != null)
 				{
 					Picture p = canvas.getPicture();
@@ -418,14 +442,17 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					try (FileOutputStream fos = new FileOutputStream(currentFile))
 					{
 						p.writeBytes(fos);
+						statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", currentFile.getName()));
 					} 
 					catch (FileNotFoundException e) 
 					{
 						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", currentFile.getName()));
+						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
 					} 
 					catch (IOException e) 
 					{
 						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", currentFile.getName()));
+						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
 					}
 				}
 				else if (canvas.getPNGPicture() != null)
@@ -436,14 +463,17 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					try (FileOutputStream fos = new FileOutputStream(currentFile))
 					{
 						p.writeBytes(fos);
+						statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", currentFile.getName()));
 					} 
 					catch (FileNotFoundException e) 
 					{
 						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", currentFile.getName()));
+						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
 					} 
 					catch (IOException e) 
 					{
 						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", currentFile.getName()));
+						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
 					}
 				}
 				else
@@ -503,6 +533,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			}
 		} catch (IOException e) {
 			SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
 			canvas.clearPicture();
 			currentFile = null;
 		}

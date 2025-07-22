@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.5.1
+
+* `Added` [GUI] A status bar and an auto-save switch.
+
+
 ### Changed for 1.5.0
 
 * `Added` [GUI] A graphics offsetter for bulk offsetting a directory of patches. Accessible via GUI or in DoomMake Studio.
