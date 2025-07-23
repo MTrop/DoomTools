@@ -702,7 +702,7 @@ public interface RepositoryHelper
 		}
 
 		/**
-		 * Checks if Git is present on this system.
+		 * Checks if Mercurial is present on this system.
 		 */
 		public static void checkMercurial()
 		{
