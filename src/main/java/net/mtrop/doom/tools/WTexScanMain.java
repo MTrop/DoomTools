@@ -661,13 +661,13 @@ public final class WTexScanMain
 						if (child.getName().equalsIgnoreCase("sky1"))
 						{
 							String value = child.getValue().getStringValue();
-							if (value.startsWith("$")) // ignore LANGUAGE
+							if (!value.startsWith("$")) // ignore LANGUAGE
 								addTexture(value);
 						}
 						else if (child.getName().equalsIgnoreCase("sky2"))
 						{
 							String value = child.getValue().getStringValue();
-							if (value.startsWith("$")) // ignore LANGUAGE
+							if (!value.startsWith("$")) // ignore LANGUAGE
 								addTexture(value);
 						}
 					}
@@ -676,8 +676,8 @@ public final class WTexScanMain
 						if (child.getName().equalsIgnoreCase("flat"))
 						{
 							String value = child.getValue().getStringValue();
-							if (value.startsWith("$")) // ignore LANGUAGE
-								addTexture(value);
+							if (!value.startsWith("$")) // ignore LANGUAGE
+								addFlat(value);
 						}
 					}
 				}
