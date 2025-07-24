@@ -71,6 +71,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 
 		File[] files = texScanParametersPanel.getFiles();
+		File[] mapInfoFiles = texScanParametersPanel.getMapInfoFiles();
 		TexScanOutputMode mode = texScanParametersPanel.getOutputMode();
 		boolean noSkies = texScanParametersPanel.getSkipSkies();
 		boolean noMessages = texScanParametersPanel.getNoCommentMessages();
@@ -79,6 +80,10 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		state.put("wtexscan.files.count", String.valueOf(files.length));
 		for (int i = 0; i < files.length; i++) 
 			state.put("wtexscan.files." + i, files[i].getAbsolutePath());
+			
+		state.put("wtexscan.files.mapinfo.count", String.valueOf(mapInfoFiles.length));
+		for (int i = 0; i < mapInfoFiles.length; i++) 
+			state.put("wtexscan.files.mapinfo." + i, mapInfoFiles[i].getAbsolutePath());
 			
 		state.put("wtexscan.mode", mode.name());
 		state.put("wtexscan.noskies", String.valueOf(noSkies));
@@ -97,8 +102,8 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		for (int i = 0; i < textureWads.length; i++) 
 			state.put("wtexport.files." + i, textureWads[i].getAbsolutePath());
 			
-		state.put("wtexport.basewad", baseWad.getAbsolutePath());
-		state.put("wtexport.outputwad", outputWad.getAbsolutePath());
+		state.put("wtexport.basewad", baseWad != null ? baseWad.getAbsolutePath() : "");
+		state.put("wtexport.outputwad", outputWad != null ? outputWad.getAbsolutePath() : "");
 		state.put("wtexport.create", String.valueOf(create));
 		state.put("wtexport.nulltexture", nullTexture != null ? nullTexture : "");
 		state.put("wtexport.noanim", String.valueOf(noAnim));
@@ -110,17 +115,23 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public void setApplicationState(Map<String, String> state)
 	{
-		int texScanCount = ValueUtils.parseInt(state.get("wtexscan.files.count"), 0);
-
-		File[] texScanFiles = new File[texScanCount];
-		
 		final Function<String, File> fileParse = (input) -> ObjectUtils.isEmpty(input) ? null : new File(input);
 		final Function<String, TexScanOutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, TexScanOutputMode.class);
 		
+		int texScanCount = ValueUtils.parseInt(state.get("wtexscan.files.count"), 0);
+		File[] texScanFiles = new File[texScanCount];
 		for (int i = 0; i < texScanFiles.length; i++) 
 			texScanFiles[i] = ValueUtils.parse(state.get("wtexscan.files." + i), fileParse);
 
 		texScanParametersPanel.setFiles(texScanFiles);
+		
+		texScanCount = ValueUtils.parseInt(state.get("wtexscan.files.mapinfo.count"), 0);
+		texScanFiles = new File[texScanCount];
+		for (int i = 0; i < texScanFiles.length; i++) 
+			texScanFiles[i] = ValueUtils.parse(state.get("wtexscan.files.mapinfo." + i), fileParse);
+
+		texScanParametersPanel.setMapInfoFiles(texScanFiles);
+		
 		texScanParametersPanel.setOutputMode(ValueUtils.parse(state.get("wtexscan.mode"), modeParse));
 		texScanParametersPanel.setSkipSkies(ValueUtils.parseBoolean(state.get("wtexscan.noskies"), false));
 		texScanParametersPanel.setNoCommentMessages(ValueUtils.parseBoolean(state.get("wtexscan.nomessages"), false));
@@ -131,7 +142,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		for (int i = 0; i < texportFiles.length; i++) 
 			texportFiles[i] = ValueUtils.parse(state.get("wtexport.files." + i), fileParse);
 
-		texScanParametersPanel.setFiles(texportFiles);
+		texportParametersPanel.setTextureWads(texportFiles);
 		texportParametersPanel.setBaseWad(ValueUtils.parse(state.get("wtexport.basewad"), fileParse));
 		texportParametersPanel.setOutputWad(ValueUtils.parse(state.get("wtexport.outputwad"), fileParse));
 		texportParametersPanel.setCreate(ValueUtils.parseBoolean(state.get("wtexport.create"), false));
@@ -160,7 +171,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		return containerOf(dimension(640, 450), borderLayout(0, 4),
+		return containerOf(dimension(640, 600), borderLayout(0, 4),
 			node(BorderLayout.CENTER, containerOf(gridLayout(1, 2, 4, 0),
 				node(utils.createTitlePanel(language.getText("wtexscan.title"), texScanParametersPanel)),
 				node(utils.createTitlePanel(language.getText("wtexport.title"), texportParametersPanel))
@@ -213,6 +224,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	private void onDoPipe() 
 	{
 		File[] files = texScanParametersPanel.getFiles();
+		File[] mapInfoFiles = texScanParametersPanel.getMapInfoFiles();
 		TexScanOutputMode mode = texScanParametersPanel.getOutputMode();
 		boolean noSkies = texScanParametersPanel.getSkipSkies();
 		boolean noMessages = texScanParametersPanel.getNoCommentMessages();
@@ -239,7 +251,8 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		}
 
 		appCommon.onExecuteWTexScanToWTExport(getApplicationContainer(), statusPanel, 
-			files, 
+			files,
+			mapInfoFiles,
 			mode, 
 			noSkies, 
 			noMessages,

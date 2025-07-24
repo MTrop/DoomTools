@@ -42,6 +42,7 @@ public class WTexScanParametersPanel extends JPanel
 	private JFormField<Boolean> outputTexturesField;
 	private JFormField<Boolean> outputFlatsField;
 	private JFormField<Boolean> outputBothField;
+	private FileListPanel mapInfoListField;
 	private JFormField<Boolean> skipSkiesField;
 	private JFormField<Boolean> noCommentMessagesField;
 	private JFormField<String> mapNameField;
@@ -61,6 +62,16 @@ public class WTexScanParametersPanel extends JPanel
 			() -> settings.getLastTouchedFile()
 		);
 		this.fileListField.setFileFilter(utils.createWADContainerFilter());
+		
+		this.mapInfoListField = new FileListPanel(language.getText("wtexscan.files.mapinfo.label"), 
+			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
+			(files) -> {
+				if (files != null && files.length > 0)
+					settings.setLastTouchedFile(files[files.length - 1]);
+			},
+			() -> settings.getLastTouchedFile()
+		);
+		this.mapInfoListField.setFileFilter(utils.createTextFileFilter());
 		
 		JRadioButton textureButton = radio(false);
 		JRadioButton flatButton = radio(false);
@@ -89,6 +100,7 @@ public class WTexScanParametersPanel extends JPanel
 						))
 					))
 				)),
+				node(BorderLayout.CENTER, mapInfoListField),
 				node(BorderLayout.SOUTH, containerOf(
 					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.other.label"), TitledBorder.LEADING, TitledBorder.TOP), 
 					node(containerOf(createEmptyBorder(4, 4, 4, 4),
@@ -111,6 +123,16 @@ public class WTexScanParametersPanel extends JPanel
 	public void setFiles(File[] files)
 	{
 		fileListField.setFiles(files);
+	}
+	
+	public File[] getMapInfoFiles()
+	{
+		return mapInfoListField.getFiles();
+	}
+	
+	public void setMapInfoFiles(File[] files)
+	{
+		mapInfoListField.setFiles(files);
 	}
 	
 	public TexScanOutputMode getOutputMode() 

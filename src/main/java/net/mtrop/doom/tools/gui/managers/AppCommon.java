@@ -560,12 +560,13 @@ public final class AppCommon
 	 * @param parent the parent container for the modal.
 	 * @param statusPanel the status panel
 	 * @param sourceFiles 
+	 * @param mapInfoFiles 
 	 * @param outputMode 
 	 * @param noSkies 
 	 * @param noMessages 
 	 * @param mapName 
 	 */
-	public void onExecuteWTexScan(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
+	public void onExecuteWTexScan(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, File[] mapInfoFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
 	{
 		utils.createProcessModal(
 			parent, 
@@ -577,7 +578,7 @@ public final class AppCommon
 				language.getText("wtexscan.status.message.success"), 
 				language.getText("wtexscan.status.message.interrupt"), 
 				language.getText("wtexscan.status.message.error"), 
-				callWTexScan(sourceFiles, outputMode, noSkies, noMessages, mapName, stdout, stderr)
+				callWTexScan(sourceFiles, mapInfoFiles, outputMode, noSkies, noMessages, mapName, stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -661,6 +662,7 @@ public final class AppCommon
 	 * @param parent the parent container for the modal.
 	 * @param statusPanel the status panel
 	 * @param sourceFiles 
+	 * @param mapInfoFiles 
 	 * @param outputMode 
 	 * @param noSkies 
 	 * @param noMessages 
@@ -673,7 +675,7 @@ public final class AppCommon
 	 * @param noSwitch 
 	 * @param nullTex 
 	 */
-	public void onExecuteWTexScanToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
+	public void onExecuteWTexScanToWTExport(Container parent, final DoomToolsStatusPanel statusPanel, File[] sourceFiles, File[] mapInfoFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
 	{
 		utils.createProcessModal(
 			parent, 
@@ -691,7 +693,7 @@ public final class AppCommon
 					ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
 					PrintStream byteOut = new PrintStream(bos);
 					
-					result = callWTexScan(sourceFiles, outputMode, noSkies, noMessages, mapName, byteOut, stderr).result();
+					result = callWTexScan(sourceFiles, mapInfoFiles, outputMode, noSkies, noMessages, mapName, byteOut, stderr).result();
 					if (result != 0)
 						return result;
 					
@@ -1043,7 +1045,7 @@ public final class AppCommon
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 	
-	public InstancedFuture<Integer> callWTexScan(File[] sourceFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
+	public InstancedFuture<Integer> callWTexScan(File[] sourceFiles, File[] mapInfoFiles, TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
 	{
 		ProcessCallable callable = Common.spawnJava(WTexScanMain.class);
 		
@@ -1073,6 +1075,9 @@ public final class AppCommon
 
 		if (mapName != null)
 			callable.arg(WTexScanMain.SWITCH_MAP).arg(mapName);
+		
+		for (File f : mapInfoFiles)
+			callable.arg(WTexScanMain.SWITCH_MAPINFO).arg(f.getAbsolutePath());
 		
 		callable
 			.setOut(stdout)

@@ -4,6 +4,8 @@ WTEXport
 ### Changed for 1.7.2
 
 * `Fixed` An incorrect error message.
+* `Fixed` [GUI] Fixed a potential exception saving app state.
+* `Fixed` [GUI] Loading app state in WTexScan-WTexport.
 
 
 ### Changed for 1.7.1

@@ -66,6 +66,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		Map<String, String> state = super.getApplicationState();
 
 		File[] files = parametersPanel.getFiles();
+		File[] mapinfos = parametersPanel.getMapInfoFiles();
 		TexScanOutputMode mode = parametersPanel.getOutputMode();
 		boolean noSkies = parametersPanel.getSkipSkies();
 		boolean noMessages = parametersPanel.getNoCommentMessages();
@@ -74,6 +75,10 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		state.put("files.count", String.valueOf(files.length));
 		for (int i = 0; i < files.length; i++) 
 			state.put("files." + i, files[i].getAbsolutePath());
+			
+		state.put("files.mapinfo.count", String.valueOf(mapinfos.length));
+		for (int i = 0; i < mapinfos.length; i++) 
+			state.put("files.mapinfo." + i, mapinfos[i].getAbsolutePath());
 			
 		state.put("mode", mode.name());
 		state.put("noskies", String.valueOf(noSkies));
@@ -86,17 +91,23 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public void setApplicationState(Map<String, String> state)
 	{
-		int count = ValueUtils.parseInt(state.get("files.count"), 0);
-
-		File[] files = new File[count];
-		
 		final Function<String, File> fileParse = (input) -> new File(input);
 		final Function<String, TexScanOutputMode> modeParse = (input) -> EnumUtils.getEnumInstance(input, TexScanOutputMode.class);
 		
+		int count = ValueUtils.parseInt(state.get("files.count"), 0);
+		File[] files = new File[count];
 		for (int i = 0; i < files.length; i++) 
 			files[i] = ValueUtils.parse(state.get("files." + i), fileParse);
 
 		parametersPanel.setFiles(files);
+
+		count = ValueUtils.parseInt(state.get("files.mapinfo.count"), 0);
+		files = new File[count];
+		for (int i = 0; i < files.length; i++) 
+			files[i] = ValueUtils.parse(state.get("files.mapinfo." + i), fileParse);
+
+		parametersPanel.setMapInfoFiles(files);
+
 		parametersPanel.setOutputMode(ValueUtils.parse(state.get("mode"), modeParse));
 		parametersPanel.setSkipSkies(ValueUtils.parseBoolean(state.get("noskies"), false));
 		parametersPanel.setNoCommentMessages(ValueUtils.parseBoolean(state.get("nomessages"), false));
@@ -123,7 +134,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		return containerOf(dimension(320, 450), borderLayout(0, 4),
+		return containerOf(dimension(350, 600), borderLayout(0, 4),
 			node(BorderLayout.CENTER, parametersPanel),
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
@@ -173,6 +184,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	private void onScanMaps() 
 	{
 		File[] files = parametersPanel.getFiles();
+		File[] mapInfoFiles = parametersPanel.getMapInfoFiles();
 		TexScanOutputMode mode = parametersPanel.getOutputMode();
 		boolean noSkies = parametersPanel.getSkipSkies();
 		boolean noMessages = parametersPanel.getNoCommentMessages();
@@ -180,6 +192,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		
 		appCommon.onExecuteWTexScan(getApplicationContainer(), statusPanel, 
 			files, 
+			mapInfoFiles,
 			mode, 
 			noSkies, 
 			noMessages,
