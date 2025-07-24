@@ -1,6 +1,11 @@
 WTexScan
 --------
 
+### Changed for 1.3.0
+
+* `Added` MAPINFO scanning for sky textures.
+
+
 ### Changed for 1.2.2
 
 * `Fixed` "Quiet mode" still output a comment line for textures when it shouldn't have.

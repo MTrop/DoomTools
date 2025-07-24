@@ -980,7 +980,8 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"wadfiles:LIST[STRING, ...]",
-							"mapsToScan:LIST[STRING, ...]",
+							"mapstoscan:LIST[STRING, ...]",
+							"mapinfofiles:LIST[STRING, ...]",
 							"quiet:BOOLEAN",
 							"outputtextures:BOOLEAN",
 							"outputflats:BOOLEAN",
@@ -1030,6 +1031,18 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							options.addWadFile(value.asObjectType(File.class));
 						else
 							options.addWadFile(new File(value.asString()));
+					}
+				}
+				temp.mapGet("mapinfofiles", args);
+				if (!args.isNull() && args.isList())
+				{
+					for (ScriptIteratorType.IteratorPair pair : args)
+					{
+						ScriptValue value = pair.getValue();
+						if (value.isObjectRef(File.class))
+							options.addMapInfoToScan(value.asObjectType(File.class));
+						else
+							options.addMapInfoToScan(new File(value.asString()));
 					}
 				}
 

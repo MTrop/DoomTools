@@ -12,9 +12,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -35,6 +37,14 @@ import net.mtrop.doom.map.udmf.UDMFReader;
 import net.mtrop.doom.map.udmf.UDMFTable;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSectorAttributes;
 import net.mtrop.doom.map.udmf.attributes.UDMFDoomSidedefAttributes;
+import net.mtrop.doom.object.TextObject;
+import net.mtrop.doom.object.TextObject.ParseException;
+import net.mtrop.doom.text.EternityMapInfo;
+import net.mtrop.doom.text.HexenMapInfo;
+import net.mtrop.doom.text.Text;
+import net.mtrop.doom.text.UniversalMapInfo;
+import net.mtrop.doom.text.ZDoomMapInfo;
+import net.mtrop.doom.text.data.MapInfoData;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
@@ -70,11 +80,18 @@ public final class WTexScanMain
 	public static final String SWITCH_MAP2 = "-m";
 	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_MAPINFO = "--mapinfo";
 
 	/** Regex pattern for Episode, Map. */
 	private static final Pattern EPISODE_PATTERN = Pattern.compile("E[1-5]M[1-9]");
 	/** Regex pattern for Map only. */
 	private static final Pattern MAP_PATTERN = Pattern.compile("MAP[0-9][0-9]");
+	/** Regex pattern for EMAPINFO. */
+	private static final Pattern EMAPINFO_PATTERN = Pattern.compile("(skyname\\s+=?|sky2name\\s+=?)", Pattern.CASE_INSENSITIVE);
+	/** Regex pattern for ZMAPINFO. */
+	private static final Pattern ZMAPINFO_PATTERN = Pattern.compile("(sky1\\s+=|sky2\\s+=)", Pattern.CASE_INSENSITIVE);
+	/** Regex pattern for UMAPINFO. */
+	private static final Pattern UMAPINFO_PATTERN = Pattern.compile("(skytexture\\s+=)", Pattern.CASE_INSENSITIVE);
 	
 	/**
 	 * Program options.
@@ -93,6 +110,7 @@ public final class WTexScanMain
 		private boolean skipSkies;
 		private List<File> wadFiles;
 		private SortedSet<String> mapsToScan;
+		private List<File> mapInfoToScan;
 		
 		private Options()
 		{
@@ -108,6 +126,7 @@ public final class WTexScanMain
 			this.skipSkies = false;
 			this.wadFiles = new LinkedList<>();
 			this.mapsToScan = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+			this.mapInfoToScan = new LinkedList<>();
 		}
 		
 		void println(Object msg)
@@ -181,6 +200,12 @@ public final class WTexScanMain
 		public Options addMapToScan(String mapname)
 		{
 			this.mapsToScan.add(mapname);
+			return this;
+		}
+
+		public Options addMapInfoToScan(File mapInfoFile)
+		{
+			this.mapInfoToScan.add(mapInfoFile);
 			return this;
 		}
 
@@ -261,13 +286,30 @@ public final class WTexScanMain
 			}
 		}
 
+		// Adds the texture references from a Map Info file to the texture list.
+		private void processMapInfoFile(File mapInfoFile)
+		{
+			options.println("# Inspecting " + mapInfoFile.getPath() + "...");
+			options.println("#     Opening file...");
+			try {
+				inspectMapInfoText(TextObject.read(Text.class, mapInfoFile, StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				options.println("#         ERROR: Opening file: " + e.getLocalizedMessage());
+			}
+		}
+
 		// Inspect WAD contents.
 		private void inspectWAD(Wad wad) throws IOException
 		{
 			String[] mapHeaders = MapUtils.getAllMapHeaders(wad);
 			for (String mapName : mapHeaders)
 				if (options.mapsToScan.isEmpty() || options.mapsToScan.contains(mapName))
-					inspectMap(wad, mapName);
+					inspectWadMap(wad, mapName);
+			
+			if (!options.skipSkies)
+			{
+				inspectWadMapInfo(wad);
+			}
 		}
 
 		/**
@@ -292,7 +334,7 @@ public final class WTexScanMain
 		}
 
 		// Inspect a map in a WAD.
-		private void inspectMap(Wad wad, String mapName) throws IOException
+		private void inspectWadMap(Wad wad, String mapName) throws IOException
 		{
 			options.println("#    Opening map "+mapName+"...");
 			
@@ -372,12 +414,11 @@ public final class WTexScanMain
 			
 			if (!options.skipSkies)
 			{
-				inspectMap(mapName);
+				inspectMapSky(mapName);
 			}
-			
 		}
 
-		private void inspectMap(String mapName)
+		private void inspectMapSky(String mapName)
 		{
 			Pair p = new Pair();
 			getEpisodeAndMap(mapName, p);
@@ -470,6 +511,153 @@ public final class WTexScanMain
 			}
 		}
 
+		// Adds the texture references from a Map Info lump to the texture list.
+		private void inspectWadMapInfo(Wad wad)
+		{
+			if (wad.contains("MAPINFO"))
+			{
+				options.println("#    Reading MAPINFO...");
+				try {
+					inspectMapInfoText(wad.getTextDataAs("MAPINFO", StandardCharsets.UTF_8, Text.class));
+				} catch (IOException e) {
+					options.println("#        ERROR: Cannot read MAPINFO. Skipping...");
+				}
+			}
+
+			if (wad.contains("ZMAPINFO"))
+			{
+				options.println("#    Reading ZMAPINFO...");
+				try {
+					inspectZDoomMapInfo(wad.getTextDataAs("ZMAPINFO", StandardCharsets.UTF_8, ZDoomMapInfo.class));
+				} catch (IOException e) {
+					options.println("#        ERROR: Cannot read ZMAPINFO. Skipping...");
+				}
+			}
+
+			if (wad.contains("EMAPINFO"))
+			{
+				options.println("#    Reading EMAPINFO...");
+				try {
+					inspectEternityMapInfo(wad.getTextDataAs("EMAPINFO", StandardCharsets.UTF_8, EternityMapInfo.class));
+				} catch (IOException e) {
+					options.println("#        ERROR: Cannot read EMAPINFO. Skipping...");
+				}
+			}
+
+			if (wad.contains("UMAPINFO"))
+			{
+				options.println("#    Reading UMAPINFO...");
+				try {
+					inspectUniversalMapInfo(wad.getTextDataAs("UMAPINFO", StandardCharsets.UTF_8, UniversalMapInfo.class));
+				} catch (IOException e) {
+					options.println("#        ERROR: Cannot read UMAPINFO. Skipping...");
+				}
+			}
+		}
+		
+		// Examines a Text lump for figuring out the MapInfo type, then processes it.
+		private void inspectMapInfoText(Text text)
+		{
+			if (text.getMatcherForPattern(EMAPINFO_PATTERN).find())
+			{
+				options.println("#        Is EMAPINFO...");
+				try {
+					inspectEternityMapInfo(text.create(EternityMapInfo.class));
+				} catch (IOException e) {
+					options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
+				}
+			}
+			else if (text.getMatcherForPattern(ZMAPINFO_PATTERN).find())
+			{
+				options.println("#        Is ZMAPINFO...");
+				try {
+					inspectZDoomMapInfo(text.create(ZDoomMapInfo.class));
+				} catch (IOException e) {
+					options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
+				}
+			}
+			else if (text.getMatcherForPattern(UMAPINFO_PATTERN).find())
+			{
+				options.println("#        Is UMAPINFO...");
+				try {
+					inspectUniversalMapInfo(text.create(UniversalMapInfo.class));
+				} catch (IOException e) {
+					options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
+				}
+			}
+			else
+			{
+				options.println("#        Is MAPINFO...");
+				try {
+					inspectHexenMapInfo(text.create(HexenMapInfo.class));
+				} catch (IOException e) {
+					options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
+				}
+			}
+		}
+		
+		// Adds the texture references from a Hexen Map Info file to the texture list.
+		private void inspectHexenMapInfo(HexenMapInfo mapInfo)
+		{
+			try {
+				String[] values;
+				while ((values = mapInfo.scanTo("sky1")) != null)
+				{
+					addTexture(values[1]);
+				}
+				mapInfo.refreshParser();
+				while ((values = mapInfo.scanTo("sky2")) != null)
+				{
+					addTexture(values[1]);
+				}
+			} catch (ParseException e) {
+				options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
+			}
+		}
+		
+		// Adds the texture references from a Eternity Map Info file to the texture list.
+		private void inspectEternityMapInfo(EternityMapInfo mapInfo)
+		{
+			for (Map.Entry<String, MapInfoData[]> entry : mapInfo)
+			{
+				for (MapInfoData data : entry.getValue())
+				{
+					if (data.getName().equalsIgnoreCase("skyname"))
+						addTexture(data.getValue().getStringValue());
+					else if (data.getName().equalsIgnoreCase("sky2name"))
+						addTexture(data.getValue().getStringValue());
+				}
+			}
+		}
+		
+		// Adds the texture references from a ZDoom Map Info file to the texture list.
+		private void inspectZDoomMapInfo(ZDoomMapInfo mapInfo)
+		{
+			for (MapInfoData entry : mapInfo)
+			{
+				if (entry.hasChildren()) for (MapInfoData child : entry)
+				{
+					if (child.getName().equalsIgnoreCase("sky1"))
+						addTexture(child.getValue().getStringValue());
+					else if (child.getName().equalsIgnoreCase("sky2"))
+						addTexture(child.getValue().getStringValue());
+				}
+			}
+		}
+		
+		// Adds the texture references from a Universal Map Info file to the texture list.
+		private void inspectUniversalMapInfo(UniversalMapInfo mapInfo)
+		{
+			for (Map.Entry<String, MapInfoData[]> entry : mapInfo)
+			{
+				for (MapInfoData data : entry.getValue())
+				{
+					if (data.getName().equalsIgnoreCase("skytexture"))
+						addTexture(data.getValue().getStringValue());
+				}
+			}
+		}
+		
 		private void addTexture(String texture)
 		{
 			if (!textureList.contains(texture) && texture != null && !texture.trim().isEmpty() && !texture.equals("-"))
@@ -517,7 +705,7 @@ public final class WTexScanMain
 				return ERROR_NONE;
 			}
 			
-			if (options.wadFiles.isEmpty())
+			if (options.wadFiles.isEmpty() && options.mapInfoToScan.isEmpty())
 			{
 				splash(options.stdout);
 				usage(options.stdout);
@@ -550,6 +738,11 @@ public final class WTexScanMain
 				}
 			}
 			
+			for (File f : options.mapInfoToScan)
+			{
+				processMapInfoFile(f);
+			}
+			
 			if (atLeastOneError)
 				return ERROR_BAD_FILE;
 			
@@ -558,7 +751,7 @@ public final class WTexScanMain
 				return ERROR_NONE;
 			}
 			
-			if (!options.wadFiles.isEmpty())
+			if (!options.wadFiles.isEmpty() || !options.mapInfoToScan.isEmpty())
 			{
 				if (textureList.isEmpty())
 				{
@@ -612,6 +805,7 @@ public final class WTexScanMain
 	
 		final int STATE_INIT = 0;
 		final int STATE_MAP = 1;
+		final int STATE_MAPINFO = 2;
 	
 		int state = STATE_INIT;
 		int i = 0;
@@ -640,6 +834,8 @@ public final class WTexScanMain
 						options.setSkipSkies(true);
 					else if (arg.equals(SWITCH_MAP) || arg.equals(SWITCH_MAP2))
 						state = STATE_MAP;
+					else if (arg.equals(SWITCH_MAPINFO))
+						state = STATE_MAPINFO;
 					else
 						options.addWadFile(new File(arg));
 				}
@@ -648,6 +844,13 @@ public final class WTexScanMain
 				case STATE_MAP:
 				{
 					options.addMapToScan(arg);
+					state = STATE_INIT;
+				}
+				break;
+				
+				case STATE_MAPINFO:
+				{
+					options.addMapInfoToScan(new File(arg));
 					state = STATE_INIT;
 				}
 				break;
@@ -778,8 +981,12 @@ public final class WTexScanMain
 		out.println();
 		out.println("    --no-skies          Skip adding associated skies by map header.");
 		out.println();
-		out.println("    --map [mapname]     Map to scan. If not specified, all maps will be scanned.");
-		out.println("    -m");
+		out.println("    --map [mapname]     Add a map to scan. If never specified, all maps will be");
+		out.println("    -m                  scanned.");
+		out.println();
+		out.println("    --mapinfo [file]    Add a mapinfo file to scan. Valid mapinfo types are:");
+		out.println("                        MAPINFO, ZMAPINFO, EMAPINFO, UMAPINFO. Type is");
+		out.println("                        autodetected.");
 	}
 	
 }
