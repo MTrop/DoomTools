@@ -6,6 +6,7 @@ DoomMake
 * `Fixed` [GUI-Studio] Fixed multi-line commit message logging.
 * `Added` DoomMake function SEARCHDIR(...).
 * `Added` DoomMake function HASHFILES(...).
+* `Changed` New projects will now scan assets WADs for MAPINFO data for texture extraction.
 
 
 ### Changed for 0.27.1

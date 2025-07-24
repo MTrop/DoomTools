@@ -398,25 +398,14 @@ check function exportColormapToImage(wad, lumpname, paletteImage) {
  * Fetches the source for the palette used for image conversion.
  * Attempts to find the default palette via the global asset folder.
  ****************************************************************************/
-// Palette source file path.
-#define PALETTE_ASSET_SRC "/assets/_global/playpal"
-
 check function getConvertPaletteSource() {
 
 	srcdir = getSourceDirectory();
 
-	paths = [
-		srcdir + "/playpal.pal",
-		srcdir + "/playpal.lmp",
-		srcdir + PALETTE_ASSET_SRC + ".pal",
-		srcdir + PALETTE_ASSET_SRC + ".lmp"
-	];
-	
-	each (path : paths) {
-		if (fileexists(path)) {
-			println("Using palette found in `" + path + "`...");
-			return path;
-		}
+	palfile = searchdir(srcdir, "PLAYPAL", true);
+	if (palfile !== null) {
+		println("Using palette found at `" + palfile + "`...");
+		return palfile;
 	}
 	
 	baseIwadPath = getIwad();

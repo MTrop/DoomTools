@@ -306,10 +306,7 @@ public final class WTexScanMain
 				if (options.mapsToScan.isEmpty() || options.mapsToScan.contains(mapName))
 					inspectWadMap(wad, mapName);
 			
-			if (!options.skipSkies)
-			{
-				inspectWadMapInfo(wad);
-			}
+			inspectWadMapInfo(wad);
 		}
 
 		/**
@@ -601,15 +598,29 @@ public final class WTexScanMain
 		{
 			try {
 				String[] values;
-				while ((values = mapInfo.scanTo("sky1")) != null)
+				if (!options.skipSkies && options.outputTextures)
 				{
-					addTexture(values[1]);
+					mapInfo.refreshParser();
+					while ((values = mapInfo.scanTo("sky1")) != null)
+					{
+						addTexture(values[1]);
+					}
+					mapInfo.refreshParser();
+					while ((values = mapInfo.scanTo("sky2")) != null)
+					{
+						addTexture(values[1]);
+					}
 				}
-				mapInfo.refreshParser();
-				while ((values = mapInfo.scanTo("sky2")) != null)
+				
+				if (options.outputFlats)
 				{
-					addTexture(values[1]);
+					mapInfo.refreshParser();
+					while ((values = mapInfo.scanTo("flat")) != null)
+					{
+						addFlat(values[1]);
+					}
 				}
+				
 			} catch (ParseException e) {
 				options.println("#            ERROR: " + e.getLocalizedMessage() + " Skipping...");
 			}
@@ -622,10 +633,18 @@ public final class WTexScanMain
 			{
 				for (MapInfoData data : entry.getValue())
 				{
-					if (data.getName().equalsIgnoreCase("skyname"))
-						addTexture(data.getValue().getStringValue());
-					else if (data.getName().equalsIgnoreCase("sky2name"))
-						addTexture(data.getValue().getStringValue());
+					if (!options.skipSkies && options.outputTextures)
+					{
+						if (data.getName().equalsIgnoreCase("skyname"))
+							addTexture(data.getValue().getStringValue());
+						else if (data.getName().equalsIgnoreCase("sky2name"))
+							addTexture(data.getValue().getStringValue());
+					}
+					if (options.outputFlats)
+					{
+						if (data.getName().equalsIgnoreCase("inter-backdrop"))
+							addFlat(data.getValue().getStringValue());
+					}
 				}
 			}
 		}
@@ -637,10 +656,18 @@ public final class WTexScanMain
 			{
 				if (entry.hasChildren()) for (MapInfoData child : entry)
 				{
-					if (child.getName().equalsIgnoreCase("sky1"))
-						addTexture(child.getValue().getStringValue());
-					else if (child.getName().equalsIgnoreCase("sky2"))
-						addTexture(child.getValue().getStringValue());
+					if (!options.skipSkies && options.outputTextures)
+					{
+						if (child.getName().equalsIgnoreCase("sky1"))
+							addTexture(child.getValue().getStringValue());
+						else if (child.getName().equalsIgnoreCase("sky2"))
+							addTexture(child.getValue().getStringValue());
+					}
+					if (options.outputFlats)
+					{
+						if (child.getName().equalsIgnoreCase("flat"))
+							addFlat(child.getValue().getStringValue());
+					}
 				}
 			}
 		}
@@ -652,8 +679,16 @@ public final class WTexScanMain
 			{
 				for (MapInfoData data : entry.getValue())
 				{
-					if (data.getName().equalsIgnoreCase("skytexture"))
-						addTexture(data.getValue().getStringValue());
+					if (!options.skipSkies && options.outputTextures)
+					{
+						if (data.getName().equalsIgnoreCase("skytexture"))
+							addTexture(data.getValue().getStringValue());
+					}
+					if (options.outputFlats)
+					{
+						if (data.getName().equalsIgnoreCase("interbackdrop"))
+							addFlat(data.getValue().getStringValue());
+					}					
 				}
 			}
 		}

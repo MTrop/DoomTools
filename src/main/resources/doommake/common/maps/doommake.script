@@ -79,8 +79,23 @@ check function doMapTextures() {
 	// Figure out where the textures are.
 	textureWad = getBuildDirectory() + "/" + getTextureWad();
 
+	assetsWadPath = getBuildDirectory() + "/" + getAssetsWad();
 	mapsWadPath = getBuildDirectory() + "/" + getMapsWad();
+	
 	outWad = getBuildDirectory() + "/" + getMapTexWad();
+
+	builds = ["textures"];
+
+	// Gather source WADs
+	mapWadPathList = [];
+	if (fileexists(assetsWadPath)) {
+		mapWadPathList->listAdd(assetsWadPath);
+		builds->listAdd("assets");
+	}
+	if (fileexists(mapsWadPath)) {
+		mapWadPathList->listAdd(mapsWadPath);
+		builds->listAdd("maps");
+	}
 
 	// Gather all WADs.
 	textureWadPathList = scanTextureWADList() ?? [];
@@ -102,8 +117,8 @@ check function doMapTextures() {
 	}
 
 	// Texture extraction.
-	if (checkFileExistenceAndBuildStatuses(outWad, ["maps", "textures"])) {
-		println("[Skipped] Both maps and textures were not built. Skipping map texture rebuild.");
+	if (checkFileExistenceAndBuildStatuses(outWad, builds)) {
+		println("[Skipped] Assets, maps, and textures were not built. Skipping map texture rebuild.");
 		return;
 	}
 
@@ -111,7 +126,7 @@ check function doMapTextures() {
 
 	extractUsedMapTextures(
 		baseIwadPath,
-		[mapsWadPath],
+		mapWadPathList,
 		textureWadPathList,
 		outWad
 	);
