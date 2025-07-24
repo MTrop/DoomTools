@@ -1,9 +1,10 @@
 DoomMake
 --------
 
-### Changed for 0.27.2
+### Changed for 0.28.0
 
 * `Fixed` [GUI-Studio] Fixed multi-line commit message logging.
+* `Added` DoomMake function SEARCHDIR(...).
 
 
 ### Changed for 0.27.1

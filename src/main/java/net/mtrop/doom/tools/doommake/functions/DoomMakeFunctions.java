@@ -914,6 +914,91 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 		
 	},
 	
+	SEARCHDIR(4)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Searches a directory tree (recursively) for a file by name and returns that file."
+				)
+				.parameter("path", 
+					type(Type.STRING, "Directory path."),
+					type(Type.OBJECTREF, "File", "Directory path.")
+				)
+				.parameter("target", 
+					type(Type.STRING, "The file's name.")
+				)
+				.parameter("noExtension",
+					type(Type.BOOLEAN, "If true, just the file's name is searched for, and not its extension.")
+				)
+				.parameter("caseSensitive",
+					type(Type.BOOLEAN, "If true, search for matching case, false for case-insensitive search.")
+				)
+				.returns(
+					type(Type.NULL, "If the file could not be found."),
+					type(Type.OBJECTREF, "File", "The file that was found."),
+					type(Type.ERROR, "BadPath", "If the provided path is not a directory."),
+					type(Type.ERROR, "BadName", "If the provided name is empty."),
+					type(Type.ERROR, "Security", "If the OS is preventing the search.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue) 
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				boolean caseSensitive = temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				boolean noExt = temp.asBoolean();
+				scriptInstance.popStackValue(temp);
+				String target = temp.isNull() ? null : temp.asString();
+				File pathDir = popFile(scriptInstance, temp);
+				
+				if (ObjectUtils.isEmpty(target))
+				{
+					returnValue.setError("BadName", "Provided name is empty.");
+					return true;
+				}
+
+				if (ObjectUtils.isEmpty(pathDir))
+				{
+					returnValue.setError("BadPath", "Provided path is empty.");
+					return true;
+				}
+				else if (!pathDir.exists())
+				{
+					returnValue.setError("BadPath", "Provided path does not exist.");
+					return true;
+				}
+				else if (!pathDir.isDirectory())
+				{
+					returnValue.setError("BadPath", "Provided path is not a directory.");
+					return true;
+				}
+
+				try {
+					returnValue.setNull();
+					scanDir(pathDir, target, noExt, caseSensitive, returnValue);
+				} catch (SecurityException e) {
+					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+				}
+				
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+		
+	}
+	
 	;
 	
 	private final int parameterCount;
@@ -997,6 +1082,53 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			return temp.asObjectType(URL.class);
 		else
 			return new URL(temp.asString());
+	}
+	
+	// Scans a directory for a file (recursively).
+	// If found, returns true and sets returnValue. 
+	// If not, returns false.
+	private static boolean scanDir(File dir, String name, boolean noExt, boolean caseSensitive, ScriptValue returnValue)
+	{
+		for (File file : dir.listFiles())
+		{
+			if (file.isDirectory())
+			{
+				if (scanDir(file, name, noExt, caseSensitive, returnValue))
+					return true;
+			}
+			else
+			{
+				if (noExt)
+				{
+					String filename = FileUtils.getFileNameWithoutExtension(file);
+					if (caseSensitive && filename.equals(name))
+					{
+						returnValue.set(new File(file.getPath()));
+						return true;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						returnValue.set(new File(file.getPath()));
+						return true;
+					}
+				}
+				else
+				{
+					String filename = file.getName();
+					if (caseSensitive && filename.equals(name))
+					{
+						returnValue.set(new File(file.getPath()));
+						return true;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						returnValue.set(new File(file.getPath()));
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 	
 	// Return value is file list.
