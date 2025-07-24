@@ -290,11 +290,11 @@ public final class WTexScanMain
 		private void processMapInfoFile(File mapInfoFile)
 		{
 			options.println("# Inspecting " + mapInfoFile.getPath() + "...");
-			options.println("#     Opening file...");
+			options.println("#    Opening file...");
 			try {
 				inspectMapInfoText(TextObject.read(Text.class, mapInfoFile, StandardCharsets.UTF_8));
 			} catch (IOException e) {
-				options.println("#         ERROR: Opening file: " + e.getLocalizedMessage());
+				options.println("#        ERROR: Opening file: " + e.getLocalizedMessage());
 			}
 		}
 
@@ -659,14 +659,26 @@ public final class WTexScanMain
 					if (!options.skipSkies && options.outputTextures)
 					{
 						if (child.getName().equalsIgnoreCase("sky1"))
-							addTexture(child.getValue().getStringValue());
+						{
+							String value = child.getValue().getStringValue();
+							if (value.startsWith("$")) // ignore LANGUAGE
+								addTexture(value);
+						}
 						else if (child.getName().equalsIgnoreCase("sky2"))
-							addTexture(child.getValue().getStringValue());
+						{
+							String value = child.getValue().getStringValue();
+							if (value.startsWith("$")) // ignore LANGUAGE
+								addTexture(value);
+						}
 					}
 					if (options.outputFlats)
 					{
 						if (child.getName().equalsIgnoreCase("flat"))
-							addFlat(child.getValue().getStringValue());
+						{
+							String value = child.getValue().getStringValue();
+							if (value.startsWith("$")) // ignore LANGUAGE
+								addTexture(value);
+						}
 					}
 				}
 			}
