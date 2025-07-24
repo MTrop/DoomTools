@@ -492,7 +492,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				files.listGetByIndex(i, temp);
 				File file = getFile(temp);
 				if (file == null)
-					returnValue.setError("BadFile", "Target file is a directory.");
+					returnValue.setError("BadFile", "Encountered a null file.");
 				else
 					zipFile(zos, file, file.getName(), compressed, returnValue);
 				
@@ -909,6 +909,89 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			finally
 			{
 				temp.setNull();
+			}
+		}
+		
+	},
+	
+	HASHFILES(2)
+	{
+		@Override
+		protected Usage usage() 
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Hashes file information. " +
+					"No data content is hashed, just file paths, length, and modified date. " +
+					"Files that are not found are skipped."
+				)
+				.parameter("paths", 
+					type(Type.LIST, "[STRING, ...]", "The list of file paths."),
+					type(Type.LIST, "[OBJECTREF:File, ...]", "The list of file paths.")
+				)
+				.parameter("algorithm",
+					type(Type.NULL, "Use \"SHA-1\"."),
+					type(Type.STRING, "The name of the hashing algorithm to use.")
+				)
+				.returns(
+					type(Type.NULL, "If the provided directory is null."),
+					type(Type.BUFFER, "A buffer containing the resultant hash digest."),
+					type(Type.ERROR, "BadFile", "If a source file is null."),
+					type(Type.ERROR, "Security", "If the OS is preventing file inspection.")
+				)
+			;
+		}
+		
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue)
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			ScriptValue files = CACHEVALUE2.get();
+			try 
+			{
+				scriptInstance.popStackValue(temp);
+				String algo = temp.isNull() ? "SHA-1" : temp.asString();
+				scriptInstance.popStackValue(files);
+				
+				MessageDigest digest;
+				try {
+					digest = MessageDigest.getInstance(algo);
+					
+					if (files.isList()) for (int i = 0; i < files.length(); i++)
+					{
+						files.listGetByIndex(i, temp);
+						File f = getFile(temp);
+						if (f == null)
+						{
+							returnValue.setError("BadFile", "Encountered a null file.");
+							return true;
+						}
+						else if (f.exists())
+						{
+							digestFileInfo(digest, f, returnValue);
+							if (returnValue.isError())
+								return true;
+						}
+					}
+
+				} catch (NoSuchAlgorithmException e) {
+					returnValue.setError("BadAlgorithm", "Hash algorithm is not available: " + algo);
+					return true;
+				}
+
+				if (returnValue.isError())
+					return true;
+
+				byte[] hash = digest.digest();
+				returnValue.setEmptyBuffer(hash.length);
+				returnValue.asObjectType(BufferType.class).readBytes(0, hash, 0, hash.length);
+
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+				files.setNull();
 			}
 		}
 		
