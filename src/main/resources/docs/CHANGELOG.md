@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-07-23** Updated DoomStruct to `2.19.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.0-RELEASE)
+
 - **2024-07-21** Fixed error code propagation for PowerShell users.
 - **2024-07-20** [GUI] Text Transformation shortcuts added to editors.
 
