@@ -1311,7 +1311,7 @@ public final class WTExportMain
 				{
 					case STATE_NONE:
 						reader.close();
-						throw new OptionParseException("ERROR: Name before '-textures' or '-flats'.");
+						throw new OptionParseException("ERROR: Name before ':textures' or ':flats'.");
 					case STATE_TEXTURES:
 						options.addTexture(line);
 						break;

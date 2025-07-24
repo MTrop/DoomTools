@@ -1,6 +1,11 @@
 WTEXport
 --------
 
+### Changed for 1.7.2
+
+* `Fixed` An incorrect error message.
+
+
 ### Changed for 1.7.1
 
 * `Fixed` Some animated switches would have their switch counterparts mixed in with the animation. This has been fixed.
