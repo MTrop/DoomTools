@@ -6,7 +6,8 @@ DoomMake
 * `Fixed` [GUI-Studio] Fixed multi-line commit message logging.
 * `Added` DoomMake function SEARCHDIR(...).
 * `Added` DoomMake function HASHFILES(...).
-* `Changed` New projects will now scan assets WADs for MAPINFO data for texture extraction.
+* `Changed` New projects will now scan the assets WAD for MAPINFO data for texture extraction (after assets are assembled).
+* `Changed` New projects will search for the PLAYPAL lump in src instead of in specific places.
 
 
 ### Changed for 0.27.1
