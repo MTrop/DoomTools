@@ -3,7 +3,7 @@ WTexScan
 
 ### Changed for 1.3.0
 
-* `Added` MAPINFO scanning for sky textures.
+* `Added` MAPINFO scanning for sky textures and intermission flats.
 
 
 ### Changed for 1.2.2
