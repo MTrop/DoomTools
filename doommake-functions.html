@@ -66,6 +66,8 @@
 			 | 
 			<a href="#category-math" class="toc-link">Math</a>
 			 | 
+			<a href="#category-random" class="toc-link">Random</a>
+			 | 
 			<a href="#category-regex" class="toc-link">RegEx</a>
 			 | 
 			<a href="#category-date-time" class="toc-link">Date / Time</a>
@@ -1846,6 +1848,136 @@
 					</div>
 				</div>
 			</div>
+			<div id="function-strbytes" class="function-section">
+				<div class="function-title" section-code="strbytes">
+					<h2 class="function-name">
+						STRBYTES
+						<span class="function-parameters">
+							(string, encoding)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-strbytes" class="function-content">
+					<div class="function-description">
+						<p>Returns a buffer of bytes that represents the provided string in the specified encoding.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								string
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">STRING</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The string to encode as bytes.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								encoding
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										Use native encoding.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">STRING</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The target encoding.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">BUFFER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The resultant buffer of bytes.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadEncoding</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If the target encoding is not found.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-strencodings" class="function-section">
+				<div class="function-title" section-code="strencodings">
+					<h2 class="function-name">
+						STRENCODINGS
+						<span class="function-parameters">
+							()
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-strencodings" class="function-content">
+					<div class="function-description">
+						<p>Returns a set (sorted, discrete) of available encoding types (and their aliases) for strings avaliable on this implementation. Can be an expensive operation.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">LIST</span>
+									<span class="parameter-subtype-name">[STRING, ...]</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A set of valid encoding type names.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<div id="category-list-set" class="category-section">
@@ -2564,6 +2696,16 @@
 							</h4>
 						</div>
 						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										Use 0.
+									</p>
+								</div>
+							</div>
 							<div class="parameter-usage">
 								<div class="parameter-type">
 									<span class="parameter-type-name">INTEGER</span>
@@ -9355,6 +9497,849 @@
 			</div>
 		</div>
 	</div>
+	<div id="category-random" class="category-section">
+		<div class="category-title" section-code="random">
+			<h1 class="category-name">
+				Random
+				<a href="#top" class="category-navigation">TOP</a>
+			</h1>
+		</div>
+		<div id="category-content-random" class="category-content">
+			<div id="function-random" class="function-section">
+				<div class="function-title" section-code="random">
+					<h2 class="function-name">
+						RANDOM
+						<span class="function-parameters">
+							()
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-random" class="function-content">
+					<div class="function-description">
+						<p>Creates a new random number generator object. Algorithm is implementation-provided.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The new random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomseed" class="function-section">
+				<div class="function-title" section-code="randomseed">
+					<h2 class="function-name">
+						RANDOMSEED
+						<span class="function-parameters">
+							(seed)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomseed" class="function-content">
+					<div class="function-description">
+						<p>Creates a new random number generator object with a defined random seed. Algorithm is implementation-provided.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								seed
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The seeding number.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The new random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomint" class="function-section">
+				<div class="function-title" section-code="randomint">
+					<h2 class="function-name">
+						RANDOMINT
+						<span class="function-parameters">
+							(random, number)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomint" class="function-content">
+					<div class="function-description">
+						<p>Generates a random number from 0 (inclusive) to an integer value (exclusive).</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								number
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The upper bound (32-bit).
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A random integer from 0 to [number] - 1.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomrange" class="function-section">
+				<div class="function-title" section-code="randomrange">
+					<h2 class="function-name">
+						RANDOMRANGE
+						<span class="function-parameters">
+							(random, min, max)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomrange" class="function-content">
+					<div class="function-description">
+						<p>Generates a random number from [min] to [max] (inclusive).</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								min
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The lower bound.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								max
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The upper bound.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A random integer from [min, max].
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomfloat" class="function-section">
+				<div class="function-title" section-code="randomfloat">
+					<h2 class="function-name">
+						RANDOMFLOAT
+						<span class="function-parameters">
+							(random)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomfloat" class="function-content">
+					<div class="function-description">
+						<p>Generates a random number from 0.0 (inclusive) to 1.0 (exclusive).</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">FLOAT</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A random integer from 0.0 to 1.0 (exclusive).
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomgauss" class="function-section">
+				<div class="function-title" section-code="randomgauss">
+					<h2 class="function-name">
+						RANDOMGAUSS
+						<span class="function-parameters">
+							(random)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomgauss" class="function-content">
+					<div class="function-description">
+						<p>Generates a random Gaussian-distributed number with mean 0.0 and standard deviation 1.0.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">FLOAT</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A random integer from 0.0 to 1.0.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomstring" class="function-section">
+				<div class="function-title" section-code="randomstring">
+					<h2 class="function-name">
+						RANDOMSTRING
+						<span class="function-parameters">
+							(random, length, alphabet)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomstring" class="function-content">
+					<div class="function-description">
+						<p>Generates a random string of characters.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								length
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										Use 0.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The amount of characters to generate.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								alphabet
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										Use "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">STRING</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The alphabet of characters to use to generate the string (with equal chance).
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">STRING</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The resultant string.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randombytes" class="function-section">
+				<div class="function-title" section-code="randombytes">
+					<h2 class="function-name">
+						RANDOMBYTES
+						<span class="function-parameters">
+							(random, length)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randombytes" class="function-content">
+					<div class="function-description">
+						<p>Generates a random buffer of bytes (native byte order).</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								length
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										Use 0.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">INTEGER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The amount of bytes to generate.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">BUFFER</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The resultant buffer.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomelement" class="function-section">
+				<div class="function-title" section-code="randomelement">
+					<h2 class="function-name">
+						RANDOMELEMENT
+						<span class="function-parameters">
+							(random, list)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomelement" class="function-content">
+					<div class="function-description">
+						<p>Selects and returns a random element in a provided list.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								list
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">LIST</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The list to select an item from.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">NULL</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If the list is empty.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ANY</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The chosen element in the list.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadList</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a list was not provided.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-randomshuffle" class="function-section">
+				<div class="function-title" section-code="randomshuffle">
+					<h2 class="function-name">
+						RANDOMSHUFFLE
+						<span class="function-parameters">
+							(random, list)
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-randomshuffle" class="function-content">
+					<div class="function-description">
+						<p>Shuffles the contents of a list in-place such that the elements are in a different order.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								random
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">OBJECTREF</span>
+									<span class="parameter-subtype-name">Random</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The random number generator.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title">
+							<h4 class="parameter-name">
+								list
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">LIST</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The list to select an item from.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">LIST</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										The list that was provided (not a new list).
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadList</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a list was not provided.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">BadRandom</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If a random number generator was not provided.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div id="category-regex" class="category-section">
 		<div class="category-title" section-code="regex">
 			<h1 class="category-name">
@@ -14041,7 +15026,7 @@
 								</div>
 								<div class="parameter-description">
 									<p>
-										Use platform encoding.
+										Use native encoding.
 									</p>
 								</div>
 							</div>
@@ -14158,7 +15143,7 @@
 								</div>
 								<div class="parameter-description">
 									<p>
-										Use platform encoding.
+										Use native encoding.
 									</p>
 								</div>
 							</div>
@@ -15766,7 +16751,7 @@
 								</div>
 								<div class="parameter-description">
 									<p>
-										Use platform encoding.
+										Use native encoding.
 									</p>
 								</div>
 							</div>
@@ -16902,7 +17887,7 @@
 								</div>
 								<div class="parameter-description">
 									<p>
-										Use platform encoding.
+										Use native encoding.
 									</p>
 								</div>
 							</div>
@@ -17267,6 +18252,42 @@
 								<div class="parameter-description">
 									<p>
 										A buffer containing the resultant hash digest.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="function-digestalgorithms" class="function-section">
+				<div class="function-title" section-code="digestalgorithms">
+					<h2 class="function-name">
+						DIGESTALGORITHMS
+						<span class="function-parameters">
+							()
+						</span>
+						<a href="#top" class="function-navigation">TOP</a>
+					</h2>
+				</div>
+				<div id="function-content-digestalgorithms" class="function-content">
+					<div class="function-description">
+						<p>Returns a set (sorted, discrete) of valid hashing algorithms (and provider aliases) available on this implementation. Can be an expensive operation.</p>
+					</div>
+					<div class="parameter-section">
+						<div class="parameter-title return">
+							<h4 class="parameter-name">
+								RETURNS
+							</h4>
+						</div>
+						<div class="parameter-content">
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">LIST</span>
+									<span class="parameter-subtype-name">[STRING, ...]</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										A set of valid algorithm names.
 									</p>
 								</div>
 							</div>
