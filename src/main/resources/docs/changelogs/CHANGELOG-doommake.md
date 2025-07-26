@@ -1,6 +1,15 @@
 DoomMake
 --------
 
+### Changed for 0.29.0
+
+* `Fixed` Some function documentation wording.
+* `Added` String host function `STRBYTES()`.
+* `Added` String host function `STRENCODINGS()`.
+* `Added` Digest host function `DIGESTALGORITHMS()`.
+* `Added` Host function library `RandomFunctions`.
+
+
 ### Changed for 0.28.0
 
 * `Fixed` [GUI-Studio] Fixed multi-line commit message logging.

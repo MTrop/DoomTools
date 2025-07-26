@@ -1,6 +1,15 @@
 WadScript
 ---------
 
+### Changed for 1.8.0
+
+* `Fixed` Some function documentation wording.
+* `Added` String host function `STRBYTES()`.
+* `Added` String host function `STRENCODINGS()`.
+* `Added` Digest host function `DIGESTALGORITHMS()`.
+* `Added` Host function library `RandomFunctions`.
+
+
 ### Changed for 1.7.1
 
 * `Changed` Splash is now printed on `--help`.

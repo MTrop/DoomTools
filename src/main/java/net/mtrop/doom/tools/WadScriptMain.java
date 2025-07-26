@@ -72,6 +72,7 @@ import com.blackrook.rookscript.functions.DigestFunctions;
 import com.blackrook.rookscript.functions.FileSystemFunctions;
 import com.blackrook.rookscript.functions.JSONFunctions;
 import com.blackrook.rookscript.functions.PrintFunctions;
+import com.blackrook.rookscript.functions.RandomFunctions;
 import com.blackrook.rookscript.struct.PreprocessorLexer;
 
 /**
@@ -124,6 +125,7 @@ public final class WadScriptMain
 		new Resolver("Buffer", BufferFunctions.createResolver()),
 		new Resolver("Error", ErrorFunctions.createResolver()),
 		new Resolver("Math", MathFunctions.createResolver()),
+		new Resolver("Random", RandomFunctions.createResolver()),
 		new Resolver("RegEx", RegexFunctions.createResolver()),
 		new Resolver("Date / Time", DateFunctions.createResolver()),
 		new Resolver("File System", FileSystemFunctions.createResolver()),
