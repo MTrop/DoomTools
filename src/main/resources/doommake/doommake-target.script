@@ -20,3 +20,19 @@ check entry clean(args) {
 }
 
 
+/****************************************************************************
+ * TARGET: editor
+ ****************************************************************************
+ * Rebuilds the editor WAD file.
+ * doommake editor
+ ****************************************************************************/
+check entry editor(args) {
+
+	editorWad = getBuildDirectory() + "/" + getEditorWAD();
+	if (fileExists(editorWad) && !filedelete(editorWad))
+		return error("DeleteWad", "Could not delete Editor WAD for rebuild.");
+
+	doEditorAssets();
+}
+
+

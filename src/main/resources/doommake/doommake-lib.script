@@ -251,6 +251,8 @@ function checkFileExistenceAndBuildStatuses(filePaths, builtTargetList) {
 #define DEFAULT_TEXWAD        "textures.wad"
 #define PROP_PATCHFILE        "doommake.file.patch"
 #define DEFAULT_PATCHFILE     "dehacked.deh"
+#define PROP_EDITORWAD        "doommake.file.editor"
+#define DEFAULT_EDITORWAD     "editor-assets.wad"
 #define PROP_PATCHFILE_SRC    "doommake.file.patch.src"
 #define DEFAULT_PATCHFILE_SRC "decohack.dh"
 
@@ -294,6 +296,13 @@ function getPatchFile() {
  */
 function getPatchSourceOutputFile() {
 	return prop(PROP_PATCHFILE_SRC, DEFAULT_PATCHFILE_SRC); 
+}
+
+/**
+ * Return the output editor assets file name.
+ */
+function getEditorWAD() {
+	return prop(PROP_EDITORWAD, DEFAULT_EDITORWAD); 
 }
 
 
@@ -553,6 +562,63 @@ function mergeWads(outputWadFile, wadList) {
 
 	println("Created WAD `" + outputWadFile->file()->filepath() + "`.");
 }
+
+
+/****************************************************************************
+ * Merges the asset WAD, the DeHackEd patches, and textures WAD into a WAD
+ * suitable for use in a map editor as a resource.
+ *
+ * editorWad: the output WAD file path.
+ ****************************************************************************/
+check function mergeEditorAssets(editorWad) {
+
+	a = 2;
+	mergeScript = swopen();
+	mergeScript->cswriteln("create out");
+
+	patchFile = getBuildDirectory() + "/" + getPatchFile();
+	patchSourceFile = getBuildDirectory() + "/" + getPatchSourceOutputFile();
+	assetFile = getBuildDirectory() + "/" + getAssetsWAD();
+	textureFile = getBuildDirectory() + "/" + getTextureWAD();
+
+	mergeList = [
+		getBuildDirectory(),
+		editorWad
+	];
+
+	if (fileExists(patchFile)) {
+		mergeScript->cswriteln("mergefile out $" + a);
+		mergeList->listAdd(patchFile);
+		a += 1;
+	}
+	if (fileExists(patchSourceFile)) {
+		mergeScript->cswriteln("mergefile out $" + a);
+		mergeList->listAdd(patchSourceFile);
+		a += 1;
+	}
+	if (fileExists(assetFile)) {
+		mergeScript->cswriteln("mergewad out $" + a);
+		mergeList->listAdd(assetFile);
+		a += 1;
+	}
+	if (fileExists(textureFile)) {
+		mergeScript->cswriteln("mergewad out $" + a);
+		mergeList->listAdd(textureFile);
+		a += 1;
+	}
+
+	mergeScript->cswriteln("finish out $1");
+	scriptbuf = mergeScript->toString()->strbytes("UTF-8");
+
+	if (tool::wadmerge({
+		usestdin: true,
+		stdin: bisopen(scriptbuf),
+		inputCharsetName: "UTF-8",
+		args: mergeList
+	})) return error("ToolError", "WadMerge threw an error.");
+
+}
+
 
 /****************************************************************************
  * Extracts used textures from a set of map-containing WADs from a set of 

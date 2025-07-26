@@ -23,3 +23,23 @@ function doClean() {
 }
 
 
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Builds the editor assets WAD file in the build directory.
+ */
+function doEditorAssets() {
+
+	editorWad = getBuildDirectory() + "/" + getEditorWAD();
+
+	if (checkFileExistenceAndBuildStatuses(editorWad, ["dehacked", "assets", "textures"])) {
+		println("[Skipped] Assets, textures, and DeHackEd patches were not built. Skipping editor WAD rebuild.");
+		return;
+	}
+	
+	mergeEditorAssets(editorWad);
+
+	setBuilt("editor");
+}
+
+

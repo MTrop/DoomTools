@@ -52,13 +52,18 @@ building it. Clone this project to a new folder and type:
 ...In order to ensure everything has been prepped correctly (some directories or files
 may need extracting, downloading, or copying).
 
+To both initialize and build this project and its distributable archive:
+
+	doommake
+
+
 To clean the build folder, type:
 
 	doommake clean
 
 
-To both initialize and build this project and its distributable archive:
+To build a resource WAD suitable for editing your project in the build folder, type:
 
-	doommake
+	doommake editor
 
 

@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.30.0
+
+* `Added` `editor` target for building editor-friendly resource WADs (in new projects).
+
+
 ### Changed for 0.29.0
 
 * `Fixed` Some function documentation wording.
