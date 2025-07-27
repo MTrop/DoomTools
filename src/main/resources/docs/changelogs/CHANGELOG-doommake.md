@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.30.1
+
+* `Fixed` A comment in PROPS.txt that was misleading.
+
+
 ### Changed for 0.30.0
 
 * `Added` `editor` target for building editor-friendly resource WADs (in new projects).
