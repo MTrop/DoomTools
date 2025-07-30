@@ -63,6 +63,7 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.wadscript.DoomMapFunctions;
+import net.mtrop.doom.tools.wadscript.MapInfoFunctions;
 import net.mtrop.doom.tools.wadscript.PK3Functions;
 import net.mtrop.doom.tools.wadscript.UtilityFunctions;
 import net.mtrop.doom.tools.wadscript.WadFunctions;
@@ -145,6 +146,7 @@ public final class WadScriptMain
 	{
 		new Resolver("WADs", WadFunctions.createResolver()),
 		new Resolver("PK3/PKEs", PK3Functions.createResolver()),
+		new Resolver("MapInfo", MapInfoFunctions.createResolver()),
 		new Resolver("Doom / Hexen / ZDoom / UDMF Maps", "MAP", DoomMapFunctions.createResolver()),
 		new Resolver("Utilities", "UTIL", UtilityFunctions.createResolver())
 	};

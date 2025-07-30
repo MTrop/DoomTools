@@ -1,9 +1,15 @@
 DoomMake
 --------
 
-### Changed for 0.30.1
+### Changed for 0.31.0
 
 * `Fixed` A comment in PROPS.txt that was misleading.
+* `Added` Map host function `ISMAP()`.
+* `Added` List host function `ISLIST()`.
+* `Added` Buffer host function `ISBUFFER()`.
+* `Added` Misc host functions: `ISBOOLEAN()` `ISINT()` `ISFLOAT()` `ISSTRING()`, `ISOBJECT()`.
+* `Added` Math host functions: `ISNAN()` `ISINFINITE()`, `ISNUMERIC()`.
+* `Added` Host function library `MapInfoFunctions`.
 
 
 ### Changed for 0.30.0

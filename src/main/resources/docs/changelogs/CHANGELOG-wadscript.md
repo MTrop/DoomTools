@@ -1,6 +1,16 @@
 WadScript
 ---------
 
+### Changed for 1.9.0
+
+* `Added` Map host function `ISMAP()`.
+* `Added` List host function `ISLIST()`.
+* `Added` Buffer host function `ISBUFFER()`.
+* `Added` Misc host functions: `ISBOOLEAN()` `ISINT()` `ISFLOAT()` `ISSTRING()`, `ISOBJECT()`.
+* `Added` Math host functions: `ISNAN()` `ISINFINITE()`, `ISNUMERIC()`.
+* `Added` Host function library `MapInfoFunctions`.
+
+
 ### Changed for 1.8.0
 
 * `Fixed` Some function documentation wording.

@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2024-07-30** Updated RookScript to `1.17.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.0-RELEASE)
+
 - **2024-07-27** Updated RookScript to `1.16.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.1-RELEASE)
 
 - **2024-07-26** Updated RookScript to `1.16.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.0-RELEASE)

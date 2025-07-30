@@ -18,6 +18,7 @@ public class WadScriptCompletionProvider extends RookScriptCompletionProvider
 {
 	public WadScriptCompletionProvider()
 	{
+		super();
 		for (Resolver r : WadScriptMain.getAllWadScriptResolvers())
 			for (ScriptFunctionType type : r.resolver.getFunctions())
 				addCompletion(new FunctionCompletion(this, r.namespace, type));
