@@ -228,8 +228,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.28.0 by Matt Tropiano
-(using DoomStruct v2.19.3 , WadScript v1.7.1, RookScript v1.16.1, RookScript-Desktop v1.10.2.1)
+DoomMake v0.31.0 by Matt Tropiano
+(using DoomStruct v2.19.3 , WadScript v1.9.0, RookScript v1.17.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -343,9 +343,21 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.31.0
+
+* &#x60;Fixed&#x60; A comment in PROPS.txt that was misleading.
+* &#x60;Added&#x60; Map host function &#x60;ISMAP()&#x60;.
+* &#x60;Added&#x60; List host function &#x60;ISLIST()&#x60;.
+* &#x60;Added&#x60; Buffer host function &#x60;ISBUFFER()&#x60;.
+* &#x60;Added&#x60; Misc host functions: &#x60;ISBOOLEAN()&#x60; &#x60;ISINT()&#x60; &#x60;ISFLOAT()&#x60; &#x60;ISSTRING()&#x60;, &#x60;ISOBJECT()&#x60;.
+* &#x60;Added&#x60; Math host functions: &#x60;ISNAN()&#x60; &#x60;ISINFINITE()&#x60;, &#x60;ISNUMERIC()&#x60;.
+* &#x60;Added&#x60; Host function library &#x60;MapInfoFunctions&#x60;.
+* &#x60;Added&#x60; DoomMake function &#x60;TOUCHFILE()&#x60;.
+
+
 ### Changed for 0.30.0
 
-* &#x60;Added&#x60; &#x60;editor&#x60; target for building editor-friendly asset WADs (in new projects).
+* &#x60;Added&#x60; &#x60;editor&#x60; target for building editor-friendly resource WADs (in new projects).
 
 
 ### Changed for 0.29.0
