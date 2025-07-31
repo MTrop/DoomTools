@@ -3,7 +3,7 @@ DoomMake
 
 ### Changed for 0.31.0
 
-* `Fixed` A comment in PROPS.txt that was misleading.
+* `Fixed` A comment in project PROPS.txt files that was misleading.
 * `Added` Map host function `ISMAP()`.
 * `Added` List host function `ISLIST()`.
 * `Added` Buffer host function `ISBUFFER()`.
