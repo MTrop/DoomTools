@@ -10,6 +10,7 @@ DoomMake
 * `Added` Misc host functions: `ISBOOLEAN()` `ISINT()` `ISFLOAT()` `ISSTRING()`, `ISOBJECT()`.
 * `Added` Math host functions: `ISNAN()` `ISINFINITE()`, `ISNUMERIC()`.
 * `Added` Host function library `MapInfoFunctions`.
+* `Added` DoomMake function `TOUCHFILE()`.
 
 
 ### Changed for 0.30.0

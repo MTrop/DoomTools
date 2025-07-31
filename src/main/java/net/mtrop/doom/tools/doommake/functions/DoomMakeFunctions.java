@@ -1080,7 +1080,67 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			}
 		}
 		
-	}
+	},
+	
+	TOUCHFILE(1)
+	{
+		@Override
+		protected Usage usage()
+		{
+			return ScriptFunctionUsage.create()
+				.instructions(
+					"Creates or updates a file's modified timestamp."
+				)
+				.parameter("path", 
+					type(Type.STRING, "The file path."),
+					type(Type.OBJECTREF, "File", "The file path.")
+				)
+				.returns(
+					type(Type.OBJECTREF, "File", "The file that was provided."),
+					type(Type.ERROR, "BadPath", "If the file name is empty, or a directory."),
+					type(Type.ERROR, "IOError", "If the file could not be created."),
+					type(Type.ERROR, "Security", "If the OS is preventing the search.")
+				)
+			;
+		}
+
+		@Override
+		public boolean execute(ScriptInstance scriptInstance, ScriptValue returnValue) 
+		{
+			ScriptValue temp = CACHEVALUE1.get();
+			try 
+			{
+				File path = popFile(scriptInstance, temp);
+				
+				if (ObjectUtils.isEmpty(path))
+				{
+					returnValue.setError("BadPath", "Provided path is empty.");
+					return true;
+				}
+				else if (path.isDirectory())
+				{
+					returnValue.setError("BadPath", "Provided path is a directory.");
+					return true;
+				}
+
+				try {
+					FileUtils.touch(path);
+					returnValue.set(path);
+				} catch (IOException e) {
+					returnValue.setError("IOError", e.getMessage(), e.getLocalizedMessage());
+				} catch (SecurityException e) {
+					returnValue.setError("Security", e.getMessage(), e.getLocalizedMessage());
+				}
+				
+				return true;
+			}
+			finally
+			{
+				temp.setNull();
+			}
+		}
+		
+	},
 	
 	;
 	
