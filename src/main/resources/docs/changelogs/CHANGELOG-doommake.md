@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.31.1
+
+* `Fixed` DoomMake would create an empty `build` directory erroneously on unrelated functions.
+
+
 ### Changed for 0.31.0
 
 * `Fixed` A comment in project PROPS.txt files that was misleading.

@@ -1055,9 +1055,6 @@ public final class DoomMakeMain
 		if (!projectDirectory.exists())
 			return JSONObject.createEmptyObject();
 		
-		if (!FileUtils.createPathForFile(fullFilePath))
-			throw new IOException("Could not create directories for lock file.");
-		
 		if (!fullFilePath.exists())
 			return JSONObject.createEmptyObject();
 		
