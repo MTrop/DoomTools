@@ -22,6 +22,7 @@ public abstract class CommonCompletionProvider extends DefaultCompletionProvider
 	protected CommonCompletionProvider()
 	{
 		super();
+		setAutoActivationRules(true, "");
 	}
 	
 	/**

@@ -344,6 +344,8 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 	public DecoHackCompletionProvider()
 	{
 		super();
+		setAutoActivationRules(true, "+-");
+
 		for (DEHActionPointerDoom19 pointer : DEHActionPointerDoom19.values())
 		{
 			if (pointer == DEHActionPointerDoom19.NULL)

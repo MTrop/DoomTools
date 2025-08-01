@@ -2062,7 +2062,6 @@ public class EditorMultiFilePanel extends JPanel
 			this.editorPanel = new EditorPanel(textArea);
 			
 			textArea.setSyntaxEditingStyle(styleName);
-			applyAutoComplete(styleName);
 			textArea.getDocument().addDocumentListener(new DocumentListener()
 			{
 				@Override
@@ -2083,6 +2082,7 @@ public class EditorMultiFilePanel extends JPanel
 					onChange();
 				}
 			});
+			applyAutoComplete(styleName);
 			updateActions();
 		}
 		
