@@ -73,8 +73,8 @@ public class FindReplacePanel extends JPanel
 		this.backwards = false;
 		this.selectionOnly = false;
 		
-		this.findField = stringField(changeUpdateListener);
-		this.replaceField = stringField(changeUpdateListener);
+		this.findField = stringField(false, false, changeUpdateListener);
+		this.replaceField = stringField(false, false, changeUpdateListener);
 		
 		this.wholeWord = checkBoxField(checkBox(updateHandler));
 		this.matchCase = checkBoxField(checkBox(updateHandler));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2025 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -206,20 +206,37 @@ public final class FormFactory
 	 * Nulls are converted to empty string.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
+	 * @param trimming if true, auto-trims the contents of the field.
 	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringField(String initialValue, final boolean nullable, JValueChangeListener<String> changeListener)
+	public static JFormField<String> stringField(String initialValue, final boolean nullable, final boolean trimming, JValueChangeListener<String> changeListener)
 	{
 		return valueTextField(initialValue, converter(
 			(text) -> {
-				text = text.trim();
+				if (trimming)
+					text = text.trim();
 				return text.length() == 0 ? (nullable ? null : "") : text;
 			},
 			(value) -> (
 				value != null ? String.valueOf(value) : ""
 			)
 		), changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * Empty strings are considered null if this field is nullable.
+	 * Auto-trims contents.
+	 * Nulls are converted to empty string.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(String initialValue, final boolean nullable, JValueChangeListener<String> changeListener)
+	{
+		return stringField(initialValue, nullable, true, changeListener);
 	}
 
 	/**
@@ -230,7 +247,30 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(String initialValue, JValueChangeListener<String> changeListener)
 	{
-		return stringField(initialValue, false, changeListener); 
+		return stringField(initialValue, false, true, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @param nullable if true, this is a nullable field.
+	 * @param trimming if true, auto-trims the contents of the field.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(boolean nullable, boolean trimming, JValueChangeListener<String> changeListener)
+	{
+		return stringField("", nullable, trimming, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @param nullable if true, this is a nullable field.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(boolean nullable, JValueChangeListener<String> changeListener)
+	{
+		return stringField("", nullable, true, changeListener); 
 	}
 
 	/**
@@ -240,7 +280,21 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(JValueChangeListener<String> changeListener)
 	{
-		return stringField("", false, changeListener); 
+		return stringField("", false, true, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * Empty strings are considered null if this field is nullable.
+	 * Nulls are converted to empty string.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param trimming if true, auto-trims the contents of the field.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(String initialValue, boolean nullable, boolean trimming)
+	{
+		return stringField(initialValue, nullable, trimming, null); 
 	}
 
 	/**
@@ -253,7 +307,7 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(String initialValue, boolean nullable)
 	{
-		return stringField(initialValue, nullable, null); 
+		return stringField(initialValue, nullable, true, null); 
 	}
 
 	/**
@@ -263,7 +317,18 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(String initialValue)
 	{
-		return stringField(initialValue, false, null); 
+		return stringField(initialValue, false, true, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * @param nullable if true, this is a nullable field.
+	 * @param trimming if true, auto-trims the contents of the field.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringField(boolean nullable, boolean trimming)
+	{
+		return stringField(nullable ? null : "", nullable, trimming, null); 
 	}
 
 	/**
@@ -273,7 +338,7 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField(boolean nullable)
 	{
-		return stringField(nullable ? null : "", nullable, null); 
+		return stringField(nullable ? null : "", nullable, true, null); 
 	}
 
 	/**
@@ -282,7 +347,7 @@ public final class FormFactory
 	 */
 	public static JFormField<String> stringField()
 	{
-		return stringField("", false, null); 
+		return stringField("", false, true, null); 
 	}
 
 	/**

@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-08-01** [GUI] Find/Replace fields do not auto-trim.
 - **2023-08-01** [GUI] Made auto-complete smarter. (Issue #136).
 - **2023-08-01** [GUI] Fixed auto-complete auto-activation not occurring (Issue #135).
 - **2023-07-31** Updated AutoComplete to `3.3.2`. [Changes here.](https://github.com/bobbylight/AutoComplete/releases/tag/3.3.2)
