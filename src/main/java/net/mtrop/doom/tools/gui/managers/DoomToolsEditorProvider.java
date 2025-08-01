@@ -126,6 +126,7 @@ public final class DoomToolsEditorProvider
 			put("properties", SYNTAX_STYLE_PROPERTIES_FILE);
 			put("py",         SYNTAX_STYLE_PYTHON);
 			put("rb",         SYNTAX_STYLE_RUBY);
+			put("rs",         SYNTAX_STYLE_RUST);
 			put("sas",        SYNTAX_STYLE_SAS);
 			put("sca",        SYNTAX_STYLE_SCALA);
 			put("sql",        SYNTAX_STYLE_SQL);
@@ -137,6 +138,7 @@ public final class DoomToolsEditorProvider
 			put("vbs",        SYNTAX_STYLE_VISUAL_BASIC);
 			put("bat",        SYNTAX_STYLE_WINDOWS_BATCH);
 			put("cmd",        SYNTAX_STYLE_WINDOWS_BATCH);
+			put("vhdl",       SYNTAX_STYLE_VHDL);
 			put("xml",        SYNTAX_STYLE_XML);
 			put("yml",        SYNTAX_STYLE_YAML);
 			put("yaml",       SYNTAX_STYLE_YAML);
@@ -212,6 +214,7 @@ public final class DoomToolsEditorProvider
 			put("Properties",         SYNTAX_STYLE_PROPERTIES_FILE);
 			put("Python",             SYNTAX_STYLE_PYTHON);
 			put("Ruby",               SYNTAX_STYLE_RUBY);
+			put("Rust",               SYNTAX_STYLE_RUST);
 			put("SAS",                SYNTAX_STYLE_SAS);
 			put("Scala",              SYNTAX_STYLE_SCALA);
 			put("SQL",                SYNTAX_STYLE_SQL);
@@ -219,6 +222,7 @@ public final class DoomToolsEditorProvider
 			put("TypeScript",         SYNTAX_STYLE_TYPESCRIPT);
 			put("Bash",               SYNTAX_STYLE_UNIX_SHELL);
 			put("VisualBasic",        SYNTAX_STYLE_VISUAL_BASIC);
+			put("VHDL",               SYNTAX_STYLE_VHDL);
 			put("CMD/BAT",            SYNTAX_STYLE_WINDOWS_BATCH);
 			put("XML",                SYNTAX_STYLE_XML);
 			put("YAML",               SYNTAX_STYLE_YAML);

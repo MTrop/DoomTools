@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-07-31** Updated AutoComplete to `3.3.2`. [Changes here.](https://github.com/bobbylight/AutoComplete/releases/tag/3.3.2)
+- **2023-07-31** Updated RSyntaxTextArea to `3.6.0`. [Changes here.](https://github.com/bobbylight/RSyntaxTextArea/releases/tag/3.6.0)
 - **2024-07-31** Updated DoomStruct to `2.19.4`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.4-RELEASE)
 
 - **2024-07-30** Updated RookScript to `1.17.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.0-RELEASE)
