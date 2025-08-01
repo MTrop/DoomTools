@@ -8,6 +8,9 @@ package net.mtrop.doom.tools.gui.managers.parsing;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
 
@@ -24,6 +27,27 @@ public class WadMergeCompletionProvider extends CommonCompletionProvider
 		super();
 		for (WadMergeCommand command : WadMergeCommand.values())
 			addCompletion(new CommandCompletion(this, command));
+	}
+	
+	@Override
+	public boolean isAutoActivateOkay(JTextComponent tc) 
+	{
+		if (!super.isAutoActivateOkay(tc))
+			return false;
+		
+		// Only auto-complete at the beginning of a line.
+		int offs = tc.getCaretPosition();
+		char c;
+		do {
+			try {
+				c = tc.getText(offs - 1, 1).charAt(0);
+			} catch (BadLocationException e) {
+				// Eat exception
+				return false;
+			}
+		} while (--offs > 0 && c != '\n' && Character.isWhitespace(c));
+		
+		return c == '\n' || offs <= 0;
 	}
 	
 	/**

@@ -8,6 +8,9 @@ package net.mtrop.doom.tools.gui.managers.parsing;
 import java.io.StringWriter;
 import java.util.List;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
 
@@ -29,12 +32,42 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 	public RookScriptCompletionProvider()
 	{
 		super();
+		setAutoActivationRules(true, ":");
+		
 		for (Resolver r : WadScriptMain.getAllBaseResolvers())
 			for (ScriptFunctionType type : r.resolver.getFunctions())
 				addCompletion(new FunctionCompletion(this, r.namespace, type));
 		
 		for (RookScriptTemplateCompletion completion : RookScriptTemplateCompletion.values())
 			addCompletion(completion.createCompletion(this));
+	}
+	
+	@Override
+	public boolean isAutoActivateOkay(JTextComponent tc) 
+	{
+		if (!super.isAutoActivateOkay(tc))
+			return false;
+		
+		// Do not auto-complete inside strings
+		int offs = tc.getCaretPosition();
+		char c;
+		do {
+			try {
+				c = tc.getText(offs - 1, 1).charAt(0);
+			} catch (BadLocationException e) {
+				// Eat exception
+				return false;
+			}
+		} while (offs-- != 0 && c != '"' && !Character.isWhitespace(c));
+		
+		return c != '"';
+	}
+	
+	@Override
+	protected boolean isValidChar(char ch)
+	{
+		// scope operator is also valid
+		return super.isValidChar(ch) || ch == ':';
 	}
 	
 	/**
