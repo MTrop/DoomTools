@@ -3,14 +3,14 @@ Copyright (c) 2019-2025 Matt Tropiano
 
 ### Required Libraries
 
-[Doom Struct](https://github.com/MTrop/DoomStruct) 2.19.3+  
+[Doom Struct](https://github.com/MTrop/DoomStruct) 2.19.5+  
 [Black Rook JSON](https://blackrooksoftware.github.io/JSON/) 1.4.1+  
 [RookScript](https://blackrooksoftware.github.io/RookScript/) 1.16.1+  
 [RookScript-Desktop](https://blackrooksoftware.github.io/RookScript/) 1.10.2.1+
 
 [FlatLaF](https://www.formdev.com/flatlaf/) 2.0.2+  
-[RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.3.0+  
-[AutoComplete](https://github.com/bobbylight/AutoComplete) 3.3.0+  
+[RSyntaxTextArea](http://bobbylight.github.io/RSyntaxTextArea/) 3.6.0+  
+[AutoComplete](https://github.com/bobbylight/AutoComplete) 3.3.2+  
 [CommonMark](https://github.com/commonmark/commonmark-java) 0.19.0+  
 [Jsoup](https://github.com/jhy/jsoup/) 1.15.3+
 
