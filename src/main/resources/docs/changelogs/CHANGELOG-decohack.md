@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.39.2
+
+* `Fixed` A potential warning was not output to `stderr`.
+
+
 ### Changed for 0.39.1
 
 * `Fixed` The `--dump-constants` switch pointed to the wrong resource (Issue #131).

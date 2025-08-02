@@ -559,7 +559,7 @@ public final class DecoHackMain
 				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
 			))
 			{
-				options.stdout.println("WARNING: Final state was replaced in the exported patch - DHE 3.1 may not import this correctly!");
+				options.stderr.println("WARNING: Final state was replaced in the exported patch - DHE 3.1 may not import this correctly!");
 			}
 			
 			if (options.outputBudget)
