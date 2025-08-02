@@ -58,7 +58,7 @@ public class RookScriptCompletionProvider extends CommonCompletionProvider
 				// Eat exception
 				return false;
 			}
-		} while (offs-- != 0 && c != '"' && !Character.isWhitespace(c));
+		} while (offs-- != 0 && c != '"' && c != '\n');
 		
 		return c != '"';
 	}
