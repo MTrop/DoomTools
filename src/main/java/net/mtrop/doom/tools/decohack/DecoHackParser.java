@@ -428,6 +428,8 @@ public final class DecoHackParser extends Lexer.Parser
 				return parseWeaponAutoBlock(context);
 			else if (matchIdentifierIgnoreCase(Keyword.AMMO))
 				return parseAmmoAutoBlock(context);
+			else if (matchIdentifierIgnoreCase(Keyword.STATE))
+				return parseStateAutoBlock(context);
 			else
 			{
 				addErrorMessage("Expected \"%s\", \"%s\", or \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.AUTO);
@@ -1809,6 +1811,103 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Parse an auto state block.
+	private boolean parseStateAutoBlock(AbstractPatchContext<?> context)
+	{
+		String stateLabel;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected state label name after \"%s\".", Keyword.STATE);
+			return false;			
+		}
+		
+		if ((stateLabel = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR STATE.");
+			return false;
+		}
+		
+		if (context.getGlobalState(stateLabel) != null)
+		{
+			addErrorMessage("Expected valid thing identifier for new auto-state: \"%s\" is already in use!", stateLabel);
+			return false;
+		}
+
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s %s\" header.", Keyword.AUTO, Keyword.STATE);
+			return false;
+		}
+		
+		// Parse start.
+
+		// start from the next free state, however, this may change if vanilla 
+		// patch and the first state defined is or is not an action pointer state 
+		
+		int attemptedFirstIndex = context.findNextFreeState(lastAutoStateIndex);
+		
+		// First frame must match state, and the block must contain at least one state.
+		if (!currentIsSpriteIndex(context))
+		{
+			addErrorMessage("Expected sprite name (for a state description).");
+			return false;
+		}
+	
+		ParsedState parsed = new ParsedState();
+		StateFillCursor stateCursor = new StateFillCursor();
+		stateCursor.lastIndexFilled = attemptedFirstIndex;
+		
+		Integer actualFirstIndex = null;
+		
+		do {
+			parsed.reset();
+			if (!parseStateLine(context, null, parsed))
+				return false;
+			if ((actualFirstIndex = fillStates(context, EMPTY_LABELS, parsed, stateCursor, false)) == null)
+				return false;
+		} while (currentIsSpriteIndex(context));
+		
+		// Parse end.
+		Object nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, actualFirstIndex, stateCursor.lastIndexFilled)) == null)
+		{
+			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
+			return false;
+		}
+		else if (nextStateIndex instanceof Integer)
+		{
+			stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
+		}
+		else // String
+		{
+			Integer globalStateIndex;
+			if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
+			{
+				stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
+			}
+			else
+			{
+				addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
+				return false;
+			}
+		}
+
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s %s\" block.", Keyword.AUTO, Keyword.STATE);
+			return false;
+		}
+		
+		// Save hint.
+		lastAutoStateIndex = stateCursor.lastIndexFilled;
+
+		// set state index to actual index started at.
+		context.setGlobalState(stateLabel, actualFirstIndex);
+		
+		return true;
+
+	}
+	
 	// Parses a state freeing command.
 	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
 	{
@@ -3846,7 +3945,15 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else // String
 					{
-						futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, (String)nextStateIndex);
+						Integer globalStateIndex;
+						if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
+						{
+							stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
+						}
+						else
+						{
+							futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, (String)nextStateIndex);
+						}
 					}
 					stateCursor.lastStateFilled = null;
 				}
@@ -3912,14 +4019,30 @@ public final class DecoHackParser extends Lexer.Parser
 		} while (currentIsSpriteIndex(context));
 		
 		// Parse end.
-		Integer nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, startIndex, stateCursor.lastIndexFilled)) == null)
+		Object nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, startIndex, stateCursor.lastIndexFilled)) == null)
 		{
 			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
 			return false;
 		}
+		else if (nextStateIndex instanceof Integer)
+		{
+			stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
+		}
+		else // String
+		{
+			Integer globalStateIndex;
+			if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
+			{
+				stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
+			}
+			else
+			{
+				addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
+				return false;
+			}
+		}
 		
-		stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex);
 		return true;
 	}
 
@@ -3929,12 +4052,30 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		DEHState state = context.getState(index);
 	
-		Integer nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, index)) != null)
+		Object nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{
-			state.setNextStateIndex(nextStateIndex);
-			context.setFreeState(index, false);
-			return true;
+			if (nextStateIndex instanceof Integer)
+			{
+				state.setNextStateIndex((Integer)nextStateIndex);
+				context.setFreeState(index, false);
+				return true;
+			}
+			else // String
+			{
+				Integer globalStateIndex;
+				if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
+				{
+					state.setNextStateIndex(globalStateIndex);
+					context.setFreeState(index, false);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
+					return false;
+				}
+			}
 		}
 		
 		boolean notModified = true;
@@ -3981,9 +4122,29 @@ public final class DecoHackParser extends Lexer.Parser
 				state.setMBF21Flags(parsedState.mbf21Flags);
 	
 			// Try to parse next state clause.
-			nextStateIndex = parseNextStateIndex(context, null, index);
+			nextStateIndex = parseNextStateIndex(context, null, null, index);
 			if (nextStateIndex != null)
-				state.setNextStateIndex(nextStateIndex);
+			{
+				if (nextStateIndex instanceof Integer)
+				{
+					state.setNextStateIndex((Integer)nextStateIndex);
+				}
+				else // String
+				{
+					Integer globalStateIndex;
+					if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
+					{
+						state.setNextStateIndex(globalStateIndex);
+						context.setFreeState(index, false);
+						return true;
+					}
+					else
+					{
+						addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
+						return false;
+					}
+				}
+			}
 			
 			context.setFreeState(index, false);
 			return true;
@@ -4764,12 +4925,6 @@ public final class DecoHackParser extends Lexer.Parser
 			return matchNumericExpression(context, actor, paramType.getTypeCheck());
 	}
 
-	// Parses a next state line.
-	private Integer parseNextStateIndex(AbstractPatchContext<?> context, Integer lastLabelledStateIndex, int currentStateIndex)
-	{
-		return (Integer)parseNextStateIndex(context, null, lastLabelledStateIndex, currentStateIndex);
-	}
-	
 	// Parses a next state line.
 	private Object parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
@@ -5902,6 +6057,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private LinkedList<String> warnings;
 	/** Editor directives. */
 	private Map<String, String> editorKeys;
+	/** Last auto state index (for slightly better search continuation). */
+	private int lastAutoStateIndex;
 	/** Last auto thing index (for slightly better search continuation). */
 	private int lastAutoThingIndex;
 	/** Last auto weapon index (for slightly better search continuation). */
@@ -5916,6 +6073,7 @@ public final class DecoHackParser extends Lexer.Parser
 		this.warnings = new LinkedList<>();
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.lastAutoStateIndex = 0;
 		this.lastAutoThingIndex = 0;
 		this.lastAutoWeaponIndex = 0;
 		this.lastAutoAmmoIndex = 0;

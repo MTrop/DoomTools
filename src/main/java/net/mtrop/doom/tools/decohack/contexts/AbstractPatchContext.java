@@ -64,6 +64,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
 	protected Map<String, Integer> ammoAliasMap;
+	
+	protected Map<String, Integer> globalStateMap;
+	
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
 
@@ -143,6 +146,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.thingAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.ammoAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		
+		this.globalStateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.customPropertyMap = new HashMap<>();
 		
@@ -912,6 +918,38 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		out.addAll(ammoAliasMap.keySet());
+		return out;
+	}
+	
+	/**
+	 * Sets a global state label.
+	 * @param name the label name.
+	 * @param stateIndex the state index.
+	 */
+	public void setGlobalState(String name, int stateIndex)
+	{
+		globalStateMap.put(name, stateIndex);
+	}
+	
+	/**
+	 * Gets a global state label.
+	 * @param name the label name.
+	 * @return the corresponding index or null if no index.
+	 */
+	public Integer getGlobalState(String name)
+	{
+		return globalStateMap.get(name);
+	}
+	
+	/**
+	 * Gets the set of available global state labels.
+	 * The returned set is a copy and can be manipulated without affecting the main set.
+	 * @return the set of state label names.
+	 */
+	public SortedSet<String> getGlobalStateLabels()
+	{
+		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		out.addAll(globalStateMap.keySet());
 		return out;
 	}
 	

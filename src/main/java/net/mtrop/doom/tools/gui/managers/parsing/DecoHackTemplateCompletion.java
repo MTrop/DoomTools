@@ -26,6 +26,30 @@ public enum DecoHackTemplateCompletion
 		"}\n"
 	)),
 
+	AUTOWEAPON("Adds an auto-weapon.", (
+		"auto weapon ${WeaponAlias} \"${WeaponName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+		
+	AUTOWEAPONCOPY("Adds an auto-thing copied from another thing.", (
+		"auto weapon ${WeaponAlias} : thing ${SourceWeapon} \"${WeaponName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	AUTOAMMO("Adds an auto-ammo.", (
+		"auto ammo ${AmmoAlias} \"${AmmoName}\" {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+			
+	AUTOSTATE("Adds an auto-state (global state label).", (
+		"auto state ${StateLabel} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+				
 	AMMOBLOCK("Adds an ammo block.", (
 		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
 		"\tmax ${MaxAmount}\n" +
