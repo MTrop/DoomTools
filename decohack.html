@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.39.1 by Matt Tropiano (using DoomStruct v2.19.5)
+DECOHack v0.40.0 by Matt Tropiano (using DoomStruct v2.19.5)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -896,6 +896,63 @@ protected. You can turn off the protection on states by doing the following:
       more info!
  
  &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+
+------------------------------------------------------------------------------
+Auto-States (Global States)
+------------------------------------------------------------------------------
+
+Since states are &quot;just another structure&quot; in Doom, they can be declared in
+batches and you can refer to them later via a global state label, separated
+from both Things and Weapons:
+
+    auto state &lt;IDENTIFIER&gt; {
+    
+        &#x2F;&#x2F; ... state info goes here ...
+    
+    }
+
+
+For example:
+
+    auto state ImpDeath {
+        TROO I 8
+        TROO J 8 A_Scream
+        TROO K 6
+        TROO L 6 A_Fall
+        TROO M -1
+        Stop
+    }
+
+
+You can then refer to this state chain anywhere that you use state labels,
+such as in Things and Weapons, and even other global states.
+
+    auto state ImpDeath2 {
+        TROO K 6
+        TROO L 6 A_Fall
+        TROO M -1
+        Stop
+    }
+
+    auto state ImpDeath {
+        TROO I 8
+        TROO J 8 A_Scream
+        Goto ImpDeath2
+    }
+
+
+Each state declared or filled in this manner are also no longer &quot;free,&quot; if
+states were freed to accommodate these new states.
+
+You can also influence the next &quot;auto state&quot; index&#x2F;slot to be used via a 
+special clause:
+
+    set next auto state index &lt;INTEGER&gt;
+
+...where &lt;INTEGER&gt; is a positive integer for setting the next seek index for
+&quot;auto&quot; states. This may not write to the exact slot for the next state, 
+however - it will still seek to the next &quot;free&quot; slot from that provided index! 
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -2273,6 +2330,15 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.40.0
+
+* &#x60;Fixed&#x60; A potential warning was not output to &#x60;stderr&#x60;.
+* &#x60;Fixed&#x60; &#x60;AmmoPerShot&#x60; was not singled out as an MBF21 property on Weapons.
+* &#x60;Fixed&#x60; [GUI] Auto-complete does not pop-up automatically in strings.
+* &#x60;Added&#x60; &quot;Auto-states,&quot; or Global State Labels (Enh. #34).
+* &#x60;Changed&#x60; Some better internal handling of object properties.
+
+
 ### Changed for 0.39.1
 
 * &#x60;Fixed&#x60; The &#x60;--dump-constants&#x60; switch pointed to the wrong resource (Issue #131).
