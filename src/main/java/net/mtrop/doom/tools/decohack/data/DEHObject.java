@@ -32,16 +32,6 @@ public abstract class DEHObject<SELF>
 	 * @param property the property.
 	 * @param value the value.
 	 */
-	public void setCustomPropertyValue(DEHProperty property, int value)
-	{
-		setCustomPropertyValue(property, String.valueOf(value));
-	}
-
-	/**
-	 * Sets a custom property value.
-	 * @param property the property.
-	 * @param value the value.
-	 */
 	public void setCustomPropertyValue(DEHProperty property, String value)
 	{
 		customProperties.put(property, value);

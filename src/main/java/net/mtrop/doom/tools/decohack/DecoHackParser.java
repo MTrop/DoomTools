@@ -1161,7 +1161,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHAmmo.class, propertyName);
 				
-				Object value;
+				ParameterValue value;
 				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -1238,7 +1238,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHSound.class, propertyName);
 				
-				Object value;
+				ParameterValue value;
 				if ((value = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -1490,7 +1490,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHMiscellany.class, propertyName);
 				
-				Object val;
+				ParameterValue val;
 				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -2648,12 +2648,13 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
 			{
-				if ((value = (Integer)matchNumericExpression(context, thing, Type.FLAGS)) == null)
+				ParameterValue pv;
+				if ((pv = matchNumericExpression(context, thing, Type.FLAGS)) == null)
 				{
 					addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
 					return false;
 				}
-				thing.setFlags(value);
+				thing.setFlags(pv.value);
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.SEESOUND))
 			{
@@ -2963,7 +2964,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, propertyName);
 				
-				Object val;
+				ParameterValue val;
 				if ((val = matchNumericExpression(context, thing, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -3830,7 +3831,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHWeapon.class, propertyName);
 				
-				Object val;
+				ParameterValue val;
 				if ((val = matchNumericExpression(context, weapon, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -4163,30 +4164,21 @@ public final class DecoHackParser extends Lexer.Parser
 		} while (currentIsSpriteIndex(context));
 		
 		// Parse end.
-		Object nextStateIndex = null;
+		StateIndex nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, startIndex, stateCursor.lastIndexFilled)) == null)
 		{
 			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
 			return false;
 		}
-		else if (nextStateIndex instanceof Integer)
+		
+		Integer next;
+		if ((next = nextStateIndex.resolve(context)) == null)
 		{
-			stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
-		}
-		else // String
-		{
-			Integer globalStateIndex;
-			if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
-			{
-				stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
-			}
-			else
-			{
-				addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
-				return false;
-			}
+			addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+			return false;
 		}
 		
+		stateCursor.lastStateFilled.setNextStateIndex(next);
 		return true;
 	}
 
@@ -4196,30 +4188,19 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		DEHState state = context.getState(index);
 	
-		Object nextStateIndex = null;
+		StateIndex nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
 		{
-			if (nextStateIndex instanceof Integer)
+			Integer next;
+			if ((next = nextStateIndex.resolve(context)) == null)
 			{
-				state.setNextStateIndex((Integer)nextStateIndex);
-				context.setFreeState(index, false);
-				return true;
+				addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+				return false;
 			}
-			else // String
-			{
-				Integer globalStateIndex;
-				if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
-				{
-					state.setNextStateIndex(globalStateIndex);
-					context.setFreeState(index, false);
-					return true;
-				}
-				else
-				{
-					addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
-					return false;
-				}
-			}
+			
+			state.setNextStateIndex(next);
+			context.setFreeState(index, false);
+			return true;
 		}
 		
 		boolean notModified = true;
@@ -4269,25 +4250,16 @@ public final class DecoHackParser extends Lexer.Parser
 			nextStateIndex = parseNextStateIndex(context, null, null, index);
 			if (nextStateIndex != null)
 			{
-				if (nextStateIndex instanceof Integer)
+				Integer next;
+				if ((next = nextStateIndex.resolve(context)) == null)
 				{
-					state.setNextStateIndex((Integer)nextStateIndex);
+					addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+					return false;
 				}
-				else // String
-				{
-					Integer globalStateIndex;
-					if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
-					{
-						state.setNextStateIndex(globalStateIndex);
-						context.setFreeState(index, false);
-						return true;
-					}
-					else
-					{
-						addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
-						return false;
-					}
-				}
+				
+				state.setNextStateIndex(next);
+				context.setFreeState(index, false);
+				return true;
 			}
 			
 			context.setFreeState(index, false);
@@ -4453,7 +4425,7 @@ public final class DecoHackParser extends Lexer.Parser
 				String propertyName = matchIdentifier(); 
 				DEHProperty property = context.getCustomPropertyByKeyword(DEHState.class, propertyName);
 				
-				Object val;
+				ParameterValue val;
 				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
 					return false;
 
@@ -4924,19 +4896,32 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					
 					// get first argument
-					Object p;
+					ParameterValue p;
 					if ((p = parseParameterValue(paramType, context, actor)) == null)
 						return false;
-					else if (p instanceof Integer)
+					else 
 					{
-						if (!checkActionParamValue(pointer, 0, (Integer)p))
+						if (p.value != null)
+						{
+							if (!checkActionParamValue(pointer, 0, p.value))
+								return false;
+							action.misc1 = p.value;
+						}
+						else if (p.label != null)
+						{
+							action.labelFields.add(new FieldSet(FieldType.MISC1, p.label));
+							action.misc1 = PLACEHOLDER_LABEL;
+						}
+						else if (p.str != null)
+						{
+							addErrorMessage("Strings are not allowed in action pointer calls.");
 							return false;
-						action.misc1 = (Integer)p;
-					}
-					else
-					{
-						action.labelFields.add(new FieldSet(FieldType.MISC1, (String)p));
-						action.misc1 = PLACEHOLDER_LABEL;
+						}
+						else
+						{
+							addErrorMessage("INTERNAL ERROR: BAD PARAMETERVALUE");
+							return false;
+						}
 					}
 
 					if (matchType(DecoHackKernel.TYPE_COMMA))
@@ -4949,16 +4934,29 @@ public final class DecoHackParser extends Lexer.Parser
 						
 						if ((p = parseParameterValue(paramType, context, actor)) == null)
 							return false;
-						else if (p instanceof Integer)
-						{
-							if (!checkActionParamValue(pointer, 1, (Integer)p))
-								return false;
-							action.misc2 = (Integer)p;
-						}
 						else
 						{
-							action.labelFields.add(new FieldSet(FieldType.MISC2, (String)p));
-							action.misc2 = PLACEHOLDER_LABEL;
+							if (p.value != null)
+							{
+								if (!checkActionParamValue(pointer, 1, p.value))
+									return false;
+								action.misc2 = p.value;
+							}
+							else if (p.label != null)
+							{
+								action.labelFields.add(new FieldSet(FieldType.MISC2, p.label));
+								action.misc2 = PLACEHOLDER_LABEL;
+							}
+							else if (p.str != null)
+							{
+								addErrorMessage("Strings are not allowed in action pointer calls.");
+								return false;
+							}
+							else
+							{
+								addErrorMessage("INTERNAL ERROR: BAD PARAMETERVALUE");
+								return false;
+							}
 						}
 					}
 
@@ -4994,19 +4992,32 @@ public final class DecoHackParser extends Lexer.Parser
 							return false;
 						}
 						
-						Object p;
+						ParameterValue p;
 						if ((p = parseParameterValue(paramType, context, actor)) == null)
 							return false;
-						else if (p instanceof Integer)
+						else 
 						{
-							if (!checkActionParamValue(pointer, argIndex, (Integer)p))
+							if (p.value != null)
+							{
+								if (!checkActionParamValue(pointer, argIndex, p.value))
+									return false;
+								action.args.add(p.value);
+							}
+							else if (p.label != null)
+							{
+								action.labelFields.add(new FieldSet(FieldType.getArg(argIndex), p.label));
+								action.args.add(PLACEHOLDER_LABEL);
+							}
+							else if (p.str != null)
+							{
+								addErrorMessage("Strings are not allowed in action pointer calls.");
 								return false;
-							action.args.add((Integer)p);
-						}
-						else
-						{
-							action.labelFields.add(new FieldSet(FieldType.getArg(argIndex), (String)p));
-							action.args.add(PLACEHOLDER_LABEL);
+							}
+							else
+							{
+								addErrorMessage("INTERNAL ERROR: BAD PARAMETERVALUE");
+								return false;
+							}
 						}
 
 						if (matchType(DecoHackKernel.TYPE_RPAREN))
@@ -5027,7 +5038,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a parameter value.
-	private Object parseParameterValue(DEHValueType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
+	private ParameterValue parseParameterValue(DEHValueType paramType, AbstractPatchContext<?> context, DEHActor<?> actor)
 	{
 		// Force value interpretation.
 		if (matchIdentifierIgnoreCase(Keyword.THING))
@@ -5047,19 +5058,29 @@ public final class DecoHackParser extends Lexer.Parser
 					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
 			}
 			
-			return thingIndex;
+			return ParameterValue.createValue(thingIndex);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
 		{
 			if (paramType == DEHValueType.WEAPON)
 				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
-			return parseWeaponOrWeaponStateIndex(context);
+			
+			Integer index;
+			if ((index = parseWeaponOrWeaponStateIndex(context)) == null)
+				return null;
+			
+			return ParameterValue.createValue(index);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
 		{
 			if (paramType == DEHValueType.SOUND)
 				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
-			return parseSoundIndex(context);
+
+			Integer index;
+			if ((index = parseSoundIndex(context)) == null)
+				return null;
+			
+			return ParameterValue.createValue(index);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
 		{
@@ -5314,22 +5335,22 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Checks the property value.
-	private boolean checkCustomPropertyValue(DEHProperty property, String propertyName, Object value) 
+	private boolean checkCustomPropertyValue(DEHProperty property, String propertyName, ParameterValue pv) 
 	{
-		if (value instanceof Integer)
+		if (pv.value != null)
 		{
 			DEHValueType param = property.getType();
-			if (param.isValueCheckable() && !param.isValueValid((Integer)value))
+			if (param.isValueCheckable() && !param.isValueValid(pv.value))
 			{
-				addErrorMessage("Invalid value '%d' for property '%s': value must be between %d and %d.", value, propertyName, param.getValueMin(), param.getValueMax());
+				addErrorMessage("Invalid value '%d' for property '%s': value must be between %d and %d.", pv, propertyName, param.getValueMin(), param.getValueMax());
 				return false;
 			}
 		}
-		else if (value instanceof String)
+		else if (pv.str != null)
 		{
 			if (property.getType() != DEHValueType.STRING)
 			{
-				addErrorMessage("Invalid value '%d' for property '%s': value must be a string.", value, propertyName);
+				addErrorMessage("Invalid value '%d' for property '%s': value must be a string.", pv, propertyName);
 				return false;
 			}
 		}
@@ -5851,7 +5872,7 @@ public final class DecoHackParser extends Lexer.Parser
 
 	// Matches and parses a numeric expression.
 	// STATE type can return a String. Everything else is an Integer, or null.
-	private Object matchNumericExpression(AbstractPatchContext<?> context, DEHActor<?> actor, Type typeCheck)
+	private ParameterValue matchNumericExpression(AbstractPatchContext<?> context, DEHActor<?> actor, Type typeCheck)
 	{
 		Integer out = null;
 		
@@ -5870,7 +5891,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected integer value.");
 					return null;
 				}
-				return out;
+				return ParameterValue.createValue(out);
 			}
 			
 			case FIXED:
@@ -5880,7 +5901,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("Expected fixed-point value.");
 					return null;
 				}
-				return out;
+				return ParameterValue.createValue(out);
 			}
 			
 			case FLAGS:
@@ -5964,36 +5985,39 @@ public final class DecoHackParser extends Lexer.Parser
 						nextToken();
 				}
 				
-				return out;
+				return ParameterValue.createValue(out);
 			}
 			
 			case STATE:
 			{
-				Object value;
+				StateIndex value;
 				if ((value = parseStateIndex(context)) == null)
 				{
-					addErrorMessage("Expected valid state: positive integer, or thing/weapon/local state label.");
+					addErrorMessage("Expected valid state: positive integer, or thing/weapon/state label.");
 					return null;
 				}
 				
-				return value;
+				if (value.index != null)
+					return ParameterValue.createValue(value.index);
+				else
+					return ParameterValue.createLabel(value.label);
 			}
 			
 			case THING:
 			{
-				Object value;
+				Integer value;
 				if ((value = matchThingIndex(context)) == null)
 				{
 					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
 					return null;
 				}
 				
-				return value;
+				return ParameterValue.createValue(value);
 			}
 
 			case THINGMISSILE:
 			{
-				Object value;
+				Integer value;
 				if ((value = matchThingIndex(context)) == null)
 				{
 					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
@@ -6007,40 +6031,40 @@ public final class DecoHackParser extends Lexer.Parser
 				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
 					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
 				
-				return value;
+				return ParameterValue.createValue(value);
 			}
 			
 			case WEAPON:
 			{
-				Object value;
+				Integer value;
 				if ((value = matchWeaponIndex(context)) == null)
 				{
 					addErrorMessage("Expected valid weapon index: positive integer, or weapon alias.");
 					return null;
 				}
 				
-				return value;
+				return ParameterValue.createValue(value);
 			}
 			
 			case SOUND:
 			{
-				Object value;
+				Integer value;
 				if ((value = parseSoundIndex(context)) == null)
 					return null;
 				
-				return value;
+				return ParameterValue.createValue(value);
 			}
 
 			case STRING:
 			{
-				Object value;
+				String value;
 				if ((value = matchString()) == null)
 				{
 					addErrorMessage("Expected string.");
 					return null;
 				}
 				
-				return value;
+				return ParameterValue.createString(value);
 			}
 		}
 	}
@@ -6157,6 +6181,14 @@ public final class DecoHackParser extends Lexer.Parser
 		if (matchType(DecoHackKernel.TYPE_FALSE))
 			return false;
 		return null;
+	}
+
+	// Resolves a state label.
+	private static Integer resolveStateLabel(String label, AbstractPatchContext<?> context, DEHActor<?> actor)
+	{
+		if (actor != null && actor.hasLabel(label))
+			return actor.getLabel(label);
+		return context.getGlobalState(label);
 	}
 
 	private static final char[] HEXALPHABET = "0123456789abcdef".toCharArray();
@@ -6652,6 +6684,53 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 	
+	private static class ParameterValue
+	{
+		private Integer value;
+		private String str;
+		private String label;
+		
+		private ParameterValue()
+		{
+			this.value = null;
+			this.str = null;
+			this.label = null;
+		}
+		
+		public static ParameterValue createValue(int value)
+		{
+			ParameterValue out = new ParameterValue();
+			out.value = value;
+			return out;
+		}
+
+		public static ParameterValue createString(String string)
+		{
+			ParameterValue out = new ParameterValue();
+			out.str = string;
+			return out;
+		}
+
+		public static ParameterValue createLabel(String label)
+		{
+			ParameterValue out = new ParameterValue();
+			out.label = label;
+			return out;
+		}
+		
+		@Override
+		public String toString() 
+		{
+			if (value != null)
+				return String.valueOf(value);
+			if (str != null)
+				return str;
+			if (label != null)
+				return label;
+			return super.toString();
+		}
+	}
+	
 	private static class StateIndex
 	{
 		private Integer index;
@@ -6677,21 +6756,12 @@ public final class DecoHackParser extends Lexer.Parser
 		public Integer resolve(AbstractPatchContext<?> context, DEHActor<?> actor)
 		{
 			if (index != null)
-			{
 				return index;
-			}
-			else if (label != null)
-			{
-				if (actor != null && actor.hasLabel(label))
-					return actor.getLabel(label);
-				return context.getGlobalState(label);
-			}
 			else
-			{
-				throw new RuntimeException("INTERNAL ERROR: State resolve.");
-			}
+				return resolveStateLabel(label, context, actor);
 		}
 		
 	}
+	
 
 }
