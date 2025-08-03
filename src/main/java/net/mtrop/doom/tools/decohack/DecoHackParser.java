@@ -567,7 +567,24 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.AUTO))
 			{
-				if (matchIdentifierIgnoreCase(Keyword.THING))
+				if (matchIdentifierIgnoreCase(Keyword.STATE))
+				{
+					if (!matchIdentifierIgnoreCase(Keyword.INDEX))
+					{
+						addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.INDEX, Keyword.STATE);
+						return false;
+					}
+
+					Integer idx;
+					if ((idx = matchPositiveInteger()) == null)
+					{
+						addErrorMessage("Expected positive integer after \"%s\".", Keyword.INDEX);
+						return false;
+					}
+					
+					lastAutoStateIndex = idx;
+				}
+				else if (matchIdentifierIgnoreCase(Keyword.THING))
 				{
 					if (!matchIdentifierIgnoreCase(Keyword.INDEX))
 					{
@@ -620,7 +637,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else
 				{
-					addErrorMessage("Expected \"%s\", \"%s\", \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.AUTO);
+					addErrorMessage("Expected \"%s\", \"%s\", \"%s\", \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.STATE, Keyword.AUTO);
 					return false;
 				}
 
@@ -628,7 +645,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected \"%s\", \"%s\", or \"%s\" after \"%s\".", Keyword.SPRITE, Keyword.SOUND, Keyword.AUTO, Keyword.NEXT);
+				addErrorMessage("Expected \"%s\", \"%s\", \"%s\", or \"%s\" after \"%s\".", Keyword.SPRITE, Keyword.SOUND, Keyword.AUTO, Keyword.NEXT);
 				return false;
 			}
 		}
@@ -4329,7 +4346,14 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;				
 				}
 				
-				state.setNextStateIndex(value.resolve(context));
+				Integer next;
+				if ((next = value.resolve(context)) == null)
+				{
+					addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
+					return false;				
+				}
+				
+				state.setNextStateIndex(next);
 				notModified = false;
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.POINTER))

@@ -739,6 +739,15 @@ such as in Things and Weapons, and even other global states.
 Each state declared or filled in this manner are also no longer "free," if
 states were freed to accommodate these new states.
 
+You can also influence the next "auto state" index/slot to be used via a 
+special clause:
+
+    set next auto state index <INTEGER>
+
+...where <INTEGER> is a positive integer for setting the next seek index for
+"auto" states. This may not write to the exact slot for the next state, 
+however - it will still seek to the next "free" slot from that provided index! 
+
 
 ==============================================================================
 ===== Weapon

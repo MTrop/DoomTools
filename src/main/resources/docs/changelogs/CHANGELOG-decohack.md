@@ -1,9 +1,10 @@
 DECOHack
 --------
 
-### Changed for 0.39.2
+### Changed for 0.40.0
 
 * `Fixed` A potential warning was not output to `stderr`.
+* `Added` "Auto-states," or Global State Labels (Enh. #34).
 
 
 ### Changed for 0.39.1
