@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.common.Common;
@@ -894,266 +895,16 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierIgnoreCase(Keyword.MAX))
+			PropertyResult pr;
+			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseAmmoBodyDoom19Properties(context, ammo)) != PropertyResult.BYPASSED)
 			{
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MAX);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				ammo.setMax(value);
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUP))
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseAmmoBodyID24Properties(context, ammo)) != PropertyResult.BYPASSED)
 			{
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUP);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				ammo.setPickup(value);
-			}
-			// ================ ID24
-			else if (matchIdentifierIgnoreCase(Keyword.INITIALAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.INITIALAMMO);
-					return false;
-				}
-				ammo.setInitialAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MAXUPGRADEDAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.MAXUPGRADEDAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MAXUPGRADEDAMMO);
-					return false;
-				}
-				ammo.setMaxUpgradedAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.BOXAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.BOXAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.BOXAMMO);
-					return false;
-				}
-				ammo.setBoxAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.BACKPACKAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.BACKPACKAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.BACKPACKAMMO);
-					return false;
-				}
-				ammo.setBackpackAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.WEAPONAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.WEAPONAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.WEAPONAMMO);
-					return false;
-				}
-				ammo.setWeaponAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDAMMO);
-					return false;
-				}
-				ammo.setDroppedAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBOXAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDBOXAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBOXAMMO);
-					return false;
-				}
-				ammo.setDroppedBoxAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBACKPACKAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDBACKPACKAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBACKPACKAMMO);
-					return false;
-				}
-				ammo.setDroppedBackpackAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DROPPEDWEAPONAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DROPPEDWEAPONAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDWEAPONAMMO);
-					return false;
-				}
-				ammo.setDroppedWeaponAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DEATHMATCHWEAPONAMMO))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.DEATHMATCHWEAPONAMMO);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.DEATHMATCHWEAPONAMMO);
-					return false;
-				}
-				ammo.setDeathmatchWeaponAmmo(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SKILL1MULTIPLIER))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL1MULTIPLIER);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveFixed(true)) == null)
-				{
-					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL1MULTIPLIER);
-					return false;
-				}
-				ammo.setSkill1Multiplier(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SKILL2MULTIPLIER))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL2MULTIPLIER);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveFixed(true)) == null)
-				{
-					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL2MULTIPLIER);
-					return false;
-				}
-				ammo.setSkill2Multiplier(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SKILL3MULTIPLIER))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL3MULTIPLIER);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveFixed(true)) == null)
-				{
-					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL3MULTIPLIER);
-					return false;
-				}
-				ammo.setSkill3Multiplier(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SKILL4MULTIPLIER))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL4MULTIPLIER);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveFixed(true)) == null)
-				{
-					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL4MULTIPLIER);
-					return false;
-				}
-				ammo.setSkill4Multiplier(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SKILL5MULTIPLIER))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SKILL5MULTIPLIER);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveFixed(true)) == null)
-				{
-					addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL5MULTIPLIER);
-					return false;
-				}
-				ammo.setSkill5Multiplier(value);
 			}
 			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHAmmo.class))
@@ -1186,6 +937,205 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	private PropertyResult parseAmmoBodyDoom19Properties(AbstractPatchContext<?> context, DEHAmmo ammo) 
+	{
+		if (matchIdentifierIgnoreCase(Keyword.MAX))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.MAX);
+				return PropertyResult.ERROR;
+			}
+			ammo.setMax(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUP))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUP);
+				return PropertyResult.ERROR;
+			}
+			ammo.setPickup(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	private PropertyResult parseAmmoBodyID24Properties(AbstractPatchContext<?> context, DEHAmmo ammo) 
+	{
+		if (matchIdentifierIgnoreCase(Keyword.INITIALAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.INITIALAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setInitialAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAXUPGRADEDAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.MAXUPGRADEDAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setMaxUpgradedAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BOXAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.BOXAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setBoxAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BACKPACKAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.BACKPACKAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setBackpackAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.WEAPONAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.WEAPONAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setWeaponAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DROPPEDAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setDroppedAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBOXAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBOXAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setDroppedBoxAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DROPPEDBACKPACKAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDBACKPACKAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setDroppedBackpackAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DROPPEDWEAPONAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.DROPPEDWEAPONAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setDroppedWeaponAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DEATHMATCHWEAPONAMMO))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.DEATHMATCHWEAPONAMMO);
+				return PropertyResult.ERROR;
+			}
+			ammo.setDeathmatchWeaponAmmo(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SKILL1MULTIPLIER))
+		{
+			Integer value;
+			if ((value = matchPositiveFixed(true)) == null)
+			{
+				addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL1MULTIPLIER);
+				return PropertyResult.ERROR;
+			}
+			ammo.setSkill1Multiplier(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SKILL2MULTIPLIER))
+		{
+			Integer value;
+			if ((value = matchPositiveFixed(true)) == null)
+			{
+				addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL2MULTIPLIER);
+				return PropertyResult.ERROR;
+			}
+			ammo.setSkill2Multiplier(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SKILL3MULTIPLIER))
+		{
+			Integer value;
+			if ((value = matchPositiveFixed(true)) == null)
+			{
+				addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL3MULTIPLIER);
+				return PropertyResult.ERROR;
+			}
+			ammo.setSkill3Multiplier(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SKILL4MULTIPLIER))
+		{
+			Integer value;
+			if ((value = matchPositiveFixed(true)) == null)
+			{
+				addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL4MULTIPLIER);
+				return PropertyResult.ERROR;
+			}
+			ammo.setSkill4Multiplier(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SKILL5MULTIPLIER))
+		{
+			Integer value;
+			if ((value = matchPositiveFixed(true)) == null)
+			{
+				addErrorMessage("Expected positive fixed-point number after \"%s\".", Keyword.SKILL5MULTIPLIER);
+				return PropertyResult.ERROR;
+			}
+			ammo.setSkill5Multiplier(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
 	// Parses an sound block.
 	private boolean parseSoundBlock(AbstractPatchContext<?> context)
 	{
@@ -1213,25 +1163,11 @@ public final class DecoHackParser extends Lexer.Parser
 
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierIgnoreCase(Keyword.PRIORITY))
+			PropertyResult pr;
+			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseSoundBlockDoom19Properties(context, sound)) != PropertyResult.BYPASSED)
 			{
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PRIORITY);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				sound.setPriority(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SINGULAR))
-			{
-				Boolean value;
-				if ((value = matchBoolean()) == null)
-				{
-					addErrorMessage("Expected boolean after \"%s\".", Keyword.SINGULAR);
-					return false;
-				}
-				sound.setSingular(value);
 			}
 			else if (currentIsCustomProperty(context, DEHSound.class))
 			{
@@ -1261,6 +1197,34 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		return true;
+	}
+
+	private PropertyResult parseSoundBlockDoom19Properties(AbstractPatchContext<?> context, DEHSound sound)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.PRIORITY))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PRIORITY);
+				return PropertyResult.ERROR;
+			}
+			sound.setPriority(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SINGULAR))
+		{
+			Boolean value;
+			if ((value = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected boolean after \"%s\".", Keyword.SINGULAR);
+				return PropertyResult.ERROR;
+			}
+			sound.setSingular(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
 	}
 
 	// Parses a par block.
@@ -1328,162 +1292,13 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		DEHMiscellany misc = context.getMiscellany();
 		
-		Boolean flag;
-		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING))
+			PropertyResult pr;
+			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseMiscellaneousBlockDoom19Properties(context, misc)) != PropertyResult.BYPASSED)
 			{
-				if ((flag = matchBoolean()) == null)
-				{
-					addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				misc.setMonsterInfightingEnabled(flag);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING2))
-			{
-				if ((flag = matchBoolean()) == null)
-				{
-					addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING2);
-					return false;
-				}
-				misc.setMonsterInfightingEnabled(flag);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.INITIAL_BULLETS))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_BULLETS);
-					return false;
-				}
-				misc.setInitialBullets(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.INITIAL_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_HEALTH);
-					return false;
-				}
-				misc.setInitialHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.GREEN_ARMOR_CLASS))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.GREEN_ARMOR_CLASS);
-					return false;
-				}
-				misc.setGreenArmorClass(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.BLUE_ARMOR_CLASS))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.BLUE_ARMOR_CLASS);
-					return false;
-				}
-				misc.setBlueArmorClass(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SOULSPHERE_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.SOULSPHERE_HEALTH);
-					return false;
-				}
-				misc.setSoulsphereHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MAX_SOULSPHERE_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_SOULSPHERE_HEALTH);
-					return false;
-				}
-				misc.setMaxSoulsphereHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MEGASPHERE_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.MEGASPHERE_HEALTH);
-					return false;
-				}
-				misc.setMegasphereHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.GOD_MODE_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.GOD_MODE_HEALTH);
-					return false;
-				}
-				misc.setGodModeHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR);
-					return false;
-				}
-				misc.setIDFAArmor(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR_CLASS))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR_CLASS);
-					return false;
-				}
-				misc.setIDFAArmorClass(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR);
-					return false;
-				}
-				misc.setIDKFAArmor(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR_CLASS))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR_CLASS);
-					return false;
-				}
-				misc.setIDKFAArmorClass(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.BFG_CELLS_PER_SHOT))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.BFG_CELLS_PER_SHOT);
-					return false;
-				}
-				misc.setBFGCellsPerShot(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MAX_HEALTH))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_HEALTH);
-					return false;
-				}
-				misc.setMaxHealth(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MAX_ARMOR))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_ARMOR);
-					return false;
-				}
-				misc.setMaxArmor(value);
 			}
 			else if (currentIsCustomProperty(context, DEHMiscellany.class))
 			{
@@ -1513,6 +1328,199 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 
 		return true;
+	}
+
+	private PropertyResult parseMiscellaneousBlockDoom19Properties(AbstractPatchContext<?> context, DEHMiscellany misc)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING))
+		{
+			Boolean flag;
+			if ((flag = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING);
+				return PropertyResult.ERROR;
+			}
+			misc.setMonsterInfightingEnabled(flag);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING2))
+		{
+			Boolean flag;
+			if ((flag = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING2);
+				return PropertyResult.ERROR;
+			}
+			misc.setMonsterInfightingEnabled(flag);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_BULLETS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_BULLETS);
+				return PropertyResult.ERROR;
+			}
+			misc.setInitialBullets(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setInitialHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.GREEN_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.GREEN_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setGreenArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BLUE_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.BLUE_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setBlueArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SOULSPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.SOULSPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setSoulsphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_SOULSPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_SOULSPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxSoulsphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MEGASPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MEGASPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMegasphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.GOD_MODE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.GOD_MODE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setGodModeHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDFAArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDFAArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDKFAArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDKFAArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BFG_CELLS_PER_SHOT))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.BFG_CELLS_PER_SHOT);
+				return PropertyResult.ERROR;
+			}
+			misc.setBFGCellsPerShot(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
 	}
 
 	// Parses a custom element clause.
@@ -2380,6 +2388,7 @@ public final class DecoHackParser extends Lexer.Parser
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
+			PropertyResult pr;
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
 				if ((value = matchThingFlagMnemonic()) != null)
@@ -2531,432 +2540,25 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.EDNUM))
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseThingBodyDoom19Properties(context, thing)) != PropertyResult.BYPASSED)
 			{
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.EDNUM);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				
-				if (value < -1 && !context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("A negative editor number is only valid for ID24 patches or better.");
-					return false;
-				}
-				
-				// bad or reserved ednums.
-				if (value == 0 || value == 1 || value == 2 || value == 3 || value == 4 || value == 11)
-				{
-					addErrorMessage("The editor number %d is either invalid or reserved.", value);
-					return false;
-				}
-				
-				thing.setEditorNumber(value);
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.HEALTH))
+			else if (context.supports(DEHFeatureLevel.EXTENDED) && (pr = parseThingBodyExtendedProperties(context, thing)) != PropertyResult.BYPASSED)
 			{
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.HEALTH);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				thing.setHealth(value);
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.SPEED))
+			else if (context.supports(DEHFeatureLevel.MBF21) && (pr = parseThingBodyMBF21Properties(context, thing)) != PropertyResult.BYPASSED)
 			{
-				if (thing.hasFlag(DEHThingFlag.MISSILE.getValue()))
-				{
-					if ((value = matchFixed(false)) == null)
-					{
-						addErrorMessage("Expected integer or fixed-point value after \"%s\".", Keyword.SPEED);
-						return false;
-					}
-					thing.setFixedSpeed(value);
-				}
-				else
-				{
-					if ((value = matchInteger()) == null)
-					{
-						addErrorMessage("Expected integer after \"%s\".", Keyword.SPEED);
-						return false;
-					}
-					thing.setSpeed(value);
-				}
+				if (pr == PropertyResult.ERROR)
+					return false;
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.RADIUS))
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseThingBodyID24Properties(context, thing)) != PropertyResult.BYPASSED)
 			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.RADIUS);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				thing.setRadius(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.HEIGHT))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.HEIGHT);
-					return false;
-				}
-				thing.setHeight(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DAMAGE))
-			{
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.DAMAGE);
-					return false;
-				}
-				thing.setDamage(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.REACTIONTIME))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.REACTIONTIME);
-					return false;
-				}
-				thing.setReactionTime(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PAINCHANCE))
-			{
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PAINCHANCE);
-					return false;
-				}
-				thing.setPainChance(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MASS))
-			{
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.MASS);
-					return false;
-				}				
-
-				// zero-mass check
-				if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
-				{
-					addWarningMessage("Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
-					return false;
-				}
-				
-				thing.setMass(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
-			{
-				ParameterValue pv;
-				if ((pv = matchNumericExpression(context, thing, Type.FLAGS)) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
-					return false;
-				}
-				thing.setFlags(pv.value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SEESOUND))
-			{
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.SEESOUND);
-					return false;
-				}
-				thing.setSeeSoundPosition(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.ATTACKSOUND))
-			{
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.ATTACKSOUND);
-					return false;
-				}
-				thing.setAttackSoundPosition(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PAINSOUND))
-			{
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.PAINSOUND);
-					return false;
-				}
-				thing.setPainSoundPosition(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.DEATHSOUND))
-			{
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.DEATHSOUND);
-					return false;
-				}
-				thing.setDeathSoundPosition(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.ACTIVESOUND))
-			{
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.ACTIVESOUND);
-					return false;
-				}
-				thing.setActiveSoundPosition(value);
-			}
-			// ================= EXTENDED
-			else if (matchIdentifierIgnoreCase(Keyword.DROPITEM))
-			{
-				if (!context.supports(DEHFeatureLevel.EXTENDED))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an EXTENDED patch.", Keyword.DROPITEM);
-					return false;
-				}
-				
-				if ((value = matchThingIndex(context, true)) == null)
-				{
-					addErrorMessage("Expected thing index after \"%s\".", Keyword.DROPITEM);
-					return false;
-				}
-				thing.setDroppedItem(value);
-			}
-			// ================= MBF21
-			else if (matchIdentifierIgnoreCase(Keyword.FASTSPEED))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.FASTSPEED);
-					return false;
-				}
-				
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.FASTSPEED);
-					return false;
-				}
-				thing.setFastSpeed(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.MELEERANGE))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.MELEERANGE);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MELEERANGE);
-					return false;
-				}
-				thing.setMeleeRange(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.RIPSOUND))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.RIPSOUND);
-					return false;
-				}
-				
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected sound name after \"%s\".", Keyword.RIPSOUND);
-					return false;
-				}
-				thing.setRipSoundPosition(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.INFIGHTINGGROUP))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.INFIGHTINGGROUP);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.INFIGHTINGGROUP);
-					return false;
-				}
-				thing.setInfightingGroup(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PROJECTILEGROUP))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.PROJECTILEGROUP);
-					return false;
-				}
-				
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PROJECTILEGROUP);
-					return false;
-				}
-				thing.setProjectileGroup(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SPLASHGROUP))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.SPLASHGROUP);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.SPLASHGROUP);
-					return false;
-				}
-				thing.setSplashGroup(value);
-			}
-			// ================= ID24
-			else if (matchIdentifierIgnoreCase(Keyword.MINRESPAWNTICS))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.MINRESPAWNTICS);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.MINRESPAWNTICS);
-					return false;
-				}
-				thing.setMinRespawnTics(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.RESPAWNDICE))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.RESPAWNDICE);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.RESPAWNDICE);
-					return false;
-				}
-				thing.setRespawnDice(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOTYPE))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPAMMOTYPE);
-					return false;
-				}
-				
-				if ((value = matchAmmoIndex(context)) == null)
-				{
-					return false;
-				}
-				thing.setPickupAmmoType(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOCATEGORY))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPAMMOCATEGORY);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPAMMOCATEGORY);
-					return false;
-				}
-				thing.setPickupAmmoCategory(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPWEAPONTYPE))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPWEAPONTYPE);
-					return false;
-				}
-				
-				if ((value = matchWeaponIndex(context)) == null)
-				{
-					return false;
-				}
-				thing.setPickupWeaponType(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPITEMTYPE))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPITEMTYPE);
-					return false;
-				}
-				
-				if ((value = matchPickupItemType()) == null)
-				{
-					return false;
-				}
-				thing.setPickupItemType(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPBONUSCOUNT))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPBONUSCOUNT);
-					return false;
-				}
-				
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPBONUSCOUNT);
-					return false;
-				}
-				thing.setPickupBonusCount(value);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPMESSAGE))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPMESSAGE);
-					return false;
-				}
-				
-				String str;
-				if ((str = matchString()) == null)
-				{
-					addErrorMessage("Expected string after \"%s\".", Keyword.PICKUPMESSAGE);
-					return false;
-				}
-				thing.setPickupMessageMnemonic(str);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.TRANSLATION))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.TRANSLATION);
-					return false;
-				}
-				
-				String str;
-				if ((str = matchString()) == null)
-				{
-					addErrorMessage("Expected string after \"%s\".", Keyword.TRANSLATION);
-					return false;
-				}
-				thing.setTranslation(str);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PICKUPSOUND))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.PICKUPSOUND);
-					return false;
-				}
-				
-				if ((value = matchSoundIndexName(context)) == null)
-				{
-					addErrorMessage("Expected valid sound after \"%s\".", Keyword.PICKUPSOUND);
-					return false;
-				}
-				thing.setPickupSoundPosition(value);
 			}
 			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHThing.class))
@@ -2975,7 +2577,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected Thing property, \"%s\" directive, or state block start.", Keyword.CLEAR);
+				addErrorMessage("Expected valid Thing property, \"%s\" directive, or state block start.", Keyword.CLEAR);
 				return false;
 			}
 		} // while
@@ -2991,6 +2593,389 @@ public final class DecoHackParser extends Lexer.Parser
 			thing.setEditorKey(entry.getKey(), entry.getValue());
 		
 		return true;
+	}
+
+	private PropertyResult parseThingBodyDoom19Properties(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
+	{
+		Integer value;
+		if (matchIdentifierIgnoreCase(Keyword.EDNUM))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.EDNUM);
+				return PropertyResult.ERROR;
+			}
+			
+			if (value < -1 && !context.supports(DEHFeatureLevel.ID24))
+			{
+				addErrorMessage("A negative editor number is only valid for ID24 patches or better.");
+				return PropertyResult.ERROR;
+			}
+			
+			// bad or reserved ednums.
+			if (value == 0 || value == 1 || value == 2 || value == 3 || value == 4 || value == 11)
+			{
+				addErrorMessage("The editor number %d is either invalid or reserved.", value);
+				return PropertyResult.ERROR;
+			}
+			
+			thing.setEditorNumber(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.HEALTH))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.HEALTH);
+				return PropertyResult.ERROR;
+			}
+			thing.setHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SPEED))
+		{
+			if (thing.hasFlag(DEHThingFlag.MISSILE.getValue()))
+			{
+				if ((value = matchFixed(false)) == null)
+				{
+					addErrorMessage("Expected integer or fixed-point value after \"%s\".", Keyword.SPEED);
+					return PropertyResult.ERROR;
+				}
+				thing.setFixedSpeed(value);
+			}
+			else
+			{
+				if ((value = matchInteger()) == null)
+				{
+					addErrorMessage("Expected integer after \"%s\".", Keyword.SPEED);
+					return PropertyResult.ERROR;
+				}
+				thing.setSpeed(value);
+			}
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.RADIUS))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.RADIUS);
+				return PropertyResult.ERROR;
+			}
+			thing.setRadius(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.HEIGHT))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.HEIGHT);
+				return PropertyResult.ERROR;
+			}
+			thing.setHeight(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DAMAGE))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.DAMAGE);
+				return PropertyResult.ERROR;
+			}
+			thing.setDamage(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.REACTIONTIME))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.REACTIONTIME);
+				return PropertyResult.ERROR;
+			}
+			thing.setReactionTime(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PAINCHANCE))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PAINCHANCE);
+				return PropertyResult.ERROR;
+			}
+			thing.setPainChance(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MASS))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.MASS);
+				return PropertyResult.ERROR;
+			}				
+
+			// zero-mass check
+			if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
+			{
+				addWarningMessage("Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
+				return PropertyResult.ERROR;
+			}
+			
+			thing.setMass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
+		{
+			ParameterValue pv;
+			if ((pv = matchNumericExpression(context, thing, Type.FLAGS)) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
+				return PropertyResult.ERROR;
+			}
+			thing.setFlags(pv.value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SEESOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.SEESOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setSeeSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.ATTACKSOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.ATTACKSOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setAttackSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PAINSOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.PAINSOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setPainSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DEATHSOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.DEATHSOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setDeathSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.ACTIVESOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.ACTIVESOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setActiveSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+	
+	private PropertyResult parseThingBodyExtendedProperties(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
+	{
+		Integer value;
+		if (matchIdentifierIgnoreCase(Keyword.DROPITEM))
+		{
+			if ((value = matchThingIndex(context, true)) == null)
+			{
+				addErrorMessage("Expected thing index after \"%s\".", Keyword.DROPITEM);
+				return PropertyResult.ERROR;
+			}
+			thing.setDroppedItem(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+	
+	private PropertyResult parseThingBodyMBF21Properties(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
+	{
+		Integer value;
+		if (matchIdentifierIgnoreCase(Keyword.FASTSPEED))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.FASTSPEED);
+				return PropertyResult.ERROR;
+			}
+			thing.setFastSpeed(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MELEERANGE))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.MELEERANGE);
+				return PropertyResult.ERROR;
+			}
+			thing.setMeleeRange(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.RIPSOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected sound name after \"%s\".", Keyword.RIPSOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setRipSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INFIGHTINGGROUP))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.INFIGHTINGGROUP);
+				return PropertyResult.ERROR;
+			}
+			thing.setInfightingGroup(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PROJECTILEGROUP))
+		{
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PROJECTILEGROUP);
+				return PropertyResult.ERROR;
+			}
+			thing.setProjectileGroup(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SPLASHGROUP))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.SPLASHGROUP);
+				return PropertyResult.ERROR;
+			}
+			thing.setSplashGroup(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+	
+	
+	private PropertyResult parseThingBodyID24Properties(AbstractPatchContext<?> context, DEHThingTarget<?> thing) 
+	{
+		Integer value;
+		if (matchIdentifierIgnoreCase(Keyword.MINRESPAWNTICS))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.MINRESPAWNTICS);
+				return PropertyResult.ERROR;
+			}
+			thing.setMinRespawnTics(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.RESPAWNDICE))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.RESPAWNDICE);
+				return PropertyResult.ERROR;
+			}
+			thing.setRespawnDice(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOTYPE))
+		{
+			if ((value = matchAmmoIndex(context)) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupAmmoType(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPAMMOCATEGORY))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPAMMOCATEGORY);
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupAmmoCategory(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPWEAPONTYPE))
+		{
+			if ((value = matchWeaponIndex(context)) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupWeaponType(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPITEMTYPE))
+		{
+			if ((value = matchPickupItemType()) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupItemType(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPBONUSCOUNT))
+		{
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.PICKUPBONUSCOUNT);
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupBonusCount(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPMESSAGE))
+		{
+			String str;
+			if ((str = matchString()) == null)
+			{
+				addErrorMessage("Expected string after \"%s\".", Keyword.PICKUPMESSAGE);
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupMessageMnemonic(str);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.TRANSLATION))
+		{
+			String str;
+			if ((str = matchString()) == null)
+			{
+				addErrorMessage("Expected string after \"%s\".", Keyword.TRANSLATION);
+				return PropertyResult.ERROR;
+			}
+			thing.setTranslation(str);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PICKUPSOUND))
+		{
+			if ((value = matchSoundIndexName(context)) == null)
+			{
+				addErrorMessage("Expected valid sound after \"%s\".", Keyword.PICKUPSOUND);
+				return PropertyResult.ERROR;
+			}
+			thing.setPickupSoundPosition(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
 	}
 	
 	// Parses a thing state clause.
@@ -3501,6 +3486,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
+			PropertyResult pr;
 			if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
 				if (!context.supports(DEHFeatureLevel.MBF21))
@@ -3589,241 +3575,20 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.AMMOTYPE))
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseWeaponBodyDoom19Properties(context, weapon)) != PropertyResult.BYPASSED)
 			{
-				Integer ammoIndex;
-				if ((ammoIndex = matchAmmoIndex(context)) == null)
-				{
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				
-				weapon.setAmmoType(ammoIndex);
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.AMMOPERSHOT))
+			else if (context.supports(DEHFeatureLevel.MBF21) && (pr = parseWeaponBodyMBF21Properties(context, weapon)) != PropertyResult.BYPASSED)
 			{
-				Integer ammoPerShot;
-				if ((ammoPerShot = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.AMMOPERSHOT);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				else
-				{
-					weapon.setAmmoPerShot(ammoPerShot);
-				}
 			}
-			// ================= MBF21
-			else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseWeaponBodyID24Properties(context, weapon)) != PropertyResult.BYPASSED)
 			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an MBF21 patch.", Keyword.FLAGS);
+				if (pr == PropertyResult.ERROR)
 					return false;
-				}
-				
-				if (!matchIdentifierIgnoreCase(Keyword.MBF21))
-				{
-					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.MBF21, Keyword.FLAGS);
-					return false;
-				}
-				
-				Integer flags;
-				if ((flags = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
-					return false;
-				}
-				else
-				{
-					weapon.setMBF21Flags(flags);
-				}
-			}
-			// ================= ID24
-			else if (matchIdentifierIgnoreCase(Keyword.SLOT))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SLOT);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOT);
-					return false;
-				}
-				else
-				{
-					weapon.setSlot(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SLOTPRIORITY))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SLOTPRIORITY);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOTPRIORITY);
-					return false;
-				}
-				else
-				{
-					weapon.setSlotPriority(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.SWITCHPRIORITY))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.SWITCHPRIORITY);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SWITCHPRIORITY);
-					return false;
-				}
-				else
-				{
-					weapon.setSwitchPriority(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.INITIALOWNED))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALOWNED);
-					return false;
-				}
-				
-				Boolean value;
-				if ((value = matchBoolean()) == null)
-				{
-					addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALOWNED);
-					return false;
-				}
-				else
-				{
-					weapon.setInitialOwned(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.INITIALRAISED))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.INITIALRAISED);
-					return false;
-				}
-				
-				Boolean value;
-				if ((value = matchBoolean()) == null)
-				{
-					addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALRAISED);
-					return false;
-				}
-				else
-				{
-					weapon.setInitialRaised(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.CAROUSELICON))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.CAROUSELICON);
-					return false;
-				}
-				
-				String value;
-				if ((value = matchString()) == null)
-				{
-					addErrorMessage("Expected a string after \"%s\".", Keyword.CAROUSELICON);
-					return false;
-				}
-				else
-				{
-					weapon.setCarouselIcon(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDWEAPON))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.ALLOWSWITCHWITHOWNEDWEAPON);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchWeaponIndex(context)) == null)
-				{
-					return false;
-				}
-				else
-				{
-					weapon.setAllowSwitchWithOwnedWeapon(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDWEAPON))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.NOSWITCHWITHOWNEDWEAPON);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchWeaponIndex(context)) == null)
-				{
-					return false;
-				}
-				else
-				{
-					weapon.setNoSwitchWithOwnedWeapon(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDITEM))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.ALLOWSWITCHWITHOWNEDITEM);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPickupItemType()) == null)
-				{
-					return false;
-				}
-				else
-				{
-					weapon.setAllowSwitchWithOwnedItem(value);
-				}
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDITEM))
-			{
-				if (!context.supports(DEHFeatureLevel.ID24))
-				{
-					addErrorMessage("The \"%s\" property is not available. Not an ID24 patch.", Keyword.NOSWITCHWITHOWNEDITEM);
-					return false;
-				}
-				
-				Integer value;
-				if ((value = matchPickupItemType()) == null)
-				{
-					return false;
-				}
-				else
-				{
-					weapon.setNoSwitchWithOwnedItem(value);
-				}
 			}
 			// Custom Properties
 			else if (currentIsCustomProperty(context, DEHWeapon.class))
@@ -3842,7 +3607,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else
 			{
-				addErrorMessage("Expected Weapon property, \"%s\" directive, or state block start.", Keyword.CLEAR);
+				addErrorMessage("Expected valid Weapon property, \"%s\" directive, or state block start.", Keyword.CLEAR);
 				return false;
 			}
 		}		
@@ -3854,6 +3619,205 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		return true;
+	}
+
+	private PropertyResult parseWeaponBodyDoom19Properties(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.AMMOTYPE))
+		{
+			Integer ammoIndex;
+			if ((ammoIndex = matchAmmoIndex(context)) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			
+			weapon.setAmmoType(ammoIndex);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	private PropertyResult parseWeaponBodyMBF21Properties(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.AMMOPERSHOT))
+		{
+			Integer ammoPerShot;
+			if ((ammoPerShot = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected a positive integer after \"%s\".", Keyword.AMMOPERSHOT);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setAmmoPerShot(ammoPerShot);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.MBF21))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.MBF21, Keyword.FLAGS);
+				return PropertyResult.ERROR;
+			}
+			
+			Integer flags;
+			if ((flags = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setMBF21Flags(flags);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+	
+	private PropertyResult parseWeaponBodyID24Properties(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.SLOT))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOT);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setSlot(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SLOTPRIORITY))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SLOTPRIORITY);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setSlotPriority(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SWITCHPRIORITY))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected a positive integer after \"%s\".", Keyword.SWITCHPRIORITY);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setSwitchPriority(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIALOWNED))
+		{
+			Boolean value;
+			if ((value = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALOWNED);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setInitialOwned(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIALRAISED))
+		{
+			Boolean value;
+			if ((value = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected a boolean value (true, false) after \"%s\".", Keyword.INITIALRAISED);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setInitialRaised(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.CAROUSELICON))
+		{
+			String value;
+			if ((value = matchString()) == null)
+			{
+				addErrorMessage("Expected a string after \"%s\".", Keyword.CAROUSELICON);
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setCarouselIcon(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDWEAPON))
+		{
+			Integer value;
+			if ((value = matchWeaponIndex(context)) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setAllowSwitchWithOwnedWeapon(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDWEAPON))
+		{
+			Integer value;
+			if ((value = matchWeaponIndex(context)) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setNoSwitchWithOwnedWeapon(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.ALLOWSWITCHWITHOWNEDITEM))
+		{
+			Integer value;
+			if ((value = matchPickupItemType()) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setAllowSwitchWithOwnedItem(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.NOSWITCHWITHOWNEDITEM))
+		{
+			Integer value;
+			if ((value = matchPickupItemType()) == null)
+			{
+				return PropertyResult.ERROR;
+			}
+			else
+			{
+				weapon.setNoSwitchWithOwnedItem(value);
+				return PropertyResult.ACCEPTED;
+			}
+		}
+		
+		return PropertyResult.BYPASSED;
 	}
 
 	private boolean parseWeaponStateClause(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon) 
@@ -4203,7 +4167,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return true;
 		}
 		
-		boolean notModified = true;
+		AtomicBoolean notModified = new AtomicBoolean(true);
 		
 		if (currentIsSpriteIndex(context))
 		{
@@ -4267,158 +4231,17 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (matchIdentifierIgnoreCase(Keyword.SPRITENAME))
+			if (context.supports(DEHFeatureLevel.DOOM19) && !parseStateBodyDoom19Properties(context, state, notModified, index))
 			{
-				Integer value;
-				if ((value = matchSpriteIndexName(context)) == null)
-				{
-					addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.SPRITENAME);
-					return false;				
-				}
-				
-				state.setSpriteIndex(value);
-				notModified = false;
+				return false;
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.FRAME))
+			else if (context.supports(DEHFeatureLevel.MBF21) && !parseStateBodyMBF21Properties(context, state, notModified))
 			{
-				Deque<Integer> value;
-				if ((value = matchFrameIndices()) == null)
-				{
-					addErrorMessage("Expected valid frame characters after \"%s\".", Keyword.FRAME);
-					return false;				
-				}
-				
-				if (value.size() > 1)
-				{
-					addErrorMessage("Expected a single frame character after \"%s\".", Keyword.FRAME);
-					return false;				
-				}
-				
-				state.setFrameIndex(value.pollFirst());
-				notModified = false;
+				return false;
 			}
-			else if (matchIdentifierIgnoreCase(Keyword.DURATION))
+			else if (context.supports(DEHFeatureLevel.ID24) && !parseStateBodyID24Properties(context, state, notModified))
 			{
-				Integer value;
-				if ((value = matchInteger()) == null)
-				{
-					addErrorMessage("Expected integer after \"%s\".", Keyword.DURATION);
-					return false;				
-				}
-				
-				state.setDuration(value);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
-			{
-				StateIndex value;
-				if ((value = parseStateIndex(context)) == null)
-				{
-					addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
-					return false;				
-				}
-				
-				Integer next;
-				if ((next = value.resolve(context)) == null)
-				{
-					addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
-					return false;				
-				}
-				
-				state.setNextStateIndex(next);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.POINTER))
-			{
-				boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
-				Integer pointerIndex = context.getStateActionPointerIndex(index);
-				ParsedAction action = new ParsedAction();
-				Boolean requireAction = isBoom ? null : pointerIndex != null;
-	
-				if (matchIdentifierIgnoreCase(VALUE_NULL))
-				{
-					if (requireAction != null && requireAction)
-					{
-						addErrorMessage("Expected an action pointer for this state.");
-						return false;
-					}
-					else
-					{
-						action.pointer = DEHActionPointer.NULL;
-					}
-				}
-				else if (!parseActionClause(context, null, action, requireAction))
-				{
-					return false;
-				}
-	
-				if (isBoom && pointerIndex != null && action.pointer == null)
-					action.pointer = DEHActionPointer.NULL;
-				
-				if (pointerIndex != null)
-					context.setActionPointer(pointerIndex, action.pointer);
-	
-				state
-					.setMisc1(action.misc1)
-					.setMisc2(action.misc2)
-					.setArgs(action.args)
-				;
-				
-				notModified = false;
-			}
-			else if (currentIdentifierIgnoreCase(Keyword.OFFSET))
-			{
-				ParsedAction action = new ParsedAction();
-				if (!parseOffsetClause(action))
-					return false;
-				
-				state
-					.setMisc1(action.misc1)
-					.setMisc2(action.misc2)
-				;
-				
-				notModified = false;
-			}
-			else if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
-			{
-				ParsedAction action = new ParsedAction();
-				if (!parseTranmapClause(action))
-					return false;
-				
-				state.setTranmap(action.tranmap);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
-			{
-				state.setBright(true);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTBRIGHT))
-			{
-				state.setBright(false);
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", Keyword.STATE_FAST);
-					return false;
-				}
-				
-				state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
-				notModified = false;
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
-			{
-				if (!context.supports(DEHFeatureLevel.MBF21))
-				{
-					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", Keyword.STATE_NOTFAST);
-					return false;
-				}
-	
-				state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
-				notModified = false;
+				return false;
 			}
 			else if (currentIsCustomProperty(context, DEHState.class))
 			{
@@ -4440,7 +4263,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		}
 		
-		if (notModified)
+		if (notModified.get())
 		{
 			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
 			return false;
@@ -4450,6 +4273,165 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	private boolean parseStateBodyDoom19Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified, int index)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.SPRITENAME))
+		{
+			Integer value;
+			if ((value = matchSpriteIndexName(context)) == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.SPRITENAME);
+				return false;				
+			}
+			
+			state.setSpriteIndex(value);
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.FRAME))
+		{
+			Deque<Integer> value;
+			if ((value = matchFrameIndices()) == null)
+			{
+				addErrorMessage("Expected valid frame characters after \"%s\".", Keyword.FRAME);
+				return false;				
+			}
+			
+			if (value.size() > 1)
+			{
+				addErrorMessage("Expected a single frame character after \"%s\".", Keyword.FRAME);
+				return false;				
+			}
+			
+			state.setFrameIndex(value.pollFirst());
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DURATION))
+		{
+			Integer value;
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.DURATION);
+				return false;				
+			}
+			
+			state.setDuration(value);
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
+		{
+			StateIndex value;
+			if ((value = parseStateIndex(context)) == null)
+			{
+				addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
+				return false;				
+			}
+			
+			Integer next;
+			if ((next = value.resolve(context)) == null)
+			{
+				addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
+				return false;				
+			}
+			
+			state.setNextStateIndex(next);
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.POINTER))
+		{
+			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			ParsedAction action = new ParsedAction();
+			Boolean requireAction = isBoom ? null : pointerIndex != null;
+
+			if (matchIdentifierIgnoreCase(VALUE_NULL))
+			{
+				if (requireAction != null && requireAction)
+				{
+					addErrorMessage("Expected an action pointer for this state.");
+					return false;
+				}
+				else
+				{
+					action.pointer = DEHActionPointer.NULL;
+				}
+			}
+			else if (!parseActionClause(context, null, action, requireAction))
+			{
+				return false;
+			}
+
+			if (isBoom && pointerIndex != null && action.pointer == null)
+				action.pointer = DEHActionPointer.NULL;
+			
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, action.pointer);
+
+			state
+				.setMisc1(action.misc1)
+				.setMisc2(action.misc2)
+				.setArgs(action.args)
+			;
+			
+			notModified.set(false);
+		}
+		else if (currentIdentifierIgnoreCase(Keyword.OFFSET))
+		{
+			ParsedAction action = new ParsedAction();
+			if (!parseOffsetClause(action))
+				return false;
+			
+			state
+				.setMisc1(action.misc1)
+				.setMisc2(action.misc2)
+			;
+			
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
+		{
+			state.setBright(true);
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTBRIGHT))
+		{
+			state.setBright(false);
+			notModified.set(false);
+		}
+		
+		return true;
+	}
+	
+	private boolean parseStateBodyMBF21Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
+		{
+			state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
+			notModified.set(false);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
+		{
+			state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
+			notModified.set(false);
+		}
+		
+		return true;
+	}
+	
+	private boolean parseStateBodyID24Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	{
+		if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
+		{
+			ParsedAction action = new ParsedAction();
+			if (!parseTranmapClause(context, action))
+				return false;
+			
+			state.setTranmap(action.tranmap);
+			notModified.set(false);
+		}
+		
+		return true;
+	}
+	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
 	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state)
@@ -4532,7 +4514,7 @@ public final class DecoHackParser extends Lexer.Parser
 			state.parsedActions.add(action = new ParsedAction());
 			if (!parseOffsetClause(action))
 				return false;
-			if (!parseTranmapClause(action))
+			if (!parseTranmapClause(context, action))
 				return false;
 			if (!parseActionClause(context, actor, action, requireAction))
 				return false;
@@ -4794,10 +4776,16 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a Tranmap clause.
-	private boolean parseTranmapClause(ParsedAction parsedAction)
+	private boolean parseTranmapClause(AbstractPatchContext<?> context, ParsedAction parsedAction)
 	{
 		if (matchIdentifierIgnoreCase(Keyword.TRANMAP))
 		{
+			if (!context.supports(DEHFeatureLevel.ID24))
+			{
+				addErrorMessage("TRANMAP is only supported by ID24 patches and higher.");
+				return false;
+			}
+			
 			if (matchType(DecoHackKernel.TYPE_LPAREN))
 			{
 				String name;
@@ -6763,5 +6751,11 @@ public final class DecoHackParser extends Lexer.Parser
 		
 	}
 	
+	private enum PropertyResult
+	{
+		ACCEPTED,
+		ERROR,
+		BYPASSED;
+	}
 
 }

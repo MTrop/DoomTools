@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
 
+import javax.swing.text.BadLocationException;
+import javax.swing.text.JTextComponent;
+
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
@@ -406,6 +409,27 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 		addFlagCompletions(DecoHackPatchType.MBF21,  "Weapon", DEHWeaponMBF21Flag.values());
 	}
 
+	@Override
+	public boolean isAutoActivateOkay(JTextComponent tc) 
+	{
+		if (!super.isAutoActivateOkay(tc))
+			return false;
+		
+		// Do not auto-complete inside strings
+		int offs = tc.getCaretPosition();
+		char c;
+		do {
+			try {
+				c = tc.getText(offs - 1, 1).charAt(0);
+			} catch (BadLocationException e) {
+				// Eat exception
+				return false;
+			}
+		} while (offs-- != 0 && c != '"' && c != '\n');
+		
+		return c != '"';
+	}
+	
 	/**
 	 * Adds define completions from parsing a resource.
 	 * @param type the patch type.

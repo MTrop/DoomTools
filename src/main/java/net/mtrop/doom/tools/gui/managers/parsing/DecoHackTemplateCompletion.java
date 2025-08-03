@@ -52,9 +52,35 @@ public enum DecoHackTemplateCompletion
 				
 	AMMOBLOCK("Adds an ammo block.", (
 		"ammo ${SlotNumber} \"${AmmoName}\" {\n" +
-		"\tmax ${MaxAmount}\n" +
-		"\tpickup ${PickupAmount}\n" +
+		"\t${cursor}\n" +
 		"}\n"
+	)),
+	
+	AMMOPROPERTIES("Adds ammo properties.", (
+		"max ${MaxAmount}\n" +
+		"pickup ${PickupAmount}\n"
+	)),
+
+	AMMOPROPERTIESID24("Adds ammo properties.", (
+		"max 0\n" +
+		"pickup 0\n" +
+		"\n" +
+		"initialAmmo 0\n" +
+		"maxUpgradedAmmo 0\n" +
+		"boxAmmo 0\n" +
+		"backpackAmmo 0\n" +
+		"weaponAmmo 0\n" +
+		"droppedAmmo 0\n" +
+		"droppedBoxAmmo 0\n" +
+		"droppedBackpackAmmo 0\n" +
+		"droppedWeaponAmmo 0\n" +
+		"deathmatchWeaponAmmo 0\n" +
+		"skill1Multiplier 2.0\n" +
+		"skill2Multiplier 1.0\n" +
+		"skill3Multiplier 1.0\n" +
+		"skill4Multiplier 1.0\n" +
+		"skill5Multiplier 2.0\n" +
+		"${cursor}"
 	)),
 
 	CUSTOMPROPERTY("Custom property clause.", (
