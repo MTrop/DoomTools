@@ -1733,7 +1733,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// if single state...
 		if (currentType(DecoHackKernel.TYPE_NUMBER))
 		{
-			if ((index = parseStateIndex(context)) == null)
+			if ((index = matchStateIndex(context)) == null)
 				return false;
 			
 			if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -1772,7 +1772,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// if fill state...
 		else if (matchIdentifierIgnoreCase(Keyword.FILL))
 		{
-			if ((index = parseStateIndex(context)) == null)
+			if ((index = matchStateIndex(context)) == null)
 				return false;
 	
 			if (!matchType(DecoHackKernel.TYPE_LBRACE))
@@ -1846,10 +1846,10 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		int attemptedFirstIndex = context.findNextFreeState(lastAutoStateIndex);
 		
-		// First frame must match state, and the block must contain at least one state.
+		// Need at least one state declared.
 		if (!currentIsSpriteIndex(context))
 		{
-			addErrorMessage("Expected sprite name (for a state description).");
+			addErrorMessage("Expected sprite name.");
 			return false;
 		}
 	
@@ -1863,34 +1863,29 @@ public final class DecoHackParser extends Lexer.Parser
 			parsed.reset();
 			if (!parseStateLine(context, null, parsed))
 				return false;
-			if ((actualFirstIndex = fillStates(context, EMPTY_LABELS, parsed, stateCursor, false)) == null)
+			Integer fillIndex;
+			if ((fillIndex = fillStates(context, EMPTY_LABELS, parsed, stateCursor, false)) == null)
 				return false;
+			if (actualFirstIndex == null)
+				actualFirstIndex = fillIndex;
 		} while (currentIsSpriteIndex(context));
 		
 		// Parse end.
-		Object nextStateIndex = null;
+		StateIndex nextStateIndex = null;
 		if ((nextStateIndex = parseNextStateIndex(context, null, actualFirstIndex, stateCursor.lastIndexFilled)) == null)
 		{
 			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
 			return false;
 		}
-		else if (nextStateIndex instanceof Integer)
+		
+		Integer resolvedIndex = nextStateIndex.resolve(context);
+		if (resolvedIndex == null)
 		{
-			stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
+			addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+			return false;
 		}
-		else // String
-		{
-			Integer globalStateIndex;
-			if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
-			{
-				stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
-			}
-			else
-			{
-				addErrorMessage("No such global state label: \"%s\"", (String)nextStateIndex);
-				return false;
-			}
-		}
+		
+		stateCursor.lastStateFilled.setNextStateIndex(resolvedIndex);
 
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
@@ -1972,30 +1967,45 @@ public final class DecoHackParser extends Lexer.Parser
 	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
 	{
 		Integer min, max;
-		if ((min = parseStateIndex(context)) != null)
+		
+		if ((min = matchPositiveInteger()) != null)
 		{
-			// protect range
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// free range
 			if (matchIdentifierIgnoreCase(Keyword.TO))
 			{
-				if ((max = parseStateIndex(context)) != null)
+				if ((max = matchPositiveInteger()) != null)
 				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
 					context.setProtectedState(min, max, protectedState);
 					return true;
 				}
 				else
 				{
+					addErrorMessage("Expected state index after \"%s\".", Keyword.TO);
 					return false;
 				}
 			}
-			// protect single state.
+			// free single
 			else
 			{
-				context.setProtectedState(min, protectedState);
+				context.setProtectedState(min, true);
 				return true;
 			}
 		}
 		else
 		{
+			addErrorMessage("Expected \"%s\" or state index after \"%s\".", Keyword.FROM, Keyword.FREE);
 			return false;
 		}
 	}
@@ -2968,60 +2978,132 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a thing state clause.
 	private boolean parseThingStateClause(AbstractPatchContext<?> context, DEHThingTarget<?> thing) 
 	{
-		Integer value;
+		StateIndex value;
 		if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_SPAWN))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setSpawnFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setSpawnFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_SEE))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setWalkFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setWalkFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_MELEE))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setMeleeFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setMeleeFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_MISSILE))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setMissileFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setMissileFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_PAIN))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setPainFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setPainFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_DEATH))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setDeathFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setDeathFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_XDEATH))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setExtremeDeathFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setExtremeDeathFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.THINGSTATE_RAISE))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				thing.setRaiseFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, thing)) != null)
+					thing.setRaiseFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
@@ -3758,39 +3840,84 @@ public final class DecoHackParser extends Lexer.Parser
 
 	private boolean parseWeaponStateClause(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon) 
 	{
-		Integer value;
+		StateIndex value;
 		if (matchIdentifierIgnoreCase(Keyword.WEAPONSTATE_READY))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				weapon.setReadyFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, weapon)) != null)
+					weapon.setReadyFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPONSTATE_SELECT))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				weapon.setRaiseFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, weapon)) != null)
+					weapon.setRaiseFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPONSTATE_DESELECT))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				weapon.setLowerFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, weapon)) != null)
+					weapon.setLowerFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPONSTATE_FIRE))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				weapon.setFireFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, weapon)) != null)
+					weapon.setFireFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPONSTATE_FLASH))
 		{
 			if ((value = parseStateIndex(context)) != null)
-				weapon.setFlashFrameIndex(value);
+			{
+				Integer index;
+				if ((index = value.resolve(context, weapon)) != null)
+					weapon.setFlashFrameIndex(index);
+				else
+				{
+					addErrorMessage("Expected valid state index or label: \"%s\" is not a valid state.", value.label);
+					return false;
+				}
+			}
 			else
 				return false;
 		}
@@ -3906,17 +4033,24 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if (matchIdentifierIgnoreCase(Keyword.GOTO))
 					{
-						Object index;
-						if ((index = parseStateIndex(context, actor)) == null)
+						StateIndex index;
+						if ((index = parseStateIndex(context)) == null)
 							return false;
-						else if (index instanceof String)
+						
+						Integer resolvedIndex = index.resolve(context, actor);
+						if (resolvedIndex != null)
 						{
 							while (!labelList.isEmpty())
-								futureLabels.addAlias(labelList.pollFirst(), (String)index);
+							{
+								futureLabels.backfill(context, actor, labelList.pollFirst(), resolvedIndex);
+							}
 						}
-						else while (!labelList.isEmpty())
+						else
 						{
-							futureLabels.backfill(context, actor, labelList.pollFirst(), (Integer)index);
+							while (!labelList.isEmpty())
+							{
+								futureLabels.addAlias(labelList.pollFirst(), index.label);
+							}
 						}
 					}
 					else if (matchIdentifierIgnoreCase(Keyword.STOP))
@@ -3933,28 +4067,19 @@ public final class DecoHackParser extends Lexer.Parser
 				// A previous state was filled.
 				else
 				{
-					Object nextStateIndex = null;
+					StateIndex nextStateIndex;
 					if ((nextStateIndex = parseNextStateIndex(context, actor, loopIndex, stateCursor.lastIndexFilled)) == null)
 					{
 						addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
 						return false;
 					}
-					else if (nextStateIndex instanceof Integer)
-					{
-						stateCursor.lastStateFilled.setNextStateIndex((Integer)nextStateIndex);
-					}
-					else // String
-					{
-						Integer globalStateIndex;
-						if ((globalStateIndex = context.getGlobalState((String)nextStateIndex)) != null)
-						{
-							stateCursor.lastStateFilled.setNextStateIndex(globalStateIndex);
-						}
-						else
-						{
-							futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, (String)nextStateIndex);
-						}
-					}
+					
+					Integer resolvedIndex = nextStateIndex.resolve(context, actor);
+					if (resolvedIndex != null)
+						stateCursor.lastStateFilled.setNextStateIndex(resolvedIndex);
+					else
+						futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, nextStateIndex.label);
+					
 					stateCursor.lastStateFilled = null;
 				}
 			}
@@ -3974,7 +4099,9 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			if (!unknownLabels.isEmpty())
 			{
-				addErrorMessage("Labels on this actor were referenced and not defined: %s", Arrays.toString(unknownLabels.toArray(new String[unknownLabels.size()])));
+				String actorType = (actor instanceof DEHThing) ? "thing" : "weapon";
+				
+				addErrorMessage("Labels on this " + actorType + " were referenced and not defined: %s", Arrays.toString(unknownLabels.toArray(new String[unknownLabels.size()])));
 				return false;
 			}
 		}
@@ -4195,14 +4322,14 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
 			{
-				Integer value;
+				StateIndex value;
 				if ((value = parseStateIndex(context)) == null)
 				{
 					addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
 					return false;				
 				}
 				
-				state.setNextStateIndex(value);
+				state.setNextStateIndex(value.resolve(context));
 				notModified = false;
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.POINTER))
@@ -4419,43 +4546,39 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	// Parses a mandatory state index.
-	private Integer parseStateIndex(AbstractPatchContext<?> context)
-	{
-		return (Integer)parseStateIndex(context, null);
-	}
-
-	// Parses a mandatory state index.
-	private Object parseStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor)
+	private StateIndex parseStateIndex(AbstractPatchContext<?> context)
 	{
 		if (matchIdentifierIgnoreCase(Keyword.THING))
 		{
-			return parseThingStateIndex(context);
+			Integer index;
+			if ((index = parseThingStateIndex(context)) == null)
+				return null;
+
+			return new StateIndex(index);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
 		{
-			return parseWeaponStateIndex(context);
+			Integer index;
+			if ((index = parseWeaponStateIndex(context)) == null)
+				return null;
+
+			return new StateIndex(index);
 		}
 		else if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (actor == null)
-			{
-				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentLexeme());
-				return null;
-			}
-			return matchIdentifier();
+			return new StateIndex(matchIdentifier());
 		}
 		else if (currentType(DecoHackKernel.TYPE_STRING))
 		{
-			if (actor == null)
-			{
-				addErrorMessage("Label '%s' was unexpected. State declaration not for a thing or weapon.", currentLexeme());
-				return null;
-			}
-			return matchString();
+			return new StateIndex(matchString());
 		}
 		else
 		{
-			return matchStateIndex(context);
+			Integer index;
+			if ((index = matchStateIndex(context)) == null)
+				return null;
+			
+			return new StateIndex(index);
 		}
 	}
 
@@ -4926,16 +5049,16 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a next state line.
-	private Object parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
+	private StateIndex parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierIgnoreCase(Keyword.STOP))
 		{
-			return 0;
+			return new StateIndex(0);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WAIT))
 		{
-			return currentStateIndex;
+			return new StateIndex(currentStateIndex);
 		}
 		else if (currentIdentifierIgnoreCase(Keyword.LOOP))
 		{
@@ -4945,11 +5068,11 @@ public final class DecoHackParser extends Lexer.Parser
 				return null;
 			}
 			nextToken();
-			return lastLabelledStateIndex;
+			return new StateIndex(lastLabelledStateIndex);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.GOTO))
 		{
-			return parseStateIndex(context, actor);
+			return parseStateIndex(context);
 		}
 		else
 		{
@@ -5823,7 +5946,7 @@ public final class DecoHackParser extends Lexer.Parser
 			case STATE:
 			{
 				Object value;
-				if ((value = parseStateIndex(context, actor)) == null)
+				if ((value = parseStateIndex(context)) == null)
 				{
 					addErrorMessage("Expected valid state: positive integer, or thing/weapon/local state label.");
 					return null;
@@ -6503,6 +6626,48 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 			});
 		}
+	}
+	
+	private static class StateIndex
+	{
+		private Integer index;
+		private String label;
+		
+		private StateIndex(int index)
+		{
+			this.index = index;
+			this.label = null;
+		}
+		
+		private StateIndex(String label)
+		{
+			this.label = label;
+			this.index = null;
+		}
+		
+		public Integer resolve(AbstractPatchContext<?> context)
+		{
+			return resolve(context, null);
+		}
+		
+		public Integer resolve(AbstractPatchContext<?> context, DEHActor<?> actor)
+		{
+			if (index != null)
+			{
+				return index;
+			}
+			else if (label != null)
+			{
+				if (actor != null && actor.hasLabel(label))
+					return actor.getLabel(label);
+				return context.getGlobalState(label);
+			}
+			else
+			{
+				throw new RuntimeException("INTERNAL ERROR: State resolve.");
+			}
+		}
+		
 	}
 
 }
