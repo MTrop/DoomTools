@@ -692,6 +692,54 @@ protected. You can turn off the protection on states by doing the following:
  /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
 
 
+------------------------------------------------------------------------------
+Auto-States (Global States)
+------------------------------------------------------------------------------
+
+Since states are "just another structure" in Doom, they can be declared in
+batches and you can refer to them later via a global state label, separated
+from both Things and Weapons:
+
+    auto state <IDENTIFIER> {
+    
+        // ... state info goes here ...
+    
+    }
+
+
+For example:
+
+    auto state ImpDeath {
+        TROO I 8
+        TROO J 8 A_Scream
+        TROO K 6
+        TROO L 6 A_Fall
+        TROO M -1
+        Stop
+    }
+
+
+You can then refer to this state chain anywhere that you use state labels,
+such as in Things and Weapons, and even other global states.
+
+    auto state ImpDeath2 {
+        TROO K 6
+        TROO L 6 A_Fall
+        TROO M -1
+        Stop
+    }
+
+    auto state ImpDeath {
+        TROO I 8
+        TROO J 8 A_Scream
+        Goto ImpDeath2
+    }
+
+
+Each state declared or filled in this manner are also no longer "free," if
+states were freed to accommodate these new states.
+
+
 ==============================================================================
 ===== Weapon
 ==============================================================================
