@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.40.1
+
+* `Fixed` Copying an object didn't copy over its custom property values.
+
+
 ### Changed for 0.40.0
 
 * `Fixed` A potential warning was not output to `stderr`.

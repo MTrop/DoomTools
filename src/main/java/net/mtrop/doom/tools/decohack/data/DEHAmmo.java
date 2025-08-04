@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.util.RangeUtils;
@@ -76,6 +77,10 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 		setName(source.name);
 		setMax(source.max);
 		setPickup(source.pickup);
+		
+		clearCustomPropertyValues();
+		for (Map.Entry<DEHProperty, String> entry : source.getCustomPropertySet())
+			setCustomPropertyValue(entry.getKey(), entry.getValue());
 		
 		// ID24
 		setInitialAmmo(source.initialAmmo);

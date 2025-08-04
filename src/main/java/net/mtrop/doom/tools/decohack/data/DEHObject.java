@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 
@@ -51,6 +52,14 @@ public abstract class DEHObject<SELF>
 	public boolean hasCustomProperties()
 	{
 		return !customProperties.isEmpty();
+	}
+	
+	/**
+	 * @return the set of all custom properties.
+	 */
+	protected Set<Map.Entry<DEHProperty, String>> getCustomPropertySet()
+	{
+		return customProperties.entrySet();
 	}
 	
 	/**

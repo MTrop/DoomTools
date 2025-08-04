@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -108,6 +109,10 @@ public class DEHState extends DEHObject<DEHState>
 		setMisc1(source.misc1);
 		setMisc2(source.misc2);
 		
+		clearCustomPropertyValues();
+		for (Map.Entry<DEHProperty, String> entry : source.getCustomPropertySet())
+			setCustomPropertyValue(entry.getKey(), entry.getValue());
+
 		// MBF21
 		setArgs(source.args);
 		setMBF21Flags(source.mbf21Flags);

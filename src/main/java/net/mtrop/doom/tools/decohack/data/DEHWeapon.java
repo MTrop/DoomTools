@@ -110,6 +110,10 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 		for (String label : source.getLabels())
 			setLabel(label, source.getLabel(label));
 
+		clearCustomPropertyValues();
+		for (Map.Entry<DEHProperty, String> entry : source.getCustomPropertySet())
+			setCustomPropertyValue(entry.getKey(), entry.getValue());
+
 		setAmmoPerShot(source.ammoPerShot);
 		setMBF21Flags(source.mbf21Flags);
 		
