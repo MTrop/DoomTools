@@ -4231,17 +4231,21 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
-			if (context.supports(DEHFeatureLevel.DOOM19) && !parseStateBodyDoom19Properties(context, state, notModified, index))
+			PropertyResult pr;
+			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseStateBodyDoom19Properties(context, state, notModified, index)) != PropertyResult.BYPASSED)
 			{
-				return false;
+				if (pr == PropertyResult.ERROR)
+					return false;
 			}
-			else if (context.supports(DEHFeatureLevel.MBF21) && !parseStateBodyMBF21Properties(context, state, notModified))
+			else if (context.supports(DEHFeatureLevel.MBF21) && (pr = parseStateBodyMBF21Properties(context, state, notModified)) != PropertyResult.BYPASSED)
 			{
-				return false;
+				if (pr == PropertyResult.ERROR)
+					return false;
 			}
-			else if (context.supports(DEHFeatureLevel.ID24) && !parseStateBodyID24Properties(context, state, notModified))
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseStateBodyID24Properties(context, state, notModified)) != PropertyResult.BYPASSED)
 			{
-				return false;
+				if (pr == PropertyResult.ERROR)
+					return false;
 			}
 			else if (currentIsCustomProperty(context, DEHState.class))
 			{
@@ -4273,7 +4277,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
-	private boolean parseStateBodyDoom19Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified, int index)
+	private PropertyResult parseStateBodyDoom19Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified, int index)
 	{
 		if (matchIdentifierIgnoreCase(Keyword.SPRITENAME))
 		{
@@ -4281,11 +4285,12 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((value = matchSpriteIndexName(context)) == null)
 			{
 				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.SPRITENAME);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			state.setSpriteIndex(value);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.FRAME))
 		{
@@ -4293,17 +4298,18 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((value = matchFrameIndices()) == null)
 			{
 				addErrorMessage("Expected valid frame characters after \"%s\".", Keyword.FRAME);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			if (value.size() > 1)
 			{
 				addErrorMessage("Expected a single frame character after \"%s\".", Keyword.FRAME);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			state.setFrameIndex(value.pollFirst());
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.DURATION))
 		{
@@ -4311,11 +4317,12 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((value = matchInteger()) == null)
 			{
 				addErrorMessage("Expected integer after \"%s\".", Keyword.DURATION);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			state.setDuration(value);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
 		{
@@ -4323,18 +4330,19 @@ public final class DecoHackParser extends Lexer.Parser
 			if ((value = parseStateIndex(context)) == null)
 			{
 				addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			Integer next;
 			if ((next = value.resolve(context)) == null)
 			{
 				addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
-				return false;				
+				return PropertyResult.ERROR;				
 			}
 			
 			state.setNextStateIndex(next);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.POINTER))
 		{
@@ -4348,7 +4356,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if (requireAction != null && requireAction)
 				{
 					addErrorMessage("Expected an action pointer for this state.");
-					return false;
+					return PropertyResult.ERROR;
 				}
 				else
 				{
@@ -4357,7 +4365,7 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (!parseActionClause(context, null, action, requireAction))
 			{
-				return false;
+				return PropertyResult.ERROR;
 			}
 
 			if (isBoom && pointerIndex != null && action.pointer == null)
@@ -4373,12 +4381,13 @@ public final class DecoHackParser extends Lexer.Parser
 			;
 			
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (currentIdentifierIgnoreCase(Keyword.OFFSET))
 		{
 			ParsedAction action = new ParsedAction();
 			if (!parseOffsetClause(action))
-				return false;
+				return PropertyResult.ERROR;
 			
 			state
 				.setMisc1(action.misc1)
@@ -4386,50 +4395,56 @@ public final class DecoHackParser extends Lexer.Parser
 			;
 			
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
 		{
 			state.setBright(true);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTBRIGHT))
 		{
 			state.setBright(false);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		
-		return true;
+		return PropertyResult.BYPASSED;
 	}
 	
-	private boolean parseStateBodyMBF21Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	private PropertyResult parseStateBodyMBF21Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
 	{
 		if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
 		{
 			state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
 		{
 			state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		
-		return true;
+		return PropertyResult.BYPASSED;
 	}
 	
-	private boolean parseStateBodyID24Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	private PropertyResult parseStateBodyID24Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
 	{
 		if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
 		{
 			ParsedAction action = new ParsedAction();
 			if (!parseTranmapClause(context, action))
-				return false;
+				return PropertyResult.ERROR;
 			
 			state.setTranmap(action.tranmap);
 			notModified.set(false);
+			return PropertyResult.ACCEPTED;
 		}
 		
-		return true;
+		return PropertyResult.BYPASSED;
 	}
 	
 	// Parse a single state and if true is returned, the input state is altered.

@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.40.1
 
 * `Fixed` Copying an object didn't copy over its custom property values.
+* `Changed` Some better internal handling of properties for states.
 
 
 ### Changed for 0.40.0
