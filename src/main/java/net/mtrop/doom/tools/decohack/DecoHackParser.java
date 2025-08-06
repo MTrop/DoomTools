@@ -2024,7 +2024,7 @@ public final class DecoHackParser extends Lexer.Parser
 			// free single
 			else
 			{
-				context.setProtectedState(min, true);
+				context.setProtectedState(min, protectedState);
 				return true;
 			}
 		}
