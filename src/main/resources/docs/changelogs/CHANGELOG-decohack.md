@@ -3,7 +3,7 @@ DECOHack
 
 ### Changed for 0.40.2
 
-* `Fixed` A typo in the state protector/unprotector kept states from being unprotected. (Issue #139)
+* `Fixed` A typo in the state protector/unprotector kept single states from being unprotected. (Issue #139)
 
 
 ### Changed for 0.40.1
