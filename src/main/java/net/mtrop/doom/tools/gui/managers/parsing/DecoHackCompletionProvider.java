@@ -328,7 +328,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			map.put(String.valueOf(i), FASTMONSTER_NOTES);
 		
 		map.put("799", (html) -> {
-			html.tag("div", "For A_BrainExplode, an MT_ROCKET (slot 34) projectile is spwaned, but immediately set to this state.");
+			html.tag("div", "For A_BrainExplode, an MT_ROCKET (slot 34) projectile is spawned, but immediately set to this state.");
 			html.tag("div", "It would be wise to then call A_BrainExplode at the end of the state animation sequence to make the next explosion occur.");
 			html.tag("div", "See A_BrainExplode for more info.");
 		});
