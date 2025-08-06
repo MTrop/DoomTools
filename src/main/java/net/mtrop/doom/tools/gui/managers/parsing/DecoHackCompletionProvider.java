@@ -324,7 +324,7 @@ public class DecoHackCompletionProvider extends CommonCompletionProvider
 			html.tag("div", "MBF21 (and higher) patches can clear this behavior with the \"NotFast\" state flag for this specific state.");
 		};
 		
-		for (int i = 477; i <= 487; i++)
+		for (int i = 477; i <= 489; i++)
 			map.put(String.valueOf(i), FASTMONSTER_NOTES);
 		
 		map.put("799", (html) -> {

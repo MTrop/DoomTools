@@ -40,7 +40,7 @@ Frame 266:
 	An actor that calls A_VileChase and encounters a dead object with a Raise 
 	frame jumps to this frame on "heal".
 
-Frames 477-487 (inclusive):
+Frames 477-489 (inclusive):
 	On Fast Monsters, these frames get their duration halved.
 
 Frame 799:
