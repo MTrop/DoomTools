@@ -202,7 +202,7 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 				final AtomicLong lastDate = new AtomicLong(System.currentTimeMillis());
 				try (FileOutputStream fos = new FileOutputStream(tempFile))
 				{
-					response.relayContent(fos, (cur, max) -> 
+					response.decode().relayContent(fos, (cur, max) -> 
 					{
 						long next = System.currentTimeMillis();
 						currentBytes.set(cur);
@@ -287,6 +287,7 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 			.setHeader("User-Agent", USER_AGENT_STRING)
 			.setHeader("Accept", "application/json")
 			.setHeader("Accept-Language", "en-US,en;q=0.5")
+			.setHeader("Accept-Encoding", "gzip")
 		.send(JSON_READER);
 	}
 	

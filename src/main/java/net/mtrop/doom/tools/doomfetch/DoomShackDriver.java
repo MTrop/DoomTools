@@ -106,6 +106,7 @@ public class DoomShackDriver extends FetchDriver
 			try {
 				cache = cache.build(HTTPRequest.get(WADLIST_URL)
 					.setHeader("User-Agent", USER_AGENT)
+					.setHeader("Accept-Encoding", "gzip")
 					.send(HTTPReader.createStringReader()));
 			} catch (IOException e) {
 				err.println("ERROR: Cannot fetch WAD list from DoomShack.org");

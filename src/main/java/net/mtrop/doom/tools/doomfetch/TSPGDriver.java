@@ -57,6 +57,7 @@ public abstract class TSPGDriver extends FetchDriver
 			response = HTTPRequest.get(baseURL + WADS_URI)
 				.setHeader("User-Agent", USER_AGENT)
 				.setHeader("Accept", "application/json")
+				.setHeader("Accept-Encoding", "gzip")
 				.setHeader("Accept-Language", "en-US,en;q=0.5")
 				.parameters(
 					HTTPUtils.entry("type", "wad"),
@@ -70,7 +71,7 @@ public abstract class TSPGDriver extends FetchDriver
 				return null;
 			}
 			
-			fileListArray = response.read(JSON_READER);
+			fileListArray = response.decode().read(JSON_READER);
 			
 		} finally {
 			IOUtils.close(response);

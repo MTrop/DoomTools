@@ -54,6 +54,7 @@ public class DogSoftDriver extends FetchDriver
 			try {
 				searchResponse = HTTPRequest.post(GETWAD_URL)
 					.setHeader("User-Agent", USER_AGENT)
+					.setHeader("Accept-Encoding", "gzip")
 					.content(HTTPContent.createFormContent(HTTPUtils.parameters(
 						HTTPUtils.entry("search", filename)
 					)))

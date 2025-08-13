@@ -416,7 +416,7 @@ public final class DoomFetchMain
 					options.stdout.println("Downloading " + response.getFilename() + "...");
 					final AtomicLong currentBytes = new AtomicLong(0L);
 					final AtomicLong lastDate = new AtomicLong(System.currentTimeMillis());
-					httpResponse.relayContent(fos, (cur, max) -> 
+					httpResponse.decode().relayContent(fos, (cur, max) -> 
 					{
 						long next = System.currentTimeMillis();
 						currentBytes.set(cur);

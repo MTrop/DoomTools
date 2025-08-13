@@ -1,6 +1,11 @@
 DoomFetch
 ---------
 
+### Changed for 1.2.2
+
+* `Changed` Some HTTP calls now allow GZIP-compressed responses.
+
+
 ### Changed for 1.2.1
 
 * `Fixed` Output ZIP files if DogSoft driver returns `application/zip`.

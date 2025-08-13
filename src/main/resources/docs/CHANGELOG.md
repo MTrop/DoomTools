@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2023-08-13** The updater now reads GZIP'ed responses.
+
 - **2023-08-02** [GUI] Fixed a bug in Rookscript-related script auto-complete auto-activation (WadScript, DoomMake).
 
 - **2023-08-01** [GUI] Find/Replace fields do not auto-trim.
