@@ -55,7 +55,7 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 
 	/** Root directory of DoomTools. */
 	private File toolsRootDirectory;
-	/** Root directory of DoomTools. */
+	/** DoomTools updater listener. */
 	private Listener listener;
 	/** Cancel switch. */
 	private AtomicBoolean cancelSwitch;
