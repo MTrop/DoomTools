@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.32.0
+
+* `Fixed` [GUI-Studio] Better handling of repository refreshes and project watching.
+
+
 ### Changed for 0.31.1
 
 * `Fixed` DoomMake would create an empty `build` directory erroneously on unrelated functions.

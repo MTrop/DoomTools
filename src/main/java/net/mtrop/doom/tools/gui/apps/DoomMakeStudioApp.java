@@ -1099,19 +1099,42 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			((MercurialRepositoryPanel)repositoryPanel).refreshEntries();
 	}
 
+	private boolean fileWasRepository(File file)
+	{
+		String projectPath = projectDirectory.getPath();
+		String relativePath = file.getPath().substring(projectPath.length() + 1); 
+		return relativePath.startsWith(".git")
+			|| relativePath.startsWith(".hg");
+	}
+	
 	private void onProjectFileCreated(File file)
 	{
+		// ignore changes to repository directories.
+		if (fileWasRepository(file))
+			return;
+		
 		searchPanel.registerFile(file);
+		refreshRepository();
 	}
 	
 	private void onProjectFileModified(File file)
 	{
+		// ignore changes to repository directories.
+		if (fileWasRepository(file))
+			return;
+		
 		searchPanel.registerFile(file);
+		refreshRepository();
 	}
 	
 	private void onProjectFileDeleted(File file)
 	{
+		// ignore changes to repository directories.
+		if (fileWasRepository(file))
+			return;
+		
 		searchPanel.deregisterFile(file);
+		refreshRepository();
 	}
 	
 	private void onWatcherError(String message)
