@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2025 Matt Tropiano
+ * Copyright (c) 2020-2025 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -2220,6 +2220,8 @@ public final class HTTPUtils
 		private String contentType;
 		private String encoding;
 		
+		private boolean decoded;
+		
 		private String contentDisposition;
 		private String filename;
 		
@@ -2233,6 +2235,8 @@ public final class HTTPUtils
 			this.length = conlen < 0 ? null : conlen;
 			this.encoding = conn.getContentEncoding();
 
+			this.decoded = false;
+			
 			this.contentTypeHeader = conn.getContentType();
 			this.charset = null;
 
@@ -2513,14 +2517,21 @@ public final class HTTPUtils
 		 * Attempts to decode the content before a read.
 		 * Useful if the stream we are getting back may be GZIP or Deflate-encoded.
 		 * If no encoding is found on the response (Content-Encoding), then this changes nothing.
+		 * If this has already been called once, calling this another time does nothing.
 		 * @return this response, for chaining.
 		 * @throws IOException if an encoding type was returned that is unsupported (these are established on the request).
 		 */
 		public HTTPResponse decode() throws IOException
 		{
+			if (decoded)
+				return this;
+			
 			String encoding;
 			if ((encoding = getEncoding()) == null || encoding.trim().length() == 0)
+			{
+				decoded = true;
 				return this;
+			}
 			
 			String[] chain = encoding.split("[,\\s]+");
 			
@@ -2528,12 +2539,15 @@ public final class HTTPUtils
 			{
 				if ("gzip".equalsIgnoreCase(e))
 					contentStream = wrapGZIPStream(contentStream);
+				else if ("x-gzip".equalsIgnoreCase(e))
+					contentStream = wrapGZIPStream(contentStream);
 				else if ("deflate".equalsIgnoreCase(e))
 					contentStream = wrapDeflateStream(contentStream);
 				else
 					throw new IOException("Unsupported encoding: " + e);
 			}
 			
+			decoded = true;
 			return this;
 		}
 
@@ -2633,53 +2647,65 @@ public final class HTTPUtils
 		
 		/**
 		 * Reads this response with an HTTPReader and returns the read result.
+		 * Automatically decodes the stream, if it were GZIP or Deflate encoded.
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
+		 * @see #decode()
 		 */
 		public <T> T read(HTTPReader<T> reader) throws IOException
 		{
+			decode();
 			return reader.onHTTPResponse(this);
 		}
 		
 		/**
 		 * Reads this response with an HTTPReader and returns the read result.
+		 * Automatically decodes the stream, if it were GZIP or Deflate encoded.
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
 		 * @param monitor the transfer monitor to use to monitor the read.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
+		 * @see #decode()
 		 */
 		public <T> T read(HTTPReader<T> reader, TransferMonitor monitor) throws IOException
 		{
+			decode();
 			return reader.onHTTPResponse(this, monitor);
 		}
 		
 		/**
 		 * Reads this response with an HTTPReader and returns the read result.
+		 * Automatically decodes the stream, if it were GZIP or Deflate encoded.
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
 		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
+		 * @see #decode()
 		 */
 		public <T> T read(HTTPReader<T> reader, AtomicBoolean cancelSwitch) throws IOException
 		{
+			decode();
 			return reader.onHTTPResponse(this, cancelSwitch);
 		}
 		
 		/**
 		 * Reads this response with an HTTPReader and returns the read result.
+		 * Automatically decodes the stream, if it were GZIP or Deflate encoded.
 		 * @param <T> the reader return type - the desired object type.
 		 * @param reader the reader.
 		 * @param cancelSwitch the cancel switch. Set to <code>true</code> to attempt to cancel.
 		 * @param monitor the transfer monitor to use to monitor the read. Can be null.
 		 * @return the resultant object.
 		 * @throws IOException if a read error occurs.
+		 * @see #decode()
 		 */
 		public <T> T read(HTTPReader<T> reader, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
 		{
+			decode();
 			return reader.onHTTPResponse(this, cancelSwitch, monitor != null ? monitor : TRANSFERMONITOR_NULL);
 		}
 		
@@ -3192,6 +3218,7 @@ public final class HTTPUtils
 		 * @throws IOException if an error happens during the read/write.
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
+		 * @see HTTPResponse#isAutoRedirectable()
 		 */
 		public HTTPResponse send() throws IOException
 		{
@@ -3215,6 +3242,7 @@ public final class HTTPUtils
 		 * @throws IOException if an error happens during the read/write.
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the request method is incorrect, or not an HTTP URL.
+		 * @see HTTPResponse#isAutoRedirectable()
 		 */
 		public HTTPResponse send(AtomicBoolean cancelSwitch) throws IOException
 		{
@@ -3233,7 +3261,15 @@ public final class HTTPUtils
 					out.close(); // close open response.
 				}
 			}
-			return cancelSwitch.get() ? null : out;
+			
+			if (cancelSwitch.get())
+			{
+				if (out != null)
+					out.close();
+				return null;
+			}
+			
+			return out;
 		}
 
 		/**
@@ -3246,6 +3282,7 @@ public final class HTTPUtils
 		 * @throws IOException if an error happens during the read/write.
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
+		 * @see HTTPResponse#isAutoRedirectable()
 		 */
 		public <T> T send(HTTPReader<T> reader) throws IOException
 		{
@@ -3263,12 +3300,13 @@ public final class HTTPUtils
 		 * @throws IOException if an error happens during the read/write.
 		 * @throws SocketTimeoutException if the socket read times out.
 		 * @throws ProtocolException if the requestMethod is incorrect, or not an HTTP URL.
+		 * @see HTTPResponse#isAutoRedirectable()
 		 */
 		public <T> T send(AtomicBoolean cancelSwitch, HTTPReader<T> reader) throws IOException
 		{
 			try (HTTPResponse response = send(cancelSwitch))
 			{
-				return response != null ? response.decode().read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false)) : null;
+				return response != null ? response.read(reader, cancelSwitch != null ? cancelSwitch : new AtomicBoolean(false)) : null;
 			}
 		}
 

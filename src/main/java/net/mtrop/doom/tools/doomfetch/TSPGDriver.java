@@ -71,7 +71,7 @@ public abstract class TSPGDriver extends FetchDriver
 				return null;
 			}
 			
-			fileListArray = response.decode().read(JSON_READER);
+			fileListArray = response.read(JSON_READER);
 			
 		} finally {
 			IOUtils.close(response);
