@@ -97,6 +97,9 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("off",        Token.RESERVED_WORD);
 		targetMap.put("next",       Token.RESERVED_WORD);
 
+		targetMap.put("force",      Token.RESERVED_WORD);
+		targetMap.put("output",     Token.RESERVED_WORD);
+
 		targetMap.put("null",       Token.LITERAL_NUMBER_DECIMAL_INT);
 		targetMap.put("true",       Token.LITERAL_BOOLEAN);
 		targetMap.put("false",      Token.LITERAL_BOOLEAN);
