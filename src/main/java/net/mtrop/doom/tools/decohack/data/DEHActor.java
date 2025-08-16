@@ -13,6 +13,13 @@ package net.mtrop.doom.tools.decohack.data;
 public interface DEHActor<SELF>
 {
 	/**
+	 * Sets if this object has all of its properties output (not just changes).
+	 * @param enabled true to enable, false to disable.
+	 * @return this object.
+	 */
+	SELF setForceOutput(boolean enabled);
+	
+	/**
 	 * Gets all state indices for state labels defined on this actor.
 	 * @return all of the defined labels for this actor.
 	 */

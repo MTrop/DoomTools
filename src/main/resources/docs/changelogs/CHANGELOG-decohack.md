@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.41.0
+
+* `Added` A "force output" clause on objects in order to force writing them to a patch, even if its fields are unchanged.
+
+
 ### Changed for 0.40.2
 
 * `Fixed` A typo in the state protector/unprotector kept single states from being unprotected. (Issue #139)

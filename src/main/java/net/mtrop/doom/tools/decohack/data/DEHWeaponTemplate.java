@@ -19,6 +19,8 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 {
+	private Boolean forceOutput;
+
 	/** Ammo type. */
 	private Integer ammoType;	
 	/** State indices (label name to index). */
@@ -71,6 +73,9 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 */
 	public DEHWeaponTemplate applyTo(DEHWeapon destination) 
 	{
+		if (forceOutput != null)
+			destination.setForceOutput(forceOutput);
+		
 		if (ammoType != null)
 			destination.setAmmoType(ammoType);
 
@@ -177,6 +182,13 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 		setReadyFrameIndex(0);
 		setFireFrameIndex(0);
 		setFlashFrameIndex(0);
+		return this;
+	}
+
+	@Override
+	public DEHWeaponTemplate setForceOutput(boolean enabled)
+	{
+		this.forceOutput = enabled;
 		return this;
 	}
 

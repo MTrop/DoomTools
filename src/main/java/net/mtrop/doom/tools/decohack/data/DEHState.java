@@ -297,17 +297,17 @@ public class DEHState extends DEHObject<DEHState>
 	@Override
 	public void writeObject(Writer writer, DEHState frame, DEHFeatureLevel level) throws IOException
 	{
-		if (spriteIndex != frame.spriteIndex)
+		if (forceOutput || spriteIndex != frame.spriteIndex)
 			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append("\r\n");
-		if (frameIndex != frame.frameIndex || bright != frame.bright)
+		if (forceOutput || frameIndex != frame.frameIndex || bright != frame.bright)
 			writer.append("Sprite subnumber = ").append(String.valueOf(frameIndex | (bright ? 0x08000 : 0x00000))).append("\r\n");
-		if (nextStateIndex != frame.nextStateIndex)
+		if (forceOutput || nextStateIndex != frame.nextStateIndex)
 			writer.append("Next frame = ").append(String.valueOf(nextStateIndex)).append("\r\n");
-		if (duration != frame.duration)
+		if (forceOutput || duration != frame.duration)
 			writer.append("Duration = ").append(String.valueOf(duration)).append("\r\n");
-		if (misc1 != frame.misc1)
+		if (forceOutput || misc1 != frame.misc1)
 			writer.append("Unknown 1 = ").append(String.valueOf(misc1)).append("\r\n");
-		if (misc2 != frame.misc2)
+		if (forceOutput || misc2 != frame.misc2)
 			writer.append("Unknown 2 = ").append(String.valueOf(misc2)).append("\r\n");
 
 		if (level.supports(DEHFeatureLevel.MBF21))
@@ -315,13 +315,13 @@ public class DEHState extends DEHObject<DEHState>
 			for (int i = 0; i < args.length; i++)
 				if (i >= frame.args.length || args[i] != frame.args[i])
 					writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
-			if (mbf21Flags != frame.mbf21Flags)
+			if (forceOutput || mbf21Flags != frame.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
 
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
-			if (!ObjectUtils.areEqual(tranmap, frame.tranmap))
+			if (forceOutput || !ObjectUtils.areEqual(tranmap, frame.tranmap))
 				writer.append("Tranmap = ").append(tranmap).append("\r\n");
 		}
 		

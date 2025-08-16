@@ -990,7 +990,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		int fastSpeedVal = isProjectile && fastSpeed != DEFAULT_FASTSPEED ? fastSpeed << 16 : fastSpeed;
 		int thingFastSpeedVal = thingIsProjectile && thing.fastSpeed != DEFAULT_FASTSPEED ? thing.fastSpeed << 16 : thing.fastSpeed;
 
-		if (editorNumber != thing.editorNumber)
+		if (forceOutput || editorNumber != thing.editorNumber)
 			writer.append("ID # = ").append(String.valueOf(editorNumber)).append("\r\n");
 		
 		// Editor keys
@@ -1025,105 +1025,105 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 				writer.append(getEditorKey("editorsprite")).append("\r\n");
 		}
 		
-		if (health != thing.health)
+		if (forceOutput || health != thing.health)
 			writer.append("Hit points = ").append(String.valueOf(health)).append("\r\n");
-		if (speedVal != thingSpeedVal)
+		if (forceOutput || speedVal != thingSpeedVal)
 			writer.append("Speed = ").append(String.valueOf(speedVal)).append("\r\n");
-		if (radius != thing.radius)
+		if (forceOutput || radius != thing.radius)
 			writer.append("Width = ").append(String.valueOf(radius << 16)).append("\r\n");
-		if (height != thing.height)
+		if (forceOutput || height != thing.height)
 			writer.append("Height = ").append(String.valueOf(height << 16)).append("\r\n");
-		if (damage != thing.damage)
+		if (forceOutput || damage != thing.damage)
 			writer.append("Missile damage = ").append(String.valueOf(damage)).append("\r\n");
-		if (reactionTime != thing.reactionTime)
+		if (forceOutput || reactionTime != thing.reactionTime)
 			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append("\r\n");
-		if (painChance != thing.painChance)
+		if (forceOutput || painChance != thing.painChance)
 			writer.append("Pain chance = ").append(String.valueOf(painChance)).append("\r\n");
-		if (flags != thing.flags)
+		if (forceOutput || flags != thing.flags)
 			writer.append("Bits = ").append(String.valueOf(flags)).append("\r\n");
-		if (mass != thing.mass)
+		if (forceOutput || mass != thing.mass)
 			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 
-		if (getSpawnFrameIndex() != thing.getSpawnFrameIndex())
+		if (forceOutput || getSpawnFrameIndex() != thing.getSpawnFrameIndex())
 			writer.append("Initial frame = ").append(String.valueOf(getSpawnFrameIndex())).append("\r\n");
-		if (getWalkFrameIndex() != thing.getWalkFrameIndex())
+		if (forceOutput || getWalkFrameIndex() != thing.getWalkFrameIndex())
 			writer.append("First moving frame = ").append(String.valueOf(getWalkFrameIndex())).append("\r\n");
-		if (getPainFrameIndex() != thing.getPainFrameIndex())
+		if (forceOutput || getPainFrameIndex() != thing.getPainFrameIndex())
 			writer.append("Injury frame = ").append(String.valueOf(getPainFrameIndex())).append("\r\n");
-		if (getMeleeFrameIndex() != thing.getMeleeFrameIndex())
+		if (forceOutput || getMeleeFrameIndex() != thing.getMeleeFrameIndex())
 			writer.append("Close attack frame = ").append(String.valueOf(getMeleeFrameIndex())).append("\r\n");
-		if (getMissileFrameIndex() != thing.getMissileFrameIndex())
+		if (forceOutput || getMissileFrameIndex() != thing.getMissileFrameIndex())
 			writer.append("Far attack frame = ").append(String.valueOf(getMissileFrameIndex())).append("\r\n");
-		if (getDeathFrameIndex() != thing.getDeathFrameIndex())
+		if (forceOutput || getDeathFrameIndex() != thing.getDeathFrameIndex())
 			writer.append("Death frame = ").append(String.valueOf(getDeathFrameIndex())).append("\r\n");
-		if (getExtremeDeathFrameIndex() != thing.getExtremeDeathFrameIndex())
+		if (forceOutput || getExtremeDeathFrameIndex() != thing.getExtremeDeathFrameIndex())
 			writer.append("Exploding frame = ").append(String.valueOf(getExtremeDeathFrameIndex())).append("\r\n");
-		if (getRaiseFrameIndex() != thing.getRaiseFrameIndex())
+		if (forceOutput || getRaiseFrameIndex() != thing.getRaiseFrameIndex())
 			writer.append("Respawn frame = ").append(String.valueOf(getRaiseFrameIndex())).append("\r\n");
 
-		if (seeSoundPosition != thing.seeSoundPosition)
+		if (forceOutput || seeSoundPosition != thing.seeSoundPosition)
 			writer.append("Alert sound = ").append(String.valueOf(seeSoundPosition)).append("\r\n");
-		if (activeSoundPosition != thing.activeSoundPosition)
+		if (forceOutput || activeSoundPosition != thing.activeSoundPosition)
 			writer.append("Action sound = ").append(String.valueOf(activeSoundPosition)).append("\r\n");
-		if (attackSoundPosition != thing.attackSoundPosition)
+		if (forceOutput || attackSoundPosition != thing.attackSoundPosition)
 			writer.append("Attack sound = ").append(String.valueOf(attackSoundPosition)).append("\r\n");
-		if (painSoundPosition != thing.painSoundPosition)
+		if (forceOutput || painSoundPosition != thing.painSoundPosition)
 			writer.append("Pain sound = ").append(String.valueOf(painSoundPosition)).append("\r\n");
-		if (deathSoundPosition != thing.deathSoundPosition)
+		if (forceOutput || deathSoundPosition != thing.deathSoundPosition)
 			writer.append("Death sound = ").append(String.valueOf(deathSoundPosition)).append("\r\n");
 
 		// Extended features
 		if (level.supports(DEHFeatureLevel.EXTENDED))
 		{
-			if (droppedItem != thing.droppedItem)
+			if (forceOutput || droppedItem != thing.droppedItem)
 				writer.append("Dropped item = ").append(String.valueOf(droppedItem)).append("\r\n");
 		}
 
 		// MBF21 features
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
-			if (mbf21Flags != thing.mbf21Flags)
+			if (forceOutput || mbf21Flags != thing.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
-			if (infightingGroup != thing.infightingGroup)
+			if (forceOutput || infightingGroup != thing.infightingGroup)
 				writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
-			if (projectileGroup != thing.projectileGroup)
+			if (forceOutput || projectileGroup != thing.projectileGroup)
 				writer.append("Projectile group = ").append(String.valueOf(projectileGroup)).append("\r\n");
-			if (splashGroup != thing.splashGroup)
+			if (forceOutput || splashGroup != thing.splashGroup)
 				writer.append("Splash group = ").append(String.valueOf(splashGroup)).append("\r\n");
-			if (fastSpeedVal != thingFastSpeedVal)
+			if (forceOutput || fastSpeedVal != thingFastSpeedVal)
 				writer.append("Fast speed = ").append(String.valueOf(fastSpeedVal)).append("\r\n");
-			if (meleeRange != thing.meleeRange)
+			if (forceOutput || meleeRange != thing.meleeRange)
 				writer.append("Melee range = ").append(String.valueOf(meleeRange << 16)).append("\r\n");
-			if (ripSoundPosition != thing.ripSoundPosition)
+			if (forceOutput || ripSoundPosition != thing.ripSoundPosition)
 				writer.append("Rip sound = ").append(String.valueOf(ripSoundPosition)).append("\r\n");
 		}
 		
 		// ID24 features
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
-			if (id24Flags != thing.id24Flags)
+			if (forceOutput || id24Flags != thing.id24Flags)
 				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags)).append("\r\n");
-			if (minRespawnTics != thing.minRespawnTics)
+			if (forceOutput || minRespawnTics != thing.minRespawnTics)
 				writer.append("Min respawn tics = ").append(String.valueOf(minRespawnTics)).append("\r\n");
-			if (respawnDice != thing.respawnDice)
+			if (forceOutput || respawnDice != thing.respawnDice)
 				writer.append("Respawn dice = ").append(String.valueOf(respawnDice)).append("\r\n");
-			if (pickupAmmoType != thing.pickupAmmoType)
+			if (forceOutput || pickupAmmoType != thing.pickupAmmoType)
 				writer.append("Pickup ammo type = ").append(String.valueOf(pickupAmmoType)).append("\r\n");
-			if (pickupAmmoCategory != thing.pickupAmmoCategory)
+			if (forceOutput || pickupAmmoCategory != thing.pickupAmmoCategory)
 				writer.append("Pickup ammo category = ").append(String.valueOf(pickupAmmoCategory)).append("\r\n");
-			if (pickupWeaponType != thing.pickupWeaponType)
+			if (forceOutput || pickupWeaponType != thing.pickupWeaponType)
 				writer.append("Pickup weapon type = ").append(String.valueOf(pickupWeaponType)).append("\r\n");
-			if (pickupItemType != thing.pickupItemType)
+			if (forceOutput || pickupItemType != thing.pickupItemType)
 				writer.append("Pickup item type = ").append(String.valueOf(pickupItemType)).append("\r\n");
-			if (pickupBonusCount != thing.pickupBonusCount)
+			if (forceOutput || pickupBonusCount != thing.pickupBonusCount)
 				writer.append("Pickup bonus count = ").append(String.valueOf(pickupBonusCount)).append("\r\n");
-			if (!ObjectUtils.areEqual(pickupMessage, thing.pickupMessage))
-				writer.append("Pickup message = ").append(pickupMessage).append("\r\n");
-			if (!ObjectUtils.areEqual(translation, thing.translation))
-				writer.append("Translation = ").append(translation).append("\r\n");
-			if (pickupSoundPosition != thing.pickupSoundPosition)
+			if (forceOutput || !ObjectUtils.areEqual(pickupMessage, thing.pickupMessage))
+				writer.append("Pickup message = ").append(pickupMessage != null ? pickupMessage : "").append("\r\n");
+			if (forceOutput || !ObjectUtils.areEqual(translation, thing.translation))
+				writer.append("Translation = ").append(translation != null ? translation : "").append("\r\n");
+			if (forceOutput || pickupSoundPosition != thing.pickupSoundPosition)
 				writer.append("Pickup sound = ").append(String.valueOf(pickupSoundPosition)).append("\r\n");
-			if (selfDamageFactor != thing.selfDamageFactor)
+			if (forceOutput || selfDamageFactor != thing.selfDamageFactor)
 				writer.append("Self damage factor = ").append(String.valueOf(selfDamageFactor)).append("\r\n");
 		}
 		

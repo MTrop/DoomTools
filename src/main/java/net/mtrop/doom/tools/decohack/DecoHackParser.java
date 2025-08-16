@@ -221,6 +221,9 @@ public final class DecoHackParser extends Lexer.Parser
 		String STATE_NOTFAST = "notfast";
 		String TRANMAP = "tranmap";
 		
+		String FORCE = "force";
+		String OUTPUT = "output";
+		
 		String WITH = "with";
 		String SWAP = "swap";
 
@@ -896,7 +899,17 @@ public final class DecoHackParser extends Lexer.Parser
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			PropertyResult pr;
-			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseAmmoBodyDoom19Properties(context, ammo)) != PropertyResult.BYPASSED)
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				ammo.setForceOutput(true);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseAmmoBodyDoom19Properties(context, ammo)) != PropertyResult.BYPASSED)
 			{
 				if (pr == PropertyResult.ERROR)
 					return false;
@@ -1164,7 +1177,17 @@ public final class DecoHackParser extends Lexer.Parser
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			PropertyResult pr;
-			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseSoundBlockDoom19Properties(context, sound)) != PropertyResult.BYPASSED)
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				sound.setForceOutput(true);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseSoundBlockDoom19Properties(context, sound)) != PropertyResult.BYPASSED)
 			{
 				if (pr == PropertyResult.ERROR)
 					return false;
@@ -1295,7 +1318,17 @@ public final class DecoHackParser extends Lexer.Parser
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			PropertyResult pr;
-			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseMiscellaneousBlockDoom19Properties(context, misc)) != PropertyResult.BYPASSED)
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				misc.setForceOutput(true);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseMiscellaneousBlockDoom19Properties(context, misc)) != PropertyResult.BYPASSED)
 			{
 				if (pr == PropertyResult.ERROR)
 					return false;
@@ -2389,7 +2422,17 @@ public final class DecoHackParser extends Lexer.Parser
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
 			PropertyResult pr;
-			if (matchType(DecoHackKernel.TYPE_PLUS))
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				thing.setForceOutput(true);
+			}
+			else if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
 				if ((value = matchThingFlagMnemonic()) != null)
 				{
@@ -3487,7 +3530,17 @@ public final class DecoHackParser extends Lexer.Parser
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
 			PropertyResult pr;
-			if (matchType(DecoHackKernel.TYPE_PLUS))
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				weapon.setForceOutput(true);
+			}
+			else if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
 				if (!context.supports(DEHFeatureLevel.MBF21))
 				{
@@ -4232,7 +4285,18 @@ public final class DecoHackParser extends Lexer.Parser
 		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			PropertyResult pr;
-			if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseStateBodyDoom19Properties(context, state, notModified, index)) != PropertyResult.BYPASSED)
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				state.setForceOutput(true);
+				notModified.set(false);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseStateBodyDoom19Properties(context, state, notModified, index)) != PropertyResult.BYPASSED)
 			{
 				if (pr == PropertyResult.ERROR)
 					return false;
@@ -5360,7 +5424,7 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		return true;
 	}
-
+	
 	// Matches a valid state index number.
 	// If match, advance token and return integer.
 	// Else, return null.

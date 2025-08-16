@@ -23,6 +23,9 @@ public abstract class DEHObject<SELF>
 	/** Custom properties. */
 	private Map<DEHProperty, String> customProperties;
 	
+	/** Force output. */
+	protected boolean forceOutput;
+	
 	protected DEHObject()
 	{
 		this.customProperties = new HashMap<>();
@@ -80,6 +83,23 @@ public abstract class DEHObject<SELF>
 	 */
 	public abstract SELF copyFrom(SELF source);
 
+	/**
+	 * Sets if this object is fully output even if no fields change.
+	 * @param enabled true to enable, false to disable.
+	 * @return this object.
+	 */
+	@SuppressWarnings("unchecked")
+	public final SELF setForceOutput(boolean enabled)
+	{
+		this.forceOutput = enabled;
+		return (SELF)this;
+	}
+	
+	public final boolean isForceOutput()
+	{
+		return forceOutput;
+	}
+	
 	/**
 	 * Writes this object to a DeHackEd file stream.
 	 * @param writer the writer to write to.

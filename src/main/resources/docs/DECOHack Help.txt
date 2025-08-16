@@ -1765,6 +1765,24 @@ Miscellaneous data is in the miscellaneous block:
 
 
 ==============================================================================
+===== Forced Output
+==============================================================================
+
+So, there may be some ports out there that have bad defaults or other fields
+on objects that do not get set properly. In order to output ALL of the fields
+on an object (instead of just changes from the original, which is the default
+behavior), you can add the following clause to an object body:
+
+    force output
+    
+...and then, the whole object definition will be output into the resulting
+patch file. Only use this if you have no alternative recourse, since this will
+bloat your output patch potentially.
+
+This will work on ammo, misc, sound, thing, state, and weapon objects.
+
+
+==============================================================================
 ===== SPECIAL: DSDHACKED Patch Behavior 
 ==============================================================================
 

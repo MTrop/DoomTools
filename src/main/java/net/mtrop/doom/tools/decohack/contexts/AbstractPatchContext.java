@@ -1022,7 +1022,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHThing original = getSourcePatch().getThing(i);
 			if (thing == null)
 				continue;
-			if (!thing.equals(original) || thing.hasCustomProperties() || thing.hasEditorKeys())
+			if (thing.isForceOutput() || !thing.equals(original) || thing.hasCustomProperties() || thing.hasEditorKeys())
 			{
 				writer.append("Thing ")
 					.append(String.valueOf(i))
@@ -1042,7 +1042,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHState original = getSourcePatch().getState(i);
 			if (state == null)
 				continue;
-			if (!state.equals(original) || state.hasCustomProperties())
+			if (state.isForceOutput() || !state.equals(original) || state.hasCustomProperties())
 			{
 				writer.append("Frame ").append(String.valueOf(i)).append(CRLF);
 				state.writeObject(writer, original, getSupportedFeatureLevel());
@@ -1057,7 +1057,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHSound original = getSourcePatch().getSound(i);
 			if (sound == null)
 				continue;
-			if (!sound.equals(original) || sound.hasCustomProperties())
+			if (sound.isForceOutput() || !sound.equals(original) || sound.hasCustomProperties())
 			{
 				writer.append("Sound ").append(String.valueOf(i)).append(CRLF);
 				sound.writeObject(writer, original, getSupportedFeatureLevel());
@@ -1072,7 +1072,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHWeapon original = getSourcePatch().getWeapon(i);
 			if (weapon == null)
 				continue;
-			if (!weapon.equals(original) || weapon.hasCustomProperties())
+			if (weapon.isForceOutput() || !weapon.equals(original) || weapon.hasCustomProperties())
 			{
 				writer.append("Weapon ")
 					.append(String.valueOf(i))
@@ -1092,7 +1092,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			DEHAmmo original = getSourcePatch().getAmmo(i);
 			if (ammo == null)
 				continue;
-			if (!ammo.equals(original) || ammo.hasCustomProperties())
+			if (ammo.isForceOutput() || !ammo.equals(original) || ammo.hasCustomProperties())
 			{
 				writer.append("Ammo ")
 					.append(String.valueOf(i))
@@ -1108,7 +1108,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 		DEHMiscellany misc = getMiscellany();
 		DEHMiscellany miscOriginal = getSourcePatch().getMiscellany();
-		if (!misc.equals(miscOriginal) || misc.hasCustomProperties())
+		if (misc.isForceOutput() || !misc.equals(miscOriginal) || misc.hasCustomProperties())
 		{
 			writer.append("Misc ").append(String.valueOf(0)).append(CRLF);
 			misc.writeObject(writer, miscOriginal, getSupportedFeatureLevel());

@@ -538,52 +538,52 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	@Override
 	public void writeObject(Writer writer, DEHWeapon weapon, DEHFeatureLevel level) throws IOException 
 	{
-		if (ammoType != weapon.ammoType)
+		if (forceOutput || ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType)).append("\r\n");
 		
 		// These look backwards. They are not.
-		if (getRaiseFrameIndex() != weapon.getRaiseFrameIndex())
+		if (forceOutput || getRaiseFrameIndex() != weapon.getRaiseFrameIndex())
 			writer.append("Deselect frame = ").append(String.valueOf(getRaiseFrameIndex())).append("\r\n");
-		if (getLowerFrameIndex() != weapon.getLowerFrameIndex())
+		if (forceOutput || getLowerFrameIndex() != weapon.getLowerFrameIndex())
 			writer.append("Select frame = ").append(String.valueOf(getLowerFrameIndex())).append("\r\n");
 
-		if (getReadyFrameIndex() != weapon.getReadyFrameIndex())
+		if (forceOutput || getReadyFrameIndex() != weapon.getReadyFrameIndex())
 			writer.append("Bobbing frame = ").append(String.valueOf(getReadyFrameIndex())).append("\r\n");
-		if (getFireFrameIndex() != weapon.getFireFrameIndex())
+		if (forceOutput || getFireFrameIndex() != weapon.getFireFrameIndex())
 			writer.append("Shooting frame = ").append(String.valueOf(getFireFrameIndex())).append("\r\n");
-		if (getFlashFrameIndex() != weapon.getFlashFrameIndex())
+		if (forceOutput || getFlashFrameIndex() != weapon.getFlashFrameIndex())
 			writer.append("Firing frame = ").append(String.valueOf(getFlashFrameIndex())).append("\r\n");
 
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
-			if (ammoPerShot != weapon.ammoPerShot)
+			if (forceOutput || ammoPerShot != weapon.ammoPerShot)
 				writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 			
-			if (mbf21Flags != weapon.mbf21Flags)
+			if (forceOutput || mbf21Flags != weapon.mbf21Flags)
 				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
 		
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
-			if (slot != weapon.slot)
+			if (forceOutput || slot != weapon.slot)
 				writer.append("Slot = ").append(String.valueOf(slot)).append("\r\n");
-			if (slotPriority != weapon.slotPriority)
+			if (forceOutput || slotPriority != weapon.slotPriority)
 				writer.append("Slot Priority = ").append(String.valueOf(slotPriority)).append("\r\n");
-			if (switchPriority != weapon.switchPriority)
+			if (forceOutput || switchPriority != weapon.switchPriority)
 				writer.append("Switch Priority = ").append(String.valueOf(switchPriority)).append("\r\n");
-			if (initialOwned != weapon.initialOwned)
+			if (forceOutput || initialOwned != weapon.initialOwned)
 				writer.append("Initial Owned = ").append(String.valueOf(initialOwned)).append("\r\n");
-			if (initialRaised != weapon.initialRaised)
+			if (forceOutput || initialRaised != weapon.initialRaised)
 				writer.append("Initial Raised = ").append(String.valueOf(initialRaised)).append("\r\n");
-			if (!carouselIcon.equalsIgnoreCase(weapon.carouselIcon))
+			if (forceOutput || !carouselIcon.equalsIgnoreCase(weapon.carouselIcon))
 				writer.append("Carousel icon = ").append(carouselIcon).append("\r\n");
-			if (allowSwitchWithOwnedWeapon != weapon.allowSwitchWithOwnedWeapon)
+			if (forceOutput || allowSwitchWithOwnedWeapon != weapon.allowSwitchWithOwnedWeapon)
 				writer.append("Allow switch with owned weapon = ").append(String.valueOf(allowSwitchWithOwnedWeapon)).append("\r\n");
-			if (noSwitchWithOwnedWeapon != weapon.noSwitchWithOwnedWeapon)
+			if (forceOutput || noSwitchWithOwnedWeapon != weapon.noSwitchWithOwnedWeapon)
 				writer.append("No switch with owned weapon = ").append(String.valueOf(noSwitchWithOwnedWeapon)).append("\r\n");
-			if (allowSwitchWithOwnedItem != weapon.allowSwitchWithOwnedItem)
+			if (forceOutput || allowSwitchWithOwnedItem != weapon.allowSwitchWithOwnedItem)
 				writer.append("Allow switch with owned item = ").append(String.valueOf(allowSwitchWithOwnedItem)).append("\r\n");
-			if (noSwitchWithOwnedItem != weapon.noSwitchWithOwnedItem)
+			if (forceOutput || noSwitchWithOwnedItem != weapon.noSwitchWithOwnedItem)
 				writer.append("No switch with owned item = ").append(String.valueOf(noSwitchWithOwnedItem)).append("\r\n");
 		}
 		

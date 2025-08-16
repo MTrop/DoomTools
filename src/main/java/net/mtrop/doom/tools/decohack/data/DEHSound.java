@@ -122,9 +122,9 @@ public class DEHSound extends DEHObject<DEHSound>
 	@Override
 	public void writeObject(Writer writer, DEHSound sound, DEHFeatureLevel level) throws IOException
 	{
-		if (priority != sound.priority)
+		if (forceOutput || priority != sound.priority)
 			writer.append("Value = ").append(String.valueOf(priority)).append("\r\n");
-		if (singular != sound.singular)
+		if (forceOutput || singular != sound.singular)
 			writer.append("Zero/One = ").append(String.valueOf(singular ? 1 : 0)).append("\r\n");
 		writeCustomProperties(writer);
 		writer.flush();

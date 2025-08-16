@@ -363,42 +363,42 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	@Override
 	public void writeObject(Writer writer, DEHAmmo ammo, DEHFeatureLevel level) throws IOException
 	{
-		if (max != ammo.max)
+		if (forceOutput || max != ammo.max)
 			writer.append("Max ammo = ").append(String.valueOf(max)).append("\r\n");
-		if (pickup != ammo.pickup)
+		if (forceOutput || pickup != ammo.pickup)
 			writer.append("Per ammo = ").append(String.valueOf(pickup)).append("\r\n");
 		
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
-			if (initialAmmo!= ammo.initialAmmo)
+			if (forceOutput || initialAmmo!= ammo.initialAmmo)
 				writer.append("Initial ammo = ").append(String.valueOf(initialAmmo)).append("\r\n");
-			if (maxUpgradedAmmo != ammo.maxUpgradedAmmo)
+			if (forceOutput || maxUpgradedAmmo != ammo.maxUpgradedAmmo)
 				writer.append("Max upgraded ammo = ").append(String.valueOf(maxUpgradedAmmo)).append("\r\n");
-			if (boxAmmo != ammo.boxAmmo)
+			if (forceOutput || boxAmmo != ammo.boxAmmo)
 				writer.append("Box ammo = ").append(String.valueOf(boxAmmo)).append("\r\n");
-			if (backpackAmmo != ammo.backpackAmmo)
+			if (forceOutput || backpackAmmo != ammo.backpackAmmo)
 				writer.append("Backpack ammo = ").append(String.valueOf(backpackAmmo)).append("\r\n");
-			if (weaponAmmo != ammo.weaponAmmo)
+			if (forceOutput || weaponAmmo != ammo.weaponAmmo)
 				writer.append("Weapon ammo = ").append(String.valueOf(weaponAmmo)).append("\r\n");
-			if (droppedAmmo != ammo.droppedAmmo)
+			if (forceOutput || droppedAmmo != ammo.droppedAmmo)
 				writer.append("Dropped ammo = ").append(String.valueOf(droppedAmmo)).append("\r\n");
-			if (droppedBoxAmmo != ammo.droppedBoxAmmo)
+			if (forceOutput || droppedBoxAmmo != ammo.droppedBoxAmmo)
 				writer.append("Dropped box ammo = ").append(String.valueOf(droppedBoxAmmo)).append("\r\n");
-			if (droppedBackpackAmmo != ammo.droppedBackpackAmmo)
+			if (forceOutput || droppedBackpackAmmo != ammo.droppedBackpackAmmo)
 				writer.append("Dropped backpack ammo = ").append(String.valueOf(droppedBackpackAmmo)).append("\r\n");
-			if (droppedWeaponAmmo != ammo.droppedWeaponAmmo)
+			if (forceOutput || droppedWeaponAmmo != ammo.droppedWeaponAmmo)
 				writer.append("Dropped weapon ammo = ").append(String.valueOf(droppedWeaponAmmo)).append("\r\n");
-			if (deathmatchWeaponAmmo != ammo.deathmatchWeaponAmmo)
+			if (forceOutput || deathmatchWeaponAmmo != ammo.deathmatchWeaponAmmo)
 				writer.append("Deathmatch weapon ammo = ").append(String.valueOf(deathmatchWeaponAmmo)).append("\r\n");
-			if (skill1Multiplier != ammo.skill1Multiplier)
+			if (forceOutput || skill1Multiplier != ammo.skill1Multiplier)
 				writer.append("Skill 1 multiplier = ").append(String.valueOf(skill1Multiplier)).append("\r\n");
-			if (skill2Multiplier != ammo.skill2Multiplier)
+			if (forceOutput || skill2Multiplier != ammo.skill2Multiplier)
 				writer.append("Skill 2 multiplier = ").append(String.valueOf(skill2Multiplier)).append("\r\n");
-			if (skill3Multiplier != ammo.skill3Multiplier)
+			if (forceOutput || skill3Multiplier != ammo.skill3Multiplier)
 				writer.append("Skill 3 multiplier = ").append(String.valueOf(skill3Multiplier)).append("\r\n");
-			if (skill4Multiplier != ammo.skill4Multiplier)
+			if (forceOutput || skill4Multiplier != ammo.skill4Multiplier)
 				writer.append("Skill 4 multiplier = ").append(String.valueOf(skill4Multiplier)).append("\r\n");
-			if (skill5Multiplier != ammo.skill5Multiplier)
+			if (forceOutput || skill5Multiplier != ammo.skill5Multiplier)
 				writer.append("Skill 5 multiplier = ").append(String.valueOf(skill5Multiplier)).append("\r\n");
 		}
 		

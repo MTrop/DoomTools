@@ -21,6 +21,8 @@ import net.mtrop.doom.util.RangeUtils;
  */
 public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 {
+	private Boolean forceOutput;
+	
 	private Integer editorNumber;
 	
 	/** Editor keys. */
@@ -171,6 +173,9 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	 */
 	public DEHThingTemplate applyTo(DEHThing destination) 
 	{
+		if (forceOutput != null)
+			destination.setForceOutput(forceOutput);
+		
 		if (editorNumber != null)
 			destination.setEditorNumber(editorNumber);
 		
@@ -392,6 +397,13 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 		setDeathFrameIndex(0);
 		setExtremeDeathFrameIndex(0);
 		setRaiseFrameIndex(0);
+		return this;
+	}
+
+	@Override
+	public DEHThingTemplate setForceOutput(boolean enabled)
+	{
+		this.forceOutput = enabled;
 		return this;
 	}
 
