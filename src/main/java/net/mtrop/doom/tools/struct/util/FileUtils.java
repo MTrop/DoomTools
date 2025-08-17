@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 
-
 /**
  * Simple utility functions around files.
  * @author Matthew Tropiano
@@ -826,6 +825,55 @@ public final class FileUtils
 		File[] out = new File[fileList.size()];
 		fileList.toArray(out);
 		return out;
+	}
+
+	/**
+	 * Scans a directory for a file recursively until it finds the desired file (by name).
+	 * @param dir the directory to search.
+	 * @param name the name of the file.
+	 * @param noExt if true, do not use the file's extension, just name.
+	 * @param caseSensitive if true, search case-insensitively.
+	 * @return the found file, or null if not found.
+	 */
+	public static File searchDirectory(File dir, String name, boolean noExt, boolean caseSensitive)
+	{
+		for (File file : dir.listFiles())
+		{
+			if (file.isDirectory())
+			{
+				File found;
+				if ((found = searchDirectory(file, name, noExt, caseSensitive)) != null)
+					return found;
+			}
+			else
+			{
+				if (noExt)
+				{
+					String filename = FileUtils.getFileNameWithoutExtension(file);
+					if (caseSensitive && filename.equals(name))
+					{
+						return file;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						return file;
+					}
+				}
+				else
+				{
+					String filename = file.getName();
+					if (caseSensitive && filename.equals(name))
+					{
+						return file;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						return file;
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

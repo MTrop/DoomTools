@@ -40,10 +40,12 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertOffsetterSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas.GuideMode;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -61,6 +63,9 @@ import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
  */
 public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 {
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DImageConvertOffsetterApp.class); 
+
 	private static final byte[] PNG_SIGNATURE = new byte[] {(byte)0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 	
 	private DoomToolsIconManager icons;
@@ -200,6 +205,9 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			startingDirectory = startingDirectory.getParentFile(); 
 		
 		File paletteFile = paletteWadPath != null ? new File(paletteWadPath) : settings.getLastPaletteFile();
+		
+		LOG.infof("Using palette file: %s", paletteFile != null ? paletteFile.getPath() : "null");
+		
 		onPaletteFileSelect(paletteFile);
 		onDirectoryChange(startingDirectory);
 	}

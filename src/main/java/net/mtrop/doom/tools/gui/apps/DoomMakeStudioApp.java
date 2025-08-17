@@ -10,11 +10,17 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.Action;
@@ -69,7 +75,9 @@ import net.mtrop.doom.tools.struct.WatchServiceThread;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.WadUtils;
 
@@ -127,6 +135,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 	// State
 
+	private Properties projectProperties;
 	private EditorHandle currentHandle;
 	private Map<EditorHandle, ScriptExecutionSettings> handleToWadScriptSettingsMap;
 	private Map<EditorHandle, MergeSettings> handleToWadMergeSettingsMap;
@@ -220,7 +229,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.treePanel.setRootDirectory(targetDirectory);
 		this.treePanel.setLabel(targetDirectory.getName());
 		
-		this.searchPanel = new ProjectSearchPanel(targetDirectory, (result) -> {
+		this.searchPanel = new ProjectSearchPanel((result) -> {
 			onOpenFile(result.getSource(), (int)result.getOffset());
 		});
 		
@@ -288,7 +297,81 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.doomMakeSettings = null;
 		
 		this.projectDirectory = targetDirectory;
+		refreshProperties();
+		refreshSearchRegistry();
 		onHandleChange();
+	}
+	
+	private void refreshProperties()
+	{
+		Properties props = new Properties();
+		
+		File propertiesFile = new File(projectDirectory.getPath() + "/doommake.properties");
+		File projectPropertiesFile = new File(projectDirectory.getPath() + "/doommake.project.properties");
+		
+		loadProperties(props, propertiesFile);
+		loadProperties(props, projectPropertiesFile);
+		
+		this.projectProperties = props;
+	}
+
+	private void refreshSearchRegistry() 
+	{
+		searchPanel.buildRegistry(getSearchableFiles(projectDirectory));
+	}
+	
+	private static void loadProperties(Properties props, File propertiesFile) 
+	{
+		try (Reader reader = new InputStreamReader(new FileInputStream(propertiesFile)))
+		{
+			props.load(reader);
+		} 
+		catch (FileNotFoundException e) 
+		{
+			LOG.infof("Could not find project properties file: %s", propertiesFile.getPath());
+		} 
+		catch (IOException e) 
+		{
+			LOG.infof("Could not open project properties file for reading: %s", propertiesFile.getPath());
+		}
+	}
+	
+	private File[] getSearchableFiles(File directory)
+	{
+		List<File> fileList = new ArrayList<>(256);  
+		
+		String build = projectProperties.getProperty("doommake.dir.build");
+		if (ObjectUtils.isEmpty(build))
+			build = "build";
+
+		String dist = projectProperties.getProperty("doommake.dir.dist");
+		if (ObjectUtils.isEmpty(dist))
+			dist = "dist";
+		
+		for (File f : FileUtils.explodeFiles(directory))
+		{
+			if (f.isHidden())
+				continue;
+			
+			String projectPath = directory.getPath();
+			String relativePath = f.getPath().substring(projectPath.length() + 1);
+			
+			// Ignore repository files.
+			if (relativePath.startsWith(".git") || relativePath.startsWith(".hg"))
+				continue;
+
+			// Ignore build directory files.
+			if (relativePath.startsWith(build + "\\") || relativePath.startsWith(build + "/"))
+				continue;
+
+			// Ignore distribution directory files.
+			if (relativePath.startsWith(dist + "\\") || relativePath.startsWith(dist + "/"))
+				continue;
+			
+			fileList.add(f);
+		}
+
+		return fileList.toArray(new File[fileList.size()]);
 	}
 	
 	/**
@@ -895,8 +978,18 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		File selected = treePanel.getSelectedFile();
 		if (selected == null)
 			return;
+		
+		String palettePath = projectProperties.getProperty("doommake.iwad");
+		String source = projectProperties.getProperty("doommake.dir.src");
+		if (ObjectUtils.isEmpty(source))
+			source = "src";
+		
+		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source), "PLAYPAL", true, false);
+		if (paletteFile != null)
+			palettePath = paletteFile.getPath();
+		
 		try {
-			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, selected.getCanonicalPath());
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, selected.getCanonicalPath(), palettePath);
 		} catch (IOException e) {
 			SwingUtils.error(language.getText("doommake.offsetter.ioerror"));
 			LOG.error(e, "I/O Error running graphic offsetter program.");
@@ -1107,11 +1200,25 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			|| relativePath.startsWith(".hg");
 	}
 	
+	private boolean fileWasProjectPropertyFile(File file)
+	{
+		String projectPath = projectDirectory.getPath();
+		String relativePath = file.getPath().substring(projectPath.length() + 1); 
+		return relativePath.equalsIgnoreCase("doommake.properties")
+			|| relativePath.equalsIgnoreCase("doommake.project.properties");
+	}
+	
 	private void onProjectFileCreated(File file)
 	{
 		// ignore changes to repository directories.
 		if (fileWasRepository(file))
 			return;
+		
+		if (fileWasProjectPropertyFile(file))
+		{
+			refreshProperties();
+			refreshSearchRegistry();
+		}
 		
 		searchPanel.registerFile(file);
 		refreshRepository();
@@ -1123,6 +1230,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		if (fileWasRepository(file))
 			return;
 		
+		if (fileWasProjectPropertyFile(file))
+		{
+			refreshProperties();
+			refreshSearchRegistry();
+		}
+
 		searchPanel.registerFile(file);
 		refreshRepository();
 	}
@@ -1133,6 +1246,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		if (fileWasRepository(file))
 			return;
 		
+		if (fileWasProjectPropertyFile(file))
+		{
+			refreshProperties();
+			refreshSearchRegistry();
+		}
+
 		searchPanel.deregisterFile(file);
 		refreshRepository();
 	}

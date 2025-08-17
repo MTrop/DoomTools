@@ -3,7 +3,9 @@ DoomMake
 
 ### Changed for 0.32.0
 
-* `Fixed` [GUI-Studio] Better handling of repository refreshes and project watching.
+* `Fixed` [GUI-Studio] Better handling of automatic repository refreshes and project watching.
+* `Fixed` [GUI-Studio] Better searching and initializing of project search function.
+* `Changed` [GUI-Studio] Graphics Offsetter will use whatever is specified as an IWAD or a PLAYPAL lump in the project.
 
 
 ### Changed for 0.31.1

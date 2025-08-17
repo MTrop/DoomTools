@@ -71,10 +71,9 @@ public class ProjectSearchPanel extends JPanel
 	
 	/**
 	 * Creates a new search panel.
-	 * @param projectDirectory
 	 * @param onSearchSelect the function to call when a search result is selected.
 	 */
-	public ProjectSearchPanel(File projectDirectory, final Consumer<SearchResult> onSearchSelect)
+	public ProjectSearchPanel(final Consumer<SearchResult> onSearchSelect)
 	{
 		this.tasks = DoomToolsTaskManager.get();
 		this.language = DoomToolsLanguageManager.get();
@@ -84,13 +83,6 @@ public class ProjectSearchPanel extends JPanel
 		
 		this.statusPanel = new DoomToolsStatusPanel();
 		
-		tasks.spawn(() -> {
-			statusPanel.setActivityMessage(language.getText("doommake.search.prep"));
-			for (File file : FileUtils.explodeFiles(projectDirectory))
-				registerFile(file);
-			statusPanel.setSuccessMessage(language.getText("doommake.search.ready"));
-		});
-
 		this.searchResultListModel = new ResultModel();
 		this.searchResultList = new JList<>(searchResultListModel);
 		this.searchResultList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -137,6 +129,21 @@ public class ProjectSearchPanel extends JPanel
 	}
 	
 	/**
+	 * Builds the registry of files asynchronously.
+	 * @param files the list of files to register.
+	 */
+	public void buildRegistry(final File ... files)
+	{
+		deregisterAllFiles();
+		tasks.spawn(() -> {
+			statusPanel.setActivityMessage(language.getText("doommake.search.prep"));
+			for (File file : files)
+				registerFile(file);
+			statusPanel.setSuccessMessage(language.getText("doommake.search.ready"));
+		});
+	}
+	
+	/**
 	 * Registers/re-registers a file in the search.
 	 * Should be called when a file changes.
 	 * If the file is considered to be a binary file, it is not registered.
@@ -161,11 +168,19 @@ public class ProjectSearchPanel extends JPanel
 	}
 	
 	/**
+	 * De-registers all files from search.
+	 */
+	public void deregisterAllFiles()
+	{
+		registeredFiles.clear();
+	}
+	
+	/**
 	 * Searches for a specific phrase.
 	 * @param phrase the phrase to search for.
 	 * @param caseSensitive if true, case sensitive search.
 	 */
-	public void search(String phrase, boolean caseSensitive)
+	public void search(String phrase, final boolean caseSensitive)
 	{
 		if (ObjectUtils.isEmpty(phrase))
 			return;
