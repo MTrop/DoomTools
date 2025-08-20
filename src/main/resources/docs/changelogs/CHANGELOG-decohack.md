@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.41.1
+
+* `Fixed` Local, "future-defined" labels were not taking precedence over global labels in `states` blocks. (Issue #140)
+
+
 ### Changed for 0.41.0
 
 * `Added` A "force output" clause on objects in order to force writing them to a patch, even if its fields are unchanged.

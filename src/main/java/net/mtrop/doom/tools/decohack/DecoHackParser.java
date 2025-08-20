@@ -4068,23 +4068,24 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if (matchIdentifierIgnoreCase(Keyword.GOTO))
 					{
-						StateIndex index;
-						if ((index = parseStateIndex(context)) == null)
+						StateIndex stateIndex;
+						if ((stateIndex = parseStateIndex(context)) == null)
 							return false;
 						
-						Integer resolvedIndex = index.resolve(context, actor);
-						if (resolvedIndex != null)
+						// don't immediately resolve - could be part of future local label
+						
+						if (stateIndex.index != null)
 						{
 							while (!labelList.isEmpty())
 							{
-								futureLabels.backfill(context, actor, labelList.pollFirst(), resolvedIndex);
+								futureLabels.backfill(context, actor, labelList.pollFirst(), stateIndex.index);
 							}
 						}
-						else
+						else // is label
 						{
 							while (!labelList.isEmpty())
 							{
-								futureLabels.addAlias(labelList.pollFirst(), index.label);
+								futureLabels.addAlias(labelList.pollFirst(), stateIndex.label);
 							}
 						}
 					}
@@ -4109,9 +4110,8 @@ public final class DecoHackParser extends Lexer.Parser
 						return false;
 					}
 					
-					Integer resolvedIndex = nextStateIndex.resolve(context, actor);
-					if (resolvedIndex != null)
-						stateCursor.lastStateFilled.setNextStateIndex(resolvedIndex);
+					if (nextStateIndex.index != null)
+						stateCursor.lastStateFilled.setNextStateIndex(nextStateIndex.index);
 					else
 						futureLabels.addStateField(stateCursor.lastIndexFilled, FieldType.NEXTSTATE, nextStateIndex.label);
 					
@@ -4129,7 +4129,14 @@ public final class DecoHackParser extends Lexer.Parser
 				if (actor.hasLabel(label))
 					futureLabels.backfill(context, actor, label, actor.getLabel(label));
 				else
-					unknownLabels.add(label);
+				{
+					// may be global label
+					Integer si = resolveStateLabel(label, context, actor);
+					if (si != null)
+						futureLabels.backfill(context, actor, label, si);
+					else
+						unknownLabels.add(label);
+				}
 			}
 			
 			if (!unknownLabels.isEmpty())
