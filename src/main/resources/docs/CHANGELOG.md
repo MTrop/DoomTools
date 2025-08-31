@@ -7,35 +7,37 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
-- **2023-08-13** The updater now reads GZIP'ed responses.
+- **2025-08-31** File path input fields accept data from clipboard as well as drag-and-drop.
 
-- **2023-08-02** [GUI] Fixed a bug in Rookscript-related script auto-complete auto-activation (WadScript, DoomMake).
+- **2025-08-13** The updater now reads GZIP'ed responses.
 
-- **2023-08-01** [GUI] Find/Replace fields do not auto-trim.
-- **2023-08-01** [GUI] Made auto-complete smarter. (Issue #136).
-- **2023-08-01** [GUI] Fixed auto-complete auto-activation not occurring (Issue #135).
-- **2024-08-01** Updated DoomStruct to `2.19.5`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.5-RELEASE)
-- **2023-07-31** Updated AutoComplete to `3.3.2`. [Changes here.](https://github.com/bobbylight/AutoComplete/releases/tag/3.3.2)
-- **2023-07-31** Updated RSyntaxTextArea to `3.6.0`. [Changes here.](https://github.com/bobbylight/RSyntaxTextArea/releases/tag/3.6.0)
+- **2025-08-02** [GUI] Fixed a bug in Rookscript-related script auto-complete auto-activation (WadScript, DoomMake).
 
-- **2024-07-30** Updated RookScript to `1.17.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.0-RELEASE)
+- **2025-08-01** [GUI] Find/Replace fields do not auto-trim.
+- **2025-08-01** [GUI] Made auto-complete smarter. (Issue #136).
+- **2025-08-01** [GUI] Fixed auto-complete auto-activation not occurring (Issue #135).
+- **2025-08-01** Updated DoomStruct to `2.19.5`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.5-RELEASE)
+- **2025-07-31** Updated AutoComplete to `3.3.2`. [Changes here.](https://github.com/bobbylight/AutoComplete/releases/tag/3.3.2)
+- **2025-07-31** Updated RSyntaxTextArea to `3.6.0`. [Changes here.](https://github.com/bobbylight/RSyntaxTextArea/releases/tag/3.6.0)
 
-- **2024-07-27** Updated RookScript to `1.16.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.1-RELEASE)
+- **2025-07-30** Updated RookScript to `1.17.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.0-RELEASE)
 
-- **2024-07-26** Updated RookScript to `1.16.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.0-RELEASE)
+- **2025-07-27** Updated RookScript to `1.16.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.1-RELEASE)
 
-- **2024-07-24** Updated DoomStruct to `2.19.3`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.3-RELEASE)
+- **2025-07-26** Updated RookScript to `1.16.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.16.0-RELEASE)
 
-- **2024-07-21** Fixed error code propagation for PowerShell users.
-- **2024-07-20** [GUI] Text Transformation shortcuts added to editors.
+- **2025-07-24** Updated DoomStruct to `2.19.3`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.19.3-RELEASE)
 
-- **2024-07-15** [GUI] You can now set the default folder for file path browsing, if other apps do not.
+- **2025-07-21** Fixed error code propagation for PowerShell users.
+- **2025-07-20** [GUI] Text Transformation shortcuts added to editors.
 
-- **2024-04-26** Updated JSON to `1.4.1`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.1-RELEASE)
-- **2024-04-25** Moved `DECOHack Constants.txt`to Docs.
-- **2024-04-25** Added `--update-docs` switch to DoomTools.
+- **2025-07-15** [GUI] You can now set the default folder for file path browsing, if other apps do not.
 
-- **2024-02-18** Updated DoomStruct to `2.18.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.18.0-RELEASE)
+- **2025-04-26** Updated JSON to `1.4.1`. [Changes here.](https://github.com/BlackRookSoftware/JSON/releases/tag/1.4.1-RELEASE)
+- **2025-04-25** Moved `DECOHack Constants.txt`to Docs.
+- **2025-04-25** Added `--update-docs` switch to DoomTools.
+
+- **2025-02-18** Updated DoomStruct to `2.18.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.18.0-RELEASE)
 
 - **2025-02-16** Updated RookScript to `1.15.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.15.1-RELEASE)
 

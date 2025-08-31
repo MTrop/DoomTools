@@ -2347,9 +2347,6 @@ public final class FormFactory
 		@SuppressWarnings("unchecked")
 		public boolean importData(TransferSupport support) 
 		{
-			if (!support.isDrop())
-				return false;
-			
 			Transferable transferable = support.getTransferable();
 			
 			if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
