@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.42.0
+
+* `Fixed` ID24 Weapons aliases were pointing to the wrong include. (Issue #141)
+
+
 ### Changed for 0.41.1
 
 * `Fixed` Local, "future-defined" labels were not taking precedence over global labels in `states` blocks. (Issue #140)

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * DECOHack Doom 1.9 Thing Aliases
+ * DECOHack ID24 Thing Aliases
  *****************************************************************************/
 
 #include "classpath:decohack/constants/mbf/things_aliases.dh"
