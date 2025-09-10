@@ -191,6 +191,17 @@ public final class DoomToolsLanguageManager
 	/**
 	 * Gets text using a text key.
 	 * @param key the language key.
+	 * @return the desired text, or a macro if it is not found. 
+	 */
+	public String getText(String key)
+	{
+		String out = languageMap.getProperty(key);
+		return String.format(out != null ? out : MISSING_TEXT);
+	}
+	
+	/**
+	 * Gets text using a text key.
+	 * @param key the language key.
 	 * @param args string formatter arguments. 
 	 * @return the desired text, or a macro if it is not found. 
 	 */
