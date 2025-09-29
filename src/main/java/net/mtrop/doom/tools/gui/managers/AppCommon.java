@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
+import net.mtrop.doom.tools.DoomFontConvertMain;
 import net.mtrop.doom.tools.DoomImageConvertMain;
 import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.DoomToolsMain;
@@ -279,6 +280,28 @@ public final class AppCommon
 		).start(tasks);
 	}
 	
+	/**
+	 * 
+	 * @param parent the parent container for the modal.
+	 * @param statusPanel the status panel.
+	 */
+	public void onExecuteDFONConv(Container parent, final DoomToolsStatusPanel statusPanel)
+	{
+		utils.createProcessModal(
+			parent, 
+			language.getText("dfonconv.status.message.title"),
+			null,
+			(stdout, stderr, stdin) -> execute(
+				statusPanel,
+				language.getText("dfonconv.status.message.running"), 
+				language.getText("dfonconv.status.message.success"), 
+				language.getText("dfonconv.status.message.interrupt"), 
+				language.getText("dfonconv.status.message.error"), 
+				callDFONConv(stdout, stderr)
+			)
+		).start(tasks);
+	}
+
 	/**
 	 * 
 	 * @param parent the parent container for the modal.
@@ -786,6 +809,27 @@ public final class AppCommon
 	}
 
 	/**
+	 * Calls DFONConv.
+	 * @param stdout
+	 * @param stderr
+	 * @return the future task
+	 */
+	public InstancedFuture<Integer> callDFONConv(PrintStream stdout, PrintStream stderr)
+	{
+		ProcessCallable callable = Common.spawnJava(DoomFontConvertMain.class);
+		
+		callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DFONConv STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DFONConv STDERR."))
+		;
+
+		LOG.infof("Calling DFONConv.");
+		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
+	}
+
+	/**
 	 * Calls DImgConv.
 	 * @param inputFile input file/dir for conversion.
 	 * @param outputFile the output file, directory, or WAD.
@@ -841,7 +885,7 @@ public final class AppCommon
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DImgConv STDERR."))
 		;
 
-		LOG.infof("Calling DMXConv.");
+		LOG.infof("Calling DImgConv.");
 		return InstancedFuture.instance(callable).spawn(DEFAULT_THREADFACTORY);
 	}
 

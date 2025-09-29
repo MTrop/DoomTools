@@ -36,6 +36,7 @@ import net.mtrop.doom.tools.gui.DoomToolsApplicationStarter;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsWorkspace;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.ApplicationNames;
+import net.mtrop.doom.tools.gui.apps.DFontConvertApp;
 import net.mtrop.doom.tools.gui.apps.DImageConvertApp;
 import net.mtrop.doom.tools.gui.apps.DImageConvertOffsetterApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
@@ -301,6 +302,7 @@ public class DoomToolsMainWindow extends JFrame
 			utils.createMenuFromLanguageKey("doomtools.menu.tools",
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dmxconv", (i) -> addApplication(new DMXConvertApp())),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dfonconv", (i) -> addApplication(new DFontConvertApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv", (i) -> addApplication(new DImageConvertApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.converters.item.dimgconv.offsetter", (i) -> openDImageConvertOffsetter())
 				),
