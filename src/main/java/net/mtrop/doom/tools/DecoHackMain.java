@@ -554,6 +554,28 @@ public final class DecoHackMain
 				}
 			}			
 
+			// pointer sanity check
+			if (context.getSupportedFeatureLevel() == DEHFeatureLevel.DOOM19)
+			{
+				for (int s = 0; s < context.getStateCount(); s++)
+				{
+					Integer pointerIndex = context.getSourcePatch().getStateActionPointerIndex(s);
+					Integer patchPointerIndex = context.getStateActionPointerIndex(s);
+					if (pointerIndex == null && patchPointerIndex != null)
+					{
+						options.stderr.println("INTERNAL ERROR: Pointer was added to a state with no pointer!");
+						options.stderr.println("Patch pointer index: " + patchPointerIndex);
+						return ERROR_PARSEERROR;
+					}
+					if (pointerIndex != null && patchPointerIndex == null)
+					{
+						options.stderr.println("INTERNAL ERROR: NULL was added to a state with a pointer!");
+						options.stderr.println("Source pointer index: " + pointerIndex);
+						return ERROR_PARSEERROR;
+					}
+				}
+			}
+			
 			// warn export if [Ultimate] Doom 1.9 and last state is replaced.
 			if (context.getSupportedFeatureLevel() == DEHFeatureLevel.DOOM19
 				&& ! (context.getState(context.getStateCount() - 1).equals(context.getSourcePatch().getState(context.getStateCount() - 1))
