@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.42.1
 
 * `Fixed` New ID24 Weapons did not use `-1` as the default ammo type enumerant.
+* `Added` Some sanity checks to Doom19 patch exports to ensure action pointers are added to the correct states.
 
 
 ### Changed for 0.42.0
