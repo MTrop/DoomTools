@@ -134,7 +134,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	@Override
 	public DEHWeapon clearProperties()
 	{
-		setAmmoType(0);
+		setAmmoType(-1);
 		setAmmoPerShot(DEFAULT_AMMO_PER_SHOT);
 		
 		setSlot(DEFAULT_SLOT);
