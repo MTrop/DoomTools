@@ -890,6 +890,8 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		DEHAmmo ammo = context.getAmmo(slot);
 
+		context.setFreeAmmo(slot, false);
+		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.AMMO);
@@ -3515,6 +3517,7 @@ public final class DecoHackParser extends Lexer.Parser
 			weapon.setName(matchString());
 		}
 		
+		context.setFreeWeapon(slot, false);
 		return parseWeaponBody(context, weapon);
 	}
 
