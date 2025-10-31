@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.42.0 by Matt Tropiano (using DoomStruct v2.19.5)
+DECOHack v0.42.1 by Matt Tropiano (using DoomStruct v2.19.5)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -275,7 +275,7 @@ You&#39;ll see them in a bunch of places in this documentation.
 To set the output format (and available features):
 
     using ( doom19 | udoom19 | doomunity | boom | 
-            mbf | extended | mbf21 | dsdhacked )
+            mbf | extended | mbf21 | dsdhacked | id24 )
 
 
 Examples:
@@ -2348,6 +2348,14 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.42.1
+
+* &#x60;Fixed&#x60; New ID24 Weapons did not use &#x60;-1&#x60; as the default ammo type enumerant.
+* &#x60;Fixed&#x60; Weapons defined using &#x60;auto weapon&#x60; (or regular define) did not un-free the Weapon on define.
+* &#x60;Fixed&#x60; Ammo defined using &#x60;auto ammo&#x60; (or regular define) did not un-free the Ammo object on define.
+* &#x60;Added&#x60; Some sanity checks to Doom19 patch exports to ensure action pointers are added to the correct states.
+
+
 ### Changed for 0.42.0
 
 * &#x60;Fixed&#x60; ID24 Weapons aliases were pointing to the wrong include. (Issue #141)
