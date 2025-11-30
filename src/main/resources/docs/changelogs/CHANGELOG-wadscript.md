@@ -4,6 +4,7 @@ WadScript
 ### Changed for 1.9.1
 
 * `Fixed` Function `PK3ENTRIES(...)` would return `null` if entries were found.
+* `Fixed` Function `WADDATA(...)`'s startFromSearch would not work if it were a string.
 
 
 ### Changed for 1.9.0

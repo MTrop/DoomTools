@@ -725,10 +725,10 @@ public enum WadFunctions implements ScriptFunctionType
 		{
 			ScriptValue temp = CACHEVALUE1.get();
 			ScriptValue entry = CACHEVALUE2.get();
+			ScriptValue start = CACHEVALUE3.get();
 			try
 			{
-				scriptInstance.popStackValue(temp);
-				int startFromSearch = temp.isNull() ? 0 : temp.asInt();
+				scriptInstance.popStackValue(start);
 				scriptInstance.popStackValue(entry);
 				scriptInstance.popStackValue(temp);
 				if (!temp.isObjectRef(Wad.class))
@@ -768,17 +768,38 @@ public enum WadFunctions implements ScriptFunctionType
 				else if (entry.isString())
 				{
 					String entryName = entry.asString();
-					WadEntry we = wad.getEntry(entryName, startFromSearch);
-					if (we != null)
+					
+					if (start.isString())
 					{
-						setWADData(returnValue, wad, we);
-						return true;
+						String startFromSearch = start.asString();
+						WadEntry we = wad.getEntry(entryName, startFromSearch);
+						if (we != null)
+						{
+							setWADData(returnValue, wad, we);
+							return true;
+						}
+						else
+						{
+							returnValue.setNull();
+							return true;
+						}
 					}
 					else
 					{
-						returnValue.setNull();
-						return true;
+						int startFromSearch = start.asInt();
+						WadEntry we = wad.getEntry(entryName, startFromSearch);
+						if (we != null)
+						{
+							setWADData(returnValue, wad, we);
+							return true;
+						}
+						else
+						{
+							returnValue.setNull();
+							return true;
+						}
 					}
+					
 				}
 				else if (entry.isMap())
 				{
