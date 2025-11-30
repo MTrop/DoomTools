@@ -155,11 +155,11 @@ public enum PK3Functions implements ScriptFunctionType
 					return true;
 				}
 
+				returnValue.setEmptyList();
 				DoomPK3 pk3 = temp.asObjectType(DoomPK3.class);
 				List<String> entries = pk3.getEntriesStartingWith(prefix);
 				if (entries.isEmpty())
 				{
-					returnValue.setEmptyList();
 					return true;
 				}
 				else
