@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
+import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext.ObjectPair;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
@@ -1676,12 +1677,12 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
-		if (!currentType(DecoHackKernel.TYPE_STRING))
+		String dehackedLabel;
+		if ((dehackedLabel = matchString()) == null)
 		{
 			addErrorMessage("Expected DeHackEd label name after type.");
 			return false;
 		}
-		String dehackedLabel = matchString();
 		
 		String propertyTypeName;
 		if ((propertyTypeName = matchIdentifier()) == null)
@@ -1697,10 +1698,60 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 
+		if (paramType == DEHValueType.FLAGS)
+		{
+			if (currentType(DecoHackKernel.TYPE_LBRACE))
+			{
+				if (objectClass == DEHThing.class || objectClass == DEHWeapon.class)
+				{
+					matchType(DecoHackKernel.TYPE_LBRACE);
+					if (!parseCustomPropertyFlags(context, objectClass, keyword))
+						return false;
+				}
+				else
+				{
+					addErrorMessage("Flag mnemonic delcaration is only available for Thing and Weapon types.");
+					return false;
+				}
+			}
+		}
+		
 		context.addCustomProperty(objectClass, new DEHProperty(keyword, dehackedLabel, paramType));
 		return true;
 	}
 	
+	// Parses the custom bitflag property body.
+	private boolean parseCustomPropertyFlags(AbstractPatchContext<?> context, Class<?> objectClass, String propertyName)
+	{
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			String mnemonic = matchIdentifier();
+
+			if (!currentType(DecoHackKernel.TYPE_NUMBER))
+			{
+				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
+				return false;
+			}
+
+			Integer value = matchPositiveInteger();
+			if (value == null)
+			{
+				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
+				return false;
+			}
+			
+			context.addCustomBitflag(objectClass, mnemonic, propertyName, value);
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' to complete bitflag body.");
+			return false;
+		}
+		
+		return true;
+	}
+
 	// Parses a custom pointer clause.
 	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
 	{
@@ -2420,6 +2471,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
+		String mnemonic;
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
@@ -2476,9 +2528,37 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					thing.addFlag(value);
 				}
+				else if ((mnemonic = matchIdentifier()) != null)
+				{
+					ObjectPair<String, Integer> keyValue;
+					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					{
+						addErrorMessage("Flag mnemonic \"%s\" for Things has not been defined.", mnemonic);
+						return false;
+					}
+					
+					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+					String stringValue = thing.getCustomPropertyValue(property);
+					
+					if (stringValue == null)
+					{
+						value = 0;
+					}
+					else
+					{
+						try {
+							value = Integer.parseInt(stringValue);
+						} catch (NumberFormatException e) {
+							addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
+							return false;
+						}
+					}
+					value = value | keyValue.getValue();
+					thing.setCustomPropertyValue(property, String.valueOf(value));
+				}
 				else
 				{
-					addErrorMessage("Expected integer after \"+\".");
+					addErrorMessage("Expected integer or valid flag mnemonic after \"+\".");
 					return false;
 				}
 			}
@@ -2524,9 +2604,37 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					thing.removeFlag(value);
 				}
+				else if ((mnemonic = matchIdentifier()) != null)
+				{
+					ObjectPair<String, Integer> keyValue;
+					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					{
+						addErrorMessage("Flag mnemonic \"%s\" for Things has not been defined.", mnemonic);
+						return false;
+					}
+					
+					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+					String stringValue = thing.getCustomPropertyValue(property);
+					
+					if (stringValue == null)
+					{
+						value = 0;
+					}
+					else
+					{
+						try {
+							value = Integer.parseInt(stringValue);
+						} catch (NumberFormatException e) {
+							addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
+							return false;
+						}
+					}
+					value = value & ~keyValue.getValue();
+					thing.setCustomPropertyValue(property, String.valueOf(value));
+				}
 				else
 				{
-					addErrorMessage("Expected integer after \"-\".");
+					addErrorMessage("Expected integer or valid flag mnemonic after \"-\".");
 					return false;
 				}
 			}
@@ -3551,13 +3659,49 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 
+				String mnemonic;
 				Integer flags;
-				if ((flags = matchWeaponMBF21FlagMnemonic(context)) == null && (flags = matchPositiveInteger()) == null)
+				if ((flags = matchWeaponMBF21FlagMnemonic(context)) != null)
 				{
-					addErrorMessage("Expected integer after \"+\".");
+					weapon.addMBF21Flag(flags);
+				}
+				else if ((flags = matchPositiveInteger()) != null)
+				{
+					weapon.addMBF21Flag(flags);
+				}
+				else if ((mnemonic = matchIdentifier()) != null)
+				{
+					ObjectPair<String, Integer> keyValue;
+					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					{
+						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
+						return false;
+					}
+					
+					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+					String stringValue = weapon.getCustomPropertyValue(property);
+					
+					if (stringValue == null)
+					{
+						flags = 0;
+					}
+					else
+					{
+						try {
+							flags = Integer.parseInt(stringValue);
+						} catch (NumberFormatException e) {
+							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
+							return false;
+						}
+					}
+					flags = flags | keyValue.getValue();
+					weapon.setCustomPropertyValue(property, String.valueOf(flags));
+				}
+				else
+				{
+					addErrorMessage("Expected integer or valid flag mnemonic after \"+\".");
 					return false;
 				}
-				weapon.addMBF21Flag(flags);
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
@@ -3567,13 +3711,49 @@ public final class DecoHackParser extends Lexer.Parser
 					return false;
 				}
 
+				String mnemonic;
 				Integer flags;
-				if ((flags = matchWeaponMBF21FlagMnemonic(context)) == null && (flags = matchPositiveInteger()) == null)
+				if ((flags = matchWeaponMBF21FlagMnemonic(context)) != null)
 				{
-					addErrorMessage("Expected integer after \"-\".");
+					weapon.removeMBF21Flag(flags);
+				}
+				else if ((flags = matchPositiveInteger()) != null)
+				{
+					weapon.removeMBF21Flag(flags);
+				}
+				else if ((mnemonic = matchIdentifier()) != null)
+				{
+					ObjectPair<String, Integer> keyValue;
+					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					{
+						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
+						return false;
+					}
+					
+					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+					String stringValue = weapon.getCustomPropertyValue(property);
+					
+					if (stringValue == null)
+					{
+						flags = 0;
+					}
+					else
+					{
+						try {
+							flags = Integer.parseInt(stringValue);
+						} catch (NumberFormatException e) {
+							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
+							return false;
+						}
+					}
+					flags = flags & ~keyValue.getValue();
+					weapon.setCustomPropertyValue(property, String.valueOf(flags));
+				}
+				else
+				{
+					addErrorMessage("Expected integer or valid flag mnemonic after \"+\".");
 					return false;
 				}
-				weapon.removeMBF21Flag(flags);
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.STATE))
 			{

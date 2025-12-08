@@ -315,6 +315,12 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
+	public String getCustomPropertyValue(DEHProperty property)
+	{
+		return customProperties.get(property);
+	}
+
+	@Override
 	public void clearCustomPropertyValues()
 	{
 		customProperties.clear();

@@ -138,6 +138,12 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
+	public String getCustomPropertyValue(DEHProperty property)
+	{
+		return customProperties.get(property);
+	}
+
+	@Override
 	public void clearCustomPropertyValues()
 	{
 		customProperties.clear();

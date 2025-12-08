@@ -1699,6 +1699,30 @@ For example, Doom Retro's "gib health" property for Things can be defined as:
     custom thing property gibhealth "Gib health" int
 
 
+Also, if you add a property that has a "flags" type, you can then define those 
+flags for use with a thing or weapon by adding those flag mnemonics in braces 
+after the definition like so:
+
+    custom thing property ExtendedBits "Extended bits" flags
+    {
+        NEWFLAG1 0x01
+        NEWFLAG2 0x02
+        NEWFLAG3 0x04
+    }
+
+...and then you can add them via a definition like so:
+
+    auto thing NewThing
+    {
+        +NEWFLAG1
+        -NEWFLAG2
+        +NEWFLAG3
+    }
+
+...and so forth, and they will be added (or'ed, rather) together for the 
+corresponding property.  
+
+
 ==============================================================================
 ===== Par Times
 ==============================================================================

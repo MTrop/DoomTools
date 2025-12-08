@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.43.0
+
+* `Added` The ability to add specific flag mnemonics for use with thing/weapon properties.
+
+
 ### Changed for 0.42.1
 
 * `Fixed` New ID24 Weapons did not use `-1` as the default ammo type enumerant.

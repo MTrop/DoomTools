@@ -69,7 +69,8 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
-
+	protected Map<Class<?>, Map<String, ObjectPair<String, Integer>>> customBitflagMap;
+	
 	/**
 	 * Shadows a DEH object from the source patch to the editable object,
 	 * or returning it if it has already been shadowed.
@@ -151,6 +152,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.customPropertyMap = new HashMap<>();
+		this.customBitflagMap = new HashMap<>();
 		
 		// Protect first two states from clear.
 		setProtectedState(0, true); // NULL state. 
@@ -324,6 +326,36 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		return Collections.unmodifiableCollection(propMap.values());
 	}
 
+	/**
+	 * Adds a custom bit flag to this context.
+	 * @param objectClass the object class.
+	 * @param mnemonic the bitflag mnemonic.
+	 * @param propertyName the associated property name.
+	 * @param value the integer value.
+	 */
+	public void addCustomBitflag(Class<?> objectClass, String mnemonic, String propertyName, int value)
+	{
+		Map<String, ObjectPair<String, Integer>> mnemonicMap;
+		if ((mnemonicMap = customBitflagMap.get(objectClass)) == null)
+			customBitflagMap.put(objectClass, mnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		mnemonicMap.put(mnemonic, new ObjectPair<String, Integer>(propertyName, value));
+	}
+	
+	/**
+	 * Gets a property name and flag mnemonic value from an object class type and mnemonic name.
+	 * @param objectClass the object class.
+	 * @param mnemonic the flag mnemonic.
+	 * @return the resultant property name and value, or null if no flag.
+	 */
+	public ObjectPair<String, Integer> getCustomFlag(Class<?> objectClass, String mnemonic)
+	{
+		Map<String, ObjectPair<String, Integer>> mnemonicMap;
+		if ((mnemonicMap = customBitflagMap.get(objectClass)) == null)
+			return null;
+		ObjectPair<String, Integer> out = mnemonicMap.get(mnemonic);
+		return out;
+	}
+	
 	@Override
 	public Integer getStateActionPointerIndex(int stateIndex) 
 	{
@@ -1130,6 +1162,44 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 				return null;
 		}
 		return i;
+	}
+	
+	/**
+	 * Object pair type.
+	 * @param <K> the key type.
+	 * @param <V> the value type.
+	 */
+	public static class ObjectPair<K, V> implements Map.Entry<K, V>
+	{
+		private K key;
+		private V value;
+		
+		public ObjectPair(K key, V value)
+		{
+			this.key = key;
+			this.value = value;
+		}
+		
+		@Override
+		public K getKey() 
+		{
+			return key;
+		}
+
+		@Override
+		public V getValue() 
+		{
+			return value;
+		}
+
+		@Override
+		public V setValue(V value) 
+		{
+			V prev = this.value;
+			this.value = value; 
+			return prev;
+		}
+		
 	}
 	
 }

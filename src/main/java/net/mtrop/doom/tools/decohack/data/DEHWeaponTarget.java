@@ -186,6 +186,8 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 
 	void setCustomPropertyValue(DEHProperty property, String value);
 
+	String getCustomPropertyValue(DEHProperty property);
+
 	void clearCustomPropertyValues();
 	
 }

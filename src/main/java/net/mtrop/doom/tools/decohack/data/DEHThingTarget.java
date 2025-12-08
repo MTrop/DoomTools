@@ -92,6 +92,8 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	
 	void setCustomPropertyValue(DEHProperty property, String value);
 
+	String getCustomPropertyValue(DEHProperty property);
+
 	void clearCustomPropertyValues();
 	
 	SELF setHealth(int health);

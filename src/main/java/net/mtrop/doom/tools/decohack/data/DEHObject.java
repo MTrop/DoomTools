@@ -41,6 +41,11 @@ public abstract class DEHObject<SELF>
 		customProperties.put(property, value);
 	}
 
+	public String getCustomPropertyValue(DEHProperty property) 
+	{
+		return customProperties.get(property);
+	}
+	
 	/**
 	 * Clears the custom properties.
 	 */
