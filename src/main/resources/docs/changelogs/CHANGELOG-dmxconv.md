@@ -1,6 +1,11 @@
 DMXConv
 -------
 
+### Changed for 1.2.1
+
+* `Fixed` Files for conversion were counted improperly (would not cause DMXConv to error out).
+
+
 ### Changed for 1.2.0
 
 * `Added` Support for directories and recursion. (Enhancement #101)
