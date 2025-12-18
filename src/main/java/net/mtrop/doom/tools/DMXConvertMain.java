@@ -235,11 +235,14 @@ public final class DMXConvertMain
 			
 			for (File f : options.sourceFiles)
 			{
-				filesFound.incrementAndGet();
 				if (f.isDirectory())
 					convertedCount += convertDirectory(f, f, searchSPI, searchFFmpeg, filesFound, options.recursive);
-				else if (convertFile(f.getParentFile(), f, searchSPI, searchFFmpeg))
-					convertedCount++;
+				else 
+				{
+					filesFound.incrementAndGet();
+					if (convertFile(f.getParentFile(), f, searchSPI, searchFFmpeg))
+						convertedCount++;
+				}
 			}
 
 			options.stdout.printf("%d of %d file(s) converted.\n", convertedCount, filesFound.get());
