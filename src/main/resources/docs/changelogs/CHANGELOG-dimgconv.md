@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.5.2
+
+* `Fixed` DIMGConv would not error out completely if a bad file was encountered.
+
+
 ### Changed for 1.5.1
 
 * `Added` [GUI] A status bar and an auto-save switch.

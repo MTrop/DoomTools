@@ -460,10 +460,14 @@ public final class DoomImageConvertMain
 				{
 					try
 					{
+						int err;
 						final File dest = outputDir;
-						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
+						if ((err = processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
 							(input, pal, info, path) -> readFile(input, pal, info, new File(dest.getPath() + FileUtils.getFileNameWithoutExtension(path) + ".lmp"))
-						);
+						)) != ERROR_NONE)
+						{
+							return err;
+						}
 					}
 					catch (IOException e)
 					{
@@ -485,9 +489,13 @@ public final class DoomImageConvertMain
 				{
 					try (final WadFile.Adder adder = outputWad.createAdder())
 					{
-						processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
+						int err;
+						if ((err = processDir(options.sourcePath, options.sourcePath, options.recursive, palette, options.metaInfoFallback, 
 							(input, pal, info, path)->readFile(input, pal, info, adder)
-						);
+						)) != ERROR_NONE)
+						{
+							return err;
+						}
 					}
 					catch (IOException e)
 					{
@@ -556,7 +564,9 @@ public final class DoomImageConvertMain
 				{
 					try (final WadFile.Adder adder = outputWad.createAdder())
 					{
-						readFile(options.sourcePath, palette, options.metaInfoFallback, adder);
+						int err;
+						if ((err = readFile(options.sourcePath, palette, options.metaInfoFallback, adder)) != ERROR_NONE)
+							return err;
 					}
 					catch (IOException e)
 					{
