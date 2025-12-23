@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.gui;
 
 import java.awt.BorderLayout;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
@@ -268,6 +269,9 @@ public final class DoomToolsGUIMain
 	 */
 	public static void setLAF() 
 	{
+		// Fool OS into properly setting DPI constraints
+		System.setProperty("sun.java2d.dpiaware", "false");
+		
 		if (OSUtils.isOSX())
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		GUIThemeType theme = GUIThemeType.MAP.get(DoomToolsSettingsManager.get().getThemeName());
@@ -283,6 +287,12 @@ public final class DoomToolsGUIMain
 	 */
 	public static void main(String[] args) 
 	{
+		if (GraphicsEnvironment.isHeadless())
+		{
+			System.err.println("ERROR: Can't initialize GUI. Environment is headless!");
+			System.exit(1);
+		}
+		
 		setLAF();
 		setExceptionHandler();
 		

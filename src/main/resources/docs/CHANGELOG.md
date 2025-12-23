@@ -7,6 +7,9 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2025-12-22** Refined shell scripts for DoomTools.
+- **2025-12-22** [GUI] Added detecting for whether or not a Java Environment is headless.
+
 - **2025-12-07** Updated RookScript to `1.17.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.1-RELEASE)
 
 - **2025-08-31** File path input fields accept data from clipboard as well as drag-and-drop.

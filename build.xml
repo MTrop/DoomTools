@@ -408,7 +408,6 @@
 				<available file="${embedded.jre.source.dir}" />
 			</and>
 		</condition>
-		<echoproperties />
 	</target>
 	
 	<target name="dist.installer.compile" if="dist.installer.is.available">

@@ -28,13 +28,13 @@ where %JAVAEXENAME% > nul 2>&1
 if %ERRORLEVEL% == 0 SET JAVAEXE=%JAVAEXENAME%
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JAVA_HOME%=="" SET JAVAEXE=%JAVA_HOME%\bin\%JAVAEXENAME%.exe
+if not "%JAVA_HOME%"=="" SET JAVAEXE=%JAVA_HOME%\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JDK_HOME%=="" SET JAVAEXE=%JDK_HOME%\bin\%JAVAEXENAME%.exe
+if not "%JDK_HOME%"=="" SET JAVAEXE=%JDK_HOME%\bin\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JRE_HOME%=="" SET JAVAEXE=%JRE_HOME%\%JAVAEXENAME%.exe
+if not "%JRE_HOME%"=="" SET JAVAEXE=%JRE_HOME%\%JAVAEXENAME%.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
 REM ===== No Java.
