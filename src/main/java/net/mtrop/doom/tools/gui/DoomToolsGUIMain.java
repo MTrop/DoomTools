@@ -126,7 +126,10 @@ public final class DoomToolsGUIMain
 		LIGHT("com.formdev.flatlaf.FlatLightLaf"),
 		DARK("com.formdev.flatlaf.FlatDarkLaf"),
 		INTELLIJ("com.formdev.flatlaf.FlatIntelliJLaf"),
-		DARCULA("com.formdev.flatlaf.FlatDarculaLaf");
+		DARCULA("com.formdev.flatlaf.FlatDarculaLaf"),
+		MACOSLIGHT("com.formdev.flatlaf.themes.FlatMacLightLaf"),
+		MACOSDARK("com.formdev.flatlaf.themes.FlatMacDarkLaf"),
+		;
 		
 		public static final Map<String, GUIThemeType> MAP = EnumUtils.createCaseInsensitiveNameMap(GUIThemeType.class);
 		

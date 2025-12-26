@@ -41,7 +41,7 @@
 	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
 	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
 
-	<property name="flatlaf.lib.version" value="2.0.2" />
+	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
 	<property name="rsyntaxtextarea.lib.version" value="3.6.0" />
@@ -124,6 +124,24 @@
 	<property name="installer.dist.name" value="${project.archive}-setup-${build.version.number}" />
 	<property name="installer.jre.dist.name" value="${project.archive}-setup-jre-${build.version.number}" />
 
+	<!-- Filesets -->
+
+	<patternset id="pattern.jar.lib.contents">
+		<include name="**/*.class" />
+		<include name="**/*.properties" />
+		<include name="**/*.xml" />
+		<include name="**/*.dtd" />
+		<include name="**/*.dll" />
+		<include name="**/*.dynlib" />
+		<include name="**/*.so" />
+		<include name="**/*.png" />
+		<include name="**/*.jpg" />
+		<include name="**/*.gif" />
+		<exclude name="module-info.class" />
+	</patternset>
+	
+	<!-- Targets -->
+
 	<target name="clean.dist" description="Cleans up the distributables folder.">
 		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
 	</target>
@@ -200,6 +218,7 @@
 					<include name="**/*.so" />
 					<include name="**/*.png" />
 					<include name="**/*.jpg" />
+					<include name="**/*.gif" />
 					<exclude name="module-info.class" />
 				</zipfileset>
 			</jar>
@@ -207,17 +226,35 @@
 	</macrodef>
 	
 	<target name="jar.one" depends="init.jar, compile, init.versions">
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${json.jar}" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${doom.jar}"               update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rookscript.jar}"         update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rookscript.desktop.jar}" update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${rsyntaxtextarea.jar}"    update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${autocomplete.jar}"       update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${commonmark.jar}"         update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${flatlaf.jar}"            update="true" />
-		<jar-lib destfile="${jar.dir}/${jar.filename}" jar="${dependencies.dir}/${jsoup.jar}"              update="true" />
-		<jar destfile="${jar.dir}/${jar.filename}" basedir="${bin.dir}" update="true" />
-		<jar destfile="${jar.dir}/${jar.filename}" update="true">
+		<jar destfile="${jar.dir}/${jar.filename}">
+			<zipfileset src="${dependencies.dir}/${json.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${doom.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${rookscript.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${rookscript.desktop.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${rsyntaxtextarea.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${autocomplete.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${commonmark.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${flatlaf.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${jsoup.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
+			<zipfileset dir="${bin.dir}"/>
 			<zipfileset dir="${build.dir}/versions" prefix="net/mtrop/doom/tools/" />
 		</jar>
 	</target>

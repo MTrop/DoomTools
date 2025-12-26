@@ -76,7 +76,9 @@ public class DoomToolsSettingsPanel extends JPanel
 			GUIThemeType.LIGHT.name(),
 			GUIThemeType.DARK.name(),
 			GUIThemeType.INTELLIJ.name(),
-			GUIThemeType.DARCULA.name()
+			GUIThemeType.DARCULA.name(),
+			GUIThemeType.MACOSLIGHT.name(),
+			GUIThemeType.MACOSDARK.name()
 		);
 		
 		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (i) -> settings.setThemeName((String)i)));

@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2025-12-26** [GUI] Added extra themes.
+- **2025-12-26** Updated Flatlaf to `3.7`.
 - **2025-12-22** Refined shell scripts for DoomTools.
 - **2025-12-22** [GUI] Added detecting for whether or not a Java Environment is headless.
 
