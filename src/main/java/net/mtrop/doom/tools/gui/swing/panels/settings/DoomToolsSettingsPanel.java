@@ -91,8 +91,8 @@ public class DoomToolsSettingsPanel extends JPanel
 			(current) -> {
 				return utils.chooseDirectory(
 					this,
-					language.getText("wadtex.export.source.browse.title"), 
-					language.getText("wadtex.export.source.browse.accept"),
+					language.getText("doomtools.settings.dir.modal.title"), 
+					language.getText("doomtools.settings.dir.modal.choice"),
 					() -> current != null ? current : settings.getLastFileSave(),
 					settings::setLastFileSave
 				);
