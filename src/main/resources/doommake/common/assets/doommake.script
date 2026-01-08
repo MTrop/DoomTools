@@ -40,13 +40,15 @@ check function doAssets() {
 
 	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
 	verifydirs(sourceDir + "/_global");
+	verifydirs(sourceDir + "/palettes");
 	verifydirs(sourceDir + "/colormaps");
+	verifydirs(sourceDir + "/colormaps-secondary");
 	verifydirs(sourceDir + "/graphics");
 	verifydirs(sourceDir + "/music");
 	verifydirs(sourceDir + "/sounds");
 	verifydirs(sourceDir + "/sprites");
 		
-	if (checkFileExistenceAndBuildStatuses(outWad, ["convert-sound", "convert-graphics", "convert-sprites", "convert-colormaps"])) {
+	if (checkFileExistenceAndBuildStatuses(outWad, ["convert-sound", "convert-graphics", "convert-sprites", "convert-palettes", "convert-colormaps", "convert-colormaps-secondary"])) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Assets directory (" + sourceDir + ") up to date.");

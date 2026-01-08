@@ -3,6 +3,34 @@
 #define SRC_DIR_CONVERT    "/convert" 
 
 /**
+ * Converts palette assets in the conversion directories.
+ * Puts them in the build conversion folder.
+ */
+check function doConvertPalettes() {
+	
+	initBuild();
+	
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/palettes";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/palettes";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+			
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Palette conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting palettes...");
+	
+	convertimg(sourceDir, targetDir, "palettes");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-palettes");
+	println("Palettes converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
  * Converts sound assets in the conversion directories.
  * Puts them in the build conversion folder.
  */
@@ -87,15 +115,39 @@ check function doConvertSprites() {
 }
 
 /**
- * Converts colormap assets in the conversion directories.
+ * Converts the primary colormap assets in the conversion directories.
  * Puts them in the build conversion folder.
  */
-check function doConvertColormaps() {
-	
-	initBuild();
+check function doConvertPrimaryColormaps() {
 
 	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/colormaps";
 	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/colormaps";
+	verifydirs(sourceDir);
+	verifydirs(targetDir);
+
+	hash = directoryHasChanged(sourceDir);
+	if (hash === null) {
+		println("[Skipped] Primary colormap conversion directory (" + sourceDir + ") up to date.");
+		return;
+	}
+
+	println("Converting primary colormaps...");
+	
+	convertimg(sourceDir, targetDir, "colormaps");
+
+	storeDirectoryChanged(sourceDir, hash);
+	setBuilt("convert-colormaps");
+	println("Primary Colormaps converted from `" + sourceDir + "` to `" + targetDir + "`.");
+}
+
+/**
+ * Converts the secondary colormap assets in the conversion directories.
+ * Puts them in the build conversion folder.
+ */
+check function doConvertSecondaryColormaps() {
+
+	sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/colormaps-secondary";
+	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/colormaps-secondary";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
 			
@@ -110,8 +162,94 @@ check function doConvertColormaps() {
 	convertimg(sourceDir, targetDir, "colormaps");
 
 	storeDirectoryChanged(sourceDir, hash);
-	setBuilt("convert-colormaps");
+	setBuilt("convert-colormaps-secondary");
 	println("Colormaps converted from `" + sourceDir + "` to `" + targetDir + "`.");
 }
 
 
+/**
+ * Converts colormap assets in the conversion directories.
+ * Puts them in the build conversion folder.
+ */
+check function doConvertColormaps() {
+	initBuild();
+	doConvertPrimaryColormaps();
+	doConvertSecondaryColormaps();
+}
+
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Creates primary palettes and colormaps from primary IWAD if they do not exist.
+ */
+function doRebuildPalettes() {
+	
+	initBuild();
+	
+	baseIwadPath = getIwad();
+	if (empty(baseIwadPath))
+		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	
+	println("Using IWAD: " + baseIwadPath);
+	
+	paletteEntries = [];
+	colormapEntries = [];
+	
+	check (err) {
+		iwad = wadfile(baseIwadPath);
+
+		// Palettes
+		iwad->wadEntryAddIfFound(
+			["PLAYPAL", "E2PAL"],
+			paletteEntries
+		);
+		
+		// Colormaps
+		iwad->wadEntryAddIfFound(
+			["COLORMAP", "TINTTAB",  "FOGMAP", 
+			 "TRANTBL0", "TRANTBL1", "TRANTBL2", "TRANTBL3", 
+			 "TRANTBL4", "TRANTBL5", "TRANTBL6", "TRANTBL7", 
+			 "TRANTBL8", "TRANTBL9", "TRANTBLA", "TRANTBLB", 
+			 "TRANTBLC", "TRANTBLD", "TRANTBLE", "TRANTBLF", 
+			 "TRANTBLG", "TRANTBLH", "TRANTBLI", "TRANTBLJ", 
+			 "TRANTBLK" 
+			],
+			colormapEntries
+		);
+		
+		sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/palettes";
+		verifyDirs(sourceDir);
+		palImage = null;
+		each (palEntry : paletteEntries) {
+			img = iwad->exportPaletteToImage(palEntry.name);
+			if (palEntry.name == "PLAYPAL")
+				palImage = img;
+			outFile = sourceDir + "/" + palEntry.name + ".png";
+			if (!fileexists(outFile)) {
+				img->imagewrite(outFile);
+				println("Wrote `" + outFile + "`.");
+			}
+			else {
+				println(outFile + " exists. Skipping rebuild.");
+			}
+		}
+		
+		sourceDir = getSourceDirectory() + SRC_DIR_CONVERT + "/colormaps";
+		verifyDirs(sourceDir);
+		each (colorEntry : colormapEntries) {
+			img = iwad->exportColormapToImage(colorEntry.name, palImage);
+			outFile = sourceDir + "/" + colorEntry.name + ".png";
+			if (!fileexists(outFile)) {
+				img->imagewrite(outFile);
+				println("Wrote `" + outFile + "`.");
+			}
+			else {
+				println(outFile + " exists. Skipping rebuild.");
+			}
+		}
+	}
+	close(iwad);
+	if (err) {
+		return err;
+	}
+}

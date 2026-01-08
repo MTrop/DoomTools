@@ -335,7 +335,9 @@ public class WADProjectGenerator extends ProjectGenerator
 		// A module that converts assets.
 		MODULES.put(MODULE_ASSETS_CONVERT, module(4)
 			.base(descriptor(
+				dir("src/convert/palettes"),
 				dir("src/convert/colormaps"),
+				dir("src/convert/colormaps-secondary"),
 				dir("src/convert/graphics"),
 				dir("src/convert/sounds"),
 				dir("src/convert/sprites"),
@@ -346,10 +348,11 @@ public class WADProjectGenerator extends ProjectGenerator
 			))
 			.releaseScript(descriptor(
 				fileContentAppend("doommake.script",
-					"\tdoConvertSounds();"
+					"\tdoConvertPalettes();"
+					,"\tdoConvertColormaps();"
 					,"\tdoConvertGraphics();"
 					,"\tdoConvertSprites();"
-					,"\tdoConvertColormaps();"
+					,"\tdoConvertSounds();"
 				)
 			))
 			.postRelease(descriptor(
@@ -358,9 +361,11 @@ public class WADProjectGenerator extends ProjectGenerator
 				)
 			))
 			.todos(
-				"Add BMP, GIF, or PNG files to `src/convert/graphics`."
+				"Add BMP, GIF, or PNG files to `src/convert/palettes`."
+				,"Add BMP, GIF, or PNG files to `src/convert/graphics`."
 				,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
 				,"Add BMP, GIF, or PNG files to `src/convert/colormaps`."
+				,"Add BMP, GIF, or PNG files to `src/convert/colormaps-secondary`."
 				,"Add WAV or AIFF files to `src/convert/sounds`."
 			)
 		);
@@ -371,6 +376,9 @@ public class WADProjectGenerator extends ProjectGenerator
 		MODULES.put(MODULE_ASSETS, module(5)
 			.base(descriptor(
 				dir("src/assets/_global"),
+				dir("src/assets/palettes"),
+				dir("src/assets/colormaps"),
+				dir("src/assets/colormaps-secondary"),
 				dir("src/assets/graphics"),
 				dir("src/assets/music"),
 				dir("src/assets/sounds"),

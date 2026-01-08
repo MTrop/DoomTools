@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.33.0
+
+* `Added` The `assets` module now adds directories for palettes and primary colormaps (and conversion) for new projects.
+
+
 ### Changed for 0.32.0
 
 * `Fixed` [GUI-Studio] Better handling of automatic repository refreshes and project watching.

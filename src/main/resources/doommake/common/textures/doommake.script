@@ -62,7 +62,7 @@ function exportTextureLump(iwadPath, textureFilePath) {
 
 
 /**
- * Creates texture listings if they do not exist.
+ * Creates texture listings from primary IWAD if they do not exist.
  */
 check function doRebuildTextures() {
 	
@@ -71,6 +71,8 @@ check function doRebuildTextures() {
 	baseIwadPath = getIwad();
 	if (empty(baseIwadPath))
 		return error("NoIWAD", "An IWAD for this project was not set in properties: " + PROP_IWADPATH);
+	
+	println("Using IWAD: " + baseIwadPath);
 	
 	check (err) {
 		iwad = wadfile(baseIwadPath);
@@ -81,8 +83,6 @@ check function doRebuildTextures() {
 	if (err) {
 		return err;
 	}
-	
-	println("Using IWAD: " + baseIwadPath);
 	
 	sourceDir = getSourceDirectory() + SRC_DIR_TEXTURES;
 	tex1filename = sourceDir + "/texture1.txt";

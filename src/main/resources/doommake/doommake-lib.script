@@ -410,8 +410,9 @@ check function exportColormapToImage(wad, lumpname, paletteImage) {
 check function getConvertPaletteSource() {
 
 	srcdir = getSourceDirectory();
+	builddir = getBuildDirectory();
 
-	palfile = searchdir(srcdir, "PLAYPAL", true);
+	palfile = searchdir(builddir + "/convert/palettes", "PLAYPAL", true) ?? searchdir(srcdir + "/assets/palettes", "PLAYPAL", true);
 	if (palfile !== null) {
 		println("Using palette found at `" + palfile + "`...");
 		return palfile;
@@ -563,6 +564,21 @@ function mergeWads(outputWadFile, wadList) {
 	println("Created WAD `" + outputWadFile->file()->filepath() + "`.");
 }
 
+/****************************************************************************
+ * Adds entries found in a list of entry names to an output list, if found.
+ *
+ * wad: the open WAD file to inspect.
+ * entryNameList: the names of entries to search for.
+ * outEntryList: the list to write the found entries to.
+ ****************************************************************************/
+function wadEntryAddIfFound(wad, entryNameList, outEntryList) {
+	each (name : entryNameList) {
+		e = wad->wadentry(name);
+		if (e !== null) {
+			outEntryList->listadd(e);
+		}
+	}
+}
 
 /****************************************************************************
  * Merges the asset WAD, the DeHackEd patches, and textures WAD into a WAD

@@ -15,6 +15,14 @@ create out
 # Globals
 mergedir  out $1/assets/_global nomarkers
 
+# Palettes
+mergedir  out $1/assets/palettes nomarkers
+mergedir  out $0/convert/palettes nomarkers
+
+# Primary Colormaps
+mergedir  out $1/assets/colormaps nomarkers
+mergedir  out $0/convert/colormaps nomarkers
+
 # Graphics
 mergedir  out $1/assets/graphics nomarkers
 mergedir  out $0/convert/graphics nomarkers
@@ -32,10 +40,10 @@ mergedir  out $1/assets/sprites nomarkers
 mergedir  out $0/convert/sprites nomarkers
 marker    out ss_end
 
-# Colormap
+# Secondary Colormaps
 marker    out c_start
-mergedir  out $1/assets/colormaps nomarkers
-mergedir  out $0/convert/colormaps nomarkers
+mergedir  out $1/assets/colormaps-secondary nomarkers
+mergedir  out $0/convert/colormaps-secondary nomarkers
 marker    out c_end
 
 finish out $0/$2

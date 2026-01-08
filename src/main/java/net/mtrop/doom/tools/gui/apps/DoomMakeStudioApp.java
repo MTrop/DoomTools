@@ -980,14 +980,25 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			return;
 		
 		String palettePath = projectProperties.getProperty("doommake.iwad");
+		String build = projectProperties.getProperty("doommake.dir.build");
+		if (ObjectUtils.isEmpty(build))
+			build = "build";
 		String source = projectProperties.getProperty("doommake.dir.src");
 		if (ObjectUtils.isEmpty(source))
 			source = "src";
 		
-		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source), "PLAYPAL", true, false);
+		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
 		if (paletteFile != null)
+		{
 			palettePath = paletteFile.getPath();
-		
+		}
+		else
+		{
+			paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
+			if (paletteFile != null)
+				palettePath = paletteFile.getPath();	
+		}
+
 		try {
 			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, selected.getCanonicalPath(), palettePath);
 		} catch (IOException e) {

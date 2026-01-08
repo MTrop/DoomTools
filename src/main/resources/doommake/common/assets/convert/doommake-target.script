@@ -5,10 +5,21 @@
  * doommake convert
  ****************************************************************************/
 check entry convert(args) {
+	doConvertPalettes();
+	doConvertColormaps();
 	doConvertSounds();
 	doConvertGraphics();
 	doConvertSprites();
-	doConvertColormaps();
 }
 
+/*****************************************************************************
+ * TARGET: rebuildpalettes
+ *****************************************************************************
+ * Creates a convert-able primary palettes and colormaps for graphic conversion 
+ * in the convert directories.
+ * doommake rebuildpalettes
+ ****************************************************************************/
+check entry rebuildpalettes(args) {
+	doRebuildPalettes();
+}
 
