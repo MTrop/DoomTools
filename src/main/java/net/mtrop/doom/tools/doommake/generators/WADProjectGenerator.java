@@ -502,6 +502,7 @@ public class WADProjectGenerator extends ProjectGenerator
 		// A module that builds vanilla texture WADs.
 		MODULES.put(MODULE_TEXTURES_VANILLA, module(11)
 			.base(descriptor(
+				dir("src/wads/textures"),
 				file("scripts/merge-textures.txt",
 					"doommake/common/textures/vanilla/wadmerge.txt")
 			))
@@ -512,6 +513,7 @@ public class WADProjectGenerator extends ProjectGenerator
 		// A module that builds Boom texture WADs.
 		MODULES.put(MODULE_TEXTURES_BOOM, module(11)
 			.base(descriptor(
+				dir("src/wads/textures"),
 				file("src/textures/defswani.txt",
 					"doommake/common/textures/boom/defswani.txt"),
 				file("scripts/merge-textures.txt",

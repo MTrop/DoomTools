@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.33.0
 
 * `Added` The `assets` module now adds directories for palettes and primary colormaps (and conversion) for new projects.
+* `Added` The textures modules will all add `src/wads/textures` directories to the project root for new projects.
 
 
 ### Changed for 0.32.0
