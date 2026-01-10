@@ -38,6 +38,10 @@ import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.JSONWriter;
 
+import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadFile;
+import net.mtrop.doom.exception.WadException;
+import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.tools.WadScriptMain.Mode;
 import net.mtrop.doom.tools.WadScriptMain.Resolver;
 import net.mtrop.doom.tools.common.Common;
@@ -46,6 +50,7 @@ import net.mtrop.doom.tools.doommake.ProjectGenerator;
 import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
+import net.mtrop.doom.tools.doommake.WADExploder;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
@@ -78,6 +83,7 @@ public final class DoomMakeMain
 	private static final int ERROR_IOERROR = 7;
 	private static final int ERROR_AGENT_RUNNING = 8;
 	private static final int ERROR_ALREADY_EMBEDDED = 9;
+	private static final int ERROR_BAD_WAD = 10;
 	private static final int ERROR_UNKNOWN = -1;
 
 	public static final String JSON_AGENT_LOCK_KEY = "agentIsRunning";
@@ -99,6 +105,10 @@ public final class DoomMakeMain
 	public static final String SWITCH_NEWPROJECT2 = "-n";
 	
 	public static final String SWITCH_NEWPROJECT_GUI = "--new-project-gui";
+
+	public static final String SWITCH_EXPLODE = "--explode";
+	public static final String SWITCH_CONVERT = "--convert";
+	public static final String SWITCH_CONVERTPALETTE = "--convert-palette";
 
 	public static final String SWITCH_EMBED = "--embed";
 	public static final String SWITCH_GUI = "--gui";
@@ -172,6 +182,11 @@ public final class DoomMakeMain
 		private boolean verboseAgent;
 
 		private boolean agentBypass;
+		
+		private File explodeWad;
+		private boolean explodeConvertible;
+		private File explodePalette;
+
 		private ProjectType projectType;
 		private List<String> templateNames;
 		
@@ -203,7 +218,12 @@ public final class DoomMakeMain
 			this.verboseAgent = false;
 			
 			this.agentBypass = false;
-			this.projectType = ProjectType.WAD;
+			
+			this.explodeWad = null;
+			this.explodeConvertible = false;
+			this.explodePalette = null;
+			
+			this.projectType = null;
 			this.templateNames = null;
 
 			this.mode = Mode.EXECUTE;
@@ -364,6 +384,78 @@ public final class DoomMakeMain
 			if (options.changelog)
 			{
 				changelog(options.stdout, "doommake");
+				return ERROR_NONE;
+			}
+			
+			if (options.explodeWad != null)
+			{
+				try (WadFile wadFile = new WadFile(options.explodeWad))
+				{
+					Palette convertPalette = null;
+					// find viable palette for conversions, if necessary.
+					if (options.explodeConvertible)
+					{
+						if (options.explodePalette != null)
+						{
+							if (Wad.isWAD(options.explodePalette))
+							{
+								try (WadFile palWad = new WadFile(options.explodePalette))
+								{
+									convertPalette = palWad.getDataAs("PLAYPAL", Palette.class);
+								}
+							}
+							else
+							{
+								convertPalette = new Palette();
+								convertPalette.readFile(options.explodePalette);
+							}
+						}
+						else if (wadFile.contains("PLAYPAL"))
+						{
+							convertPalette = wadFile.getDataAs("PLAYPAL", Palette.class);
+						}
+						
+						if (convertPalette == null)
+						{
+							options.stderr.println("ERROR: No viable palette set for converting graphics to project scaffolding.");
+							options.stderr.println("Must use `--convert-palette` to set for this project.");
+							return ERROR_BAD_PROJECT;
+						}
+					}
+					
+					ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
+					
+					ProjectGenerator generator = projectType.createGenerator();
+
+					try {
+						WADExploder.getTemplatesFromWAD(projectType, wadFile, options.templateNames);
+					} catch (WadException e) {
+						options.stderr.println("ERROR: " + e.getLocalizedMessage());
+						return ERROR_BAD_WAD;
+					} 
+					
+					int err;
+					if ((err = createProject(generator)) != ERROR_NONE)
+						return err;
+					
+					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+				}
+				catch (WadException e)
+				{
+					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" is not a WAD file.");
+					return ERROR_BAD_WAD;
+				} 
+				catch (IOException e)
+				{
+					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read.");
+					return ERROR_IOERROR;
+				} 
+				catch (SecurityException e)
+				{
+					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read (access denied).");
+					return ERROR_SECURITY;
+				}
+				
 				return ERROR_NONE;
 			}
 			
@@ -809,6 +901,8 @@ public final class DoomMakeMain
 		final int STATE_SWITCHES_RUNAWAY = 5;
 		final int STATE_MODULENAME = 6;
 		final int STATE_PROJECTTYPE = 7;
+		final int STATE_EXPLODEWAD = 8;
+		final int STATE_CONVERTPALETTE = 9;
 		int state = STATE_START;
 		
 		boolean target = false;
@@ -844,6 +938,16 @@ public final class DoomMakeMain
 						options.guiStudio = true;
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT_GUI))
 						options.guiNewProject = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CONVERT))
+						options.explodeConvertible = true;
+					else if (arg.equalsIgnoreCase(SWITCH_CONVERTPALETTE))
+					{
+						state = STATE_CONVERTPALETTE;
+					}
+					else if (arg.equalsIgnoreCase(SWITCH_EXPLODE))
+					{
+						state = STATE_EXPLODEWAD;
+					}
 					else if (arg.equalsIgnoreCase(SWITCH_PROJECTTYPE))
 					{
 						state = STATE_PROJECTTYPE;
@@ -854,6 +958,8 @@ public final class DoomMakeMain
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
 					{
+						if (options.projectType == null)
+							options.projectType = ProjectType.WAD;
 						options.templateNames = new LinkedList<>();
 						state = STATE_MODULENAME;
 					}
@@ -959,6 +1065,20 @@ public final class DoomMakeMain
 				}
 				break;
 				
+				case STATE_EXPLODEWAD:
+				{
+					options.explodeWad = new File(arg);
+					state = STATE_MODULENAME;
+				}
+				break;
+				
+				case STATE_CONVERTPALETTE:
+				{
+					options.explodePalette = new File(arg);
+					state = STATE_START;
+				}
+				break;
+				
 			}
 			i++;
 		}
@@ -975,6 +1095,10 @@ public final class DoomMakeMain
 			throw new OptionParseException("ERROR: Expected number after runaway limit switch.");
 		if (state == STATE_PROJECTTYPE)
 			throw new OptionParseException("ERROR: Expected project type name after project type switch.");
+		if (state == STATE_EXPLODEWAD)
+			throw new OptionParseException("ERROR: Expected WAD file path after explode switch.");
+		if (state == STATE_CONVERTPALETTE)
+			throw new OptionParseException("ERROR: Expected WAD file or file path after convert palette switch.");
 		
 		return options;
 	}
@@ -1219,6 +1343,23 @@ public final class DoomMakeMain
 		out.println("    --studio                       Opens this project in DoomMake Studio.");
 		out.println();
 		out.println("    --new-project-gui              Opens the \"New Project\" GUI.");
+		out.println();
+		out.println("-----------------------------------------------------------------------------");
+		out.println("[EXPERIMENTAL]!");
+		out.println();
+		out.println("    --explode [wad]                Creates a new project in the target folder");
+		out.println("                                       using [wad] as the originating file.");
+		out.println("                                       Everything after this is an additional");
+		out.println("                                       template name.");
+		out.println();
+		out.println("    --convert                      If specified, types found in the WAD are");
+		out.println("                                       turned into convertible types. Must be");
+		out.println("                                       specified before --explode.");
+		out.println();
+		out.println("    --convert-palette [file]       If --convert is specified, this must point");
+		out.println("                                       to a WAD or palette file for graphics");
+		out.println("                                       conversion if no palette is in the");
+		out.println("                                       source WAD.");
 		out.println();
 		out.println("-----------------------------------------------------------------------------");
 		out.println();

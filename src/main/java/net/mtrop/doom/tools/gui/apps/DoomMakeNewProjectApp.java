@@ -322,6 +322,14 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 
 		return ArrayUtils.arrayOf(
 			node(BorderLayout.NORTH, containerOf(panel, boxLayout(panel, BoxAxis.PAGE_AXIS),		
+				node(titlePanel(language.getText("doommake.newproject.wadgen.contain"), containerOf(
+					node(BorderLayout.CENTER, checkBox(language.getText("doommake.newproject.wadgen.contain.assets"), false, (v) -> {
+						if (v)
+							addTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
+						else
+							removeTemplateName(WADProjectGenerator.TEMPLATE_ASSETS);
+					}))
+				))),
 				node(titlePanel(language.getText("doommake.newproject.texwad.textures"), containerOf(
 					node(comboBox(comboBoxModel(textureOptions), (i) -> {
 						removeTemplateCategory(TextureProjectGenerator.CATEGORY_TEXTURES);

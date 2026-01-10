@@ -49,6 +49,7 @@ public class TextureProjectGenerator extends ProjectGenerator
 	public static final String TEMPLATE_BASE = "base";
 	public static final String TEMPLATE_GIT = "git";
 	public static final String TEMPLATE_MERCURIAL = "hg";
+	public static final String TEMPLATE_ASSETS = "assets";
 	public static final String TEMPLATE_TEXTURES = "textures";
 	public static final String TEMPLATE_TEXTURES_BOOM = "texturesboom";
 
@@ -56,6 +57,8 @@ public class TextureProjectGenerator extends ProjectGenerator
 	private static final String MODULE_MERCURIAL = "hg";
 	private static final String MODULE_INIT = "init";
 	private static final String MODULE_BASE = "bare";
+	private static final String MODULE_ASSETS = "assets";
+	private static final String MODULE_ASSETS_CONVERT = "assets-convert";
 	private static final String MODULE_TEXTURES = "textures";
 	private static final String MODULE_TEXTURES_VANILLA = "textures-vanilla";
 	private static final String MODULE_TEXTURES_BOOM = "textures-boom";
@@ -173,6 +176,93 @@ public class TextureProjectGenerator extends ProjectGenerator
 			.todos(
 				"Add resources to merge to the WadMerge script."
 				,"Add targets to the doommake.script script."
+			)
+		);
+
+		// ................................................................
+
+		// A module that converts assets.
+		MODULES.put(MODULE_ASSETS_CONVERT, module(4)
+			.base(descriptor(
+				dir("src/convert/palettes"),
+				dir("src/convert/colormaps"),
+				dir("src/convert/colormaps-secondary"),
+				dir("src/convert/graphics"),
+				dir("src/convert/sounds"),
+				dir("src/convert/sprites"),
+				fileAppend("doommake.script",
+					"doommake/common/assets/convert/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/assets/convert/README.md")
+			))
+			.releaseScript(descriptor(
+				fileContentAppend("doommake.script",
+					"\tdoConvertPalettes();"
+					,"\tdoConvertColormaps();"
+					,"\tdoConvertGraphics();"
+					,"\tdoConvertSprites();"
+					,"\tdoConvertSounds();"
+				)
+			))
+			.postRelease(descriptor(
+				fileAppend("doommake.script",
+					"doommake/common/assets/convert/doommake-target.script"
+				)
+			))
+			.todos(
+				"Add BMP, GIF, or PNG files to `src/convert/palettes`."
+				,"Add BMP, GIF, or PNG files to `src/convert/graphics`."
+				,"Add BMP, GIF, or PNG files to `src/convert/sprites`."
+				,"Add BMP, GIF, or PNG files to `src/convert/colormaps`."
+				,"Add BMP, GIF, or PNG files to `src/convert/colormaps-secondary`."
+				,"Add WAV or AIFF files to `src/convert/sounds`."
+			)
+		);
+
+		// ................................................................
+
+		// A module that builds non-texture assets together.
+		MODULES.put(MODULE_ASSETS, module(5)
+			.base(descriptor(
+				dir("src/assets/_global"),
+				dir("src/assets/palettes"),
+				dir("src/assets/colormaps"),
+				dir("src/assets/colormaps-secondary"),
+				dir("src/assets/graphics"),
+				dir("src/assets/music"),
+				dir("src/assets/sounds"),
+				dir("src/assets/sprites"),
+				file("scripts/merge-assets.txt",
+					"doommake/common/assets/wadmerge.txt"),
+				fileAppend("doommake.properties", 
+					"doommake/common/assets/doommake.properties"),
+				fileAppend("PROPS.txt",
+					"doommake/common/assets/props.txt"),
+				fileAppend("doommake.script",
+					"doommake/common/assets/doommake.script"),
+				fileAppend("README.md",
+					"doommake/common/assets/README.md")
+			))
+			.releaseScript(descriptor(
+				fileContentAppend("doommake.script",
+					"\tdoAssets();"
+				)
+			))
+			.releaseScriptMerge(descriptor(
+				fileContentAppend("doommake.script",
+					"\t\t,getAssetsWAD()"
+				)
+			))
+			.releaseWadMergeLines(
+				"mergewad   out $0/$"
+			)
+			.postRelease(descriptor(
+				fileAppend("doommake.script",
+					"doommake/common/assets/doommake-target.script"
+				)
+			))
+			.todos(
+				"Add assets to `src/assets` into the appropriate folders."
 			)
 		);
 
@@ -331,6 +421,11 @@ public class TextureProjectGenerator extends ProjectGenerator
 		TEMPLATES.put(TEMPLATE_MERCURIAL, template(
 			TEMPLATE_MERCURIAL, CATEGORY_REPOSITORY, "Adds Mercurial repository ignores to the project.",
 			MODULE_INIT, MODULE_MERCURIAL
+		));
+		
+		TEMPLATES.put(TEMPLATE_ASSETS, template(
+			TEMPLATE_ASSETS, CATEGORY_ASSETS, "Adds non-texture assets.",
+			MODULE_INIT, MODULE_ASSETS_CONVERT, MODULE_ASSETS
 		));
 		
 		TEMPLATES.put(TEMPLATE_TEXTURES, template(
