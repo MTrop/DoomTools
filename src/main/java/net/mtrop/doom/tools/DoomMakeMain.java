@@ -424,6 +424,7 @@ public final class DoomMakeMain
 					}
 					
 					ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
+					options.stdout.println("Detected project type: " + projectType.name());
 					
 					ProjectGenerator generator = projectType.createGenerator();
 
@@ -434,20 +435,26 @@ public final class DoomMakeMain
 						return ERROR_BAD_WAD;
 					} 
 					
+					options.stdout.println("Using templates: " + Arrays.toString(options.templateNames.toArray(new String[options.templateNames.size()])));
+					
+					options.stdout.println("Building project scaffolding...");
 					int err;
 					if ((err = createProject(generator)) != ERROR_NONE)
 						return err;
-					
+					options.stdout.println("Scaffolding built.");
+
+					options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
 					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+					options.stdout.println("Done!");
 				}
 				catch (WadException e)
 				{
-					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" is not a WAD file.");
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
 					return ERROR_BAD_WAD;
 				} 
 				catch (IOException e)
 				{
-					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read.");
+					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read: " + e.getLocalizedMessage());
 					return ERROR_IOERROR;
 				} 
 				catch (SecurityException e)
@@ -946,6 +953,7 @@ public final class DoomMakeMain
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_EXPLODE))
 					{
+						options.templateNames = new LinkedList<>();
 						state = STATE_EXPLODEWAD;
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_PROJECTTYPE))
