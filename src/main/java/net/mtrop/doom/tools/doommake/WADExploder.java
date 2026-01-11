@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,9 +76,20 @@ public final class WADExploder
 
 	private static final byte[] MNUM_RIFF = "RIFF".getBytes(StandardCharsets.US_ASCII);
 
+	private static final byte[] MNUM_ACS  = "ACS".getBytes(StandardCharsets.US_ASCII);
+
 	// Secondary or offset magic numbers.
 	private static final byte[] MNUM_WAVE = "WAVE".getBytes(StandardCharsets.US_ASCII); // at 8
-	private static final byte[] MNUM_MOD  = "M.K.".getBytes(StandardCharsets.US_ASCII); // at 0x438
+
+	private static final byte[] MNUM_MOD1  = "M.K.".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD2  = "4CHN".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD3  = "6CHN".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD4  = "8CHN".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD5  = "4FLT".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD6  = "8FLT".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD7  = "FLT4".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	private static final byte[] MNUM_MOD8  = "FLT8".getBytes(StandardCharsets.US_ASCII); // at 0x438
+	
 	private static final byte[] MNUM_S3M  = "SCRM".getBytes(StandardCharsets.US_ASCII); // at 44
 	
 	private static final Set<String> JSON_NAMES = ObjectUtils.createCaseInsensitiveSortedSet(
@@ -280,9 +292,12 @@ public final class WADExploder
 		// "assets" template can be safely assumed.
 		outTemplates.add(WADProjectGenerator.TEMPLATE_ASSETS);
 
+		if (wadContainsEntry(wad, "A_START", "A_END", "S_START", "S_END", "SS_START", "SS_END"))
+			outTemplates.add(WADProjectGenerator.TEMPLATE_ASSETS);
+
 		if (wadContainsEntry(wad, "ANIMATED", "SWITCHES"))
 			outTemplates.add(WADProjectGenerator.TEMPLATE_TEXTURES_BOOM);
-		else if (wadContainsEntry(wad, "TEXTURE1", "TEXTURE2", "PNAMES"))
+		else if (wadContainsEntry(wad, "TEXTURE1", "TEXTURE2", "PNAMES", "FF_START", "F_START", "FF_END", "F_END", "PP_START", "P_START", "PP_END", "P_END"))
 			outTemplates.add(WADProjectGenerator.TEMPLATE_TEXTURES);
 
 		if (wadContainsEntry(wad, "THINGS", "TEXTMAP"))
@@ -311,12 +326,14 @@ public final class WADExploder
 		explodeTexturesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
 		explodeSpritesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
 		explodePalettesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
+		explodeACSLibrariesIntoProject(log, entrySet, wad, targetDirectory);
+		explodeInfoAndCreditsIntoProject(log, entrySet, wad, targetDirectory);
 		explodeRemainingGlobalsIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
 	}
 	
 	private static void explodePatchIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
 	{
-		WadEntry entry;;
+		WadEntry entry;
 		if ((entry = wad.getEntry("DECOHACK")) != null)
 		{
 			File outDecoHackDir = new File(targetDirectory.getPath() + "/src/decohack");
@@ -327,6 +344,11 @@ public final class WADExploder
 				log.println("Wrote `" + out.getPath() + "`.");
 			}
 			entrySet.remove(entry);
+
+			// If DECOHACK source found, don't bother exporting the DEHACKED.
+			entry = wad.getEntry("DEHACKED");
+			if (entry != null)
+				entrySet.remove(entry);
 		}
 		else if ((entry = wad.getEntry("DEHACKED")) != null)
 		{
@@ -593,6 +615,16 @@ public final class WADExploder
 		}
 	}
 
+	private static void explodeACSLibrariesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	{
+		File outDir = new File(targetDirectory.getPath() + "/src/assets/acslib");
+
+		WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "A");
+		exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outDir);
+		for (WadEntry entry : WadUtils.withEntries(withoutNulls(wad.getEntry("A_START"), wad.getEntry("A_END"))).get())
+			entrySet.remove(entry);
+	}
+
 	private static void explodeMapsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src/maps");
@@ -641,6 +673,36 @@ public final class WADExploder
 
 		for (WadEntry h : headers)
 			entrySet.remove(h);
+	}
+
+	private static void explodeInfoAndCreditsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	{
+		File outDir = new File(targetDirectory.getPath() + "/src");
+		WadEntry entry;
+		
+		entry = wad.getEntry("WADINFO");
+		if (entry != null)
+		{
+			File out = new File(outDir.getPath() + "/wadinfo.txt");
+			try (FileOutputStream fos = new FileOutputStream(out))
+			{
+				fos.write(wad.getData(entry));
+				log.println("Wrote `" + out.getPath() + "`.");
+			}
+			entrySet.remove(entry);
+		}
+		
+		entry = wad.getEntry("CREDITS");
+		if (entry != null)
+		{
+			File out = new File(outDir.getPath() + "/credits.txt");
+			try (FileOutputStream fos = new FileOutputStream(out))
+			{
+				fos.write(wad.getData(entry));
+				log.println("Wrote `" + out.getPath() + "`.");
+			}
+			entrySet.remove(entry);
+		}	
 	}
 	
 	private static void explodeRemainingGlobalsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
@@ -817,7 +879,7 @@ public final class WADExploder
 					{
 						for (WadEntry animFlatEntry : scanEntriesForAnimatedRange(flatEntries, ae.getFirstName(), ae.getLastName()))
 						{
-							adder.addDataAt(ffEnd, animFlatEntry.getName(), wad.getData(animFlatEntry));
+							adder.addDataAt(ffEnd++, animFlatEntry.getName(), wad.getData(animFlatEntry));
 							entrySet.remove(animFlatEntry);
 						}
 					}
@@ -960,12 +1022,27 @@ public final class WADExploder
 				return "wav";
 		}
 
-		if (matchMagicNumber(data, 0x0438, MNUM_MOD))
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD1))
 			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD2))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD3))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD4))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD5))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD6))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD7))
+			return "mod";
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD8))
+			return "mod";
+		
 		if (matchMagicNumber(data, 44, MNUM_S3M))
 			return "s3m";
 
-		return ".dat";
+		return "dat";
 	}
 	
 	private static String getExtensionFor(String entryName, byte[] data)
@@ -974,6 +1051,9 @@ public final class WADExploder
 			return "deh";
 		if (entryName.equalsIgnoreCase("DECOHACK"))
 			return "dh";
+
+		if (matchMagicNumber(data, 0, MNUM_ACS))
+			return "o";
 
 		if (PALETTE_NAMES.contains(entryName))
 			return "pal";
@@ -1024,8 +1104,23 @@ public final class WADExploder
 				return true;
 		}
 
-		if (matchMagicNumber(data, 0x0438, MNUM_MOD))
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD1))
 			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD2))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD3))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD4))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD5))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD6))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD7))
+			return true;
+		if (matchMagicNumber(data, 0x0438, MNUM_MOD8))
+			return true;
+
 		if (matchMagicNumber(data, 44, MNUM_S3M))
 			return true;
 
@@ -1148,8 +1243,7 @@ public final class WADExploder
 	private static boolean isBinaryData(InputStream in)
 	{
 		byte[] buffer = new byte[512];
-		try
-		{
+		try {
 			int amt = in.read(buffer);
 			for (int i = 0; i < amt; i++)
 			{
@@ -1158,20 +1252,13 @@ public final class WADExploder
 					return true;
 			}
 			return false;
-		} 
-		catch (FileNotFoundException e) 
-		{
+		} catch (FileNotFoundException e) {
 			return false;
-		} 
-		catch (IOException e) 
-		{
+		} catch (IOException e)	{
 			return false;
-		} 
-		catch (SecurityException e) 
-		{
+		} catch (SecurityException e) {
 			return false;
 		}
-		
 	}
 
 	// Test if the data is JSON data.
@@ -1180,6 +1267,8 @@ public final class WADExploder
 		try {
 			JSONReader.readJSON(new InputStreamReader(new ByteArrayInputStream(data), StandardCharsets.UTF_8));
 			return true;
+		} catch (EmptyStackException e) {
+			return false;
 		} catch (JSONConversionException e) {
 			return false;
 		} catch (IOException e) {

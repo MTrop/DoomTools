@@ -389,81 +389,7 @@ public final class DoomMakeMain
 			
 			if (options.explodeWad != null)
 			{
-				try (WadFile wadFile = new WadFile(options.explodeWad))
-				{
-					Palette convertPalette = null;
-					// find viable palette for conversions, if necessary.
-					if (options.explodeConvertible)
-					{
-						if (options.explodePalette != null)
-						{
-							if (Wad.isWAD(options.explodePalette))
-							{
-								try (WadFile palWad = new WadFile(options.explodePalette))
-								{
-									convertPalette = palWad.getDataAs("PLAYPAL", Palette.class);
-								}
-							}
-							else
-							{
-								convertPalette = new Palette();
-								convertPalette.readFile(options.explodePalette);
-							}
-						}
-						else if (wadFile.contains("PLAYPAL"))
-						{
-							convertPalette = wadFile.getDataAs("PLAYPAL", Palette.class);
-						}
-						
-						if (convertPalette == null)
-						{
-							options.stderr.println("ERROR: No viable palette set for converting graphics to project scaffolding.");
-							options.stderr.println("Must use `--convert-palette` to set for this project.");
-							return ERROR_BAD_PROJECT;
-						}
-					}
-					
-					ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
-					options.stdout.println("Detected project type: " + projectType.name());
-					
-					ProjectGenerator generator = projectType.createGenerator();
-
-					try {
-						WADExploder.getTemplatesFromWAD(projectType, wadFile, options.templateNames);
-					} catch (WadException e) {
-						options.stderr.println("ERROR: " + e.getLocalizedMessage());
-						return ERROR_BAD_WAD;
-					} 
-					
-					options.stdout.println("Using templates: " + Arrays.toString(options.templateNames.toArray(new String[options.templateNames.size()])));
-					
-					options.stdout.println("Building project scaffolding...");
-					int err;
-					if ((err = createProject(generator)) != ERROR_NONE)
-						return err;
-					options.stdout.println("Scaffolding built.");
-
-					options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
-					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
-					options.stdout.println("Done!");
-				}
-				catch (WadException e)
-				{
-					options.stderr.println("ERROR: " + e.getLocalizedMessage());
-					return ERROR_BAD_WAD;
-				} 
-				catch (IOException e)
-				{
-					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read: " + e.getLocalizedMessage());
-					return ERROR_IOERROR;
-				} 
-				catch (SecurityException e)
-				{
-					options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read (access denied).");
-					return ERROR_SECURITY;
-				}
-				
-				return ERROR_NONE;
+				return doWADExplode();
 			}
 			
 			if (options.projectType != null)
@@ -505,7 +431,7 @@ public final class DoomMakeMain
 				}
 				else if (options.templateNames != null)
 				{
-					return createProject(generator);
+					return createProject(generator, true);
 				}
 			}
 
@@ -717,7 +643,7 @@ public final class DoomMakeMain
 			return lock.get(JSON_AGENT_LOCK_KEY).getBoolean();
 		}
 		
-		private int createProject(ProjectGenerator generator)
+		private int createProject(ProjectGenerator generator, boolean printTODO)
 		{
 			if (ObjectUtils.isEmpty(options.targetName))
 			{
@@ -747,14 +673,14 @@ public final class DoomMakeMain
 				
 				if (!todoList.isEmpty())
 				{
-					options.stdout.println("You should also probably do the following:");
+					if (printTODO) options.stdout.println("You should also probably do the following:");
 					try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
 					{
 						todoPrinter.println("# Stuff To Do\n");
 						int i = 1;
 						for (String t : todoList)
 						{
-							options.stdout.println(i + ") " + t);
+							if (printTODO) options.stdout.println(i + ") " + t);
 							todoPrinter.println(i + ") " + t);
 							i++;
 						}
@@ -769,6 +695,83 @@ public final class DoomMakeMain
 			}
 			
 			options.stdout.println("Project created.");
+			return ERROR_NONE;
+		}
+
+		private int doWADExplode() 
+		{
+			try (WadFile wadFile = new WadFile(options.explodeWad))
+			{
+				Palette convertPalette = null;
+				// find viable palette for conversions, if necessary.
+				if (options.explodeConvertible)
+				{
+					if (options.explodePalette != null)
+					{
+						if (Wad.isWAD(options.explodePalette))
+						{
+							try (WadFile palWad = new WadFile(options.explodePalette))
+							{
+								convertPalette = palWad.getDataAs("PLAYPAL", Palette.class);
+							}
+						}
+						else
+						{
+							convertPalette = new Palette();
+							convertPalette.readFile(options.explodePalette);
+						}
+					}
+					else if (wadFile.contains("PLAYPAL"))
+					{
+						convertPalette = wadFile.getDataAs("PLAYPAL", Palette.class);
+					}
+					
+					if (convertPalette == null)
+					{
+						options.stderr.println("ERROR: No viable palette set for converting graphics to project scaffolding.");
+						options.stderr.println("Must use `--convert-palette` to set for this project.");
+						return ERROR_BAD_PROJECT;
+					}
+				}
+				
+				ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
+				options.stdout.println("Detected project type: " + projectType.name());
+				
+				ProjectGenerator projectGenerator = projectType.createGenerator();
+		
+				try {
+					WADExploder.getTemplatesFromWAD(projectType, wadFile, options.templateNames);
+				} catch (WadException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_BAD_WAD;
+				} 
+				
+				options.stdout.println("Using templates: " + Arrays.toString(options.templateNames.toArray(new String[options.templateNames.size()])));
+				
+				int err;
+				if ((err = createProject(projectGenerator, false)) != ERROR_NONE)
+					return err;
+		
+				options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
+				WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+				options.stdout.println("Done!");
+			}
+			catch (WadException e)
+			{
+				options.stderr.println("ERROR: " + e.getLocalizedMessage());
+				return ERROR_BAD_WAD;
+			} 
+			catch (IOException e)
+			{
+				options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read: " + e.getLocalizedMessage());
+				return ERROR_IOERROR;
+			} 
+			catch (SecurityException e)
+			{
+				options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read (access denied).");
+				return ERROR_SECURITY;
+			}
+			
 			return ERROR_NONE;
 		}
 

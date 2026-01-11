@@ -17,6 +17,14 @@ check function cleanUpAssetWAD(wadpath) {
 		wf->waddelete(wf->wadentryindex("SS_END"));
 	}
 	
+	// Remove the acs namespace if empty.
+	sx = wadentryindex(wf, "A_START");
+	sy = wadentryindex(wf, "A_END");
+	if (sx !== null && (sy - sx === 1)) {
+		wf->waddelete(wf->wadentryindex("A_START"));
+		wf->waddelete(wf->wadentryindex("A_END"));
+	}
+	
 	// Remove the colormap namespace if empty.
 	sx = wadentryindex(wf, "C_START");
 	sy = wadentryindex(wf, "C_END");
@@ -40,6 +48,7 @@ check function doAssets() {
 
 	sourceDir = getSourceDirectory() + SRC_DIR_ASSETS;
 	verifydirs(sourceDir + "/_global");
+	verifydirs(sourceDir + "/acslib");
 	verifydirs(sourceDir + "/palettes");
 	verifydirs(sourceDir + "/colormaps");
 	verifydirs(sourceDir + "/colormaps-secondary");

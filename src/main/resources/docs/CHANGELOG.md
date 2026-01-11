@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-01-11** Updated DoomStruct to `2.21.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.21.0-RELEASE)
 - **2025-12-26** [GUI] Fixed a setting modal title for selecting a directory.
 - **2025-12-26** [GUI] Added extra themes.
 - **2025-12-26** Updated Flatlaf to `3.7`.

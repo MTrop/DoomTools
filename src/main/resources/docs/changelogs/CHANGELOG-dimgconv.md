@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.6.0
+
+* `Fixed` Palette index 255 is considered for color matching again on Pictures. Error was in DoomStruct library.
+
+
 ### Changed for 1.5.2
 
 * `Fixed` DIMGConv would not error out completely if a bad file was encountered.

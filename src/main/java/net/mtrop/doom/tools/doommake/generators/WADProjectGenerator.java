@@ -376,6 +376,7 @@ public class WADProjectGenerator extends ProjectGenerator
 		MODULES.put(MODULE_ASSETS, module(5)
 			.base(descriptor(
 				dir("src/assets/_global"),
+				dir("src/assets/acslib"),
 				dir("src/assets/palettes"),
 				dir("src/assets/colormaps"),
 				dir("src/assets/colormaps-secondary"),

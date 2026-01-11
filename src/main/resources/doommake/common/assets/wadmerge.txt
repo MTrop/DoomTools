@@ -40,6 +40,11 @@ mergedir  out $1/assets/sprites nomarkers
 mergedir  out $0/convert/sprites nomarkers
 marker    out ss_end
 
+# ACS Libraries
+marker    out a_start
+mergedir  out $1/assets/acslib nomarkers
+marker    out a_end
+
 # Secondary Colormaps
 marker    out c_start
 mergedir  out $1/assets/colormaps-secondary nomarkers
