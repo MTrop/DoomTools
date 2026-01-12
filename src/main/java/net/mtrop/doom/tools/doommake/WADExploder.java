@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2020-2026 Matt Tropiano
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package net.mtrop.doom.tools.doommake;
 
 import java.awt.image.BufferedImage;
@@ -8,8 +13,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +62,7 @@ import net.mtrop.doom.tools.DoomMakeMain.ProjectType;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
+import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.GraphicUtils;
 import net.mtrop.doom.util.MapUtils;
@@ -102,11 +112,7 @@ public final class WADExploder
 	);
 	
 	private static final Set<String> ANSI_NAMES = ObjectUtils.createCaseInsensitiveSortedSet(
-		"LOADING", "ENDOOM"
-	);
-	
-	private static final Set<String> FLATGRAPHIC_NAMES = ObjectUtils.createCaseInsensitiveSortedSet(
-		"TITLE", "E2END"
+		"LOADING", "ENDOOM", "ENDTEXT"
 	);
 	
 	private static final Set<String> PALETTE_NAMES = ObjectUtils.createCaseInsensitiveSortedSet(
@@ -120,7 +126,13 @@ public final class WADExploder
 		"TRANTBLC", "TRANTBLD", "TRANTBLE", "TRANTBLF", "TRANTBLG", "TRANTBLH", 
 		"TRANTBLI", "TRANTBLJ", "TRANTBLK" 
 	);
+
+	// stuff that's actually binary data
+	private static final Set<String> BINARY_NAMES = ObjectUtils.createCaseInsensitiveSortedSet(
+		"SNDCURVE", "AUTOPAGE"
+	);
 	
+
 	private static final WadEntry[] NO_ENTRIES = new WadEntry[0];
 	
 	/**
@@ -707,6 +719,8 @@ public final class WADExploder
 	
 	private static void explodeRemainingGlobalsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
 	{
+		StringBuilder flatGraphicData = new StringBuilder();
+		
 		for (WadEntry entry : entrySet)
 		{
 			String entryName = entry.getName();
@@ -753,14 +767,33 @@ public final class WADExploder
 				}
 				
 			}
-			else if (isDemoData(entryData))
+			else if (isRawScreenGraphicData(entryData)) // for Heretic/Hexen flat screens
 			{
-				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
-				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
-				try (FileOutputStream fos = new FileOutputStream(out))
+				if (convertible)
 				{
-					fos.write(wad.getData(entry));
-					log.println("Wrote `" + out.getPath() + "`.");
+					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
+					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
+
+					Flat flat = new Flat(entryData.length / 200, 200);
+					flat.fromBytes(entryData);
+
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
+						log.println("Wrote `" + out.getPath() + "`.");
+						
+						flatGraphicData.append(sanitizeEntryName(entryName) + " flat").append('\n');
+					}
+				}
+				else
+				{
+					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
+					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						fos.write(wad.getData(entry));
+						log.println("Wrote `" + out.getPath() + "`.");
+					}
 				}
 			}
 			else if (isGraphicData(entryData))
@@ -790,31 +823,14 @@ public final class WADExploder
 					}
 				}
 			}
-			else if (FLATGRAPHIC_NAMES.contains(entryName)) // for Heretic/Hexen flat screens
+			else if (isDemoData(entryData))
 			{
-				if (convertible)
+				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+				try (FileOutputStream fos = new FileOutputStream(out))
 				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
-
-					Flat flat = new Flat(entryData.length / 200, 200);
-					flat.fromBytes(entryData);
-
-					try (FileOutputStream fos = new FileOutputStream(out))
-					{
-						ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
-						log.println("Wrote `" + out.getPath() + "`.");
-					}
-				}
-				else
-				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
-					try (FileOutputStream fos = new FileOutputStream(out))
-					{
-						fos.write(wad.getData(entry));
-						log.println("Wrote `" + out.getPath() + "`.");
-					}
+					fos.write(wad.getData(entry));
+					log.println("Wrote `" + out.getPath() + "`.");
 				}
 			}
 			else
@@ -826,6 +842,20 @@ public final class WADExploder
 					fos.write(wad.getData(entry));
 					log.println("Wrote `" + out.getPath() + "`.");
 				}
+			}
+		}
+
+		// write exceptions for some graphic data
+		if (flatGraphicData.length() > 0)
+		{
+			flatGraphicData.append("* graphic").append('\n');
+			File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
+			File out = new File(outGraphicsDir.getPath() + "/dimgconv.txt");
+			try (Reader reader = new StringReader(flatGraphicData.toString()); Writer writer = new OutputStreamWriter(new FileOutputStream(out), StandardCharsets.UTF_8))
+			{
+				IOUtils.relay(reader, writer);
+				writer.flush();
+				log.println("Wrote `" + out.getPath() + "`.");
 			}
 		}
 	}
@@ -904,7 +934,12 @@ public final class WADExploder
 				continue;
 			}
 			
-			Flat flatData = new Flat(64, 64);
+			Flat flatData;
+			if (data.length == 4) // Heretic F_SKY, which 2x2 for whatever reason
+				flatData = new Flat(2, 2);
+			else
+				flatData = new Flat(64, 64);
+			
 			flatData.fromBytes(data);
 			
 			File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + ".png");
@@ -1055,6 +1090,8 @@ public final class WADExploder
 		if (matchMagicNumber(data, 0, MNUM_ACS))
 			return "o";
 
+		if (BINARY_NAMES.contains(entryName))
+			return "lmp";
 		if (PALETTE_NAMES.contains(entryName))
 			return "pal";
 		if (COLORMAP_NAMES.contains(entryName))
@@ -1165,6 +1202,11 @@ public final class WADExploder
 		return false;
 	}
 
+	private static boolean isRawScreenGraphicData(byte[] entryData)
+	{
+		return isBinaryData(entryData) && entryData.length / 200 >= 320 && entryData.length % 200 == 0;
+	}
+	
 	// Test if the data is Doom sound data.
 	private static boolean isDMXSoundData(byte[] data)
 	{
