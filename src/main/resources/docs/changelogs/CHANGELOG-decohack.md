@@ -3,7 +3,7 @@ DECOHack
 
 ### Changed for 0.43.1
 
-* `Fixed` Made different "Max Health" default for Boom patches and higher.
+* `Fixed` Made different "Max Health" default for Boom patches and higher (Issue #146).
 
 
 ### Changed for 0.43.0
