@@ -228,8 +228,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.32.0 by Matt Tropiano
-(using DoomStruct v2.19.5 , WadScript v1.9.1, RookScript v1.17.1, RookScript-Desktop v1.10.2.1)
+DoomMake v0.33.0 by Matt Tropiano
+(using DoomStruct v2.21.0 , WadScript v1.9.1, RookScript v1.17.1, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -289,6 +289,23 @@ Usage: doommake [target] [args] [switches]
     --new-project-gui              Opens the &quot;New Project&quot; GUI.
 
 -----------------------------------------------------------------------------
+[EXPERIMENTAL]!
+
+    --explode [wad]                Creates a new project in the target folder
+                                       using [wad] as the originating file.
+                                       Everything after this is an additional
+                                       template name.
+
+    --convert                      If specified, types found in the WAD are
+                                       turned into convertible types. Must be
+                                       specified before --explode.
+
+    --convert-palette [file]       If --convert is specified, this must point
+                                       to a WAD or palette file for graphics
+                                       conversion if no palette is in the
+                                       source WAD.
+
+-----------------------------------------------------------------------------
 
     --script, -s [filename]        Use [filename] for the root build script.
                                        Default is &quot;doommake.script&quot;.
@@ -343,6 +360,15 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.33.0
+
+* &#x60;Added&#x60; The &#x60;assets&#x60; module now adds directories for palettes and primary colormaps (and conversion) for new projects.
+* &#x60;Added&#x60; The &#x60;assets&#x60; module now adds directories for ACS libraries for new projects.
+* &#x60;Added&#x60; The textures modules will all add &#x60;src&#x2F;wads&#x2F;textures&#x60; directories to the project root for new projects.
+* &#x60;Added&#x60; An &#x60;assets&#x60; template for Texture WAD projects (for texture projects that contain other assets).
+* &#x60;Added&#x60; A way for users to explode a WAD into a new project scaffolding.
+
+
 ### Changed for 0.32.0
 
 * &#x60;Fixed&#x60; [GUI-Studio] Better handling of automatic repository refreshes and project watching.
