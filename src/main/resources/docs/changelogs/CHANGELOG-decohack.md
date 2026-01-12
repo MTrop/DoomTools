@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.43.1
+
+* `Fixed` Made different "Max Health" default for Boom patches and higher.
+
+
 ### Changed for 0.43.0
 
 * `Added` The ability to add specific flag mnemonics for use with thing/weapon properties.

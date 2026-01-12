@@ -7,6 +7,7 @@ package net.mtrop.doom.tools.decohack.patches;
 
 import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
 
+import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
@@ -1047,4 +1048,10 @@ interface ConstantsBoom
 			.setActiveSoundPosition(DEHThing.SOUND_NONE),
 	};
 	
+	static final DEHMiscellany DEHMISCBOOM = 
+		(new DEHMiscellany())
+		.setMaxHealth(100)
+	;
+		
+
 }

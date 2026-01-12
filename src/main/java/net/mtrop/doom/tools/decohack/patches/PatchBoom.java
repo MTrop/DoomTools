@@ -417,7 +417,7 @@ public class PatchBoom implements DEHPatchBoom
 	@Override
 	public DEHMiscellany getMiscellany() 
 	{
-		return DEHMISC;
+		return DEHMISCBOOM;
 	}
 
 	@Override
