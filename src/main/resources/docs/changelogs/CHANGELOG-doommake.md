@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.33.1
+
+* `Added` [GUI-Studio] Added a line to log output when a DoomMake target is executed (for finding the start of a build).
+
+
 ### Changed for 0.33.0
 
 * `Added` The `assets` module now adds directories for palettes and primary colormaps (and conversion) for new projects.
