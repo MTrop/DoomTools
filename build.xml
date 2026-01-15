@@ -43,6 +43,8 @@
 
 	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
+	<property name="flatlaf.themes.lib.version" value="3.7" />
+	<property name="flatlaf.themes.jar" value="flatlaf-intellij-themes-${flatlaf.lib.version}.jar" />
 
 	<property name="rsyntaxtextarea.lib.version" value="3.6.0" />
 	<property name="rsyntaxtextarea.jar" value="rsyntaxtextarea-${rsyntaxtextarea.lib.version}.jar" />
@@ -60,7 +62,18 @@
 	<!-- Project Info -->
 	<property name="project.archive" value="doomtools" />
 	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${doom.jar}${S}${dev.base}/${rookscript.jar}${S}${dev.base}/${rookscript.desktop.jar}${S}${dev.base}/${rsyntaxtextarea.jar}${S}${dev.base}/${autocomplete.jar}${S}${dev.base}/${flatlaf.jar}${S}${dev.base}/${commonmark.jar}${S}${dev.base}/${jsoup.jar}"/>
+	<property name="project.classpath" value="
+		${dev.base}/${json.jar}
+		${S}${dev.base}/${doom.jar}
+		${S}${dev.base}/${rookscript.jar}
+		${S}${dev.base}/${rookscript.desktop.jar}
+		${S}${dev.base}/${rsyntaxtextarea.jar}
+		${S}${dev.base}/${autocomplete.jar}
+		${S}${dev.base}/${flatlaf.jar}
+		${S}${dev.base}/${flatlaf.themes.jar}
+		${S}${dev.base}/${commonmark.jar}
+		${S}${dev.base}/${jsoup.jar}
+	"/>
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -137,6 +150,8 @@
 		<include name="**/*.png" />
 		<include name="**/*.jpg" />
 		<include name="**/*.gif" />
+		<include name="**/*.json" />
+		<include name="**/*.txt" />
 		<exclude name="module-info.class" />
 	</patternset>
 	
@@ -251,6 +266,9 @@
 			<zipfileset src="${dependencies.dir}/${flatlaf.jar}">
 				<patternset refid="pattern.jar.lib.contents" />
 			</zipfileset>
+			<zipfileset src="${dependencies.dir}/${flatlaf.themes.jar}">
+				<patternset refid="pattern.jar.lib.contents" />
+			</zipfileset>
 			<zipfileset src="${dependencies.dir}/${jsoup.jar}">
 				<patternset refid="pattern.jar.lib.contents" />
 			</zipfileset>
@@ -282,6 +300,8 @@
 	<target name="dependency.flatlaf">
 		<maven-jar-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
 		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+		<maven-jar-dl group-path="com/formdev" artifact="flatlaf-intellij-themes" version="${flatlaf.themes.lib.version}" />
+		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf-intellij-themes" version="${flatlaf.themes.lib.version}" />
 	</target>
 
 	<target name="dependency.rsyntaxtextarea">

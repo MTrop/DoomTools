@@ -123,21 +123,82 @@ public final class DoomToolsGUIMain
 	 */
 	public enum GUIThemeType
 	{
-		LIGHT("com.formdev.flatlaf.FlatLightLaf"),
-		DARK("com.formdev.flatlaf.FlatDarkLaf"),
-		INTELLIJ("com.formdev.flatlaf.FlatIntelliJLaf"),
-		DARCULA("com.formdev.flatlaf.FlatDarculaLaf"),
-		MACOSLIGHT("com.formdev.flatlaf.themes.FlatMacLightLaf"),
-		MACOSDARK("com.formdev.flatlaf.themes.FlatMacDarkLaf"),
+		LIGHT("Light", "com.formdev.flatlaf.FlatLightLaf", false),
+		DARK("Dark", "com.formdev.flatlaf.FlatDarkLaf", true),
+		INTELLIJ("IntelliJ", "com.formdev.flatlaf.FlatIntelliJLaf", false),
+		DARCULA("Darcula", "com.formdev.flatlaf.FlatDarculaLaf", true),
+		MACOSLIGHT("macOS Light", "com.formdev.flatlaf.themes.FlatMacLightLaf", false),
+		MACOSDARK("macOS Dark", "com.formdev.flatlaf.themes.FlatMacDarkLaf", true),
+		ARC("Arc", "com.formdev.flatlaf.intellijthemes.FlatArcIJTheme", false),
+		ARCORANGE("Arc - Orange", "com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme", false),
+		ARCDARK("Arc Dark", "com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme", true),
+		ARCDARKORANGE("Arc Dark - Orange", "com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme", true),
+		CARBON("Carbon", "com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme", true),
+		COBALT2("Cobalt 2", "com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme", true),
+		CYANLIGHT("Cyan light", "com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme", false),
+		DARKFLAT("Dark Flat", "com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme", true),
+		DARKPURPLE("Dark purple", "com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme", true),
+		DRACULA("Dracula", "com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme", true),
+		GRADIENTODARKFUSCHIA("Gradianto Dark Fuchsia", "com.formdev.flatlaf.intellijthemes.FlatGradiantoDarkFuchsiaIJTheme", true),
+		GRADIENTODEEPOCEAN("Gradianto Deep Ocean", "com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme", true),
+		GRADIENTOMIDNIGHTBLUE("Gradianto Midnight Blue", "com.formdev.flatlaf.intellijthemes.FlatGradiantoMidnightBlueIJTheme", true),
+		GRADIENTONATUREGREEN("Gradianto Nature Green", "com.formdev.flatlaf.intellijthemes.FlatGradiantoNatureGreenIJTheme", true),
+		GRAY("Gray", "com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme", false),
+		GRUVBOXDARKHARD("Gruvbox Dark Hard", "com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkHardIJTheme", true),
+		HIBERBEEDARK("Hiberbee Dark", "com.formdev.flatlaf.intellijthemes.FlatHiberbeeDarkIJTheme", true),
+		HIGHCONTRAST("High Contrast", "com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme", true),
+		LIGHTFLAT("Light Flat", "com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme", false),
+		MATERIALDESIGNDARK("Material Design Dark", "com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme", true),
+		MONOKAI("Monocai", "com.formdev.flatlaf.intellijthemes.FlatMonocaiIJTheme", true),
+		MONOKAIPRO("Monokai Pro", "com.formdev.flatlaf.intellijthemes.FlatMonokaiProIJTheme", true),
+		NORD("Nord", "com.formdev.flatlaf.intellijthemes.FlatNordIJTheme", true),
+		ONEDARK("One Dark", "com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme", true),
+		SOLARIZEDDARK("Solarized Dark", "com.formdev.flatlaf.intellijthemes.FlatSolarizedDarkIJTheme", true),
+		SOLARIZEDLIGHT("Solarized Light", "com.formdev.flatlaf.intellijthemes.FlatSolarizedLightIJTheme", false),
+		SPACEGRAY("Spacegray", "com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme", true),
+		VUESION("Vuesion", "com.formdev.flatlaf.intellijthemes.FlatVuesionIJTheme", true),
+		XCODEDARK("Xcode-Dark", "com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme", true),
+		ARCDARKMATERIAL("Arc Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTArcDarkIJTheme", true),
+		ATOMONEDARKMATERIAL("Atom One Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTAtomOneDarkIJTheme", true),
+		ATOMONELIGHTMATERIAL("Atom One Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTAtomOneLightIJTheme", false),
+		DRACULAMATERIAL("Dracula (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTDraculaIJTheme", true),
+		GITHUBMATERIAL("GitHub (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTGitHubIJTheme", false),
+		GITHUBDARKMATERIAL("GitHub Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTGitHubDarkIJTheme", true),
+		LIGHTOWLMATERIAL("Light Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTLightOwlIJTheme", false),
+		MATERIALDARKER("Material Darker (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialDarkerIJTheme", true),
+		MATERIALDEEPOCEAN("Material Deep Ocean (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialDeepOceanIJTheme", true),
+		MATERIALLIGHTER("Material Lighter (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialLighterIJTheme", false),
+		MATERIALOCEANIC("Material Oceanic (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialOceanicIJTheme", true),
+		MATERIALPALEKNIGHT("Material Palenight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMaterialPalenightIJTheme", true),
+		MONOKAIPROMATERIAL("Monokai Pro (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMonokaiProIJTheme", true),
+		MOONLIGHTMATERIAL("Moonlight (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTMoonlightIJTheme", true),
+		NIGHTOWLMATERIAL("Night Owl (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTNightOwlIJTheme", true),
+		SOLARIZEDDARKMATERIAL("Solarized Dark (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedDarkIJTheme", true),
+		SOLARIZEDLIGHTMATERIAL("Solarized Light (Material)", "com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMTSolarizedLightIJTheme", false),
 		;
 		
 		public static final Map<String, GUIThemeType> MAP = EnumUtils.createCaseInsensitiveNameMap(GUIThemeType.class);
 		
 		private final String className;
+		private final String name;
+		private final boolean dark;
 		
-		private GUIThemeType(String className)
+		private GUIThemeType(String name, String className, boolean dark)
 		{
 			this.className = className;
+			this.name = name;
+			this.dark = dark;
+		}
+		
+		public boolean isDark()
+		{
+			return this.dark;
+		}
+		
+		@Override
+		public String toString() 
+		{
+			return (this.dark ? "(Dark) " : "(Light) ") + this.name;
 		}
 	}
 	

@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain.GUIThemeType;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -72,17 +73,15 @@ public class DoomToolsSettingsPanel extends JPanel
 	// Create main panel.
 	private Container createMainPanel()
 	{
-		List<String> themes = Arrays.asList(
-			GUIThemeType.LIGHT.name(),
-			GUIThemeType.DARK.name(),
-			GUIThemeType.INTELLIJ.name(),
-			GUIThemeType.DARCULA.name(),
-			GUIThemeType.MACOSLIGHT.name(),
-			GUIThemeType.MACOSDARK.name()
-		);
+		List<GUIThemeType> themes = Arrays.asList(GUIThemeType.values());
+		themes.sort((a, b) -> a.toString().compareToIgnoreCase(b.toString()));
 		
-		JFormField<String> themeField = comboField(comboBox(comboBoxModel(themes), (i) -> settings.setThemeName((String)i)));
-		themeField.setValue(settings.getThemeName());
+		JFormField<GUIThemeType> themeField = comboField(comboBox(comboBoxModel(themes), (i) -> {
+			settings.setThemeName(i.name());
+			DoomToolsGUIMain.setLAF();
+		}));
+		
+		themeField.setValue(GUIThemeType.MAP.get(settings.getThemeName()));
 		
 		final DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
