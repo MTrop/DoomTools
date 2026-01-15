@@ -225,7 +225,7 @@ public final class WADExploder
 		int ppStart;
 		if ((ppStart = wadIndexOfAny(wad, "PP_START", "P_START")) >= 0)
 		{
-			// clear out FF namespace.
+			// clear out PP namespace.
 			int ppEnd = wadIndexOfAny(wad, "PP_END", "P_END");
 			if (ppEnd < 0)
 				throw new WadException("Could not find end of patch namespace (P_END or PP_END).");
@@ -240,7 +240,7 @@ public final class WADExploder
 		int ssStart;
 		if ((ssStart = wadIndexOfAny(wad, "SS_START", "S_START")) >= 0)
 		{
-			// clear out FF namespace.
+			// clear out SS namespace.
 			int ssEnd = wadIndexOfAny(wad, "SS_END", "S_END");
 			if (ssEnd < 0)
 				throw new WadException("Could not find end of sprite namespace (S_END or SS_END).");
