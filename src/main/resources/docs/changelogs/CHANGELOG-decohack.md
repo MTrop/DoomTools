@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.44.0
+
+* `Added` A Thing/Weapon Deep Copy operator `<-` for deep-copying from another Thing/Weapon (Enh. #147).
+
+
 ### Changed for 0.43.1
 
 * `Fixed` Made different "Max Health" default for Boom patches and higher (Issue #146).

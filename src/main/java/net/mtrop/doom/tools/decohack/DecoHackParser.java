@@ -2450,6 +2450,29 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			thing.copyFrom(context.getThing(sourceSlot));
 		}
+		else if (matchType(DecoHackKernel.TYPE_LEFTARROW))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.THING))
+			{
+				addErrorMessage("Expected \"%s\" after '<-'.", Keyword.THING);
+				return false;
+			}
+			
+			Integer sourceSlot;
+			if ((sourceSlot = matchThingIndex(context)) == null)
+				return false;
+			
+			Map<Integer, Integer> indexRemap = new TreeMap<>();
+			thing.copyFrom(context.getThing(sourceSlot));
+			if (context.copyThingStates(sourceSlot, lastAutoStateIndex, new TreeSet<>(), indexRemap) == null)
+			{
+				addErrorMessage("No more states for deep copy of thing.");
+				return false;
+			}
+
+			for(String label : thing.getLabels())
+				thing.setLabel(label, indexRemap.getOrDefault(thing.getLabel(label), 0));
+		}
 		
 		if (currentType(DecoHackKernel.TYPE_STRING))
 		{
@@ -3618,6 +3641,29 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 	
 			weapon.copyFrom(context.getWeapon(sourceSlot));
+		}
+		else if (matchType(DecoHackKernel.TYPE_LEFTARROW))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.WEAPON))
+			{
+				addErrorMessage("Expected \"%s\" after '<-'.", Keyword.WEAPON);
+				return false;
+			}
+			
+			Integer sourceSlot;
+			if ((sourceSlot = matchWeaponIndex(context)) == null)
+				return false;
+			
+			Map<Integer, Integer> indexRemap = new TreeMap<>();
+			weapon.copyFrom(context.getWeapon(sourceSlot));
+			if (context.copyWeaponStates(sourceSlot, lastAutoStateIndex, new TreeSet<>(), indexRemap) == null)
+			{
+				addErrorMessage("No more states for deep copy of weapon.");
+				return false;
+			}
+
+			for(String label : weapon.getLabels())
+				weapon.setLabel(label, indexRemap.getOrDefault(weapon.getLabel(label), 0));
 		}
 		
 		if (currentType(DecoHackKernel.TYPE_STRING))
@@ -6850,6 +6896,7 @@ public final class DecoHackParser extends Lexer.Parser
 		public static final int TYPE_PLUS = 12;
 		public static final int TYPE_DASH = 13;
 		public static final int TYPE_PIPE = 14;
+		public static final int TYPE_LEFTARROW = 15;
 
 		public static final int TYPE_TRUE = 101;
 		public static final int TYPE_FALSE = 102;
@@ -6871,6 +6918,7 @@ public final class DecoHackParser extends Lexer.Parser
 			addDelimiter(",", TYPE_COMMA);
 			addDelimiter(".", TYPE_PERIOD);
 			addDelimiter(":", TYPE_COLON);
+			addDelimiter("<-", TYPE_LEFTARROW);
 
 			addDelimiter("+", TYPE_PLUS);
 			addDelimiter("-", TYPE_DASH);

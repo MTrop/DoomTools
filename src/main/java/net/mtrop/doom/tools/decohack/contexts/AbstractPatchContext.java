@@ -597,6 +597,57 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Searches through the states and copies them to the next free state, if available.
+	 * The state traversal is through the "next state" indices on each state.
+	 * Stops at protected states, states it already copied, and the NULL state (0).
+	 * States that are copied TO have their "free" status set to false.
+	 * @param startingStateIndex the state index to start from.
+	 * @param nextFreeStateSearchIndex the index to start the search for the next free states from.
+	 * @param copiedIndexSet the index set for the search to stop on. Is added to throughout the copy.
+	 * @param indexRemap the map to use for the state remap.
+	 * @return the amount of states copied, or null if a copy ran out of available states.
+	 */
+	public Integer copyConnectedStates(int startingStateIndex, int nextFreeStateSearchIndex, Set<Integer> copiedIndexSet, Map<Integer, Integer> indexRemap)
+	{
+		int out = 0;
+		int index = startingStateIndex;
+		while (!isProtectedState(index) && !copiedIndexSet.contains(index) && index != 0)
+		{
+			copiedIndexSet.add(index);
+			
+			Integer nextFreeState = findNextFreeState(nextFreeStateSearchIndex);
+			if (nextFreeState != null)
+			{
+				DEHState thisState = getState(index);
+				DEHState targetState = getState(nextFreeState);
+				setActionPointer(nextFreeState, getActionPointer(index));
+				indexRemap.put(index, nextFreeState);
+				targetState.copyFrom(thisState);
+				setFreeState(nextFreeState, false);
+			}
+			else
+			{
+				return null;
+			}
+			
+			index = getState(index).getNextStateIndex();
+			out++;
+		}
+		return out;
+	}
+	
+	// Remaps the copied states.
+	private void remapCopiedStates(Map<Integer, Integer> indexRemap)
+	{
+		Collection<Integer> copiedIndices = indexRemap.values();
+		for (Integer targetStateIndex : copiedIndices)
+		{
+			DEHState targetState = getState(targetStateIndex);
+			targetState.setNextStateIndex(indexRemap.getOrDefault(targetState.getNextStateIndex(), 0));
+		}
+	}
+	
+	/**
 	 * Flags each associated state in a thing as "free".
 	 * Each starting state index is taken from the state that the corresponding thing uses.
 	 * Each connected state (connected via next state indices) is freed until an already free state
@@ -617,6 +668,36 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Copies a Thing's states to a range of free states.
+	 * Each starting state index is taken from the state that the corresponding thing uses.
+	 * The state traversal is through the "next state" indices on each state.
+	 * Stops at protected states, states it already copied, and the NULL state (0).
+	 * States that are copied TO have their "free" status set to false.
+	 * @param thingIndex the thing slot index.
+	 * @param nextFreeStateSearchIndex the index to start the search for the next free states from.
+	 * @param copiedIndexSet the index set for the search to stop on. Is added to throughout the copy.
+	 * @param indexRemap the map to use for remapping states.
+	 * @return the amount of states copied, or null if a copy ran out of available states.
+	 * @see #getThing(int)
+	 * @see #setFreeState(int, boolean)
+	 * @see #copyConnectedStates(int, int, Set, Map)
+	 */
+	public Integer copyThingStates(int thingIndex, int nextFreeStateSearchIndex, Set<Integer> copiedIndexSet, Map<Integer, Integer> indexRemap)
+	{
+		int out = 0;
+		DEHThing thing = getThing(thingIndex);
+		for (String label : thing.getLabels())
+		{
+			Integer stateAmt = copyConnectedStates(thing.getLabel(label), nextFreeStateSearchIndex, copiedIndexSet, indexRemap);
+			if (stateAmt == null)
+				return null;
+			out += stateAmt;
+		}
+		remapCopiedStates(indexRemap);
+		return out;
+	}
+	
+	/**
 	 * Flags each associated state in a weapon as "free".
 	 * Each starting state index is taken from the state that the corresponding weapon uses.
 	 * Each connected state (connected via next state indices) is freed until an already free state
@@ -633,6 +714,36 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		DEHWeapon weapon = getWeapon(weaponIndex);
 		for (String label : weapon.getLabels())
 			out += freeConnectedStates(weapon.getLabel(label));
+		return out;
+	}
+	
+	/**
+	 * Copies a Weapons's states to a range of free states.
+	 * Each starting state index is taken from the state that the corresponding weapon uses.
+	 * The state traversal is through the "next state" indices on each state.
+	 * Stops at protected states, states it already copied, and the NULL state (0).
+	 * States that are copied TO have their "free" status set to false.
+	 * @param weaponIndex the weapon slot index.
+	 * @param nextFreeStateSearchIndex the index to start the search for the next free states from.
+	 * @param copiedIndexSet the index set for the search to stop on. Is added to throughout the copy.
+	 * @param indexRemap the map to use for remapping states.
+	 * @return the amount of states copied, or null if a copy ran out of available states.
+	 * @see #getThing(int)
+	 * @see #setFreeState(int, boolean)
+	 * @see #copyConnectedStates(int, int, Set, Map)
+	 */
+	public Integer copyWeaponStates(int weaponIndex, int nextFreeStateSearchIndex, Set<Integer> copiedIndexSet, Map<Integer, Integer> indexRemap)
+	{
+		int out = 0;
+		DEHWeapon weapon = getWeapon(weaponIndex);
+		for (String label : weapon.getLabels())
+		{
+			Integer stateAmt = copyConnectedStates(weapon.getLabel(label), nextFreeStateSearchIndex, copiedIndexSet, indexRemap);
+			if (stateAmt == null)
+				return null;
+			out += stateAmt;
+		}
+		remapCopiedStates(indexRemap);
 		return out;
 	}
 	
