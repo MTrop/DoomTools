@@ -224,7 +224,9 @@ public final class DecoHackParser extends Lexer.Parser
 		
 		String FORCE = "force";
 		String OUTPUT = "output";
-		
+
+		String RESKIN = "reskin";
+
 		String WITH = "with";
 		String SWAP = "swap";
 
@@ -2259,6 +2261,37 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			return true;
 		}
+		else if (matchIdentifierIgnoreCase(Keyword.RESKIN))
+		{
+			final Integer oldSpriteIndex = matchSpriteIndexName(context);
+			if (oldSpriteIndex == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.RESKIN);
+				return false;
+			}
+
+			if (!matchIdentifierIgnoreCase(Keyword.TO))
+			{
+				addErrorMessage("Expected \"%s\" after sprite name.", Keyword.TO);
+				return false;
+			}
+
+			final Integer newSpriteIndex = matchSpriteIndexName(context);
+			if (newSpriteIndex == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.TO);
+				return false;
+			}
+
+			DEHThing thing = context.getThing(slot);
+
+			context.transformActorStates(thing, (state) -> {
+				if (state.getSpriteIndex() == oldSpriteIndex)
+					state.setSpriteIndex(newSpriteIndex);
+			});
+			
+			return true;
+		}
 		else
 		{
 			return parseThingDefinitionBlock(context, slot);
@@ -2464,7 +2497,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			Map<Integer, Integer> indexRemap = new TreeMap<>();
 			thing.copyFrom(context.getThing(sourceSlot));
-			if (context.copyThingStates(sourceSlot, lastAutoStateIndex, new TreeSet<>(), indexRemap) == null)
+			if (context.copyThingStates(sourceSlot, lastAutoStateIndex, indexRemap) == null)
 			{
 				addErrorMessage("No more states for deep copy of thing.");
 				return false;
@@ -3453,6 +3486,37 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			return true;
 		}
+		else if (matchIdentifierIgnoreCase(Keyword.RESKIN))
+		{
+			final Integer oldSpriteIndex = matchSpriteIndexName(context);
+			if (oldSpriteIndex == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.RESKIN);
+				return false;
+			}
+
+			if (!matchIdentifierIgnoreCase(Keyword.TO))
+			{
+				addErrorMessage("Expected \"%s\" after sprite name.", Keyword.TO);
+				return false;
+			}
+
+			final Integer newSpriteIndex = matchSpriteIndexName(context);
+			if (newSpriteIndex == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.TO);
+				return false;
+			}
+
+			DEHWeapon weapon = context.getWeapon(slot);
+
+			context.transformActorStates(weapon, (state) -> {
+				if (state.getSpriteIndex() == oldSpriteIndex)
+					state.setSpriteIndex(newSpriteIndex);
+			});
+			
+			return true;
+		}
 		else
 		{
 			return parseWeaponDefinitionBlock(context, slot);
@@ -3656,7 +3720,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			Map<Integer, Integer> indexRemap = new TreeMap<>();
 			weapon.copyFrom(context.getWeapon(sourceSlot));
-			if (context.copyWeaponStates(sourceSlot, lastAutoStateIndex, new TreeSet<>(), indexRemap) == null)
+			if (context.copyWeaponStates(sourceSlot, lastAutoStateIndex, indexRemap) == null)
 			{
 				addErrorMessage("No more states for deep copy of weapon.");
 				return false;

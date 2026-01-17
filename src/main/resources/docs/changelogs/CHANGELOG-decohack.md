@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.44.0
 
 * `Added` A Thing/Weapon Deep Copy operator `<-` for deep-copying from another Thing/Weapon (Enh. #147).
+* `Added` A "reskin" operation for a Thing/Weapon (Enh. #147).
 
 
 ### Changed for 0.43.1

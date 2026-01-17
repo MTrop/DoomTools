@@ -15,10 +15,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
+import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHObject;
@@ -597,6 +599,30 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Searches through the states and transforms them somehow.
+	 * The state traversal is through the "next state" indices on each state.
+	 * Stops at protected states, states it already visited, and the NULL state (0).
+	 * @param startingStateIndex the state index to start from.
+	 * @param visitedIndexSet the index set for the search to stop on. Is added to throughout the search.
+	 * @param stateTransformer the state transformer function.
+	 * @return the amount of states freed.
+	 */
+	public int transformConnectedStates(int startingStateIndex, Set<Integer> visitedIndexSet, Consumer<DEHState> stateTransformer)
+	{
+		int out = 0;
+		int index = startingStateIndex;
+		while (!isProtectedState(index) && !visitedIndexSet.contains(index) && index != 0)
+		{
+			visitedIndexSet.add(index);
+			DEHState state = getState(index);
+			stateTransformer.accept(state);
+			index = state.getNextStateIndex();
+			out++;
+		}
+		return out;
+	}
+	
+	/**
 	 * Searches through the states and copies them to the next free state, if available.
 	 * The state traversal is through the "next state" indices on each state.
 	 * Stops at protected states, states it already copied, and the NULL state (0).
@@ -648,6 +674,26 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Transforms an Actor's states.
+	 * Each starting state index is taken from the state that the corresponding weapon uses.
+	 * The state traversal is through the "next state" indices on each state.
+	 * Stops at protected states, states it already copied, and the NULL state (0).
+	 * @param actor the weapon.
+	 * @param stateTransformer the state transformer function.
+	 * @return the amount of states copied, or null if a copy ran out of available states.
+	 * @see #getWeapon(int)
+	 * @see #transformConnectedStates(int, Set, Consumer)
+	 */
+	public int transformActorStates(DEHActor<?> actor, Consumer<DEHState> stateTransformer)
+	{
+		int out = 0;
+		Set<Integer> visitedIndices = new TreeSet<>();
+		for (String label : actor.getLabels())
+			out += transformConnectedStates(actor.getLabel(label), visitedIndices, stateTransformer);
+		return out;
+	}
+
+	/**
 	 * Flags each associated state in a thing as "free".
 	 * Each starting state index is taken from the state that the corresponding thing uses.
 	 * Each connected state (connected via next state indices) is freed until an already free state
@@ -675,17 +721,17 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * States that are copied TO have their "free" status set to false.
 	 * @param thingIndex the thing slot index.
 	 * @param nextFreeStateSearchIndex the index to start the search for the next free states from.
-	 * @param copiedIndexSet the index set for the search to stop on. Is added to throughout the copy.
 	 * @param indexRemap the map to use for remapping states.
 	 * @return the amount of states copied, or null if a copy ran out of available states.
 	 * @see #getThing(int)
 	 * @see #setFreeState(int, boolean)
 	 * @see #copyConnectedStates(int, int, Set, Map)
 	 */
-	public Integer copyThingStates(int thingIndex, int nextFreeStateSearchIndex, Set<Integer> copiedIndexSet, Map<Integer, Integer> indexRemap)
+	public Integer copyThingStates(int thingIndex, int nextFreeStateSearchIndex, Map<Integer, Integer> indexRemap)
 	{
 		int out = 0;
 		DEHThing thing = getThing(thingIndex);
+		Set<Integer> copiedIndexSet = new TreeSet<>();
 		for (String label : thing.getLabels())
 		{
 			Integer stateAmt = copyConnectedStates(thing.getLabel(label), nextFreeStateSearchIndex, copiedIndexSet, indexRemap);
@@ -716,26 +762,26 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			out += freeConnectedStates(weapon.getLabel(label));
 		return out;
 	}
-	
+
 	/**
-	 * Copies a Weapons's states to a range of free states.
+	 * Copies a Weapon's states to a range of free states.
 	 * Each starting state index is taken from the state that the corresponding weapon uses.
 	 * The state traversal is through the "next state" indices on each state.
 	 * Stops at protected states, states it already copied, and the NULL state (0).
 	 * States that are copied TO have their "free" status set to false.
 	 * @param weaponIndex the weapon slot index.
 	 * @param nextFreeStateSearchIndex the index to start the search for the next free states from.
-	 * @param copiedIndexSet the index set for the search to stop on. Is added to throughout the copy.
 	 * @param indexRemap the map to use for remapping states.
 	 * @return the amount of states copied, or null if a copy ran out of available states.
-	 * @see #getThing(int)
+	 * @see #getWeapon(int)
 	 * @see #setFreeState(int, boolean)
 	 * @see #copyConnectedStates(int, int, Set, Map)
 	 */
-	public Integer copyWeaponStates(int weaponIndex, int nextFreeStateSearchIndex, Set<Integer> copiedIndexSet, Map<Integer, Integer> indexRemap)
+	public Integer copyWeaponStates(int weaponIndex, int nextFreeStateSearchIndex, Map<Integer, Integer> indexRemap)
 	{
 		int out = 0;
 		DEHWeapon weapon = getWeapon(weaponIndex);
+		Set<Integer> copiedIndexSet = new TreeSet<>();
 		for (String label : weapon.getLabels())
 		{
 			Integer stateAmt = copyConnectedStates(weapon.getLabel(label), nextFreeStateSearchIndex, copiedIndexSet, indexRemap);

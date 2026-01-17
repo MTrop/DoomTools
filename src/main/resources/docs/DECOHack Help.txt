@@ -1058,6 +1058,55 @@ special clause:
 however - it will still seek to the next "free" slot from that provided index! 
 
 
+------------------------------------------------------------------------------
+"Reskinning" Weapons
+------------------------------------------------------------------------------
+
+You can change the sprite name of a weapon and all of its connected states via
+a "reskin" clause:
+
+    weapon Shotgun reskin SHTG to SP00
+
+
+...and all states that use "SHTG" for its sprite name will then use "SP00".
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ 
+      IMPORTANT: DECOHack is not smart enough to check that all frames
+      for a sprite name exist, as it does no outside checking for
+      graphic or state data associated with a patch. Reskinning should
+      be used with caution, and has very limited use!
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+------------------------------------------------------------------------------
+Deep-Copy Weapons
+------------------------------------------------------------------------------
+
+Copying a weapon with the ":" operator or clause will copy the weapon's
+characteristics, but that means it will copy the labels for the weapon and NOT
+the states themselves (only what the labels point to).
+
+This is fine for most cases where you want to copy a weapon, but if you want
+to also copy every state that is in it (for re-skinning or other purposes),
+you can make a "deep copy" of that weapon using the "<-" (left-arrow) 
+operator, like so:
+
+    auto weapon NewShotgun <- weapon Shotgun "New Shotgun"
+    {
+        // ... code ...
+    }
+
+
+And a deep-copy of a new weapon will be created, along with its own set of
+copied states. Like "freeing" states, this traverses a weapon's set of 
+connected states until it reaches states that it has copied or PROTECTED
+states. You must have free states to copy to, or DECOHack will throw an error
+if you ran out of states!
+
+
 ==============================================================================
 ===== Thing
 ==============================================================================
@@ -1457,6 +1506,56 @@ special clause:
 ...where <INTEGER> is a positive integer for setting the next seek index for
 "auto" things. This may not write to the exact slot for the next thing, 
 however - it will still seek to the next "free" slot from that provided index! 
+
+
+------------------------------------------------------------------------------
+"Reskinning" Things
+------------------------------------------------------------------------------
+
+You can change the sprite name of a thing and all of its connected states via
+a "reskin" clause:
+
+    thing DoomImp reskin TROO to SP00
+
+
+...and all states that use "TROO" for its sprite name will then use "SP00".
+
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+ 
+      IMPORTANT: DECOHack is not smart enough to check that all frames
+      for a sprite name exist, as it does no outside checking for
+      graphic or state data associated with a patch. Reskinning should
+      be used with caution, and has very limited use!
+
+ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\ /!\
+
+
+------------------------------------------------------------------------------
+Deep-Copy Things
+------------------------------------------------------------------------------
+
+Copying a weapon with the ":" operator or clause will copy the thing's
+characteristics, but that means it will copy the labels for the thing and NOT
+the states themselves (only what the labels point to).
+
+This is fine for most cases where you want to copy a thing, but if you want
+to also copy every state that is in it (for re-skinning or other purposes),
+you can make a "deep copy" of that thing using the "<-" (left-arrow) 
+operator, like so:
+
+    auto thing NewImp <- thing DoomImp "New Imp"
+    {
+        // ... code ...
+    }
+
+
+And a deep-copy of a new thing will be created, along with its own set of
+copied states. Like "freeing" states, this traverses a thing's set of 
+connected states until it reaches states that it has copied or PROTECTED
+states. You must have free states to copy to, or DECOHack will throw an error
+if you ran out of states!
+
 
 ------------------------------------------------------------------------------
 Thing Editor Keys
