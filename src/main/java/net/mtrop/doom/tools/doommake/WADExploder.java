@@ -483,7 +483,7 @@ public final class WADExploder
 		Animated animated = wad.getDataAs("ANIMATED", Animated.class);
 		if (animated != null)
 		{
-			WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "FF");
+			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
 			exportAnimFlatsToWAD(log, entrySet, wad, animated, flatEntries, outAnimFlatWad);
 			log.println("Amended `" + outAnimFlatWad.getPath() + "`.");
 		}
@@ -494,14 +494,10 @@ public final class WADExploder
 			File outPatchDir = new File(targetDirectory.getPath() + "/src/convert/patches");
 			File outFlatDir = new File(targetDirectory.getPath() + "/src/convert/flats");
 	
-			WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "FF");
-			exportFlatGraphicsToDirectory(log, entrySet, palette, wad, flatEntries, outFlatDir);
-			flatEntries = WadUtils.getEntriesInNamespace(wad, "F", Pattern.compile("F[1-9]_(START|END)"));
+			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
 			exportFlatGraphicsToDirectory(log, entrySet, palette, wad, flatEntries, outFlatDir);
 	
-			WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(wad, "PP");
-			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, patchEntries, outPatchDir);
-			patchEntries = WadUtils.getEntriesInNamespace(wad, "P", Pattern.compile("P[1-9]_(START|END)"));
+			WadEntry[] patchEntries = getEntriesInNamespace(wad, "P", "PP", Pattern.compile("P[1-9]_(START|END)"));
 			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, patchEntries, outPatchDir);
 		}
 		else
@@ -509,14 +505,10 @@ public final class WADExploder
 			File outPatchDir = new File(targetDirectory.getPath() + "/src/textures/patches");
 			File outFlatDir = new File(targetDirectory.getPath() + "/src/textures/flats");
 	
-			WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "FF");
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outFlatDir);
-			flatEntries = WadUtils.getEntriesInNamespace(wad, "F", Pattern.compile("F[1-9]_(START|END)"));
+			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
 			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outFlatDir);
 			
-			WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(wad, "PP");
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(patchEntries), outPatchDir);
-			patchEntries = WadUtils.getEntriesInNamespace(wad, "P", Pattern.compile("P[1-9]_(START|END)"));
+			WadEntry[] patchEntries = getEntriesInNamespace(wad, "P", "PP", Pattern.compile("P[1-9]_(START|END)"));
 			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(patchEntries), outPatchDir);
 		}
 		
@@ -660,9 +652,7 @@ public final class WADExploder
 			File outSpriteDir = new File(targetDirectory.getPath() + "/src/convert/sprites");
 			WadEntry[] spriteEntries;
 			
-			spriteEntries = WadUtils.getEntriesInNamespace(wad, "SS");
-			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, spriteEntries, outSpriteDir);
-			spriteEntries = WadUtils.getEntriesInNamespace(wad, "S");
+			spriteEntries = getEntriesInNamespace(wad, "S", "SS");
 			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, spriteEntries, outSpriteDir);
 		}
 		else
@@ -670,9 +660,7 @@ public final class WADExploder
 			File outSpriteDir = new File(targetDirectory.getPath() + "/src/assets/sprites");
 			WadEntry[] spriteEntries;
 
-			spriteEntries = WadUtils.getEntriesInNamespace(wad, "SS");
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir);
-			spriteEntries = WadUtils.getEntriesInNamespace(wad, "S");
+			spriteEntries = getEntriesInNamespace(wad, "S", "SS");
 			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir);
 		}
 		
@@ -1005,6 +993,31 @@ public final class WADExploder
 				out.add(entries[i]);
 			return out.toArray(new WadEntry[out.size()]);
 		}
+	}
+	
+	private static WadEntry[] getEntriesInNamespace(Wad wad, String name, String altName)
+	{
+		return getEntriesInNamespace(wad, name, altName, null);
+	}
+	
+	private static WadEntry[] getEntriesInNamespace(Wad wad, String name, String altName, Pattern ignorePattern)
+	{
+		List<WadEntry> entryList = new ArrayList<>(128);
+		
+		int start = wadIndexOfAny(wad, name + "_START", altName + "_START");
+		if (start >= 0)
+		{
+			int end = wadIndexOfAny(wad, name + "_END", altName + "_END");
+			for (int i = start + 1; i < end; i++)
+			{
+				WadEntry entry = wad.getEntry(i);
+				if (ignorePattern != null && ignorePattern.matcher(entry.getName()).matches())
+					continue;
+				entryList.add(entry);
+			}
+		}
+		
+		return entryList.toArray(new WadEntry[entryList.size()]);
 	}
 	
 	private static int wadIndexOfAny(Wad wad, String ... entryNames)

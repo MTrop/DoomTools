@@ -754,14 +754,23 @@ public final class DoomMakeMain
 					return ERROR_BAD_WAD;
 				} 
 				
-				options.stdout.println("Using templates: " + Arrays.toString(options.templateNames.toArray(new String[options.templateNames.size()])));
+				options.stdout.println("Using templates: " + options.templateNames.toString());
 				
 				int err;
 				if ((err = createProject(projectGenerator, false, true)) != ERROR_NONE)
 					return err;
 		
 				options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
-				WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+				try {
+					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_UNKNOWN;
+				} 
+					
 				options.stdout.println("Done!");
 			}
 			catch (WadException e)
@@ -779,11 +788,6 @@ public final class DoomMakeMain
 				options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read (access denied).");
 				return ERROR_SECURITY;
 			}
-			catch (Exception e)
-			{
-				options.stderr.println("ERROR: " + e.getLocalizedMessage());
-				return ERROR_BAD_WAD;
-			} 
 			
 			return ERROR_NONE;
 		}
