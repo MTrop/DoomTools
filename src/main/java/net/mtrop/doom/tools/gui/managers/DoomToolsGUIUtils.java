@@ -767,7 +767,7 @@ public final class DoomToolsGUIUtils
 		return new ProcessModal() 
 		{
 			@Override
-			public void start(DoomToolsTaskManager tasks, final Runnable onStart, final Runnable onEnd) 
+			public void start(DoomToolsTaskManager tasks, final Runnable onStart, final Consumer<Integer> onEnd) 
 			{
 				final PrintStream outStream = outputPanel.getPrintStream();
 				final PrintStream errorStream = outputPanel.getErrorPrintStream();
@@ -776,10 +776,11 @@ public final class DoomToolsGUIUtils
 					if (onStart != null)
 						onStart.run();
 					
+					Integer result = -1;
 					try (InputStream stdin = inFile != null ? new FileInputStream(inFile) : IOUtils.getNullInputStream()) 
 					{
 						InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
-						Integer result = runInstance.result();
+						result = runInstance.result();
 						if (result == 0)
 							status.setSuccessMessage(language.getText("doomtools.process.success"));
 						else
@@ -795,7 +796,7 @@ public final class DoomToolsGUIUtils
 					}
 					
 					if (onEnd != null)
-						onEnd.run();
+						onEnd.accept(result);
 				});
 				if (!dontOpen)
 					outputModal.openThenDispose();
@@ -1266,7 +1267,7 @@ public final class DoomToolsGUIUtils
 		 * @param onStart called on start.
 		 * @param onEnd called on end.
 		 */
-		void start(DoomToolsTaskManager tasks, Runnable onStart, Runnable onEnd);
+		void start(DoomToolsTaskManager tasks, Runnable onStart, Consumer<Integer> onEnd);
 	}
 	
 	/**

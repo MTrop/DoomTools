@@ -431,7 +431,7 @@ public final class DoomMakeMain
 				}
 				else if (options.templateNames != null)
 				{
-					return createProject(generator, true);
+					return createProject(generator, true, false);
 				}
 			}
 
@@ -643,7 +643,7 @@ public final class DoomMakeMain
 			return lock.get(JSON_AGENT_LOCK_KEY).getBoolean();
 		}
 		
-		private int createProject(ProjectGenerator generator, boolean printTODO)
+		private int createProject(ProjectGenerator generator, boolean printTODO, boolean skipDECOHackReplacer)
 		{
 			if (ObjectUtils.isEmpty(options.targetName))
 			{
@@ -661,6 +661,8 @@ public final class DoomMakeMain
 			try {
 				SortedSet<ProjectModule> selectedModules = generator.getSelectedModules(options.templateNames);
 				List<ProjectTokenReplacer> projectReplacers = ProjectGenerator.getReplacers(selectedModules);
+				if (skipDECOHackReplacer)
+					projectReplacers.remove(WADProjectGenerator.REPLACER_PROJECT_DECOHACK);
 				Map<String, String> replacerMap = ProjectGenerator.consoleReplacer(projectReplacers, options.stdout, options.stdin);
 
 				options.stdout.println("Creating...");
@@ -735,6 +737,12 @@ public final class DoomMakeMain
 				}
 				
 				ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
+				if (projectType == null)
+				{
+					options.stderr.println("ERROR: Could not detect project type from provided WAD.");
+					return ERROR_BAD_PROJECT;
+				}
+				
 				options.stdout.println("Detected project type: " + projectType.name());
 				
 				ProjectGenerator projectGenerator = projectType.createGenerator();
@@ -749,7 +757,7 @@ public final class DoomMakeMain
 				options.stdout.println("Using templates: " + Arrays.toString(options.templateNames.toArray(new String[options.templateNames.size()])));
 				
 				int err;
-				if ((err = createProject(projectGenerator, false)) != ERROR_NONE)
+				if ((err = createProject(projectGenerator, false, true)) != ERROR_NONE)
 					return err;
 		
 				options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");

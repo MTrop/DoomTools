@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
@@ -355,7 +356,7 @@ public final class AppCommon
 		final String[] args, 
 		boolean agentOverride,
 		Runnable onStart,
-		Runnable onEnd
+		Consumer<Integer> onEnd
 	){
 		onExecuteDoomMake(
 			parent, 
@@ -396,7 +397,7 @@ public final class AppCommon
 		final String[] args, 
 		boolean agentOverride,
 		Runnable onStart,
-		Runnable onEnd
+		Consumer<Integer> onEnd
 	){
 		utils.createProcessModal(
 			parent, 
@@ -713,9 +714,9 @@ public final class AppCommon
 	 * @param interruptMessage the message to display in the modal on interruption.
 	 * @param errorMessage the message to display in the modal on error.
 	 * @param task the instanced future to execute.
-	 * @return
+	 * @return an InstancedFuture to queue in a task manager.
 	 */
-	private InstancedFuture<Integer> execute(
+	public InstancedFuture<Integer> execute(
 		final DoomToolsStatusPanel statusPanel, 
 		final String activityMessage, 
 		final String successMessage, 

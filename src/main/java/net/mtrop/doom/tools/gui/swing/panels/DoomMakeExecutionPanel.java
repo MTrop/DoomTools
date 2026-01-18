@@ -341,7 +341,7 @@ public class DoomMakeExecutionPanel extends JPanel
 			outputPanel.getPrintStream().println("###### Executing Target: " + currentTarget);
 		
 		appCommon.onExecuteDoomMake(this, outputPanel != null ? outputPanel : new DoomToolsTextOutputPanel(), statusPanel, outputPanel != null, projectDirectory, null, currentTarget, NO_ARGS, false,
-			()->updateTargetsEnabled(false), ()->updateTargetsEnabled(true)
+			()->updateTargetsEnabled(false), (result)->updateTargetsEnabled(true)
 		);
 	}
 

@@ -41,6 +41,7 @@ import net.mtrop.doom.tools.gui.apps.DImageConvertOffsetterApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeExploderApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
@@ -311,7 +312,8 @@ public class DoomToolsMainWindow extends JFrame
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.new", (i) -> addApplication(new DoomMakeNewProjectApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.open", (i) -> openDoomMakeProject()),
-					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.studio", (i) -> openDoomMakeStudio())
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.studio", (i) -> openDoomMakeStudio()),
+					utils.createItemFromLanguageKey("doomtools.menu.tools.item.doommake.item.exploder", (i) -> addApplication(new DoomMakeExploderApp()))
 				),
 				utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge",
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.wadmerge.item.editor", (i) -> addApplication(new WadMergeEditorApp())),

@@ -1,9 +1,10 @@
 DoomMake
 --------
 
-### Changed for 0.33.1
+### Changed for 0.34.0
 
 * `Added` [GUI-Studio] Added a line to log output when a DoomMake target is executed (for finding the start of a build).
+* `Added` [GUI] Added the WAD Exploder as a GUI application.
 
 
 ### Changed for 0.33.0

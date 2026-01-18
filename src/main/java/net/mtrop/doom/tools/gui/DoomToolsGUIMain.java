@@ -26,6 +26,7 @@ import net.mtrop.doom.tools.gui.apps.DImageConvertOffsetterApp;
 import net.mtrop.doom.tools.gui.apps.DMXConvertApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackCompilerApp;
 import net.mtrop.doom.tools.gui.apps.DecoHackEditorApp;
+import net.mtrop.doom.tools.gui.apps.DoomMakeExploderApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeNewProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeOpenProjectApp;
 import net.mtrop.doom.tools.gui.apps.DoomMakeStudioApp;
@@ -90,6 +91,8 @@ public final class DoomToolsGUIMain
 		String DOOMMAKE_OPEN = "doommake-open";
 		/** DoomMake - Studio Project. */
 		String DOOMMAKE_STUDIO = "doommake-studio";
+		/** DoomMake - WAD Exploder. */
+		String DOOMMAKE_EXPLODER = "doommake-exploder";
 		/** WadMerge. */
 		String WADMERGE = "wadmerge";
 		/** WadMerge Executor. */
@@ -372,157 +375,209 @@ public final class DoomToolsGUIMain
 			DoomToolsGUIPreWarmer.get();
 			get().createAndDisplayMainWindow();
 		}
+		else switch(args[0])
+		{
+			case ApplicationNames.DECOHACK:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
+			}
+			break;
 
-		// run standalone application.
-		else if (ApplicationNames.DECOHACK.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new DecoHackEditorApp(path != null ? new File(path) : null));
-		}
-		else if (ApplicationNames.DECOHACK_COMPILER.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new DecoHackCompilerApp(path));
-		}
-		else if (ApplicationNames.DIMGCONVERT.equals(args[0]))
-		{
-			startApplication(new DImageConvertApp());
-		}
-		else if (ApplicationNames.DIMGCONVERT_OFFSETTER.equals(args[0]))
-		{
-			File projectDirectory;
-			String path = ArrayUtils.arrayElement(args, 1);
-			String paletteWadPath = ArrayUtils.arrayElement(args, 2);
+			case ApplicationNames.DECOHACK_COMPILER:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new DecoHackCompilerApp(path));
+			}
+			break;
 			
-			// No path. Open file.
-			if (ObjectUtils.isEmpty(path) || !(projectDirectory = new File(path)).isDirectory())
+			case ApplicationNames.DIMGCONVERT:
 			{
-				DImageConvertOffsetterApp app;
-				if ((app = DImageConvertOffsetterApp.openAndCreate(null)) != null)
-					startApplication(app);
+				startApplication(new DImageConvertApp());
 			}
-			else
-			{
-				startApplication(new DImageConvertOffsetterApp(projectDirectory, paletteWadPath));
-			}
-		}
-		else if (ApplicationNames.DMXCONVERT.equals(args[0]))
-		{
-			startApplication(new DMXConvertApp());
-		}
-		else if (ApplicationNames.DOOMMAKE_NEW.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			if (ObjectUtils.isEmpty(path))
-				path = null;
-			startApplication(new DoomMakeNewProjectApp(path, !ObjectUtils.isEmpty(ArrayUtils.arrayElement(args, 2))));
-		}
-		else if (ApplicationNames.DOOMMAKE_OPEN.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
+			break;
 			
-			// No path. Open file.
-			if (ObjectUtils.isEmpty(path))
+			case ApplicationNames.DIMGCONVERT_OFFSETTER:
 			{
-				DoomMakeOpenProjectApp app;
-				if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
-					startApplication(app);
-			}
-			else
-			{
-				File projectDirectory = new File(args[1]);
-				if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
-					startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+				File projectDirectory;
+				String path = ArrayUtils.arrayElement(args, 1);
+				String paletteWadPath = ArrayUtils.arrayElement(args, 2);
+				
+				// No path. Open file.
+				if (ObjectUtils.isEmpty(path) || !(projectDirectory = new File(path)).isDirectory())
+				{
+					DImageConvertOffsetterApp app;
+					if ((app = DImageConvertOffsetterApp.openAndCreate(null)) != null)
+						startApplication(app);
+				}
 				else
-					SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+				{
+					startApplication(new DImageConvertOffsetterApp(projectDirectory, paletteWadPath));
+				}
 			}
-		}
-		else if (ApplicationNames.DOOMMAKE_STUDIO.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			
-			// No path. Open file.
-			if (ObjectUtils.isEmpty(path))
+			break;
+
+			case ApplicationNames.DMXCONVERT:
 			{
-				DoomMakeStudioApp app;
-				if ((app = DoomMakeStudioApp.openAndCreate(null)) != null)
-					startApplication(app);
+				startApplication(new DMXConvertApp());
 			}
-			else
+			break;
+
+			case ApplicationNames.DOOMMAKE_NEW:
 			{
-				File projectDirectory = new File(args[1]);
-				if (DoomMakeStudioApp.isProjectDirectory(projectDirectory))
-					startApplication(new DoomMakeStudioApp(projectDirectory));
+				String path = ArrayUtils.arrayElement(args, 1);
+				if (ObjectUtils.isEmpty(path))
+					path = null;
+				startApplication(new DoomMakeNewProjectApp(path, !ObjectUtils.isEmpty(ArrayUtils.arrayElement(args, 2))));
+			}
+			break;
+
+			case ApplicationNames.DOOMMAKE_OPEN:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				
+				// No path. Open file.
+				if (ObjectUtils.isEmpty(path))
+				{
+					DoomMakeOpenProjectApp app;
+					if ((app = DoomMakeOpenProjectApp.openAndCreate(null)) != null)
+						startApplication(app);
+				}
 				else
-					SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+				{
+					File projectDirectory = new File(args[1]);
+					if (DoomMakeOpenProjectApp.isProjectDirectory(projectDirectory))
+						startApplication(new DoomMakeOpenProjectApp(projectDirectory));
+					else
+						SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+				}
 			}
-		}
-		else if (ApplicationNames.WADMERGE.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
-		}
-		else if (ApplicationNames.WADMERGE_EXECUTOR.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadMergeExecutorApp(path));
-		}
-		else if (ApplicationNames.WADSCRIPT.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
-		}
-		else if (ApplicationNames.WADSCRIPT_EXECUTOR.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadScriptExecutorApp(path));
-		}
-		else if (ApplicationNames.WADTEX.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadTexEditorApp(path != null ? new File(path) : null));
-		}
-		else if (ApplicationNames.WADTEX_COMPILER.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WadTexCompilerApp(path != null ? path : null));
-		}
-		else if (ApplicationNames.WSWANTBL.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WSwAnTablesEditorApp(path != null ? new File(path) : null));
-		}
-		else if (ApplicationNames.WSWANTBL_COMPILER.equals(args[0]))
-		{
-			String path = ArrayUtils.arrayElement(args, 1);
-			startApplication(new WSwAnTablesCompilerApp(path));
-		}
-		else if (ApplicationNames.WTEXLIST.equals(args[0]))
-		{
-			startApplication(new WTexListApp());
-		}
-		else if (ApplicationNames.WTEXSCAN.equals(args[0]))
-		{
-			startApplication(new WTexScanApp());
-		}
-		else if (ApplicationNames.WTEXPORT.equals(args[0]))
-		{
-			startApplication(new WTExportApp());
-		}
-		else if (ApplicationNames.WTEXLIST_WTEXPORT.equals(args[0]))
-		{
-			startApplication(new WTexListTExportApp());
-		}
-		else if (ApplicationNames.WTEXSCAN_WTEXPORT.equals(args[0]))
-		{
-			startApplication(new WTexScanTExportApp());
-		}
-		else
-		{
-			SwingUtils.error("Expected valid application name.");
-			System.err.println("ERROR: Expected valid application name.");
-			System.exit(-1);
-			return;
+			break;
+
+			case ApplicationNames.DOOMMAKE_STUDIO:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				
+				// No path. Open file.
+				if (ObjectUtils.isEmpty(path))
+				{
+					DoomMakeStudioApp app;
+					if ((app = DoomMakeStudioApp.openAndCreate(null)) != null)
+						startApplication(app);
+				}
+				else
+				{
+					File projectDirectory = new File(args[1]);
+					if (DoomMakeStudioApp.isProjectDirectory(projectDirectory))
+						startApplication(new DoomMakeStudioApp(projectDirectory));
+					else
+						SwingUtils.error(DoomToolsLanguageManager.get().getText("doommake.project.open.browse.baddir", projectDirectory.getAbsolutePath()));
+				}
+			}
+			break;
+
+			case ApplicationNames.DOOMMAKE_EXPLODER:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				if (ObjectUtils.isEmpty(path))
+					path = null;
+				startApplication(new DoomMakeExploderApp(path));
+			}
+			break;
+			
+			case ApplicationNames.WADMERGE:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadMergeEditorApp(path != null ? new File(path) : null));
+			}
+			break;
+			
+			case ApplicationNames.WADMERGE_EXECUTOR:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadMergeExecutorApp(path));
+			}
+			break;
+			
+			case ApplicationNames.WADSCRIPT:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadScriptEditorApp(path != null ? new File(path) : null));
+			}
+			break;
+			
+			case ApplicationNames.WADSCRIPT_EXECUTOR:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadScriptExecutorApp(path));
+			}
+			break;
+			
+			case ApplicationNames.WADTEX:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadTexEditorApp(path != null ? new File(path) : null));
+			}
+			break;
+			
+			case ApplicationNames.WADTEX_COMPILER:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WadTexCompilerApp(path != null ? path : null));
+			}
+			break;
+			
+			case ApplicationNames.WSWANTBL:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WSwAnTablesEditorApp(path != null ? new File(path) : null));
+			}
+			break;
+			
+			case ApplicationNames.WSWANTBL_COMPILER:
+			{
+				String path = ArrayUtils.arrayElement(args, 1);
+				startApplication(new WSwAnTablesCompilerApp(path));
+			}
+			break;
+			
+			case ApplicationNames.WTEXLIST:
+			{
+				startApplication(new WTexListApp());
+			}
+			break;
+			
+			case ApplicationNames.WTEXSCAN:
+			{
+				startApplication(new WTexScanApp());
+			}
+			break;
+			
+			case ApplicationNames.WTEXPORT:
+			{
+				startApplication(new WTExportApp());
+			}
+			break;
+			
+			case ApplicationNames.WTEXLIST_WTEXPORT:
+			{
+				startApplication(new WTexListTExportApp());
+			}
+			break;
+			
+			case ApplicationNames.WTEXSCAN_WTEXPORT:
+			{
+				startApplication(new WTexScanTExportApp());
+			}
+			break;
+		
+			default:
+			{
+				SwingUtils.error("Expected valid application name.");
+				System.err.println("ERROR: Expected valid application name.");
+				System.exit(-1);
+				return;
+			}
 		}
 	}
 
