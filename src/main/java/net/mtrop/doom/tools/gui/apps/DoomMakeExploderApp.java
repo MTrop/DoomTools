@@ -167,7 +167,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 							utils.createAllFilesFilter()
 						), 
 						(selected) -> { 
-							sourceWAD = selected;
+							paletteFile = selected;
 						}
 					))
 				))

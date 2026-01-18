@@ -716,8 +716,18 @@ public final class WADExploder
 			
 			if (entryData.length == 0) // skip markers
 				continue;
-			
-			if (isMusicData(entryName, entryData))
+
+			if (entryName.startsWith("DEMO"))
+			{
+				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+				try (FileOutputStream fos = new FileOutputStream(out))
+				{
+					fos.write(wad.getData(entry));
+					log.println("Wrote `" + out.getPath() + "`.");
+				}
+			}
+			else if (isMusicData(entryName, entryData))
 			{
 				File outMusicDir = new File(targetDirectory.getPath() + "/src/assets/music");
 				File out = new File(outMusicDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getMusicExtensionFor(entryData));
