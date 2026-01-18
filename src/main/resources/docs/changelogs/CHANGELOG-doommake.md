@@ -5,6 +5,7 @@ DoomMake
 
 * `Added` [GUI-Studio] Added a line to log output when a DoomMake target is executed (for finding the start of a build).
 * `Added` [GUI] Added the WAD Exploder as a GUI application.
+* `FIxed` WAD Exploder is more tolerant of mismatched header namespaces.
 
 
 ### Changed for 0.33.0
