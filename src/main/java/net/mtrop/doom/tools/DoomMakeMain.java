@@ -779,6 +779,11 @@ public final class DoomMakeMain
 				options.stderr.println("ERROR: The provided WAD file \"" + options.explodeWad.getPath() + "\" could not be read (access denied).");
 				return ERROR_SECURITY;
 			}
+			catch (Exception e)
+			{
+				options.stderr.println("ERROR: " + e.getLocalizedMessage());
+				return ERROR_BAD_WAD;
+			} 
 			
 			return ERROR_NONE;
 		}

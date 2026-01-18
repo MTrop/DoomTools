@@ -51,6 +51,7 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
+import net.mtrop.doom.tools.struct.util.StringUtils;
 
 import static javax.swing.BorderFactory.*;
 
@@ -567,7 +568,14 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 		try {
 			WADExploder.explodeIntoProject(log, wadFile, targetDirectory, convert, convertPalette);
 		} catch (IOException e) {
+			log.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+			return 1;
+		} catch (SecurityException e) {
+			log.println("ERROR: (Access Denied): " + e.getLocalizedMessage());
+			return 1;
+		} catch (Exception e) {
 			log.println("ERROR: " + e.getLocalizedMessage());
+			SwingUtils.error(getApplicationContainer(), StringUtils.getJREExceptionString(e));
 			return 1;
 		}
 		
