@@ -1535,7 +1535,7 @@ a "reskin" clause:
 Deep-Copy Things
 ------------------------------------------------------------------------------
 
-Copying a weapon with the ":" operator or clause will copy the thing's
+Copying a thing with the ":" operator or clause will copy the thing's
 characteristics, but that means it will copy the labels for the thing and NOT
 the states themselves (only what the labels point to).
 
