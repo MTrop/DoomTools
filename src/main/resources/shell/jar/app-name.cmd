@@ -10,7 +10,7 @@ SET DOOMTOOLS_PATH=%~dp0
 SET DOOMTOOLS_JAR=
 
 REM ===== Get latest JAR.
-FOR /F %%F in ('dir "%DOOMTOOLS_PATH%\jar\*.jar" /a/b/n') DO ( SET DOOMTOOLS_JAR=jar\%%F )
+FOR /F %%F in ('dir "%DOOMTOOLS_PATH%\jar\*.jar" /a/b/n') DO (SET DOOMTOOLS_JAR=jar\%%F)
 
 REM =========================================================================
 
