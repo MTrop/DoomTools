@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.43.1 by Matt Tropiano (using DoomStruct v2.21.0)
+DECOHack v0.44.0 by Matt Tropiano (using DoomStruct v2.21.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -1264,6 +1264,55 @@ special clause:
 however - it will still seek to the next &quot;free&quot; slot from that provided index! 
 
 
+------------------------------------------------------------------------------
+&quot;Reskinning&quot; Weapons
+------------------------------------------------------------------------------
+
+You can change the sprite name of a weapon and all of its connected states via
+a &quot;reskin&quot; clause:
+
+    weapon Shotgun reskin SHTG to SP00
+
+
+...and all states that use &quot;SHTG&quot; for its sprite name will then use &quot;SP00&quot;.
+
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+ 
+      IMPORTANT: DECOHack is not smart enough to check that all frames
+      for a sprite name exist, as it does no outside checking for
+      graphic or state data associated with a patch. Reskinning should
+      be used with caution, and has very limited use!
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+
+------------------------------------------------------------------------------
+Deep-Copy Weapons
+------------------------------------------------------------------------------
+
+Copying a weapon with the &quot;:&quot; operator or clause will copy the weapon&#39;s
+characteristics, but that means it will copy the labels for the weapon and NOT
+the states themselves (only what the labels point to).
+
+This is fine for most cases where you want to copy a weapon, but if you want
+to also copy every state that is in it (for re-skinning or other purposes),
+you can make a &quot;deep copy&quot; of that weapon using the &quot;&lt;-&quot; (left-arrow) 
+operator, like so:
+
+    auto weapon NewShotgun &lt;- weapon Shotgun &quot;New Shotgun&quot;
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+And a deep-copy of a new weapon will be created, along with its own set of
+copied states. Like &quot;freeing&quot; states, this traverses a weapon&#39;s set of 
+connected states until it reaches states that it has copied or PROTECTED
+states. You must have free states to copy to, or DECOHack will throw an error
+if you ran out of states!
+
+
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Thing
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -1663,6 +1712,56 @@ special clause:
 ...where &lt;INTEGER&gt; is a positive integer for setting the next seek index for
 &quot;auto&quot; things. This may not write to the exact slot for the next thing, 
 however - it will still seek to the next &quot;free&quot; slot from that provided index! 
+
+
+------------------------------------------------------------------------------
+&quot;Reskinning&quot; Things
+------------------------------------------------------------------------------
+
+You can change the sprite name of a thing and all of its connected states via
+a &quot;reskin&quot; clause:
+
+    thing DoomImp reskin TROO to SP00
+
+
+...and all states that use &quot;TROO&quot; for its sprite name will then use &quot;SP00&quot;.
+
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+ 
+      IMPORTANT: DECOHack is not smart enough to check that all frames
+      for a sprite name exist, as it does no outside checking for
+      graphic or state data associated with a patch. Reskinning should
+      be used with caution, and has very limited use!
+
+ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\ &#x2F;!\
+
+
+------------------------------------------------------------------------------
+Deep-Copy Things
+------------------------------------------------------------------------------
+
+Copying a thing with the &quot;:&quot; operator or clause will copy the thing&#39;s
+characteristics, but that means it will copy the labels for the thing and NOT
+the states themselves (only what the labels point to).
+
+This is fine for most cases where you want to copy a thing, but if you want
+to also copy every state that is in it (for re-skinning or other purposes),
+you can make a &quot;deep copy&quot; of that thing using the &quot;&lt;-&quot; (left-arrow) 
+operator, like so:
+
+    auto thing NewImp &lt;- thing DoomImp &quot;New Imp&quot;
+    {
+        &#x2F;&#x2F; ... code ...
+    }
+
+
+And a deep-copy of a new thing will be created, along with its own set of
+copied states. Like &quot;freeing&quot; states, this traverses a thing&#39;s set of 
+connected states until it reaches states that it has copied or PROTECTED
+states. You must have free states to copy to, or DECOHack will throw an error
+if you ran out of states!
+
 
 ------------------------------------------------------------------------------
 Thing Editor Keys
@@ -2372,6 +2471,12 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.44.0
+
+* &#x60;Added&#x60; A Thing&#x2F;Weapon Deep Copy operator &#x60;&lt;-&#x60; for deep-copying from another Thing&#x2F;Weapon (Enh. #147).
+* &#x60;Added&#x60; A &quot;reskin&quot; operation for a Thing&#x2F;Weapon (Enh. #147).
+
+
 ### Changed for 0.43.1
 
 * &#x60;Fixed&#x60; Made different &quot;Max Health&quot; default for Boom patches and higher (Issue #146).
