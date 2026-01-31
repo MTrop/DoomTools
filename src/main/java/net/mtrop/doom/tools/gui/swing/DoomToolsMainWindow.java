@@ -395,7 +395,8 @@ public class DoomToolsMainWindow extends JFrame
 			"docs/licenses/LICENSE-RSyntaxTextArea.txt",
 			"docs/licenses/LICENSE-AutoComplete.txt",
 			"docs/licenses/LICENSE-CommonMark.txt",
-			"docs/licenses/LICENSE-Silk Icons.txt"
+			"docs/licenses/LICENSE-Silk Icons.txt",
+			"docs/licenses/LICENSE-Jsoup.txt"
 		};
 		
 		HelpSource[] sources = new HelpSource[licenses.length];
