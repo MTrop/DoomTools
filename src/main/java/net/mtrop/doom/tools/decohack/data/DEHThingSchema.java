@@ -19,7 +19,7 @@ import net.mtrop.doom.util.RangeUtils;
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
  * @author Matthew Tropiano
  */
-public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
+public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 {
 	private Boolean forceOutput;
 	
@@ -103,7 +103,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	/**
 	 * Creates a new blank thing.
 	 */
-	public DEHThingTemplate()
+	public DEHThingSchema()
 	{
 		this.editorNumber = null;
 		
@@ -171,7 +171,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	 * @param destination the destination thing.
 	 * @return this template.
 	 */
-	public DEHThingTemplate applyTo(DEHThing destination) 
+	public DEHThingSchema applyTo(DEHThing destination) 
 	{
 		if (forceOutput != null)
 			destination.setForceOutput(forceOutput);
@@ -327,7 +327,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate clearProperties() 
+	public DEHThingSchema clearProperties() 
 	{
 		setEditorNumber(EDITORNUMBER_NONE);
 		setHealth(0);
@@ -367,7 +367,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate clearSounds() 
+	public DEHThingSchema clearSounds() 
 	{
 		setSeeSoundPosition(SOUND_NONE);
 		setAttackSoundPosition(SOUND_NONE);
@@ -382,7 +382,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate clearFlags() 
+	public DEHThingSchema clearFlags() 
 	{
 		setFlags(0x00000000);
 		setMBF21Flags(0x00000000);
@@ -391,7 +391,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate clearLabels()
+	public DEHThingSchema clearLabels()
 	{
 		stateIndexMap.clear();
 		// If a template clears labels, explicitly set state 0.
@@ -407,14 +407,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setForceOutput(boolean enabled)
+	public DEHThingSchema setForceOutput(boolean enabled)
 	{
 		this.forceOutput = enabled;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate setEditorNumber(int editorNumber)
+	public DEHThingSchema setEditorNumber(int editorNumber)
 	{
 		if (editorNumber == 0)
 			throw new IllegalArgumentException("Editor number can not be 0.");
@@ -424,14 +424,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate clearEditorKeys() 
+	public DEHThingSchema clearEditorKeys() 
 	{
 		editorKeyMap.clear();
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setEditorKey(String key, String value)
+	public DEHThingSchema setEditorKey(String key, String value)
 	{
 		editorKeyMap.put(key, value);
 		return this;
@@ -451,7 +451,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setHealth(int health)
+	public DEHThingSchema setHealth(int health)
 	{
 		RangeUtils.checkRange("Health", 0, 999999, health);
 		this.health = health;
@@ -459,7 +459,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setSpeed(int speed) 
+	public DEHThingSchema setSpeed(int speed) 
 	{
 		RangeUtils.checkRange("Speed", -32768, 32767, speed);
 		this.speed = speed;
@@ -468,14 +468,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setFixedSpeed(Integer fixedSpeed)
+	public DEHThingSchema setFixedSpeed(Integer fixedSpeed)
 	{
 		this.fixedSpeed = fixedSpeed;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate setFastSpeed(int fastSpeed) 
+	public DEHThingSchema setFastSpeed(int fastSpeed) 
 	{
 		RangeUtils.checkRange("Fast speed", -1, 65535, fastSpeed);
 		this.fastSpeed = fastSpeed;
@@ -483,7 +483,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setRadius(int radius) 
+	public DEHThingSchema setRadius(int radius) 
 	{
 		RangeUtils.checkRange("Radius", 0, 65535, radius);
 		this.radius = radius;
@@ -491,7 +491,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setHeight(int height) 
+	public DEHThingSchema setHeight(int height) 
 	{
 		RangeUtils.checkRange("Height", 0, 65535, height);
 		this.height = height;
@@ -499,7 +499,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setDamage(int damage) 
+	public DEHThingSchema setDamage(int damage) 
 	{
 		RangeUtils.checkRange("Damage", -999999, 999999, damage);
 		this.damage = damage;
@@ -507,7 +507,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setReactionTime(int reactionTime)
+	public DEHThingSchema setReactionTime(int reactionTime)
 	{
 		RangeUtils.checkRange("Reaction time", 0, Integer.MAX_VALUE, reactionTime);
 		this.reactionTime = reactionTime;
@@ -515,7 +515,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setPainChance(int painChance)
+	public DEHThingSchema setPainChance(int painChance)
 	{
 		RangeUtils.checkRange("Pain chance", 0, Integer.MAX_VALUE, painChance);
 		this.painChance = painChance;
@@ -523,14 +523,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setFlags(int bits) 
+	public DEHThingSchema setFlags(int bits) 
 	{
 		this.flags = bits;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate addFlag(int bits)
+	public DEHThingSchema addFlag(int bits)
 	{
 		if (this.flags != null)
 			this.flags |= bits;
@@ -540,7 +540,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate removeFlag(int bits)
+	public DEHThingSchema removeFlag(int bits)
 	{
 		if (this.flags != null)
 			this.flags &= ~bits;
@@ -565,14 +565,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setMBF21Flags(int bits) 
+	public DEHThingSchema setMBF21Flags(int bits) 
 	{
 		this.mbf21Flags = bits;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate addMBF21Flag(int bits)
+	public DEHThingSchema addMBF21Flag(int bits)
 	{
 		if (this.mbf21Flags != null)
 			this.mbf21Flags |= bits;
@@ -582,7 +582,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate removeMBF21Flag(int bits)
+	public DEHThingSchema removeMBF21Flag(int bits)
 	{
 		if (this.mbf21Flags != null)
 			this.mbf21Flags &= ~bits;
@@ -607,14 +607,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setMass(int mass) 
+	public DEHThingSchema setMass(int mass) 
 	{
 		this.mass = mass;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate setMeleeRange(int meleeRange) 
+	public DEHThingSchema setMeleeRange(int meleeRange) 
 	{
 		RangeUtils.checkRange("Melee range", 0, 65535, meleeRange);
 		this.meleeRange = meleeRange;
@@ -622,7 +622,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setInfightingGroup(int infightingGroup) 
+	public DEHThingSchema setInfightingGroup(int infightingGroup) 
 	{
 		RangeUtils.checkRange("Infighting group", 0, Integer.MAX_VALUE, infightingGroup);
 		this.infightingGroup = infightingGroup;
@@ -630,7 +630,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setProjectileGroup(int projectileGroup) 
+	public DEHThingSchema setProjectileGroup(int projectileGroup) 
 	{
 		RangeUtils.checkRange("Projectile group", -1, Integer.MAX_VALUE, projectileGroup);
 		this.projectileGroup = projectileGroup;
@@ -638,7 +638,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setSplashGroup(int splashGroup) 
+	public DEHThingSchema setSplashGroup(int splashGroup) 
 	{
 		RangeUtils.checkRange("Splash group", 0, Integer.MAX_VALUE, splashGroup);
 		this.splashGroup = splashGroup;
@@ -646,7 +646,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setDroppedItem(int droppedItem) 
+	public DEHThingSchema setDroppedItem(int droppedItem) 
 	{
 		RangeUtils.checkRange("Dropped item", 0, Integer.MAX_VALUE, droppedItem);
 		this.droppedItem = droppedItem;
@@ -654,7 +654,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 	
 	@Override
-	public DEHThingTemplate setSpawnFrameIndex(int spawnFrameIndex)
+	public DEHThingSchema setSpawnFrameIndex(int spawnFrameIndex)
 	{
 		RangeUtils.checkRange("Spawn frame index", 0, Integer.MAX_VALUE, spawnFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_SPAWN, spawnFrameIndex);
@@ -662,7 +662,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setWalkFrameIndex(int walkFrameIndex) 
+	public DEHThingSchema setWalkFrameIndex(int walkFrameIndex) 
 	{
 		RangeUtils.checkRange("Walk frame index", 0, Integer.MAX_VALUE, walkFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_SEE, walkFrameIndex);
@@ -670,7 +670,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setPainFrameIndex(int painFrameIndex) 
+	public DEHThingSchema setPainFrameIndex(int painFrameIndex) 
 	{
 		RangeUtils.checkRange("Pain frame index", 0, Integer.MAX_VALUE, painFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_PAIN, painFrameIndex);
@@ -678,7 +678,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setMeleeFrameIndex(int meleeFrameIndex)
+	public DEHThingSchema setMeleeFrameIndex(int meleeFrameIndex)
 	{
 		RangeUtils.checkRange("Melee frame index", 0, Integer.MAX_VALUE, meleeFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_MELEE, meleeFrameIndex);
@@ -686,7 +686,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setMissileFrameIndex(int missileFrameIndex) 
+	public DEHThingSchema setMissileFrameIndex(int missileFrameIndex) 
 	{
 		RangeUtils.checkRange("Attack frame index", 0, Integer.MAX_VALUE, missileFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_MISSILE, missileFrameIndex);
@@ -694,7 +694,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setDeathFrameIndex(int deathFrameIndex) 
+	public DEHThingSchema setDeathFrameIndex(int deathFrameIndex) 
 	{
 		RangeUtils.checkRange("Death frame index", 0, Integer.MAX_VALUE, deathFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_DEATH, deathFrameIndex);
@@ -702,7 +702,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
+	public DEHThingSchema setExtremeDeathFrameIndex(int extremeDeathFrameIndex)
 	{
 		RangeUtils.checkRange("Extreme death frame index", 0, Integer.MAX_VALUE, extremeDeathFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_XDEATH, extremeDeathFrameIndex);
@@ -710,7 +710,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setRaiseFrameIndex(int raiseFrameIndex) 
+	public DEHThingSchema setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		setLabel(DEHThing.STATE_LABEL_RAISE, raiseFrameIndex);
@@ -718,7 +718,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setLabel(String label, int index)
+	public DEHThingSchema setLabel(String label, int index)
 	{
 		if (index < 0)
 			throw new IllegalArgumentException("index cannot be < 0");
@@ -747,7 +747,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setSeeSoundPosition(int seeSoundPosition)
+	public DEHThingSchema setSeeSoundPosition(int seeSoundPosition)
 	{
 		RangeUtils.checkRange("Alert sound position", 0, Integer.MAX_VALUE, seeSoundPosition);
 		this.seeSoundPosition = seeSoundPosition;
@@ -755,7 +755,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setAttackSoundPosition(int attackSoundPosition)
+	public DEHThingSchema setAttackSoundPosition(int attackSoundPosition)
 	{
 		RangeUtils.checkRange("Attack sound position", 0, Integer.MAX_VALUE, attackSoundPosition);
 		this.attackSoundPosition = attackSoundPosition;
@@ -763,7 +763,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setPainSoundPosition(int painSoundPosition) 
+	public DEHThingSchema setPainSoundPosition(int painSoundPosition) 
 	{
 		RangeUtils.checkRange("Pain sound position", 0, Integer.MAX_VALUE, painSoundPosition);
 		this.painSoundPosition = painSoundPosition;
@@ -771,7 +771,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setDeathSoundPosition(int deathSoundPosition) 
+	public DEHThingSchema setDeathSoundPosition(int deathSoundPosition) 
 	{
 		RangeUtils.checkRange("Death sound position", 0, Integer.MAX_VALUE, deathSoundPosition);
 		this.deathSoundPosition = deathSoundPosition;
@@ -779,7 +779,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setActiveSoundPosition(int activeSoundPosition)
+	public DEHThingSchema setActiveSoundPosition(int activeSoundPosition)
 	{
 		RangeUtils.checkRange("Active sound position", 0, Integer.MAX_VALUE, activeSoundPosition);
 		this.activeSoundPosition = activeSoundPosition;
@@ -787,7 +787,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setRipSoundPosition(int ripSoundPosition)
+	public DEHThingSchema setRipSoundPosition(int ripSoundPosition)
 	{
 		RangeUtils.checkRange("Rip sound position", 0, Integer.MAX_VALUE, ripSoundPosition);
 		this.ripSoundPosition = ripSoundPosition;
@@ -795,14 +795,14 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setID24Flags(int bits) 
+	public DEHThingSchema setID24Flags(int bits) 
 	{
 		this.id24Flags = bits;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate addID24Flag(int bits)
+	public DEHThingSchema addID24Flag(int bits)
 	{
 		if (this.id24Flags != null)
 			this.id24Flags |= bits;
@@ -812,7 +812,7 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate removeID24Flag(int bits)
+	public DEHThingSchema removeID24Flag(int bits)
 	{
 		if (this.id24Flags != null)
 			this.id24Flags &= ~bits;
@@ -837,77 +837,77 @@ public class DEHThingTemplate implements DEHThingTarget<DEHThingTemplate>
 	}
 
 	@Override
-	public DEHThingTemplate setMinRespawnTics(int tics)
+	public DEHThingSchema setMinRespawnTics(int tics)
 	{
 		this.minRespawnTics = tics;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setRespawnDice(int dice)
+	public DEHThingSchema setRespawnDice(int dice)
 	{
 		this.respawnDice = dice;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate setPickupAmmoType(int typeId)
+	public DEHThingSchema setPickupAmmoType(int typeId)
 	{
 		this.pickupAmmoType = typeId;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupAmmoCategory(int categoryBits)
+	public DEHThingSchema setPickupAmmoCategory(int categoryBits)
 	{
 		this.pickupAmmoCategory = categoryBits;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupWeaponType(int weaponTypeId)
+	public DEHThingSchema setPickupWeaponType(int weaponTypeId)
 	{
 		this.pickupWeaponType = weaponTypeId;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupItemType(int itemTypeId)
+	public DEHThingSchema setPickupItemType(int itemTypeId)
 	{
 		this.pickupItemType = itemTypeId;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupBonusCount(int count)
+	public DEHThingSchema setPickupBonusCount(int count)
 	{
 		this.pickupBonusCount = count;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupSoundPosition(int soundPosition)
+	public DEHThingSchema setPickupSoundPosition(int soundPosition)
 	{
 		this.pickupSound = soundPosition;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setPickupMessageMnemonic(String message)
+	public DEHThingSchema setPickupMessageMnemonic(String message)
 	{
 		this.pickupMessage = message;
 		return this;
 	}
 	
 	@Override
-	public DEHThingTemplate setTranslation(String name)
+	public DEHThingSchema setTranslation(String name)
 	{
 		this.translation = name;
 		return this;
 	}
 
 	@Override
-	public DEHThingTemplate setSelfDamageFactor(int selfDamageFactor)
+	public DEHThingSchema setSelfDamageFactor(int selfDamageFactor)
 	{
 		this.selfDamageFactor = selfDamageFactor;
 		return this;

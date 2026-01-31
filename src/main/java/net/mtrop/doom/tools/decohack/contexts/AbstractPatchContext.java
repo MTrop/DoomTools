@@ -66,6 +66,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected Map<String, Integer> thingAliasMap;
 	protected Map<String, Integer> weaponAliasMap;
 	protected Map<String, Integer> ammoAliasMap;
+
+	protected Map<String, DEHThing> thingTemplateMap;
+	protected Map<String, DEHWeapon> weaponTemplateMap;
+	protected Map<String, DEHAmmo> ammoTemplateMap;
+	protected Map<String, DEHSound> soundTemplateMap;
 	
 	protected Map<String, Integer> globalStateMap;
 	
@@ -150,6 +155,11 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.weaponAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.ammoAliasMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
+		this.thingTemplateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.weaponTemplateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.ammoTemplateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.soundTemplateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
 		this.globalStateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -937,6 +947,28 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Gets a thing template by corresponding identifier.
+	 * @param identifier the identifier.
+	 * @return the corresponding thing, or null if no template by that name.
+	 */
+	public DEHThing getThingTemplate(String identifier)
+	{
+		return thingTemplateMap.get(identifier);
+	}
+
+	/**
+	 * Creates a new thing template by identifier.
+	 * @param identifier the identifier.
+	 * @return the new thing template.
+	 */
+	public DEHThing createThingTemplate(String identifier)
+	{
+		DEHThing out = new DEHThing();
+		thingTemplateMap.put(identifier, out);
+		return out;
+	}
+
+	/**
 	 * Gets if a weapon is flagged as "free".
 	 * @param weaponIndex the index.
 	 * @return true if so, false if not.
@@ -1024,6 +1056,28 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
+	 * Gets a weapon template by corresponding identifier.
+	 * @param identifier the identifier.
+	 * @return the corresponding weapon, or null if no template by that name.
+	 */
+	public DEHWeapon getWeaponTemplate(String identifier)
+	{
+		return weaponTemplateMap.get(identifier);
+	}
+
+	/**
+	 * Creates a new weapon template by identifier.
+	 * @param identifier the identifier.
+	 * @return the new weapon template.
+	 */
+	public DEHWeapon createWeaponTemplate(String identifier)
+	{
+		DEHWeapon out = new DEHWeapon();
+		weaponTemplateMap.put(identifier, out);
+		return out;
+	}
+
+	/**
 	 * Gets if an ammo type is flagged as "free".
 	 * @param weaponIndex the index.
 	 * @return true if so, false if not.
@@ -1107,6 +1161,50 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	{
 		SortedSet<String> out = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		out.addAll(ammoAliasMap.keySet());
+		return out;
+	}
+	
+	/**
+	 * Gets a ammo template by corresponding identifier.
+	 * @param identifier the identifier.
+	 * @return the corresponding ammo, or null if no template by that name.
+	 */
+	public DEHAmmo getAmmoTemplate(String identifier)
+	{
+		return ammoTemplateMap.get(identifier);
+	}
+	
+	/**
+	 * Creates a new ammo template by identifier.
+	 * @param identifier the identifier.
+	 * @return the new ammo template.
+	 */
+	public DEHAmmo createAmmoTemplate(String identifier)
+	{
+		DEHAmmo out = new DEHAmmo();
+		ammoTemplateMap.put(identifier, out);
+		return out;
+	}
+	
+	/**
+	 * Gets a sound template by corresponding identifier.
+	 * @param identifier the identifier.
+	 * @return the corresponding sound, or null if no template by that name.
+	 */
+	public DEHSound getSoundTemplate(String identifier)
+	{
+		return soundTemplateMap.get(identifier);
+	}
+	
+	/**
+	 * Creates a new sound template by identifier.
+	 * @param identifier the identifier.
+	 * @return the new sound template.
+	 */
+	public DEHSound createSoundTemplate(String identifier)
+	{
+		DEHSound out = new DEHSound();
+		soundTemplateMap.put(identifier, out);
 		return out;
 	}
 	

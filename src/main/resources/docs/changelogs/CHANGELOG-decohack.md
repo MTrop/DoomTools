@@ -1,8 +1,10 @@
 DECOHack
 --------
 
-### Changed for 0.44.1
+### Changed for 0.45.0
 
+* `Fixed` Parsing single state bodies would not have set a `tranmap`, if specified.
+* `Added` Template support for certain object types (things, weapons, sounds, ammo) (Enh. #149). 
 * `Changed` Some docs for Action Pointer `A_SkelFist`.
 
 

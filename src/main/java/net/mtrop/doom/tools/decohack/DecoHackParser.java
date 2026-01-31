@@ -41,7 +41,7 @@ import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHThingTarget;
-import net.mtrop.doom.tools.decohack.data.DEHThingTemplate;
+import net.mtrop.doom.tools.decohack.data.DEHThingSchema;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.enums.DEHValueType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
@@ -54,7 +54,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHValueType.Type;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
-import net.mtrop.doom.tools.decohack.data.DEHWeaponTemplate;
+import net.mtrop.doom.tools.decohack.data.DEHWeaponSchema;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
@@ -118,6 +118,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String PROPERTY = "property";
 
 		String ALIAS = "alias";
+		String TEMPLATE = "template";
 		String AUTO = "auto";
 		String EACH = "each";
 		String IN = "in";
@@ -406,15 +407,17 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(Keyword.STATE))
 			return parseStateBlock(context);
 		else if (matchIdentifierIgnoreCase(Keyword.PARS))
-			return parseParBlock(context);
+			return parseParBodyBlock(context);
 		else if (matchIdentifierIgnoreCase(Keyword.THING))
 			return parseThingBlock(context);
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
 			return parseWeaponBlock(context);
 		else if (matchIdentifierIgnoreCase(Keyword.MISC))
-			return parseMiscellaneousBlock(context);
+			return parseMiscellaneousBodyBlock(context);
 		else if (matchIdentifierIgnoreCase(Keyword.CUSTOM))
 			return parseCustomClause(context);
+		else if (matchIdentifierIgnoreCase(Keyword.TEMPLATE))
+			return parseTemplateEntry(context);
 		else if (matchIdentifierIgnoreCase(Keyword.EACH))
 		{
 			if (matchIdentifierIgnoreCase(Keyword.THING))
@@ -436,7 +439,7 @@ public final class DecoHackParser extends Lexer.Parser
 			else if (matchIdentifierIgnoreCase(Keyword.AMMO))
 				return parseAmmoAutoBlock(context);
 			else if (matchIdentifierIgnoreCase(Keyword.STATE))
-				return parseStateAutoBlock(context);
+				return parseActorStateAutoBlock(context);
 			else
 			{
 				addErrorMessage("Expected \"%s\", \"%s\", or \"%s\" after \"%s\".", Keyword.THING, Keyword.WEAPON, Keyword.AMMO, Keyword.AUTO);
@@ -473,6 +476,112 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 			return true;
+	}
+
+	// Parses a template entry. 
+	private boolean parseTemplateEntry(AbstractPatchContext<?> context)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.THING))
+		{
+			String name;
+			if ((name = matchIdentifier()) == null)
+			{
+				addErrorMessage("Expected identifier for thing template name.");
+				return false;
+			}
+			
+			if (context.getThingAlias(name) != null)
+			{
+				addErrorMessage("Thing alias \"%s\" has already been defined.", name);
+				return false;
+			}
+			
+			if (context.getThingTemplate(name) != null)
+			{
+				addErrorMessage("Thing template \"%s\" has already been defined.", name);
+				return false;
+			}
+			
+			DEHThing template = context.createThingTemplate(name);
+			return parseThingBodyBlock(context, template);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
+		{
+			String name;
+			if ((name = matchIdentifier()) == null)
+			{
+				addErrorMessage("Expected identifier for thing template name.");
+				return false;
+			}
+			
+			if (context.getWeaponAlias(name) != null)
+			{
+				addErrorMessage("Weapon alias \"%s\" has already been defined.", name);
+				return false;
+			}
+
+			if (context.getWeaponTemplate(name) != null)
+			{
+				addErrorMessage("Weapon template \"%s\" has already been defined.", name);
+				return false;
+			}
+			
+			DEHWeapon template = context.createWeaponTemplate(name);
+			return parseWeaponBodyBlock(context, template);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.AMMO))
+		{
+			String name;
+			if ((name = matchIdentifier()) == null)
+			{
+				addErrorMessage("Expected identifier for ammo template name.");
+				return false;
+			}
+			
+			if (context.getAmmoAlias(name) != null)
+			{
+				addErrorMessage("Ammo alias \"%s\" has already been defined.", name);
+				return false;
+			}
+
+			if (context.getAmmoTemplate(name) != null)
+			{
+				addErrorMessage("Ammo template \"%s\" has already been defined.", name);
+				return false;
+			}
+			
+			DEHAmmo template = context.createAmmoTemplate(name);
+			return parseAmmoBodyBlock(context, template);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
+		{
+			String name;
+			if ((name = matchIdentifier()) == null)
+			{
+				addErrorMessage("Expected identifier for sound template name.");
+				return false;
+			}
+			
+			if (context.getSoundIndex(name) != null)
+			{
+				addErrorMessage("Sound index \"%s\" has already been defined - cannot be a template name.", name);
+				return false;
+			}
+			
+			if (context.getSoundTemplate(name) != null)
+			{
+				addErrorMessage("Sound template \"%s\" has already been defined.", name);
+				return false;
+			}
+			
+			DEHSound template = context.createSoundTemplate(name);
+			return parseSoundBodyBlock(context, template);
+		}
+		else
+		{
+			addErrorMessage("Expected object type after \"%s\".", Keyword.TEMPLATE);
+			return false;
+		}
 	}
 
 	// Parses a "set" clause.
@@ -752,6 +861,590 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parses a par block.
+	private boolean parseParBodyBlock(AbstractPatchContext<?> context)
+	{
+		if (!context.supports(DEHFeatureLevel.BOOM))
+		{
+			addErrorMessage("Par block not supported in non-Boom-feature-level patches.");
+			return false;
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.PARS);
+			return false;
+		}
+		
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
+		{
+			EpisodeMap map;
+			if ((map = matchEpisodeMap()) == null)
+			{
+				addErrorMessage("Expected EXMY or MAPXX map entry.");
+				return false;
+			}
+			
+			Integer seconds;
+			if ((seconds = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected seconds after map entry.");
+				return false;
+			}
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				int minutes = seconds;
+				if ((seconds = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected seconds after ':'.");
+					return false;
+				}
+				seconds = (minutes * 60) + seconds;
+			}
+			
+			((PatchBoomContext)context).setParSeconds(map, seconds);
+		}
+	
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.PARS);
+			return false;
+		}
+		
+		return true;
+	}
+
+	// Parses a miscellany block.
+	private boolean parseMiscellaneousBodyBlock(AbstractPatchContext<?> context)
+	{
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.MISC);
+			return false;
+		}
+		
+		DEHMiscellany misc = context.getMiscellany();
+		
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			PropertyResult pr;
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				misc.setForceOutput(true);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseMiscellaneousBodyBlockDoom19Properties(context, misc)) != PropertyResult.BYPASSED)
+			{
+				if (pr == PropertyResult.ERROR)
+					return false;
+			}
+			else if (currentIsCustomProperty(context, DEHMiscellany.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHMiscellany.class, propertyName);
+				
+				ParameterValue val;
+				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+	
+				if (!checkCustomPropertyValue(property, propertyName, val))
+					return false;
+				
+				misc.setCustomPropertyValue(property, String.valueOf(val));
+			}
+			else
+			{
+				addErrorMessage("Expected valid miscellaneous entry type.");
+				return false;
+			}
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.MISC);
+			return false;
+		}
+	
+		return true;
+	}
+
+	private PropertyResult parseMiscellaneousBodyBlockDoom19Properties(AbstractPatchContext<?> context, DEHMiscellany misc)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING))
+		{
+			Boolean flag;
+			if ((flag = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING);
+				return PropertyResult.ERROR;
+			}
+			misc.setMonsterInfightingEnabled(flag);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING2))
+		{
+			Boolean flag;
+			if ((flag = matchBoolean()) == null)
+			{
+				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING2);
+				return PropertyResult.ERROR;
+			}
+			misc.setMonsterInfightingEnabled(flag);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_BULLETS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_BULLETS);
+				return PropertyResult.ERROR;
+			}
+			misc.setInitialBullets(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setInitialHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.GREEN_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.GREEN_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setGreenArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BLUE_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.BLUE_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setBlueArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SOULSPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.SOULSPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setSoulsphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_SOULSPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_SOULSPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxSoulsphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MEGASPHERE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MEGASPHERE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMegasphereHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.GOD_MODE_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.GOD_MODE_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setGodModeHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDFAArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDFAArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDKFAArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR_CLASS))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR_CLASS);
+				return PropertyResult.ERROR;
+			}
+			misc.setIDKFAArmorClass(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.BFG_CELLS_PER_SHOT))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.BFG_CELLS_PER_SHOT);
+				return PropertyResult.ERROR;
+			}
+			misc.setBFGCellsPerShot(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_HEALTH))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_HEALTH);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxHealth(value);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MAX_ARMOR))
+		{
+			Integer value;
+			if ((value = matchPositiveInteger()) == null)
+			{
+				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_ARMOR);
+				return PropertyResult.ERROR;
+			}
+			misc.setMaxArmor(value);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	// Parses a custom element clause.
+	private boolean parseCustomClause(AbstractPatchContext<?> context)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.THING))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+	
+				return parseCustomPointerClause(context, false);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHThing.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.THING);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.POINTER))
+			{
+				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
+				{
+					addErrorMessage("Patch type must be Boom or better for custom pointers.");
+					return false;
+				}
+	
+				return parseCustomPointerClause(context, true);
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHWeapon.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.WEAPON);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.AMMO))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHAmmo.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.AMMO);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHState.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.STATE);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHSound.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.SOUND);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.MISC))
+		{
+			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
+			{
+				return parseCustomPropertyClause(context, DEHMiscellany.class);
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.MISC);
+				return false;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected an object type after \"%s\": %s", Keyword.CUSTOM, Arrays.toString(ArrayUtils.arrayOf(Keyword.MISC, Keyword.STATE, Keyword.SOUND, Keyword.AMMO, Keyword.WEAPON, Keyword.THING)));
+			return false;
+		}
+	}
+
+	// Parses a custom pointer clause.
+	private boolean parseCustomPropertyClause(AbstractPatchContext<?> context, Class<?> objectClass)
+	{
+		String keyword;
+		if ((keyword = matchIdentifier()) == null)
+		{
+			addErrorMessage("Expected identifier for custom property name.");
+			return false;
+		}
+	
+		if (context.getCustomPropertyByKeyword(objectClass, keyword) != null)
+		{
+			addErrorMessage("Custom property \"%s\" was already defined for this object type.", keyword);
+			return false;
+		}
+	
+		String dehackedLabel;
+		if ((dehackedLabel = matchString()) == null)
+		{
+			addErrorMessage("Expected DeHackEd label name after type.");
+			return false;
+		}
+		
+		String propertyTypeName;
+		if ((propertyTypeName = matchIdentifier()) == null)
+		{
+			addErrorMessage("Expected identifier for parameter type after \"%s\".", keyword);
+			return false;
+		}
+		
+		DEHValueType paramType;
+		if ((paramType = DEHValueType.getByName(propertyTypeName)) == null)
+		{
+			addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
+			return false;
+		}
+	
+		if (paramType == DEHValueType.FLAGS)
+		{
+			if (currentType(DecoHackKernel.TYPE_LBRACE))
+			{
+				if (objectClass == DEHThing.class || objectClass == DEHWeapon.class)
+				{
+					matchType(DecoHackKernel.TYPE_LBRACE);
+					if (!parseCustomPropertyFlags(context, objectClass, keyword))
+						return false;
+				}
+				else
+				{
+					addErrorMessage("Flag mnemonic delcaration is only available for Thing and Weapon types.");
+					return false;
+				}
+			}
+		}
+		
+		context.addCustomProperty(objectClass, new DEHProperty(keyword, dehackedLabel, paramType));
+		return true;
+	}
+
+	// Parses the custom bitflag property body.
+	private boolean parseCustomPropertyFlags(AbstractPatchContext<?> context, Class<?> objectClass, String propertyName)
+	{
+		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			String mnemonic = matchIdentifier();
+	
+			if (!currentType(DecoHackKernel.TYPE_NUMBER))
+			{
+				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
+				return false;
+			}
+	
+			Integer value = matchPositiveInteger();
+			if (value == null)
+			{
+				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
+				return false;
+			}
+			
+			context.addCustomBitflag(objectClass, mnemonic, propertyName, value);
+		}
+		
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' to complete bitflag body.");
+			return false;
+		}
+		
+		return true;
+	}
+
+	// Parses a custom pointer clause.
+	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected argument type: [boom, mbf, mbf21].");
+			return false;
+		}
+		
+		DEHActionPointerType type;
+		String typeName = currentLexeme();
+		if ((type = DEHActionPointerType.getByName(typeName)) == null)
+		{
+			addErrorMessage("Expected \"boom\", \"mbf\", or \"mbf21\" for the parameter use type.");
+			return false;
+		}
+		nextToken();
+	
+		String pointerName;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected action pointer name (i.e. \"A_PointerName\").");
+			return false;
+		}
+	
+		pointerName = currentLexeme();
+		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
+		{
+			addErrorMessage("Action pointer name must start with \"A_\".");
+			return false;
+		}
+		nextToken();
+		
+		// Action mnemonic.
+		String pointerMnemonic = pointerName.substring(2);
+		
+		if (context.getActionPointerByMnemonic(pointerMnemonic) != null)
+		{
+			addErrorMessage("Action pointer \"%s\" is already defined.", pointerName);
+			return false;
+		}
+		
+		// Parameters
+		List<DEHValueType> params = new LinkedList<>();
+		if (matchType(DecoHackKernel.TYPE_LPAREN))
+		{
+			String parameterTypeName;
+			if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			{
+				do {
+					if ((parameterTypeName = matchIdentifier()) == null)
+					{
+						addErrorMessage("Expected identifier for parameter type after \",\".");
+						return false;
+					}
+					
+					DEHValueType paramType;
+					if ((paramType = DEHValueType.getByName(parameterTypeName)) == null)
+					{
+						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
+						return false;
+					}
+					if (params.size() >= type.getMaxCustomParams())
+					{
+						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
+						return false;
+					}
+					
+					params.add(paramType);
+					
+				} while (matchType(DecoHackKernel.TYPE_COMMA));
+			}
+			
+			if (!matchType(DecoHackKernel.TYPE_RPAREN))
+			{
+				addErrorMessage("Expected ',' to continue parameter types or ')' to end parameter type list.");
+				return false;
+			}
+		}
+		
+		DEHValueType[] parameters = params.toArray(new DEHValueType[params.size()]);
+		context.addActionPointer(new DEHActionPointerEntry(weapon, type, pointerMnemonic, parameters));
+		return true;
+	}
+
 	// Parses an ammo type alias line.
 	private boolean parseAmmoAliasLine(AbstractPatchContext<?> context)
 	{
@@ -828,7 +1521,8 @@ public final class DecoHackParser extends Lexer.Parser
 		if ((optionalName = matchString()) != null)
 			context.getAmmo(slot).setName(optionalName);
 
-		return parseAmmoBodyBlock(context, slot);
+		context.setFreeAmmo(slot, false);
+		return parseAmmoBodyBlock(context, context.getAmmo(slot));
 	}
 	
 	// Parses an ammo block.
@@ -863,7 +1557,6 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		}
 		
-		DEHAmmo ammo;
 		Integer ammoIndex;
 		if ((ammoIndex = matchPositiveInteger()) == null)
 		{
@@ -875,26 +1568,46 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
 			return false;
 		}
-		else if ((ammo = context.getAmmo(ammoIndex)) == null)
+		else if (context.getAmmo(ammoIndex) == null)
 		{
 			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
 			return false;
+		}
+
+		return parseAmmoDefinitionBlock(context, ammoIndex);
+	}
+	
+	// Parses an Ammo definition block.
+	private boolean parseAmmoDefinitionBlock(AbstractPatchContext<?> context, int slot)
+	{
+		DEHAmmo ammo = context.getAmmo(slot);
+		
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.AMMO))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", Keyword.AMMO);
+				return false;
+			}
+			
+			DEHAmmo source;
+			if ((source = matchAmmo(context)) == null)
+				return false;
+			
+			ammo.copyFrom(source);
 		}
 		
 		String optionalName;
 		if ((optionalName = matchString()) != null)
 			ammo.setName(optionalName);
 		
-		return parseAmmoBodyBlock(context, ammoIndex);
+		context.setFreeAmmo(slot, false);
+		return parseAmmoBodyBlock(context, ammo);
 	}
 	
 	// Parses an ammo body block.
-	private boolean parseAmmoBodyBlock(AbstractPatchContext<?> context, int slot)
+	private boolean parseAmmoBodyBlock(AbstractPatchContext<?> context, DEHAmmo ammo)
 	{
-		DEHAmmo ammo = context.getAmmo(slot);
-
-		context.setFreeAmmo(slot, false);
-		
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.AMMO);
@@ -1154,7 +1867,7 @@ public final class DecoHackParser extends Lexer.Parser
 		return PropertyResult.BYPASSED;
 	}
 
-	// Parses an sound block.
+	// Parses a sound block.
 	private boolean parseSoundBlock(AbstractPatchContext<?> context)
 	{
 		DEHSound sound;
@@ -1172,7 +1885,34 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected sound name after \"%s\".", Keyword.SOUND);
 			return false;
 		}
+		
+		return parseSoundDefinitionBlock(context, sound);
+	}
 
+	// Parses a sound definition block.
+	private boolean parseSoundDefinitionBlock(AbstractPatchContext<?> context, DEHSound sound)
+	{
+		if (matchType(DecoHackKernel.TYPE_COLON))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.SOUND))
+			{
+				addErrorMessage("Expected \"%s\" after ':'.", Keyword.SOUND);
+				return false;
+			}
+			
+			DEHSound source;
+			if ((source = matchSound(context)) == null)
+				return false;
+			
+			sound.copyFrom(source);
+		}
+		
+		return parseSoundBodyBlock(context, sound);
+	}
+	
+	// Parses a sound body.
+	private boolean parseSoundBodyBlock(AbstractPatchContext<?> context, DEHSound sound) 
+	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
 			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.SOUND);
@@ -1253,874 +1993,6 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		return PropertyResult.BYPASSED;
-	}
-
-	// Parses a par block.
-	private boolean parseParBlock(AbstractPatchContext<?> context)
-	{
-		if (!context.supports(DEHFeatureLevel.BOOM))
-		{
-			addErrorMessage("Par block not supported in non-Boom-feature-level patches.");
-			return false;
-		}
-		
-		if (!matchType(DecoHackKernel.TYPE_LBRACE))
-		{
-			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.PARS);
-			return false;
-		}
-		
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
-		{
-			EpisodeMap map;
-			if ((map = matchEpisodeMap()) == null)
-			{
-				addErrorMessage("Expected EXMY or MAPXX map entry.");
-				return false;
-			}
-			
-			Integer seconds;
-			if ((seconds = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected seconds after map entry.");
-				return false;
-			}
-			
-			if (matchType(DecoHackKernel.TYPE_COLON))
-			{
-				int minutes = seconds;
-				if ((seconds = matchPositiveInteger()) == null)
-				{
-					addErrorMessage("Expected seconds after ':'.");
-					return false;
-				}
-				seconds = (minutes * 60) + seconds;
-			}
-			
-			((PatchBoomContext)context).setParSeconds(map, seconds);
-		}
-
-		if (!matchType(DecoHackKernel.TYPE_RBRACE))
-		{
-			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.PARS);
-			return false;
-		}
-		
-		return true;
-	}
-	
-	// Parses a miscellany block.
-	private boolean parseMiscellaneousBlock(AbstractPatchContext<?> context)
-	{
-		if (!matchType(DecoHackKernel.TYPE_LBRACE))
-		{
-			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.MISC);
-			return false;
-		}
-		
-		DEHMiscellany misc = context.getMiscellany();
-		
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			PropertyResult pr;
-			if (matchIdentifierIgnoreCase(Keyword.FORCE))
-			{
-				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
-				{
-					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
-					return false;
-				}
-				
-				misc.setForceOutput(true);
-			}
-			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseMiscellaneousBlockDoom19Properties(context, misc)) != PropertyResult.BYPASSED)
-			{
-				if (pr == PropertyResult.ERROR)
-					return false;
-			}
-			else if (currentIsCustomProperty(context, DEHMiscellany.class))
-			{
-				String propertyName = matchIdentifier(); 
-				DEHProperty property = context.getCustomPropertyByKeyword(DEHMiscellany.class, propertyName);
-				
-				ParameterValue val;
-				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
-					return false;
-
-				if (!checkCustomPropertyValue(property, propertyName, val))
-					return false;
-				
-				misc.setCustomPropertyValue(property, String.valueOf(val));
-			}
-			else
-			{
-				addErrorMessage("Expected valid miscellaneous entry type.");
-				return false;
-			}
-		}
-		
-		if (!matchType(DecoHackKernel.TYPE_RBRACE))
-		{
-			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.MISC);
-			return false;
-		}
-
-		return true;
-	}
-
-	private PropertyResult parseMiscellaneousBlockDoom19Properties(AbstractPatchContext<?> context, DEHMiscellany misc)
-	{
-		if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING))
-		{
-			Boolean flag;
-			if ((flag = matchBoolean()) == null)
-			{
-				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING);
-				return PropertyResult.ERROR;
-			}
-			misc.setMonsterInfightingEnabled(flag);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MONSTER_INFIGHTING2))
-		{
-			Boolean flag;
-			if ((flag = matchBoolean()) == null)
-			{
-				addErrorMessage("Expected boolean value after \"%s\".", Keyword.MONSTER_INFIGHTING2);
-				return PropertyResult.ERROR;
-			}
-			misc.setMonsterInfightingEnabled(flag);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_BULLETS))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_BULLETS);
-				return PropertyResult.ERROR;
-			}
-			misc.setInitialBullets(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.INITIAL_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.INITIAL_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setInitialHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.GREEN_ARMOR_CLASS))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.GREEN_ARMOR_CLASS);
-				return PropertyResult.ERROR;
-			}
-			misc.setGreenArmorClass(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.BLUE_ARMOR_CLASS))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.BLUE_ARMOR_CLASS);
-				return PropertyResult.ERROR;
-			}
-			misc.setBlueArmorClass(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.SOULSPHERE_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.SOULSPHERE_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setSoulsphereHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MAX_SOULSPHERE_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_SOULSPHERE_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setMaxSoulsphereHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MEGASPHERE_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.MEGASPHERE_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setMegasphereHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.GOD_MODE_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.GOD_MODE_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setGodModeHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR);
-				return PropertyResult.ERROR;
-			}
-			misc.setIDFAArmor(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.IDFA_ARMOR_CLASS))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDFA_ARMOR_CLASS);
-				return PropertyResult.ERROR;
-			}
-			misc.setIDFAArmorClass(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR);
-				return PropertyResult.ERROR;
-			}
-			misc.setIDKFAArmor(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.IDKFA_ARMOR_CLASS))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.IDKFA_ARMOR_CLASS);
-				return PropertyResult.ERROR;
-			}
-			misc.setIDKFAArmorClass(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.BFG_CELLS_PER_SHOT))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.BFG_CELLS_PER_SHOT);
-				return PropertyResult.ERROR;
-			}
-			misc.setBFGCellsPerShot(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MAX_HEALTH))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_HEALTH);
-				return PropertyResult.ERROR;
-			}
-			misc.setMaxHealth(value);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MAX_ARMOR))
-		{
-			Integer value;
-			if ((value = matchPositiveInteger()) == null)
-			{
-				addErrorMessage("Expected integer value after \"%s\".", Keyword.MAX_ARMOR);
-				return PropertyResult.ERROR;
-			}
-			misc.setMaxArmor(value);
-			return PropertyResult.ACCEPTED;
-		}
-		
-		return PropertyResult.BYPASSED;
-	}
-
-	// Parses a custom element clause.
-	private boolean parseCustomClause(AbstractPatchContext<?> context)
-	{
-		if (matchIdentifierIgnoreCase(Keyword.THING))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.POINTER))
-			{
-				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
-				{
-					addErrorMessage("Patch type must be Boom or better for custom pointers.");
-					return false;
-				}
-
-				return parseCustomPointerClause(context, false);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHThing.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.THING);
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.POINTER))
-			{
-				if (context.getSupportedActionPointerType() == DEHActionPointerType.DOOM19)
-				{
-					addErrorMessage("Patch type must be Boom or better for custom pointers.");
-					return false;
-				}
-
-				return parseCustomPointerClause(context, true);
-			}
-			else if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHWeapon.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.WEAPON);
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.AMMO))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHAmmo.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.AMMO);
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.STATE))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHState.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.STATE);
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHSound.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.SOUND);
-				return false;
-			}
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.MISC))
-		{
-			if (matchIdentifierIgnoreCase(Keyword.PROPERTY))
-			{
-				return parseCustomPropertyClause(context, DEHMiscellany.class);
-			}
-			else
-			{
-				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.PROPERTY, Keyword.MISC);
-				return false;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected an object type after \"%s\": %s", Keyword.CUSTOM, Arrays.toString(ArrayUtils.arrayOf(Keyword.MISC, Keyword.STATE, Keyword.SOUND, Keyword.AMMO, Keyword.WEAPON, Keyword.THING)));
-			return false;
-		}
-	}
-
-	// Parses a custom pointer clause.
-	private boolean parseCustomPropertyClause(AbstractPatchContext<?> context, Class<?> objectClass)
-	{
-		String keyword;
-		if ((keyword = matchIdentifier()) == null)
-		{
-			addErrorMessage("Expected identifier for custom property name.");
-			return false;
-		}
-
-		if (context.getCustomPropertyByKeyword(objectClass, keyword) != null)
-		{
-			addErrorMessage("Custom property \"%s\" was already defined for this object type.", keyword);
-			return false;
-		}
-
-		String dehackedLabel;
-		if ((dehackedLabel = matchString()) == null)
-		{
-			addErrorMessage("Expected DeHackEd label name after type.");
-			return false;
-		}
-		
-		String propertyTypeName;
-		if ((propertyTypeName = matchIdentifier()) == null)
-		{
-			addErrorMessage("Expected identifier for parameter type after \"%s\".", keyword);
-			return false;
-		}
-		
-		DEHValueType paramType;
-		if ((paramType = DEHValueType.getByName(propertyTypeName)) == null)
-		{
-			addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
-			return false;
-		}
-
-		if (paramType == DEHValueType.FLAGS)
-		{
-			if (currentType(DecoHackKernel.TYPE_LBRACE))
-			{
-				if (objectClass == DEHThing.class || objectClass == DEHWeapon.class)
-				{
-					matchType(DecoHackKernel.TYPE_LBRACE);
-					if (!parseCustomPropertyFlags(context, objectClass, keyword))
-						return false;
-				}
-				else
-				{
-					addErrorMessage("Flag mnemonic delcaration is only available for Thing and Weapon types.");
-					return false;
-				}
-			}
-		}
-		
-		context.addCustomProperty(objectClass, new DEHProperty(keyword, dehackedLabel, paramType));
-		return true;
-	}
-	
-	// Parses the custom bitflag property body.
-	private boolean parseCustomPropertyFlags(AbstractPatchContext<?> context, Class<?> objectClass, String propertyName)
-	{
-		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			String mnemonic = matchIdentifier();
-
-			if (!currentType(DecoHackKernel.TYPE_NUMBER))
-			{
-				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
-				return false;
-			}
-
-			Integer value = matchPositiveInteger();
-			if (value == null)
-			{
-				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
-				return false;
-			}
-			
-			context.addCustomBitflag(objectClass, mnemonic, propertyName, value);
-		}
-		
-		if (!matchType(DecoHackKernel.TYPE_RBRACE))
-		{
-			addErrorMessage("Expected '}' to complete bitflag body.");
-			return false;
-		}
-		
-		return true;
-	}
-
-	// Parses a custom pointer clause.
-	private boolean parseCustomPointerClause(AbstractPatchContext<?> context, boolean weapon)
-	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			addErrorMessage("Expected argument type: [boom, mbf, mbf21].");
-			return false;
-		}
-		
-		DEHActionPointerType type;
-		String typeName = currentLexeme();
-		if ((type = DEHActionPointerType.getByName(typeName)) == null)
-		{
-			addErrorMessage("Expected \"boom\", \"mbf\", or \"mbf21\" for the parameter use type.");
-			return false;
-		}
-		nextToken();
-
-		String pointerName;
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			addErrorMessage("Expected action pointer name (i.e. \"A_PointerName\").");
-			return false;
-		}
-
-		pointerName = currentLexeme();
-		if (!"A_".equalsIgnoreCase(pointerName.substring(0, 2)))
-		{
-			addErrorMessage("Action pointer name must start with \"A_\".");
-			return false;
-		}
-		nextToken();
-		
-		// Action mnemonic.
-		String pointerMnemonic = pointerName.substring(2);
-		
-		if (context.getActionPointerByMnemonic(pointerMnemonic) != null)
-		{
-			addErrorMessage("Action pointer \"%s\" is already defined.", pointerName);
-			return false;
-		}
-		
-		// Parameters
-		List<DEHValueType> params = new LinkedList<>();
-		if (matchType(DecoHackKernel.TYPE_LPAREN))
-		{
-			String parameterTypeName;
-			if (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-			{
-				do {
-					if ((parameterTypeName = matchIdentifier()) == null)
-					{
-						addErrorMessage("Expected identifier for parameter type after \",\".");
-						return false;
-					}
-					
-					DEHValueType paramType;
-					if ((paramType = DEHValueType.getByName(parameterTypeName)) == null)
-					{
-						addErrorMessage("Expected valid parameter type: %s", Arrays.toString(DEHValueType.values()));
-						return false;
-					}
-					if (params.size() >= type.getMaxCustomParams())
-					{
-						addErrorMessage("Action pointer definition cannot exceed %d parameters for type: %s.", type.getMaxCustomParams(), type.name());
-						return false;
-					}
-					
-					params.add(paramType);
-					
-				} while (matchType(DecoHackKernel.TYPE_COMMA));
-			}
-			
-			if (!matchType(DecoHackKernel.TYPE_RPAREN))
-			{
-				addErrorMessage("Expected ',' to continue parameter types or ')' to end parameter type list.");
-				return false;
-			}
-		}
-		
-		DEHValueType[] parameters = params.toArray(new DEHValueType[params.size()]);
-		context.addActionPointer(new DEHActionPointerEntry(weapon, type, pointerMnemonic, parameters));
-		return true;
-	}
-
-	// Parses a state block.
-	private boolean parseStateBlock(AbstractPatchContext<?> context)
-	{
-		Integer index;
-		// if single state...
-		if (currentType(DecoHackKernel.TYPE_NUMBER))
-		{
-			if ((index = matchStateIndex(context)) == null)
-				return false;
-			
-			if (!matchType(DecoHackKernel.TYPE_LBRACE))
-			{
-				addErrorMessage("Expected '{' after \"%s\" header.", Keyword.STATE);
-				return false;
-			}
-	
-			if (context.isProtectedState(index))
-			{
-				addErrorMessage("State index %d is a protected state.", index);
-				return false;
-			}
-			
-			if (!parseStateBody(context, index))
-				return false;
-	
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				String lexeme = currentLexeme();
-				// be a little smart
-				if (lexeme != null && lexeme.length() >= 2 && "A_".equalsIgnoreCase(currentLexeme().substring(0, 2)))
-				{
-					addErrorMessage("Unknown or unsupported action pointer \"%s\".", lexeme);
-					return false;
-				}
-				else
-				{
-					addErrorMessage("Expected '}' after \"%s\" definition.", Keyword.STATE);
-					return false;
-				}
-			}
-	
-			return true;
-		}
-		// if fill state...
-		else if (matchIdentifierIgnoreCase(Keyword.FILL))
-		{
-			if ((index = matchStateIndex(context)) == null)
-				return false;
-	
-			if (!matchType(DecoHackKernel.TYPE_LBRACE))
-			{
-				addErrorMessage("Expected '{' after \"%s %s\" header.", Keyword.STATE, Keyword.FILL);
-				return false;
-			}
-	
-			if (!parseStateFillSequence(context, index))
-				return false;
-	
-			if (!matchType(DecoHackKernel.TYPE_RBRACE))
-			{
-				addErrorMessage("Expected '}' after \"%s %s\" block.", Keyword.STATE, Keyword.FILL);
-				return false;
-			}
-			
-			return true;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.FREE))
-		{
-			return parseStateFreeLine(context);
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.PROTECT))
-		{
-			return parseStateProtectLine(context, true);
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.UNPROTECT))
-		{
-			return parseStateProtectLine(context, false);
-		}
-		else
-		{
-			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", Keyword.FILL, Keyword.STATE);
-			return false;
-		}
-	}
-
-	// Parse an auto state block.
-	private boolean parseStateAutoBlock(AbstractPatchContext<?> context)
-	{
-		String stateLabel;
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			addErrorMessage("Expected state label name after \"%s\".", Keyword.STATE);
-			return false;			
-		}
-		
-		if ((stateLabel = matchIdentifier()) == null)
-		{
-			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR STATE.");
-			return false;
-		}
-		
-		if (context.getGlobalState(stateLabel) != null)
-		{
-			addErrorMessage("Expected valid thing identifier for new auto-state: \"%s\" is already in use!", stateLabel);
-			return false;
-		}
-
-		if (!matchType(DecoHackKernel.TYPE_LBRACE))
-		{
-			addErrorMessage("Expected '{' after \"%s %s\" header.", Keyword.AUTO, Keyword.STATE);
-			return false;
-		}
-		
-		// Parse start.
-
-		// start from the next free state, however, this may change if vanilla 
-		// patch and the first state defined is or is not an action pointer state 
-		
-		int attemptedFirstIndex = context.findNextFreeState(lastAutoStateIndex);
-		
-		// Need at least one state declared.
-		if (!currentIsSpriteIndex(context))
-		{
-			addErrorMessage("Expected sprite name.");
-			return false;
-		}
-	
-		ParsedState parsed = new ParsedState();
-		StateFillCursor stateCursor = new StateFillCursor();
-		stateCursor.lastIndexFilled = attemptedFirstIndex;
-		
-		Integer actualFirstIndex = null;
-		
-		do {
-			parsed.reset();
-			if (!parseStateLine(context, null, parsed))
-				return false;
-			Integer fillIndex;
-			if ((fillIndex = fillStates(context, EMPTY_LABELS, parsed, stateCursor, false)) == null)
-				return false;
-			if (actualFirstIndex == null)
-				actualFirstIndex = fillIndex;
-		} while (currentIsSpriteIndex(context));
-		
-		// Parse end.
-		StateIndex nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, actualFirstIndex, stateCursor.lastIndexFilled)) == null)
-		{
-			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
-			return false;
-		}
-		
-		Integer resolvedIndex = nextStateIndex.resolve(context);
-		if (resolvedIndex == null)
-		{
-			addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
-			return false;
-		}
-		
-		stateCursor.lastStateFilled.setNextStateIndex(resolvedIndex);
-
-		if (!matchType(DecoHackKernel.TYPE_RBRACE))
-		{
-			addErrorMessage("Expected '}' after \"%s %s\" block.", Keyword.AUTO, Keyword.STATE);
-			return false;
-		}
-		
-		// Save hint.
-		lastAutoStateIndex = stateCursor.lastIndexFilled;
-
-		// set state index to actual index started at.
-		context.setGlobalState(stateLabel, actualFirstIndex);
-		
-		return true;
-
-	}
-	
-	// Parses a state freeing command.
-	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
-	{
-		Integer min, max;
-		if (matchIdentifierIgnoreCase(Keyword.FROM))
-		{
-			// free chain
-			if ((min = matchPositiveInteger()) != null)
-			{
-				context.freeConnectedStates(min);
-				return true;
-			}
-			else
-			{
-				addErrorMessage("Expected state index after \"%s\".", Keyword.FROM);
-				return false;
-			}
-		}
-		else if ((min = matchPositiveInteger()) != null)
-		{
-			if (min >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
-				return false;
-			}
-			
-			// free range
-			if (matchIdentifierIgnoreCase(Keyword.TO))
-			{
-				if ((max = matchPositiveInteger()) != null)
-				{
-					if (max >= context.getStateCount())
-					{
-						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
-						return false;
-					}
-					
-					context.setFreeState(min, max, true);
-					return true;
-				}
-				else
-				{
-					addErrorMessage("Expected state index after \"%s\".", Keyword.TO);
-					return false;
-				}
-			}
-			// free single
-			else
-			{
-				context.setFreeState(min, true);
-				return true;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected \"%s\" or state index after \"%s\".", Keyword.FROM, Keyword.FREE);
-			return false;
-		}
-	}
-
-	// Parses a state protection line.
-	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
-	{
-		Integer min, max;
-		
-		if ((min = matchPositiveInteger()) != null)
-		{
-			if (min >= context.getStateCount())
-			{
-				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
-				return false;
-			}
-			
-			// free range
-			if (matchIdentifierIgnoreCase(Keyword.TO))
-			{
-				if ((max = matchPositiveInteger()) != null)
-				{
-					if (max >= context.getStateCount())
-					{
-						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
-						return false;
-					}
-					
-					context.setProtectedState(min, max, protectedState);
-					return true;
-				}
-				else
-				{
-					addErrorMessage("Expected state index after \"%s\".", Keyword.TO);
-					return false;
-				}
-			}
-			// free single
-			else
-			{
-				context.setProtectedState(min, protectedState);
-				return true;
-			}
-		}
-		else
-		{
-			addErrorMessage("Expected \"%s\" or state index after \"%s\".", Keyword.FROM, Keyword.FREE);
-			return false;
-		}
 	}
 
 	// Parses a thing alias line.
@@ -2351,8 +2223,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		DEHThingTemplate template = new DEHThingTemplate();
-		if (!parseThingBody(context, template))
+		DEHThingSchema schema = new DEHThingSchema();
+		if (!parseThingBodyBlock(context, schema))
 			return false;
 		
 		for (Integer id : thingList)
@@ -2364,7 +2236,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			template.applyTo(thing);
+			schema.applyTo(thing);
 			context.setFreeThing(id, false);
 		}
 
@@ -2402,8 +2274,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		DEHThingTemplate template = new DEHThingTemplate();
-		if (!parseThingBody(context, template))
+		DEHThingSchema schema = new DEHThingSchema();
+		if (!parseThingBodyBlock(context, schema))
 			return false;
 		
 		int a = Math.min(min, max);
@@ -2419,7 +2291,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			template.applyTo(thing);
+			schema.applyTo(thing);
 			context.setFreeThing(id, false);
 		}
 		
@@ -2477,11 +2349,11 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			Integer sourceSlot;
-			if ((sourceSlot = matchThingIndex(context)) == null)
+			DEHThing source;
+			if ((source = matchThing(context)) == null)
 				return false;
 			
-			thing.copyFrom(context.getThing(sourceSlot));
+			thing.copyFrom(source);
 		}
 		else if (matchType(DecoHackKernel.TYPE_LEFTARROW))
 		{
@@ -2513,11 +2385,11 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		context.setFreeThing(slot, false);
-		return parseThingBody(context, thing);
+		return parseThingBodyBlock(context, thing);
 	}
 
 	// Parses a thing body.
-	private boolean parseThingBody(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
+	private boolean parseThingBodyBlock(AbstractPatchContext<?> context, DEHThingTarget<?> thing)
 	{
 		editorKeys.clear();
 		
@@ -3576,8 +3448,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		DEHWeaponTemplate template = new DEHWeaponTemplate();
-		if (!parseWeaponBody(context, template))
+		DEHWeaponSchema schema = new DEHWeaponSchema();
+		if (!parseWeaponBodyBlock(context, schema))
 			return false;
 		
 		for (Integer id : weaponList)
@@ -3589,7 +3461,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			template.applyTo(weapon);
+			schema.applyTo(weapon);
 		}
 
 		return true;
@@ -3626,8 +3498,8 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		DEHWeaponTemplate template = new DEHWeaponTemplate();
-		if (!parseWeaponBody(context, template))
+		DEHWeaponSchema schema = new DEHWeaponSchema();
+		if (!parseWeaponBodyBlock(context, schema))
 			return false;
 		
 		int a = Math.min(min, max);
@@ -3643,7 +3515,7 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			template.applyTo(weapon);
+			schema.applyTo(weapon);
 		}
 		
 		return true;
@@ -3700,11 +3572,11 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 			
-			Integer sourceSlot;
-			if ((sourceSlot = matchWeaponIndex(context)) == null)
+			DEHWeapon source;
+			if ((source = matchWeapon(context)) == null)
 				return false;
 	
-			weapon.copyFrom(context.getWeapon(sourceSlot));
+			weapon.copyFrom(source);
 		}
 		else if (matchType(DecoHackKernel.TYPE_LEFTARROW))
 		{
@@ -3736,11 +3608,11 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		context.setFreeWeapon(slot, false);
-		return parseWeaponBody(context, weapon);
+		return parseWeaponBodyBlock(context, weapon);
 	}
 
 	// Parses a weapon body.
-	private boolean parseWeaponBody(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
+	private boolean parseWeaponBodyBlock(AbstractPatchContext<?> context, DEHWeaponTarget<?> weapon)
 	{
 		if (!matchType(DecoHackKernel.TYPE_LBRACE))
 		{
@@ -4286,6 +4158,515 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	// Parses a state freeing command.
+	private boolean parseStateFreeLine(AbstractPatchContext<?> context)
+	{
+		Integer min, max;
+		if (matchIdentifierIgnoreCase(Keyword.FROM))
+		{
+			// free chain
+			if ((min = matchPositiveInteger()) != null)
+			{
+				context.freeConnectedStates(min);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected state index after \"%s\".", Keyword.FROM);
+				return false;
+			}
+		}
+		else if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// free range
+			if (matchIdentifierIgnoreCase(Keyword.TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					context.setFreeState(min, max, true);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", Keyword.TO);
+					return false;
+				}
+			}
+			// free single
+			else
+			{
+				context.setFreeState(min, true);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or state index after \"%s\".", Keyword.FROM, Keyword.FREE);
+			return false;
+		}
+	}
+
+	// Parses a state protection line.
+	private boolean parseStateProtectLine(AbstractPatchContext<?> context, boolean protectedState)
+	{
+		Integer min, max;
+		
+		if ((min = matchPositiveInteger()) != null)
+		{
+			if (min >= context.getStateCount())
+			{
+				addErrorMessage("Invalid state index: %d. Max is %d.", min, context.getStateCount() - 1);
+				return false;
+			}
+			
+			// free range
+			if (matchIdentifierIgnoreCase(Keyword.TO))
+			{
+				if ((max = matchPositiveInteger()) != null)
+				{
+					if (max >= context.getStateCount())
+					{
+						addErrorMessage("Invalid state index: %d. Max is %d.", max, context.getStateCount() - 1);
+						return false;
+					}
+					
+					context.setProtectedState(min, max, protectedState);
+					return true;
+				}
+				else
+				{
+					addErrorMessage("Expected state index after \"%s\".", Keyword.TO);
+					return false;
+				}
+			}
+			// free single
+			else
+			{
+				context.setProtectedState(min, protectedState);
+				return true;
+			}
+		}
+		else
+		{
+			addErrorMessage("Expected \"%s\" or state index after \"%s\".", Keyword.FROM, Keyword.FREE);
+			return false;
+		}
+	}
+
+	// Parses a state block.
+	private boolean parseStateBlock(AbstractPatchContext<?> context)
+	{
+		Integer index;
+		// if single state...
+		if (currentType(DecoHackKernel.TYPE_NUMBER))
+		{
+			if ((index = matchStateIndex(context)) == null)
+				return false;
+			
+			return parseStateBodyBlock(context, context.getState(index), index);
+		}
+		// if fill state...
+		else if (matchIdentifierIgnoreCase(Keyword.FILL))
+		{
+			if ((index = matchStateIndex(context)) == null)
+				return false;
+	
+			if (!matchType(DecoHackKernel.TYPE_LBRACE))
+			{
+				addErrorMessage("Expected '{' after \"%s %s\" header.", Keyword.STATE, Keyword.FILL);
+				return false;
+			}
+	
+			if (!parseActorStateFillSequence(context, index))
+				return false;
+	
+			if (!matchType(DecoHackKernel.TYPE_RBRACE))
+			{
+				addErrorMessage("Expected '}' after \"%s %s\" block.", Keyword.STATE, Keyword.FILL);
+				return false;
+			}
+			
+			return true;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.FREE))
+		{
+			return parseStateFreeLine(context);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.PROTECT))
+		{
+			return parseStateProtectLine(context, true);
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.UNPROTECT))
+		{
+			return parseStateProtectLine(context, false);
+		}
+		else
+		{
+			addErrorMessage("Expected state index or \"%s\" keyword after \"%s\".", Keyword.FILL, Keyword.STATE);
+			return false;
+		}
+	}
+
+	private boolean parseStateBodyBlock(AbstractPatchContext<?> context, DEHState state, int stateIndex) 
+	{
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s\" header.", Keyword.STATE);
+			return false;
+		}
+	
+		if (context.isProtectedState(stateIndex))
+		{
+			addErrorMessage("State index %d is a protected state.", stateIndex);
+			return false;
+		}
+		
+		if (!parseStateBody(context, state, stateIndex))
+			return false;
+	
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			String lexeme = currentLexeme();
+			// be a little smart
+			if (lexeme != null && lexeme.length() >= 2 && "A_".equalsIgnoreCase(currentLexeme().substring(0, 2)))
+			{
+				addErrorMessage("Unknown or unsupported action pointer \"%s\".", lexeme);
+				return false;
+			}
+			else
+			{
+				addErrorMessage("Expected '}' after \"%s\" definition.", Keyword.STATE);
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	// Parses a single state definition body.
+	// Either consists of a next state index clause, a state and next index clause, or just a state.
+	private boolean parseStateBody(AbstractPatchContext<?> context, DEHState state, int stateIndex)
+	{
+		StateIndex nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, null, stateIndex)) != null)
+		{
+			Integer next;
+			if ((next = nextStateIndex.resolve(context)) == null)
+			{
+				addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+				return false;
+			}
+			
+			state.setNextStateIndex(next);
+			context.setFreeState(stateIndex, false);
+			return true;
+		}
+		
+		AtomicBoolean notModified = new AtomicBoolean(true);
+		
+		if (currentIsSpriteIndex(context))
+		{
+			ParsedState parsedState = new ParsedState();
+	
+			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+			Integer pointerIndex = context.getStateActionPointerIndex(stateIndex);
+			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
+				return false;
+	
+			ParsedAction parsedAction = parsedState.parsedActions.get(0);
+			
+			if (isBoom)
+			{
+				if (pointerIndex != null && parsedAction.pointer == null)
+					parsedAction.pointer = DEHActionPointer.NULL;
+			}
+			else if ((pointerIndex == null && parsedAction.pointer != null) || (pointerIndex != null && parsedAction.pointer == null))
+			{
+				if (parsedAction.pointer != null)
+					addErrorMessage("Action function specified for state without a function!");
+				else
+					addErrorMessage("Action function not specified for state with a function!");
+				return false;
+			}
+	
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, parsedAction.pointer);
+			
+			// fill state.
+			state
+				.setSpriteIndex(parsedState.spriteIndex)
+				.setFrameIndex(parsedState.frameList.pollFirst())
+				.setDuration(parsedState.duration)
+				.setBright(parsedState.bright)
+				.setMisc1(parsedAction.misc1)
+				.setMisc2(parsedAction.misc2)
+				.setArgs(parsedAction.args)
+				.setTranmap(parsedAction.tranmap)
+			;
+			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
+				state.setMBF21Flags(parsedState.mbf21Flags);
+	
+			// Try to parse next state clause.
+			nextStateIndex = parseNextStateIndex(context, null, null, stateIndex);
+			if (nextStateIndex != null)
+			{
+				Integer next;
+				if ((next = nextStateIndex.resolve(context)) == null)
+				{
+					addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+					return false;
+				}
+				
+				state.setNextStateIndex(next);
+				context.setFreeState(stateIndex, false);
+				return true;
+			}
+			
+			context.setFreeState(stateIndex, false);
+			return true;
+		}
+		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			PropertyResult pr;
+			if (matchIdentifierIgnoreCase(Keyword.FORCE))
+			{
+				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
+				{
+					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
+					return false;
+				}
+				
+				state.setForceOutput(true);
+				notModified.set(false);
+			}
+			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseStateBodyDoom19Properties(context, state, notModified, stateIndex)) != PropertyResult.BYPASSED)
+			{
+				if (pr == PropertyResult.ERROR)
+					return false;
+			}
+			else if (context.supports(DEHFeatureLevel.MBF21) && (pr = parseStateBodyMBF21Properties(context, state, notModified)) != PropertyResult.BYPASSED)
+			{
+				if (pr == PropertyResult.ERROR)
+					return false;
+			}
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseStateBodyID24Properties(context, state, notModified)) != PropertyResult.BYPASSED)
+			{
+				if (pr == PropertyResult.ERROR)
+					return false;
+			}
+			else if (currentIsCustomProperty(context, DEHState.class))
+			{
+				String propertyName = matchIdentifier(); 
+				DEHProperty property = context.getCustomPropertyByKeyword(DEHState.class, propertyName);
+				
+				ParameterValue val;
+				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
+					return false;
+	
+				if (!checkCustomPropertyValue(property, propertyName, val))
+					return false;
+				
+				state.setCustomPropertyValue(property, String.valueOf(val));
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		if (notModified.get())
+		{
+			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
+			return false;
+		}
+		
+		context.setFreeState(stateIndex, false);
+		return true;
+	}
+
+	private PropertyResult parseStateBodyDoom19Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified, int index)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.SPRITENAME))
+		{
+			Integer value;
+			if ((value = matchSpriteIndexName(context)) == null)
+			{
+				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.SPRITENAME);
+				return PropertyResult.ERROR;				
+			}
+			
+			state.setSpriteIndex(value);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.FRAME))
+		{
+			Deque<Integer> value;
+			if ((value = matchFrameIndices()) == null)
+			{
+				addErrorMessage("Expected valid frame characters after \"%s\".", Keyword.FRAME);
+				return PropertyResult.ERROR;				
+			}
+			
+			if (value.size() > 1)
+			{
+				addErrorMessage("Expected a single frame character after \"%s\".", Keyword.FRAME);
+				return PropertyResult.ERROR;				
+			}
+			
+			state.setFrameIndex(value.pollFirst());
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.DURATION))
+		{
+			Integer value;
+			if ((value = matchInteger()) == null)
+			{
+				addErrorMessage("Expected integer after \"%s\".", Keyword.DURATION);
+				return PropertyResult.ERROR;				
+			}
+			
+			state.setDuration(value);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
+		{
+			StateIndex value;
+			if ((value = parseStateIndex(context)) == null)
+			{
+				addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
+				return PropertyResult.ERROR;				
+			}
+			
+			Integer next;
+			if ((next = value.resolve(context)) == null)
+			{
+				addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
+				return PropertyResult.ERROR;				
+			}
+			
+			state.setNextStateIndex(next);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.POINTER))
+		{
+			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
+			Integer pointerIndex = context.getStateActionPointerIndex(index);
+			ParsedAction action = new ParsedAction();
+			Boolean requireAction = isBoom ? null : pointerIndex != null;
+	
+			if (matchIdentifierIgnoreCase(VALUE_NULL))
+			{
+				if (requireAction != null && requireAction)
+				{
+					addErrorMessage("Expected an action pointer for this state.");
+					return PropertyResult.ERROR;
+				}
+				else
+				{
+					action.pointer = DEHActionPointer.NULL;
+				}
+			}
+			else if (!parseActionClause(context, null, action, requireAction))
+			{
+				return PropertyResult.ERROR;
+			}
+	
+			if (isBoom && pointerIndex != null && action.pointer == null)
+				action.pointer = DEHActionPointer.NULL;
+			
+			if (pointerIndex != null)
+				context.setActionPointer(pointerIndex, action.pointer);
+	
+			state
+				.setMisc1(action.misc1)
+				.setMisc2(action.misc2)
+				.setArgs(action.args)
+			;
+			
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (currentIdentifierIgnoreCase(Keyword.OFFSET))
+		{
+			ParsedAction action = new ParsedAction();
+			if (!parseOffsetClause(action))
+				return PropertyResult.ERROR;
+			
+			state
+				.setMisc1(action.misc1)
+				.setMisc2(action.misc2)
+			;
+			
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
+		{
+			state.setBright(true);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTBRIGHT))
+		{
+			state.setBright(false);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	private PropertyResult parseStateBodyMBF21Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	{
+		if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
+		{
+			state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
+		{
+			state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	private PropertyResult parseStateBodyID24Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
+	{
+		if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
+		{
+			ParsedAction action = new ParsedAction();
+			if (!parseTranmapClause(context, action))
+				return PropertyResult.ERROR;
+			
+			state.setTranmap(action.tranmap);
+			notModified.set(false);
+			return PropertyResult.ACCEPTED;
+		}
+		
+		return PropertyResult.BYPASSED;
+	}
+
+	
 	/* ***************************************************************************************** */
 	/*                                START STATE BODY PARSER                                    */
 	/* ***************************************************************************************** */
@@ -4444,8 +4825,100 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Parse an auto state block.
+	private boolean parseActorStateAutoBlock(AbstractPatchContext<?> context)
+	{
+		String stateLabel;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected state label name after \"%s\".", Keyword.STATE);
+			return false;			
+		}
+		
+		if ((stateLabel = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED IDENTIFIER FOR STATE.");
+			return false;
+		}
+		
+		if (context.getGlobalState(stateLabel) != null)
+		{
+			addErrorMessage("Expected valid thing identifier for new auto-state: \"%s\" is already in use!", stateLabel);
+			return false;
+		}
+	
+		if (!matchType(DecoHackKernel.TYPE_LBRACE))
+		{
+			addErrorMessage("Expected '{' after \"%s %s\" header.", Keyword.AUTO, Keyword.STATE);
+			return false;
+		}
+		
+		// Parse start.
+	
+		// start from the next free state, however, this may change if vanilla 
+		// patch and the first state defined is or is not an action pointer state 
+		
+		int attemptedFirstIndex = context.findNextFreeState(lastAutoStateIndex);
+		
+		// Need at least one state declared.
+		if (!currentIsSpriteIndex(context))
+		{
+			addErrorMessage("Expected sprite name.");
+			return false;
+		}
+	
+		ParsedState parsed = new ParsedState();
+		StateFillCursor stateCursor = new StateFillCursor();
+		stateCursor.lastIndexFilled = attemptedFirstIndex;
+		
+		Integer actualFirstIndex = null;
+		
+		do {
+			parsed.reset();
+			if (!parseStateLine(context, null, parsed))
+				return false;
+			Integer fillIndex;
+			if ((fillIndex = fillStates(context, EMPTY_LABELS, parsed, stateCursor, false)) == null)
+				return false;
+			if (actualFirstIndex == null)
+				actualFirstIndex = fillIndex;
+		} while (currentIsSpriteIndex(context));
+		
+		// Parse end.
+		StateIndex nextStateIndex = null;
+		if ((nextStateIndex = parseNextStateIndex(context, null, actualFirstIndex, stateCursor.lastIndexFilled)) == null)
+		{
+			addErrorMessage("Expected next state clause (%s, %s, %s, %s).", Keyword.STOP, Keyword.WAIT, Keyword.LOOP, Keyword.GOTO);
+			return false;
+		}
+		
+		Integer resolvedIndex = nextStateIndex.resolve(context);
+		if (resolvedIndex == null)
+		{
+			addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
+			return false;
+		}
+		
+		stateCursor.lastStateFilled.setNextStateIndex(resolvedIndex);
+	
+		if (!matchType(DecoHackKernel.TYPE_RBRACE))
+		{
+			addErrorMessage("Expected '}' after \"%s %s\" block.", Keyword.AUTO, Keyword.STATE);
+			return false;
+		}
+		
+		// Save hint.
+		lastAutoStateIndex = stateCursor.lastIndexFilled;
+	
+		// set state index to actual index started at.
+		context.setGlobalState(stateLabel, actualFirstIndex);
+		
+		return true;
+	
+	}
+
 	// Parses a sequence of auto-fill states.
-	private boolean parseStateFillSequence(AbstractPatchContext<?> context, int startIndex)
+	private boolean parseActorStateFillSequence(AbstractPatchContext<?> context, int startIndex)
 	{
 		if (!context.isFreeState(startIndex))
 		{
@@ -4499,318 +4972,6 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
-	// Parses a single state definition body.
-	// Either consists of a next state index clause, a state and next index clause, or just a state.
-	private boolean parseStateBody(AbstractPatchContext<?> context, int index)
-	{
-		DEHState state = context.getState(index);
-	
-		StateIndex nextStateIndex = null;
-		if ((nextStateIndex = parseNextStateIndex(context, null, null, index)) != null)
-		{
-			Integer next;
-			if ((next = nextStateIndex.resolve(context)) == null)
-			{
-				addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
-				return false;
-			}
-			
-			state.setNextStateIndex(next);
-			context.setFreeState(index, false);
-			return true;
-		}
-		
-		AtomicBoolean notModified = new AtomicBoolean(true);
-		
-		if (currentIsSpriteIndex(context))
-		{
-			ParsedState parsedState = new ParsedState();
-	
-			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
-			Integer pointerIndex = context.getStateActionPointerIndex(index);
-			if (!parseStateLine(context, null, parsedState, true, isBoom ? null : pointerIndex != null))
-				return false;
-	
-			ParsedAction parsedAction = parsedState.parsedActions.get(0);
-			
-			if (isBoom)
-			{
-				if (pointerIndex != null && parsedAction.pointer == null)
-					parsedAction.pointer = DEHActionPointer.NULL;
-			}
-			else if ((pointerIndex == null && parsedAction.pointer != null) || (pointerIndex != null && parsedAction.pointer == null))
-			{
-				if (parsedAction.pointer != null)
-					addErrorMessage("Action function specified for state without a function!");
-				else
-					addErrorMessage("Action function not specified for state with a function!");
-				return false;
-			}
-	
-			if (pointerIndex != null)
-				context.setActionPointer(pointerIndex, parsedAction.pointer);
-			
-			// fill state.
-			state
-				.setSpriteIndex(parsedState.spriteIndex)
-				.setFrameIndex(parsedState.frameList.pollFirst())
-				.setDuration(parsedState.duration)
-				.setBright(parsedState.bright)
-				.setMisc1(parsedAction.misc1)
-				.setMisc2(parsedAction.misc2)
-				.setArgs(parsedAction.args)
-			;
-			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
-				state.setMBF21Flags(parsedState.mbf21Flags);
-	
-			// Try to parse next state clause.
-			nextStateIndex = parseNextStateIndex(context, null, null, index);
-			if (nextStateIndex != null)
-			{
-				Integer next;
-				if ((next = nextStateIndex.resolve(context)) == null)
-				{
-					addErrorMessage("No such global state label: \"%s\"", nextStateIndex.label);
-					return false;
-				}
-				
-				state.setNextStateIndex(next);
-				context.setFreeState(index, false);
-				return true;
-			}
-			
-			context.setFreeState(index, false);
-			return true;
-		}
-		else while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
-		{
-			PropertyResult pr;
-			if (matchIdentifierIgnoreCase(Keyword.FORCE))
-			{
-				if (!matchIdentifierIgnoreCase(Keyword.OUTPUT))
-				{
-					addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.OUTPUT, Keyword.FORCE);
-					return false;
-				}
-				
-				state.setForceOutput(true);
-				notModified.set(false);
-			}
-			else if (context.supports(DEHFeatureLevel.DOOM19) && (pr = parseStateBodyDoom19Properties(context, state, notModified, index)) != PropertyResult.BYPASSED)
-			{
-				if (pr == PropertyResult.ERROR)
-					return false;
-			}
-			else if (context.supports(DEHFeatureLevel.MBF21) && (pr = parseStateBodyMBF21Properties(context, state, notModified)) != PropertyResult.BYPASSED)
-			{
-				if (pr == PropertyResult.ERROR)
-					return false;
-			}
-			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseStateBodyID24Properties(context, state, notModified)) != PropertyResult.BYPASSED)
-			{
-				if (pr == PropertyResult.ERROR)
-					return false;
-			}
-			else if (currentIsCustomProperty(context, DEHState.class))
-			{
-				String propertyName = matchIdentifier(); 
-				DEHProperty property = context.getCustomPropertyByKeyword(DEHState.class, propertyName);
-				
-				ParameterValue val;
-				if ((val = matchNumericExpression(context, null, property.getType().getTypeCheck())) == null)
-					return false;
-
-				if (!checkCustomPropertyValue(property, propertyName, val))
-					return false;
-				
-				state.setCustomPropertyValue(property, String.valueOf(val));
-			}
-			else
-			{
-				break;
-			}
-		}
-		
-		if (notModified.get())
-		{
-			addErrorMessage("Expected valid sprite name, property, or next state clause (goto, stop, wait).");
-			return false;
-		}
-		
-		context.setFreeState(index, false);
-		return true;
-	}
-
-	private PropertyResult parseStateBodyDoom19Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified, int index)
-	{
-		if (matchIdentifierIgnoreCase(Keyword.SPRITENAME))
-		{
-			Integer value;
-			if ((value = matchSpriteIndexName(context)) == null)
-			{
-				addErrorMessage("Expected valid sprite name after \"%s\".", Keyword.SPRITENAME);
-				return PropertyResult.ERROR;				
-			}
-			
-			state.setSpriteIndex(value);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.FRAME))
-		{
-			Deque<Integer> value;
-			if ((value = matchFrameIndices()) == null)
-			{
-				addErrorMessage("Expected valid frame characters after \"%s\".", Keyword.FRAME);
-				return PropertyResult.ERROR;				
-			}
-			
-			if (value.size() > 1)
-			{
-				addErrorMessage("Expected a single frame character after \"%s\".", Keyword.FRAME);
-				return PropertyResult.ERROR;				
-			}
-			
-			state.setFrameIndex(value.pollFirst());
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.DURATION))
-		{
-			Integer value;
-			if ((value = matchInteger()) == null)
-			{
-				addErrorMessage("Expected integer after \"%s\".", Keyword.DURATION);
-				return PropertyResult.ERROR;				
-			}
-			
-			state.setDuration(value);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.NEXTSTATE))
-		{
-			StateIndex value;
-			if ((value = parseStateIndex(context)) == null)
-			{
-				addErrorMessage("Expected valid state index clause after \"%s\".", Keyword.NEXTSTATE);
-				return PropertyResult.ERROR;				
-			}
-			
-			Integer next;
-			if ((next = value.resolve(context)) == null)
-			{
-				addErrorMessage("Expected valid state index clause after \"%s\": label \"%s\" could not be resolved.", Keyword.NEXTSTATE, value.label);
-				return PropertyResult.ERROR;				
-			}
-			
-			state.setNextStateIndex(next);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.POINTER))
-		{
-			boolean isBoom = context.supports(DEHFeatureLevel.BOOM);			
-			Integer pointerIndex = context.getStateActionPointerIndex(index);
-			ParsedAction action = new ParsedAction();
-			Boolean requireAction = isBoom ? null : pointerIndex != null;
-
-			if (matchIdentifierIgnoreCase(VALUE_NULL))
-			{
-				if (requireAction != null && requireAction)
-				{
-					addErrorMessage("Expected an action pointer for this state.");
-					return PropertyResult.ERROR;
-				}
-				else
-				{
-					action.pointer = DEHActionPointer.NULL;
-				}
-			}
-			else if (!parseActionClause(context, null, action, requireAction))
-			{
-				return PropertyResult.ERROR;
-			}
-
-			if (isBoom && pointerIndex != null && action.pointer == null)
-				action.pointer = DEHActionPointer.NULL;
-			
-			if (pointerIndex != null)
-				context.setActionPointer(pointerIndex, action.pointer);
-
-			state
-				.setMisc1(action.misc1)
-				.setMisc2(action.misc2)
-				.setArgs(action.args)
-			;
-			
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (currentIdentifierIgnoreCase(Keyword.OFFSET))
-		{
-			ParsedAction action = new ParsedAction();
-			if (!parseOffsetClause(action))
-				return PropertyResult.ERROR;
-			
-			state
-				.setMisc1(action.misc1)
-				.setMisc2(action.misc2)
-			;
-			
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.STATE_BRIGHT))
-		{
-			state.setBright(true);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTBRIGHT))
-		{
-			state.setBright(false);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		
-		return PropertyResult.BYPASSED;
-	}
-	
-	private PropertyResult parseStateBodyMBF21Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
-	{
-		if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
-		{
-			state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
-		{
-			state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		
-		return PropertyResult.BYPASSED;
-	}
-	
-	private PropertyResult parseStateBodyID24Properties(AbstractPatchContext<?> context, DEHState state, AtomicBoolean notModified)
-	{
-		if (currentIdentifierIgnoreCase(Keyword.TRANMAP))
-		{
-			ParsedAction action = new ParsedAction();
-			if (!parseTranmapClause(context, action))
-				return PropertyResult.ERROR;
-			
-			state.setTranmap(action.tranmap);
-			notModified.set(false);
-			return PropertyResult.ACCEPTED;
-		}
-		
-		return PropertyResult.BYPASSED;
-	}
-	
 	// Parse a single state and if true is returned, the input state is altered.
 	// requireAction is either true, false, or null. If null, no check is performed. 
 	private boolean parseStateLine(AbstractPatchContext<?> context, DEHActor<?> actor, ParsedState state)
@@ -5461,7 +5622,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 
 	// Parses a next state line.
-	private StateIndex parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, int currentStateIndex)
+	private StateIndex parseNextStateIndex(AbstractPatchContext<?> context, DEHActor<?> actor, Integer lastLabelledStateIndex, Integer currentStateIndex)
 	{
 		// Test for only next state clause.
 		if (matchIdentifierIgnoreCase(Keyword.STOP))
@@ -5470,6 +5631,12 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WAIT))
 		{
+			if (currentStateIndex == null)
+			{
+				addErrorMessage("Cannot use \"wait\" here.");
+				return null;
+			}
+			
 			return new StateIndex(currentStateIndex);
 		}
 		else if (currentIdentifierIgnoreCase(Keyword.LOOP))
@@ -5752,6 +5919,44 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	// Matches a valid thing (considers templates).
+	// If match, advance token and return thing.
+	// Else, return null.
+	private DEHThing matchThing(AbstractPatchContext<?> context)
+	{
+		Integer slot;
+		String name;
+		
+		if ((name = matchIdentifier()) != null)
+		{
+			DEHThing out;
+			if ((out = context.getThingTemplate(name)) != null)
+			{
+				return out;
+			}
+			else if ((slot = context.getWeaponAlias(name)) == null)
+			{
+				addErrorMessage("Expected valid thing identifier: \"%s\" is not a valid alias.", name);
+				return null;
+			}
+			else
+			{
+				return context.getThing(slot);
+			}
+		}
+		else if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected valid integer or alias for thing.");
+			return null;
+		}
+		else if (verifyThingIndex(context, slot) == null)
+		{
+			return null;
+		}
+		
+		return context.getThing(slot);
+	}
+	
 	// Matches a valid nonzero thing index number.
 	// If match, advance token and return integer.
 	// Else, return null.
@@ -5766,13 +5971,13 @@ public final class DecoHackParser extends Lexer.Parser
 	private Integer matchThingIndex(AbstractPatchContext<?> context, boolean allowZero)
 	{
 		Integer slot;
-		String autoThingName;
+		String name;
 		
-		if ((autoThingName = matchIdentifier()) != null)
+		if ((name = matchIdentifier()) != null)
 		{
-			if ((slot = context.getThingAlias(autoThingName)) == null)
+			if ((slot = context.getThingAlias(name)) == null)
 			{
-				addErrorMessage("Expected valid thing alias: \"%s\" is not a valid alias.", autoThingName);
+				addErrorMessage("Expected valid thing alias: \"%s\" is not a valid alias.", name);
 				return null;
 			}
 			else
@@ -5818,19 +6023,57 @@ public final class DecoHackParser extends Lexer.Parser
 		return slot;
 	}
 
+	// Matches a valid weapon by number or name (considers templates).
+	// If match, advance token and return weapon.
+	// Else, return null.
+	private DEHWeapon matchWeapon(AbstractPatchContext<?> context) 
+	{
+		Integer slot;
+		String name;
+		
+		if ((name = matchIdentifier()) != null)
+		{
+			DEHWeapon out;
+			if ((out = context.getWeaponTemplate(name)) != null)
+			{
+				return out;
+			}
+			else if ((slot = context.getWeaponAlias(name)) == null)
+			{
+				addErrorMessage("Expected valid weapon identifier: \"%s\" is not a valid alias.", name);
+				return null;
+			}
+			else
+			{
+				return context.getWeapon(slot);
+			}
+		}
+		else if ((slot = context.supports(DEHFeatureLevel.ID24) ? matchInteger() : matchPositiveInteger()) == null)
+		{
+			addErrorMessage("Expected valid integer or alias for weapon.");
+			return null;
+		}
+		else if (verifyWeaponIndex(context, slot) == null)
+		{
+			return null;
+		}
+		
+		return context.getWeapon(slot);
+	}
+	
 	// Matches a valid weapon index number.
 	// If match, advance token and return integer.
 	// Else, return null.
 	private Integer matchWeaponIndex(AbstractPatchContext<?> context) 
 	{
 		Integer slot;
-		String autoWeaponName;
+		String name;
 		
-		if ((autoWeaponName = matchIdentifier()) != null)
+		if ((name = matchIdentifier()) != null)
 		{
-			if ((slot = context.getWeaponAlias(autoWeaponName)) == null)
+			if ((slot = context.getWeaponAlias(name)) == null)
 			{
-				addErrorMessage("Expected valid weapon identifier: \"%s\" is not a valid alias.", autoWeaponName);
+				addErrorMessage("Expected valid weapon identifier: \"%s\" is not a valid alias.", name);
 				return null;
 			}
 			else
@@ -5865,17 +6108,68 @@ public final class DecoHackParser extends Lexer.Parser
 		return slot;
 	}
 
+	// Matches a valid ammo by number or name (considers templates).
+	// If match, advance token and return Ammo.
+	// Else, return null.
+	private DEHAmmo matchAmmo(AbstractPatchContext<?> context)
+	{
+		Integer ammoType;
+		String name;
+		
+		if ((name = matchIdentifier()) != null)
+		{
+			DEHAmmo out;
+			if ((out = context.getAmmoTemplate(name)) != null)
+			{
+				return out;				
+			}
+			else if ((ammoType = context.getAmmoAlias(name)) == null)
+			{
+				addErrorMessage("Expected valid ammo identifier: \"%s\" is not a valid alias.", name);
+				return null;
+			}
+			else
+			{
+				return context.getAmmo(ammoType);
+			}
+		}
+		
+		if ((ammoType = matchInteger()) == null)
+		{
+			addErrorMessage("Expected integer for ammo type.");
+			return null;
+		}
+		else if (ammoType == 4)
+		{
+			addErrorMessage("Ammo type %d is reserved.", ammoType);
+			return null;
+		}
+		
+		if (context.getAmmo(ammoType) == null)
+		{
+			addErrorMessage("Expected valid ammo type index.");
+			return null;
+		}
+		else if (verifyAmmoIndex(context, ammoType) == null)
+		{
+			return null;
+		}
+		
+		return context.getAmmo(ammoType);
+	}
+	
 	// Mqtches a valid ammo type.
+	// Returns valid index or null if invalid.
 	private Integer matchAmmoIndex(AbstractPatchContext<?> context)
 	{
 		Integer ammoType;
-		String autoAmmoName;
+		String name;
 		
-		if ((autoAmmoName = matchIdentifier()) != null)
+		if ((name = matchIdentifier()) != null)
 		{
-			if ((ammoType = context.getAmmoAlias(autoAmmoName)) == null)
+			if ((ammoType = context.getAmmoAlias(name)) == null)
 			{
-				addErrorMessage("Expected valid ammo identifier: \"%s\" is not a valid alias.", autoAmmoName);
+				addErrorMessage("Expected valid ammo identifier: \"%s\" is not a valid alias.", name);
 				return null;
 			}
 			else
@@ -5927,8 +6221,67 @@ public final class DecoHackParser extends Lexer.Parser
 
 		return slot;
 	}
+	
+	// Matches a sound (considers templates).
+	// Returns a sound or null if no sound.
+	private DEHSound matchSound(AbstractPatchContext<?> context)
+	{
+		String name;
+		
+		if ((name = matchIdentifier()) != null)
+		{
+			DEHSound out;
+			if ((out = context.getSoundTemplate(name)) != null)
+			{
+				return out;
+			}
+			
+			Integer slot;
+			if ((slot = context.getSoundIndex(name)) == null)
+			{
+				addErrorMessage("Expected valid sound name: \"%s\" is not a valid name.", name);
+				return null;
+			}
+			else
+			{
+				return context.getSound(slot);
+			}
+		}
+		
+		addErrorMessage("Expected valid sound name: \"%s\" is not a valid name.", name);
+		return null;
+	}
 
-	// Mqtches a valid pickup item type.
+	// Matches an identifier or string that references a sound name.
+	// If match, advance token and return sound index integer.
+	// Else, return null.
+	private Integer matchSoundIndexName(DEHPatch patch)
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
+			return null;
+		
+		String name = currentLexeme();
+		
+		Integer out;
+		if (name.length() == 0)
+		{
+			nextToken();
+			return 0;
+		}
+		if (name.length() > 6)
+		{
+			addErrorMessage("Sound name \"%s\" is invalid - sounds cannot exceed 6 characters.", name);
+			return null;
+		}
+		if ((out = patch.getSoundIndex(name)) == null)
+			return null;
+		nextToken();
+		return out;
+	}
+
+	// Matches a valid pickup item type.
+	// If match, advance token and return integer.
+	// Else, return null.
 	private Integer matchPickupItemType()
 	{
 		Integer itemType;
@@ -5970,20 +6323,6 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
-	// Matches an identifier or string that references a sprite name.
-	// If match, advance token and return sprite index integer.
-	// Else, return null.
-	private Integer matchSpriteIndexName(DEHPatch patch)
-	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
-			return null;
-		Integer out;
-		if ((out = patch.getSpriteIndex(currentLexeme())) == null)
-			return null;
-		nextToken();
-		return out;
-	}
-	
 	// Matches an identifier that is interpreted to be a list of subframe indices.
 	// If match, advance token and returns the list of indices.
 	// Else, return null.
@@ -6169,33 +6508,20 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 
-	// Matches an identifier or string that references a sound name.
-	// If match, advance token and return sound index integer.
+	// Matches an identifier or string that references a sprite name.
+	// If match, advance token and return sprite index integer.
 	// Else, return null.
-	private Integer matchSoundIndexName(DEHPatch patch)
+	private Integer matchSpriteIndexName(DEHPatch patch)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return null;
-		
-		String name = currentLexeme();
-		
 		Integer out;
-		if (name.length() == 0)
-		{
-			nextToken();
-			return 0;
-		}
-		if (name.length() > 6)
-		{
-			addErrorMessage("Sound name \"%s\" is invalid - sounds cannot exceed 6 characters.", name);
-			return null;
-		}
-		if ((out = patch.getSoundIndex(name)) == null)
+		if ((out = patch.getSpriteIndex(currentLexeme())) == null)
 			return null;
 		nextToken();
 		return out;
 	}
-	
+
 	// Matches an identifier or string that references a map lump pattern.
 	// If match, advance token and return episode-map.
 	// Else, return null.

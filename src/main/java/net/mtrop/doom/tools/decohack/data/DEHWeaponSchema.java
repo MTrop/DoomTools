@@ -17,7 +17,7 @@ import net.mtrop.doom.util.RangeUtils;
  * can be applied to many Weapon entries.
  * @author Matthew Tropiano
  */
-public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
+public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 {
 	private Boolean forceOutput;
 
@@ -53,7 +53,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	private Map<DEHProperty, String> customProperties;
 	
 
-	public DEHWeaponTemplate()
+	public DEHWeaponSchema()
 	{
 		this.ammoType = 0;
 		this.ammoPerShot = null;
@@ -71,7 +71,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param destination the destination weapon.
 	 * @return this template.
 	 */
-	public DEHWeaponTemplate applyTo(DEHWeapon destination) 
+	public DEHWeaponSchema applyTo(DEHWeapon destination) 
 	{
 		if (forceOutput != null)
 			destination.setForceOutput(forceOutput);
@@ -150,7 +150,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
-	public DEHWeaponTemplate clearProperties()
+	public DEHWeaponSchema clearProperties()
 	{
 		setAmmoType(0);
 
@@ -172,14 +172,14 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
-	public DEHWeaponTemplate clearFlags() 
+	public DEHWeaponSchema clearFlags() 
 	{
 		setMBF21Flags(0x00000000);
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate clearLabels()
+	public DEHWeaponSchema clearLabels()
 	{
 		stateIndexMap.clear();
 		// If a template clears labels, explicitly set state 0.
@@ -192,7 +192,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
-	public DEHWeaponTemplate setForceOutput(boolean enabled)
+	public DEHWeaponSchema setForceOutput(boolean enabled)
 	{
 		this.forceOutput = enabled;
 		return this;
@@ -203,7 +203,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param ammoType the type.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setAmmoType(int ammoType) 
+	public DEHWeaponSchema setAmmoType(int ammoType) 
 	{
 		this.ammoType = ammoType;
 		return this;
@@ -214,7 +214,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param ammoPerShot the ammo per shot.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setAmmoPerShot(int ammoPerShot) 
+	public DEHWeaponSchema setAmmoPerShot(int ammoPerShot) 
 	{
 		this.ammoPerShot = ammoPerShot;
 		return this;
@@ -225,14 +225,14 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param bits the weapon flags to set.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setMBF21Flags(int bits) 
+	public DEHWeaponSchema setMBF21Flags(int bits) 
 	{
 		this.mbf21Flags = bits;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate addMBF21Flag(int bits)
+	public DEHWeaponSchema addMBF21Flag(int bits)
 	{
 		if (this.mbf21Flags != null)
 			this.mbf21Flags |= bits;
@@ -242,7 +242,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
-	public DEHWeaponTemplate removeMBF21Flag(int bits)
+	public DEHWeaponSchema removeMBF21Flag(int bits)
 	{
 		if (this.mbf21Flags != null)
 			this.mbf21Flags &= ~bits;
@@ -256,7 +256,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param raiseFrameIndex the index.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setRaiseFrameIndex(int raiseFrameIndex) 
+	public DEHWeaponSchema setRaiseFrameIndex(int raiseFrameIndex) 
 	{
 		RangeUtils.checkRange("Raise frame index", 0, Integer.MAX_VALUE, raiseFrameIndex);
 		setLabel(DEHWeapon.STATE_LABEL_SELECT, raiseFrameIndex);
@@ -268,7 +268,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param lowerFrameIndex the index.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setLowerFrameIndex(int lowerFrameIndex) 
+	public DEHWeaponSchema setLowerFrameIndex(int lowerFrameIndex) 
 	{
 		RangeUtils.checkRange("Lower frame index", 0, Integer.MAX_VALUE, lowerFrameIndex);
 		setLabel(DEHWeapon.STATE_LABEL_DESELECT, lowerFrameIndex);
@@ -280,7 +280,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param readyFrameIndex the index.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setReadyFrameIndex(int readyFrameIndex) 
+	public DEHWeaponSchema setReadyFrameIndex(int readyFrameIndex) 
 	{
 		RangeUtils.checkRange("Ready frame index", 0, Integer.MAX_VALUE, readyFrameIndex);
 		setLabel(DEHWeapon.STATE_LABEL_READY, readyFrameIndex);
@@ -292,7 +292,7 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param fireFrameIndex the index.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setFireFrameIndex(int fireFrameIndex) 
+	public DEHWeaponSchema setFireFrameIndex(int fireFrameIndex) 
 	{
 		RangeUtils.checkRange("Fire frame index", 0, Integer.MAX_VALUE, fireFrameIndex);
 		setLabel(DEHWeapon.STATE_LABEL_FIRE, fireFrameIndex);
@@ -304,14 +304,14 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	 * @param flashFrameIndex the index.
 	 * @return this object.
 	 */
-	public DEHWeaponTemplate setFlashFrameIndex(int flashFrameIndex) 
+	public DEHWeaponSchema setFlashFrameIndex(int flashFrameIndex) 
 	{
 		RangeUtils.checkRange("Flash frame index", 0, Integer.MAX_VALUE, flashFrameIndex);
 		setLabel(DEHWeapon.STATE_LABEL_FLASH, flashFrameIndex);
 		return this;
 	}
 	
-	public DEHWeaponTemplate setLabel(String label, int index)
+	public DEHWeaponSchema setLabel(String label, int index)
 	{
 		// 0 is a valid index for applying to weapons - preserve in map.
 		stateIndexMap.put(label, index);
@@ -337,70 +337,70 @@ public class DEHWeaponTemplate implements DEHWeaponTarget<DEHWeaponTemplate>
 	}
 
 	@Override
-	public DEHWeaponTemplate setSlot(int slot)
+	public DEHWeaponSchema setSlot(int slot)
 	{
 		this.slot = slot; 
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setSlotPriority(int priority) 
+	public DEHWeaponSchema setSlotPriority(int priority) 
 	{
 		this.slotPriority = priority;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setSwitchPriority(int priority) 
+	public DEHWeaponSchema setSwitchPriority(int priority) 
 	{
 		this.switchPriority = priority;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setInitialOwned(boolean owned)
+	public DEHWeaponSchema setInitialOwned(boolean owned)
 	{
 		this.initialOwned = owned;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setInitialRaised(boolean raised) 
+	public DEHWeaponSchema setInitialRaised(boolean raised) 
 	{
 		this.initialRaised = raised;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setCarouselIcon(String icon) 
+	public DEHWeaponSchema setCarouselIcon(String icon) 
 	{
 		this.carouselIcon = icon;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setAllowSwitchWithOwnedWeapon(int weaponId) 
+	public DEHWeaponSchema setAllowSwitchWithOwnedWeapon(int weaponId) 
 	{
 		this.allowSwitchWithOwnedWeapon = weaponId;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setNoSwitchWithOwnedWeapon(int weaponId) 
+	public DEHWeaponSchema setNoSwitchWithOwnedWeapon(int weaponId) 
 	{
 		this.noSwitchWithOwnedWeapon = weaponId;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setAllowSwitchWithOwnedItem(int itemId) 
+	public DEHWeaponSchema setAllowSwitchWithOwnedItem(int itemId) 
 	{
 		this.allowSwitchWithOwnedItem = itemId;
 		return this;
 	}
 
 	@Override
-	public DEHWeaponTemplate setNoSwitchWithOwnedItem(int itemId) 
+	public DEHWeaponSchema setNoSwitchWithOwnedItem(int itemId) 
 	{
 		this.noSwitchWithOwnedItem = itemId;
 		return this;

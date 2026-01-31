@@ -1823,6 +1823,63 @@ corresponding property.
 
 
 ==============================================================================
+===== Templates
+==============================================================================
+
+Templates are a way to specify objects *without them taking up an actual slot*
+that you can copy from later. All template language takes this form:
+
+    template <Object> <Name>
+    {
+        //  ... object body here ...
+    }
+
+...where <Object> is one of: 
+
+    thing, weapon, sound, ammo
+    
+...and <Name> is an <IDENTIFIER> specifying the template name. 
+
+For example, an "thing" template may look like this:
+
+    template thing MonsterTemplate
+    {
+        Health 100
+        Radius 16
+        Height 56
+        Mass 300
+        ReactionTime 8
+        PainChance 96
+    
+        clear flags
+        +SOLID
+        +SHOOTABLE
+        +COUNTKILL
+    }
+
+
+And then you can copy from it as you would any other object, while modifying
+the original fields:
+
+    auto thing NewMonster : thing MonsterTemplate "New Monster"
+    {
+        Health 80
+        States
+        {
+            // ... state code ...
+        }
+    }
+
+
+Be warned though about Things and Weapons - if you specify a "States" body in 
+a template, those states will actually occupy real state slots/indices!
+
+A limitation of templates are that they CANNOT be deep-copied from, so you
+may not want to declare states in the body of a weapon or thing template -
+leave that for the proper definition itself. 
+
+
+==============================================================================
 ===== Par Times
 ==============================================================================
 
