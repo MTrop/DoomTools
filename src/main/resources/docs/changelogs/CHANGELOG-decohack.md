@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.44.1
+
+* `Changed` Some docs for Action Pointer `A_SkelFist`.
+
+
 ### Changed for 0.44.0
 
 * `Added` A Thing/Weapon Deep Copy operator `<-` for deep-copying from another Thing/Weapon (Enh. #147).

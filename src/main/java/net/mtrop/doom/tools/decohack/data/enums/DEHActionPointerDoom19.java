@@ -283,7 +283,7 @@ public enum DEHActionPointerDoom19 implements DEHActionPointer
 	
 	SKELFIST      (338, false, "SkelFist", usage(
 		"Calls A_FaceTarget and attempts a melee attack from the calling actor.",
-		"If the attack connects, this does 1d10 x 6 damage.",
+		"If the attack connects, this does 1d10 x 6 damage and plays sound \"SKEPCH\" from the calling actor.",
 		"\nIf the calling actor has no target, this does nothing."
 	)),
 
