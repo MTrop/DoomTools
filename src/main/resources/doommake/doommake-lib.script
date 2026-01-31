@@ -456,15 +456,15 @@ check function convertimg(sourceDir, targetDir, mode, recurse) {
  * targetDir: The target directory path.
  ****************************************************************************/
 check function convertdmx(sourceDir, targetDir) {
-
-	files = filelist(sourceDir);
+	files = filelist(sourceDir, true);
 	if (empty(files)) {
 		println("No sounds to convert.");
 		return;
 	}
 
 	if (tool::dmxconvert({
-		files: files,
+		files: [file(sourceDir)],
+		recursive: true,
 		outputdirectory: file(targetDir),
 		verbose: false
 	})) return error("ToolError", "DMXConvert threw an error.");

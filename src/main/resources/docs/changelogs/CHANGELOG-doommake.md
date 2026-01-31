@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.34.1
+
+* `Changed` New projects will build and organize converted sounds into subdirectories, if laid out that way in source.
+
+
 ### Changed for 0.34.0
 
 * `Added` [GUI-Studio] Added a line to log output when a DoomMake target is executed (for finding the start of a build).

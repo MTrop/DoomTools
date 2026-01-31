@@ -417,6 +417,7 @@ public enum ToolInvocationFunctions implements ScriptFunctionType
 							"stdout:OBJECTREF(OutputStream)",
 							"stderr:OBJECTREF(OutputStream)",
 							"files:LIST[STRING, ...]",
+							"recursive:BOOLEAN",
 							"outputdirectory:OBJECTREF(File)",
 							"ffmpegpath:OBJECTREF(File)",
 							"onlyffmpeg:BOOLEAN",
