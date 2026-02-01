@@ -6,6 +6,8 @@
 package net.mtrop.doom.tools.gui.swing;
 
 import java.awt.Container;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -56,6 +58,11 @@ public class DoomToolsApplicationFrame extends JFrame
 			}
 			
 			@Override
+			public void windowStateChanged(WindowEvent e) 
+			{
+			}
+			
+			@Override
 			public void windowGainedFocus(WindowEvent e) 
 			{
 				instance.onFocus();
@@ -79,6 +86,16 @@ public class DoomToolsApplicationFrame extends JFrame
 				instance.onRestore();
 			}
 		});
+		
+		addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentResized(ComponentEvent e) 
+			{
+				instance.onResize(e.getSource());
+			}
+		});
+		
 		instance.setApplicationListener(new DoomToolsApplicationListener() 
 		{
 			@Override

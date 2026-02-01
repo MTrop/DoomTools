@@ -10,6 +10,8 @@ import static net.mtrop.doom.tools.struct.swing.ContainerFactory.containerOf;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.node;
 
 import java.awt.Container;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.Icon;
 import javax.swing.JInternalFrame;
@@ -88,6 +90,16 @@ public class DoomToolsApplicationInternalFrame extends JInternalFrame
 				instance.onRestore();
 			}
 		});
+		
+		addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentResized(ComponentEvent e) 
+			{
+				instance.onResize(e.getSource());
+			}
+		});
+		
 		instance.setApplicationListener(new DoomToolsApplicationListener() 
 		{
 			@Override

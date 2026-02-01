@@ -310,7 +310,8 @@ public class DImageConvertOffsetterCanvas extends Canvas
 				int originY = (int)(getHeight() / 2 - (100 * zoomFactor));
 				
 				g2d.setColor(Color.BLACK);
-				g2d.drawRect(originX, originY,(int)(320 * zoomFactor), (int)(200 * zoomFactor));
+				g2d.drawRect(originX, originY, (int)(320 * zoomFactor), (int)(200 * zoomFactor));
+				g2d.drawRect(originX, originY, (int)(320 * zoomFactor), (int)((200 - 32) * zoomFactor));
 			}
 			// fall through, draw midpoint guides.
 			

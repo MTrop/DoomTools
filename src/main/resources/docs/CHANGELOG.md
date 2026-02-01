@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-02-01** Updated DoomStruct to `2.22.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.22.0-RELEASE)
+
 - **2026-01-15** Added more FlatLaf Themes.
 
 - **2026-01-11** Updated DoomStruct to `2.21.0`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.21.0-RELEASE)

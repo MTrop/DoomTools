@@ -1,6 +1,13 @@
 DImgConv
 --------
 
+### Changed for 1.6.1
+
+* `Fixed` [Offsetter] Resizing the window would not force a canvas redraw.
+* `Added` [Offsetter] HUD guide line for the status bar.
+* `Added` [Offsetter] Auto-align and bulk-auto-align options (Enh. #150).
+
+
 ### Changed for 1.6.0
 
 * `Fixed` Palette index 255 is considered for color matching again on Pictures. Error was in DoomStruct library.

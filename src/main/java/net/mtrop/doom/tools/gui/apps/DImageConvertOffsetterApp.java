@@ -3,9 +3,11 @@ package net.mtrop.doom.tools.gui.apps;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
@@ -15,15 +17,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -35,6 +40,7 @@ import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
+import net.mtrop.doom.object.GraphicObject;
 import net.mtrop.doom.struct.io.SerialReader;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
@@ -48,13 +54,13 @@ import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
-import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
 import static net.mtrop.doom.tools.struct.swing.FormFactory.*;
 import static net.mtrop.doom.tools.struct.swing.LayoutFactory.*;
+import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 
 /**
  * DImageConvert Offsetter program.
@@ -78,6 +84,10 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private JFormField<Short> offsetYField;
 	private JComboBox<GuideMode> guideModeField;
 	private JFormField<Boolean> autosaveField;
+	private Action autoAlignAction;
+	private Action autoAlignBulkAction;
+	
+	private JPopupMenu filePopupMenu;
 	
 	private JList<File> fileList;
 	private DirectoryListModel fileListModel;
@@ -111,11 +121,17 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.zoomFactorField = spinnerField(spinner(spinnerModel(1, 1, 4, .5), (c) -> onZoomFactorChanged((Double)c.getValue())));
 		this.offsetXField = shortField((short)0, this::onOffsetXChanged);
 		this.offsetYField = shortField((short)0, this::onOffsetYChanged);
-		this.guideModeField = comboBox(ObjectUtils.createList(GuideMode.SPRITE, GuideMode.HUD), this::onGuideModeChange);
+		this.guideModeField = comboBox(Arrays.asList(GuideMode.SPRITE, GuideMode.HUD), this::onGuideModeChange);
 		this.autosaveField = checkBoxField(checkBox(language.getText("dimgconv.offsetter.autosave"), false, this::onAutoSaveChange));
+		this.autoAlignAction = actionItem(language.getText("dimgconv.offsetter.offset.auto"), (e) -> onAutoAlign());
+		this.autoAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.auto.bulk"), (e) -> onAutoAlignBulk());
+		
+		this.filePopupMenu = popupMenu(
+			menuItem(autoAlignBulkAction)
+		);
 		
 		this.fileListModel = new DirectoryListModel();
-		this.fileList = list(fileListModel, ListSelectionMode.SINGLE, this::onFileSelect);
+		this.fileList = list(fileListModel, ListSelectionMode.MULTIPLE_INTERVAL, this::onFileSelect);
 		this.fileList.setCellRenderer(new FileListRenderer());
 		
 		this.currentDirectory = null;
@@ -191,10 +207,42 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			}
 		};
 		
+		fileList.addMouseListener(new MouseAdapter() 
+		{
+			@Override
+			public void mousePressed(MouseEvent e) 
+			{
+				if (e.isPopupTrigger())
+					doPopupTrigger(e.getComponent(), e.getX(), e.getY());
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) 
+			{
+				if (e.isPopupTrigger())
+					doPopupTrigger(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+		fileList.addKeyListener(new KeyAdapter() 
+		{
+			public void keyPressed(KeyEvent e) 
+			{
+				if (e.getKeyCode() == KeyEvent.VK_CONTEXT_MENU)
+				{
+					Point point = e.getComponent().getMousePosition();
+					if (point != null)
+						doPopupTrigger(e.getComponent(), point.x, point.y);
+				}
+			}
+		});
+		
 		canvas.addMouseListener(canvasMouseAdapter);
 		canvas.addMouseMotionListener(canvasMouseAdapter);
 		canvas.addMouseWheelListener(canvasMouseAdapter);
-		canvas.addKeyListener(canvasKeyboardAdapter);		
+		canvas.addKeyListener(canvasKeyboardAdapter);
+		
+		autoAlignAction.setEnabled(false);
+		autoAlignBulkAction.setEnabled(false);
 	}
 	
 	public DImageConvertOffsetterApp(File startingDirectory, String paletteWadPath)
@@ -250,7 +298,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					node(label(language.getText("dimgconv.offsetter.offset.x"))),
 					node(offsetXField),
 					node(label(language.getText("dimgconv.offsetter.offset.y"))),
-					node(offsetYField)
+					node(offsetYField),
+					node(button(autoAlignAction))
 				)),
 				node(BorderLayout.EAST, containerOf(flowLayout(Flow.LEADING, 4, 0),
 					node(label(language.getText("dimgconv.offsetter.guidemode"))),
@@ -306,6 +355,12 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	public boolean shouldClose(Object frame, boolean fromWorkspaceClear) 
 	{
 		return fromWorkspaceClear || SwingUtils.yesTo(language.getText("doomtools.application.close"));
+	}
+	
+	@Override
+	public void onResize(Object frame) 
+	{
+		canvas.repaint();
 	}
 
 	/**
@@ -431,11 +486,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		autoSave = selected;
 	}
 	
-	private void onFileSelect(List<File> file, boolean adjusting)
+	private void onFileSelect(List<File> files, boolean adjusting)
 	{
-		// one should be selected.
-		File selected = file.size() > 0 ? file.get(0) : null;
-		
 		// save previous
 		if (currentFile != null && canvas.offsetsDiffer())
 		{
@@ -444,45 +496,11 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				statusPanel.setActivityMessage(language.getText("dimgconv.offsetter.status.savingfile"));
 				if (canvas.getPicture() != null)
 				{
-					Picture p = canvas.getPicture();
-					p.setOffsetX(offsetXField.getValue());
-					p.setOffsetY(offsetYField.getValue());
-					try (FileOutputStream fos = new FileOutputStream(currentFile))
-					{
-						p.writeBytes(fos);
-						statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", currentFile.getName()));
-					} 
-					catch (FileNotFoundException e) 
-					{
-						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", currentFile.getName()));
-						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
-					} 
-					catch (IOException e) 
-					{
-						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", currentFile.getName()));
-						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
-					}
+					savePicture(canvas.getPicture(), offsetXField.getValue(), offsetYField.getValue(), currentFile, statusPanel);
 				}
 				else if (canvas.getPNGPicture() != null)
 				{
-					PNGPicture p = canvas.getPNGPicture();
-					p.setOffsetX(offsetXField.getValue());
-					p.setOffsetY(offsetYField.getValue());
-					try (FileOutputStream fos = new FileOutputStream(currentFile))
-					{
-						p.writeBytes(fos);
-						statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", currentFile.getName()));
-					} 
-					catch (FileNotFoundException e) 
-					{
-						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", currentFile.getName()));
-						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
-					} 
-					catch (IOException e) 
-					{
-						SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", currentFile.getName()));
-						statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", currentFile.getName()));
-					}
+					savePNGPicture(canvas.getPNGPicture(), offsetXField.getValue(), offsetYField.getValue(), currentFile, statusPanel);
 				}
 				else
 				{
@@ -490,61 +508,226 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				}
 			}
 		}
-		
-		if (selected == null)
-		{
-			canvas.clearPicture();
-			offsetXField.setValue((short)0);
-			offsetYField.setValue((short)0);
-			currentFile = null;
-			return;
-		}
-		
-		// load next picture
-		try {
-			if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
-			{
-				PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
-				canvas.setPNGPicture(p);
-				offsetXField.setValue((short)p.getOffsetX());
-				offsetYField.setValue((short)p.getOffsetY());
-				currentFile = selected;
-			}
-			else // picture?
-			{
-				int w, h, ox, oy;
-				try (FileInputStream fis = new FileInputStream(selected))
-				{
-					SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
-					w = sr.readShort(fis);
-					h = sr.readShort(fis);
-					ox = sr.readShort(fis);
-					oy = sr.readShort(fis);
-				}
 
-				// test if acceptable or reasonable bounds
-				if (w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024)
+		if (files.size() == 1)
+		{
+			File selected = files.get(0);
+			
+			autoAlignAction.setEnabled(true);
+			autoAlignBulkAction.setEnabled(true);
+			
+			// load next picture
+			try {
+				if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
 				{
-					Picture p = BinaryObject.read(Picture.class, selected);
-					canvas.setPicture(p);
+					PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
+					canvas.setPNGPicture(p);
 					offsetXField.setValue((short)p.getOffsetX());
 					offsetYField.setValue((short)p.getOffsetY());
 					currentFile = selected;
 				}
-				else
+				else // picture?
 				{
-					canvas.clearPicture();
-					offsetXField.setValue((short)0);
-					offsetYField.setValue((short)0);
-					currentFile = null;
+					int w, h, ox, oy;
+					try (FileInputStream fis = new FileInputStream(selected))
+					{
+						SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
+						w = sr.readShort(fis);
+						h = sr.readShort(fis);
+						ox = sr.readShort(fis);
+						oy = sr.readShort(fis);
+					}
+
+					// test if acceptable or reasonable bounds
+					if (w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024)
+					{
+						Picture p = BinaryObject.read(Picture.class, selected);
+						canvas.setPicture(p);
+						offsetXField.setValue((short)p.getOffsetX());
+						offsetYField.setValue((short)p.getOffsetY());
+						currentFile = selected;
+					}
+					else
+					{
+						canvas.clearPicture();
+						offsetXField.setValue((short)0);
+						offsetYField.setValue((short)0);
+						currentFile = null;
+					}
 				}
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
+				statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
+				canvas.clearPicture();
+				currentFile = null;
 			}
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
-			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
+		}
+		else
+		{
+			autoAlignAction.setEnabled(false);
+			autoAlignBulkAction.setEnabled(!files.isEmpty());
+
 			canvas.clearPicture();
+			offsetXField.setValue((short)0);
+			offsetYField.setValue((short)0);
 			currentFile = null;
 		}
+	}
+	
+	private void onAutoAlign()
+	{
+		AutoAlignMode mode = selectAutoAlignMode();
+		if (mode == null)
+			return;
+		
+		if (canvas.getPicture() != null)
+		{
+			Picture p = canvas.getPicture();
+			mode.alignGraphic(p);
+			offsetXField.setValue((short)p.getOffsetX());
+			offsetYField.setValue((short)p.getOffsetY());
+		}
+		else if (canvas.getPNGPicture() != null)
+		{
+			PNGPicture p = canvas.getPNGPicture();
+			mode.alignGraphic(p);
+			offsetXField.setValue((short)p.getOffsetX());
+			offsetYField.setValue((short)p.getOffsetY());
+		}
+	}
+
+	private void onAutoAlignBulk()
+	{
+		AutoAlignMode mode = selectAutoAlignMode();
+		if (mode == null)
+			return;
+		
+		int count = 0;
+		for (File file : fileList.getSelectedValuesList())
+		{
+			try {
+				if (FileUtils.matchMagicNumber(file, PNG_SIGNATURE)) // png?
+				{
+					PNGPicture p = BinaryObject.read(PNGPicture.class, file);
+					mode.alignGraphic(p);
+					savePNGPicture(p, (short)p.getOffsetX(), (short)p.getOffsetY(), file, statusPanel);
+					count++;
+				}
+				else
+				{
+					Picture p = BinaryObject.read(Picture.class, file);
+					mode.alignGraphic(p);
+					savePicture(p, (short)p.getOffsetX(), (short)p.getOffsetY(), file, statusPanel);
+					count++;
+				}
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("dimgconv.offsetter.file.security", file.getName()));
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", file.getName()));
+			}
+		}
+		
+		SwingUtils.info(language.getText("dimgconv.offsetter.offset.auto.bulk.count", count));
+	}
+	
+	private void doPopupTrigger(Component c, int x, int y)
+	{
+		filePopupMenu.show(c, x, y);
+	}
+
+	private static AutoAlignMode selectAutoAlignMode()
+	{
+		DoomToolsLanguageManager language = DoomToolsLanguageManager.get(); 
+
+		JComboBox<AutoAlignMode> combo = comboBox(comboBoxModel(Arrays.asList(AutoAlignMode.values())));
+		
+		Boolean ok = modal(language.getText("dimgconv.offsetter.offset.auto.title"),
+			containerOf(node(combo)),
+			choice(language.getText("doomtools.ok"), Boolean.TRUE),
+			choice(language.getText("doomtools.cancel"), Boolean.FALSE)
+		).openThenDispose();
+		
+		return ok == Boolean.TRUE ? combo.getItemAt(combo.getSelectedIndex()) : null; 
+	}
+
+	private static void savePicture(Picture picture, short offsetX, short offsetY, File destinationFile, DoomToolsStatusPanel statusPanel) 
+	{
+		DoomToolsLanguageManager language = DoomToolsLanguageManager.get(); 
+		
+		picture.setOffsetX(offsetX);
+		picture.setOffsetY(offsetY);
+		try (FileOutputStream fos = new FileOutputStream(destinationFile))
+		{
+			picture.writeBytes(fos);
+			statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", destinationFile.getName()));
+		} 
+		catch (FileNotFoundException e) 
+		{
+			SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", destinationFile.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", destinationFile.getName()));
+		} 
+		catch (IOException e) 
+		{
+			SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", destinationFile.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", destinationFile.getName()));
+		}
+	}
+
+	private static void savePNGPicture(PNGPicture picture, short offsetX, short offsetY, File destinationFile, DoomToolsStatusPanel statusPanel) 
+	{
+		DoomToolsLanguageManager language = DoomToolsLanguageManager.get(); 
+		
+		picture.setOffsetX(offsetX);
+		picture.setOffsetY(offsetY);
+		try (FileOutputStream fos = new FileOutputStream(destinationFile))
+		{
+			picture.writeBytes(fos);
+			statusPanel.setSuccessMessage(language.getText("dimgconv.offsetter.status.savefile", destinationFile.getName()));
+		} 
+		catch (FileNotFoundException e) 
+		{
+			SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.notfound", destinationFile.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", destinationFile.getName()));
+		} 
+		catch (IOException e) 
+		{
+			SwingUtils.error(language.getText("dimgconv.offsetter.save.changes.ioerror", destinationFile.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.savefile.error", destinationFile.getName()));
+		}
+	}
+
+	private enum AutoAlignMode
+	{
+		OBJECT
+		{
+			@Override
+			protected void alignGraphic(GraphicObject graphic)
+			{
+				graphic.setOffsetX(graphic.getWidth() / 2);
+				graphic.setOffsetY(graphic.getHeight());
+			}
+		},
+		WEAPON
+		{
+			@Override
+			protected void alignGraphic(GraphicObject graphic)
+			{
+				graphic.setOffsetX(-(320 - graphic.getWidth() - ((320 - graphic.getWidth()) / 2)));
+				graphic.setOffsetY(-(200 - 32 - graphic.getHeight()));
+			}
+		},
+		PROJECTILE
+		{
+			@Override
+			protected void alignGraphic(GraphicObject graphic) 
+			{
+				graphic.setOffsetX(graphic.getWidth() / 2);
+				graphic.setOffsetY(graphic.getHeight() / 2);
+			}
+		};
+		
+		protected abstract void alignGraphic(GraphicObject graphic);
+		
 	}
 	
 	private static class DirectoryListModel implements ListModel<File>

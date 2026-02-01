@@ -242,4 +242,14 @@ public abstract class DoomToolsApplicationInstance
 		// Do nothing.
 	}
 
+	/**
+	 * Called when the application is resized or during resizing.
+	 * <p> This should NEVER be called by the application itself.
+	 * @param frame the source object that was resized - which is usually a window container of some kind.
+	 */
+	public void onResize(Object frame)
+	{
+		// Do nothing.
+	}
+
 }
