@@ -1840,7 +1840,7 @@ that you can copy from later. All template language takes this form:
     
 ...and <Name> is an <IDENTIFIER> specifying the template name. 
 
-For example, an "thing" template may look like this:
+For example, a "thing" template may look like this:
 
     template thing MonsterTemplate
     {
