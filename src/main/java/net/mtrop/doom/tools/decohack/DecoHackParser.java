@@ -501,8 +501,27 @@ public final class DecoHackParser extends Lexer.Parser
 				addErrorMessage("Thing template \"%s\" has already been defined.", name);
 				return false;
 			}
-			
+
 			DEHThing template = context.createThingTemplate(name);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				DEHThing source;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.THING))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", Keyword.THING);
+					return false;
+				}
+				
+				if ((source = matchThing(context)) == null)
+				{
+					return false;
+				}
+				
+				template.copyFrom(source);
+			}
+			
 			return parseThingBodyBlock(context, template);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
@@ -527,6 +546,25 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			DEHWeapon template = context.createWeaponTemplate(name);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				DEHWeapon source;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.WEAPON))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", Keyword.WEAPON);
+					return false;
+				}
+				
+				if ((source = matchWeapon(context)) == null)
+				{
+					return false;
+				}
+				
+				template.copyFrom(source);
+			}
+			
 			return parseWeaponBodyBlock(context, template);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.AMMO))
@@ -551,6 +589,25 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			DEHAmmo template = context.createAmmoTemplate(name);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				DEHAmmo source;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.AMMO))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", Keyword.AMMO);
+					return false;
+				}
+				
+				if ((source = matchAmmo(context)) == null)
+				{
+					return false;
+				}
+				
+				template.copyFrom(source);
+			}
+			
 			return parseAmmoBodyBlock(context, template);
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
@@ -575,6 +632,25 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			
 			DEHSound template = context.createSoundTemplate(name);
+			
+			if (matchType(DecoHackKernel.TYPE_COLON))
+			{
+				DEHSound source;
+				
+				if (!matchIdentifierIgnoreCase(Keyword.SOUND))
+				{
+					addErrorMessage("Expected \"%s\" after ':'.", Keyword.SOUND);
+					return false;
+				}
+				
+				if ((source = matchSound(context)) == null)
+				{
+					return false;
+				}
+				
+				template.copyFrom(source);
+			}
+			
 			return parseSoundBodyBlock(context, template);
 		}
 		else

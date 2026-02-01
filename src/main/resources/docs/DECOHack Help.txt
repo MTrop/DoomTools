@@ -1863,7 +1863,11 @@ the original fields:
 
     auto thing NewMonster : thing MonsterTemplate "New Monster"
     {
+    	EdNum 6001
         Health 80
+        
+        // ... other properties ...
+        
         States
         {
             // ... state code ...
@@ -1871,8 +1875,20 @@ the original fields:
     }
 
 
+Templates can also copy their characteristics from other objects of the same
+type:
+
+    template thing BlankTemplate : thing Candlestick
+    {
+        // ... properties ...
+    } 
+
+
 Be warned though about Things and Weapons - if you specify a "States" body in 
 a template, those states will actually occupy real state slots/indices!
+
+Templates are also BLANK OBJECTS, so that means whatever you don't fill in
+from the template MUST be filled in, or it will be blank/default values! 
 
 A limitation of templates are that they CANNOT be deep-copied from, so you
 may not want to declare states in the body of a weapon or thing template -
