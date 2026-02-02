@@ -4,9 +4,11 @@ DImgConv
 ### Changed for 1.6.1
 
 * `Fixed` [Offsetter] Resizing the window would not force a canvas redraw.
+* `Fixed` [Offsetter] Switching directories with something selected could have resulted in an NPE.
 * `Added` [Offsetter] HUD guide line for the status bar.
 * `Added` [Offsetter] Auto-align and bulk-auto-align options (Enh. #150).
 * `Added` [Offsetter] Offset Adjust and bulk-offset-adjust options (Enh. #150).
+* `Added` [Offsetter] Sort by name and frame options (Enh. #150).
 
 
 ### Changed for 1.6.0

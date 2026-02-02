@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -84,10 +85,13 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private JFormField<Short> offsetYField;
 	private JComboBox<GuideMode> guideModeField;
 	private JFormField<Boolean> autosaveField;
+	
 	private Action autoAlignAction;
 	private Action adjustAlignAction;
 	private Action autoAlignBulkAction;
 	private Action adjustAlignBulkAction;
+	private Action sortByNameAction;
+	private Action sortByFrameAction;
 	
 	private JPopupMenu filePopupMenu;
 	
@@ -125,14 +129,20 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.offsetYField = shortField((short)0, this::onOffsetYChanged);
 		this.guideModeField = comboBox(Arrays.asList(GuideMode.SPRITE, GuideMode.HUD), this::onGuideModeChange);
 		this.autosaveField = checkBoxField(checkBox(language.getText("dimgconv.offsetter.autosave"), false, this::onAutoSaveChange));
+		
 		this.autoAlignAction = actionItem(language.getText("dimgconv.offsetter.offset.auto"), (e) -> onAutoAlign());
 		this.adjustAlignAction = actionItem(language.getText("dimgconv.offsetter.offset.adjust"), (e) -> onAdjustAlign());
 		this.autoAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.auto.bulk"), (e) -> onAutoAlignBulk());
 		this.adjustAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.adjust.bulk"), (e) -> onAdjustAlignBulk());
+		this.sortByNameAction = actionItem(language.getText("dimgconv.offsetter.sort.name"), (e) -> onSortByName());
+		this.sortByFrameAction = actionItem(language.getText("dimgconv.offsetter.sort.frame"), (e) -> onSortByFrame());
 		
 		this.filePopupMenu = popupMenu(
 			menuItem(autoAlignBulkAction),
-			menuItem(adjustAlignBulkAction)
+			menuItem(adjustAlignBulkAction),
+			separator(),
+			menuItem(sortByNameAction),
+			menuItem(sortByFrameAction)
 		);
 		
 		this.fileListModel = new DirectoryListModel();
@@ -247,6 +257,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		canvas.addKeyListener(canvasKeyboardAdapter);
 		
 		updateActions();
+		onSortByName();
 	}
 	
 	public DImageConvertOffsetterApp(File startingDirectory, String paletteWadPath)
@@ -577,6 +588,9 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	
 	private void updateActions()
 	{
+		sortByNameAction.setEnabled(true);
+		sortByFrameAction.setEnabled(true);
+		
 		List<File> files = fileList.getSelectedValuesList();
 		
 		if (files.size() == 1)
@@ -709,6 +723,47 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		}
 		
 		SwingUtils.info(language.getText("dimgconv.offsetter.offset.adjust.bulk.count", count));
+	}
+
+	private void onSortByName()
+	{
+		fileListModel.setSort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+		onFileSelect(fileList.getSelectedValuesList(), false);
+	}
+	
+	private void onSortByFrame()
+	{
+		fileListModel.setSort((a, b) -> 
+		{
+			String aname = FileUtils.getFileNameWithoutExtension(a.getName());
+			String bname = FileUtils.getFileNameWithoutExtension(b.getName());
+			
+			String asprite = aname.substring(0, Math.min(aname.length(), 4));
+			String bsprite = bname.substring(0, Math.min(bname.length(), 4));
+			
+			String aframe = "";
+			String bframe = "";
+			String arot = "";
+			String brot = "";
+			if (aname.length() > 4)
+				aframe = Character.toString(aname.charAt(4));
+			if (aname.length() > 5)
+				arot = Character.toString(aname.charAt(5));
+			if (bname.length() > 4)
+				bframe = Character.toString(bname.charAt(4));
+			if (bname.length() > 5)
+				brot = Character.toString(bname.charAt(5));
+			
+			int rotCompare = arot.compareToIgnoreCase(brot);
+			int frameCompare = aframe.compareToIgnoreCase(bframe);
+			int spriteCompare = asprite.compareToIgnoreCase(bsprite);
+			
+			return spriteCompare == 0 
+				? (rotCompare == 0 ? frameCompare : rotCompare)
+				: spriteCompare
+			;
+		});
+		onFileSelect(fileList.getSelectedValuesList(), false);
 	}
 
 	private void doPopupTrigger(Component c, int x, int y)
@@ -848,12 +903,22 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 
 		public void setDirectory(File dir)
 		{
+			int amount = fileList.size();
+			
 			fileList.clear();
+			
+			if (amount > 0)
+			{
+				listeners.forEach((listener) -> listener.intervalRemoved(
+					new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, 0, amount - 1)
+				));
+			}
+			
 			for (File f : dir.listFiles((f) -> !f.isHidden() && !f.isDirectory()))
 				fileList.add(f);
 			
 			listeners.forEach((listener) -> listener.intervalAdded(
-				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, 0)
+				new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, 0, fileList.size() - 1)
 			));
 		}
 		
@@ -881,6 +946,18 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		public void removeListDataListener(ListDataListener l) 
 		{
 			listeners.remove(l);
+		}
+		
+		/**
+		 * Sorts the list in a different way.
+		 * @param comparator the comparator to use.
+		 */
+		public void setSort(Comparator<File> comparator)
+		{
+			fileList.sort(comparator);
+			listeners.forEach((listener) -> listener.contentsChanged(
+				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, fileList.size() - 1)
+			));
 		}
 	}
 	
