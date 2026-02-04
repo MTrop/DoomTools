@@ -80,6 +80,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	
 	private JFormField<File> paletteSourceField;
 	private JFormField<Double> zoomFactorField;
+	private JFormField<Boolean> onionSkinField;
 	private DImageConvertOffsetterCanvas canvas;
 	private JFormField<Short> offsetXField;
 	private JFormField<Short> offsetYField;
@@ -101,6 +102,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private File currentDirectory;
 	private JLabel currentDirectoryLabel;
 	private File currentFile;
+	private boolean onionSkin;
 	private boolean autoSave;
 
 	private DoomToolsStatusPanel statusPanel;
@@ -125,6 +127,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		onPaletteFileSelect(paletteSourceField.getValue());
 
 		this.zoomFactorField = spinnerField(spinner(spinnerModel(1, 1, 4, .5), (c) -> onZoomFactorChanged((Double)c.getValue())));
+		this.onionSkinField = checkBoxField(checkBox(language.getText("dimgconv.offsetter.onion"), false, this::onOnionSkinChange));
 		this.offsetXField = shortField((short)0, this::onOffsetXChanged);
 		this.offsetYField = shortField((short)0, this::onOffsetYChanged);
 		this.guideModeField = comboBox(Arrays.asList(GuideMode.SPRITE, GuideMode.HUD), this::onGuideModeChange);
@@ -299,7 +302,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			node(BorderLayout.NORTH, containerOf(borderLayout(4, 0),
 				node(BorderLayout.WEST, containerOf(flowLayout(Flow.LEADING, 4, 0),
 					node(label(language.getText("dimgconv.offsetter.zoom"))),
-					node(zoomFactorField)
+					node(zoomFactorField),
+					node(onionSkinField)
 				)),
 				node(BorderLayout.CENTER, containerOf(borderLayout(4, 0),
 					node(BorderLayout.WEST, label(language.getText("dimgconv.offsetter.palette.source"))),
@@ -497,6 +501,12 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		canvas.setGuideMode(mode);
 	}
 	
+	private void onOnionSkinChange(boolean selected)
+	{
+		onionSkin = selected;
+		updateOnionSkinFile();
+	}
+	
 	private void onAutoSaveChange(boolean selected)
 	{
 		autoSave = selected;
@@ -529,63 +539,140 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 
 		if (files.size() == 1)
 		{
-			File selected = files.get(0);
-			
 			// load next picture
-			try {
-				if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
-				{
-					PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
-					canvas.setPNGPicture(p);
-					offsetXField.setValue((short)p.getOffsetX());
-					offsetYField.setValue((short)p.getOffsetY());
-					currentFile = selected;
-				}
-				else // picture?
-				{
-					int w, h, ox, oy;
-					try (FileInputStream fis = new FileInputStream(selected))
-					{
-						SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
-						w = sr.readShort(fis);
-						h = sr.readShort(fis);
-						ox = sr.readShort(fis);
-						oy = sr.readShort(fis);
-					}
-
-					// test if acceptable or reasonable bounds
-					if (w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024)
-					{
-						Picture p = BinaryObject.read(Picture.class, selected);
-						canvas.setPicture(p);
-						offsetXField.setValue((short)p.getOffsetX());
-						offsetYField.setValue((short)p.getOffsetY());
-						currentFile = selected;
-					}
-					else
-					{
-						canvas.clearPicture();
-						offsetXField.setValue((short)0);
-						offsetYField.setValue((short)0);
-						currentFile = null;
-					}
-				}
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
-				statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
-				canvas.clearPicture();
-				currentFile = null;
-			}
+			File selected = files.get(0);
+			currentFile = updateNextFile(selected);
+			updateOnionSkinFile();
 		}
 		else
 		{
-			canvas.clearPicture();
+			canvas.clearPictures();
 			offsetXField.setValue((short)0);
 			offsetYField.setValue((short)0);
 			currentFile = null;
 		}
 	}
+
+	private File updateNextFile(File selected) 
+	{
+		try {
+			if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
+			{
+				PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
+				canvas.setPNGPicture(p);
+				offsetXField.setValue((short)p.getOffsetX());
+				offsetYField.setValue((short)p.getOffsetY());
+				return selected;
+			}
+			else // picture?
+			{
+				int w, h, ox, oy;
+				try (FileInputStream fis = new FileInputStream(selected))
+				{
+					SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
+					w = sr.readShort(fis);
+					h = sr.readShort(fis);
+					ox = sr.readShort(fis);
+					oy = sr.readShort(fis);
+				}
+
+				// test if acceptable or reasonable bounds
+				if (checkPictureBounds(w, h, ox, oy))
+				{
+					Picture p = BinaryObject.read(Picture.class, selected);
+					canvas.setPicture(p);
+					offsetXField.setValue((short)p.getOffsetX());
+					offsetYField.setValue((short)p.getOffsetY());
+					return selected;
+				}
+				else
+				{
+					canvas.clearPictures();
+					offsetXField.setValue((short)0);
+					offsetYField.setValue((short)0);
+					return null;
+				}
+			}
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
+			canvas.clearPictures();
+			return null;
+		}
+	}
 	
+	private File updateNextOnionSkinFile(File selected) 
+	{
+		try {
+			if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
+			{
+				PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
+				canvas.setOnionSkinPNGPicture(p);
+				return selected;
+			}
+			else // picture?
+			{
+				int w, h, ox, oy;
+				try (FileInputStream fis = new FileInputStream(selected))
+				{
+					SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
+					w = sr.readShort(fis);
+					h = sr.readShort(fis);
+					ox = sr.readShort(fis);
+					oy = sr.readShort(fis);
+				}
+
+				// test if acceptable or reasonable bounds
+				if (checkPictureBounds(w, h, ox, oy))
+				{
+					Picture p = BinaryObject.read(Picture.class, selected);
+					canvas.setOnionSkinPicture(p);
+					return selected;
+				}
+				else
+				{
+					canvas.clearOnionSkinPicture();
+					return null;
+				}
+			}
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", selected.getName()));
+			statusPanel.setErrorMessage(language.getText("dimgconv.offsetter.status.readfile.error", currentFile.getName()));
+			canvas.clearOnionSkinPicture();
+			return null;
+		}
+	}
+
+	private boolean checkPictureBounds(int w, int h, int ox, int oy)
+	{
+		return w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024;
+	}
+	
+	private void updateOnionSkinFile()
+	{
+		if (!onionSkin)
+		{
+			canvas.clearOnionSkinPicture();
+			return;
+		}
+		
+		int index;
+		int[] selectedIndices = fileList.getSelectedIndices();
+		if (selectedIndices.length != 1)
+		{
+			canvas.clearOnionSkinPicture();
+			return;
+		}
+		
+		index = selectedIndices[0];
+		
+		if (index > 0)
+		{
+			updateNextOnionSkinFile(fileList.getModel().getElementAt(index - 1));
+			currentFile = updateNextFile(currentFile);
+		}
+	}
+
 	private void updateActions()
 	{
 		sortByNameAction.setEnabled(true);

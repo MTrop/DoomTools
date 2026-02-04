@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Black Rook Software
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -372,8 +372,8 @@ public final class ImageUtils
 	}
 
 	/**
-	 * A composite that multiplies pixel color together.
-	 * The scalar amount for the multiply per pixel is taken from the alpha component.  
+	 * A composite that desaturates pixel color.
+	 * The scalar amount to desaturate per pixel is taken from the Red component, pre-multiplied by the alpha component.  
 	 */
 	public static final class DesaturationComposite implements Composite
 	{
@@ -422,7 +422,7 @@ public final class ImageUtils
 	/**
 	 * All composite contexts that mix two pixels together.
 	 */
-	private static abstract class ARGBCompositeContext implements CompositeContext
+	public static abstract class ARGBCompositeContext implements CompositeContext
 	{
 		protected ColorModel srcColorModel; 
 		protected ColorModel dstColorModel;

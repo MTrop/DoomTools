@@ -9,6 +9,7 @@ DImgConv
 * `Added` [Offsetter] Auto-align and bulk-auto-align options (Enh. #150).
 * `Added` [Offsetter] Offset Adjust and bulk-offset-adjust options (Enh. #150).
 * `Added` [Offsetter] Sort by name and frame options (Enh. #150).
+* `Added` [Offsetter] "Onion Skin" option for comparing previous frames (Enh. #150).
 
 
 ### Changed for 1.6.0

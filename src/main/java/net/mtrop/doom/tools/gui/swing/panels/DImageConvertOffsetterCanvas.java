@@ -1,7 +1,9 @@
 package net.mtrop.doom.tools.gui.swing.panels;
 
+import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -55,6 +57,8 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		g2d.dispose();
 	});
 	
+	private static final Composite ONION_SKIN_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f);
+	
 	public enum GuideMode
 	{
 		SPRITE,
@@ -65,15 +69,22 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	
 	private float zoomFactor;
 	private Palette palette;
+
 	private Picture picture;
 	private PNGPicture pngPicture;
 	private Point currentOffset;
 	private Point originalOffset;
+
+	private Picture onionSkinPicture;
+	private PNGPicture onionSkinPNGPicture;
+	private Point onionSkinOffset;
+
 	private GuideMode guideMode;
 	
 	private VolatileImage canvasImage;
 	private BufferedImage backgroundImage;
 	private Image renderedImage;
+	private Image renderedOnionSkinImage;
 	
 	public DImageConvertOffsetterCanvas()
 	{
@@ -83,12 +94,15 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		this.pngPicture = null;
 		this.currentOffset = new Point();
 		this.originalOffset = new Point();
+		this.onionSkinPicture = null;
+		this.onionSkinPNGPicture = null;
+		this.onionSkinOffset = new Point();
 		this.guideMode = GuideMode.SPRITE;
 		
 		this.backgroundImage = null;
 		this.renderedImage = null;
 		
-		clearPicture();
+		clearPictures();
 		rebuildImage();
 	}
 	
@@ -175,9 +189,49 @@ public class DImageConvertOffsetterCanvas extends Canvas
 	}
 	
 	/**
+	 * Sets the onion skin picture.
+	 * If this is set, the onion skin PNG picture is cleared.
+	 * @param p the picture to set.
+	 */
+	public void setOnionSkinPicture(Picture p)
+	{
+		onionSkinPNGPicture = null;
+		onionSkinPicture = p;
+		onionSkinOffset.x = p.getOffsetX();
+		onionSkinOffset.y = p.getOffsetY();
+		rebuildImage();
+		repaint();
+	}
+	
+	/**
+	 * Sets the onion skin PNG picture.
+	 * If this is set, the onion skin picture is cleared.
+	 * @param p the PNGPicture to set.
+	 */
+	public void setOnionSkinPNGPicture(PNGPicture p)
+	{
+		onionSkinPicture = null;
+		onionSkinPNGPicture = p;
+		onionSkinOffset.x = p.getOffsetX();
+		onionSkinOffset.y = p.getOffsetY();
+		rebuildImage();
+		repaint();
+	}
+	
+	public void clearOnionSkinPicture()
+	{
+		onionSkinPicture = null;
+		onionSkinPNGPicture = null;
+		onionSkinOffset.x = 0;
+		onionSkinOffset.y = 0;
+		rebuildImage();
+		repaint();
+	}
+
+	/**
 	 * Set no picture.
 	 */
-	public void clearPicture()
+	public void clearPictures()
 	{
 		picture = null;
 		pngPicture = null;
@@ -247,6 +301,21 @@ public class DImageConvertOffsetterCanvas extends Canvas
 			currentOffset.x = 0;
 			currentOffset.y = 0;
 		}
+		
+		if (onionSkinPicture != null)
+		{
+			renderedOnionSkinImage = GraphicUtils.createImage(onionSkinPicture, palette);
+		}
+		else if (onionSkinPNGPicture != null)
+		{
+			renderedOnionSkinImage = onionSkinPNGPicture.getImage();
+		}
+		else
+		{
+			renderedOnionSkinImage = BLANK_IMAGE;
+			onionSkinOffset.x = 0;
+			onionSkinOffset.y = 0;
+		}
 	}
 	
 	@Override
@@ -271,6 +340,7 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		AffineTransform prevTransform = canvasGraphics.getTransform();
 		
 		drawBackground(canvasGraphics);
+		drawOnionSkinImage(canvasGraphics);
 		drawGuides(canvasGraphics);
 		drawImage(canvasGraphics);
 		
@@ -331,6 +401,60 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		g2d.setColor(prevColor);
 	}
 
+	protected void drawOnionSkinImage(Graphics2D g2d)
+	{
+		Composite prevComposite = g2d.getComposite();
+		g2d.setComposite(ONION_SKIN_COMPOSITE);
+		
+		switch (guideMode)
+		{
+			case HUD:
+			{
+				// start top-left corner at HUD edge.
+				int originX = (int)(getWidth() / 2 - (160 * zoomFactor));
+				int originY = (int)(getHeight() / 2 - (100 * zoomFactor));
+				
+				originX -= onionSkinOffset.x * zoomFactor;
+				originY -= onionSkinOffset.y * zoomFactor;
+
+				if (zoomFactor > 0)
+				{
+					g2d.drawImage(renderedOnionSkinImage, 
+						originX, originY, 
+						(int)(renderedOnionSkinImage.getWidth(null) * zoomFactor), 
+						(int)(renderedOnionSkinImage.getHeight(null) * zoomFactor), 
+						null
+					);
+				}
+			}
+			break;
+			
+			default:
+			case SPRITE:
+			{
+				// start top-left corner at midpoint.
+				int originX = getWidth() / 2;
+				int originY = getHeight() / 2;
+				
+				originX -= onionSkinOffset.x * zoomFactor;
+				originY -= onionSkinOffset.y * zoomFactor;
+
+				if (zoomFactor > 0)
+				{
+					g2d.drawImage(renderedOnionSkinImage, 
+						originX, originY, 
+						(int)(renderedOnionSkinImage.getWidth(null) * zoomFactor), 
+						(int)(renderedOnionSkinImage.getHeight(null) * zoomFactor), 
+						null
+					);
+				}
+			}
+			break;
+		}
+		
+		g2d.setComposite(prevComposite);
+	}
+	
 	protected void drawImage(Graphics g2d)
 	{
 		Color prevColor = g2d.getColor();
@@ -395,5 +519,5 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		
 		g2d.setColor(prevColor);
 	}
-	
+
 }
