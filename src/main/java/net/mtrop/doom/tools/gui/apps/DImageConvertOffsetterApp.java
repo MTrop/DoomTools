@@ -53,6 +53,8 @@ import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas.GuideMode;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.swing.LayoutFactory.Flow;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
@@ -91,6 +93,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private Action adjustAlignAction;
 	private Action autoAlignBulkAction;
 	private Action adjustAlignBulkAction;
+	private Action setAlignBulkAction;
 	private Action sortByNameAction;
 	private Action sortByFrameAction;
 	
@@ -137,11 +140,13 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.adjustAlignAction = actionItem(language.getText("dimgconv.offsetter.offset.adjust"), (e) -> onAdjustAlign());
 		this.autoAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.auto.bulk"), (e) -> onAutoAlignBulk());
 		this.adjustAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.adjust.bulk"), (e) -> onAdjustAlignBulk());
+		this.setAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.set.bulk"), (e) -> onSetAlignBulk());
 		this.sortByNameAction = actionItem(language.getText("dimgconv.offsetter.sort.name"), (e) -> onSortByName());
 		this.sortByFrameAction = actionItem(language.getText("dimgconv.offsetter.sort.frame"), (e) -> onSortByFrame());
 		
 		this.filePopupMenu = popupMenu(
 			menuItem(autoAlignBulkAction),
+			menuItem(setAlignBulkAction),
 			menuItem(adjustAlignBulkAction),
 			separator(),
 			menuItem(sortByNameAction),
@@ -542,7 +547,6 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			// load next picture
 			File selected = files.get(0);
 			currentFile = updateNextFile(selected);
-			updateOnionSkinFile();
 		}
 		else
 		{
@@ -551,6 +555,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			offsetYField.setValue((short)0);
 			currentFile = null;
 		}
+
+		updateOnionSkinFile();
 	}
 
 	private File updateNextFile(File selected) 
@@ -686,6 +692,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			adjustAlignAction.setEnabled(true);
 			autoAlignBulkAction.setEnabled(true);
 			adjustAlignBulkAction.setEnabled(true);
+			setAlignBulkAction.setEnabled(true);
 		}
 		else
 		{
@@ -693,6 +700,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			adjustAlignAction.setEnabled(false);
 			autoAlignBulkAction.setEnabled(!files.isEmpty());
 			adjustAlignBulkAction.setEnabled(!files.isEmpty());
+			setAlignBulkAction.setEnabled(!files.isEmpty());
 		}
 	}
 	
@@ -812,6 +820,42 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		SwingUtils.info(language.getText("dimgconv.offsetter.offset.adjust.bulk.count", count));
 	}
 
+	private void onSetAlignBulk() 
+	{
+		Point offset = selectSetAlign();
+		if (offset == null)
+			return;
+
+		int count = 0;
+		for (File file : fileList.getSelectedValuesList())
+		{
+			try {
+				if (FileUtils.matchMagicNumber(file, PNG_SIGNATURE)) // png?
+				{
+					PNGPicture p = BinaryObject.read(PNGPicture.class, file);
+					p.setOffsetX(offset.x);
+					p.setOffsetY(offset.y);
+					savePNGPicture(p, (short)p.getOffsetX(), (short)p.getOffsetY(), file, statusPanel);
+					count++;
+				}
+				else
+				{
+					Picture p = BinaryObject.read(Picture.class, file);
+					p.setOffsetX(offset.x);
+					p.setOffsetY(offset.y);
+					savePicture(p, (short)p.getOffsetX(), (short)p.getOffsetY(), file, statusPanel);
+					count++;
+				}
+			} catch (SecurityException e) {
+				SwingUtils.error(language.getText("dimgconv.offsetter.file.security", file.getName()));
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("dimgconv.offsetter.file.ioerror", file.getName()));
+			}
+		}
+		
+		SwingUtils.info(language.getText("dimgconv.offsetter.offset.adjust.bulk.count", count));
+	}
+
 	private void onSortByName()
 	{
 		fileListModel.setSort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
@@ -873,14 +917,14 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		return ok == Boolean.TRUE ? combo.getItemAt(combo.getSelectedIndex()) : null; 
 	}
 
-	private static Point selectAdjustAlign()
+	private static Point selectOffsetDialog(String titleKey)
 	{
 		DoomToolsLanguageManager language = DoomToolsLanguageManager.get(); 
-
+	
 		JFormField<Short> offsetX = shortField((short)0, false);
 		JFormField<Short> offsetY = shortField((short)0, false);
 		
-		Boolean ok = modal(language.getText("dimgconv.offsetter.offset.adjust.bulk.title"),
+		Boolean ok = modal(language.getText(titleKey),
 			containerOf(flowLayout(Flow.LEADING, 4, 0),
 				node(label(language.getText("dimgconv.offsetter.offset.x"))),
 				node(offsetX),
@@ -895,6 +939,18 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			return null;
 		
 		return new Point(offsetX.getValue(), offsetY.getValue());
+	}
+
+	private static Point selectAdjustAlign()
+	{
+		String titleKey = "dimgconv.offsetter.offset.adjust.bulk.title";
+		return selectOffsetDialog(titleKey);
+	}
+
+	private static Point selectSetAlign()
+	{
+		String titleKey = "dimgconv.offsetter.offset.set.bulk.title";
+		return selectOffsetDialog(titleKey);
 	}
 
 	private static void savePicture(Picture picture, short offsetX, short offsetY, File destinationFile, DoomToolsStatusPanel statusPanel) 
