@@ -3,6 +3,7 @@ DoomMake
 
 ### Changed for 0.34.1
 
+* `Fixed` Some projects setups would throw `BadPath` if palette directories did not exist in a project.
 * `Changed` New projects will build and organize converted sounds into subdirectories, if laid out that way in source.
 
 

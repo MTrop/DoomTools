@@ -412,7 +412,14 @@ check function getConvertPaletteSource() {
 	srcdir = getSourceDirectory();
 	builddir = getBuildDirectory();
 
-	palfile = searchdir(builddir + "/convert/palettes", "PLAYPAL", true) ?? searchdir(srcdir + "/assets/palettes", "PLAYPAL", true);
+	palfile = null;
+
+	if (fileexists(builddir + "/convert/palettes")) {
+		palfile = searchdir(builddir + "/convert/palettes", "PLAYPAL", true);
+	}
+	if (palfile === null && fileexists(srcdir + "/assets/palettes")) {
+		palfile = searchdir(srcdir + "/assets/palettes", "PLAYPAL", true);
+	}
 	if (palfile !== null) {
 		println("Using palette found at `" + palfile + "`...");
 		return palfile;
