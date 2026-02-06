@@ -182,6 +182,30 @@ public enum DecoHackTemplateCompletion
 		"}\n"
 	)),
 		
+	TEMPLATEAMMO("Adds an ammo template block.", (
+		"template ammo ${AmmoID} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	TEMPLATESOUND("Adds a sound template block.", (
+		"template sound ${SoundID} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+	
+	TEMPLATETHING("Adds a thing template block.", (
+		"template thing ${ThingID} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
+	TEMPLATEWEAPON("Adds a weapon template block.", (
+		"template weapon ${WeaponID} {\n" +
+		"\t${cursor}\n" +
+		"}\n"
+	)),
+
 	THINGBLOCK("Adds a thing block.", (
 		"thing ${ThingID} \"${ThingName}\" {\n" +
 		"\t${cursor}\n" +

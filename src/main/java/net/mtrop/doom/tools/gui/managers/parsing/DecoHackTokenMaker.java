@@ -68,6 +68,7 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("auto",       Token.RESERVED_WORD);
 		targetMap.put("fill",       Token.RESERVED_WORD);
 		targetMap.put("alias",      Token.RESERVED_WORD);
+		targetMap.put("template",   Token.RESERVED_WORD);
 
 		targetMap.put("set",        Token.RESERVED_WORD);
 		targetMap.put("clear",      Token.RESERVED_WORD);

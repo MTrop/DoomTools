@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.45.1
+
+* `Added` [GUI] Added auto-completions for template blocks.
+
+
 ### Changed for 0.45.0
 
 * `Fixed` Parsing single state bodies would not have set a `tranmap`, if specified.
