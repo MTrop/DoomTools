@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.44.0 by Matt Tropiano (using DoomStruct v2.21.0)
+DECOHack v0.45.0 by Matt Tropiano (using DoomStruct v2.22.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -2029,6 +2029,79 @@ corresponding property.
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Templates
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
+
+Templates are a way to specify objects *without them taking up an actual slot*
+that you can copy from later. All template language takes this form:
+
+    template &lt;Object&gt; &lt;Name&gt;
+    {
+        &#x2F;&#x2F;  ... object body here ...
+    }
+
+...where &lt;Object&gt; is one of: 
+
+    thing, weapon, sound, ammo
+    
+...and &lt;Name&gt; is an &lt;IDENTIFIER&gt; specifying the template name. 
+
+For example, a &quot;thing&quot; template may look like this:
+
+    template thing MonsterTemplate
+    {
+        Health 100
+        Radius 16
+        Height 56
+        Mass 300
+        ReactionTime 8
+        PainChance 96
+    
+        clear flags
+        +SOLID
+        +SHOOTABLE
+        +COUNTKILL
+    }
+
+
+And then you can copy from it as you would any other object, while modifying
+the original fields:
+
+    auto thing NewMonster : thing MonsterTemplate &quot;New Monster&quot;
+    {
+    	EdNum 6001
+        Health 80
+        
+        &#x2F;&#x2F; ... other properties ...
+        
+        States
+        {
+            &#x2F;&#x2F; ... state code ...
+        }
+    }
+
+
+Templates can also copy their characteristics from other objects of the same
+type:
+
+    template thing BlankTemplate : thing Candlestick
+    {
+        &#x2F;&#x2F; ... properties ...
+    } 
+
+
+Be warned though about Things and Weapons - if you specify a &quot;States&quot; body in 
+a template, those states will actually occupy real state slots&#x2F;indices!
+
+Templates are also BLANK OBJECTS, so that means whatever you don&#39;t fill in
+from the template MUST be filled in, or it will be blank&#x2F;default values! 
+
+A limitation of templates are that they CANNOT be deep-copied from, so you
+may not want to declare states in the body of a weapon or thing template -
+leave that for the proper definition itself. 
+
+
+&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D; Par Times
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
 
@@ -2471,6 +2544,13 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.45.0
+
+* &#x60;Fixed&#x60; Parsing single state bodies would not have set a &#x60;tranmap&#x60;, if specified.
+* &#x60;Added&#x60; Template support for certain object types (things, weapons, sounds, ammo) (Enh. #149). 
+* &#x60;Changed&#x60; Some docs for Action Pointer &#x60;A_SkelFist&#x60;.
+
+
 ### Changed for 0.44.0
 
 * &#x60;Added&#x60; A Thing&#x2F;Weapon Deep Copy operator &#x60;&lt;-&#x60; for deep-copying from another Thing&#x2F;Weapon (Enh. #147).
