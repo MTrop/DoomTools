@@ -21,7 +21,7 @@ public class DEUTEXTokenMaker extends CommonTokenMaker
 {
 	private static final char[] DECIMALDIGITS = createAlphabet("0123456789");
 	private static final char[] PATCHENTRY = createAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^+-_");
-	private static final char[] TEXTUREENTRY = createAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ+-_");
+	private static final char[] TEXTUREENTRY = createAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^+-_");
 
 	protected static final int TYPE_IDENTIFIER_PATCH =   COMMON_NUM_TOKEN_TYPES;
 	protected static final int TYPE_IDENTIFIER_TEXTURE = COMMON_NUM_TOKEN_TYPES + 1;

@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.4.1
+
+* `Fixed` [GUI] Bring texture entry pattern to parity with patch (entry) names.
+
+
 ### Changed for 1.4.0
 
 * `Fixed` PNAMES lumps with duplicate entries would have caused an exception on export.
