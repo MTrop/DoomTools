@@ -607,7 +607,15 @@ public final class DoomImageConvertMain
 				metaMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 			
 			int err;
-			for (File f : srcDir.listFiles())
+			
+			File[] dirFiles = srcDir.listFiles();
+			if (dirFiles == null)
+			{
+				options.stderr.println("ERROR: Could not read directory: " + srcDir.getPath());
+				return ERROR_IOERROR;
+			}
+			
+			for (File f : dirFiles)
 			{
 				String treeName = f.getPath().substring(base.getPath().length());
 				if (f.isDirectory())

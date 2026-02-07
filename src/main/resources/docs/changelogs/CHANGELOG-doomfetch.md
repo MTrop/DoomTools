@@ -1,6 +1,11 @@
 DoomFetch
 ---------
 
+### Changed for 1.2.3
+
+* `Fixed` DoomFetch will skip directories that it can't read when searching for a file.
+
+
 ### Changed for 1.2.2
 
 * `Changed` Some HTTP calls now allow GZIP-compressed responses.

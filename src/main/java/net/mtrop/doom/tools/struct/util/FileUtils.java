@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2025 Black Rook Software
+ * Copyright (c) 2020-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -696,7 +696,7 @@ public final class FileUtils
 	 * @param path the file path, relative or absolute that
 	 * 		contains wildcards in the file name portion.
 	 * @param hidden if true, include hidden files.
-	 * @return a list of matching files. Can return an array of zero length if nothing matches.
+	 * @return a list of matching files. Can return an array of zero length if nothing matches. Can return null on a bad directory read.
 	 */
 	public static File[] getFilesByWildcardPath(String path, boolean hidden)
 	{
@@ -726,7 +726,11 @@ public final class FileUtils
 		if (!(dir.exists() && dir.isDirectory()))
 			return new File[0];
 		
-		for (File f : dir.listFiles())
+		File[] dirFiles = dir.listFiles();
+		if (dirFiles == null)
+			return null;
+		
+		for (File f : dirFiles)
 		{
 			if (!hidden && f.isHidden())
 				continue;
@@ -750,7 +754,7 @@ public final class FileUtils
 	 * in the input list if they are not directories.
 	 *
 	 * @param files	the list of files to expand.
-	 * @return	a list of all files found in the subdirectory search.
+	 * @return	a list of all files found in the subdirectory search, or null on a bad directory read.
 	 * @throws	NullPointerException if files is null.
 	 */
 	public static File[] explodeFiles(File ... files)
@@ -766,7 +770,11 @@ public final class FileUtils
 			File dequeuedFile = fileQueue.poll();
 			if (dequeuedFile.isDirectory())
 			{
-				for (File f : dequeuedFile.listFiles())
+				File[] dirFiles = dequeuedFile.listFiles();
+				if (dirFiles == null)
+					return null;
+				
+				for (File f : dirFiles)
 				{
 					if (f.isDirectory())
 						fileQueue.add(f);
@@ -796,7 +804,7 @@ public final class FileUtils
 	 * in the input list if they are not directories.
 	 *
 	 * @param files	the list of files to expand.
-	 * @return	a list of all files found in the subdirectory search.
+	 * @return	a list of all files found in the subdirectory search, or null on a bad directory read.
 	 * @throws	NullPointerException if files is null.
 	 */
 	public static File[] expandFiles(File ... files)
@@ -812,7 +820,11 @@ public final class FileUtils
 			File dequeuedFile = fileQueue.poll();
 			if (!dequeuedFile.isDirectory())
 			{
-				for (File f : dequeuedFile.listFiles())
+				File[] dirFiles = dequeuedFile.listFiles();
+				if (dirFiles == null)
+					return null;
+				
+				for (File f : dirFiles)
 					if (!f.isDirectory())
 						fileList.add(f);
 			}
@@ -833,11 +845,15 @@ public final class FileUtils
 	 * @param name the name of the file.
 	 * @param noExt if true, do not use the file's extension, just name.
 	 * @param caseSensitive if true, search case-insensitively.
-	 * @return the found file, or null if not found.
+	 * @return the found file, or null if not found or the directory could not be read.
 	 */
 	public static File searchDirectory(File dir, String name, boolean noExt, boolean caseSensitive)
 	{
-		for (File file : dir.listFiles())
+		File[] dirFiles = dir.listFiles();
+		if (dirFiles == null)
+			return null;
+		
+		for (File file : dirFiles)
 		{
 			if (file.isDirectory())
 			{

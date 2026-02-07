@@ -450,7 +450,11 @@ public final class DoomFetchMain
 			if (!targetDirectoryPath.exists())
 				return false;
 			
-			for (File f : targetDirectoryPath.listFiles())
+			File[] dirFiles = targetDirectoryPath.listFiles();
+			if (dirFiles == null)
+				return false;
+			
+			for (File f : dirFiles)
 			{
 				String fname = FileUtils.getFileNameWithoutExtension(f);
 				if (OSUtils.isWindows() && fname.equalsIgnoreCase(name))

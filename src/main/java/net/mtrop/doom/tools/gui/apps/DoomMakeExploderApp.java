@@ -185,8 +185,14 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 				), 
 				(selected) -> { 
 					targetDirectory = selected;
-					if (targetDirectory != null && targetDirectory.isDirectory() && targetDirectory.listFiles().length > 0)
-						SwingUtils.warning(getApplicationContainer(), language.getText("doommake.newproject.directory.browse.notempty"));
+					if (targetDirectory != null && targetDirectory.isDirectory())
+					{
+						File[] dirFiles = targetDirectory.listFiles();
+						if (dirFiles == null)
+							SwingUtils.warning(getApplicationContainer(), language.getText("doommake.newproject.directory.browse.error"));
+						else if (dirFiles.length > 0)
+							SwingUtils.warning(getApplicationContainer(), language.getText("doommake.newproject.directory.browse.notempty"));
+					}
 				}
 			)))
 		);

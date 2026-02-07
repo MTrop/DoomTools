@@ -253,7 +253,15 @@ public final class DMXConvertMain
 		private int convertDirectory(File base, File dir, boolean searchSPI, boolean searchFFmpeg, AtomicInteger filesFound, boolean recurse)
 		{
 			int convertedCount = 0;
-			for (File f : dir.listFiles())
+			
+			File[] dirFiles = dir.listFiles();
+			if (dirFiles == null)
+			{
+				options.stderr.println("ERROR: Could not read directory: " + dir.getPath() +". Skipping...");
+				return 0;
+			}
+			
+			for (File f : dirFiles)
 			{
 				if (f.isDirectory())
 				{ 

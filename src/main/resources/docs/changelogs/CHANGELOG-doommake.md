@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.34.2
+
+* `Fixed` Some functions that work on directories will error out if the directory cannot be read.
+
+
 ### Changed for 0.34.1
 
 * `Fixed` Some projects setups would throw `BadPath` if palette directories did not exist in a project.

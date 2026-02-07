@@ -855,6 +855,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 					type(Type.NULL, "If the provided directory is null."),
 					type(Type.BUFFER, "A buffer containing the resultant hash digest."),
 					type(Type.ERROR, "BadPath", "If the provided path is not a directory."),
+					type(Type.ERROR, "IOError", "If the directory could not be read."),
 					type(Type.ERROR, "Security", "If the OS is preventing file inspection.")
 				)
 			;
@@ -1232,7 +1233,14 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	// If not, returns false.
 	private static boolean scanDir(File dir, String name, boolean noExt, boolean caseSensitive, ScriptValue returnValue)
 	{
-		for (File file : dir.listFiles())
+		File[] dirFiles = dir.listFiles();
+		if (dirFiles == null)
+		{
+			returnValue.setError("IOError", "Directory " + dir.getPath() + " could not be read.");
+			return false;
+		}
+		
+		for (File file : dirFiles)
 		{
 			if (file.isDirectory())
 			{
@@ -1278,11 +1286,23 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	private static void copyDir(File base, File srcDir, File destDir, boolean recursive, FileFilter filter, ScriptValue returnValue)
 	{
 		ScriptValue fileValue = ScriptValue.create(null);
+		
+		File[] dirFiles = srcDir.listFiles();
+		if (dirFiles == null)
+		{
+			returnValue.setError("IOError", "Directory " + srcDir.getPath() + " could not be read.");
+			return;
+		}
+		
 		for (File f : srcDir.listFiles())
 		{
 			String treeName = f.getPath().substring(base.getPath().length());
 			if (f.isDirectory() && recursive)
+			{
 				copyDir(base, f, destDir, recursive, filter, returnValue);
+				if (returnValue.isError())
+					break;
+			}
 			else if (filter.accept(f))
 			{
 				copyFile(f, new File(destDir.getPath() + treeName), true, fileValue);
@@ -1425,7 +1445,14 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 			return;
 		}
 		
-		for (File f : srcDir.listFiles())
+		File[] dirFiles = srcDir.listFiles();
+		if (dirFiles == null)
+		{
+			returnValue.setError("IOError", "Directory " + srcDir.getPath() + " could not be read.");
+			return;
+		}
+		
+		for (File f : dirFiles)
 		{
 			String treeName = prefix + "/" + f.getPath().substring(base.getPath().length() + 1);
 			if (treeName.startsWith("/"))
@@ -1466,6 +1493,13 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 
 	private static void digestDirectory(MessageDigest digest, boolean recursive, File directory, ScriptValue returnValue) 
 	{
+		File[] dirFiles = directory.listFiles();
+		if (dirFiles == null)
+		{
+			returnValue.setError("IOError", "Directory " + directory.getPath() + " could not be read.");
+			return;
+		}
+		
 		for (File f : directory.listFiles())
 		{
 			if (f.isDirectory() && recursive)

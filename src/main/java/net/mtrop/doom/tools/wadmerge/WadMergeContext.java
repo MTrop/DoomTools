@@ -796,7 +796,6 @@ public class WadMergeContext
 			return Response.BAD_SYMBOL;
 
 		File[] files = inDirectory.listFiles();
-		
 		if (files == null)
 		{
 			return Response.BAD_DIRECTORY;

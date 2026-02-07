@@ -1,6 +1,11 @@
 DMXConv
 -------
 
+### Changed for 1.2.2
+
+* `Fixed` DMXConv will throw an error for directories that it cannot read.
+
+
 ### Changed for 1.2.1
 
 * `Fixed` Files for conversion were counted improperly (would not cause DMXConv to error out).

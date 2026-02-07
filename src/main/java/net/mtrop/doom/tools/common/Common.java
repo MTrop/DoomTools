@@ -80,6 +80,11 @@ public final class Common
 	public static boolean cleanDirectory(File directory, boolean deleteTop)
 	{
 		boolean out = true;
+		
+		File[] dirFiles = directory.listFiles();
+		if (dirFiles == null)
+			return false;
+		
 		for (File f : directory.listFiles())
 		{
 			if (f.isDirectory())

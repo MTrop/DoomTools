@@ -812,7 +812,12 @@ public class DirectoryTreePanel extends JPanel
 		{
 			File file = toCopy[i];
 			if (file.isDirectory())
-				out += countFilesToCopy(file.listFiles());
+			{
+				File[] dirFiles = file.listFiles();
+				if (dirFiles == null)
+					return 0;
+				out += countFilesToCopy(dirFiles);
+			}
 			out++;
 		}
 		return out;
@@ -825,6 +830,9 @@ public class DirectoryTreePanel extends JPanel
 	
 	private void copyFolder(File parent, File[] toCopy, boolean overwrite, AtomicBoolean cancelSwitch, AtomicInteger result, Consumer<File> eachFile)
 	{
+		if (toCopy == null)
+			return;
+		
 		for (int i = 0; i < toCopy.length; i++) 
 		{
 			if (cancelSwitch.get())

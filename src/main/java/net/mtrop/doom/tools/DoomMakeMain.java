@@ -652,10 +652,19 @@ public final class DoomMakeMain
 			}
 			
 			File targetDirectory = new File(options.targetName);
-			if (targetDirectory.exists() && targetDirectory.listFiles().length > 0)
+			if (targetDirectory.exists())
 			{
-				options.stderr.println("ERROR: Target directory contains files. Project creation aborted.");
-				return ERROR_BAD_PROJECT;
+				File[] dirFiles = targetDirectory.listFiles();
+				if (dirFiles == null)
+				{
+					options.stderr.println("ERROR: Target directory could not be read. Project creation aborted.");
+					return ERROR_BAD_PROJECT;
+				}
+				else if (dirFiles.length > 0)
+				{
+					options.stderr.println("ERROR: Target directory contains files. Project creation aborted.");
+					return ERROR_BAD_PROJECT;
+				}
 			}
 
 			try {

@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.6.3
+
+* `Fixed` DImgConv will error out on directories that it cannot read.
+
+
 ### Changed for 1.6.2
 
 * `Added` [Offsetter] Import/export graphic offsets (Enh. #150).
