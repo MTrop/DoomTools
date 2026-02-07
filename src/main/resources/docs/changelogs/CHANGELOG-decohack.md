@@ -1,9 +1,12 @@
 DECOHack
 --------
 
-### Changed for 0.45.1
+### Changed for 0.46.0
 
 * `Added` [GUI] Added auto-completions for template blocks.
+* `Added` Warnings for Spawn frames with 0 Duration (or lower) (Enh. #152).
+* `Added` Warnings for Spawn frames with strange action pointers (Enh. #30).
+* `Added` Warning suppression language to parser.
 
 
 ### Changed for 0.45.0

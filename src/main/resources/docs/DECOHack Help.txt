@@ -2011,6 +2011,44 @@ sprite or sound index (for safety reasons). For example:
 
 
 ==============================================================================
+===== Warning Suppression 
+==============================================================================
+
+This may not be necessary for most patch writers out there, but you have the
+ability to suppress cetain types of warning messages that may arise from
+patch compilation. You can suppress a warning type by typing the following:
+
+    set suppress warning <WarningType> on
+
+
+...and from that point forward, the output of a warning of a particular type 
+will be suppressed, until you turn it off with:  
+
+    set suppress warning <WarningType> off
+
+
+The following are some available <WarningType>s:
+
+    "clauses"      Will suppress warnings about unnecessary clause use.
+    "conversion"   Will suppress warnings about integer to fixed conversion 
+                   and vice-versa.
+    "spawnpointer" Will suppress warnings about action pointers used on the 
+                   first spawn frame.
+    "thingmissile" Will suppress warnings about things used as MISSILEs that
+                   are not flagged as such. 
+    "zeroduration" Will suppress warnings about the first spawn frame 
+                   having zero duration on objects that probably shouldn't
+                   have it.
+    "zeromass"     Will suppress warnings about things that are SHOOTABLE 
+                   with zero mass.
+
+
+For example, in order to suppress conversion messages, use the following:
+
+    set suppress warning "conversion" on
+
+
+==============================================================================
 ===== Preprocessor
 ==============================================================================
 

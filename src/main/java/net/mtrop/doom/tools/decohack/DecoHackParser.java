@@ -52,6 +52,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHThingID24Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHWeaponMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHValueType.Type;
+import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponTarget;
 import net.mtrop.doom.tools.decohack.data.DEHWeaponSchema;
@@ -70,6 +71,16 @@ public final class DecoHackParser extends Lexer.Parser
 {
 	public static final String STREAMNAME_TEXT = "[Text String]";
 
+	private interface WarningType
+	{
+		String CLAUSES = "clauses";
+		String CONVERSION = "conversion";
+		String SPAWNPOINTER = "spawnpointer";
+		String THINGMISSILE = "thingmissile";
+		String ZERODURATION = "zeroduration";
+		String ZEROMASS = "zeromass";
+	}
+	
 	private interface Keyword
 	{
 		String MISC = "misc";
@@ -94,6 +105,8 @@ public final class DecoHackParser extends Lexer.Parser
 		String PARS = "pars";
 		
 		String SET = "set";
+		String SUPPRESS = "suppress";
+		String WARNING = "warning";
 		String SAFETY = "safety";
 		String ON = "on";
 		String OFF = "off";
@@ -690,6 +703,37 @@ public final class DecoHackParser extends Lexer.Parser
 			else
 			{
 				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.ON, Keyword.OFF, Keyword.SAFETY);
+				return false;
+			}
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.SUPPRESS))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.WARNING))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.WARNING, Keyword.SUPPRESS);
+				return false;
+			}
+
+			String name = matchString();
+			if (name == null)
+			{
+				addErrorMessage("Expected string (warning type) after \"%s\".", Keyword.WARNING);
+				return false;
+			}
+			
+			if (matchIdentifierIgnoreCase(Keyword.ON))
+			{
+				warningSuppressions.add(name);
+				return true;
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.OFF))
+			{
+				warningSuppressions.remove(name);
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after warning type.", Keyword.ON, Keyword.OFF, Keyword.SAFETY);
 				return false;
 			}
 		}
@@ -2872,7 +2916,7 @@ public final class DecoHackParser extends Lexer.Parser
 			// zero-mass check
 			if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
 			{
-				addWarningMessage("Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
+				addWarningMessage(WarningType.ZEROMASS, "Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
 				return PropertyResult.ERROR;
 			}
 			
@@ -3302,6 +3346,23 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.STATES);
 			return false;
+		}
+		
+		int spawnIndex = thing.getLabel(DEHThing.STATE_LABEL_SPAWN);
+		DEHState spawnState = context.getState(spawnIndex);
+
+		// check for 0-duration spawn state on things that potentially have AI.
+		int seeIndex = thing.getLabel(DEHThing.STATE_LABEL_SEE);
+		if (spawnState.getDuration() <= 0 && ((spawnState.getNextStateIndex() > 0 && spawnState.getNextStateIndex() != spawnIndex) || seeIndex != 0))
+			addWarningMessage(WarningType.ZERODURATION, "Thing has a 0-duration (or lower) spawn state for its first state. This will not progress its animation.");
+
+		// check for questionable action pointers on the first spawn frame.
+		Integer spawnPointerIndex = context.getStateActionPointerIndex(spawnIndex);
+		if (spawnPointerIndex != null)
+		{
+			DEHActionPointer pointer = context.getActionPointer(spawnPointerIndex);
+			if (pointer != null && !(pointer == DEHActionPointer.NULL || pointer == DEHActionPointerDoom19.LOOK))
+				addWarningMessage(WarningType.SPAWNPOINTER, "Thing has a non-LOOK action pointer on its spawn state: %s. This pointer will not be called.", pointer.getMnemonic());
 		}
 		
 		return true;
@@ -5648,7 +5709,7 @@ public final class DecoHackParser extends Lexer.Parser
 		if (matchIdentifierIgnoreCase(Keyword.THING))
 		{
 			if (paramType == DEHValueType.THING || paramType == DEHValueType.THINGMISSILE)
-				addWarningMessage("The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
+				addWarningMessage(WarningType.CLAUSES, "The use of a \"thing\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a thing alias.");
 			
 			Integer thingIndex;
 			if ((thingIndex = parseThingOrThingStateIndex(context)) == null)
@@ -5659,7 +5720,7 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				DEHThing thing = context.getThing(thingIndex);
 				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
-					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
+					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE.");
 			}
 			
 			return ParameterValue.createValue(thingIndex);
@@ -5667,7 +5728,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(Keyword.WEAPON))
 		{
 			if (paramType == DEHValueType.WEAPON)
-				addWarningMessage("The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
+				addWarningMessage(WarningType.CLAUSES, "The use of a \"weapon\" clause as a parameter in an action pointer is unneccesary. You can just use an index or a weapon alias.");
 			
 			Integer index;
 			if ((index = parseWeaponOrWeaponStateIndex(context)) == null)
@@ -5678,7 +5739,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(Keyword.SOUND))
 		{
 			if (paramType == DEHValueType.SOUND)
-				addWarningMessage("The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
+				addWarningMessage(WarningType.CLAUSES, "The use of a \"sound\" clause as a parameter in an action pointer is unneccesary. You can just use the sound name.");
 
 			Integer index;
 			if ((index = parseSoundIndex(context)) == null)
@@ -5689,7 +5750,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(Keyword.FLAGS))
 		{
 			if (paramType == DEHValueType.FLAGS)
-				addWarningMessage("The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
+				addWarningMessage(WarningType.CLAUSES, "The use of a \"flags\" clause as a parameter in an action pointer is unneccesary. You can just write flags as-is.");
 			return matchNumericExpression(context, actor, Type.FLAGS);
 		}
 		// Guess it.
@@ -6798,7 +6859,7 @@ public final class DecoHackParser extends Lexer.Parser
 				// Verify missile type.
 				DEHThing thing = context.getThing(index);
 				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
-					addWarningMessage("This action pointer requires a Thing that is flagged with MISSILE.");
+					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE.");
 				
 				return ParameterValue.createValue(value);
 			}
@@ -6857,7 +6918,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Fixed - coerce to whole number.
 		else if (lexeme.contains("."))
 		{
-			addWarningMessage("Found fixed-point, but will be converted to integer.");
+			addWarningMessage(WarningType.CONVERSION, "Found fixed-point, but will be converted to integer.");
 			try {
 				int out = (int)(Double.parseDouble(lexeme));
 				nextToken();
@@ -6886,7 +6947,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// Always take hex numbers as raw.
 		if (lexeme.startsWith("0X") || lexeme.startsWith("0x"))
 		{
-			addWarningMessage("Expected fixed-point - hex numbers are interpreted as-is.");
+			addWarningMessage(WarningType.CONVERSION, "Expected fixed-point - hex numbers are interpreted as-is.");
 			long v = parseUnsignedHexLong(lexeme.substring(2));
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
@@ -6907,7 +6968,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else
 		{
 			if (typeCheck)
-				addWarningMessage("Found integer, but will be converted to fixed-point.");
+				addWarningMessage(WarningType.CONVERSION, "Found integer, but will be converted to fixed-point.");
 			long v = Long.parseLong(lexeme);
 			if (v > (long)Integer.MAX_VALUE || v < (long)Integer.MIN_VALUE)
 				return null;
@@ -7001,6 +7062,8 @@ public final class DecoHackParser extends Lexer.Parser
 
 	/** List of errors. */
 	private LinkedList<String> errors;
+	/** Set of warning suppressions. */
+	private Set<String> warningSuppressions;
 	/** List of warnings. */
 	private LinkedList<String> warnings;
 	/** Editor directives. */
@@ -7019,6 +7082,7 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		super(new DecoHackLexer(streamName, in != null ? new InputStreamReader(in, inputCharset) : null, inputCharset));
 		this.warnings = new LinkedList<>();
+		this.warningSuppressions = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 		this.errors = new LinkedList<>();
 		this.editorKeys = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.lastAutoStateIndex = 0;
@@ -7027,9 +7091,10 @@ public final class DecoHackParser extends Lexer.Parser
 		this.lastAutoAmmoIndex = 0;
 	}
 	
-	private void addWarningMessage(String message, Object... args)
+	private void addWarningMessage(String warningType, String message, Object... args)
 	{
-		warnings.add(getTokenInfoLine(String.format(message, args)));
+		if (!warningSuppressions.contains(warningType))
+			warnings.add(getTokenInfoLine(String.format(warningType.toUpperCase() + ": " + message, args)));
 	}
 	
 	private String[] getWarningMessages()
