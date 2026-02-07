@@ -82,6 +82,8 @@ public class DecoHackTokenMaker extends CommonTokenMaker
 		targetMap.put("wait",       Token.RESERVED_WORD);
 		targetMap.put("stop",       Token.RESERVED_WORD);
 
+		targetMap.put("suppress",   Token.RESERVED_WORD);
+		targetMap.put("warning",    Token.RESERVED_WORD);
 		targetMap.put("free",       Token.RESERVED_WORD);
 		targetMap.put("protect",    Token.RESERVED_WORD);
 		targetMap.put("unprotect",  Token.RESERVED_WORD);
