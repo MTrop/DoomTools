@@ -861,7 +861,8 @@ public enum WadMergeCommand
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
-			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
+			out.println("             BAD_DIRECTORY if the provided file is not a directory or it cannot");
+			out.println("                           be read.");
 		}
 		
 		@Override
@@ -914,7 +915,8 @@ public enum WadMergeCommand
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
-			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
+			out.println("             BAD_DIRECTORY if the provided file is not a directory or it cannot");
+			out.println("                           be read.");
 		}
 		
 		@Override
@@ -1165,7 +1167,8 @@ public enum WadMergeCommand
 			out.println("    Returns: OK if the file was found and contents were merged in,");
 			out.println("             BAD_FILE if a file could not be read,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,");
-			out.println("             BAD_DIRECTORY if the provided file is not a directory.");
+			out.println("             BAD_DIRECTORY if the provided file is not a directory or it cannot");
+			out.println("                           be read.");
 		}
 		
 		@Override

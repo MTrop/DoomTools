@@ -1,6 +1,11 @@
 WadMerge
 --------
 
+### Changed for 1.11.1
+
+* `Fixed` WadMerge will not NPE on a bad directory read (Issue #151).
+
+
 ### Changed for 1.11.0
 
 * `Changed` MERGETEXTUREDIR now works on a "P" namespace if it exists in the target buffer.

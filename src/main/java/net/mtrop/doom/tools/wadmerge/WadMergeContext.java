@@ -783,7 +783,7 @@ public class WadMergeContext
 	 * @param omitMarkers if true, omit directory markers.
 	 * @return OK if the was written, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
-	 * 		or BAD_DIRECTORY if the provided file is not a directory.
+	 * 		or BAD_DIRECTORY if the provided file is not a directory or can't be read.
 	 * @throws IOException if the file could not be written.
 	 */
 	public Response mergeTree(String symbol, File inDirectory, FileFilter filter, boolean omitMarkers) throws IOException
@@ -795,10 +795,15 @@ public class WadMergeContext
 		if ((buffer = currentWads.get(symbol)) == null)
 			return Response.BAD_SYMBOL;
 
-		File[] files;
+		File[] files = inDirectory.listFiles();
+		
+		if (files == null)
+		{
+			return Response.BAD_DIRECTORY;
+		}
 		
 		// Sort files first, directories last, alphabetical order.
-		Arrays.sort(files = inDirectory.listFiles(), DIR_FILESORT);
+		Arrays.sort(files, DIR_FILESORT);
 
 		WadFile.Adder adder = null;
 		try {
@@ -1015,10 +1020,15 @@ public class WadMergeContext
 		TextureSet textureSet = new TextureSet(pout, tout);
 		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
 
-		File[] files;
+		File[] files = textureDirectory.listFiles();
+		if (files == null)
+		{
+			return Response.BAD_DIRECTORY;
+		}
+		
 		
 		// Sort files first, directories last, alphabetical order.
-		Arrays.sort(files = textureDirectory.listFiles(), DIR_FILESORT);
+		Arrays.sort(files, DIR_FILESORT);
 
 		try {
 			for (File f : files)
