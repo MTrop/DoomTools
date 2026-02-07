@@ -1,6 +1,13 @@
 DImgConv
 --------
 
+### Changed for 1.6.2
+
+* `Added` [Offsetter] Import/export graphic offsets (Enh. #150).
+* `Added` [Offsetter] Copy/paste graphic offsets (Enh. #150).
+* `Changed` [Offsetter] Changed max zoom factor to up to 8x.
+
+
 ### Changed for 1.6.1
 
 * `Fixed` [Offsetter] Resizing the window would not force a canvas redraw.
