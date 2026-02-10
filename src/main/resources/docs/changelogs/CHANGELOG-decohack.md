@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.46.1
 
 * `Fixed` Attempting to match a Thing alias looked up Weapon aliases instead in certain cases.
+* `Fixed` Setting a Thing as BOUNCES (MBF flag) will set its Speed to fixed-point.
 
 
 ### Changed for 0.46.0

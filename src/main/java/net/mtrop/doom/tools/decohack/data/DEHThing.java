@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
+import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBFFlag;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
@@ -976,8 +977,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public void writeObject(Writer writer, DEHThing thing, DEHFeatureLevel level) throws IOException
 	{
-		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0;
-		boolean thingIsProjectile = (thing.flags & DEHThingFlag.MISSILE.getValue()) != 0;
+		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0 || (flags & DEHThingMBFFlag.BOUNCES.getValue()) != 0;
+		boolean thingIsProjectile = (thing.flags & DEHThingFlag.MISSILE.getValue()) != 0|| (thing.flags & DEHThingMBFFlag.BOUNCES.getValue()) != 0;
 
 		int speedVal;
 		if (fixedSpeed != null)
