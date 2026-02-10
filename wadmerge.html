@@ -89,7 +89,7 @@ end
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WadMerge v1.11.0 by Matt Tropiano (using DoomStruct v2.22.0)
+WadMerge v1.11.1 by Matt Tropiano (using DoomStruct v2.22.0)
 Usage: wadmerge [--help | -h | --version]
                 [switches] [scriptfile] [arguments]
 
@@ -364,7 +364,8 @@ MERGEDIR [symbol] [path] [opt:nomarkers]
     ................................
     Returns: OK if merge successful,
              BAD_SYMBOL if the destination symbol is invalid,
-             BAD_DIRECTORY if the provided file is not a directory.
+             BAD_DIRECTORY if the provided file is not a directory or it cannot
+                           be read.
 
 MERGEWADDIR [symbol] [path]
     Adds a directory and its subdirectories recursively (files first, then
@@ -382,7 +383,8 @@ MERGEWADDIR [symbol] [path]
     ................................
     Returns: OK if merge successful,
              BAD_SYMBOL if the destination symbol is invalid,
-             BAD_DIRECTORY if the provided file is not a directory.
+             BAD_DIRECTORY if the provided file is not a directory or it cannot
+                           be read.
 
 MERGEENTRY [dest-symbol] [entry] [src-symbol] [opt:src-entry]
     Adds an entry from [src-symbol] to [dest-symbol].
@@ -455,7 +457,8 @@ MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]
     Returns: OK if the file was found and contents were merged in,
              BAD_FILE if a file could not be read,
              BAD_SYMBOL if the destination symbol is invalid,
-             BAD_DIRECTORY if the provided file is not a directory.
+             BAD_DIRECTORY if the provided file is not a directory or it cannot
+                           be read.
 
 FILECHARSUB [char] [replacement]
     Sets a character replacement mapping (from this command onward) for
@@ -476,6 +479,11 @@ FILECHARSUB [char] [replacement]
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.11.1
+
+* &#x60;Fixed&#x60; WadMerge will not NPE on a bad directory read (Issue #151).
+
+
 ### Changed for 1.11.0
 
 * &#x60;Changed&#x60; MERGETEXTUREDIR now works on a &quot;P&quot; namespace if it exists in the target buffer.

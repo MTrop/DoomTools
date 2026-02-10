@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.46.0 by Matt Tropiano (using DoomStruct v2.22.0)
+DECOHack v0.46.1 by Matt Tropiano (using DoomStruct v2.22.0)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -2235,18 +2235,18 @@ will be suppressed, until you turn it off with:
 
 The following are some available &lt;WarningType&gt;s:
 
-    &quot;clauses&quot;      Will suppress warnings about unnecessary clause use.
-    &quot;conversion&quot;   Will suppress warnings about integer to fixed conversion 
-                   and vice-versa.
-    &quot;spawnpointer&quot; Will suppress warnings about action pointers used on the 
-                   first spawn frame.
-    &quot;thingmissile&quot; Will suppress warnings about things used as MISSILEs that
-                   are not flagged as such. 
-    &quot;zeroduration&quot; Will suppress warnings about the first spawn frame 
-                   having zero duration on objects that probably shouldn&#39;t
-                   have it.
-    &quot;zeromass&quot;     Will suppress warnings about things that are SHOOTABLE 
-                   with zero mass.
+    &quot;adjustedvalue&quot; Will suppress warnings about objects that have its values
+                    adjusted to to avoiding a crash or other strange behavior.
+    &quot;clauses&quot;       Will suppress warnings about unnecessary clause use.
+    &quot;conversion&quot;    Will suppress warnings about integer to fixed conversion 
+                    and vice-versa.
+    &quot;spawnpointer&quot;  Will suppress warnings about action pointers used on the 
+                    first spawn frame.
+    &quot;thingmissile&quot;  Will suppress warnings about things used as MISSILEs that
+                    are not flagged as such. 
+    &quot;zeroduration&quot;  Will suppress warnings about the first spawn frame 
+                    having zero duration on objects that probably shouldn&#39;t
+                    have it.
 
 
 For example, in order to suppress conversion messages, use the following:
@@ -2582,6 +2582,13 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.46.1
+
+* &#x60;Fixed&#x60; Attempting to match a Thing alias looked up Weapon aliases instead in certain cases.
+* &#x60;Fixed&#x60; Setting a Thing as BOUNCES (MBF flag) will set its Speed to fixed-point.
+* &#x60;Changed&#x60; Warning about 0-mass, SHOOTABLE Things will set its mass to 100 in order to avoid a crash (Issue. #154).
+
+
 ### Changed for 0.46.0
 
 * &#x60;Added&#x60; [GUI] Added auto-completions for template blocks.
