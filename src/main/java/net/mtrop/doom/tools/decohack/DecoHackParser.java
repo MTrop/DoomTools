@@ -6071,7 +6071,7 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				return out;
 			}
-			else if ((slot = context.getWeaponAlias(name)) == null)
+			else if ((slot = context.getThingAlias(name)) == null)
 			{
 				addErrorMessage("Expected valid thing identifier: \"%s\" is not a valid alias.", name);
 				return null;

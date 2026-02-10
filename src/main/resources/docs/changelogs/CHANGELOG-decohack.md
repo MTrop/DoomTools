@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.46.1
+
+* `Fixed` Attempting to match a Thing alias looked up Weapon aliases instead in certain cases.
+
+
 ### Changed for 0.46.0
 
 * `Added` [GUI] Added auto-completions for template blocks.
