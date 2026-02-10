@@ -2783,6 +2783,20 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		} // while
 
+		if (currentType(DecoHackKernel.TYPE_RBRACE))
+		{
+			// zero-mass check
+			if (thing instanceof DEHThing)
+			{
+				DEHThing dehThing = (DEHThing)thing;
+				if (dehThing.getMass() == 0 && dehThing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
+				{
+					addWarningMessage(WarningType.ADJUSTEDVALUE, "Thing is SHOOTABLE and Mass was set to 0. This may crash certain ports, so Mass was set to 100.");
+					dehThing.setMass(100);
+				}
+			}
+		}
+		
 		if (!matchType(DecoHackKernel.TYPE_RBRACE))
 		{
 			addErrorMessage("Expected '}' after \"%s\" section.", Keyword.THING);
@@ -2792,7 +2806,7 @@ public final class DecoHackParser extends Lexer.Parser
 		// apply editor keys
 		for (Map.Entry<String, String> entry : editorKeys.entrySet())
 			thing.setEditorKey(entry.getKey(), entry.getValue());
-		
+
 		return true;
 	}
 
@@ -2913,13 +2927,6 @@ public final class DecoHackParser extends Lexer.Parser
 				return PropertyResult.ERROR;
 			}				
 
-			// zero-mass check
-			if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
-			{
-				addWarningMessage(WarningType.ADJUSTEDVALUE, "Thing is SHOOTABLE and Mass was set to 0. This may crash certain ports, so Mass was set to 100.");
-				value = 100;
-			}
-			
 			thing.setMass(value);
 			return PropertyResult.ACCEPTED;
 		}
