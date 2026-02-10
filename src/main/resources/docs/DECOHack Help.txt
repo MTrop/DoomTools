@@ -2029,18 +2029,18 @@ will be suppressed, until you turn it off with:
 
 The following are some available <WarningType>s:
 
-    "clauses"      Will suppress warnings about unnecessary clause use.
-    "conversion"   Will suppress warnings about integer to fixed conversion 
-                   and vice-versa.
-    "spawnpointer" Will suppress warnings about action pointers used on the 
-                   first spawn frame.
-    "thingmissile" Will suppress warnings about things used as MISSILEs that
-                   are not flagged as such. 
-    "zeroduration" Will suppress warnings about the first spawn frame 
-                   having zero duration on objects that probably shouldn't
-                   have it.
-    "zeromass"     Will suppress warnings about things that are SHOOTABLE 
-                   with zero mass.
+    "adjustedvalue" Will suppress warnings about objects that have its values
+                    adjusted to to avoiding a crash or other strange behavior.
+    "clauses"       Will suppress warnings about unnecessary clause use.
+    "conversion"    Will suppress warnings about integer to fixed conversion 
+                    and vice-versa.
+    "spawnpointer"  Will suppress warnings about action pointers used on the 
+                    first spawn frame.
+    "thingmissile"  Will suppress warnings about things used as MISSILEs that
+                    are not flagged as such. 
+    "zeroduration"  Will suppress warnings about the first spawn frame 
+                    having zero duration on objects that probably shouldn't
+                    have it.
 
 
 For example, in order to suppress conversion messages, use the following:

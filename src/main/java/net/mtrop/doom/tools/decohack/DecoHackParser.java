@@ -78,7 +78,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String SPAWNPOINTER = "spawnpointer";
 		String THINGMISSILE = "thingmissile";
 		String ZERODURATION = "zeroduration";
-		String ZEROMASS = "zeromass";
+		String ADJUSTEDVALUE = "adjustedvalue";
 	}
 	
 	private interface Keyword
@@ -2916,8 +2916,8 @@ public final class DecoHackParser extends Lexer.Parser
 			// zero-mass check
 			if (value == 0 && thing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
 			{
-				addWarningMessage(WarningType.ZEROMASS, "Thing is SHOOTABLE and mass was set to 0. This may crash certain ports!");
-				return PropertyResult.ERROR;
+				addWarningMessage(WarningType.ADJUSTEDVALUE, "Thing is SHOOTABLE and Mass was set to 0. This may crash certain ports, so Mass was set to 100.");
+				value = 100;
 			}
 			
 			thing.setMass(value);
@@ -3357,12 +3357,15 @@ public final class DecoHackParser extends Lexer.Parser
 			addWarningMessage(WarningType.ZERODURATION, "Thing has a 0-duration (or lower) spawn state for its first state. This will not progress its animation.");
 
 		// check for questionable action pointers on the first spawn frame.
-		Integer spawnPointerIndex = context.getStateActionPointerIndex(spawnIndex);
-		if (spawnPointerIndex != null)
+		if (spawnIndex != 0)
 		{
-			DEHActionPointer pointer = context.getActionPointer(spawnPointerIndex);
-			if (pointer != null && !(pointer == DEHActionPointer.NULL || pointer == DEHActionPointerDoom19.LOOK))
-				addWarningMessage(WarningType.SPAWNPOINTER, "Thing has a non-LOOK action pointer on its spawn state: %s. This pointer will not be called.", pointer.getMnemonic());
+			Integer spawnPointerIndex = context.getStateActionPointerIndex(spawnIndex);
+			if (spawnPointerIndex != null)
+			{
+				DEHActionPointer pointer = context.getActionPointer(spawnPointerIndex);
+				if (pointer != null && !(pointer == DEHActionPointer.NULL || pointer == DEHActionPointerDoom19.NULL || pointer == DEHActionPointerDoom19.LOOK))
+					addWarningMessage(WarningType.SPAWNPOINTER, "Thing has a non-LOOK action pointer on its spawn state: %s. This pointer will not be called.", pointer.getMnemonic());
+			}
 		}
 		
 		return true;

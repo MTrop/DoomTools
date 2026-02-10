@@ -5,6 +5,7 @@ DECOHack
 
 * `Fixed` Attempting to match a Thing alias looked up Weapon aliases instead in certain cases.
 * `Fixed` Setting a Thing as BOUNCES (MBF flag) will set its Speed to fixed-point.
+* `Changed` Warning about 0-mass, SHOOTABLE Things will set its mass to 100 in order to avoid a crash (Issue. #).
 
 
 ### Changed for 0.46.0
