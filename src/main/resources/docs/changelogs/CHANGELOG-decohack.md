@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.46.2
+
+* `Added` [GUI] Keyword "reskin" was not highlighted as a keyword.
+
+
 ### Changed for 0.46.1
 
 * `Fixed` Attempting to match a Thing alias looked up Weapon aliases instead in certain cases.
