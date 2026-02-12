@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.9.2
+
+* `Fixed` Preprocessor directives in comment blocks now will not get processed.
+
+
 ### Changed for 1.9.1
 
 * `Fixed` Function `PK3ENTRIES(...)` would return `null` if entries were found.

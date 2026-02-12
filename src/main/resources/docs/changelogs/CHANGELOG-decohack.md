@@ -3,6 +3,7 @@ DECOHack
 
 ### Changed for 0.46.2
 
+* `Fixed` Preprocessor directives in comment blocks now will not get processed (Issue #155).
 * `Added` [GUI] Keyword "reskin" was not highlighted as a keyword.
 
 

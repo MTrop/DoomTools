@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Black Rook Software
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -330,7 +330,11 @@ public class PreprocessorLexer extends Lexer
 			else if (lineBeginning && c == '#')
 			{
 				lineBeginning = false;
-				preprocess();
+
+				//if we're processing a comment, skip directives in the comment
+				int type = getCurrentLexemeType();
+				if (type != Kernel.TYPE_COMMENT && type != Kernel.TYPE_LINE_COMMENT)
+					preprocess();
 			}
 			else if (lineBeginning && Character.isWhitespace(c))
 			{

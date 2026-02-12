@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -53,6 +53,8 @@ public class Lexer
 	
 	// ============ STATE =============
 	
+	/** Current token state. */
+	private int state;
 	/** Current token builder. */
 	private StringBuilder tokenBuffer;
 
@@ -145,6 +147,14 @@ public class Lexer
 	}
 
 	/**
+	 * @return this Lexer's Kernel.
+	 */
+	public Kernel getKernel()
+	{
+		return kernel;
+	}
+	
+	/**
 	 * Pushes a stream onto the encapsulated reader stack.
 	 * @param name the name of the stream.
 	 * @param in the reader reader.
@@ -165,12 +175,13 @@ public class Lexer
 	{
 		int lineNumber = -1;
 		int charIndex = 0;
-		int state = Kernel.TYPE_UNKNOWN;
 		boolean breakloop = false;
 		Character stringEnd = null;
 		String commentEnd = null;
 		int commentEndIndex = 0;
 		
+		state = Kernel.TYPE_UNKNOWN;
+
 		while (!breakloop)
 		{
 			char c = readChar();
@@ -1390,6 +1401,15 @@ public class Lexer
 	}
 
 	/**
+	 * Gets the current lexeme type.
+	 * @return the current lexeme type state.
+	 */
+	protected int getCurrentLexemeType()
+	{
+		return state;
+	}
+	
+	/**
 	 * Gets the current token lexeme.
 	 * @return the current contents of the token lexeme builder buffer. 
 	 */
@@ -2033,6 +2053,7 @@ public class Lexer
 		public void addCommentDelimiter(String delimiterStart, String delimiterEnd)
 		{
 			keyCheck(delimiterStart);
+			keyCheck(delimiterEnd);
 			commentTable.put(delimiterStart, delimiterEnd);
 			if (!delimStartTable.contains(delimiterStart.charAt(0)))
 				delimStartTable.add(delimiterStart.charAt(0));
@@ -2187,6 +2208,16 @@ public class Lexer
 			return decimalSeparator;
 		}
 	
+		private Map<String, String> getCommentTable()
+		{
+			return commentTable;
+		}
+
+		private Set<String> getCommentLineSet()
+		{
+			return commentLineTable;
+		}
+
 		private Set<Character> getDelimStartTable()
 		{
 			return delimStartTable;
@@ -2195,16 +2226,6 @@ public class Lexer
 		private Map<String, Integer> getDelimTable()
 		{
 			return delimTable;
-		}
-	
-		private Map<String, String> getCommentTable()
-		{
-			return commentTable;
-		}
-	
-		private Set<String> getCommentLineSet()
-		{
-			return commentLineTable;
 		}
 	
 		private Map<String, Integer> getKeywordTable()
