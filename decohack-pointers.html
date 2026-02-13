@@ -530,7 +530,7 @@
 						</h3>
 						<div class="instructions">
 							<p>Calls A_FaceTarget and attempts a melee attack from the calling actor.</p>
-							<p>If the attack connects, this does 1d10 x 6 damage.</p>
+							<p>If the attack connects, this does 1d10 x 6 damage and plays sound &quot;SKEPCH&quot; from the calling actor.</p>
 							<p>If the calling actor has no target, this does nothing.</p>
 						</div>
 					</div>
@@ -598,7 +598,7 @@
 							<p>* If E4M6, checks if the caller is an MT_CYBORG (slot 22), then checks if all MT_CYBORG things are dead, and if so, opens the sector tagged 666 like a fast door.</p>
 							<p>* If E4M8, checks if the caller is an MT_SPIDER (slot 20), then checks if all MT_SPIDER things are dead, and if so, lowers the sector tagged 666 to the lowest floor.</p>
 							<p>* If MAP07, checks if the caller is an MT_FATSO (slot 9), then checks if all MT_FATSO things are dead, and if so, lowers the sector tagged 666 to the lowest floor.</p>
-							<p>* If MAP07, checks if the caller is an MT_BABY (slot 9), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.</p>
+							<p>* If MAP07, checks if the caller is an MT_BABY (slot 21), then checks if all MT_BABY things are dead, and if so, raises the sector tagged 667 by the amount of units of its highest lower texture.</p>
 							<p>This does nothing if no players are alive by the time this triggers.</p>
 							<p>Some engines allow you to change this function's behavior via MAPINFO or some other mechanism.</p>
 						</div>
