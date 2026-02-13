@@ -154,11 +154,12 @@ A:visited {
 }
 
 .dh-pointer-type {
-	background-color: rgb(80, 80, 80);
+	background-color: rgb(128, 128, 128);
 	padding-left: 16px;
 	padding-right: 16px;
 	padding-top: 8px;
 	padding-bottom: 8px;
+	border-radius: 8px;
 }
 
 .dh-pointer-type > .dh-pointer-subtype {
@@ -172,7 +173,10 @@ A:visited {
 }
 
 .dh-pointer-name {
+	background-color: rgb(80, 80, 80);
 	margin-bottom: 8px;
+	padding: 8px;
+	border-radius: 4px;
 }
 
 .dh-pointer-parameter {
