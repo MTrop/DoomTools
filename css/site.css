@@ -17,6 +17,30 @@ BODY {
     margin-right: auto;
 }
 
+H1 {
+	font-size: 200%;
+}
+
+H2 {
+	font-size: 175%;
+}
+
+H3 {
+	font-size: 150%;
+}
+
+H4 {
+	font-size: 125%;
+}
+
+H5 {
+	font-size: 110%;
+}
+
+H6 {
+	font-size: 100%;
+}
+
 KBD {
 	background-color: #061e24;
 	border-radius: 4px;
@@ -25,8 +49,16 @@ KBD {
 	position: relative;
 }
 
+A {
+	color: rgb(240, 240, 240);
+}
+
 A:hover {
-	color: #ffffff;
+	color: rgb(255, 255, 255);
+}
+
+A:visited {
+	color: rgb(240, 240, 240);
 }
 
 #page-links {
@@ -125,4 +157,20 @@ PRE {
 	max-width: 400px;
     margin-left: auto;
 	margin-right: auto;
+}
+
+.nav-section {
+	width: 100%;
+	text-align: center;
+	margin-top: 16px;
+	margin-bottom: 16px;
+}
+.main-title {
+	width: 100%;
+	text-align: center;
+}
+
+.main-title-name {
+	font-size: 250%;
+	font-weight: 900;
 }

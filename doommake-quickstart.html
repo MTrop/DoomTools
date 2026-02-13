@@ -414,6 +414,26 @@
 							are applied to these files on import. Subfolders are searched and imported, but no markers 
 							are added per subfolder.
 						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/acslib</kbd> should contain ACS libraries that are to be added into the 
+							WAD's ACS Library namespace (<kbd>A_START</kbd> / <kbd>A_END</kbd>) as-is. Subfolders are searched and imported, 
+							but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/colormaps</kbd> should contain colormaps that are to be added into the 
+							global WAD namespace as-is. Subfolders are searched and imported, but no markers are added per 
+							subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/colormaps-secondary</kbd> should contain colormaps that are to be added into the 
+							WAD's colormap namespace (<kbd>C_START</kbd> / <kbd>C_END</kbd>) as-is. Subfolders are searched and imported, 
+							but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/assets/palettes</kbd> should contain colormaps that are to be added into the 
+							global WAD namespace as-is. Subfolders are searched and imported, but no markers are added per 
+							subfolder. This directory is also searched for a palette for graphic conversion.
+						</p>
 					</div>
 				</div>
 				<div class="w3-row">
@@ -429,20 +449,50 @@
 						</p>
 						<p class="site-blurb">
 							The folder <kbd>src/convert/graphics</kbd> should contain graphics that get converted from formats 
-							like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/graphics</kbd>. If PNG files 
-							have offset information in them (grAb), it is preserved on conversion. Target files are overwritten.
+							like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/graphics</kbd>, which are 
+							imported into the WAD's global namespace. If PNG files have offset information in them (grAb), 
+							it is preserved on conversion.
 						</p>
 						<p class="site-blurb">
 							The folder <kbd>src/convert/sounds</kbd> should contain sounds that get converted from formats 
-							like WAV or AIFF and end up as DMX-formatted sounds in <kbd>build/convert/sounds</kbd>. Stereo sounds 
-							are mixed to mono, but their sampling rate is preserved. If you need to convert from other formats, 
-							you need to have <a href="https://ffmpeg.org/">FFmpeg</a> on your system PATH (or point to it some 
-							other way). Target files are overwritten.
+							like WAV or AIFF and end up as DMX-formatted sounds in <kbd>build/convert/sounds</kbd>, which are 
+							imported into the WAD's global namespace. Stereo sounds are mixed to mono, but their sampling rate 
+							is preserved. If you need to convert from other formats, you need to have <a href="https://ffmpeg.org/">FFmpeg</a> 
+							on your system PATH (or point to it some other way).
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/flats</kbd> should contain flat graphics that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/flats</kbd>, which are 
+							imported into the WAD's flat namespace (<kbd>FF_START</kbd> / <kbd>FF_END</kbd>).
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/patches</kbd> should contain patch graphics that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/patches</kbd>, which are 
+							imported into the WAD's patch namespace (<kbd>PP_START</kbd> / <kbd>PP_END</kbd>).
 						</p>
 						<p class="site-blurb">
 							The folder <kbd>src/convert/sprites</kbd> should contain sprite graphics that get converted from 
-							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/sprites</kbd>. If PNG files 
-							have offset information in them (grAb), it is preserved on conversion. Target files are overwritten.
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/sprites</kbd>, which are 
+							imported into the WAD's sprite namespace (<kbd>SS_START</kbd> / <kbd>SS_END</kbd>). If PNG files 
+							have offset information in them (grAb), it is preserved on conversion.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/colormaps</kbd> should contain colormaps that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/colormaps</kbd>, which are 
+							imported into the WAD's global namespace. Subfolders are searched and imported, but no markers are 
+							added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/colormaps-secondary</kbd> should contain colormaps that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in <kbd>build/convert/colormaps</kbd>, which are 
+							imported into the WAD's colormap namespace (<kbd>C_START</kbd> / <kbd>C_END</kbd>). 
+							Subfolders are searched and imported, but no markers are added per subfolder.
+						</p>
+						<p class="site-blurb">
+							The folder <kbd>src/convert/palettes</kbd> should contain colormaps that get converted from 
+							formats like PNG, GIF, BMP, or JPG and end up as LMPs in the global WAD namespace. Subfolders 
+							are searched and imported, but no markers are added per subfolder. This directory (or rather 
+							the directory the conversion is placed in) is also searched for a palette for graphic conversion.
 						</p>
 					</div>
 				</div>
