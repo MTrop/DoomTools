@@ -8,7 +8,6 @@ Changes
 -------
 
 - **2026-02-11** Updated RookScript to `1.18.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.18.0-RELEASE)
-
 - **2026-02-11** Updated DoomStruct to `2.22.1`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.22.1-RELEASE)
 
 - **2026-02-07** Updated RookScript to `1.17.3`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.17.3-RELEASE)
