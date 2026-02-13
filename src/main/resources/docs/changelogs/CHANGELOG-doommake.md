@@ -3,6 +3,7 @@ DoomMake
 
 ### Changed for 0.34.2
 
+* `Fixed` MAPINFO scanning functions will not mis-parse comma-separated numbers in certain locales.
 * `Fixed` Preprocessor directives in comment blocks now will not get processed.
 * `Fixed` Some functions that work on directories will error out if the directory cannot be read.
 
