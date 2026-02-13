@@ -12833,7 +12833,7 @@
 								</div>
 								<div class="parameter-description">
 									<p>
-										If not a directory or [path] is null.
+										If not a directory or [path] is null, or the directory could not be read.
 									</p>
 								</div>
 							</div>
@@ -13910,7 +13910,7 @@
 				</div>
 				<div id="function-content-zfentry" class="function-content">
 					<div class="function-description">
-						<p>Returns a list of all of the entries in an open Zip File.</p>
+						<p>Returns a single entry from an open Zip File by name.</p>
 					</div>
 					<div class="parameter-section">
 						<div class="parameter-title">
@@ -31894,6 +31894,17 @@
 							<div class="parameter-usage">
 								<div class="parameter-type">
 									<span class="parameter-type-name">ERROR</span>
+									<span class="parameter-subtype-name">IOError</span>
+								</div>
+								<div class="parameter-description">
+									<p>
+										If the directory could not be read.
+									</p>
+								</div>
+							</div>
+							<div class="parameter-usage">
+								<div class="parameter-type">
+									<span class="parameter-type-name">ERROR</span>
 									<span class="parameter-subtype-name">Security</span>
 								</div>
 								<div class="parameter-description">
@@ -32662,7 +32673,7 @@
 							<div class="parameter-usage">
 								<div class="parameter-type">
 									<span class="parameter-type-name">MAP</span>
-									<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), files:LIST[STRING, ...], outputdirectory:OBJECTREF(File), ffmpegpath:OBJECTREF(File), onlyffmpeg:BOOLEAN, onlyjspi:BOOLEAN}</span>
+									<span class="parameter-subtype-name">{stdout:OBJECTREF(OutputStream), stderr:OBJECTREF(OutputStream), files:LIST[STRING, ...], recursive:BOOLEAN, outputdirectory:OBJECTREF(File), ffmpegpath:OBJECTREF(File), onlyffmpeg:BOOLEAN, onlyjspi:BOOLEAN}</span>
 								</div>
 								<div class="parameter-description">
 									<p>
