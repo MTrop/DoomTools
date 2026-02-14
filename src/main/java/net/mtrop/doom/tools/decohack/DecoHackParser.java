@@ -1451,21 +1451,31 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses the custom bitflag property body.
 	private boolean parseCustomPropertyFlags(AbstractPatchContext<?> context, Class<?> objectClass, String propertyName)
 	{
+		Integer lastValue = null;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
 			String mnemonic = matchIdentifier();
-	
+			Integer value;
+			
 			if (!currentType(DecoHackKernel.TYPE_NUMBER))
 			{
-				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
-				return false;
+				if (lastValue == null)
+					lastValue = 0;
+				
+				if (lastValue == 0)
+					value = 1;
+				else
+					value = lastValue << 1;
+				
+				lastValue = value;
 			}
-	
-			Integer value = matchPositiveInteger();
-			if (value == null)
+			else
 			{
-				addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
-				return false;
+				if ((value = matchPositiveInteger()) == null)
+				{
+					addErrorMessage("Expected positive integer for value for mnemonic: \"%s\"", mnemonic);
+					return false;
+				}
 			}
 			
 			context.addCustomBitflag(objectClass, mnemonic, propertyName, value);

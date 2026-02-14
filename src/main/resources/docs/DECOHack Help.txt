@@ -1819,7 +1819,32 @@ after the definition like so:
     }
 
 ...and so forth, and they will be added (or'ed, rather) together for the 
-corresponding property.  
+corresponding property. You can also define flags without a number:
+
+    custom thing property ExtendedBits "Extended bits" flags
+    {
+        NEWFLAG1
+        NEWFLAG2
+        NEWFLAG3
+        NEWFLAG4
+    }
+
+...and those flags will receive auto-enumerated values (in this case, 
+NEWFLAG1, NEWFLAG2, NEWFLAG3, and NEWFLAG4 get 0x01, 0x02, 0x04, and 0x08, 
+respectively). If you set a number to one of those flags, however, the 
+auto-enumerator will define the next blank flag as the last value left-shifted
+by one bit. In this example,
+
+    custom thing property ExtendedBits "Extended bits" flags
+    {
+        NEWFLAG1
+        NEWFLAG2
+        NEWFLAG3 0x008
+        NEWFLAG4
+    }
+
+...NEWFLAG4 will be given 0x010, since that is [0x008 << 1]. NEWFLAG1 and
+NEWFLAG2 will be 0x001 and 0x002, respectively.
 
 
 ==============================================================================
