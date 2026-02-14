@@ -6758,6 +6758,12 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				Integer value;
 				
+				if (!currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
+				{
+					addErrorMessage("Expected valid flag expression.");
+					return null;
+				}
+				
 				// Check for accidental flag mixing.
 				int flagInclusionMask = 0;
 				final int FIM_THING_DOOM19 = 0x01;
@@ -6858,7 +6864,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer value;
 				if ((value = matchThingIndex(context)) == null)
 				{
-					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
+					addErrorMessage("Expected valid thing index: integer, or thing alias.");
 					return null;
 				}
 				
@@ -6870,7 +6876,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer value;
 				if ((value = matchThingIndex(context)) == null)
 				{
-					addErrorMessage("Expected valid thing index: positive integer, or thing alias.");
+					addErrorMessage("Expected valid thing index: integer, or thing alias.");
 					return null;
 				}
 				
@@ -6878,8 +6884,8 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				// Verify missile type.
 				DEHThing thing = context.getThing(index);
-				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
-					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE.");
+				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0 && (thing.getFlags() & DEHFlag.flags(DEHThingFlag.BOUNCES)) == 0)
+					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE or BOUNCE (or both).");
 				
 				return ParameterValue.createValue(value);
 			}
@@ -6889,7 +6895,7 @@ public final class DecoHackParser extends Lexer.Parser
 				Integer value;
 				if ((value = matchWeaponIndex(context)) == null)
 				{
-					addErrorMessage("Expected valid weapon index: positive integer, or weapon alias.");
+					addErrorMessage("Expected valid weapon index: integer, or weapon alias.");
 					return null;
 				}
 				

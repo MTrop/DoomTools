@@ -3,6 +3,7 @@ DECOHack
 
 ### Changed for 0.47.0
 
+* `Fixed` A crash could occur on parsing a flag expression if it encountered bad input (Issue #160).
 * `Added` Custom flags are not auto-enumerated if not followed by a number (Enh. #158).
 
 
