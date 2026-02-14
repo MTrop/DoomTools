@@ -165,6 +165,13 @@ PRE {
 	margin-top: 16px;
 	margin-bottom: 16px;
 }
+
+.footer-section {
+	width: 100%;
+	font-size: 80%;
+	text-align: center;
+}
+
 .main-title {
 	width: 100%;
 	text-align: center;
