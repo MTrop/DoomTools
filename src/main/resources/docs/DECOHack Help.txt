@@ -345,7 +345,9 @@ is used).
 
     A_RandomJump(missile2, 255)         // Available state label on same actor
     A_RandomJump(thing 23 pain, 128)    // Thing state label
-    A_RandomJump(weapon 5 fire2, 128)   // Weapon state label
+    A_RandomJump(pain, 128)             // Available state label on same actor
+    A_WeaponJump(weapon 5 fire2, 128)   // Weapon state label
+    A_WeaponJump(fire2, 128)            // Available state label on same actor
     A_PlaySound("FRE001", 0)            // Sound name
     A_PlaySound(pistol, 0)              // Sound name
 
@@ -357,7 +359,8 @@ function requires them or understands them:
 
 
 Depending on the expected parameter type, DECOHack will automatically convert
-those parameters to fixed-point. The following is equivalent to the above:
+those parameters to fixed-point (but it will warn you when it does). The 
+following is equivalent to the above:
 
     A_Mushroom(-45, 16)
 
