@@ -130,7 +130,7 @@ function display_release_data(release, release_section_element, release_version_
 			"class": asset.name.indexOf('-setup-jre') >= 0 
 				? 'w3-button w3-xlarge w3-round-large download-link'
 				: 'w3-button w3-round-large download-link',
-			"style": "width: 99%; margin-bottom: 8px"
+			"style": "width: 99%; margin-bottom: 16px"
 		});
 		link.innerHTML = linkhtml;
 
