@@ -128,9 +128,9 @@ function display_release_data(release, release_section_element, release_version_
 		let link = $DJ.e('a', {
 			"href": asset.browser_download_url, 
 			"class": asset.name.indexOf('-setup-jre') >= 0 
-				? 'w3-button w3-xlarge w3-round-large w3-margin download-link'
-				: 'w3-button w3-round-large w3-margin download-link',
-			"style": "width: 99%"
+				? 'w3-button w3-xlarge w3-round-large download-link'
+				: 'w3-button w3-round-large download-link',
+			"style": "width: 99%; margin-bottom: 8px"
 		});
 		link.innerHTML = linkhtml;
 
