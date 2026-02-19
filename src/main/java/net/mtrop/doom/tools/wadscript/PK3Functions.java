@@ -230,7 +230,7 @@ public enum PK3Functions implements ScriptFunctionType
 					type(Type.MAP, "{... name:STRING ...}", "A map of zip entry info containing the name of the entry.")
 				)
 				.returns(
-					type(Type.OBJECTREF, "Wad", "An open data input stream to read from."),
+					type(Type.OBJECTREF, "Wad", "An in-memory WAD buffer with loaded data."),
 					type(Type.ERROR, "BadParameter", "If an open zip file was not provided, or [entry] is null or [entry].name is null."),
 					type(Type.ERROR, "BadEntry", "If [entry] could not be found in the zip."),
 					type(Type.ERROR, "BadWad", "If [entry] is not a WAD file."),

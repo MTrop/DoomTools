@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.9.3
+
+* `Fixed` Some docs for PK3 functions.
+
+
 ### Changed for 1.9.2
 
 * `Fixed` Preprocessor directives in comment blocks now will not get processed.
