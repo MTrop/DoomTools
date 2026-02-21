@@ -1686,23 +1686,10 @@ public final class DecoHackParser extends Lexer.Parser
 				return false;
 			}
 		}
-		
+
 		Integer ammoIndex;
-		if ((ammoIndex = matchPositiveInteger()) == null)
-		{
-			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
+		if ((ammoIndex = matchAmmoIndex(context)) == null)
 			return false;
-		}		
-		else if (ammoIndex >= context.getAmmoCount())
-		{
-			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
-			return false;
-		}
-		else if (context.getAmmo(ammoIndex) == null)
-		{
-			addErrorMessage("Expected ammo type: an integer from 0 to %d.", context.getAmmoCount() - 1);
-			return false;
-		}
 
 		return parseAmmoDefinitionBlock(context, ammoIndex);
 	}
@@ -6340,17 +6327,6 @@ public final class DecoHackParser extends Lexer.Parser
 			addErrorMessage("Expected integer for ammo type.");
 			return null;
 		}
-		else if (ammoType == 4)
-		{
-			addErrorMessage("Ammo type %d is reserved.", ammoType);
-			return null;
-		}
-		
-		if (context.getAmmo(ammoType) == null)
-		{
-			addErrorMessage("Expected valid ammo type index.");
-			return null;
-		}
 		
 		return verifyAmmoIndex(context, ammoType);
 	}
@@ -6360,19 +6336,17 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (slot == 4)
 		{
-			addErrorMessage("Invalid ammo index: %d.", slot);
+			addErrorMessage("Ammo type %d is reserved.", slot);
 			return null;
 		}
-
-		if (slot >= context.getAmmoCount())
+		else if (slot >= context.getAmmoCount())
 		{
 			addErrorMessage("Invalid ammo index: %d. Max is %d.", slot, context.getAmmoCount() - 1);
 			return null;
 		}
-
-		if (context.getAmmo(slot) == null)
+		else if (context.getAmmo(slot) == null)
 		{
-			addErrorMessage("Invalid ammo index: %d. Max is %d.", slot, context.getAmmoCount() - 1);
+			addErrorMessage("Expected valid ammo type index.");
 			return null;
 		}
 

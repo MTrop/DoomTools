@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.47.0
 
 * `Fixed` A crash could occur on parsing a flag expression if it encountered bad input (Issue #160).
+* `Fixed` Ammo aliases in ammo definition blocks did not work. Now they do.
 * `Added` Custom flags are now auto-enumerated if not followed by a number (Enh. #158).
 
 
