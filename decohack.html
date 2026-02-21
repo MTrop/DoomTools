@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.46.2 by Matt Tropiano (using DoomStruct v2.22.1)
+DECOHack v0.47.0 by Matt Tropiano (using DoomStruct v2.22.1)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -551,7 +551,9 @@ is used).
 
     A_RandomJump(missile2, 255)         &#x2F;&#x2F; Available state label on same actor
     A_RandomJump(thing 23 pain, 128)    &#x2F;&#x2F; Thing state label
-    A_RandomJump(weapon 5 fire2, 128)   &#x2F;&#x2F; Weapon state label
+    A_RandomJump(pain, 128)             &#x2F;&#x2F; Available state label on same actor
+    A_WeaponJump(weapon 5 fire2, 128)   &#x2F;&#x2F; Weapon state label
+    A_WeaponJump(fire2, 128)            &#x2F;&#x2F; Available state label on same actor
     A_PlaySound(&quot;FRE001&quot;, 0)            &#x2F;&#x2F; Sound name
     A_PlaySound(pistol, 0)              &#x2F;&#x2F; Sound name
 
@@ -563,7 +565,8 @@ function requires them or understands them:
 
 
 Depending on the expected parameter type, DECOHack will automatically convert
-those parameters to fixed-point. The following is equivalent to the above:
+those parameters to fixed-point (but it will warn you when it does). The 
+following is equivalent to the above:
 
     A_Mushroom(-45, 16)
 
@@ -2025,7 +2028,32 @@ after the definition like so:
     }
 
 ...and so forth, and they will be added (or&#39;ed, rather) together for the 
-corresponding property.  
+corresponding property. You can also define flags without a number:
+
+    custom thing property ExtendedBits &quot;Extended bits&quot; flags
+    {
+        NEWFLAG1
+        NEWFLAG2
+        NEWFLAG3
+        NEWFLAG4
+    }
+
+...and those flags will receive auto-enumerated values (in this case, 
+NEWFLAG1, NEWFLAG2, NEWFLAG3, and NEWFLAG4 get 0x01, 0x02, 0x04, and 0x08, 
+respectively). If you set a number to one of those flags, however, the 
+auto-enumerator will define the next blank flag as the last value left-shifted
+by one bit. In this example,
+
+    custom thing property ExtendedBits &quot;Extended bits&quot; flags
+    {
+        NEWFLAG1
+        NEWFLAG2
+        NEWFLAG3 0x008
+        NEWFLAG4
+    }
+
+...NEWFLAG4 will be given 0x010, since that is [0x008 &lt;&lt; 1]. NEWFLAG1 and
+NEWFLAG2 will be 0x001 and 0x002, respectively.
 
 
 &#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;
@@ -2582,6 +2610,13 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.47.0
+
+* &#x60;Fixed&#x60; A crash could occur on parsing a flag expression if it encountered bad input (Issue #160).
+* &#x60;Fixed&#x60; Ammo aliases in ammo definition blocks did not work. Now they do.
+* &#x60;Added&#x60; Custom flags are now auto-enumerated if not followed by a number (Enh. #158).
+
+
 ### Changed for 0.46.2
 
 * &#x60;Fixed&#x60; Preprocessor directives in comment blocks now will not get processed (Issue #155).
