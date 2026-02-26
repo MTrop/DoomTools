@@ -122,7 +122,7 @@ A:visited {
 .download-link {
 	background-color: #2d4760;
 	color: #dddddd;
-	box-shadow: rgb(8, 37, 46) 0px 5px;
+	box-shadow: rgb(0, 24, 46) 0px 5px;
 	white-space: pre-wrap;
 }
 
