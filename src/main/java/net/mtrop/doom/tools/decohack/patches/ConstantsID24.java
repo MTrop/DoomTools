@@ -3439,7 +3439,7 @@ interface ConstantsID24
 			put(-1, (new DEHAmmo()).setName("None")
 				.setMax(0).setPickup(0));
 			put(-1879048192, (new DEHAmmo()).setName("Fuel")
-					.setMax(0).setPickup(0));
+				.setMax(150).setPickup(10));
 		}
 	};
 

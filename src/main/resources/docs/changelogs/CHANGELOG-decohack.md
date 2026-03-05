@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.47.1
+
+* `Fixed` ID24's Fuel Ammo had incorrect defaults.
+
+
 ### Changed for 0.47.0
 
 * `Fixed` A crash could occur on parsing a flag expression if it encountered bad input (Issue #160).
