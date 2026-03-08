@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-03-07** Fixed preprocessors causing StackOverflowErrors by not catching recursive macro loops.
 - **2026-03-01** Updated DoomStruct to `2.22.2`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.22.2-RELEASE)
 
 - **2026-02-19** Updated RookScript to `1.19.0`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.19.0-RELEASE)

@@ -4,6 +4,7 @@ DECOHack
 ### Changed for 0.47.1
 
 * `Fixed` ID24's Fuel Ammo had incorrect defaults.
+* `Fixed` DECOHack will error out if it catches a macro loop.
 
 
 ### Changed for 0.47.0

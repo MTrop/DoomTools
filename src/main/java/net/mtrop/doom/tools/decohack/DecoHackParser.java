@@ -59,6 +59,7 @@ import net.mtrop.doom.tools.decohack.data.DEHWeaponSchema;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.decohack.patches.DEHPatchBoom.EpisodeMap;
 import net.mtrop.doom.tools.struct.Lexer;
+import net.mtrop.doom.tools.struct.Lexer.LexerException;
 import net.mtrop.doom.tools.struct.PreprocessorLexer;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EnumUtils;
@@ -7134,6 +7135,9 @@ public final class DecoHackParser extends Lexer.Parser
 			noError = context != null;
 			while (currentToken() != null && noError)
 				noError = parseEntry(context);
+		} catch (LexerException e) {
+			addErrorMessage(e.getMessage());
+			noError = false;
 		} catch (NumberFormatException e) {
 			addErrorMessage(e.getMessage());
 			noError = false;

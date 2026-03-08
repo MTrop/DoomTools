@@ -161,7 +161,18 @@ public class Lexer
 	 */
 	public void pushStream(String name, Reader in)
 	{
-		readerStack.push(name, in);
+		readerStack.push(null, name, in);
+	}
+	
+	/**
+	 * Pushes a stream onto the encapsulated reader stack.
+	 * @param macro the macro to push.
+	 * @param name the name of the stream.
+	 * @param in the reader reader.
+	 */
+	protected void pushStream(String macro, String name, Reader in)
+	{
+		readerStack.push(macro, name, in);
 	}
 	
 	/**
@@ -1672,17 +1683,26 @@ public class Lexer
 		public ReaderStack(String name, Reader reader)
 		{
 			this();
-			push(name, reader);
+			push(null, name, reader);
 		}
 		
 		/**
 		 * Pushes another reader onto the stack.
+		 * @param macro if macro, the macro name.
 		 * @param name the name to give this reader.
 		 * @param reader the reader itself (assumed open).
+		 * @throws LexerException if a circular stream was detected.
 		 */
-		public final void push(String name, Reader reader)
+		public final void push(String macro, String name, Reader reader)
 		{
-			innerStack.add(new Stream(name, reader));
+			if (macro != null)
+			{
+				for (Stream s : innerStack)
+					if (macro.equals(s.macroName))
+						throw new LexerException("Circular macro use has been detected: " + macro);
+			}
+			
+			innerStack.add(new Stream(macro, name, reader));
 		}
 		
 		/**
@@ -1773,6 +1793,8 @@ public class Lexer
 		 */
 		public class Stream implements AutoCloseable
 		{
+			/** Name of the inner macro used (if any). */
+			private String macroName;
 			/** Name of the stream. */
 			private String streamName;
 			/** The buffered reader. */
@@ -1787,11 +1809,13 @@ public class Lexer
 			
 			/**
 			 * Creates a new stream.
+			 * @param macro the macro name (if any).
 			 * @param name the stream name.
 			 * @param in the reader used.
 			 */
-			private Stream(String name, Reader in)
+			private Stream(String macro, String name, Reader in)
 			{
+				this.macroName = macro;
 				this.streamName = name;
 				this.reader = new BufferedReader(in);
 				this.line = 1;
@@ -2542,6 +2566,32 @@ public class Lexer
 			if (lexeme != null)
 				sb.append(", Lexeme: \"").append(lexeme).append('"');
 			return sb.toString();
+		}
+		
+	}
+	
+	public static class LexerException extends RuntimeException
+	{
+		private static final long serialVersionUID = -4526020755030240214L;
+		
+		public LexerException()
+		{
+			super("A lexer exception has happened.");
+		}
+		
+		public LexerException(String message)
+		{
+			super(message);
+		}
+		
+		public LexerException(Throwable cause)
+		{
+			super("A lexer exception has happened.", cause);
+		}
+		
+		public LexerException(String message, Throwable cause)
+		{
+			super(message, cause);
 		}
 		
 	}
