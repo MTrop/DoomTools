@@ -6002,6 +6002,14 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 	}
 
+	private boolean currentIsPositiveFixed()
+	{
+		if (!currentType(DecoHackKernel.TYPE_NUMBER))
+			return false;
+		
+		return currentLexeme().contains(".");
+	}
+
 	// Checks if the current identifier is a custom property.
 	private boolean currentIsCustomProperty(AbstractPatchContext<?> context, Class<?> objectType)
 	{
@@ -6955,7 +6963,7 @@ public final class DecoHackParser extends Lexer.Parser
 			nextToken();
 			return ((int)v);
 		}
-		else if (lexeme.contains("."))
+		else if (currentIsPositiveFixed())
 		{
 			try {
 				int out = (int)(Double.parseDouble(lexeme) * (1 << 16L));
