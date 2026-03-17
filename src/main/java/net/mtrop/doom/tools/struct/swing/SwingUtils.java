@@ -313,7 +313,7 @@ public final class SwingUtils
 	 */
 	public static void soundAsterisk()
 	{
-		desktopProperty(Runnable.class, "win.sound.asterisk", "win.sound.default").ifPresent((runnable) -> runnable.run());
+		desktopProperty(Runnable.class, "win.sound.asterisk").ifPresent((runnable) -> runnable.run());
 	}
 	
 	/**
@@ -321,7 +321,7 @@ public final class SwingUtils
 	 */
 	public static void soundExclamation()
 	{
-		desktopProperty(Runnable.class, "win.sound.exclamation", "win.sound.default").ifPresent((runnable) -> runnable.run());
+		desktopProperty(Runnable.class, "win.sound.exclamation").ifPresent((runnable) -> runnable.run());
 	}
 	
 	/**
@@ -329,7 +329,7 @@ public final class SwingUtils
 	 */
 	public static void soundQuestion()
 	{
-		desktopProperty(Runnable.class, "win.sound.question", "win.sound.default").ifPresent((runnable) -> runnable.run());
+		desktopProperty(Runnable.class, "win.sound.question").ifPresent((runnable) -> runnable.run());
 	}
 
 	/**
