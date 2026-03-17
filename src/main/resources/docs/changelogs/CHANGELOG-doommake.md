@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.35.0
+
+* `Added` [GUI] The ability to make DoomMake play a sound on successful or failed builds (Enh. #162).
+
+
 ### Changed for 0.34.3
 
 * `Fixed` MAPINFO scanning functions will not mis-parse comma-separated numbers in certain locales.

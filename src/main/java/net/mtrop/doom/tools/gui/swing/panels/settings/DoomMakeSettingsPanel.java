@@ -6,12 +6,16 @@
 package net.mtrop.doom.tools.gui.swing.panels.settings;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.swing.JPanel;
 
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager.SoundType;
 
 import static net.mtrop.doom.tools.struct.swing.ComponentFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -41,6 +45,8 @@ public class DoomMakeSettingsPanel extends JPanel
 		this.utils = DoomToolsGUIUtils.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomMakeSettingsManager.get();
+		
+		Collection<SoundType> sounds = Collections.unmodifiableList(Arrays.asList(SoundType.values()));
 		
 		containerOf(this, dimension(450, 200), borderLayout(0, 4),
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.settings.label.width")),
@@ -79,7 +85,13 @@ public class DoomMakeSettingsPanel extends JPanel
 						utils.createExecutableFilter()
 					), 
 					(value) -> settings.setPathToMapEditor(value)
-				))
+				)),
+				utils.formField("doommake.settings.sound.success.label", 
+					comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildSuccessSound(sound)))
+				),
+				utils.formField("doommake.settings.sound.failure.label", 
+					comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildFailureSound(sound)))
+				)
 			)),
 			node(BorderLayout.CENTER, containerOf()),
 			node(BorderLayout.SOUTH, wrappedLabel(language.getText("doommake.settings.notice")))

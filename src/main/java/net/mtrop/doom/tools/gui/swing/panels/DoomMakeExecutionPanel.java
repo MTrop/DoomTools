@@ -23,6 +23,7 @@ import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
@@ -295,10 +296,17 @@ public class DoomMakeExecutionPanel extends JPanel
 				try {
 					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
 					int result = appCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, outputStream, outputStream, null).get();
+					DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
 					if (result != 0)
+					{
 						statusPanel.setErrorMessage(language.getText("doommake.project.build.message.error"));
+						settings.getBuildFailureSound().play();
+					}
 					else
+					{
 						statusPanel.setSuccessMessage(language.getText("doommake.project.build.message.success"));
+						settings.getBuildSuccessSound().play();
+					}
 					return result;
 				} catch (InterruptedException e) {
 					LOG.warn("DoomMake call interrupted!");
@@ -341,7 +349,14 @@ public class DoomMakeExecutionPanel extends JPanel
 			outputPanel.getPrintStream().println("###### Executing Target: " + currentTarget);
 		
 		appCommon.onExecuteDoomMake(this, outputPanel != null ? outputPanel : new DoomToolsTextOutputPanel(), statusPanel, outputPanel != null, projectDirectory, null, currentTarget, NO_ARGS, false,
-			()->updateTargetsEnabled(false), (result)->updateTargetsEnabled(true)
+			() -> updateTargetsEnabled(false), (result) -> {
+				updateTargetsEnabled(true);
+				DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
+				if (result != 0)
+					settings.getBuildFailureSound().play();
+				else
+					settings.getBuildSuccessSound().play();
+			}
 		);
 	}
 

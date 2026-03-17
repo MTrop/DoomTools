@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.Optional;
 
 import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
@@ -289,6 +290,65 @@ public final class SwingUtils
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Emits a beep depending on the default toolkit.
+	 */
+	public static void beep()
+	{
+		Toolkit.getDefaultToolkit().beep();
+	}
+	
+	/**
+	 * Emits the "default" sound for the default toolkit.
+	 */
+	public static void soundDefault()
+	{
+		desktopProperty(Runnable.class, "win.sound.default").ifPresent((runnable) -> runnable.run());
+	}
+	
+	/**
+	 * Emits the "asterisk" sound for the default toolkit.
+	 */
+	public static void soundAsterisk()
+	{
+		desktopProperty(Runnable.class, "win.sound.asterisk", "win.sound.default").ifPresent((runnable) -> runnable.run());
+	}
+	
+	/**
+	 * Emits the "exclamation" sound for the default toolkit.
+	 */
+	public static void soundExclamation()
+	{
+		desktopProperty(Runnable.class, "win.sound.exclamation", "win.sound.default").ifPresent((runnable) -> runnable.run());
+	}
+	
+	/**
+	 * Emits the "question" sound for the default toolkit.
+	 */
+	public static void soundQuestion()
+	{
+		desktopProperty(Runnable.class, "win.sound.question", "win.sound.default").ifPresent((runnable) -> runnable.run());
+	}
+
+	/**
+	 * Gets the first non-null desktop property.
+	 * @param <T> the return type.
+	 * @param properties the property names.
+	 * @return the first non-null instance of a desired property, or empty optional if none found.
+	 */
+	@SuppressWarnings("unchecked")
+	private static <T> Optional<T> desktopProperty(Class<T> type, String ... properties)
+	{
+		Object obj = null;
+		for (int i = 0; i < properties.length; i++) 
+		{
+			obj = Toolkit.getDefaultToolkit().getDesktopProperty(properties[i]);
+			if (obj != null)
+				break;
+		}
+		return (Optional<T>)Optional.ofNullable(obj);
 	}
 	
 }

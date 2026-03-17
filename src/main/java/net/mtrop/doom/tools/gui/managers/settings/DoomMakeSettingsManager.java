@@ -10,6 +10,8 @@ import java.io.File;
 import net.mtrop.doom.tools.gui.DoomToolsSettings;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 
 /**
@@ -39,9 +41,65 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 	private static final String DOOMMAKE_PATH_SLADE = "path.slade";
 	private static final String DOOMMAKE_PATH_IDE = "path.vscode";
 	private static final String DOOMMAKE_PATH_MAPEDITOR = "path.map.editor";
+	private static final String DOOMMAKE_SOUND_BUILD_SUCCESS = "sound.build.success";
+	private static final String DOOMMAKE_SOUND_BUILD_FAILURE = "sound.build.failure";
 
 	/* ==================================================================== */
 
+	public enum SoundType
+	{
+		NONE
+		{
+			@Override
+			public void play() 
+			{
+				// Do nothing.
+			}
+		},
+		
+		DEFAULT
+		{
+			@Override
+			public void play() 
+			{
+				SwingUtils.soundDefault();
+			}
+		},
+
+		ASTERISK
+		{
+			@Override
+			public void play() 
+			{
+				SwingUtils.soundAsterisk();
+			}
+		},
+
+		EXCLAMATION
+		{
+			@Override
+			public void play() 
+			{
+				SwingUtils.soundExclamation();
+			}
+		},
+
+		QUESTION
+		{
+			@Override
+			public void play() 
+			{
+				SwingUtils.soundQuestion();
+			}
+		},
+		;
+		
+		/**
+		 * Plays the sound.
+		 */
+		public abstract void play();
+	}
+	
 	private DoomMakeSettingsManager()
 	{
 		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(DoomMakeSettingsManager.class));
@@ -137,4 +195,42 @@ public final class DoomMakeSettingsManager extends DoomToolsSettings
 		return getFile(PATH_LAST_FILE);
 	}
 
+	/**
+	 * Sets the build success sound.
+	 * @param type the build success sound.
+	 */
+	public void setBuildSuccessSound(SoundType type)
+	{
+		setString(DOOMMAKE_SOUND_BUILD_SUCCESS, type.name());
+		commit();
+	}
+	
+	/**
+	 * @return the build success sound.
+	 */
+	public SoundType getBuildSuccessSound()
+	{
+		String sound = getString(DOOMMAKE_SOUND_BUILD_SUCCESS);
+		return sound != null ? EnumUtils.getEnumInstance(sound, SoundType.class) : SoundType.NONE;
+	}
+	
+	/**
+	 * Sets the build failure sound.
+	 * @param type the build failure sound.
+	 */
+	public void setBuildFailureSound(SoundType type)
+	{
+		setString(DOOMMAKE_SOUND_BUILD_FAILURE, type.name());
+		commit();
+	}
+	
+	/**
+	 * @return the build failure sound.
+	 */
+	public SoundType getBuildFailureSound()
+	{
+		String sound = getString(DOOMMAKE_SOUND_BUILD_FAILURE);
+		return sound != null ? EnumUtils.getEnumInstance(sound, SoundType.class) : SoundType.NONE;
+	}
+	
 }
