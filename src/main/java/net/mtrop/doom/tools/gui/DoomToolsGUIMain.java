@@ -13,8 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.util.Map;
 
 import javax.swing.JFrame;
@@ -57,6 +55,7 @@ import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.StringUtils;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.SingleInstanceTempFileLock;
 
 import static net.mtrop.doom.tools.struct.swing.ModalFactory.*;
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -208,8 +207,12 @@ public final class DoomToolsGUIMain
 	/** Logger. */
 	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsGUIMain.class); 
 
-	/** Instance socket. */
-	private static final int INSTANCE_SOCKET_PORT = 54666;
+	/** Instance file name. */
+	private static final String INSTANCE_FILENAME = "DoomTools-GUI-Instance-Running";
+	/** Instance lock. */
+	@SuppressWarnings("unused")
+	private static SingleInstanceTempFileLock instanceLock;
+	
 	/** The instance encapsulator. */
 	private static final SingletonProvider<DoomToolsGUIMain> INSTANCE = new SingletonProvider<>(() -> new DoomToolsGUIMain());
 	/** Application starter linker. */
@@ -222,9 +225,6 @@ public final class DoomToolsGUIMain
 		}
 	};
 	
-	/** Instance socket. */
-	@SuppressWarnings("unused")
-	private static ServerSocket instanceSocket;
 	
 	/**
 	 * @return the singleton instance of this settings object.
@@ -234,19 +234,6 @@ public final class DoomToolsGUIMain
 		return INSTANCE.get();
 	}
 
-	/**
-	 * @return true if already running, false if not.
-	 */
-	public static boolean isAlreadyRunning()
-	{
-		try {
-			instanceSocket = new ServerSocket(INSTANCE_SOCKET_PORT, 50, InetAddress.getByName(null));
-			return false;
-		} catch (IOException e) {
-			return true;
-		}
-	}
-	
 	/**
 	 * Starts an orphaned main GUI Application.
 	 * Inherits the working directory and environment.
@@ -305,6 +292,15 @@ public final class DoomToolsGUIMain
 		});
 	}
 
+	/**
+	 * Attempts to acquire a process lock for the GUI.
+	 * @throws IOException if a lock could not be acquired.
+	 */
+	public static void acquireProcessLock() throws IOException
+	{
+		instanceLock = new SingleInstanceTempFileLock(INSTANCE_FILENAME);
+	}
+	
 	/* ==================================================================== */
 
 	/**
@@ -366,12 +362,14 @@ public final class DoomToolsGUIMain
 		// no args - run main application.
 		if (args.length == 0)
 		{
-			if (isAlreadyRunning())
-			{
+			try {
+				acquireProcessLock();
+			} catch (IOException e) {
 				System.err.println("DoomTools is already running.");
 				System.exit(1);
 				return;
 			}
+			
 			DoomToolsGUIPreWarmer.get();
 			get().createAndDisplayMainWindow();
 		}

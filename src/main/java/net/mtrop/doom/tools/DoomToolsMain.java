@@ -454,21 +454,20 @@ public final class DoomToolsMain
 			}
 			else if (options.gui)
 			{
-				if (DoomToolsGUIMain.isAlreadyRunning())
-				{
+				try {
+					DoomToolsGUIMain.acquireProcessLock();
+				} catch (IOException e) {
 					options.stderr.println("DoomTools is already running.");
 					return ERROR_GUI_ALREADY_RUNNING;
 				}
-				else
-				{
-					try {
-						DoomToolsGUIMain.startGUIAppProcess();
-					} catch (IOException e) {
-						options.stderr.println("ERROR: Could not start DoomTools GUI process!");
-						return ERROR_IOERROR;
-					}
-					return ERROR_NONE;
+				
+				try {
+					DoomToolsGUIMain.startGUIAppProcess();
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start DoomTools GUI process!");
+					return ERROR_IOERROR;
 				}
+				return ERROR_NONE;
 			}
 			else if (options.updateDocs)
 			{
