@@ -115,6 +115,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private Action setAlignBulkAction;
 	private Action importOffsetsAction;
 	private Action exportOffsetsAction;
+	private Action exportDICOffsetsAction;
 	private Action sortByNameAction;
 	private Action sortByFrameAction;
 	
@@ -182,6 +183,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.setAlignBulkAction = actionItem(language.getText("dimgconv.offsetter.offset.set.bulk"), (e) -> onSetAlignBulk());
 		this.importOffsetsAction = actionItem(language.getText("dimgconv.offsetter.offset.import"), (e) -> onImportOffsets());
 		this.exportOffsetsAction = actionItem(language.getText("dimgconv.offsetter.offset.export"), (e) -> onExportOffsets());
+		this.exportDICOffsetsAction = actionItem(language.getText("dimgconv.offsetter.offset.export.dimgconv"), (e) -> onExportDICOffsets());
 		this.sortByNameAction = actionItem(language.getText("dimgconv.offsetter.sort.name"), (e) -> onSortByName());
 		this.sortByFrameAction = actionItem(language.getText("dimgconv.offsetter.sort.frame"), (e) -> onSortByFrame());
 		
@@ -192,6 +194,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			separator(),
 			menuItem(importOffsetsAction),
 			menuItem(exportOffsetsAction),
+			menuItem(exportDICOffsetsAction),
 			separator(),
 			menuItem(sortByNameAction),
 			menuItem(sortByFrameAction)
@@ -733,6 +736,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			adjustAlignBulkAction.setEnabled(true);
 			setAlignBulkAction.setEnabled(true);
 			exportOffsetsAction.setEnabled(true);
+			exportDICOffsetsAction.setEnabled(true);
 		}
 		else
 		{
@@ -744,6 +748,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			adjustAlignBulkAction.setEnabled(!files.isEmpty());
 			setAlignBulkAction.setEnabled(!files.isEmpty());
 			exportOffsetsAction.setEnabled(!files.isEmpty());
+			exportDICOffsetsAction.setEnabled(!files.isEmpty());
 		}
 	}
 	
@@ -1013,32 +1018,13 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	
 	private void onExportOffsets()
 	{
-		FileFilter filter = utils.createTextFileFilter();
-		JFormField<File> targetFile = fileField("...",
-			(current) -> utils.chooseFile(
-				getApplicationContainer(),
-				language.getText("dimgconv.offsetter.offset.export.file.browse"), 
-				language.getText("dimgconv.offsetter.offset.export.file.select"),
-				() -> current != null ? current : settings.getLastTouchedFile(),
-				settings::setLastTouchedFile,
-				(f, input) -> (f == filter ? FileUtils.addMissingExtension(input, "txt") : input),
-				filter
-			) 
-		);
+		File targetFile = selectExportFile();
 		
-		Boolean ok = modal(language.getText("dimgconv.offsetter.offset.export.title"),
-			containerOf(node(utils.createForm(form(language.getInteger("dimgconv.offsetter.offset.export.labelwidth")),
-				utils.formField("dimgconv.offsetter.offset.export.file", targetFile)
-			))),
-			choice(language.getText("doomtools.ok"), Boolean.TRUE),
-			choice(language.getText("doomtools.cancel"), Boolean.FALSE)
-		).openThenDispose();
-		
-		if (ok != Boolean.TRUE || targetFile.getValue() == null)
+		if (targetFile == null)
 			return;
-		
+
 		int count = 0;
-		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile.getValue()))))
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile))))
 		{
 			writer.append(DIMGCONV_OFFSETTER_FILEHEADER).append('\n');
 			for (File f : fileList.getSelectedValuesList())
@@ -1050,6 +1036,46 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					graphic = BinaryObject.read(Picture.class, f);
 				
 				writer.append(f.getName()).append(' ')
+					.append(String.valueOf(graphic.getOffsetX())).append(' ')
+					.append(String.valueOf(graphic.getOffsetY()))
+					.append('\n');
+				count++;
+			}
+		} 
+		catch (IOException e)
+		{
+			SwingUtils.error(getApplicationContainer(), language.getText("dimgconv.offsetter.offset.export.file.ioerror"));
+			return;
+		} 
+		catch (SecurityException e) 
+		{
+			SwingUtils.error(getApplicationContainer(), language.getText("dimgconv.offsetter.offset.export.file.security"));
+			return;
+		}
+		
+		SwingUtils.info(getApplicationContainer(), language.getText("dimgconv.offsetter.offset.export.file.count", count));
+	}
+
+	private void onExportDICOffsets()
+	{
+		File targetFile = selectExportFile();
+		
+		if (targetFile == null)
+			return;
+		
+		int count = 0;
+		try (Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetFile))))
+		{
+			for (File f : fileList.getSelectedValuesList())
+			{
+				GraphicObject graphic;
+				if (FileUtils.matchMagicNumber(f, PNG_SIGNATURE)) // png?
+					graphic = BinaryObject.read(PNGPicture.class, f);
+				else
+					graphic = BinaryObject.read(Picture.class, f);
+				
+				writer.append(FileUtils.getFileNameWithoutExtension(f)).append(' ')
+					.append("graphic").append(' ')
 					.append(String.valueOf(graphic.getOffsetX())).append(' ')
 					.append(String.valueOf(graphic.getOffsetY()))
 					.append('\n');
@@ -1119,6 +1145,35 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private void doOffsetPopupTrigger(Component c, int x, int y)
 	{
 		offsetPopupMenu.show(c, x, y);
+	}
+
+	private File selectExportFile()
+	{
+		FileFilter filter = utils.createTextFileFilter();
+		JFormField<File> targetFile = fileField("...",
+			(current) -> utils.chooseFile(
+				getApplicationContainer(),
+				language.getText("dimgconv.offsetter.offset.export.file.browse"), 
+				language.getText("dimgconv.offsetter.offset.export.file.select"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile,
+				(f, input) -> (f == filter ? FileUtils.addMissingExtension(input, "txt") : input),
+				filter
+			) 
+		);
+		
+		Boolean ok = modal(language.getText("dimgconv.offsetter.offset.export.title"),
+			containerOf(node(utils.createForm(form(language.getInteger("dimgconv.offsetter.offset.export.labelwidth")),
+				utils.formField("dimgconv.offsetter.offset.export.file", targetFile)
+			))),
+			choice(language.getText("doomtools.ok"), Boolean.TRUE),
+			choice(language.getText("doomtools.cancel"), Boolean.FALSE)
+		).openThenDispose();
+		
+		if (ok != Boolean.TRUE || targetFile.getValue() == null)
+			return null;
+		
+		return targetFile.getValue();
 	}
 
 	private static AutoAlignMode selectAutoAlignMode()
