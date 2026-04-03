@@ -331,23 +331,25 @@ public class DImageConvertOffsetterCanvas extends Canvas
 		Graphics2D graphics = (Graphics2D)g;
 
 		canvasImage = ImageUtils.recreateVolatileImage(canvasImage, getWidth(), getHeight(), Transparency.OPAQUE);
-		
-		Graphics2D canvasGraphics = canvasImage.createGraphics();
-		
-		// force nearest rendering mode.
-		ImageUtils.ResamplingType.NEAREST.setHints(canvasGraphics);
-		
-		AffineTransform prevTransform = canvasGraphics.getTransform();
-		
-		drawBackground(canvasGraphics);
-		drawOnionSkinImage(canvasGraphics);
-		drawGuides(canvasGraphics);
-		drawImage(canvasGraphics);
-		
-		canvasGraphics.setTransform(prevTransform);
-		canvasGraphics.dispose();
-		
-		graphics.drawImage(canvasImage, 0, 0, null);
+		if (canvasImage != null)
+		{
+			Graphics2D canvasGraphics = canvasImage.createGraphics();
+			
+			// force nearest rendering mode.
+			ImageUtils.ResamplingType.NEAREST.setHints(canvasGraphics);
+			
+			AffineTransform prevTransform = canvasGraphics.getTransform();
+			
+			drawBackground(canvasGraphics);
+			drawOnionSkinImage(canvasGraphics);
+			drawGuides(canvasGraphics);
+			drawImage(canvasGraphics);
+			
+			canvasGraphics.setTransform(prevTransform);
+			canvasGraphics.dispose();
+
+			graphics.drawImage(canvasImage, 0, 0, null);
+		}
 	}
 	
 	protected void drawBackground(Graphics2D g2d)
