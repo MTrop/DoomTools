@@ -281,7 +281,7 @@ public class PreprocessorLexer extends Lexer
 			return null;
 		
 		String macro = token.getLexeme().toLowerCase();
-		if (token.getType() == Kernel.TYPE_IDENTIFIER && macroMap.containsKey(macro))
+		if (macroMap.containsKey(macro))
 		{
 			pushStream(macro, getCurrentStreamName() + ":" + macro, new StringReader(macroMap.get(macro).get()));
 			return nextToken();

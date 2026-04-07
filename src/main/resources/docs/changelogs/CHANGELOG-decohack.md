@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.47.2
+
+* `Fixed` Preprocessor wouldn't recognize all token types as potential macros.
+
+
 ### Changed for 0.47.1
 
 * `Fixed` ID24's Fuel Ammo had incorrect defaults.
