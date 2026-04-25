@@ -486,6 +486,10 @@ public class GitRepositoryPanel extends JPanel
 		setActionsEnabled(false);
 		String[] paragraphs = content.split("\\n+");
 		
+		// Escape quotes
+		for (int i = 0; i < paragraphs.length; i++)
+			paragraphs[i] = paragraphs[i].replace("\"", "\\\"");
+		
 		int result;
 		if ((result = client.commit(paragraphs)) != 0)
 		{

@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.35.1
+
+* `Added` [GUI-Studio] Quotes were not escaped in commit messages to Git or Mercurial.
+
+
 ### Changed for 0.35.0
 
 * `Added` [GUI] The ability to make DoomMake play a sound on successful or failed builds (Enh. #162).
