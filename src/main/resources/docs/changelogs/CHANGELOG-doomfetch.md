@@ -1,6 +1,11 @@
 DoomFetch
 ---------
 
+### Changed for 1.2.4
+
+* `Fixed` The idGames driver did not sort by filename properly (thanks, @electricbrass).
+
+
 ### Changed for 1.2.3
 
 * `Fixed` DoomFetch will skip directories that it can't read when searching for a file.
