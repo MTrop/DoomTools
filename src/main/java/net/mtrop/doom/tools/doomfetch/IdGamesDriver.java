@@ -43,7 +43,7 @@ public class IdGamesDriver extends FetchDriver
 			.parameters(
 				HTTPUtils.entry("action", "search"),
 				HTTPUtils.entry("type", "filename"),
-				HTTPUtils.entry("sort", "name"),
+				HTTPUtils.entry("sort", "filename"),
 				HTTPUtils.entry("out", "json"),
 				HTTPUtils.entry("query", name)
 		).send(JSON_READER);
