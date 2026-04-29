@@ -41,6 +41,7 @@ import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadTexCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WadTexEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadTexTextureEditorApp;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIPreWarmer;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -104,6 +105,8 @@ public final class DoomToolsGUIMain
 		String WADTEX = "wadtex";
 		/** WADTex Compiler. */
 		String WADTEX_COMPILER = "wadtex-compiler";
+		/** WADTex Texture Editor. */
+		String WADTEX_TEXTURE_EDITOR = "wadtex-texture-editor";
 		/** WSwAnTbl. */
 		String WSWANTBL = "wswantbl";
 		/** WSwAnTbl Compiler. */
@@ -522,6 +525,27 @@ public final class DoomToolsGUIMain
 			{
 				String path = ArrayUtils.arrayElement(args, 1);
 				startApplication(new WadTexCompilerApp(path != null ? path : null));
+			}
+			break;
+			
+			case ApplicationNames.WADTEX_TEXTURE_EDITOR:
+			{
+				File projectDirectory;
+				String path = ArrayUtils.arrayElement(args, 1);
+				String iwadBasePath = ArrayUtils.arrayElement(args, 2);
+				String paletteWadPath = ArrayUtils.arrayElement(args, 3);
+				
+				// No path. Open file.
+				if (ObjectUtils.isEmpty(path) || !(projectDirectory = new File(path)).isDirectory())
+				{
+					WadTexTextureEditorApp app;
+					if ((app = WadTexTextureEditorApp.openAndCreate(null)) != null)
+						startApplication(app);
+				}
+				else
+				{
+					startApplication(new WadTexTextureEditorApp(projectDirectory, iwadBasePath,  paletteWadPath));
+				}
 			}
 			break;
 			

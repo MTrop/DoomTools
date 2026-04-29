@@ -58,6 +58,7 @@ import net.mtrop.doom.tools.gui.apps.WadScriptEditorApp;
 import net.mtrop.doom.tools.gui.apps.WadScriptExecutorApp;
 import net.mtrop.doom.tools.gui.apps.WadTexCompilerApp;
 import net.mtrop.doom.tools.gui.apps.WadTexEditorApp;
+import net.mtrop.doom.tools.gui.apps.WadTexTextureEditorApp;
 import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils.HelpSource;
@@ -330,7 +331,8 @@ public class DoomToolsMainWindow extends JFrame
 					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex",
 						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.editor", (i) -> addApplication(new WadTexEditorApp())),
-						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.compile", (i) -> addApplication(new WadTexCompilerApp()))
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.compile", (i) -> addApplication(new WadTexCompilerApp())),
+						utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wadtex.item.texture.editor", (i) -> openWadTexTextureEditor())
 					),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexport", (i) -> addApplication(new WTExportApp())),
 					utils.createItemFromLanguageKey("doomtools.menu.tools.item.textures.item.wtexlist", (i) -> addApplication(new WTexListApp())),
@@ -649,6 +651,13 @@ public class DoomToolsMainWindow extends JFrame
 	{
 		DoomMakeOpenProjectApp app;
 		if ((app = DoomMakeOpenProjectApp.openAndCreate(this)) != null)
+			addApplication(app);
+	}
+
+	private void openWadTexTextureEditor()
+	{
+		WadTexTextureEditorApp app;
+		if ((app = WadTexTextureEditorApp.openAndCreate(this)) != null)
 			addApplication(app);
 	}
 

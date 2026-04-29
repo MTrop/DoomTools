@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.5.0
+
+* `Fixed` [GUI-TextureEditor] Added an interactive texture editor.
+
+
 ### Changed for 1.4.1
 
 * `Fixed` [GUI] Bring texture entry pattern to parity with patch (entry) names.

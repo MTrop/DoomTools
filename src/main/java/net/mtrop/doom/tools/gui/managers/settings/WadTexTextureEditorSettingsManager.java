@@ -15,21 +15,21 @@ import net.mtrop.doom.tools.struct.SingletonProvider;
 
 
 /**
- * WadTex GUI settings singleton.
+ * WadTex Texture Editor GUI settings singleton.
  * @author Matthew Tropiano
  */
-public final class WadTexSettingsManager extends DoomToolsSettings
+public final class WadTexTextureEditorSettingsManager extends DoomToolsSettings
 {
 	/** Settings filename. */
-	private static final String SETTINGS_FILENAME = "wadtex.properties";
+	private static final String SETTINGS_FILENAME = "wadtex-texture.properties";
 
 	/** The instance encapsulator. */
-	private static final SingletonProvider<WadTexSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadTexSettingsManager());
+	private static final SingletonProvider<WadTexTextureEditorSettingsManager> INSTANCE = new SingletonProvider<>(() -> new WadTexTextureEditorSettingsManager());
 	
 	/**
 	 * @return the singleton instance of this settings object.
 	 */
-	public static WadTexSettingsManager get()
+	public static WadTexTextureEditorSettingsManager get()
 	{
 		return INSTANCE.get();
 	}
@@ -38,14 +38,12 @@ public final class WadTexSettingsManager extends DoomToolsSettings
 	
 	private static final String PATH_LAST_FILE = "path.lastFile";
 	private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
-	private static final String EXPORT_PATH_LAST_FILE = "path.export.lastFile";
-	private static final String EXPORT_SOURCE_PATH_LAST_FILE = "path.export.source.lastFile";
 
 	/* ==================================================================== */
 
-	private WadTexSettingsManager()
+	private WadTexTextureEditorSettingsManager()
 	{
-		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WadTexSettingsManager.class));
+		super(getConfigFile(SETTINGS_FILENAME), DoomToolsLogger.getLogger(WadTexTextureEditorSettingsManager.class));
 	}
 	
 	/**
@@ -109,42 +107,6 @@ public final class WadTexSettingsManager extends DoomToolsSettings
 	public File getLastOpenedWAD() 
 	{
 		return getFile(PATH_LAST_WAD_OPEN);
-	}
-
-	/**
-	 * Sets the last file opened or saved on export.
-	 * @param path the file.
-	 */
-	public void setLastExportFile(File path) 
-	{
-		setFile(EXPORT_PATH_LAST_FILE, path);
-		commit();
-	}
-
-	/**
-	 * @return the last file opened or saved on export.
-	 */
-	public File getLastExportFile() 
-	{
-		return getFile(EXPORT_PATH_LAST_FILE);
-	}
-
-	/**
-	 * Sets the last file opened or saved on export for source.
-	 * @param path the file.
-	 */
-	public void setLastExportSourceFile(File path) 
-	{
-		setFile(EXPORT_SOURCE_PATH_LAST_FILE, path);
-		commit();
-	}
-
-	/**
-	 * @return the last file opened or saved on export for source.
-	 */
-	public File getLastExportSourceFile() 
-	{
-		return getFile(EXPORT_SOURCE_PATH_LAST_FILE);
 	}
 
 }

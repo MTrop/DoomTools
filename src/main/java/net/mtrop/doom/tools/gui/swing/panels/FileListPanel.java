@@ -552,8 +552,6 @@ public class FileListPanel extends JPanel
 				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, 0)
 			));
 		}
-
-		
 		
 		/**
 		 * Removes the provided files.
