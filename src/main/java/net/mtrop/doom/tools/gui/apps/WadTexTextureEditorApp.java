@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.gui.apps;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -19,11 +20,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuBar;
 import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
@@ -32,19 +38,22 @@ import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.struct.io.SerialReader;
-import net.mtrop.doom.texture.CommonPatch;
-import net.mtrop.doom.texture.CommonTexture;
+import net.mtrop.doom.texture.TextureSet;
+import net.mtrop.doom.tools.DoomMakeMain;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
+import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WadTexTextureEditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchGraphic;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchListModel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
-import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
+import net.mtrop.doom.tools.struct.swing.LayoutFactory.Flow;
 import net.mtrop.doom.tools.struct.swing.ImageUtils;
+import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -80,6 +89,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private final WadTexTextureEditorSettingsManager settings;
 	
 	private File projectDirectory;
+	private Properties projectProperties;
 
 	private JFormField<Double> zoomFactorField;
 	private JFormField<File> iwadSourceField;
@@ -89,37 +99,65 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private PatchListModel patchListModel;
 	private JList<PatchGraphic> patchList;
 	private TextureListModel textureListModel;
-	private JList<CommonTexture<CommonPatch>> textureList;
+	private JList<TextureSet.Texture> textureList;
+
+	private JLabel textureInfoLabel;
 	
-	public WadTexTextureEditorApp(File projectDirectory, String baseIwadPath, String paletteWadPath, String ... textureFilePaths)
+	private Action textureAddAction;
+	private Action textureRemoveAction;
+	private Action textureMoveUpAction;
+	private Action textureMoveDownAction;
+	private Action patchAddAction;
+	private Action patchRemoveAction;
+	private Action patchMoveUpAction;
+	private Action patchMoveDownAction;
+	private Action patchMoveToFrontAction;
+	private Action patchMoveToBackAction;
+
+	private File currentTextureFile;
+	
+	public WadTexTextureEditorApp(File projectDirectory, File baseIwadPath, File paletteWadPath)
 	{
 		this();
 		
 		this.projectDirectory = projectDirectory;
+		try {
+			this.projectProperties = DoomMakeMain.createProjectProperties(projectDirectory);
+		} catch (IOException e) {
+			throw new RuntimeException("Could not initialize texture editor app.", e);
+		}
+		this.iwadSourceField.setValue(baseIwadPath != null ? baseIwadPath : settings.getLastOpenedWAD());
+		this.paletteSourceField.setValue(paletteWadPath != null ? paletteWadPath : settings.getLastPaletteFile());
+	}
+
+	public WadTexTextureEditorApp()
+	{
+		this.icons = DoomToolsIconManager.get();
+		this.settings = WadTexTextureEditorSettingsManager.get();
 		
 		this.zoomFactorField = spinnerField(spinner(spinnerModel(ZOOMFACTOR_MIN, ZOOMFACTOR_MIN, ZOOMFACTOR_MAX, ZOOMFACTOR_STEP), (c) -> onZoomFactorChanged((Double)c.getValue())));
 		
-		this.iwadSourceField = fileField(settings.getLastPaletteFile(), 
+		this.iwadSourceField = fileField(settings.getLastOpenedWAD(), 
 			(current) -> utils.chooseFile(
 				getApplicationContainer(),
-				language.getText("dimgconv.offsetter.palette.source.browse.title"), 
-				language.getText("dimgconv.offsetter.palette.source.browse.accept"),
+				language.getText("wadtex.texture.editor.iwad.source.browse.title"), 
+				language.getText("wadtex.texture.editor.iwad.source.browse.accept"),
 				() -> current != null ? current : settings.getLastTouchedFile(),
 				settings::setLastTouchedFile,
 				utils.createWADFileFilter()
 			), 
 			this::onIWADFileSelect
 		);
-		onIWADFileSelect(paletteSourceField.getValue());
+		onIWADFileSelect(iwadSourceField.getValue());
 	
 		this.paletteSourceField = fileField(settings.getLastPaletteFile(), 
 			(current) -> utils.chooseFile(
 				getApplicationContainer(),
-				language.getText("dimgconv.offsetter.palette.source.browse.title"), 
-				language.getText("dimgconv.offsetter.palette.source.browse.accept"),
+				language.getText("wadtex.texture.editor.palette.source.browse.title"), 
+				language.getText("wadtex.texture.editor.palette.source.browse.accept"),
 				() -> current != null ? current : settings.getLastTouchedFile(),
 				settings::setLastTouchedFile,
-				utils.createWADFileFilter()
+				utils.createAllFilesFilter()
 			), 
 			this::onPaletteFileSelect
 		);
@@ -134,72 +172,189 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		});
 		
 		this.textureListModel = new TextureListModel();
-		this.textureList = list(textureListModel, ListSelectionMode.SINGLE, (list, b) -> {
-			CommonTexture<CommonPatch> tex = list.isEmpty() ? null : list.get(0);
+		this.textureList = list(textureListModel, ListSelectionMode.MULTIPLE_INTERVAL, (list, b) -> {
+			TextureSet.Texture tex = list.isEmpty() || list.size() > 1 ? null : list.get(0);
 			onSwitchToTexture(tex);	
 		});
 		
-		// TODO: Finish this.
-	}
-
-	public WadTexTextureEditorApp()
-	{
-		this.icons = DoomToolsIconManager.get();
-		this.settings = WadTexTextureEditorSettingsManager.get();
+		this.textureInfoLabel = label("");
 		
-		// TODO: Finish this.
+		this.textureAddAction = actionItem(icons.getImage("add.png"), (a) -> onTextureAdd());
+		this.textureRemoveAction = actionItem(icons.getImage("remove.png"), (a) -> onTextureRemove());
+		this.textureMoveUpAction = actionItem(icons.getImage("up-arrow.png"), (a) -> onTextureMoveUp());
+		this.textureMoveDownAction = actionItem(icons.getImage("down-arrow.png"), (a) -> onTextureMoveDown());
+		this.patchAddAction = actionItem(icons.getImage("add.png"), (a) -> onPatchAdd());
+		this.patchRemoveAction = actionItem(icons.getImage("remove.png"), (a) -> onPatchRemove());
+		this.patchMoveUpAction = actionItem(icons.getImage("up-arrow.png"), (a) -> onPatchMoveUp());
+		this.patchMoveDownAction = actionItem(icons.getImage("down-arrow.png"), (a) -> onPatchMoveDown());
+		this.patchMoveToFrontAction = actionItem(icons.getImage("foreground.png"), (a) -> onPatchMoveToFront());
+		this.patchMoveToBackAction = actionItem(icons.getImage("background.png"), (a) -> onPatchMoveToBack());
+		
+		this.currentTextureFile = null;
 	}
 
 	public static WadTexTextureEditorApp openAndCreate(Component parent)
 	{
-		// TODO: Finish this.
-		return null;
+		DoomToolsLanguageManager language = DoomToolsLanguageManager.get();
+		WadTexTextureEditorSettingsManager settings = WadTexTextureEditorSettingsManager.get();
+		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
+		
+		File projectDir = utils.chooseDirectory(
+			parent,
+			language.getText("wadtex.texture.editor.open.directory.title"),
+			language.getText("wadtex.texture.editor.open.directory.accept"),
+			settings::getLastTouchedFile,
+			settings::setLastTouchedFile
+		);
+		
+		if (projectDir == null)
+			return null;
+		
+		if (!projectDir.isDirectory())
+			return null;
+
+		if (!DoomMakeOpenProjectApp.isProjectDirectory(projectDir))
+		{
+			SwingUtils.error(language.getText("wadtex.texture.editor.open.directory.error", projectDir.getPath()));
+			return null;
+		}
+		
+		return new WadTexTextureEditorApp(projectDir, null, null);
 	}
 
 	@Override
 	public String getTitle()
 	{
-		return language.getText("wadtex.texture.title");
+		return language.getText("wadtex.texture.editor.title");
 	}
 
 	@Override
 	public Container createContentPane()
 	{
-		// TODO: Finish this.
-		return containerOf();
+		Container textureListPanel = containerOf(borderLayout(4, 4),
+			node(BorderLayout.NORTH, containerOf(borderLayout(4, 4),
+				node(BorderLayout.WEST, label(language.getText("wadtex.texture.editor.list.textures"))),
+				node(BorderLayout.CENTER, containerOf(flowLayout(Flow.LEFT, 4, 0),
+					node(button(textureAddAction)),
+					node(button(textureRemoveAction)),
+					node(button(textureMoveUpAction)),
+					node(button(textureMoveDownAction))
+				))
+			)),
+			node(BorderLayout.CENTER, containerOf(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), 
+				node(textureList)
+			))
+		);
+		
+		Container patchListPanel = containerOf(borderLayout(4, 4),
+			node(BorderLayout.NORTH, containerOf(borderLayout(4, 4),
+				node(BorderLayout.WEST, label(language.getText("wadtex.texture.editor.list.patches"))),
+				node(BorderLayout.CENTER, containerOf(flowLayout(Flow.LEFT, 4, 0),
+					node(button(patchAddAction)),
+					node(button(patchRemoveAction)),
+					node(button(patchMoveUpAction)),
+					node(button(patchMoveDownAction)),
+					node(button(patchMoveToFrontAction)),
+					node(button(patchMoveToBackAction))
+				))
+			)),
+			node(BorderLayout.CENTER, containerOf(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), 
+				node(patchList)
+			))
+		);
+		
+		return containerOf(dimension(820, 560), borderLayout(4, 4),
+			node(BorderLayout.WEST, containerOf(borderLayout(4, 4),
+				node(BorderLayout.WEST, textureListPanel),
+				node(BorderLayout.EAST, patchListPanel)
+			)),
+			node(BorderLayout.CENTER, containerOf(borderLayout(4, 4),
+				node(BorderLayout.NORTH, containerOf(borderLayout(4, 4),
+					node(BorderLayout.WEST, containerOf(flowLayout(Flow.LEADING, 4, 0),
+						node(label(language.getText("wadtex.texture.editor.zoom"))),
+						node(zoomFactorField)
+					)),
+					node(BorderLayout.CENTER, containerOf(gridLayout(1, 2, 4, 4),
+						node(containerOf(borderLayout(4, 4),
+							node(BorderLayout.LINE_START, label(language.getText("wadtex.texture.editor.iwad"))),
+							node(BorderLayout.CENTER, iwadSourceField)
+						)),
+						node(containerOf(borderLayout(4, 4),
+							node(BorderLayout.LINE_START, label(language.getText("wadtex.texture.editor.palette.source"))),
+							node(BorderLayout.CENTER, paletteSourceField)
+						))
+					))
+				)),
+				node(BorderLayout.CENTER, canvas)
+			)),
+			node(BorderLayout.SOUTH, textureInfoLabel)
+		);
 	}
 	
-	public void onExportTextures()
+	@Override
+	public JMenuBar createDesktopMenuBar()
 	{
-		// TODO: Finish this.
+		return menuBar(
+			utils.createMenuFromLanguageKey("wadtex.texture.editor.menu.file",
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.new", (i) -> onNewTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.open", (i) -> onOpenTextureFile()),
+				separator(),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (i) -> onSaveTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.saveas", (i) -> onSaveTextureFileAs()),
+				separator(),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.exit", (i) -> attemptClose())
+			)
+		);
+	}
+	
+	@Override
+	public JMenuBar createInternalMenuBar() 
+	{
+		return menuBar(
+			utils.createMenuFromLanguageKey("wadtex.texture.editor.menu.file",
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.new", (i) -> onNewTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.open", (i) -> onOpenTextureFile()),
+				separator(),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (i) -> onSaveTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.saveas", (i) -> onSaveTextureFileAs())
+			)
+		);
+	}
+	
+	@Override
+	public void onResize(Object frame) 
+	{
+		canvas.repaint();
 	}
 
 	private File fetchPatchFileForName(String name)
 	{
 		Map<String, File> fileMap = new HashMap<>();
 
+		File srcDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, projectProperties, "doommake.dir.src", "src");
+		
 		// try src/convert/patches
-		File convertPatchDir = new File(projectDirectory.getPath() + "/src/convert/patches/");
+		File convertPatchDir = new File(srcDir.getPath() + "/convert/patches");
 		File[] fileList = convertPatchDir.listFiles();
 		if (fileList != null)
 		{
 			for (File f : fileList)
 				fileMap.put(FileUtils.getFilePathWithoutExtension(f), f);
 
-			File file = fileMap.get(projectDirectory.getPath() + "/src/convert/patches/" + name);
+			File file = fileMap.get(convertPatchDir.getPath() + "/" + name);
 			if (file != null)
 				return file;
 		}
 		
 		// try src/textures/patches
-		File texturePatchDir = new File(projectDirectory.getPath() + "/src/textures/patches/");
+		File texturePatchDir = new File(srcDir.getPath() + "/textures/patches");
 		fileList = texturePatchDir.listFiles();
 		if (fileList != null)
 		{
 			for (File f : fileList)
 				fileMap.put(FileUtils.getFilePathWithoutExtension(f), f);
 
-			File file = fileMap.get(projectDirectory.getPath() + "/src/textures/patches/" + name);
+			File file = fileMap.get(texturePatchDir.getPath() + "/" + name);
 			if (file != null)
 				return file;
 		}
@@ -207,7 +362,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		return null;
 	}
 	
-	private Picture fetchPatchForName(String name)
+	private Picture fetchIWADPatchForName(String name)
 	{
 		// search IWAD
 		File iwad = iwadSourceField.getValue();
@@ -229,19 +384,19 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 	}
 	
-	private boolean addFoundPatch(String name, Picture picture)
+	private boolean addFoundPatch(TextureSet.Patch patch, Picture picture)
 	{
-		createPatch(name.toUpperCase(), picture);
+		createPatch(patch, picture);
 		return true;
 	}
 	
-	private boolean addFoundPatchFile(File selected)
+	private boolean addFoundPatchFile(TextureSet.Patch patch, File selected)
 	{
 		try {
 			if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
 			{
 				PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
-				createPatch(FileUtils.getFileNameWithoutExtension(selected).toUpperCase(), p);
+				createPatch(patch, p);
 				return true;
 			}
 			else // other?
@@ -251,7 +406,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				try {
 					image = ImageIO.read(selected);
 					png.setImage(image);
-					createPatch(FileUtils.getFileNameWithoutExtension(selected).toUpperCase(), png);
+					createPatch(patch, png);
 					return true;
 				} catch (IOException e) {
 					image = null;
@@ -271,12 +426,12 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				if (checkPictureBounds(w, h, ox, oy))
 				{
 					Picture p = BinaryObject.read(Picture.class, selected);
-					createPatch(FileUtils.getFileNameWithoutExtension(selected).toUpperCase(), p);
+					createPatch(patch, p);
 					return true;
 				}
 				else
 				{
-					createPatch(FileUtils.getFileNameWithoutExtension(selected).toUpperCase(), NO_PATCH);
+					createPatch(patch, NO_PATCH);
 					return false;
 				}
 			}
@@ -290,12 +445,32 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		return w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024;
 	}
 	
-	private void onSwitchToPatch(PatchGraphic patch)
+	private void onNewTextureFile()
+	{
+		// TODO Auto-generated method stub
+	}
+
+	private void onOpenTextureFile()
+	{
+		// TODO Auto-generated method stub
+	}
+
+	public void onSaveTextureFile()
 	{
 		// TODO: Finish this.
 	}
 
-	private void onSwitchToTexture(CommonTexture<CommonPatch> texture)
+	private void onSaveTextureFileAs() 
+	{
+		// TODO: Finish this.
+	}
+
+	private void onSwitchToTexture(TextureSet.Texture texture)
+	{
+		// TODO: Finish this.
+	}
+
+	private void onSwitchToPatch(PatchGraphic patch)
 	{
 		// TODO: Finish this.
 	}
@@ -315,15 +490,65 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		// TODO: Finish this.
 	}
 
+	private void onTextureAdd()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onTextureRemove()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onTextureMoveUp()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onTextureMoveDown()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchAdd()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchRemove()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchMoveUp()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchMoveDown()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchMoveToFront()
+	{
+		// TODO: Finish this.
+	}
+
+	private void onPatchMoveToBack()
+	{
+		// TODO: Finish this.
+	}
+
 	/**
 	 * Adds a patch to this texture canvas.
-	 * @param name the patch name.
+	 * @param patch the patch.
 	 * @param p the patch picture.
 	 * @return a reference to the created patch.
 	 */
-	public PatchGraphic createPatch(String name, Picture p)
+	public PatchGraphic createPatch(TextureSet.Patch patch, Picture p)
 	{
-		PatchGraphic newPatch = canvas.new PatchGraphic(name);
+		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setPicture(p);
 		patchListModel.addPatch(newPatch);
 		return newPatch;
@@ -331,13 +556,13 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	/**
 	 * Adds a patch to this texture canvas.
-	 * @param name the patch name.
+	 * @param patch the patch.
 	 * @param p the patch picture.
 	 * @return a reference to the created patch.
 	 */
-	public PatchGraphic createPatch(String name, PNGPicture p)
+	public PatchGraphic createPatch(TextureSet.Patch patch, PNGPicture p)
 	{
-		PatchGraphic newPatch = canvas.new PatchGraphic(name);
+		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setPNGPicture(p);
 		patchListModel.addPatch(newPatch);
 		return newPatch;
@@ -345,13 +570,13 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	/**
 	 * Adds a patch to this texture canvas.
-	 * @param name the patch name.
+	 * @param patch the patch.
 	 * @param image the patch picture.
 	 * @return a reference to the created patch.
 	 */
-	public PatchGraphic createPatch(String name, Image image)
+	public PatchGraphic createPatch(TextureSet.Patch patch, Image image)
 	{
-		PatchGraphic newPatch = canvas.new PatchGraphic(name);
+		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setImage(image);
 		patchListModel.addPatch(newPatch);
 		return newPatch;
@@ -360,14 +585,14 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	/**
 	 * The texture list model for the textures.
 	 */
-	public static class TextureListModel implements ListModel<CommonTexture<CommonPatch>>
+	public static class TextureListModel implements ListModel<TextureSet.Texture>
 	{
-		private List<CommonTexture<CommonPatch>> textures;
+		private List<TextureSet.Texture> textures;
 		private final List<ListDataListener> listeners;
 	
 		public TextureListModel() 
 		{
-			this.textures = Collections.synchronizedList(new ArrayList<CommonTexture<CommonPatch>>(4));
+			this.textures = Collections.synchronizedList(new ArrayList<TextureSet.Texture>(4));
 			this.listeners = Collections.synchronizedList(new ArrayList<>(4));
 		}
 		
@@ -378,7 +603,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 	
 		@Override
-		public CommonTexture<CommonPatch> getElementAt(int index)
+		public TextureSet.Texture getElementAt(int index)
 		{
 			return textures.get(index);
 		}
@@ -387,7 +612,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		 * Adds a texture to this texture canvas.
 		 * @param tex the texture graphic to add.
 		 */
-		public void addTexture(CommonTexture<CommonPatch> tex)
+		public void addTexture(TextureSet.Texture tex)
 		{
 			int index = textures.size();
 			textures.add(tex);
@@ -401,7 +626,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		 * @param index the position to add the texture to.
 		 * @param tex the texture graphic to add.
 		 */
-		public void addTexture(int index, CommonTexture<CommonPatch> tex)
+		public void addTexture(int index, TextureSet.Texture tex)
 		{
 			textures.add(index, tex);
 			listeners.forEach((listener) -> listener.intervalAdded(
@@ -414,7 +639,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		 * @param tex the texture graphic to remove.
 		 * @return true of removed, false if not.
 		 */
-		public boolean removeTexture(CommonTexture<CommonPatch> tex)
+		public boolean removeTexture(TextureSet.Texture tex)
 		{
 			int index = textures.indexOf(tex);
 			if (textures.remove(tex))
@@ -432,9 +657,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		 * @param index the index of the texture to remove.
 		 * @return true of removed, false if not.
 		 */
-		public CommonTexture<CommonPatch> removeTexture(int index)
+		public TextureSet.Texture removeTexture(int index)
 		{
-			CommonTexture<CommonPatch> out;
+			TextureSet.Texture out;
 			out = textures.remove(index);
 			listeners.forEach((listener) -> listener.intervalRemoved(
 				new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, index, index)
@@ -460,7 +685,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		 * @return the corresponding texture.
 		 * @throws IndexOutOfBoundsException if the index is &lt; 0 or &gt;= count.
 		 */
-		public CommonTexture<?> getTexture(int index)
+		public TextureSet.Texture getTexture(int index)
 		{
 			return textures.get(index);
 		}

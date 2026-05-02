@@ -139,8 +139,8 @@ public class FileListPanel extends JPanel
 
 		final LoaderFuture<ImageIcon> addIcon = icons.getImageAsync("add.png");
 		final LoaderFuture<ImageIcon> removeIcon = icons.getImageAsync("remove.png");
-		final LoaderFuture<ImageIcon> upIcon = icons.getImageAsync("up_arrow.png");
-		final LoaderFuture<ImageIcon> downIcon = icons.getImageAsync("down_arrow.png");
+		final LoaderFuture<ImageIcon> upIcon = icons.getImageAsync("up-arrow.png");
+		final LoaderFuture<ImageIcon> downIcon = icons.getImageAsync("down-arrow.png");
 		
 		this.addAction = actionItem(addIcon.result(), (e) -> onAddFiles());
 		this.removeAction = actionItem(removeIcon.result(), (e) -> onRemoveSelected());
@@ -170,7 +170,7 @@ public class FileListPanel extends JPanel
 		containerOf(this, borderLayout(0, 4),
 			node(BorderLayout.NORTH, containerOf(
 				node(BorderLayout.CENTER, label(titleLabel)),
-				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 0, 0), 
+				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEFT, 0, 0), 
 					buttonNodes.toArray(new Node[buttonNodes.size()])
 				))
 			)),

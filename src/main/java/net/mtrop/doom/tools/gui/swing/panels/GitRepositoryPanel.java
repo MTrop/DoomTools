@@ -195,7 +195,7 @@ public class GitRepositoryPanel extends JPanel
 		JComponent unstagedListPanel = containerOf(borderLayout(0, 4),
 			node(BorderLayout.NORTH, containerOf(borderLayout(),
 				node(BorderLayout.CENTER, label(language.getText("git.repo.unstaged.label"))),
-				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 0, 0),
+				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEFT, 0, 0),
 					node(button(revertAction)),
 					node(button(stageAction)),
 					node(button(stageAllAction))
@@ -207,7 +207,7 @@ public class GitRepositoryPanel extends JPanel
 		JComponent stagedListPanel = containerOf(borderLayout(0, 4),
 			node(BorderLayout.NORTH, containerOf(borderLayout(),
 				node(BorderLayout.CENTER, label(language.getText("git.repo.staged.label"))),
-				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 0, 0),
+				node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEFT, 0, 0),
 					node(button(unstageAction)),
 					node(button(unstageAllAction))
 				))
@@ -228,7 +228,7 @@ public class GitRepositoryPanel extends JPanel
 							branchMenu.show(b, b.getX(), b.getY());
 						}))
 					)),
-					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 4, 0),
+					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEFT, 4, 0),
 						node(button(pullAction)),
 						node(button(pushAction)),
 						node(button(refreshAction))
@@ -236,7 +236,7 @@ public class GitRepositoryPanel extends JPanel
 				)),
 				node(BorderLayout.SOUTH, containerOf(borderLayout(4, 0),
 					node(BorderLayout.LINE_START, branchPanel),
-					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEADING, 8, 0),
+					node(BorderLayout.LINE_END, containerOf(flowLayout(Flow.LEFT, 8, 0),
 						node(remoteBranchPanel),
 						node(aheadBehindPanel)
 					))

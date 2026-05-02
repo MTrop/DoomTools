@@ -133,14 +133,14 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 
 	private DoomToolsStatusPanel statusPanel;
 	
-	public DImageConvertOffsetterApp(File startingDirectory, String paletteWadPath)
+	public DImageConvertOffsetterApp(File startingDirectory, File paletteWadPath)
 	{
 		this();
 		
 		if (!startingDirectory.isDirectory())
 			startingDirectory = startingDirectory.getParentFile(); 
 		
-		File paletteFile = paletteWadPath != null ? new File(paletteWadPath) : settings.getLastPaletteFile();
+		File paletteFile = paletteWadPath != null ? paletteWadPath : settings.getLastPaletteFile();
 		
 		LOG.infof("Using palette file: %s", paletteFile != null ? paletteFile.getPath() : "null");
 		
@@ -161,7 +161,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				language.getText("dimgconv.offsetter.palette.source.browse.accept"),
 				() -> current != null ? current : settings.getLastTouchedFile(),
 				settings::setLastTouchedFile,
-				utils.createWADFileFilter()
+				utils.createAllFilesFilter()
 			), 
 			this::onPaletteFileSelect
 		);
@@ -351,7 +351,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					node(onionSkinField)
 				)),
 				node(BorderLayout.CENTER, containerOf(borderLayout(4, 0),
-					node(BorderLayout.WEST, label(language.getText("dimgconv.offsetter.palette.source"))),
+					node(BorderLayout.LINE_START, label(language.getText("dimgconv.offsetter.palette.source"))),
 					node(BorderLayout.CENTER, paletteSourceField)
 				))
 			)),

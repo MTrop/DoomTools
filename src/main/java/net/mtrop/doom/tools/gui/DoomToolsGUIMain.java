@@ -413,7 +413,7 @@ public final class DoomToolsGUIMain
 				}
 				else
 				{
-					startApplication(new DImageConvertOffsetterApp(projectDirectory, paletteWadPath));
+					startApplication(new DImageConvertOffsetterApp(projectDirectory, new File(paletteWadPath)));
 				}
 			}
 			break;
@@ -544,7 +544,7 @@ public final class DoomToolsGUIMain
 				}
 				else
 				{
-					startApplication(new WadTexTextureEditorApp(projectDirectory, iwadBasePath,  paletteWadPath));
+					startApplication(new WadTexTextureEditorApp(projectDirectory, new File(iwadBasePath),  new File(paletteWadPath)));
 				}
 			}
 			break;

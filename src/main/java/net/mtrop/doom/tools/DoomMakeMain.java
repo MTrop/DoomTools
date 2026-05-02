@@ -1185,6 +1185,32 @@ public final class DoomMakeMain
 	}
 	
 	/**
+	 * Creates properties from a project's properties files.
+	 * @param projectDirectory the project directory.
+	 * @return the combined properties for a project.
+	 * @throws IOException if the properties files could not be read.
+	 */
+	public static Properties createProjectProperties(File projectDirectory) throws IOException
+	{
+		Properties properties = new Properties();
+		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
+		File propertiesFile = new File(projectDirectory + File.separator + "doommake.properties");
+		if (projectPropertiesFile.exists())
+			mergeProperties(properties, projectPropertiesFile);
+		if (propertiesFile.exists())
+			mergeProperties(properties, propertiesFile);
+		return properties;
+	}
+
+	private static void mergeProperties(Properties properties, File projectPropertiesFile) throws IOException
+	{
+		try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
+		{
+			properties.load(fis);
+		} 
+	}
+
+	/**
 	 * Gets a file path for a project's path that is in a project directory. 
 	 * @param projectDirectory the project directory root.
 	 * @param properties the properties to look into.

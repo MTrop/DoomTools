@@ -6,7 +6,6 @@
 package net.mtrop.doom.tools.doommake;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
@@ -64,7 +63,11 @@ public class AutoBuildAgent
 		this.projectDirectory = Objects.requireNonNull(projectDirectory);
 		this.listener = Objects.requireNonNull(listener);
 
-		this.mergedProperties = createProjectProperties();
+		try {
+			this.mergedProperties = DoomMakeMain.createProjectProperties(projectDirectory);
+		} catch (IOException e) {
+			fireErrorMessage(e, "Project properties could not be refreshed!");
+		}
 		this.propertiesPath = new File(projectDirectory.getPath() + File.separator + "doommake.properties");
 		this.projectPropertiesPath = new File(projectDirectory.getPath() + File.separator + "doommake.project.properties");
 		this.sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
@@ -182,11 +185,15 @@ public class AutoBuildAgent
 
 		if (FileUtils.filePathEquals(file, propertiesPath) || FileUtils.filePathEquals(file, projectPropertiesPath))
 		{
-			mergedProperties = createProjectProperties();
-			File oldSourceDir = new File(sourceDirectory.getPath());
-			sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
-			if (!FileUtils.filePathEquals(oldSourceDir, sourceDirectory))
-				watchThread.registerSubdirectoriesOf(sourceDirectory);
+			try {
+				mergedProperties = DoomMakeMain.createProjectProperties(projectDirectory);
+				File oldSourceDir = new File(sourceDirectory.getPath());
+				sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
+				if (!FileUtils.filePathEquals(oldSourceDir, sourceDirectory))
+					watchThread.registerSubdirectoriesOf(sourceDirectory);
+			} catch (IOException e) {
+				fireErrorMessage(e, "Project properties could not be refreshed!");
+			}
 		}
 		
 		fireFileModify(file);
@@ -293,30 +300,6 @@ public class AutoBuildAgent
 	{
 		if (listener != null)
 			listener.onErrorMessage(t, message);
-	}
-
-	private Properties createProjectProperties()
-	{
-		Properties properties = new Properties();
-		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
-		File propertiesFile = new File(projectDirectory + File.separator + "doommake.properties");
-		if (projectPropertiesFile.exists())
-			mergeProperties(properties, projectPropertiesFile);
-		if (propertiesFile.exists())
-			mergeProperties(properties, propertiesFile);
-		return properties;
-	}
-
-	private void mergeProperties(Properties properties, File projectPropertiesFile) 
-	{
-		if (projectPropertiesFile.exists()) try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
-		{
-			properties.load(fis);
-		} 
-		catch (Exception e) 
-		{
-			fireErrorMessage(e, "Project properties could not be refreshed!");
-		}
 	}
 
 	/**

@@ -22,6 +22,7 @@ import javax.swing.event.ListDataListener;
 import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
+import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.tools.struct.swing.ImageUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.GraphicUtils;
@@ -193,8 +194,8 @@ public class WadTexTextureEditorCanvas extends Canvas
 		Color prevColor = g2d.getColor();
 		
 		// start at midpoint, then draw texture rectangle.
-		int originX = (int)(getWidth() / 2 - (textureDimensions.width * zoomFactor));
-		int originY = (int)(getHeight() / 2 - (textureDimensions.height * zoomFactor));
+		int originX = (int)((getWidth() / 2) - (textureDimensions.width / 2 * zoomFactor));
+		int originY = (int)((getHeight() / 2) - (textureDimensions.height / 2 * zoomFactor));
 		
 		g2d.setColor(Color.BLACK);
 		g2d.drawRect(originX, originY, (int)(textureDimensions.width * zoomFactor), (int)(textureDimensions.height * zoomFactor));
@@ -215,11 +216,11 @@ public class WadTexTextureEditorCanvas extends Canvas
 			if (zoomFactor > 0)
 			{
 				// start top-left corner at HUD edge.
-				int originX = (int)(getWidth() / 2 - (textureDimensions.width / 2 * zoomFactor));
-				int originY = (int)(getHeight() / 2 - (textureDimensions.height / 2 * zoomFactor));
+				int originX = (int)((getWidth() / 2) - (textureDimensions.width / 2 * zoomFactor));
+				int originY = (int)((getHeight() / 2) - (textureDimensions.height / 2 * zoomFactor));
 				
-				originX += pg.offsetX * zoomFactor;
-				originY += pg.offsetY * zoomFactor;
+				originX += pg.patch.getOriginX() * zoomFactor;
+				originY += pg.patch.getOriginY() * zoomFactor;
 
 				g2d.drawImage(pg.renderedImage, 
 					originX, originY, 
@@ -238,7 +239,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 	 */
 	public class PatchGraphic
 	{
-		private String name;
+		private TextureSet.Patch patch;
 		
 		private Image renderedImage;
 		
@@ -246,21 +247,15 @@ public class WadTexTextureEditorCanvas extends Canvas
 		private PNGPicture pngPicture;
 		private Image sourceImage;
 		
-		private int offsetX;
-		private int offsetY;
-		
-		public PatchGraphic(String name)
+		public PatchGraphic(TextureSet.Patch patch)
 		{
-			this.name = name;
+			this.patch = patch;
 			
 			this.renderedImage = null;
 			
 			this.picture = null;
 			this.pngPicture = null;
 			this.sourceImage = null;
-			
-			this.offsetX = 0;
-			this.offsetY = 0;
 		}
 		
 		/**
@@ -306,8 +301,8 @@ public class WadTexTextureEditorCanvas extends Canvas
 		 */
 		public void setOffsets(int x, int y)
 		{
-			this.offsetX = x;
-			this.offsetY = y;
+			patch.setOriginX(x);
+			patch.setOriginY(y);
 		}
 		
 		/**
@@ -317,14 +312,14 @@ public class WadTexTextureEditorCanvas extends Canvas
 		 */
 		public void translate(int x, int y)
 		{
-			this.offsetX += x;
-			this.offsetY += y;
+			patch.setOriginX(patch.getOriginX() + x);
+			patch.setOriginY(patch.getOriginY() + y);
 		}
 		
 		@Override
 		public String toString() 
 		{
-			return name;
+			return patch.getName();
 		}
 		
 		private void rebuildImage()
