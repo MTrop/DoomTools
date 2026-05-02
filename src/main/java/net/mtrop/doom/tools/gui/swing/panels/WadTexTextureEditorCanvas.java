@@ -244,6 +244,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 		
 		private Picture picture;
 		private PNGPicture pngPicture;
+		private Image sourceImage;
 		
 		private int offsetX;
 		private int offsetY;
@@ -256,6 +257,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 			
 			this.picture = null;
 			this.pngPicture = null;
+			this.sourceImage = null;
 			
 			this.offsetX = 0;
 			this.offsetY = 0;
@@ -269,6 +271,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 		{
 			this.picture = p;
 			this.pngPicture = null;
+			this.sourceImage = null;
 			rebuildImage();
 		}
 		
@@ -280,6 +283,19 @@ public class WadTexTextureEditorCanvas extends Canvas
 		{
 			this.picture = null;
 			this.pngPicture = p;
+			this.sourceImage = null;
+			rebuildImage();
+		}
+		
+		/**
+		 * Sets the patch's Image (unsets Picture/PNGPicture).
+		 * @param image the image.
+		 */
+		public void setImage(Image image)
+		{
+			this.picture = null;
+			this.pngPicture = null;
+			this.sourceImage = image;
 			rebuildImage();
 		}
 		
@@ -320,6 +336,10 @@ public class WadTexTextureEditorCanvas extends Canvas
 			else if (pngPicture != null)
 			{
 				renderedImage = pngPicture.getImage();
+			}
+			else if (sourceImage != null)
+			{
+				renderedImage = sourceImage;
 			}
 			else
 			{

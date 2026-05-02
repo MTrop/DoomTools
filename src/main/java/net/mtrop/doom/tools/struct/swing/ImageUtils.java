@@ -11,8 +11,10 @@ import java.awt.CompositeContext;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -20,6 +22,7 @@ import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 /**
  * Image processing utility library.
@@ -28,6 +31,74 @@ public final class ImageUtils
 {
 	private ImageUtils() {}
 
+	/**
+	 * A simple image builder.
+	 * @param width the width of the image.
+	 * @param height the height of the image.
+	 * @param bufferedImageType the BufferedImage type id.
+	 * @param builder the builder function.
+	 * @return the image, after the builder function is executed.
+	 */
+	public static BufferedImage imageBuilder(int width, int height, int bufferedImageType, Consumer<BufferedImage> builder)
+	{
+		BufferedImage image = new BufferedImage(width, height, bufferedImageType);
+		builder.accept(image);
+		return image;
+	}
+	
+	/**
+	 * A simple image builder that uses a source image.
+	 * The image is copied before it is altered.
+	 * @param source the source image.
+	 * @param bufferedImageType the BufferedImage type id.
+	 * @param builder the builder function.
+	 * @return the image, after the builder function is executed.
+	 */
+	public static BufferedImage imageBuilder(Image source, int bufferedImageType, Consumer<BufferedImage> builder)
+	{
+		BufferedImage image = new BufferedImage(source.getWidth(null), source.getHeight(null), bufferedImageType);
+		Graphics2D g2d = image.createGraphics();
+		g2d.drawImage(source, 0, 0, null);
+		g2d.dispose();
+		builder.accept(image);
+		return image;
+	}
+	
+	/**
+	 * Gets a sub-image from another image.
+	 * @param source the source image.
+	 * @param x the top-left of the image, x-coordinate.
+	 * @param y the top-left of the image, y-coordinate.
+	 * @param width the width of the selection in pixels.
+	 * @param height the height of the selection in pixels.
+	 * @return a new image that is the sub-image of the source image.
+	 */
+	public static final BufferedImage getSubImage(Image source, int x, int y, int width, int height)
+	{
+		BufferedImage out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = out.createGraphics();
+		g2d.drawImage(source, -x, -y, null);
+		g2d.dispose();
+		return out;
+	}
+
+	/**
+	 * Creates/Recreates a new buffered image that is compatible with this {@link GraphicsConfiguration}.
+	 * @param currentImage the previous VolatileImage to validate.
+	 * @param width the width of the new image.
+	 * @param height the height of the new image.
+	 * @param transparency the transparency mode (from {@link Transparency}).
+	 * @return a new or same BufferedImage.
+	 * @see GraphicsConfiguration#createCompatibleImage(int, int, int)
+	 */
+	public static BufferedImage reallocateImage(BufferedImage currentImage, int width, int height, int transparency)
+	{
+		GraphicsConfiguration gconfig = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+		if (currentImage == null || currentImage.getWidth() != width || currentImage.getHeight() != height || currentImage.getTransparency() != transparency)
+			currentImage = gconfig.createCompatibleImage(width, height, transparency);
+		return currentImage;
+	}
+	
 	/**
 	 * Creates/Recreates a new volatile image.
 	 * A new VolatileImage, compatible with the current local graphics environment is returned

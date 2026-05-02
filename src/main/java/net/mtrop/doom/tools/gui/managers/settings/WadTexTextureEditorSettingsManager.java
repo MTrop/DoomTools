@@ -38,6 +38,7 @@ public final class WadTexTextureEditorSettingsManager extends DoomToolsSettings
 	
 	private static final String PATH_LAST_FILE = "path.lastFile";
 	private static final String PATH_LAST_WAD_OPEN = "path.lastWAD.open";
+	private static final String PATH_PALETTE_LAST_FILE = "path.palette.lastFile";
 
 	/* ==================================================================== */
 
@@ -107,6 +108,24 @@ public final class WadTexTextureEditorSettingsManager extends DoomToolsSettings
 	public File getLastOpenedWAD() 
 	{
 		return getFile(PATH_LAST_WAD_OPEN);
+	}
+
+	/**
+	 * Sets the last palette file opened or saved.
+	 * @param path the file.
+	 */
+	public void setLastPaletteFile(File path) 
+	{
+		setFile(PATH_PALETTE_LAST_FILE, path);
+		commit();
+	}
+
+	/**
+	 * @return the last palette file opened or saved.
+	 */
+	public File getLastPaletteFile() 
+	{
+		return getFile(PATH_PALETTE_LAST_FILE);
 	}
 
 }
