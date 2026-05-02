@@ -380,6 +380,51 @@ public final class FileUtils
 	}
 
 	/**
+	 * Returns the file's path, no extension.
+	 * @param file the file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @return the file's path without extension.
+	 */
+	public static String getFilePathWithoutExtension(File file, String extensionSeparator)
+	{
+		return getFilePathWithoutExtension(file.getPath(), extensionSeparator);
+	}
+
+	/**
+	 * Returns the file's path, no extension.
+	 * @param filepath the file path.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @return the file's path without extension.
+	 */
+	public static String getFilePathWithoutExtension(String filepath, String extensionSeparator)
+	{
+		int extindex = filepath.lastIndexOf(extensionSeparator);
+		if (extindex >= 0)
+			return filepath.substring(0, extindex);
+		return filepath;
+	}
+
+	/**
+	 * Returns the file's path, no extension.
+	 * @param file the file.
+	 * @return the file's path without extension.
+	 */
+	public static String getFilePathWithoutExtension(File file)
+	{
+		return getFilePathWithoutExtension(file.getPath(), ".");
+	}
+
+	/**
+	 * Returns the file's path, no extension.
+	 * @param filepath the file path.
+	 * @return the file's path without extension.
+	 */
+	public static String getFilePathWithoutExtension(String filepath)
+	{
+		return getFilePathWithoutExtension(filepath, ".");
+	}
+
+	/**
 	 * Returns the extension of a filename.
 	 * @param filename the file name.
 	 * @param extensionSeparator the text or characters that separates file name from extension.

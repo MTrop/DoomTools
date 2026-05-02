@@ -85,15 +85,15 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 {
 	private static final String DIMGCONV_OFFSETTER_FILEHEADER = "*DIMGCONV-Offsetter";
 
-	private static final int ZOOMFACTOR_MIN = 1;
-	private static final int ZOOMFACTOR_MAX = 8;
-	private static final double ZOOMFACTOR_STEP = .5;
-
 	/** Logger. */
 	private static final Logger LOG = DoomToolsLogger.getLogger(DImageConvertOffsetterApp.class); 
 
 	private static final byte[] PNG_SIGNATURE = new byte[] {(byte)0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 	
+	private static final int ZOOMFACTOR_MIN = 1;
+	private static final int ZOOMFACTOR_MAX = 8;
+	private static final double ZOOMFACTOR_STEP = .5;
+
 	private DoomToolsIconManager icons;
 	private DImageConvertOffsetterSettingsManager settings;
 	

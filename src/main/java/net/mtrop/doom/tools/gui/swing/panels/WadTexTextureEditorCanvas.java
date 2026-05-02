@@ -128,34 +128,6 @@ public class WadTexTextureEditorCanvas extends Canvas
 	}
 	
 	/**
-	 * Adds a patch to this texture canvas.
-	 * @param name the patch name.
-	 * @param p the patch picture.
-	 * @return a reference to the created patch.
-	 */
-	public PatchGraphic createPatch(String name, Picture p)
-	{
-		PatchGraphic newPatch = new PatchGraphic(name);
-		newPatch.setPicture(p);
-		patchListModel.addPatch(newPatch);
-		return newPatch;
-	}
-
-	/**
-	 * Adds a patch to this texture canvas.
-	 * @param name the patch name.
-	 * @param p the patch picture.
-	 * @return a reference to the created patch.
-	 */
-	public PatchGraphic createPatch(String name, PNGPicture p)
-	{
-		PatchGraphic newPatch = new PatchGraphic(name);
-		newPatch.setPNGPicture(p);
-		patchListModel.addPatch(newPatch);
-		return newPatch;
-	}
-
-	/**
 	 * @return the list model for the patches in this texture canvas.
 	 */
 	public PatchListModel getPatchListModel() 
@@ -442,6 +414,18 @@ public class WadTexTextureEditorCanvas extends Canvas
 			return out;
 		}
 	
+		/**
+		 * Removes all patches from the model.
+		 */
+		public void clearPatches()
+		{
+			int amount = patches.size();
+			patches.clear();
+			listeners.forEach((listener) -> listener.intervalRemoved(
+				new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, 0, amount - 1)
+			));
+		}
+		
 		/**
 		 * Gets a patch from this texture canvas.
 		 * @param index the index of the patch to get.
