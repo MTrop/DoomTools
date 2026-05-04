@@ -6,6 +6,7 @@
 package net.mtrop.doom.tools.common;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,11 +19,13 @@ import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.ReplacerReader;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
+import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 
 /**
@@ -253,6 +256,48 @@ public final class Common
 			return false;
 		}
 		
+	}
+
+	/**
+	 * Creates properties from a project's properties files.
+	 * @param projectDirectory the project directory.
+	 * @return the combined properties for a project.
+	 * @throws IOException if the properties files could not be read.
+	 */
+	public static Properties createProjectProperties(File projectDirectory) throws IOException
+	{
+		Properties properties = new Properties();
+		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
+		File propertiesFile = new File(projectDirectory + File.separator + "doommake.properties");
+		if (projectPropertiesFile.exists())
+			mergeProperties(properties, projectPropertiesFile);
+		if (propertiesFile.exists())
+			mergeProperties(properties, propertiesFile);
+		return properties;
+	}
+
+	private static void mergeProperties(Properties properties, File projectPropertiesFile) throws IOException
+	{
+		try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
+		{
+			properties.load(fis);
+		} 
+	}
+
+	/**
+	 * Gets a file path for a project's path that is in a project directory. 
+	 * @param projectDirectory the project directory root.
+	 * @param properties the properties to look into.
+	 * @param property the property name.
+	 * @param defaultValue the default value, if not found.
+	 * @return the project path.
+	 */
+	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
+	{
+		String path = properties.getProperty(property);
+		if (ObjectUtils.isEmpty(path))
+			path = defaultValue;
+		return new File(projectDirectory.getPath() + File.separator + path);
 	}
 	
 }

@@ -62,7 +62,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 		g2d.dispose();
 	});
 	
-	private static final Composite PATCH_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f);
+	private static final Composite PATCH_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP);
 	
 	private float zoomFactor;
 	private Palette palette;
@@ -136,7 +136,10 @@ public class WadTexTextureEditorCanvas extends Canvas
 		return patchListModel;
 	}
 	
-	private void rebuildImages()
+	/**
+	 * Cues the canvas to reload or rebuild its patch images.
+	 */
+	public void rebuildImages()
 	{
 		for (int i = 0; i < patchListModel.getSize(); i++)
 			patchListModel.getElementAt(i).rebuildImage();
@@ -316,6 +319,14 @@ public class WadTexTextureEditorCanvas extends Canvas
 			patch.setOriginY(patch.getOriginY() + y);
 		}
 		
+		/**
+		 * @return the patch on this graphic.
+		 */
+		public TextureSet.Patch getPatch()
+		{
+			return patch;
+		}
+		
 		@Override
 		public String toString() 
 		{
@@ -435,6 +446,8 @@ public class WadTexTextureEditorCanvas extends Canvas
 		public void clearPatches()
 		{
 			int amount = patches.size();
+			if (amount == 0)
+				return;
 			patches.clear();
 			listeners.forEach((listener) -> listener.intervalRemoved(
 				new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, 0, amount - 1)

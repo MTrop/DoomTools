@@ -1185,48 +1185,6 @@ public final class DoomMakeMain
 	}
 	
 	/**
-	 * Creates properties from a project's properties files.
-	 * @param projectDirectory the project directory.
-	 * @return the combined properties for a project.
-	 * @throws IOException if the properties files could not be read.
-	 */
-	public static Properties createProjectProperties(File projectDirectory) throws IOException
-	{
-		Properties properties = new Properties();
-		File projectPropertiesFile = new File(projectDirectory + File.separator + "doommake.project.properties");
-		File propertiesFile = new File(projectDirectory + File.separator + "doommake.properties");
-		if (projectPropertiesFile.exists())
-			mergeProperties(properties, projectPropertiesFile);
-		if (propertiesFile.exists())
-			mergeProperties(properties, propertiesFile);
-		return properties;
-	}
-
-	private static void mergeProperties(Properties properties, File projectPropertiesFile) throws IOException
-	{
-		try (FileInputStream fis = new FileInputStream(projectPropertiesFile)) 
-		{
-			properties.load(fis);
-		} 
-	}
-
-	/**
-	 * Gets a file path for a project's path that is in a project directory. 
-	 * @param projectDirectory the project directory root.
-	 * @param properties the properties to look into.
-	 * @param property the property name.
-	 * @param defaultValue the default value, if not found.
-	 * @return the project path.
-	 */
-	public static File getProjectPropertyPath(File projectDirectory, Properties properties, String property, String defaultValue)
-	{
-		String path = properties.getProperty(property);
-		if (ObjectUtils.isEmpty(path))
-			path = defaultValue;
-		return new File(projectDirectory.getPath() + File.separator + path);
-	}
-
-	/**
 	 * Reads in the lock JSON file and returns it as an object.
 	 * If the file does not exist, an empty object is returned.
 	 * @param projectDirectory the project directory root.
@@ -1295,7 +1253,7 @@ public final class DoomMakeMain
 	// Gets the lock file path.
 	private static File getLockFile(File projectDirectory, Properties properties) 
 	{
-		File buildDir = DoomMakeMain.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
+		File buildDir = Common.getProjectPropertyPath(projectDirectory, properties, "doommake.dir.build", "build"); 
 		String lockFile = properties.getProperty("doommake.file.lock", "lock.json");
 		if (ObjectUtils.isEmpty(lockFile))
 			lockFile = "lock.json";

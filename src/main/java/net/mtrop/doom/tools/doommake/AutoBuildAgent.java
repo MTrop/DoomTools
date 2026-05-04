@@ -22,6 +22,7 @@ import com.blackrook.json.JSONConversionException;
 import com.blackrook.json.JSONObject;
 
 import net.mtrop.doom.tools.DoomMakeMain;
+import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
@@ -64,13 +65,13 @@ public class AutoBuildAgent
 		this.listener = Objects.requireNonNull(listener);
 
 		try {
-			this.mergedProperties = DoomMakeMain.createProjectProperties(projectDirectory);
+			this.mergedProperties = Common.createProjectProperties(projectDirectory);
 		} catch (IOException e) {
 			fireErrorMessage(e, "Project properties could not be refreshed!");
 		}
 		this.propertiesPath = new File(projectDirectory.getPath() + File.separator + "doommake.properties");
 		this.projectPropertiesPath = new File(projectDirectory.getPath() + File.separator + "doommake.project.properties");
-		this.sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
+		this.sourceDirectory = Common.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
 		
 		this.currentlyBuilding = false;
 		this.watchThread = null;
@@ -186,9 +187,9 @@ public class AutoBuildAgent
 		if (FileUtils.filePathEquals(file, propertiesPath) || FileUtils.filePathEquals(file, projectPropertiesPath))
 		{
 			try {
-				mergedProperties = DoomMakeMain.createProjectProperties(projectDirectory);
+				mergedProperties = Common.createProjectProperties(projectDirectory);
 				File oldSourceDir = new File(sourceDirectory.getPath());
-				sourceDirectory = DoomMakeMain.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
+				sourceDirectory = Common.getProjectPropertyPath(projectDirectory, mergedProperties, "doommake.dir.src", "src");
 				if (!FileUtils.filePathEquals(oldSourceDir, sourceDirectory))
 					watchThread.registerSubdirectoriesOf(sourceDirectory);
 			} catch (IOException e) {

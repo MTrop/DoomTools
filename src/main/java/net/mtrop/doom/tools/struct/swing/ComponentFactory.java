@@ -1,10 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doom.tools.struct.swing;
 
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -13,6 +14,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
@@ -22,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -1868,6 +1871,27 @@ public final class ComponentFactory
 	}
 
 	/**
+	 * Creates a cell renderer that returns label text for an object type.
+	 * @param <E> the object type.
+	 * @param labelGetter the label fetching function per object.
+	 * @return a cell renderer for a list to strings.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <E> ListCellRenderer<E> listLabelRenderer(Function<E, String> labelGetter)
+	{
+		return (ListCellRenderer<E>) new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) 
+			{
+				JLabel label = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				label.setText(labelGetter.apply((E)value));
+				return label;
+			}
+		};
+	}
+	
+	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
 	 * @param model the list model.
@@ -1876,11 +1900,11 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, final ListSelectionHandler<E> handler)
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionMode selectionMode, final ListSelectionHandler<E> handler)
 	{
 		final JList<E> out = new JList<>(model);
 		out.setCellRenderer(renderer);
-		out.setSelectionMode(selectionMode);
+		out.setSelectionMode(selectionMode.swingId);
 		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
 		{
 			@Override
@@ -3021,9 +3045,5 @@ public final class ComponentFactory
 		}
 		
 	}
-
-	/* ==================================================================== */
-	/* ==== Checkboxes                                                 ==== */
-	/* ==================================================================== */
 
 }

@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2025-2026 Matt Tropiano
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package net.mtrop.doom.tools.gui.apps;
 
 import java.awt.BorderLayout;
