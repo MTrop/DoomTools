@@ -52,6 +52,7 @@ public final class WADTexMain
 
 	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
+	public static final String SWITCH_GUI_EDITOR = "--gui-editor";
 	public static final String SWITCH_HELP1 = "--help";
 	public static final String SWITCH_HELP2 = "-h";
 	public static final String SWITCH_VERBOSE1 = "--verbose";
@@ -85,6 +86,7 @@ public final class WADTexMain
 		private boolean verbose;
 		private boolean changelog;
 		private boolean gui;
+		private boolean guiEditor;
 		
 		private boolean additive;
 		private boolean strife;
@@ -102,6 +104,7 @@ public final class WADTexMain
 			this.verbose = false;
 			this.changelog = false;
 			this.gui = false;
+			this.guiEditor = false;
 			this.additive = false;
 			this.strife = false;
 			this.exportMode = null;
@@ -188,6 +191,17 @@ public final class WADTexMain
 					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX);
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Could not start WADTex GUI!");
+					return ERROR_IOERROR;
+				}
+				return ERROR_NONE;
+			}
+
+			if (options.guiEditor)
+			{
+				try {
+					DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR);
+				} catch (IOException e) {
+					options.stderr.println("ERROR: Could not start WADTex Texture Editor!");
 					return ERROR_IOERROR;
 				}
 				return ERROR_NONE;
@@ -457,6 +471,8 @@ public final class WADTexMain
 						options.help = true;
 					else if (arg.equals(SWITCH_GUI))
 						options.gui = true;
+					else if (arg.equals(SWITCH_GUI_EDITOR))
+						options.guiEditor = true;
 					else if (arg.equalsIgnoreCase(SWITCH_CHANGELOG))
 						options.changelog = true;
 					else if (arg.equals(SWITCH_VERBOSE1) || arg.equals(SWITCH_VERBOSE2))
@@ -608,6 +624,10 @@ public final class WADTexMain
 		out.println("    --version           Prints version, and exits.");
 		out.println();
 		out.println("    --changelog         Prints the changelog, and exits.");
+		out.println();
+		out.println("    --gui               Opens the GUI version of this program.");
+		out.println();
+		out.println("    --gui-editor        Opens the GUI Texture Editor.");
 		out.println();
 		out.println("[file]:");
 		out.println("    <filename>          The WAD file.");
