@@ -588,6 +588,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private MenuNode[] createRunMenuItems()
 	{
 		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("doommake.menu.run.item.texture.editor", (e) -> onOpenTextureEditorApp()),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.run", runWadMergeAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.params", runWadMergeParametersAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadscript.run", runWadScriptAction),
@@ -1007,6 +1008,38 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 	}
 
+	private void onOpenTextureEditorApp()
+	{
+		String iwadPath = projectProperties.getProperty("doommake.iwad");
+		String palettePath = projectProperties.getProperty("doommake.iwad");
+		
+		String build = projectProperties.getProperty("doommake.dir.build");
+		if (ObjectUtils.isEmpty(build))
+			build = "build";
+		String source = projectProperties.getProperty("doommake.dir.src");
+		if (ObjectUtils.isEmpty(source))
+			source = "src";
+
+		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
+		if (paletteFile != null)
+		{
+			palettePath = paletteFile.getPath();
+		}
+		else
+		{
+			paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
+			if (paletteFile != null)
+				palettePath = paletteFile.getPath();	
+		}
+
+		try {
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("doommake.texture.editor.ioerror"));
+			LOG.error(e, "I/O Error running texture editor program.");
+		}
+	}
+	
 	private boolean saveBeforeExecute()
 	{
 		final Container parent = getApplicationContainer();

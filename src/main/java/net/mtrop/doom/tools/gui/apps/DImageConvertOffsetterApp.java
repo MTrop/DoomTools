@@ -15,7 +15,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -45,7 +44,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.MouseInputListener;
 import javax.swing.filechooser.FileFilter;
 
 import net.mtrop.doom.Wad;
@@ -62,6 +60,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.DImageConvertOffsetterSettingsManager;
+import net.mtrop.doom.tools.gui.swing.adapters.MouseControlAdapter;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.DImageConvertOffsetterCanvas.GuideMode;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -286,6 +285,12 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					case KeyEvent.VK_DOWN:
 						offsetYField.setValue((short)(offsetYField.getValue() - 1));
 						break;
+					case KeyEvent.VK_MINUS:
+						zoomFactorField.setValue(Math.max(ZOOMFACTOR_MIN, Math.min(ZOOMFACTOR_MAX, zoomFactorField.getValue() - ZOOMFACTOR_STEP)));
+						break;
+					case KeyEvent.VK_EQUALS:
+						zoomFactorField.setValue(Math.max(ZOOMFACTOR_MIN, Math.min(ZOOMFACTOR_MAX, zoomFactorField.getValue() + ZOOMFACTOR_STEP)));
+						break;
 				}
 			}
 		};
@@ -443,7 +448,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		DImageConvertOffsetterSettingsManager settings = DImageConvertOffsetterSettingsManager.get();
 		DoomToolsGUIUtils utils = DoomToolsGUIUtils.get();
 		
-		File projectDir = utils.chooseDirectory(
+		File offsetterDir = utils.chooseDirectory(
 			parent,
 			language.getText("dimgconv.offsetter.open.directory.title"),
 			language.getText("dimgconv.offsetter.open.directory.accept"),
@@ -451,13 +456,13 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 			settings::setLastTouchedFile
 		);
 		
-		if (projectDir == null)
+		if (offsetterDir == null)
 			return null;
 		
-		if (!projectDir.isDirectory())
+		if (!offsetterDir.isDirectory())
 			return null;
 		
-		return new DImageConvertOffsetterApp(projectDir, null);
+		return new DImageConvertOffsetterApp(offsetterDir, null);
 	}
 
 	private void onDirectoryChange(File directory)
@@ -1411,63 +1416,6 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 				label.setText(((File)value).getName());
 			return label;
 		}
-	}
-	
-	private static class MouseControlAdapter implements MouseInputListener, MouseWheelListener
-	{
-		public MouseControlAdapter()
-		{
-			// Do nothing.
-		}
-		
-		@Override
-		public void mouseClicked(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) 
-		{
-			// Do nothing.
-		}
-
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e)
-		{
-			// Do nothing.
-		}
-		
 	}
 	
 }

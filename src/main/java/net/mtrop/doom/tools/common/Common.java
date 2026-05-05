@@ -27,7 +27,6 @@ import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
-
 /**
  * Common shared functions.
  * @author Matthew Tropiano
@@ -299,5 +298,5 @@ public final class Common
 			path = defaultValue;
 		return new File(projectDirectory.getPath() + File.separator + path);
 	}
-	
+
 }
