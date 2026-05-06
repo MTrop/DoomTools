@@ -140,6 +140,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action patchRemoveAction;
 	private Action patchMoveUpAction;
 	private Action patchMoveDownAction;
+	private Action helpAction;
 
 	private boolean currentHasChanged;
 	private TextureSet.Texture currentTexture;
@@ -165,7 +166,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.projectPatchFiles = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.projectPatchNames = new ArrayList<>();
 
-		this.projectDirectoryField = fileField(settings.getLastTouchedFile(), 
+		this.projectDirectoryField = fileField(null, 
 			(current) -> utils.chooseDirectory(
 				getApplicationContainer(),
 				language.getText("wadtex.texture.editor.project.source.browse.title"), 
@@ -233,6 +234,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.patchRemoveAction = actionItem(icons.getImage("remove.png"), (a) -> onPatchRemove());
 		this.patchMoveUpAction = actionItem(icons.getImage("up-arrow.png"), (a) -> onPatchMoveUp());
 		this.patchMoveDownAction = actionItem(icons.getImage("down-arrow.png"), (a) -> onPatchMoveDown());
+		this.helpAction = actionItem(icons.getImage("help.png"), (a) -> onHelpDialog());
 		
 		this.currentHasChanged = false;
 		this.currentTexture = null;
@@ -387,8 +389,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			))
 		);
 		
-		JPanel filePanel = new JPanel();
-		
 		return containerOf(borderLayout(4, 4),
 			node(BorderLayout.WEST, containerOf(borderLayout(4, 4),
 				node(BorderLayout.WEST, dimension(160, 560), textureListPanel),
@@ -407,14 +407,23 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 						node(label(language.getText("wadtex.texture.editor.zoom"))),
 						node(zoomFactorField)
 					)),
-					node(BorderLayout.CENTER, containerOf())
+					node(BorderLayout.CENTER, containerOf()),
+					node(BorderLayout.EAST, containerOf(flowLayout(Flow.TRAILING),
+						node(button(helpAction))
+					))
 				)),
 				node(BorderLayout.CENTER, canvas),
-				node(BorderLayout.SOUTH, containerOf(filePanel, boxLayout(filePanel, BoxAxis.Y_AXIS),
-					node(utils.createForm(form(LabelSide.LEADING, language.getInteger("wadtex.texture.editor.files.labelwidth")),
-						utils.formField("wadtex.texture.editor.project", projectDirectoryField),
-						utils.formField("wadtex.texture.editor.iwad", iwadSourceField),
-						utils.formField("wadtex.texture.editor.palette.source", paletteSourceField)
+				node(BorderLayout.SOUTH, containerOf(borderLayout(),
+					node(BorderLayout.NORTH, containerOf(BorderFactory.createTitledBorder(language.getText("wadtex.texture.editor.files.title")),
+						node(utils.createForm(form(LabelSide.LEADING, language.getInteger("wadtex.texture.editor.files.labelwidth")),
+							utils.formField("wadtex.texture.editor.project", projectDirectoryField),
+							utils.formField("wadtex.texture.editor.iwad", iwadSourceField)
+						))
+					)),
+					node(BorderLayout.SOUTH, containerOf(BorderFactory.createTitledBorder(language.getText("wadtex.texture.editor.files.title.palette")),
+						node(utils.createForm(form(LabelSide.LEADING, language.getInteger("wadtex.texture.editor.files.labelwidth")),
+							utils.formField("wadtex.texture.editor.palette.source", paletteSourceField)
+						))
 					))
 				))
 			)),
@@ -1154,6 +1163,16 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		currentHasChanged = true;
 	}
 
+	private void onHelpDialog()
+	{
+		modal(
+			getApplicationContainer(),
+			language.getText("wadtex.texture.editor.help.title"),
+			containerOf(node(label(language.getHTML("wadtex.texture.editor.help.content")))),
+			utils.createChoiceFromLanguageKey("doomtools.ok")
+		).openThenDispose();
+	}
+	
 	/**
 	 * Adds a patch to this texture canvas.
 	 * @param patch the patch.

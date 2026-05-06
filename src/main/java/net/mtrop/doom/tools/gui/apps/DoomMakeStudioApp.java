@@ -465,6 +465,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				)
 			)),
 			utils.createMenuFromLanguageKey("doommake.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("doommake.menu.utilities", createUtilityMenuItems()),
 			utils.createMenuFromLanguageKey("doommake.menu.run", createRunMenuItems()),
 			utils.createMenuFromLanguageKey("doommake.menu.editor", createCommonEditorMenuItems()),
 			createHelpMenu()
@@ -477,6 +478,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		return menuBar(
 			utils.createMenuFromLanguageKey("doommake.menu.file", createCommonFileMenuItems()),
 			utils.createMenuFromLanguageKey("doommake.menu.edit", createCommonEditMenuItems()),
+			utils.createMenuFromLanguageKey("doommake.menu.utilities", createUtilityMenuItems()),
 			utils.createMenuFromLanguageKey("doommake.menu.run", createRunMenuItems()),
 			utils.createMenuFromLanguageKey("doommake.menu.editor", createCommonEditorMenuItems()),
 			createHelpMenu()
@@ -585,10 +587,17 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		);
 	}
 
+	private MenuNode[] createUtilityMenuItems()
+	{
+		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("doommake.menu.utilities.item.offsetter", (e) -> onOpenOffsetterApp()),
+			utils.createItemFromLanguageKey("doommake.menu.utilities.item.texture.editor", (e) -> onOpenTextureEditorApp())
+		);
+	}
+
 	private MenuNode[] createRunMenuItems()
 	{
 		return ArrayUtils.arrayOf(
-			utils.createItemFromLanguageKey("doommake.menu.run.item.texture.editor", (e) -> onOpenTextureEditorApp()),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.run", runWadMergeAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.params", runWadMergeParametersAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadscript.run", runWadScriptAction),
@@ -978,7 +987,21 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		File selected = treePanel.getSelectedFile();
 		if (selected == null)
-			return;
+		{
+			selected = utils.chooseDirectory(
+				getApplicationContainer(),
+				language.getText("dimgconv.offsetter.open.directory.title"),
+				language.getText("dimgconv.offsetter.open.directory.accept"),
+				settings::getLastTouchedFile,
+				settings::setLastTouchedFile
+			);
+			
+			if (selected == null)
+				return;
+			
+			if (!selected.isDirectory())
+				return;
+		}
 		
 		String palettePath = projectProperties.getProperty("doommake.iwad");
 		String build = projectProperties.getProperty("doommake.dir.build");

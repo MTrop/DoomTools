@@ -35,6 +35,7 @@ import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -122,6 +123,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	private Action exportDICOffsetsAction;
 	private Action sortByNameAction;
 	private Action sortByFrameAction;
+	private Action helpAction;
 	
 	private JPopupMenu filePopupMenu;
 	private JPopupMenu offsetPopupMenu;
@@ -190,7 +192,8 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		this.exportDICOffsetsAction = actionItem(language.getText("dimgconv.offsetter.offset.export.dimgconv"), (e) -> onExportDICOffsets());
 		this.sortByNameAction = actionItem(language.getText("dimgconv.offsetter.sort.name"), (e) -> onSortByName());
 		this.sortByFrameAction = actionItem(language.getText("dimgconv.offsetter.sort.frame"), (e) -> onSortByFrame());
-		
+		this.helpAction = actionItem(icons.getImage("help.png"), (a) -> onHelpDialog());
+
 		this.filePopupMenu = popupMenu(
 			menuItem(autoAlignBulkAction),
 			menuItem(setAlignBulkAction),
@@ -360,24 +363,30 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 					node(zoomFactorField),
 					node(onionSkinField)
 				)),
-				node(BorderLayout.CENTER, containerOf(borderLayout(4, 0),
-					node(BorderLayout.LINE_START, label(language.getText("dimgconv.offsetter.palette.source"))),
-					node(BorderLayout.CENTER, paletteSourceField)
+				node(BorderLayout.CENTER, containerOf()),
+				node(BorderLayout.EAST, containerOf(flowLayout(Flow.TRAILING),
+					node(button(helpAction))
 				))
 			)),
 			node(BorderLayout.CENTER, canvas),
 			node(BorderLayout.SOUTH, containerOf(borderLayout(),
-				node(BorderLayout.WEST, containerOf(flowLayout(Flow.LEADING, 4, 0),
-					node(label(language.getText("dimgconv.offsetter.offset"))),
-					node(label(language.getText("dimgconv.offsetter.offset.x"))),
-					node(offsetXField),
-					node(label(language.getText("dimgconv.offsetter.offset.y"))),
-					node(offsetYField),
-					node(button("\u25bc" /* Black Down-pointing Triangle */, (b) -> doOffsetPopupTrigger(b, b.getWidth(), 0)))
+				node(BorderLayout.CENTER, containerOf(BorderFactory.createTitledBorder(language.getText("dimgconv.offsetter.controls.title")), borderLayout(),
+					node(BorderLayout.WEST, containerOf(flowLayout(Flow.LEADING, 4, 0),
+						node(label(language.getText("dimgconv.offsetter.offset"))),
+						node(label(language.getText("dimgconv.offsetter.offset.x"))),
+						node(offsetXField),
+						node(label(language.getText("dimgconv.offsetter.offset.y"))),
+						node(offsetYField),
+						node(button("\u25bc" /* Black Down-pointing Triangle */, (b) -> doOffsetPopupTrigger(b, b.getWidth(), 0)))
+					)),
+					node(BorderLayout.EAST, containerOf(flowLayout(Flow.LEADING, 4, 0),
+						node(label(language.getText("dimgconv.offsetter.guidemode"))),
+						node(guideModeField)
+					))
 				)),
-				node(BorderLayout.EAST, containerOf(flowLayout(Flow.LEADING, 4, 0),
-					node(label(language.getText("dimgconv.offsetter.guidemode"))),
-					node(guideModeField)
+				node(BorderLayout.SOUTH, containerOf(BorderFactory.createTitledBorder(language.getText("dimgconv.offsetter.palette.title")), borderLayout(4, 0),
+					node(BorderLayout.LINE_START, label(language.getText("dimgconv.offsetter.palette.source"))),
+					node(BorderLayout.CENTER, paletteSourceField)
 				))
 			))
 		);
@@ -1186,6 +1195,16 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 		return targetFile.getValue();
 	}
 
+	private void onHelpDialog()
+	{
+		modal(
+			getApplicationContainer(),
+			language.getText("dimgconv.offsetter.help.title"),
+			containerOf(node(label(language.getHTML("dimgconv.offsetter.help.content")))),
+			utils.createChoiceFromLanguageKey("doomtools.ok")
+		).openThenDispose();
+	}
+	
 	private static AutoAlignMode selectAutoAlignMode()
 	{
 		DoomToolsLanguageManager language = DoomToolsLanguageManager.get(); 

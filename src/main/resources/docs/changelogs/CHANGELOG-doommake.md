@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.35.1
 
 * `Added` [GUI-Studio] Quotes were not escaped in commit messages to Git or Mercurial.
+* `Added` [GUI-Studio] Added Texture Editor hooks, changed some menu options.
 
 
 ### Changed for 0.35.0
