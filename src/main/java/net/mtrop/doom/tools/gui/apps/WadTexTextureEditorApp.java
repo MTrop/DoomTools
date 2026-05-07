@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -36,6 +37,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -45,13 +47,16 @@ import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadEntry;
 import net.mtrop.doom.WadFile;
 import net.mtrop.doom.WadMap;
+import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.struct.io.SerialReader;
+import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
 import net.mtrop.doom.texture.PatchNames;
+import net.mtrop.doom.texture.StrifeTextureList;
 import net.mtrop.doom.texture.TextureSet;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Common;
@@ -74,6 +79,7 @@ import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.util.TextureUtils;
 import net.mtrop.doom.util.WadUtils;
 
 import static net.mtrop.doom.tools.struct.swing.ContainerFactory.*;
@@ -438,6 +444,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("wadtex.texture.editor.menu.file",
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.new", (i) -> onNewTextureFile()),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.open", (i) -> onOpenTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.openwad", (i) -> onOpenFromWADTextureFile()),
 				separator(),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (i) -> onSaveTextureFile()),
 				separator(),
@@ -453,6 +460,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			utils.createMenuFromLanguageKey("wadtex.texture.editor.menu.file",
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.new", (i) -> onNewTextureFile()),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.open", (i) -> onOpenTextureFile()),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.openwad", (i) -> onOpenFromWADTextureFile()),
 				separator(),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (i) -> onSaveTextureFile())
 			)
@@ -783,7 +791,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			language.getText("wadtex.texture.editor.open.file.accept"),
 			settings::getLastTouchedFile,
 			settings::setLastTouchedFile,
-			utils.createTextFileFilter()
+			utils.createWadTexFileFilter()
 		);
 		
 		if (openedFile == null)
@@ -822,9 +830,144 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		currentPatch = null;
 	}
 
+	private void onOpenFromWADTextureFile()
+	{
+		File file = utils.chooseFile(
+			getApplicationContainer(), 
+			language.getText("wadtex.open.wad.title"), 
+			language.getText("wadtex.open.wad.accept"),
+			settings::getLastOpenedWAD,
+			settings::setLastOpenedWAD,
+			utils.createWADFileFilter()
+		);
+		
+		if (file == null)
+			return;
+		
+		boolean isWad;
+		try {
+			isWad = Wad.isWAD(file);
+		} catch (FileNotFoundException e) {
+			SwingUtils.error(language.getText("wadtex.open.wad.error.notfound", file.getAbsolutePath()));
+			return;
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("wadtex.open.wad.error.ioerror", file.getAbsolutePath()));
+			return;
+		} catch (SecurityException e) {
+			SwingUtils.error(language.getText("wadtex.open.wad.error.security", file.getAbsolutePath()));
+			return;
+		}
+	
+		if (!isWad)
+		{
+			SwingUtils.error(language.getText("wadtex.open.wad.error.badwad", file.getAbsolutePath()));
+			return;
+		}
+		
+		TextureSet texture1 = null;
+		TextureSet texture2 = null;
+		
+		try (WadFile wad = new WadFile(file))
+		{
+			int texture1Index = wad.indexOf("TEXTURE1");
+			int texture2Index = wad.indexOf("TEXTURE2");
+			int pnamesIndex =   wad.indexOf("PNAMES");
+			
+			if (pnamesIndex < 0 || (pnamesIndex >= 0 && texture1Index < 0 && texture2Index < 0))
+			{
+				SwingUtils.error(language.getText("wadtex.open.wad.error.nodata", file.getAbsolutePath()));
+				return;
+			}
+			
+			PatchNames pnames = wad.getDataAs(pnamesIndex, PatchNames.class);
+			byte[] texture1data = texture1Index >= 0 ? wad.getData(texture1Index) : null;
+			byte[] texture2data = texture2Index >= 0 ? wad.getData(texture2Index) : null;
+			
+			CommonTextureList<?> texture1List = null;
+			if (texture1data != null)
+			{
+				if (TextureUtils.isStrifeTextureData(texture1data))
+					texture1List = BinaryObject.create(StrifeTextureList.class, texture1data);
+				else
+					texture1List = BinaryObject.create(DoomTextureList.class, texture1data);
+			}
+
+			CommonTextureList<?> texture2List = null;
+			if (texture2data != null)
+			{
+				if (TextureUtils.isStrifeTextureData(texture2data))
+					texture2List = BinaryObject.create(StrifeTextureList.class, texture2data);
+				else
+					texture2List = BinaryObject.create(DoomTextureList.class, texture2data);
+			}
+
+			texture1 = texture1List != null ? new TextureSet(pnames, texture1List) : null;
+			texture2 = texture2List != null ? new TextureSet(pnames, texture2List) : null;
+		}
+		catch (WadException e) 
+		{
+			SwingUtils.error(language.getText("wadtex.open.wad.error.badwad", file.getAbsolutePath()));
+			return;
+		}
+		catch (IOException e) 
+		{
+			SwingUtils.error(language.getText("wadtex.open.wad.error.ioerror", file.getAbsolutePath()));
+			return;
+		}
+		catch (SecurityException e) 
+		{
+			SwingUtils.error(language.getText("wadtex.open.wad.error.security", file.getAbsolutePath()));
+			return;
+		}
+
+		TextureSet selectedTextureSet;
+		
+		if (texture1 != null && texture2 != null)
+		{
+			JRadioButton tex1button = radio("TEXTURE1", true);
+			JRadioButton tex2button = radio("TEXTURE2", false);
+			group(tex1button, tex2button);
+			
+			Boolean ok = modal(
+				getApplicationContainer(),
+				language.getText("wadtex.texture.editor.open.texture.lump.title"),
+				containerOf(gridLayout(2, 1, 4, 4),
+					node(tex1button),
+					node(tex2button)
+				),
+				utils.createChoiceFromLanguageKey("doomtools.ok", (Boolean)true),
+				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)false)
+			).openThenDispose();
+			
+			if (ok != Boolean.TRUE)
+				return;
+			
+			if (tex1button.isSelected())
+				selectedTextureSet = texture1;
+			else
+				selectedTextureSet = texture2;
+		}
+		else if (texture1 != null)
+		{
+			selectedTextureSet = texture1;
+		}
+		else
+		{
+			selectedTextureSet = texture2;
+		}
+		
+		onSwitchToTexture(null);
+		patchListModel.clearPatches();
+		textureListModel.clearTextures();
+		textureListModel.setTextures(selectedTextureSet);
+		currentHasChanged = false;
+		currentTexture = null;
+		currentPatch = null;
+	}
+	
 	private void onSaveTextureFile()
 	{
-		final FileFilter txtFilter = utils.createTextFileFilter();
+		final FileFilter txtFilter = utils.createWadTexFileFilter();
 		
 		File saveFile = utils.chooseFile(
 			getApplicationContainer(),

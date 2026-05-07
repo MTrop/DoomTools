@@ -1019,6 +1019,14 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * @return the WAdTex file filter.
+	 */
+	public FileFilter createWadTexFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.wadtex.description") + " (*.txt)", "txt");
+	}
+
+	/**
 	 * @return the text file filter.
 	 */
 	public FileFilter createTextFileFilter()
