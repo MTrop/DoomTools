@@ -4,6 +4,7 @@ WadTex
 ### Changed for 1.5.0
 
 * `Fixed` [GUI-TextureEditor] Added an interactive texture editor.
+* `Fixed` [GUI] Fixed rare circumstances where a DEUTex file from WAD would not be fully imported.
 
 
 ### Changed for 1.4.1

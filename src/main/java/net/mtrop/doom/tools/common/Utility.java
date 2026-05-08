@@ -86,6 +86,18 @@ public final class Utility
 		
 		return out != null ? out : "SNAPSHOT";
 	}
+
+	/**
+	 * Parses a DEUTEX texture file contents.
+	 * @param reader the reader to read from.
+	 * @return a combined texture set.
+	 * @throws IOException if an I/O Error occurs during read.
+	 * @throws ParseException if an error occurs during parse.
+	 */
+	public static TextureSet readDEUTEXFile(BufferedReader reader) throws IOException, ParseException
+	{
+		return readDEUTEXFile(reader, null, null);
+	}
 	
 	/**
 	 * Parses a DEUTEX texture file contents.
@@ -99,7 +111,13 @@ public final class Utility
 	public static TextureSet readDEUTEXFile(BufferedReader reader, PatchNames startingPatches, CommonTextureList<?> startingTextureList) throws IOException, ParseException
 	{
 		Texture currentTexture = null;
-		TextureSet textureSet = new TextureSet(startingPatches, startingTextureList);
+		
+		TextureSet textureSet;
+		if (startingPatches == null || startingTextureList == null)
+			textureSet = new TextureSet();
+		else
+			textureSet = new TextureSet(startingPatches, startingTextureList);
+		
 		String line;
 		int linenum = 0;
 		Pattern whitespacePattern = Pattern.compile("\\s+"); 
@@ -175,6 +193,7 @@ public final class Utility
 				writer.println("*\t" + p.getName() + " " + p.getOriginX() + " " + p.getOriginY());
 			writer.println();
 		}
+		writer.flush();
 	}
 	
 	/**

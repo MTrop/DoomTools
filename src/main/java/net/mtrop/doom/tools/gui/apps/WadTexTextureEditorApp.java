@@ -17,12 +17,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,9 +78,11 @@ import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doom.tools.struct.swing.LayoutFactory.Flow;
 import net.mtrop.doom.tools.struct.swing.ImageUtils;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.EncodingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ValueUtils;
 import net.mtrop.doom.util.TextureUtils;
 import net.mtrop.doom.util.WadUtils;
 
@@ -95,7 +99,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private static final byte[] PNG_SIGNATURE = new byte[] {(byte)0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
 
-	private static final String FILE_HEADER = "; File written by WadTex v" + Version.WADTEX + " by Matt Tropiano";
+	private static final String FILE_HEADER = "; File written by WadTex Texture Editor v" + Version.WADTEX + " by Matt Tropiano";
 
 	private static final double ZOOMFACTOR_MIN = .5;
 	private static final double ZOOMFACTOR_MAX = 8;
@@ -338,17 +342,33 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	}
 
 	@Override
-	public void setApplicationState(Map<String, String> state)
-	{
-		// TODO Auto-generated method stub
-		super.setApplicationState(state);
-	}
-	
-	@Override
 	public Map<String, String> getApplicationState()
 	{
-		// TODO Auto-generated method stub
-		return super.getApplicationState();
+		Map<String, String> state = super.getApplicationState(); 
+		
+		state.put("textureState", textureListModel.createState());
+		
+		state.put("projectDir", projectDirectory == null ? "" : projectDirectory.getAbsolutePath());
+		state.put("baseWad", iwadSourceField.getValue() == null ? "" : iwadSourceField.getValue().getPath());
+		state.put("palette", paletteSourceField.getValue() == null ? "" : paletteSourceField.getValue().getPath());
+		
+		state.put("zoom.factor", String.valueOf(zoomFactorField.getValue()));
+		
+		return state;
+	}
+
+	@Override
+	public void setApplicationState(Map<String, String> state)
+	{
+		super.setApplicationState(state);
+		
+		textureListModel.restoreState(state.getOrDefault("textureState", ""));
+		
+		paletteSourceField.setValue(ValueUtils.parse(state.get("palette"), (s) -> s == null ? null : new File(s)));
+		iwadSourceField.setValue(ValueUtils.parse(state.get("baseWad"), (s) -> s == null ? null : new File(s)));
+		projectDirectoryField.setValue(ValueUtils.parse(state.get("projectDir"), (s) -> s == null ? null : new File(s)));
+		
+		zoomFactorField.setValue(ValueUtils.parseDouble(state.get("zoom.factor"), 1));
 	}
 	
 	@Override
@@ -797,13 +817,11 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		if (openedFile == null)
 			return;
 		
-		PatchNames pnames = new PatchNames();
-		DoomTextureList textures = new DoomTextureList();
 		TextureSet textureSet;
 		
 		try (BufferedReader br = IOUtils.openTextFile(openedFile))
 		{
-			textureSet = Utility.readDEUTEXFile(br, pnames, textures);
+			textureSet = Utility.readDEUTEXFile(br);
 		}
 		catch (IOException e) 
 		{
@@ -1384,6 +1402,41 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			return textures.getTexture(index);
 		}
 	
+		/**
+		 * Creates a state to load from later.
+		 * @return a state string.
+		 */
+		public String createState()
+		{
+			try {
+				ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+				PrintWriter pw = new PrintWriter(bos);
+				Utility.writeDEUTEXFile(textures, "; State metadata", pw);
+				byte[] zippedBytes = EncodingUtils.gzipBytes(bos.toByteArray());
+				return EncodingUtils.asBase64(zippedBytes);
+			} catch (IOException e) {
+				LOG.error(e, "Error creating texture set state.");
+				return null;
+			}
+		}
+		
+		/**
+		 * Restores a state created by {@link #createState()}.
+		 * @param state the state string.
+		 */
+		public void restoreState(String state)
+		{
+			try {
+				byte[] zippedBytes = EncodingUtils.fromBase64(state);
+				String deuTex = new String(EncodingUtils.gunzipBytes(zippedBytes));
+				setTextures(Utility.readDEUTEXFile(new BufferedReader(new StringReader(deuTex))));
+			} catch (IOException e) {
+				LOG.error(e, "Error restoring texture set state.");
+			} catch (ParseException e) {
+				LOG.error(e, "Parse Error restoring texture set state.");
+			}
+		}
+		
 		/**
 		 * Sets the textures on this texture set.
 		 * @param textures the textures to add.
