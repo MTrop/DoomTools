@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2025 Matt Tropiano
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -23,6 +23,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -2324,6 +2326,67 @@ public final class FormFactory
 		
 	}
 
+	/**
+	 * A Transferable for File list data.
+	 */
+	private static class FileListTransferable implements Transferable
+	{
+		private static final DataFlavor[] FLAVORS = new DataFlavor[]{ DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor };
+		
+		private List<File> fileList;
+		private String fileListString;
+		
+		/**
+		 * Creates a FileListTransferable for a piece of File list data.
+		 * @param fileList the File list data.
+		 */
+		private FileListTransferable(File ... fileList)
+		{
+			this(Arrays.asList(fileList));
+		}
+		
+		/**
+		 * Creates a FileListTransferable for a piece of File list data.
+		 * @param fileList the File list data.
+		 */
+		private FileListTransferable(List<File> fileList)
+		{
+			this.fileList = fileList;
+			StringBuilder sb = new StringBuilder();
+			for (File file : fileList)
+			{
+				if (sb.length() > 0)
+					sb.append("\n");
+				sb.append(file.getPath());
+			}
+			this.fileListString = sb.toString();
+		}
+		
+		@Override
+		public DataFlavor[] getTransferDataFlavors() 
+		{
+			return FLAVORS;
+		}
+
+		@Override
+		public boolean isDataFlavorSupported(DataFlavor flavor) 
+		{
+			return FLAVORS[0].equals(flavor)
+				|| FLAVORS[1].equals(flavor);
+		}
+
+		@Override
+		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException 
+		{
+			if (DataFlavor.javaFileListFlavor.equals(flavor))
+				return fileList;
+			else if (DataFlavor.stringFlavor.equals(flavor))
+				return fileListString;
+			else
+				return null;
+		}
+	}
+	
 	// File Drop Handler.
 	private static class FileDropTransferHandler extends TransferHandler
 	{
@@ -2334,6 +2397,27 @@ public final class FormFactory
 		private FileDropTransferHandler(JFormField<File> fileField)
 		{
 			this.fileField = fileField;
+		}
+		
+		@Override
+		public int getSourceActions(JComponent c)
+		{
+			return COPY_OR_MOVE;
+		}
+		
+		@Override
+		protected Transferable createTransferable(JComponent c) 
+		{
+			if (c instanceof JTextField)
+				return new FileListTransferable(new File(((JTextField)c).getSelectedText()));
+			return null;
+		}
+		
+		@Override
+		protected void exportDone(JComponent source, Transferable data, int action)
+		{
+			if (source instanceof JTextField && action == MOVE)
+				((JTextField)source).replaceSelection("");
 		}
 		
 		@Override
@@ -2361,18 +2445,29 @@ public final class FormFactory
 				if (!files.isEmpty())
 					fileField.setValue(files.get(files.size() - 1));
 			}
-			else 
+			else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
 			{
 				String text;
-				try {
-					text = (String)transferable.getTransferData(DataFlavor.stringFlavor);
-				} catch (UnsupportedFlavorException | IOException e) {
+				try (
+					Reader reader = DataFlavor.stringFlavor.getReaderForText(transferable); 
+					StringWriter writer = new StringWriter()
+				) {
+					int buf;
+					char[] RELAY_BUFFER = new char[8192];
+					while ((buf = reader.read(RELAY_BUFFER)) > 0)
+						writer.write(RELAY_BUFFER, 0, buf);
+					writer.flush();
+					text = writer.toString();
+				} 
+				catch (UnsupportedFlavorException | IOException e) 
+				{
 					return false;
 				}
 				
 				fileField.setValue(new File(text));
+				return true;
 			}
-			return true;
+			return false;
 		}
 
 	}

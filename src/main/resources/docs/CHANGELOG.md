@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-05-09** Fixes for File fields and copy-pasting.
+
 - **2026-03-26** Better detection for if DoomTools GUI is already running (uses temp file channels instead of socket ports).
 - **2026-03-07** Fixed preprocessors causing StackOverflowErrors by not catching recursive macro loops.
 - **2026-03-01** Updated DoomStruct to `2.22.2`. [Changes here.](https://github.com/MTrop/DoomStruct/releases/tag/2.22.2-RELEASE)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -97,7 +97,30 @@ public final class ClipboardUtils
 	 */
 	public static void sendFilesToClipboard(File[] files, ClipboardOwner ownerLossFunction)
 	{
-		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(Arrays.asList(files)), ownerLossFunction);
+		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(files), ownerLossFunction);
+	}
+
+	/**
+	 * Sends a list of files to the system clipboard.
+	 * @param files the file references to send.
+	 * @throws HeadlessException if <code>GraphicsEnvironment.isHeadless()</code> returns true.
+	 * @throws IllegalStateException  if the system clipboard is not available.
+	 */
+	public static void sendFilesToClipboard(List<File> files)
+	{
+		sendFilesToClipboard(files, BLANK_OWNER);
+	}
+
+	/**
+	 * Sends a list of files to the system clipboard.
+	 * @param files the file references to send.
+	 * @param ownerLossFunction the function to call when this program loses the clipboard content ownership.
+	 * @throws HeadlessException if <code>GraphicsEnvironment.isHeadless()</code> returns true.
+	 * @throws IllegalStateException  if the system clipboard is not available.
+	 */
+	public static void sendFilesToClipboard(List<File> files, ClipboardOwner ownerLossFunction)
+	{
+		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(files), ownerLossFunction);
 	}
 
 	/**
@@ -240,12 +263,21 @@ public final class ClipboardUtils
 		private List<File> fileList;
 		private String fileListString;
 		
+		private FileListTransferable(File ... files)
+		{
+			this(Arrays.asList(files));
+		}
+		
 		private FileListTransferable(List<File> fileList)
 		{
 			this.fileList = fileList;
 			StringBuilder sb = new StringBuilder();
 			for (File file : fileList)
-				sb.append(file.getPath()).append("\n");
+			{
+				if (sb.length() > 0)
+					sb.append("\n");
+				sb.append(file.getPath());
+			}
 			this.fileListString = sb.toString();
 		}
 		
