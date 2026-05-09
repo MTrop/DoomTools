@@ -764,8 +764,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 	private void updateActionsAndFields()
 	{
+		List<TextureSet.Texture> selectedTextures =  textureList.getSelectedValuesList();
+		
 		textureAddAction.setEnabled(true);
-		textureRemoveAction.setEnabled(currentTexture != null);
+		textureRemoveAction.setEnabled(!selectedTextures.isEmpty());
 		textureMoveUpAction.setEnabled(currentTexture != null);
 		textureMoveDownAction.setEnabled(currentTexture != null);
 
