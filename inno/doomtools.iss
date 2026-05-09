@@ -46,7 +46,7 @@ WizardStyle=modern
 WizardImageFile=installer-image.bmp
 WizardImageStretch=yes
 
-AppCopyright=(C) 2019-2025 Matt Tropiano
+AppCopyright=(C) 2019-2026 Matt Tropiano
 
 
 [Languages]
@@ -77,6 +77,7 @@ Name: "{group}\Utilities\DoomMake";                 Filename: "{app}\{#DTAppExeN
 Name: "{group}\Utilities\DoomMake Studio";          Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-studio"
 Name: "{group}\Utilities\DoomMake (New Project)";   Filename: "{app}\{#DTAppExeName}"; Parameters: "doommake-new"
 Name: "{group}\Utilities\WADTex Editor";            Filename: "{app}\{#DTAppExeName}"; Parameters: "wadtex"
+Name: "{group}\Utilities\WADTex Texture Editor";    Filename: "{app}\{#DTAppExeName}"; Parameters: "wadtex-texture-editor"
 Name: "{group}\Utilities\WadMerge Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wadmerge"
 Name: "{group}\Utilities\WadScript Editor";         Filename: "{app}\{#DTAppExeName}"; Parameters: "wadscript"
 Name: "{group}\Utilities\WSwAnTbl Editor";          Filename: "{app}\{#DTAppExeName}"; Parameters: "wswantbl"
