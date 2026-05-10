@@ -48,6 +48,12 @@ public class DoomMakeSettingsPanel extends JPanel
 		
 		Collection<SoundType> sounds = Collections.unmodifiableList(Arrays.asList(SoundType.values()));
 		
+		JFormField<SoundType> successSoundBox = comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildSuccessSound(sound)));
+		successSoundBox.setValue(settings.getBuildSuccessSound());
+
+		JFormField<SoundType> failureSoundBox = comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildFailureSound(sound)));
+		failureSoundBox.setValue(settings.getBuildFailureSound());
+
 		containerOf(this, dimension(450, 200), borderLayout(0, 4),
 			node(BorderLayout.NORTH, utils.createForm(form(language.getInteger("doommake.settings.label.width")),
 				utils.formField("doommake.settings.vscode.label", fileField(
@@ -86,12 +92,8 @@ public class DoomMakeSettingsPanel extends JPanel
 					), 
 					(value) -> settings.setPathToMapEditor(value)
 				)),
-				utils.formField("doommake.settings.sound.success.label", 
-					comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildSuccessSound(sound)))
-				),
-				utils.formField("doommake.settings.sound.failure.label", 
-					comboField(comboBox(comboBoxModel(sounds), (sound) -> settings.setBuildFailureSound(sound)))
-				)
+				utils.formField("doommake.settings.sound.success.label", successSoundBox),
+				utils.formField("doommake.settings.sound.failure.label", failureSoundBox)
 			)),
 			node(BorderLayout.CENTER, containerOf()),
 			node(BorderLayout.SOUTH, wrappedLabel(language.getText("doommake.settings.notice")))
