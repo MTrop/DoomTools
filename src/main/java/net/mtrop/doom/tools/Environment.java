@@ -61,6 +61,8 @@ public final class Environment
 	public static String getDoomToolsPath()
 	{
 		String path = System.getenv("DOOMTOOLS_PATH");
+		if (path == null)
+			return null;
 		return path.endsWith(File.separator) ? path.substring(0, path.length() - File.separator.length()) : path;
 	}
 	
