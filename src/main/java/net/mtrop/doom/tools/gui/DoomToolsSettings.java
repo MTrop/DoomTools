@@ -21,8 +21,8 @@ import javax.swing.KeyStroke;
 
 import org.fife.ui.rsyntaxtextarea.Theme;
 
+import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.Version;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorAutoCompleteSettings;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorCodeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorViewSettings;
@@ -149,7 +149,7 @@ public class DoomToolsSettings
 	 */
 	protected static File getConfigFile(String path)
 	{
-		return new File(Paths.APPDATA_PATH + path);
+		return new File(Environment.getApplicationConfigPath() + File.separator + path);
 	}
 	
 	private void loadProperties()

@@ -31,7 +31,6 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.doomtools.DoomToolsUpdater;
 import net.mtrop.doom.tools.exception.OptionParseException;
 import net.mtrop.doom.tools.gui.DoomToolsGUIMain;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.OSUtils;
@@ -120,6 +119,7 @@ public final class DoomToolsMain
 	public static final String SWITCH_DOCS = "--docs";
 	public static final String SWITCH_WHERE = "--where";
 	public static final String SWITCH_SETTINGS = "--settings";
+	public static final String SWITCH_ENVIRONMENT = "--env";
 	public static final String SWITCH_JAVA = "--java";
 	public static final String SWITCH_UPDATE = "--update";
 	public static final String SWITCH_UPDATE_CLEANUP = "--update-cleanup";
@@ -144,6 +144,7 @@ public final class DoomToolsMain
 		private boolean openWebsite;
 		private boolean openDocs;
 		private boolean where;
+		private boolean env;
 		private boolean openSettings;
 		private boolean gui;
 		
@@ -158,6 +159,7 @@ public final class DoomToolsMain
 			this.javaStats = false;
 			this.openWebsite = false;
 			this.where = false;
+			this.env = false;
 			this.openSettings = false;
 			this.gui = false;
 		}
@@ -485,6 +487,18 @@ public final class DoomToolsMain
 			{
 				return doUpdate();
 			}
+			else if (options.env)
+			{
+				options.stdout.println("DoomTools Path:     " + Environment.getDoomToolsPath());
+				options.stdout.println("DoomTools JAR Path: " + Environment.getDoomToolsJarPath());
+				options.stdout.println("App Config Path:    " + Environment.getApplicationConfigPath());
+				options.stdout.println("App Data Path:      " + Environment.getApplicationDataPath());
+				options.stdout.println("App Cache Path:     " + Environment.getApplicationCachePath());
+				options.stdout.println("System Config Path: " + Environment.getSystemConfigPath());
+				options.stdout.println("System Data Path:   " + Environment.getSystemDataPath());
+				options.stdout.println("System Temp Path:   " + Environment.getSystemTempPath());
+				return ERROR_NONE;
+			}
 			else if (options.javaStats)
 			{
 				options.stdout.println("Java Vendor:     " + System.getProperty("java.vendor"));
@@ -551,7 +565,7 @@ public final class DoomToolsMain
 				if ((desktopError = checkDesktopAction(Desktop.Action.OPEN, "settings folder")) != ERROR_NONE)
 					return desktopError;
 
-				File settingsDir = new File(Paths.APPDATA_PATH);
+				File settingsDir = new File(Environment.getApplicationConfigPath());
 				options.stdout.printf("Opening the DoomTools settings folder (%s)...\n", settingsDir.toString());
 				if (!settingsDir.exists())
 				{
@@ -678,6 +692,8 @@ public final class DoomToolsMain
 						options.openSettings = true;
 					else if (arg.equalsIgnoreCase(SWITCH_DOCS))
 						options.openDocs = true;
+					else if (arg.equalsIgnoreCase(SWITCH_ENVIRONMENT))
+						options.env = true;
 					else if (arg.equalsIgnoreCase(SWITCH_WHERE))
 						options.where = true;
 					else if (arg.equalsIgnoreCase(SWITCH_JAVA))
@@ -751,6 +767,8 @@ public final class DoomToolsMain
 		out.println("    --website            Opens DoomTools's main website.");
 		out.println();
 		out.println("    --where              Displays where DoomTools lives (ENVVAR test).");
+		out.println();
+		out.println("    --env                Shows important paths in the DoomTools Environment.");
 		out.println();
 		out.println("    --java               Displays Java runtime information.");
 		out.println();

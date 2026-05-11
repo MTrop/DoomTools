@@ -8,7 +8,7 @@ package net.mtrop.doom.tools.gui.managers;
 import java.io.File;
 import java.io.IOException;
 
-import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
+import net.mtrop.doom.tools.Environment;
 import net.mtrop.doom.tools.struct.LoggingFactory;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.util.FileUtils;
@@ -23,7 +23,7 @@ public final class DoomToolsLogger
 	/** Logging filename. */
 	private static final String LOG_FILENAME = "doomtools.log";
 	/** Configuration file. */
-	private static final File LOG_FILE = new File(Paths.APPDATA_PATH + LOG_FILENAME);
+	private static final File LOG_FILE = new File(Environment.getApplicationConfigPath() + File.separator + LOG_FILENAME);
 
 	/** The instance encapsulator. */
 	private static final SingletonProvider<DoomToolsLogger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLogger()); 

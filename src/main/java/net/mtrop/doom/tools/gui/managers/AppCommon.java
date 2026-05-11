@@ -40,7 +40,6 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.gui.apps.data.ScriptExecutionSettings;
 import net.mtrop.doom.tools.gui.apps.data.WadTexExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.PatchExportSettings;
-import net.mtrop.doom.tools.gui.DoomToolsConstants.Paths;
 import net.mtrop.doom.tools.gui.apps.data.DefSwAniExportSettings;
 import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
@@ -181,7 +180,7 @@ public final class AppCommon
 		
 		LOG.info("Opening the DoomTools settings folder...");
 		
-		File settingsDir = new File(Paths.APPDATA_PATH);
+		File settingsDir = new File(Environment.getApplicationConfigPath());
 		if (!settingsDir.exists())
 		{
 			SwingUtils.error(language.getText("doomtools.error.opensettings.notfound"));
