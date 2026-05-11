@@ -7,7 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
-- **2026-05-10** Settings will now respect Linux XDG environments.
+- **2026-05-10** Settings will now respect Linux XDG environments. (Enh. #164)
 - **2026-05-10** DoomMake preference drop-downs did not set the correct value for success/failure sounds when opened (but does on change).
 
 - **2026-05-09** Fixes for File fields and copy-pasting.
