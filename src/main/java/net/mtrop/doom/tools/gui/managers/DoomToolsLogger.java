@@ -23,7 +23,7 @@ public final class DoomToolsLogger
 	/** Logging filename. */
 	private static final String LOG_FILENAME = "doomtools.log";
 	/** Configuration file. */
-	private static final File LOG_FILE = new File(Environment.getApplicationConfigPath() + File.separator + LOG_FILENAME);
+	private static final File LOG_FILE = new File(Environment.getApplicationStatePath() + File.separator + LOG_FILENAME);
 
 	/** The instance encapsulator. */
 	private static final SingletonProvider<DoomToolsLogger> INSTANCE = new SingletonProvider<>(() -> new DoomToolsLogger()); 

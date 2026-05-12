@@ -494,6 +494,7 @@ public final class DoomToolsMain
 				options.stdout.println("App Config Path:    " + Environment.getApplicationConfigPath());
 				options.stdout.println("App Data Path:      " + Environment.getApplicationDataPath());
 				options.stdout.println("App Cache Path:     " + Environment.getApplicationCachePath());
+				options.stdout.println("App State Path:     " + Environment.getApplicationStatePath());
 				options.stdout.println("System Config Path: " + Environment.getSystemConfigPath());
 				options.stdout.println("System Data Path:   " + Environment.getSystemDataPath());
 				options.stdout.println("System Temp Path:   " + Environment.getSystemTempPath());

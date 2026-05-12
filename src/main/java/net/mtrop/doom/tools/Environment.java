@@ -42,6 +42,7 @@ public final class Environment
 		return System.getenv("XDG_CONFIG_HOME") != null
 			|| System.getenv("XDG_DATA_HOME") != null
 			|| System.getenv("XDG_STATE_HOME") != null
+			|| System.getenv("XDG_CACHE_HOME") != null
 			|| System.getenv("XDG_DATA_DIRS") != null
 			|| System.getenv("XDG_CONFIG_DIRS") != null
 		;
@@ -101,6 +102,14 @@ public final class Environment
 		return ENV_STATE.getApplicationCachePath();
 	}
 	
+	/** 
+	 * @return the path to where application state gets stored. 
+	 */
+	public static String getApplicationStatePath()
+	{
+		return ENV_STATE.getApplicationStatePath();
+	}
+	
 	/**
 	 * @return the path to where system configuration gets stored. 
 	 */
@@ -110,7 +119,7 @@ public final class Environment
 	}
 	
 	/**
-	 * @return the path to where system configuration gets stored. 
+	 * @return the path to where system data gets stored. 
 	 */
 	public static String getSystemDataPath()
 	{
@@ -138,9 +147,15 @@ public final class Environment
 		String getApplicationDataPath();
 
 		/** 
-		 * @return the path to where application data gets stored. 
+		 * @return the path to where application cache gets stored. 
 		 */
 		String getApplicationCachePath();
+
+
+		/** 
+		 * @return the path to where application state gets stored. 
+		 */
+		String getApplicationStatePath();
 
 		/** 
 		 * @return the path to where system configuration gets stored. 
@@ -178,6 +193,12 @@ public final class Environment
 		public String getApplicationCachePath()
 		{
 			return APPDATA_PATH + File.separator + "cache";
+		}
+
+		@Override
+		public String getApplicationStatePath()
+		{
+			return APPDATA_PATH;
 		}
 
 		@Override
@@ -219,6 +240,12 @@ public final class Environment
 		public String getApplicationCachePath()
 		{
 			return LOCAL_CONFIG_DIR + File.separator + "cache";
+		}
+
+		@Override
+		public String getApplicationStatePath()
+		{
+			return getApplicationConfigPath();
 		}
 
 		@Override
@@ -293,6 +320,16 @@ public final class Environment
 			String path = System.getenv("XDG_CACHE_HOME");
 			if (ObjectUtils.isEmpty(path))
 				return "~/.cache" + File.separator + "DoomTools";
+			else
+				return path + File.separator + "DoomTools";
+		}
+
+		@Override
+		public String getApplicationStatePath()
+		{
+			String path = System.getenv("XDG_STATE_HOME");
+			if (ObjectUtils.isEmpty(path))
+				return "~/.local/state" + File.separator + "DoomTools";
 			else
 				return path + File.separator + "DoomTools";
 		}
