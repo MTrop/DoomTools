@@ -151,7 +151,6 @@ public final class Environment
 		 */
 		String getApplicationCachePath();
 
-
 		/** 
 		 * @return the path to where application state gets stored. 
 		 */
@@ -198,7 +197,7 @@ public final class Environment
 		@Override
 		public String getApplicationStatePath()
 		{
-			return APPDATA_PATH;
+			return getApplicationDataPath();
 		}
 
 		@Override
@@ -245,7 +244,7 @@ public final class Environment
 		@Override
 		public String getApplicationStatePath()
 		{
-			return getApplicationConfigPath();
+			return getApplicationDataPath();
 		}
 
 		@Override
