@@ -48,7 +48,8 @@ public enum DEHValueType
 		THINGMISSILE,
 		WEAPON,
 		SOUND,
-		STRING
+		STRING,
+		USERSTRING,
 	}
 	
 	private Type typeCheck;

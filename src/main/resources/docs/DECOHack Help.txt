@@ -27,6 +27,10 @@ you proceed, as some pieces are similar, and some are not.
 <STRING>     : Any single- or double-quoted set of characters, or a raw string 
                bounded in backticks.
 
+<USERSTRING> : Any single- or double-quoted set of characters, or a raw string 
+               bounded in backticks. These strings get turned into mnemonics
+               user the covers.
+
 <INTEGER>    : Any positive integer, or hex integer (e.g. 0x01234abcd). 
 
 <NUMBER>     : <INTEGER>
@@ -1188,7 +1192,7 @@ the thing state indices. Other labels are used for arbitrary jump points.
         pickupWeaponType <INTEGER or WeaponAlias>
         pickupItemType <INTEGER>
         pickupBonusCount <INTEGER>
-        pickupMessage <STRING>
+        pickupMessage <USERSTRING>
         translation <STRING>
         pickupSound <STRING>
 
@@ -1794,6 +1798,7 @@ pointers.
     sound        // valid sound name.
     flags        // -2147483648 to 2147483647, flag expression
     string       // any string expression, written as-is.
+    userstring   // any string expression - gets converted to a generated mnemonic
 
 
 For example, Doom Retro's "gib health" property for Things can be defined as:

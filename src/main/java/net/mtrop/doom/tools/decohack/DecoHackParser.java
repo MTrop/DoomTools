@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2025 Matt Tropiano
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -31,6 +31,7 @@ import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext.ObjectPair;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDoom19Context;
+import net.mtrop.doom.tools.decohack.contexts.PatchID24Context;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
@@ -257,6 +258,7 @@ public final class DecoHackParser extends Lexer.Parser
 	
 	private static final Pattern MAPLUMP_EXMY = Pattern.compile("E[0-9]+M[0-9]+", Pattern.CASE_INSENSITIVE);
 	private static final Pattern MAPLUMP_MAPXX = Pattern.compile("MAP[0-9][0-9]+", Pattern.CASE_INSENSITIVE);
+	private static final Pattern USER_MNEMONIC = Pattern.compile("USER_[A-Z0-9]+");
 
 	private static final FutureLabels EMPTY_LABELS = null;
 	private static final int PLACEHOLDER_LABEL = -1234567890;
@@ -2754,7 +2756,7 @@ public final class DecoHackParser extends Lexer.Parser
 				if (pr == PropertyResult.ERROR)
 					return false;
 			}
-			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseThingBodyID24Properties(context, thing)) != PropertyResult.BYPASSED)
+			else if (context.supports(DEHFeatureLevel.ID24) && (pr = parseThingBodyID24Properties((PatchID24Context)context, thing)) != PropertyResult.BYPASSED)
 			{
 				if (pr == PropertyResult.ERROR)
 					return false;
@@ -3078,7 +3080,7 @@ public final class DecoHackParser extends Lexer.Parser
 	}
 	
 	
-	private PropertyResult parseThingBodyID24Properties(AbstractPatchContext<?> context, DEHThingTarget<?> thing) 
+	private PropertyResult parseThingBodyID24Properties(PatchID24Context context, DEHThingTarget<?> thing) 
 	{
 		Integer value;
 		if (matchIdentifierIgnoreCase(Keyword.MINRESPAWNTICS))
@@ -3151,7 +3153,7 @@ public final class DecoHackParser extends Lexer.Parser
 		else if (matchIdentifierIgnoreCase(Keyword.PICKUPMESSAGE))
 		{
 			String str;
-			if ((str = matchString()) == null)
+			if ((str = matchAndGenerateStringMnemonic(context)) == null)
 			{
 				addErrorMessage("Expected string after \"%s\".", Keyword.PICKUPMESSAGE);
 				return PropertyResult.ERROR;
@@ -6045,6 +6047,15 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 	
+	// Checks if the current lexeme is a valid user string mnemonic value.
+	private boolean currentStringIsUserMnemonic()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return false;
+		
+		return USER_MNEMONIC.matcher(currentLexeme()).matches();
+	}
+	
 	// Matches a valid state index number.
 	// If match, advance token and return integer.
 	// Else, return null.
@@ -6703,6 +6714,27 @@ public final class DecoHackParser extends Lexer.Parser
 		return out;
 	}
 
+	// Matches a string.
+	private String matchAndGenerateStringMnemonic(PatchBoomContext context)
+	{
+		if (!currentType(DecoHackKernel.TYPE_STRING))
+			return null;
+		
+		String out;
+		if (!currentStringIsUserMnemonic())
+		{
+			out = "USER_GENERATED" + (lastMnemonicIndex++);
+			context.setString(out, currentLexeme());
+		}
+		else
+		{
+			out = currentLexeme();
+		}
+		
+		nextToken();
+		return out;
+	}
+
 	// Matches and parses a numeric expression.
 	// STATE type can return a String. Everything else is an Integer, or null.
 	private ParameterValue matchNumericExpression(AbstractPatchContext<?> context, DEHActor<?> actor, Type typeCheck)
@@ -6905,6 +6937,27 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				return ParameterValue.createString(value);
 			}
+
+			case USERSTRING:
+			{
+				String value;
+				
+				if (context instanceof PatchBoomContext)
+				{
+					if ((value = matchAndGenerateStringMnemonic((PatchBoomContext)context)) == null)
+					{
+						addErrorMessage("Expected string.");
+						return null;
+					}
+				}
+				else if ((value = matchString()) == null)
+				{
+					addErrorMessage("Expected string.");
+					return null;
+				}
+				
+				return ParameterValue.createString(value);
+			}
 		}
 	}
 
@@ -7085,6 +7138,8 @@ public final class DecoHackParser extends Lexer.Parser
 	private int lastAutoWeaponIndex;
 	/** Last auto ammo index (for slightly better search continuation). */
 	private int lastAutoAmmoIndex;
+	/** Last generated mnemonic increment. */
+	private int lastMnemonicIndex;
 
 	// Return the exporter for the patch.
 	private DecoHackParser(String streamName, InputStream in, Charset inputCharset)
@@ -7098,6 +7153,7 @@ public final class DecoHackParser extends Lexer.Parser
 		this.lastAutoThingIndex = 0;
 		this.lastAutoWeaponIndex = 0;
 		this.lastAutoAmmoIndex = 0;
+		this.lastMnemonicIndex = 0;
 	}
 	
 	private void addWarningMessage(String warningType, String message, Object... args)
