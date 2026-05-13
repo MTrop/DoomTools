@@ -6050,7 +6050,7 @@ public final class DecoHackParser extends Lexer.Parser
 	// Checks if the current lexeme is a valid user string mnemonic value.
 	private boolean currentStringIsUserMnemonic()
 	{
-		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_STRING))
 			return false;
 		
 		return USER_MNEMONIC.matcher(currentLexeme()).matches();
