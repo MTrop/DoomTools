@@ -3,7 +3,7 @@ DECOHack
 
 ### Changed for 0.48.0
 
-* `Changed` DECOHack will now mnemonic-ize non-mnemonic user strings for ID24 patches user the covers, avoiding crashes. (Enh. #165)
+* `Changed` DECOHack will now mnemonic-ize non-mnemonic thing pickup strings for ID24 patches user the covers, avoiding crashes. (Enh. #165)
 
 
 ### Changed for 0.47.2

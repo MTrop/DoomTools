@@ -2471,6 +2471,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+		// ========== Start Pickups ==========
 		(new DEHThing()).setName("Green armor")
 			.setEditorNumber(2018)
 			.setHealth(1000)
@@ -2496,7 +2497,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTARMOR"),
 		(new DEHThing()).setName("Blue armor")
 			.setEditorNumber(2019)
 			.setHealth(1000)
@@ -2522,7 +2524,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTMEGA"),
 		(new DEHThing()).setName("Health potion")
 			.setEditorNumber(2014)
 			.setHealth(1000)
@@ -2549,7 +2552,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTHTHBONUS"),
 		(new DEHThing()).setName("Armor helmet")
 			.setEditorNumber(2015)
 			.setHealth(1000)
@@ -2576,7 +2580,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTARMBONUS"),
 		(new DEHThing()).setName("Blue keycard")
 			.setEditorNumber(5)
 			.setHealth(1000)
@@ -2604,6 +2609,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTBLUECARD")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2634,6 +2640,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTREDCARD")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2664,6 +2671,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTYELWCARD")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2694,6 +2702,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTYELWSKUL")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2724,6 +2733,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTREDSKULL")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2754,6 +2764,7 @@ interface Constants
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTBLUESKUL")
 			.setID24Flags(DEHFlag.flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
 			)),
@@ -2808,7 +2819,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTMEDIKIT"),
 		(new DEHThing()).setName("Soul sphere")
 			.setEditorNumber(2013)
 			.setHealth(1000)
@@ -2836,7 +2848,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSUPER"),
 		(new DEHThing()).setName("Invulnerability")
 			.setEditorNumber(2022)
 			.setHealth(1000)
@@ -2864,7 +2877,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTINVUL"),
 		(new DEHThing()).setName("Berserk sphere")
 			.setEditorNumber(2023)
 			.setHealth(1000)
@@ -2891,7 +2905,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTBERSERK"),
 		(new DEHThing()).setName("Blur sphere")
 			.setEditorNumber(2024)
 			.setHealth(1000)
@@ -2919,7 +2934,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTINVIS"),
 		(new DEHThing()).setName("Radiation suit")
 			.setEditorNumber(2025)
 			.setHealth(1000)
@@ -2945,7 +2961,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSUIT"),
 		(new DEHThing()).setName("Computer map")
 			.setEditorNumber(2026)
 			.setHealth(1000)
@@ -2972,7 +2989,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTMAP"),
 		(new DEHThing()).setName("Lite amplification visor")
 			.setEditorNumber(2045)
 			.setHealth(1000)
@@ -2999,7 +3017,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTVISOR"),
 		(new DEHThing()).setName("Mega sphere")
 			.setEditorNumber(83)
 			.setHealth(1000)
@@ -3027,7 +3046,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTMSPHERE"),
 		(new DEHThing()).setName("Ammo clip")
 			.setEditorNumber(2007)
 			.setHealth(1000)
@@ -3053,7 +3073,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCLIP"),
 		(new DEHThing()).setName("Box of ammo")
 			.setEditorNumber(2048)
 			.setHealth(1000)
@@ -3079,7 +3100,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCLIPBOX"),
 		(new DEHThing()).setName("Rocket")
 			.setEditorNumber(2010)
 			.setHealth(1000)
@@ -3105,7 +3127,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTROCKET"),
 		(new DEHThing()).setName("Box of rockets")
 			.setEditorNumber(2046)
 			.setHealth(1000)
@@ -3131,7 +3154,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTROCKBOX"),
 		(new DEHThing()).setName("Energy cell")
 			.setEditorNumber(2047)
 			.setHealth(1000)
@@ -3157,7 +3181,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCELL"),
 		(new DEHThing()).setName("Energy cell pack")
 			.setEditorNumber(17)
 			.setHealth(1000)
@@ -3183,7 +3208,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCELLBOX"),
 		(new DEHThing()).setName("Shells")
 			.setEditorNumber(2008)
 			.setHealth(1000)
@@ -3209,7 +3235,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSHELLS"),
 		(new DEHThing()).setName("Box of shells")
 			.setEditorNumber(2049)
 			.setHealth(1000)
@@ -3235,7 +3262,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSHELLBOX"),
 		(new DEHThing()).setName("Backpack")
 			.setEditorNumber(8)
 			.setHealth(1000)
@@ -3261,7 +3289,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTBACKPACK"),
 		(new DEHThing()).setName("BFG 9000")
 			.setEditorNumber(2006)
 			.setHealth(1000)
@@ -3287,7 +3316,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTBFG9000"),
 		(new DEHThing()).setName("Chaingun")
 			.setEditorNumber(2002)
 			.setHealth(1000)
@@ -3313,7 +3343,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCHAINGUN"),
 		(new DEHThing()).setName("Chainsaw")
 			.setEditorNumber(2005)
 			.setHealth(1000)
@@ -3339,7 +3370,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTCHAINSAW"),
 		(new DEHThing()).setName("Rocket launcher")
 			.setEditorNumber(2003)
 			.setHealth(1000)
@@ -3365,7 +3397,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTLAUNCHER"),
 		(new DEHThing()).setName("Plasma rifle")
 			.setEditorNumber(2004)
 			.setHealth(1000)
@@ -3391,7 +3424,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTPLASMA"),
 		(new DEHThing()).setName("Shotgun")
 			.setEditorNumber(2001)
 			.setHealth(1000)
@@ -3417,7 +3451,8 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSHOTGUN"),
 		(new DEHThing()).setName("Super shotgun")
 			.setEditorNumber(82)
 			.setHealth(1000)
@@ -3443,7 +3478,9 @@ interface Constants
 			.setAttackSoundPosition(DEHThing.SOUND_NONE)
 			.setPainSoundPosition(DEHThing.SOUND_NONE)
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
-			.setActiveSoundPosition(DEHThing.SOUND_NONE),
+			.setActiveSoundPosition(DEHThing.SOUND_NONE)
+			.setPickupMessageMnemonic("GOTSHOTGUN2"),
+		// ========== End Pickups ==========
 		(new DEHThing()).setName("Tall lamp")
 			.setEditorNumber(85)
 			.setHealth(1000)
