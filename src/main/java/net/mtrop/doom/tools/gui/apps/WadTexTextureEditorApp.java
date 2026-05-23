@@ -17,15 +17,18 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +57,7 @@ import net.mtrop.doom.graphics.PNGPicture;
 import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
+import net.mtrop.doom.object.GraphicObject;
 import net.mtrop.doom.struct.io.SerialReader;
 import net.mtrop.doom.texture.CommonTextureList;
 import net.mtrop.doom.texture.DoomTextureList;
@@ -69,6 +73,7 @@ import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WadTexTextureEditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.adapters.MouseControlAdapter;
+import net.mtrop.doom.tools.gui.swing.panels.PatchDisplayCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchGraphic;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchListModel;
@@ -78,6 +83,7 @@ import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doom.tools.struct.swing.LayoutFactory.Flow;
 import net.mtrop.doom.tools.struct.swing.ImageUtils;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
+import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.EncodingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -644,59 +650,102 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		return true;
 	}
 	
+	private GraphicObject getGraphicObjectFromSource(String patchName)
+	{
+		File patchFile = fetchPatchFileForName(patchName);
+		if (patchFile != null)
+		{
+			try {
+				return getGraphicObject(IOUtils.getBinaryContents(patchFile));
+			} catch (IOException e) {
+				LOG.error(e, "Could not load patch data from " + patchName);
+				return new PNGPicture();
+			}
+		}
+		else
+		{
+			Picture picture = fetchIWADPatchForName(patchName);
+			if (picture != null)
+			{
+				return picture;
+			}
+			else
+			{
+				PNGPicture out = new PNGPicture();
+				out.setImage(NO_PATCH);
+				return out;
+			}
+		}
+
+	}
+	
 	private boolean addFoundPatchFile(TextureSet.Patch patch, File selected)
 	{
 		try {
-			if (FileUtils.matchMagicNumber(selected, PNG_SIGNATURE)) // png?
+			GraphicObject go = getGraphicObject(IOUtils.getBinaryContents(selected));
+			if (go != null)
 			{
-				PNGPicture p = BinaryObject.read(PNGPicture.class, selected);
-				createPatch(patch, p);
+				if (go instanceof Picture)
+					createPatch(patch, (Picture)go);
+				else
+					createPatch(patch, (PNGPicture)go);
 				return true;
 			}
-			else // other?
+			else
 			{
-				BufferedImage image;
-				PNGPicture png = new PNGPicture();
-				try {
-					image = ImageIO.read(selected);
-					if (image != null)
-					{
-						png.setImage(image);
-						createPatch(patch, png);
-						return true;
-					}
-				} catch (IOException e) {
-					image = null;
-				}
-				
-				int w, h, ox, oy;
-				try (FileInputStream fis = new FileInputStream(selected))
-				{
-					SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
-					w = sr.readShort(fis);
-					h = sr.readShort(fis);
-					ox = sr.readShort(fis);
-					oy = sr.readShort(fis);
-				}
-
-				// test if acceptable or reasonable bounds
-				if (checkPictureBounds(w, h, ox, oy))
-				{
-					Picture p = BinaryObject.read(Picture.class, selected);
-					createPatch(patch, p);
-					return true;
-				}
-				else
-				{
-					createPatch(patch, NO_PATCH);
-					return false;
-				}
+				createPatch(patch, NO_PATCH);
+				return false;
 			}
 		} catch (IOException e) {
 			return false;
 		}
 	}
 
+	private GraphicObject getGraphicObject(byte[] data)
+	{
+		try {
+			if (ArrayUtils.startsWith(data, PNG_SIGNATURE)) // png?
+			{
+				return BinaryObject.create(PNGPicture.class, data);
+			}
+			else // other?
+			{
+				BufferedImage image;
+				PNGPicture png = new PNGPicture();
+				try {
+					image = ImageIO.read(new ByteArrayInputStream(data));
+					if (image != null)
+					{
+						png.setImage(image);
+						return png;
+					}
+				} catch (IOException e) {}
+				
+				int w, h, ox, oy;
+				try (InputStream ins = new ByteArrayInputStream(data))
+				{
+					SerialReader sr = new SerialReader(SerialReader.LITTLE_ENDIAN);
+					w = sr.readShort(ins);
+					h = sr.readShort(ins);
+					ox = sr.readShort(ins);
+					oy = sr.readShort(ins);
+				}
+
+				// test if acceptable or reasonable bounds
+				if (checkPictureBounds(w, h, ox, oy))
+				{
+					return BinaryObject.create(Picture.class, data);
+				}
+				else
+				{
+					return null;
+				}
+			}
+		} catch (IOException e) {
+			return null;
+		}
+	}
+	
 	private void refreshGraphicData(final TextureSet.Texture texture)
 	{
 		for (TextureSet.Patch patch : texture)
@@ -1226,12 +1275,32 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private void onPatchAdd()
 	{
-		JList<String> patchList = list(projectPatchNames, ListSelectionMode.SINGLE);
+		PatchDisplayCanvas displayCanvas = new PatchDisplayCanvas();
+		displayCanvas.setZoomFactor((float)(double)zoomFactorField.getValue());
+		displayCanvas.setPalette(canvas.getPalette());
+		
+		JList<String> patchList = list(projectPatchNames, ListSelectionMode.SINGLE, (selected, adjusting) ->
+		{
+			String sel = selected.isEmpty() ? null : selected.get(0);
+			if (sel == null)
+				displayCanvas.clearPictures();
+			else
+			{
+				GraphicObject go = getGraphicObjectFromSource(sel);
+				if (go instanceof Picture)
+					displayCanvas.setPicture((Picture)go);
+				else
+					displayCanvas.setPNGPicture((PNGPicture)go);
+			}
+		});
 		
 		Boolean ok = modal(
 			getApplicationContainer(),
 			language.getText("wadtex.texture.editor.patch.add"),
-			containerOf(borderLayout(), node(dimension(128, 256), scroll(patchList))),
+			containerOf(borderLayout(), 
+				node(BorderLayout.WEST, dimension(128, 512), scroll(patchList)),
+				node(BorderLayout.CENTER, dimension(512, 512), displayCanvas)
+			),
 			utils.createChoiceFromLanguageKey("doomtools.ok", (Boolean)true),
 			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)false)
 		).openThenDispose();

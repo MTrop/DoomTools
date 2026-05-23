@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Simple utility functions around Arrays.
@@ -146,21 +147,25 @@ public final class ArrayUtils
 		}
 		return -1;
 	}
-
-	/**
-	 * Fetches all items in a collection an an array of items.
-	 * @param <T> the item type.
-	 * @param <C> the collection type.
-	 * @param collection the collection to use.
-	 * @param type the the encapsulated type.
-	 * @return a new array of items from the collection.
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T, C extends Collection<T>> T[] items(C collection, Class<T> type)
-	{
-		return collection.toArray((T[])Array.newInstance(type, collection.size()));
-	}
 	
+	/**
+	 * Returns a new array such that the contents of the old array are copied to a
+	 * new array of a particular length. If the new length is less than the old array,
+	 * the array returned is a truncation of the old array.
+	 * @param <T> the array type.
+	 * @param oldArray the old array.
+	 * @param newLength the length of the new array in elements.
+	 * @return the new array.
+	 */
+	public static <T> T[] resizeArray(T[] oldArray, int newLength)
+	{
+		Class<?> type = getArrayType(oldArray);
+		@SuppressWarnings("unchecked")
+		T[] out = (T[])Array.newInstance(type, newLength);
+		System.arraycopy(oldArray, 0, out, 0, Math.min(oldArray.length, newLength));
+		return out;
+	}
+
 	/**
 	 * Returns a new (safe) array reference that contains all of the passed-in elements in order.
 	 * @param <T> the object type in the array.
@@ -178,6 +183,20 @@ public final class ArrayUtils
 	}
 
 	/**
+	 * Fetches all items in a collection an an array of items.
+	 * @param <T> the item type.
+	 * @param <C> the collection type.
+	 * @param collection the collection to use.
+	 * @param type the the encapsulated type.
+	 * @return a new array of items from the collection.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T, C extends Collection<T>> T[] items(C collection, Class<T> type)
+	{
+		return collection.toArray((T[])Array.newInstance(type, collection.size()));
+	}
+	
+	/**
 	 * Gets the element at an index in the array, but returns 
 	 * null if the index is outside of the array bounds.
 	 * @param <T> the array type.
@@ -189,6 +208,40 @@ public final class ArrayUtils
 	{
 		if (index < 0 || index >= array.length)
 			return null;
+		else
+			return array[index];
+	}
+
+	/**
+	 * Gets the element at an index in the array, but returns 
+	 * a default value if the index is outside of the array bounds.
+	 * @param <T> the array type.
+	 * @param array the array to use.
+	 * @param index the index to use.
+	 * @param defaultValue the default value.
+	 * @return <code>array[index]</code> or the default value if out of bounds.
+	 */
+	public static <T> T arrayElement(T[] array, int index, T defaultValue)
+	{
+		if (index < 0 || index >= array.length)
+			return defaultValue;
+		else
+			return array[index];
+	}
+
+	/**
+	 * Gets the element at an index in the array, but returns 
+	 * a default value if the index is outside of the array bounds.
+	 * @param <T> the array type.
+	 * @param array the array to use.
+	 * @param index the index to use.
+	 * @param defaultValue the default value supplier.
+	 * @return <code>array[index]</code> or the default value if out of bounds.
+	 */
+	public static <T> T arrayElement(T[] array, int index, Supplier<T> defaultValue)
+	{
+		if (index < 0 || index >= array.length)
+			return defaultValue.get();
 		else
 			return array[index];
 	}
@@ -235,6 +288,163 @@ public final class ArrayUtils
 		}
 		
 		return out;
+	}
+	
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(byte[] array, byte[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(short[] array, short[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(int[] array, int[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(long[] array, long[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(float[] array, float[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static boolean startsWith(double[] array, double[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] != sequence[i])
+				return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * Checks if an array starts with a sequence of data.
+	 * @param <T> the array type.
+	 * @param array the array.
+	 * @param sequence the sequence to test.
+	 * @return true if so, false if not.
+	 * @see #equals(Object)
+	 * @throws NullPointerException if array or sequence is null.
+	 */
+	public static <T> boolean startsWith(T[] array, T[] sequence)
+	{
+		if (sequence.length < array.length)
+			return false;
+		
+		for (int i = 0; i < sequence.length; i++)
+		{
+			if (array[i] == null && sequence[i] != null)
+				return false;
+			if (!array[i].equals(sequence[i]))
+				return false;
+		}
+		
+		return true;
 	}
 
 	/**

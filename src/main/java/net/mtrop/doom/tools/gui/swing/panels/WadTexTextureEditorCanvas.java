@@ -129,6 +129,15 @@ public class WadTexTextureEditorCanvas extends Canvas
 	}
 	
 	/**
+	 * Gets the palette in use by this canvas.
+	 * @return the palette in use.
+	 */
+	public Palette getPalette()
+	{
+		return palette;
+	}
+	
+	/**
 	 * @return the list model for the patches in this texture canvas.
 	 */
 	public PatchListModel getPatchListModel() 

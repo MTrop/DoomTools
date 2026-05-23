@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.5.1
+
+* `Fixed` [GUI-TextureEditor] Added a patch previewer (Enh. #166).
+
+
 ### Changed for 1.5.0
 
 * `Fixed` [GUI-TextureEditor] Added an interactive texture editor.
