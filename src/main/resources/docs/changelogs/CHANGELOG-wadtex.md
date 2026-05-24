@@ -4,6 +4,7 @@ WadTex
 ### Changed for 1.5.1
 
 * `Fixed` [GUI-TextureEditor] Added a patch previewer (Enh. #166).
+* `Fixed` [GUI-TextureEditor] Added project texture WADs as a source (Enh. #167).
 
 
 ### Changed for 1.5.0

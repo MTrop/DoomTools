@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.Action;
@@ -125,8 +126,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 	private File projectDirectory;
 	private Properties projectProperties;
-	private Map<String, File> projectConvertFiles;
-	private Map<String, File> projectPatchFiles;
+	private Map<String, File> projectPatchSources;
 	private List<String> projectPatchNames;
 
 	private JFormField<File> projectDirectoryField;
@@ -176,8 +176,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		
 		this.zoomFactorField = spinnerField(spinner(spinnerModel(1, ZOOMFACTOR_MIN, ZOOMFACTOR_MAX, ZOOMFACTOR_STEP), (c) -> onZoomFactorChanged((Double)c.getValue())));
 		
-		this.projectConvertFiles = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		this.projectPatchFiles = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.projectPatchSources = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.projectPatchNames = new ArrayList<>();
 
 		this.projectDirectoryField = fileField(null, 
@@ -506,8 +505,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private void onProjectDirectorySelect(File directory)
 	{
 		projectDirectory = directory;
-		projectConvertFiles.clear();
-		projectPatchFiles.clear();
+		projectPatchSources.clear();
 
 		if (projectDirectory != null)
 		{
@@ -521,19 +519,22 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 			File convertPatchDir = new File(srcDir.getPath() + "/convert/patches");
 			File texturePatchDir = new File(srcDir.getPath() + "/textures/patches");
+			File textureWadsDir = new File(srcDir.getPath() + "/wads/textures");
 			
+			// Add convert sources.
 			File[] fileList = convertPatchDir.listFiles();
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectConvertFiles.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
 			}
 	
+			// Add loose patch sources.
 			fileList = texturePatchDir.listFiles();
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectPatchFiles.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
 			}
 
 			if (iwadSourceField.getValue() == null)
@@ -568,6 +569,41 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				}
 			}
 			
+			// Add IWAD sources.
+			if (iwadSourceField != null)
+			{
+				File iwad = iwadSourceField.getValue();
+				try {
+					WadMap iwadMap = new WadMap(iwad);
+					WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(iwadMap, "P", Pattern.compile("P[1-9]_(START|END)"));
+					for (int i = 0; i < patchEntries.length; i++)
+						projectPatchSources.put(patchEntries[i].getName(), iwad);
+				} catch (IOException e) {
+					LOG.error(e, "Could not read IWAD " + iwad.getPath() + " for patch entries.");
+				}
+			}
+			
+			// Add texture WAD sources.
+			File[] textureWads = FileUtils.explodeFiles(textureWadsDir);
+			if (textureWads != null)
+			{
+				for (int x = 0; x < textureWads.length; x++)
+				{
+					File wad = textureWads[x];
+					try {
+						WadMap wadMap = new WadMap(wad);
+						WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(wadMap, "P", Pattern.compile("P[1-9]_(START|END)"));
+						for (int i = 0; i < patchEntries.length; i++)
+							projectPatchSources.put(patchEntries[i].getName(), wad);
+						patchEntries = WadUtils.getEntriesInNamespace(wadMap, "PP");
+						for (int i = 0; i < patchEntries.length; i++)
+							projectPatchSources.put(patchEntries[i].getName(), wad);
+					} catch (IOException e) {
+						LOG.error(e, "Could not read texture WAD " + wad.getPath() + " for patch entries.");
+					}
+				}
+			}
+			
 			if (currentTexture != null)
 			{
 				refreshGraphicData(currentTexture);
@@ -596,109 +632,37 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 	}
 	
-	private File fetchPatchFileForName(String name)
+	private GraphicObject fetchGraphicObjectForName(String name)
 	{
 		if (projectDirectory == null)
 			return null;
 		
-		File srcDir = Common.getProjectPropertyPath(projectDirectory, projectProperties, "doommake.dir.src", "src");
-		File convertPatchDir = new File(srcDir.getPath() + File.separator + "convert" + File.separator + "patches");
-		File texturePatchDir = new File(srcDir.getPath() + File.separator + "textures" + File.separator + "patches");
-
-		File file;
-
-		// try src/convert/patches
-		file = projectConvertFiles.get(convertPatchDir.getPath() + File.separator + name);
+		File file = projectPatchSources.get(name);
 		if (file != null)
-			return file;
-
-		// try src/textures/patches
-		file = projectPatchFiles.get(texturePatchDir.getPath() + File.separator + name);
-		if (file != null)
-			return file;
+		{
+			try {
+				if (Wad.isWAD(file))
+				{
+					try (WadFile wf = new WadFile(file))
+					{
+						byte[] data = wf.getData(name);
+						if (data == null)
+							return null;
+						return getGraphicObject(data);
+					}
+				}
+				else
+				{
+					return getGraphicObject(IOUtils.getBinaryContents(file));
+				}
+			} catch (IOException e) {
+				LOG.error(e, "Could not load patch from file: " + file.getPath());
+			}
+		}
 		
 		return null;
 	}
 	
-	private Picture fetchIWADPatchForName(String name)
-	{
-		// search IWAD
-		File iwad = iwadSourceField.getValue();
-		if (iwad == null || !iwad.exists())
-			return null;
-		
-		try (WadFile wad = new WadFile(iwad))
-		{
-			int pidx = wad.indexOf("P_START");
-			if (pidx < 0)
-				pidx = wad.indexOf("PP_START");
-			if (pidx < 0)
-				return null;
-			return wad.getDataAs(name, pidx, Picture.class);
-		} 
-		catch (IOException e)
-		{
-			return null;
-		}
-	}
-	
-	private boolean addFoundPatch(TextureSet.Patch patch, Picture picture)
-	{
-		createPatch(patch, picture);
-		return true;
-	}
-	
-	private GraphicObject getGraphicObjectFromSource(String patchName)
-	{
-		File patchFile = fetchPatchFileForName(patchName);
-		if (patchFile != null)
-		{
-			try {
-				return getGraphicObject(IOUtils.getBinaryContents(patchFile));
-			} catch (IOException e) {
-				LOG.error(e, "Could not load patch data from " + patchName);
-				return new PNGPicture();
-			}
-		}
-		else
-		{
-			Picture picture = fetchIWADPatchForName(patchName);
-			if (picture != null)
-			{
-				return picture;
-			}
-			else
-			{
-				PNGPicture out = new PNGPicture();
-				out.setImage(NO_PATCH);
-				return out;
-			}
-		}
-
-	}
-	
-	private boolean addFoundPatchFile(TextureSet.Patch patch, File selected)
-	{
-		try {
-			GraphicObject go = getGraphicObject(IOUtils.getBinaryContents(selected));
-			if (go != null)
-			{
-				if (go instanceof Picture)
-					createPatch(patch, (Picture)go);
-				else
-					createPatch(patch, (PNGPicture)go);
-				return true;
-			}
-			else
-			{
-				createPatch(patch, NO_PATCH);
-				return false;
-			}
-		} catch (IOException e) {
-			return false;
-		}
-	}
-
 	private GraphicObject getGraphicObject(byte[] data)
 	{
 		try {
@@ -748,18 +712,17 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	{
 		for (TextureSet.Patch patch : texture)
 		{
-			File patchFile = fetchPatchFileForName(patch.getName());
-			if (patchFile != null)
+			GraphicObject gobj = fetchGraphicObjectForName(patch.getName());
+			if (gobj != null)
 			{
-				addFoundPatchFile(patch, patchFile);
+				if (gobj instanceof Picture)
+					createPatch(patch, (Picture)gobj);
+				else
+					createPatch(patch, (PNGPicture)gobj);
 			}
 			else
 			{
-				Picture picture = fetchIWADPatchForName(patch.getName());
-				if (picture != null)
-					addFoundPatch(patch, picture);
-				else
-					createPatch(patch, NO_PATCH);
+				createPatch(patch, NO_PATCH);
 			}
 		}
 	}
@@ -768,37 +731,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	{
 		LOG.debugf("Start patch name refresh...");
 		projectPatchNames.clear();
-		
-		for (Map.Entry<String, ?> entry : projectConvertFiles.entrySet())
-		{
-			String pname = FileUtils.getFileNameWithoutExtension((new File(entry.getKey())).getName()).toUpperCase(); 
-			projectPatchNames.add(pname);
-		}
-		
-		for (Map.Entry<String, ?> entry : projectPatchFiles.entrySet())
-		{
-			String pname = FileUtils.getFileNameWithoutExtension((new File(entry.getKey())).getName()).toUpperCase(); 
-			projectPatchNames.add(pname);
-		}
-		
-		if (iwadSourceField.getValue() != null)
-		{
-			try {
-				WadMap wad = new WadMap(iwadSourceField.getValue());
-				for (WadEntry entry : WadUtils.getEntriesInNamespace(wad, "P"))
-				{
-					if (!entry.isMarker())
-						projectPatchNames.add(entry.getName());
-				}
-				for (WadEntry entry : WadUtils.getEntriesInNamespace(wad, "PP"))
-				{
-					if (!entry.isMarker())
-						projectPatchNames.add(entry.getName());
-				}
-			} catch (IOException e) {
-				// Eat exception.
-			}
-		}
+
+		for (Map.Entry<String, ?> entry : projectPatchSources.entrySet())
+			projectPatchNames.add(entry.getKey());
 		
 		projectPatchNames.sort(String.CASE_INSENSITIVE_ORDER);
 		LOG.debugf("Patch name refresh finished.");
@@ -1284,7 +1219,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				displayCanvas.clearPictures();
 			else
 			{
-				GraphicObject go = getGraphicObjectFromSource(sel);
+				GraphicObject go = fetchGraphicObjectForName(sel);
 				if (go instanceof Picture)
 					displayCanvas.setPicture((Picture)go);
 				else
@@ -1310,25 +1245,19 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		if (patchName == null)
 			return;
 		
-		File patchFile = fetchPatchFileForName(patchName);
-		if (patchFile != null)
+		GraphicObject gobj = fetchGraphicObjectForName(patchName);
+		if (gobj != null)
 		{
 			TextureSet.Patch patch = currentTexture.createPatch(patchName);
-			addFoundPatchFile(patch, patchFile);
+			if (gobj instanceof Picture)
+				createPatch(patch, (Picture)gobj);
+			else
+				createPatch(patch, (PNGPicture)gobj);
 		}
 		else
 		{
-			Picture picture = fetchIWADPatchForName(patchName);
-			if (picture != null)
-			{
-				TextureSet.Patch patch = currentTexture.createPatch(patchName);
-				addFoundPatch(patch, picture);
-			}
-			else
-			{
-				TextureSet.Patch patch = currentTexture.createPatch(patchName);
-				createPatch(patch, NO_PATCH);
-			}
+			TextureSet.Patch patch = currentTexture.createPatch(patchName);
+			createPatch(patch, NO_PATCH);
 		}
 		
 		canvas.repaint();
