@@ -517,41 +517,26 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 			File srcDir = Common.getProjectPropertyPath(projectDirectory, projectProperties, "doommake.dir.src", "src");
 	
-			File convertPatchDir = new File(srcDir.getPath() + "/convert/patches");
-			File texturePatchDir = new File(srcDir.getPath() + "/textures/patches");
-			File additionalTexturePatchDir1 = new File(srcDir.getPath() + "/textures/texture1");
-			File additionalTexturePatchDir2 = new File(srcDir.getPath() + "/textures/texture2");
+			File[] dirs = {
+				new File(srcDir.getPath() + "/convert/patches"),
+				new File(srcDir.getPath() + "/textures/patches"),
+				new File(srcDir.getPath() + "/textures/texture1"),
+				new File(srcDir.getPath() + "/textures/texture2"),
+				new File(srcDir.getPath() + "/convert/texture1"),
+				new File(srcDir.getPath() + "/convert/texture2")
+			};
 			
-			// Add convert sources.
-			File[] fileList = convertPatchDir.listFiles();
-			if (fileList != null)
+			for (File dir : dirs)
 			{
-				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
+				// Add convert sources.
+				File[] fileList = dir.listFiles();
+				if (fileList != null)
+				{
+					for (File f : fileList)
+						projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
+				}
 			}
-	
-			// Add loose patch sources.
-			fileList = texturePatchDir.listFiles();
-			if (fileList != null)
-			{
-				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
-			}
-
-			// Add loose texture sources.
-			fileList = additionalTexturePatchDir1.listFiles();
-			if (fileList != null)
-			{
-				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
-			}
-			fileList = additionalTexturePatchDir2.listFiles();
-			if (fileList != null)
-			{
-				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
-			}
-
+			
 			if (iwadSourceField.getValue() == null)
 			{
 				String iwadPath = projectProperties.getProperty("doommake.iwad");
