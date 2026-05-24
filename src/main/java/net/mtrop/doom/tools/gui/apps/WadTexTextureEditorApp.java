@@ -519,7 +519,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 			File convertPatchDir = new File(srcDir.getPath() + "/convert/patches");
 			File texturePatchDir = new File(srcDir.getPath() + "/textures/patches");
-			File textureWadsDir = new File(srcDir.getPath() + "/wads/textures");
+			File additionalTexturePatchDir1 = new File(srcDir.getPath() + "/textures/texture1");
+			File additionalTexturePatchDir2 = new File(srcDir.getPath() + "/textures/texture2");
 			
 			// Add convert sources.
 			File[] fileList = convertPatchDir.listFiles();
@@ -531,6 +532,20 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 			// Add loose patch sources.
 			fileList = texturePatchDir.listFiles();
+			if (fileList != null)
+			{
+				for (File f : fileList)
+					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+			}
+
+			// Add loose texture sources.
+			fileList = additionalTexturePatchDir1.listFiles();
+			if (fileList != null)
+			{
+				for (File f : fileList)
+					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+			}
+			fileList = additionalTexturePatchDir2.listFiles();
 			if (fileList != null)
 			{
 				for (File f : fileList)
@@ -580,27 +595,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 						projectPatchSources.put(patchEntries[i].getName(), iwad);
 				} catch (IOException e) {
 					LOG.error(e, "Could not read IWAD " + iwad.getPath() + " for patch entries.");
-				}
-			}
-			
-			// Add texture WAD sources.
-			File[] textureWads = FileUtils.explodeFiles(textureWadsDir);
-			if (textureWads != null)
-			{
-				for (int x = 0; x < textureWads.length; x++)
-				{
-					File wad = textureWads[x];
-					try {
-						WadMap wadMap = new WadMap(wad);
-						WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(wadMap, "P", Pattern.compile("P[1-9]_(START|END)"));
-						for (int i = 0; i < patchEntries.length; i++)
-							projectPatchSources.put(patchEntries[i].getName(), wad);
-						patchEntries = WadUtils.getEntriesInNamespace(wadMap, "PP");
-						for (int i = 0; i < patchEntries.length; i++)
-							projectPatchSources.put(patchEntries[i].getName(), wad);
-					} catch (IOException e) {
-						LOG.error(e, "Could not read texture WAD " + wad.getPath() + " for patch entries.");
-					}
 				}
 			}
 			
