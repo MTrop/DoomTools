@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.47.2 by Matt Tropiano (using DoomStruct v2.22.2)
+DECOHack v0.48.0 by Matt Tropiano (using DoomStruct v2.22.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -232,6 +232,10 @@ you proceed, as some pieces are similar, and some are not.
 
 &lt;STRING&gt;     : Any single- or double-quoted set of characters, or a raw string 
                bounded in backticks.
+
+&lt;USERSTRING&gt; : Any single- or double-quoted set of characters, or a raw string 
+               bounded in backticks. These strings get turned into mnemonics
+               user the covers.
 
 &lt;INTEGER&gt;    : Any positive integer, or hex integer (e.g. 0x01234abcd). 
 
@@ -1394,7 +1398,7 @@ the thing state indices. Other labels are used for arbitrary jump points.
         pickupWeaponType &lt;INTEGER or WeaponAlias&gt;
         pickupItemType &lt;INTEGER&gt;
         pickupBonusCount &lt;INTEGER&gt;
-        pickupMessage &lt;STRING&gt;
+        pickupMessage &lt;USERSTRING&gt;
         translation &lt;STRING&gt;
         pickupSound &lt;STRING&gt;
 
@@ -2000,6 +2004,7 @@ pointers.
     sound        &#x2F;&#x2F; valid sound name.
     flags        &#x2F;&#x2F; -2147483648 to 2147483647, flag expression
     string       &#x2F;&#x2F; any string expression, written as-is.
+    userstring   &#x2F;&#x2F; any string expression - gets converted to a generated mnemonic
 
 
 For example, Doom Retro&#39;s &quot;gib health&quot; property for Things can be defined as:
@@ -2610,6 +2615,11 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.48.0
+
+* &#x60;Changed&#x60; DECOHack will now mnemonic-ize non-mnemonic thing pickup strings for ID24 patches user the covers, avoiding crashes. (Enh. #165)
+
+
 ### Changed for 0.47.2
 
 * &#x60;Fixed&#x60; Preprocessor wouldn&#39;t recognize all token types as potential macros.
