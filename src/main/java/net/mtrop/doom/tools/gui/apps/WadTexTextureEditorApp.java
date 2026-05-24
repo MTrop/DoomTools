@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -528,8 +529,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			
 			for (File dir : dirs)
 			{
-				// Add convert sources.
-				File[] fileList = dir.listFiles();
+				File[] fileList = FileUtils.explodeFiles(dir);
 				if (fileList != null)
 				{
 					for (File f : fileList)
@@ -718,7 +718,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		LOG.debugf("Patch name refresh finished.");
 	}
 
-	private boolean checkPictureBounds(int w, int h, int ox, int oy)
+	private static boolean checkPictureBounds(int w, int h, int ox, int oy)
 	{
 		return w > 0 && w < 8192 && h > 0 && h < 8192 && Math.abs(ox) < 1024 && Math.abs(oy) < 1024;
 	}
@@ -1190,6 +1190,35 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		PatchDisplayCanvas displayCanvas = new PatchDisplayCanvas();
 		displayCanvas.setZoomFactor((float)(double)zoomFactorField.getValue());
 		displayCanvas.setPalette(canvas.getPalette());
+		
+		displayCanvas.addKeyListener(new KeyAdapter() 
+		{
+			@Override
+			public void keyPressed(KeyEvent e) 
+			{
+				switch (e.getKeyCode())
+				{
+					case KeyEvent.VK_MINUS:
+						displayCanvas.setZoomFactor((float)(double)Math.max(ZOOMFACTOR_MIN, Math.min(ZOOMFACTOR_MAX, displayCanvas.getZoomFactor() - ZOOMFACTOR_STEP)));
+						break;
+					case KeyEvent.VK_EQUALS:
+						displayCanvas.setZoomFactor((float)(double)Math.max(ZOOMFACTOR_MIN, Math.min(ZOOMFACTOR_MAX, displayCanvas.getZoomFactor() + ZOOMFACTOR_STEP)));
+						break;
+				}
+			}
+		});
+		
+		displayCanvas.addMouseWheelListener(new MouseWheelListener()
+		{
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+				{
+					displayCanvas.setZoomFactor((float)(double)Math.max(ZOOMFACTOR_MIN, Math.min(ZOOMFACTOR_MAX, displayCanvas.getZoomFactor() + (e.getUnitsToScroll() > 0 ? -ZOOMFACTOR_STEP : ZOOMFACTOR_STEP))));
+				}
+			}
+		});
 		
 		JList<String> patchList = list(projectPatchNames, ListSelectionMode.SINGLE, (selected, adjusting) ->
 		{
