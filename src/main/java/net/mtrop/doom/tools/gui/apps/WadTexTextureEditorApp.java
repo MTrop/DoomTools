@@ -518,10 +518,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			File srcDir = Common.getProjectPropertyPath(projectDirectory, projectProperties, "doommake.dir.src", "src");
 	
 			File[] dirs = {
-				new File(srcDir.getPath() + "/convert/patches"),
 				new File(srcDir.getPath() + "/textures/patches"),
 				new File(srcDir.getPath() + "/textures/texture1"),
 				new File(srcDir.getPath() + "/textures/texture2"),
+				new File(srcDir.getPath() + "/convert/patches"),
 				new File(srcDir.getPath() + "/convert/texture1"),
 				new File(srcDir.getPath() + "/convert/texture2")
 			};
