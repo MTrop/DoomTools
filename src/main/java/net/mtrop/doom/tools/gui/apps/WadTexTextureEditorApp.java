@@ -527,7 +527,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
 			}
 	
 			// Add loose patch sources.
@@ -535,7 +535,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
 			}
 
 			// Add loose texture sources.
@@ -543,13 +543,13 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
 			}
 			fileList = additionalTexturePatchDir2.listFiles();
 			if (fileList != null)
 			{
 				for (File f : fileList)
-					projectPatchSources.put(FileUtils.getFilePathWithoutExtension(f), f);
+					projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
 			}
 
 			if (iwadSourceField.getValue() == null)
