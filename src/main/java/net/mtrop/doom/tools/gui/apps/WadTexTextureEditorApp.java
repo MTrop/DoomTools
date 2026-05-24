@@ -1228,10 +1228,17 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			else
 			{
 				GraphicObject go = fetchGraphicObjectForName(sel);
-				if (go instanceof Picture)
-					displayCanvas.setPicture((Picture)go);
+				if (go != null)
+				{
+					if (go instanceof Picture)
+						displayCanvas.setPicture((Picture)go);
+					else
+						displayCanvas.setPNGPicture((PNGPicture)go);
+				}
 				else
-					displayCanvas.setPNGPicture((PNGPicture)go);
+				{
+					displayCanvas.clearPictures();
+				}
 			}
 		});
 		
