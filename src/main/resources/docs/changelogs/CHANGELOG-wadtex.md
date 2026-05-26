@@ -5,6 +5,7 @@ WadTex
 
 * `Fixed` [GUI-TextureEditor] Patch previewer can now be zoomed with +, -, and mousewheel. (Enh. #166).
 * `Fixed` [GUI-TextureEditor] Patch directories in a project are now searched recursively. (Enh. #167).
+* `Fixed` [GUI-TextureEditor] Patches, when loaded are now coerced into viable patch names. (Issue #168).
 
 
 ### Changed for 1.5.1

@@ -89,6 +89,7 @@ import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.tools.struct.util.ValueUtils;
+import net.mtrop.doom.util.NameUtils;
 import net.mtrop.doom.util.TextureUtils;
 import net.mtrop.doom.util.WadUtils;
 
@@ -191,13 +192,13 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			this::onProjectDirectorySelect
 		);
 	
-		this.iwadSourceField = fileField(settings.getLastOpenedWAD(), 
+		this.iwadSourceField = fileField(settings.getLastIWAD(), 
 			(current) -> utils.chooseFile(
 				getApplicationContainer(),
 				language.getText("wadtex.texture.editor.iwad.source.browse.title"), 
 				language.getText("wadtex.texture.editor.iwad.source.browse.accept"),
-				() -> current != null ? current : settings.getLastOpenedWAD(),
-				settings::setLastOpenedWAD,
+				() -> current != null ? current : settings.getLastIWAD(),
+				settings::setLastIWAD,
 				utils.createWADFileFilter()
 			), 
 			this::onIWADFileSelect
@@ -533,7 +534,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				if (fileList != null)
 				{
 					for (File f : fileList)
-						projectPatchSources.put(FileUtils.getFileNameWithoutExtension(f), f);
+						projectPatchSources.put(NameUtils.toValidTextureName(FileUtils.getFileNameWithoutExtension(f)), f);
 				}
 			}
 			
@@ -1261,9 +1262,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			return;
 		
 		GraphicObject gobj = fetchGraphicObjectForName(patchName);
+		TextureSet.Patch patch = currentTexture.createPatch(patchName);
 		if (gobj != null)
 		{
-			TextureSet.Patch patch = currentTexture.createPatch(patchName);
 			if (gobj instanceof Picture)
 				createPatch(patch, (Picture)gobj);
 			else
@@ -1271,7 +1272,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 		else
 		{
-			TextureSet.Patch patch = currentTexture.createPatch(patchName);
 			createPatch(patch, NO_PATCH);
 		}
 		
