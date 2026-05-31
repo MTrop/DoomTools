@@ -353,8 +353,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		state.put("textureState", textureListModel.createState());
 		
 		state.put("projectDir", projectDirectoryField.getValue() == null ? "" : projectDirectoryField.getValue().getAbsolutePath());
-		state.put("baseWad", iwadSourceField.getValue() == null ? "" : iwadSourceField.getValue().getPath());
-		state.put("palette", paletteSourceField.getValue() == null ? "" : paletteSourceField.getValue().getPath());
+		state.put("baseWad", iwadSourceField.getValue() == null ? "" : iwadSourceField.getValue().getAbsolutePath());
+		state.put("palette", paletteSourceField.getValue() == null ? "" : paletteSourceField.getValue().getAbsolutePath());
 		
 		state.put("zoom.factor", String.valueOf(zoomFactorField.getValue()));
 		
