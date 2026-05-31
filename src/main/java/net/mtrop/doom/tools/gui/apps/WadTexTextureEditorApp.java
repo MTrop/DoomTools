@@ -126,7 +126,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private final DoomToolsIconManager icons;
 	private final WadTexTextureEditorSettingsManager settings;
 	
-	private File projectDirectory;
 	private Properties projectProperties;
 	private Map<String, File> projectPatchSources;
 	private List<String> projectPatchNames;
@@ -157,7 +156,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action patchMoveUpAction;
 	private Action patchMoveDownAction;
 	private Action helpAction;
-
+	
 	private boolean currentHasChanged;
 	private TextureSet.Texture currentTexture;
 	private TextureSet.Patch currentPatch;
@@ -181,17 +180,18 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.projectPatchSources = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.projectPatchNames = new ArrayList<>();
 
-		this.projectDirectoryField = fileField(null, 
-			(current) -> utils.chooseDirectory(
+		this.paletteSourceField = fileField(settings.getLastPaletteFile(), 
+			(current) -> utils.chooseFile(
 				getApplicationContainer(),
-				language.getText("wadtex.texture.editor.project.source.browse.title"), 
-				language.getText("wadtex.texture.editor.project.source.browse.accept"),
-				() -> current != null ? current : settings.getLastTouchedFile(),
-				settings::setLastTouchedFile
+				language.getText("wadtex.texture.editor.palette.source.browse.title"), 
+				language.getText("wadtex.texture.editor.palette.source.browse.accept"),
+				() -> current != null ? current : settings.getLastPaletteFile(),
+				settings::setLastPaletteFile,
+				utils.createAllFilesFilter()
 			), 
-			this::onProjectDirectorySelect
+			this::onPaletteFileSelect
 		);
-	
+		
 		this.iwadSourceField = fileField(settings.getLastIWAD(), 
 			(current) -> utils.chooseFile(
 				getApplicationContainer(),
@@ -204,16 +204,15 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			this::onIWADFileSelect
 		);
 	
-		this.paletteSourceField = fileField(settings.getLastPaletteFile(), 
-			(current) -> utils.chooseFile(
+		this.projectDirectoryField = fileField(null, 
+			(current) -> utils.chooseDirectory(
 				getApplicationContainer(),
-				language.getText("wadtex.texture.editor.palette.source.browse.title"), 
-				language.getText("wadtex.texture.editor.palette.source.browse.accept"),
-				() -> current != null ? current : settings.getLastPaletteFile(),
-				settings::setLastPaletteFile,
-				utils.createAllFilesFilter()
+				language.getText("wadtex.texture.editor.project.source.browse.title"), 
+				language.getText("wadtex.texture.editor.project.source.browse.accept"),
+				() -> current != null ? current : settings.getLastTouchedFile(),
+				settings::setLastTouchedFile
 			), 
-			this::onPaletteFileSelect
+			this::onProjectDirectorySelect
 		);
 	
 		this.textureWidthField = shortField((short)0, this::onTextureWidthChanged);
@@ -353,7 +352,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		
 		state.put("textureState", textureListModel.createState());
 		
-		state.put("projectDir", projectDirectory == null ? "" : projectDirectory.getAbsolutePath());
+		state.put("projectDir", projectDirectoryField.getValue() == null ? "" : projectDirectoryField.getValue().getAbsolutePath());
 		state.put("baseWad", iwadSourceField.getValue() == null ? "" : iwadSourceField.getValue().getPath());
 		state.put("palette", paletteSourceField.getValue() == null ? "" : paletteSourceField.getValue().getPath());
 		
@@ -504,96 +503,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		canvas.repaint();
 	}
 
-	private void onProjectDirectorySelect(File directory)
-	{
-		projectDirectory = directory;
-		projectPatchSources.clear();
-
-		if (projectDirectory != null)
-		{
-			try {
-				projectProperties = Common.createProjectProperties(projectDirectory);
-			} catch (IOException e) {
-				throw new RuntimeException("Could not initialize texture editor app project properties.", e);
-			}
-	
-			File srcDir = Common.getProjectPropertyPath(projectDirectory, projectProperties, "doommake.dir.src", "src");
-	
-			File[] dirs = {
-				new File(srcDir.getPath() + "/textures/patches"),
-				new File(srcDir.getPath() + "/textures/texture1"),
-				new File(srcDir.getPath() + "/textures/texture2"),
-				new File(srcDir.getPath() + "/convert/patches"),
-				new File(srcDir.getPath() + "/convert/texture1"),
-				new File(srcDir.getPath() + "/convert/texture2")
-			};
-			
-			for (File dir : dirs)
-			{
-				File[] fileList = FileUtils.explodeFiles(dir);
-				if (fileList != null)
-				{
-					for (File f : fileList)
-						projectPatchSources.put(NameUtils.toValidTextureName(FileUtils.getFileNameWithoutExtension(f)), f);
-				}
-			}
-			
-			if (iwadSourceField.getValue() == null)
-			{
-				String iwadPath = projectProperties.getProperty("doommake.iwad");
-				File file;
-				if (!ObjectUtils.isEmpty(iwadPath) && (file = new File(iwadPath)).exists())
-					iwadSourceField.setValue(file);
-			}
-			
-			if (paletteSourceField.getValue() == null)
-			{
-				String build = projectProperties.getProperty("doommake.dir.build");
-				if (ObjectUtils.isEmpty(build))
-					build = "build";
-				String source = projectProperties.getProperty("doommake.dir.src");
-				if (ObjectUtils.isEmpty(source))
-					source = "src";
-
-				File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
-				if (paletteFile != null)
-				{
-					paletteSourceField.setValue(paletteFile);
-				}
-				else
-				{
-					paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
-					if (paletteFile != null)
-						paletteSourceField.setValue(paletteFile);
-					else if (iwadSourceField.getValue() != null)
-						paletteSourceField.setValue(iwadSourceField.getValue());
-				}
-			}
-			
-			// Add IWAD sources.
-			if (iwadSourceField != null)
-			{
-				File iwad = iwadSourceField.getValue();
-				try {
-					WadMap iwadMap = new WadMap(iwad);
-					WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(iwadMap, "P", Pattern.compile("P[1-9]_(START|END)"));
-					for (int i = 0; i < patchEntries.length; i++)
-						projectPatchSources.put(patchEntries[i].getName(), iwad);
-				} catch (IOException e) {
-					LOG.error(e, "Could not read IWAD " + iwad.getPath() + " for patch entries.");
-				}
-			}
-			
-			if (currentTexture != null)
-			{
-				refreshGraphicData(currentTexture);
-				canvas.repaint();
-			}
-		}
-		
-		refeshPatchNameList();
-	}
-
 	private void commitCurrentTexture()
 	{
 		if (currentTexture == null)
@@ -614,9 +523,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 	private GraphicObject fetchGraphicObjectForName(String name)
 	{
-		if (projectDirectory == null)
-			return null;
-		
 		File file = projectPatchSources.get(name);
 		if (file != null)
 		{
@@ -707,6 +613,62 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 	}
 
+	private void refreshPatchSources()
+	{
+		LOG.debugf("Start patch source refresh...");
+		projectPatchSources.clear();
+		
+		if (projectDirectoryField.getValue() != null)
+		{
+			File value = projectDirectoryField.getValue();
+
+			File srcDir = Common.getProjectPropertyPath(value, projectProperties, "doommake.dir.src", "src");
+
+			File[] dirs = {
+				new File(srcDir.getPath() + "/textures/patches"),
+				new File(srcDir.getPath() + "/textures/texture1"),
+				new File(srcDir.getPath() + "/textures/texture2"),
+				new File(srcDir.getPath() + "/convert/patches"),
+				new File(srcDir.getPath() + "/convert/texture1"),
+				new File(srcDir.getPath() + "/convert/texture2")
+			};
+			
+			for (File dir : dirs)
+			{
+				File[] fileList = FileUtils.explodeFiles(dir);
+				if (fileList != null)
+				{
+					for (File f : fileList)
+						projectPatchSources.put(NameUtils.toValidTextureName(FileUtils.getFileNameWithoutExtension(f)), f);
+				}
+			}
+		}
+		
+		if (iwadSourceField.getValue() != null)
+		{
+			File value = iwadSourceField.getValue();
+			
+			try {
+				if (!Wad.isWAD(value))
+					SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.iwad.error.notwad", value.getPath()));
+			} catch (IOException e) {
+				SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.iwad.error.notwad", value.getPath()));
+			}
+
+			try {
+				WadMap iwadMap = new WadMap(value);
+				WadEntry[] patchEntries = WadUtils.getEntriesInNamespace(iwadMap, "P", Pattern.compile("P[1-9]_(START|END)"));
+				for (int i = 0; i < patchEntries.length; i++)
+					projectPatchSources.put(patchEntries[i].getName(), value);
+			} catch (IOException e) {
+				LOG.error(e, "Could not read IWAD " + value.getPath() + " for patch entries.");
+			}
+		}
+
+		LOG.debugf("End patch source refresh.");
+		refeshPatchNameList();
+	}
+	
 	private void refeshPatchNameList()
 	{
 		LOG.debugf("Start patch name refresh...");
@@ -1038,6 +1000,64 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		canvas.setZoomFactor((float)zoomFactor);
 	}
 	
+	private void onProjectDirectorySelect(File directory)
+	{
+		if (directory != null)
+		{
+			try {
+				projectProperties = Common.createProjectProperties(directory);
+			} catch (IOException e) {
+				throw new RuntimeException("Could not initialize texture editor app project properties.", e);
+			}
+
+			if (iwadSourceField.getValue() == null)
+			{
+				String iwadPath = projectProperties.getProperty("doommake.iwad");
+				File file;
+				if (!ObjectUtils.isEmpty(iwadPath) && (file = new File(iwadPath)).exists())
+					iwadSourceField.setValue(file);
+			}
+			
+			if (paletteSourceField.getValue() == null)
+			{
+				String build = projectProperties.getProperty("doommake.dir.build");
+				if (ObjectUtils.isEmpty(build))
+					build = "build";
+				String source = projectProperties.getProperty("doommake.dir.src");
+				if (ObjectUtils.isEmpty(source))
+					source = "src";
+	
+				File paletteFile = FileUtils.searchDirectory(new File(directory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
+				if (paletteFile != null)
+				{
+					paletteSourceField.setValue(paletteFile);
+				}
+				else
+				{
+					paletteFile = FileUtils.searchDirectory(new File(directory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
+					if (paletteFile != null)
+						paletteSourceField.setValue(paletteFile);
+					else if (iwadSourceField.getValue() != null)
+						paletteSourceField.setValue(iwadSourceField.getValue());
+				}
+			}
+		}
+		
+		if (currentTexture != null)
+		{
+			refreshGraphicData(currentTexture);
+			canvas.repaint();
+		}
+		
+		refreshPatchSources();
+	}
+
+	private void onIWADFileSelect(File value)
+	{
+		refreshPatchSources();
+		onSwitchToTexture(currentTexture);
+	}
+	
 	private void onPaletteFileSelect(File selectedFile)
 	{
 		if (selectedFile == null)
@@ -1055,7 +1075,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 		
 		Palette pal = null;
-
+	
 		// If WAD, search for PlayPal
 		if (wadfile)
 		{
@@ -1077,28 +1097,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			}
 		}
 		
-		if (pal != null)
-			settings.setLastPaletteFile(selectedFile);
-		
 		canvas.setPalette(pal);
 	}
 
-	private void onIWADFileSelect(File value)
-	{
-		if (value != null)
-		{
-			try {
-				if (!Wad.isWAD(value))
-					SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.iwad.error.notwad", value.getPath()));
-			} catch (IOException e) {
-				SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.iwad.error.notwad", value.getPath()));
-			}
-		}
-
-		onSwitchToTexture(currentTexture);
-		refeshPatchNameList();
-	}
-	
 	private void onTextureWidthChanged(Short value)
 	{
 		currentTexture.setWidth(value);
