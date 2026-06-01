@@ -1,6 +1,15 @@
 WadTex
 ------
 
+### Changed for 1.5.3
+
+* `Added` [GUI-TextureEditor] Add copy texture function (Enh. #170).
+* `Added` [GUI-TextureEditor] Add rename texture function (Enh. #170).
+* `Added` [GUI-TextureEditor] Add multi-patch add (Enh. #170).
+* `Added` [GUI-TextureEditor] Refresh commands for textures and patch lists (Enh. #170).
+* `Added` [GUI-TextureEditor] Better save file handling.
+
+
 ### Changed for 1.5.2
 
 * `Fixed` [GUI-TextureEditor] Patch previewer can now be zoomed with +, -, and mousewheel. (Enh. #166).
