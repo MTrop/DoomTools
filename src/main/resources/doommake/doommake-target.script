@@ -27,11 +27,6 @@ check entry clean(args) {
  * doommake editor
  ****************************************************************************/
 check entry editor(args) {
-
-	editorWad = getBuildDirectory() + "/" + getEditorWAD();
-	if (fileExists(editorWad) && !filedelete(editorWad))
-		return error("DeleteWad", "Could not delete Editor WAD for rebuild.");
-
 	doEditorAssets();
 }
 

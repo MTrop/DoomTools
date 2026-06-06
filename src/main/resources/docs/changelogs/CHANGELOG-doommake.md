@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.35.2
+
+* `Changed` New DoomMake projects will not delete the "Editor WAD" on rebuild as that has issues with UDB. (Issue #171).
+
+
 ### Changed for 0.35.1
 
 * `Added` [GUI-Studio] Quotes were not escaped in commit messages to Git or Mercurial.
