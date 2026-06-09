@@ -18,10 +18,7 @@
 
 	<!-- Project Libs -->
 	<property name="doom.lib.version" value="2.22.2" />
-	<property name="doom.tag" value="${doom.lib.version}-RELEASE" />
-	<property name="doom.project" value="doomstruct-${doom.lib.version}" />	
-	<property name="doom.jar" value="${doom.project}.jar" />
-	<property name="doom.jar.src" value="${doom.project}-sources.jar" />
+	<property name="doom.jar" value="doomstruct-${doom.lib.version}.jar" />
 
 	<property name="json.lib.version" value="1.4.1" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
@@ -283,8 +280,8 @@
 	</target>
 
 	<target name="dependency.doom">
-		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar}" dest="${dependencies.dir}" />
-		<github-dl repository="MTrop/DoomStruct" tag="${doom.tag}" file="${doom.jar.src}" dest="${dependencies.dir}" />
+		<maven-jar-dl group-path="net/mtrop" artifact="doomstruct" version="${doom.lib.version}" />
+		<maven-jar-sources-dl group-path="net/mtrop" artifact="doomstruct" version="${doom.lib.version}" />
 	</target>
 	
 	<target name="dependency.rookscript">
