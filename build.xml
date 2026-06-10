@@ -21,25 +21,17 @@
 	<property name="doom.jar" value="doomstruct-${doom.lib.version}.jar" />
 
 	<property name="json.lib.version" value="1.4.1" />
-	<property name="json.tag" value="${json.lib.version}-RELEASE" />
-	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
-	<property name="json.jar" value="${json.project}.jar" />
-	<property name="json.jar.src" value="${json.project}-sources.jar" />
+	<property name="json.jar" value="json-${json.lib.version}.jar" />
 
 	<property name="rookscript.lib.version" value="1.19.0" />
-	<property name="rookscript.tag" value="${rookscript.lib.version}-RELEASE" />
-	<property name="rookscript.project" value="blackrook-rookscript-${rookscript.lib.version}" />	
-	<property name="rookscript.jar" value="${rookscript.project}.jar" />
-	<property name="rookscript.jar.src" value="${rookscript.project}-sources.jar" />
+	<property name="rookscript.jar" value="rookscript-${rookscript.lib.version}.jar" />
 
 	<property name="rookscript.desktop.lib.version" value="1.10.2.1" />
-	<property name="rookscript.desktop.tag" value="${rookscript.desktop.lib.version}-RELEASE" />
-	<property name="rookscript.desktop.project" value="blackrook-rookscript-desktop-${rookscript.desktop.lib.version}" />	
-	<property name="rookscript.desktop.jar" value="${rookscript.desktop.project}.jar" />
-	<property name="rookscript.desktop.jar.src" value="${rookscript.desktop.project}-sources.jar" />
+	<property name="rookscript.desktop.jar" value="rookscript-desktop-${rookscript.desktop.project}.jar" />
 
 	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
+	
 	<property name="flatlaf.themes.lib.version" value="3.7" />
 	<property name="flatlaf.themes.jar" value="flatlaf-intellij-themes-${flatlaf.lib.version}.jar" />
 
@@ -275,8 +267,8 @@
 	</target>
 
 	<target name="dependency.json">
-		<github-dl repository="BlackRookSoftware/JSON" tag="${json.tag}" file="${json.jar}" dest="${dependencies.dir}" />
-		<github-dl repository="BlackRookSoftware/JSON" tag="${json.tag}" file="${json.jar.src}" dest="${dependencies.dir}" />
+		<maven-jar-dl group-path="com/blackrooksoftware" artifact="json" version="${json.lib.version}" />
+		<maven-jar-sources-dl group-path="com/blackrooksoftware" artifact="json" version="${json.lib.version}" />
 	</target>
 
 	<target name="dependency.doom">
@@ -285,13 +277,13 @@
 	</target>
 	
 	<target name="dependency.rookscript">
-		<github-dl repository="BlackRookSoftware/RookScript" tag="${rookscript.tag}" file="${rookscript.jar}" dest="${dependencies.dir}" />
-		<github-dl repository="BlackRookSoftware/RookScript" tag="${rookscript.tag}" file="${rookscript.jar.src}" dest="${dependencies.dir}" />
+		<maven-jar-dl group-path="com/blackrooksoftware" artifact="rookscript" version="${rookscript.lib.version}" />
+		<maven-jar-sources-dl group-path="com/blackrooksoftware" artifact="rookscript" version="${rookscript.lib.version}" />
 	</target>
 	
 	<target name="dependency.rookscript.desktop">
-		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar}" dest="${dependencies.dir}" />
-		<github-dl repository="BlackRookSoftware/RookScript-Desktop" tag="${rookscript.desktop.tag}" file="${rookscript.desktop.jar.src}" dest="${dependencies.dir}" />
+		<maven-jar-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.desktop.lib.version}" />
+		<maven-jar-sources-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.desktop.lib.version}" />
 	</target>
 
 	<target name="dependency.flatlaf">
