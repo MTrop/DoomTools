@@ -991,6 +991,8 @@ public final class DoomMakeMain
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES) || arg.equalsIgnoreCase(SWITCH_LISTTEMPLATES2))
 					{
+						if (options.projectType == null)
+							options.projectType = ProjectType.WAD;
 						options.listModules = true;
 					}
 					else if (arg.equalsIgnoreCase(SWITCH_NEWPROJECT) || arg.equalsIgnoreCase(SWITCH_NEWPROJECT2))
