@@ -8,6 +8,8 @@ package net.mtrop.doom.tools.gui.managers.parsing;
 import org.fife.ui.autocomplete.CompletionProvider;
 import org.fife.ui.autocomplete.TemplateCompletion;
 
+import net.mtrop.doom.tools.struct.HTMLWriter;
+
 /**
  * An enumeration of RookScript Templates. 
  * @author Matthew Tropiano
@@ -122,12 +124,13 @@ public enum RookScriptTemplateCompletion
 	 */
 	public final TemplateCompletion createCompletion(CompletionProvider parent)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("<html><body>");
-		sb.append("<div>").append(description).append("</div>");
-		sb.append("<pre>").append(templateString).append("</pre>");
-		sb.append("</body></html>");
-		return new RookScriptTemplate(parent, inputText, templateString, description, sb.toString());
+		HTMLWriter writer = HTMLWriter.createHTMLString()
+			.push("html").push("body")
+			.push("div").text(description).pop()
+			.push("pre").text(templateString).pop()
+			.pop().pop()
+		;
+		return new RookScriptTemplate(parent, inputText, templateString, description, writer.toString());
 	}
 	
 	/**
