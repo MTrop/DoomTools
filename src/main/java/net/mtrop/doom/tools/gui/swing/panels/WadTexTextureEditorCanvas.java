@@ -63,6 +63,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 	});
 	
 	private static final Composite PATCH_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP);
+	private static final Composite PATCH_COMPOSITE_OUTER = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.25f);
 	
 	private float zoomFactor;
 	private Palette palette;
@@ -175,7 +176,8 @@ public class WadTexTextureEditorCanvas extends Canvas
 			ImageUtils.ResamplingType.NEAREST.setHints(canvasGraphics);
 			
 			drawBackground(canvasGraphics);
-			drawTexture(canvasGraphics);
+			drawTexture(canvasGraphics, true);
+			drawTexture(canvasGraphics, false);
 			drawGuides(canvasGraphics);
 			
 			canvasGraphics.dispose();
@@ -216,17 +218,27 @@ public class WadTexTextureEditorCanvas extends Canvas
 		g2d.setColor(prevColor);
 	}
 
-	protected void drawTexture(Graphics2D g2d)
+	protected void drawTexture(Graphics2D g2d, boolean outerClip)
 	{
 		Composite prevComposite = g2d.getComposite();
-		g2d.setComposite(PATCH_COMPOSITE);
+		if (outerClip)
+		{
+			g2d.setComposite(PATCH_COMPOSITE_OUTER);
+		}
+		else
+		{
+			int originX = (int)((getWidth() / 2) - (textureDimensions.width / 2 * zoomFactor));
+			int originY = (int)((getHeight() / 2) - (textureDimensions.height / 2 * zoomFactor));
+			g2d.setClip(originX, originY, (int)(textureDimensions.width * zoomFactor), (int)(textureDimensions.height * zoomFactor));
+			g2d.setComposite(PATCH_COMPOSITE);
+		}
 
 		for (int i = 0; i < patchListModel.getSize(); i++)
 		{
 			PatchGraphic pg = patchListModel.getElementAt(i);
 			
 			if (zoomFactor > 0)
-			{
+			{	
 				// start top-left corner at HUD edge.
 				int originX = (int)((getWidth() / 2) - (textureDimensions.width / 2 * zoomFactor));
 				int originY = (int)((getHeight() / 2) - (textureDimensions.height / 2 * zoomFactor));
