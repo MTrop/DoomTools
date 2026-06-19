@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.5.4
+
+* `Added` [GUI-TextureEditor] Add clone patch function (Enh. #173).
+
+
 ### Changed for 1.5.3
 
 * `Added` [GUI-TextureEditor] Add copy texture function (Enh. #170).

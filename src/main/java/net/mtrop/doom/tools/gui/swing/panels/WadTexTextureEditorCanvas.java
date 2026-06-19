@@ -271,6 +271,21 @@ public class WadTexTextureEditorCanvas extends Canvas
 		}
 		
 		/**
+		 * Clones a PatchGraphic, but uses the provided patch data.
+		 * @param patchData the patch data.
+		 * @return a new PatchGraphic.
+		 */
+		public PatchGraphic cloneUsing(TextureSet.Patch patchData)
+		{
+			PatchGraphic out = new PatchGraphic(patchData);
+			out.picture = picture;
+			out.pngPicture = pngPicture;
+			out.sourceImage = sourceImage;
+			out.rebuildImage();
+			return out;
+		}
+		
+		/**
 		 * Sets the patch's picture (unsets PNGPicture).
 		 * @param p the picture.
 		 */

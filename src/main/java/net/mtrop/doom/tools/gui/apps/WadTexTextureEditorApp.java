@@ -162,6 +162,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action patchRemoveAction2;
 	private Action patchMoveUpAction;
 	private Action patchMoveDownAction;
+	private Action patchCloneAction;
 	private Action helpAction;
 
 	private Action copyTextureAction;
@@ -270,6 +271,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.renameTextureAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.texture.rename", (a) -> onTextureRename());
 		this.patchAddAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.add", (a) -> onPatchAdd());
 		this.patchRemoveAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.remove", (a) -> onPatchRemove());
+		this.patchCloneAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.clone", (a) -> onPatchClone());
 		
 		this.textureList.setComponentPopupMenu(popupMenu(
 			menuItem(textureAddAction2),
@@ -280,7 +282,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		));
 		this.patchList.setComponentPopupMenu(popupMenu(
 			menuItem(patchAddAction2),
-			menuItem(patchRemoveAction2)
+			menuItem(patchRemoveAction2),
+			separator(),
+			menuItem(patchCloneAction)
 		));
 		
 		this.currentTextureFile = null;
@@ -730,7 +734,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private void updateActionsAndFields()
 	{
-		List<TextureSet.Texture> selectedTextures =  textureList.getSelectedValuesList();
+		List<TextureSet.Texture> selectedTextures = textureList.getSelectedValuesList();
+		List<PatchGraphic> selectedPatches = patchList.getSelectedValuesList();
 		
 		saveAction.setEnabled(currentTextureFile != null);
 		refreshTextureListAction.setEnabled(currentTextureFile != null);
@@ -748,6 +753,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		patchRemoveAction2.setEnabled(currentPatch != null);
 		patchMoveUpAction.setEnabled(currentPatch != null);
 		patchMoveDownAction.setEnabled(currentPatch != null);
+		patchCloneAction.setEnabled(!selectedPatches.isEmpty());
 
 		textureWidthField.setEnabled(currentTexture != null);
 		textureHeightField.setEnabled(currentTexture != null);
@@ -1569,6 +1575,18 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		patchYField.setValue((short)(currentPatch.getOriginY() + y));
 		canvas.repaint();
 		currentHasChanged = true;
+	}
+
+	private void onPatchClone()
+	{
+		for (PatchGraphic pg : patchList.getSelectedValuesList())
+		{
+			TextureSet.Patch origpatch = pg.getPatch();
+			TextureSet.Patch patch = currentTexture.createPatch(origpatch.getName());
+			patch.setOriginX(origpatch.getOriginX());
+			patch.setOriginY(origpatch.getOriginY());
+			patchListModel.addPatch(pg.cloneUsing(patch));
+		}
 	}
 
 	private void onHelpDialog()
