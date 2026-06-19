@@ -128,6 +128,12 @@ public class WadScriptEditorApp extends DoomToolsApplicationInstance
 			{
 				return false;
 			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return false;
+			}
 		}, 
 		new WadScriptEditorPanel.Listener()
 		{

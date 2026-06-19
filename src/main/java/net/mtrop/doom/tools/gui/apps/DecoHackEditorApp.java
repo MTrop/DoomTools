@@ -128,6 +128,12 @@ public class DecoHackEditorApp extends DoomToolsApplicationInstance
 			{
 				return false;
 			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return false;
+			}
 		}, 
 		new DecoHackEditorPanel.Listener()
 		{

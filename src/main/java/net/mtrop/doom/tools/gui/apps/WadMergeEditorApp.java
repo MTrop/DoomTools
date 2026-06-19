@@ -123,6 +123,12 @@ public class WadMergeEditorApp extends DoomToolsApplicationInstance
 			{
 				return true;
 			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return false;
+			}
 		}, 
 		new WadMergeEditorPanel.Listener()
 		{

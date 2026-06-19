@@ -120,6 +120,12 @@ public class WSwAnTablesEditorApp extends DoomToolsApplicationInstance
 			{
 				return true;
 			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return false;
+			}
 		}, 
 		new DefSwAniEditorPanel.Listener()
 		{

@@ -126,6 +126,12 @@ public class WadTexEditorApp extends DoomToolsApplicationInstance
 			{
 				return true;
 			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return false;
+			}
 		}, 
 		new WadTexEditorPanel.Listener()
 		{

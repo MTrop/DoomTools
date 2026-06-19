@@ -69,12 +69,15 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
 import net.mtrop.doom.tools.gui.managers.settings.WadTexTextureEditorSettingsManager;
 import net.mtrop.doom.tools.gui.swing.adapters.MouseControlAdapter;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel;
 import net.mtrop.doom.tools.gui.swing.panels.PatchDisplayCanvas;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas;
+import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchGraphic;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchListModel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -511,6 +514,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", saveAction),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.saveas", (i) -> onSaveTextureFileAs()),
 				separator(),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.textedit", (i) -> onTextOpen()),
+				separator(),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.texture", refreshTextureListAction),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.patch", (i) -> onRefreshPatchList()),
 				separator(),
@@ -567,6 +572,19 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		}
 	}
 	
+	private void commitTextureSet(TextureSet textureSet)
+	{
+		onSwitchToTexture(null);
+		patchListModel.clearPatches();
+		textureListModel.clearTextures();
+		if (textureSet != null && !textureSet.isEmpty())
+			textureListModel.setTextures(textureSet);
+		currentHasChanged = false;
+		currentTexture = null;
+		currentPatch = null;
+		updateActionsAndFields();
+	}
+
 	private GraphicObject fetchGraphicObjectForName(String name)
 	{
 		File file = projectPatchSources.get(name);
@@ -789,15 +807,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			return;
 		}
 		
-		onSwitchToTexture(null);
-		patchListModel.clearPatches();
-		textureListModel.clearTextures();
-		textureListModel.setTextures(textureSet);
+		commitTextureSet(textureSet);
 		currentTextureFile = openedFile;
-		currentHasChanged = false;
-		currentTexture = null;
-		currentPatch = null;
-		updateActionsAndFields();
 	}
 
 	private void onNewTextureFile()
@@ -808,14 +819,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				return;
 		}
 		
-		onSwitchToTexture(null);
-		patchListModel.clearPatches();
-		textureListModel.clearTextures();
+		commitTextureSet(null);
 		currentTextureFile = null;
-		currentHasChanged = false;
-		currentTexture = null;
-		currentPatch = null;
-		updateActionsAndFields();
 	}
 
 	private void onOpenTextureFile()
@@ -972,16 +977,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		{
 			selectedTextureSet = texture2;
 		}
-		
-		onSwitchToTexture(null);
-		patchListModel.clearPatches();
-		textureListModel.clearTextures();
-		textureListModel.setTextures(selectedTextureSet);
+
+		commitTextureSet(selectedTextureSet);
 		currentTextureFile = null; // must save to TXT
-		currentHasChanged = false;
-		currentTexture = null;
-		currentPatch = null;
-		updateActionsAndFields();
 	}
 
 	private void onSaveTextureFile()
@@ -1588,9 +1586,128 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			patchListModel.addPatch(pg.cloneUsing(patch));
 		}
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		canvas.requestFocus();
+		
 	}
 
+	private void onTextOpen()
+	{
+		Modal<Boolean> editorModal = null;
+		
+		EditorMultiFilePanel editorPanel =  new EditorMultiFilePanel(new EditorMultiFilePanel.Options()
+		{
+			@Override
+			public boolean hideTreeActions()
+			{
+				return true;
+			}
+			
+			@Override
+			public boolean hideStyleChangePanel()
+			{
+				return true;
+			}
+			
+			@Override
+			public boolean forbidClose() 
+			{
+				return true;
+			}
+			
+		}, new EditorMultiFilePanel.Listener() 
+		{
+			@Override
+			public void onTreeRevealRequest(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void onTreeDirectoryRequest(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void onSave(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void onOpen(EditorHandle handle)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void onClose(EditorHandle handle) 
+			{
+				// Do nothing.
+			}
+		});
+		
+		editorModal = modal(getApplicationContainer(),
+			language.getText("wadtex.texture.editor.texteditor.title"),
+			containerOf(dimension(640, 512), node(editorPanel)),
+			utils.createChoiceFromLanguageKey("wadtex.texture.editor.texteditor.nochange", Boolean.TRUE)
+		);
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 16);
+		try (PrintWriter pw = new PrintWriter(bos)) 
+		{
+			Utility.writeDEUTEXFile(textureListModel.textures, "; " + language.getText("wadtex.texture.editor.texteditor.comment"), pw);
+		} 
+		catch (IOException e)
+		{
+			// Not happening.
+			throw new RuntimeException("INTERNAL ERROR: BAD INTERNAL BUFFER", e); 
+		}
+		
+		String editorContent = new String(bos.toByteArray());
+		boolean parseOkay = false;
+		editorPanel.newEditor("TEXTURESET", "");
+		TextureSet textureSet = textureListModel.textures;
+		Boolean result;
+		
+		do {
+			EditorHandle handle = editorPanel.getEditorByIndex(0);
+			handle.changeStyleName(DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX);
+			handle.setContent(editorContent);
+			result = editorModal.open();
+			
+			if (result == Boolean.TRUE) // DON'T CHANGE
+				return;
+			
+			editorContent = handle.getContent();
+			
+			try (BufferedReader br = new BufferedReader(new StringReader(editorContent))) 
+			{
+				textureSet = Utility.readDEUTEXFile(br);
+				parseOkay = true;
+			} 
+			catch (IOException e)
+			{
+				// Not happening.
+				throw new RuntimeException("INTERNAL ERROR: BAD INTERNAL BUFFER", e); 
+			} 
+			catch (ParseException e) 
+			{
+				SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.texteditor.error.parse", e.getLocalizedMessage()));
+			}
+			
+		} while (!parseOkay);
+		
+		editorModal.dispose();
+		
+		commitTextureSet(textureSet);
+	}
+	
 	private void onHelpDialog()
 	{
 		modal(
@@ -1613,7 +1730,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setPicture(p);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		canvas.requestFocus();
+		
 		return newPatch;
 	}
 
@@ -1629,7 +1746,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setPNGPicture(p);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		canvas.requestFocus();
+		
 		return newPatch;
 	}
 
@@ -1645,7 +1762,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setImage(image);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		canvas.requestFocus();
+		
 		return newPatch;
 	}
 

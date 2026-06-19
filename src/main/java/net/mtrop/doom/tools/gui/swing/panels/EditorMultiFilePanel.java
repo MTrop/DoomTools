@@ -127,6 +127,12 @@ public class EditorMultiFilePanel extends JPanel
 		{
 			return false;
 		}
+		
+		@Override
+		public boolean forbidClose() 
+		{
+			return false;
+		};
 	};
 
 	public interface ActionNames
@@ -153,11 +159,11 @@ public class EditorMultiFilePanel extends JPanel
 	
 	// ======================================================================
 	
-	private DoomToolsEditorProvider editorProvider;
-	private DoomToolsIconManager icons;
-	private DoomToolsLanguageManager language;
-	private EditorSettingsManager settings;
-	private DoomToolsGUIUtils utils;
+	private final DoomToolsEditorProvider editorProvider;
+	private final DoomToolsIconManager icons;
+	private final DoomToolsLanguageManager language;
+	private final EditorSettingsManager settings;
+	private final DoomToolsGUIUtils utils;
 	
 	// ======================================================================
 
@@ -235,6 +241,9 @@ public class EditorMultiFilePanel extends JPanel
 	private MenuNode toggleLineWrapMenuItem;
 	
 	// ======================================================================
+	
+	/** If tabs are closeable. */
+	private boolean closeableTabs;
 	
 	/** All editors. */
 	private Map<Component, EditorHandle> allEditors;
@@ -389,6 +398,8 @@ public class EditorMultiFilePanel extends JPanel
 			)
 		));
 		labelNodes.add(node(containerOf(createBevelBorder(BevelBorder.LOWERED), node(caretPositionLabel))));
+		
+		this.closeableTabs = !options.forbidClose();
 		
 		containerOf(this, borderLayout(0, 2),
 			node(BorderLayout.CENTER, this.mainEditorTabs),
@@ -2011,6 +2022,11 @@ public class EditorMultiFilePanel extends JPanel
 		 * @return false to allow style changing, true to forbid it.
 		 */
 		boolean hideStyleChangePanel();
+
+		/**
+		 * @return false to allow tab closing, true to forbid it.
+		 */
+		boolean forbidClose();
 	}
 	
 	/**
@@ -2058,7 +2074,11 @@ public class EditorMultiFilePanel extends JPanel
 	
 			this.fileRevealAction = actionItem(language.getText("texteditor.action.reveal"), (e) -> openEditorFileInSystem(this));
 			
-			this.editorTab = new EditorTab(savedIcon, title, (b) -> attemptToCloseEditor(this));
+			if (closeableTabs)
+				this.editorTab = new EditorTab(savedIcon, title, (b) -> attemptToCloseEditor(this));
+			else
+				this.editorTab = new EditorTab(savedIcon, title);
+				
 			this.editorPanel = new EditorPanel(textArea);
 			
 			textArea.setSyntaxEditingStyle(styleName);
@@ -2177,6 +2197,15 @@ public class EditorMultiFilePanel extends JPanel
 			return editorPanel.textArea.getText();
 		}
 	
+		/**
+		 * Sets the content of the editor entirely.
+		 * @param editorContent the editor content text.
+		 */
+		public void setContent(String editorContent)
+		{
+			editorPanel.textArea.setText(editorContent);
+		}
+
 		/**
 		 * @return the editor charset encoding.
 		 */
@@ -2317,21 +2346,35 @@ public class EditorMultiFilePanel extends JPanel
 		
 		private JLabel titleLabel;
 		private JButton closeButton;
+
+		private EditorTab(Icon icon, String title)
+		{
+			this(icon, title, null);
+		}
 		
 		private EditorTab(Icon icon, String title, ButtonClickHandler closeHandler)
 		{
 			this.titleLabel = label(JLabel.LEADING, icon, title);
 			
-			this.closeButton = apply(button(icons.getImage("close-icon.png"), closeHandler), (b) -> {
-				b.setBorder(null);
-				b.setOpaque(false);
-			});
-			
+			if (closeHandler != null)
+			{
+				this.closeButton = apply(button(icons.getImage("close-icon.png"), closeHandler), (b) -> {
+					b.setBorder(null);
+					b.setOpaque(false);
+				});				
+				containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
+					node(titleLabel),
+					node(closeButton)
+				);
+			}
+			else
+			{
+				this.closeButton = null;
+				containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
+					node(titleLabel)
+				);
+			}
 			setOpaque(false);
-			containerOf(this, (Border)null, flowLayout(Flow.LEADING, 8, 0),
-				node(titleLabel),
-				node(closeButton)
-			);
 		}
 		
 		private void setTabIcon(Icon icon)
