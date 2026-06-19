@@ -4,6 +4,7 @@ WadTex
 ### Changed for 1.5.4
 
 * `Added` [GUI-TextureEditor] Add clone patch function (Enh. #173).
+* `Added` [GUI-TextureEditor] Auto-select the most recently added patch on add (Enh. #173).
 
 
 ### Changed for 1.5.3

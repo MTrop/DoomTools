@@ -1587,6 +1587,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			patch.setOriginY(origpatch.getOriginY());
 			patchListModel.addPatch(pg.cloneUsing(patch));
 		}
+		patchList.setSelectedIndex(patchListModel.getSize() - 1);
+		canvas.requestFocus();
 	}
 
 	private void onHelpDialog()
@@ -1610,6 +1612,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setPicture(p);
 		patchListModel.addPatch(newPatch);
+		patchList.setSelectedIndex(patchListModel.getSize() - 1);
+		canvas.requestFocus();
 		return newPatch;
 	}
 
@@ -1624,6 +1628,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setPNGPicture(p);
 		patchListModel.addPatch(newPatch);
+		patchList.setSelectedIndex(patchListModel.getSize() - 1);
+		canvas.requestFocus();
 		return newPatch;
 	}
 
@@ -1638,6 +1644,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setImage(image);
 		patchListModel.addPatch(newPatch);
+		patchList.setSelectedIndex(patchListModel.getSize() - 1);
+		canvas.requestFocus();
 		return newPatch;
 	}
 
