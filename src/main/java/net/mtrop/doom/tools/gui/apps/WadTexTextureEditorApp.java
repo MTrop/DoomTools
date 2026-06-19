@@ -1730,7 +1730,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setPicture(p);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		
 		return newPatch;
 	}
 
@@ -1746,7 +1745,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setPNGPicture(p);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		
 		return newPatch;
 	}
 
@@ -1762,7 +1760,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		newPatch.setImage(image);
 		patchListModel.addPatch(newPatch);
 		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		
 		return newPatch;
 	}
 
