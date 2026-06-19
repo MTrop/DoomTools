@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.35.3
+
+* `Changed` New DoomMake projects will check for changes to the flat/patch convert builds for building textures. (Issue #175).
+
+
 ### Changed for 0.35.2
 
 * `Changed` New DoomMake projects will not delete the "Editor WAD" on rebuild as that has issues with UDB. (Issue #171).

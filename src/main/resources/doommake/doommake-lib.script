@@ -191,7 +191,7 @@ check function storeDirectoryChanged(dirpath, hash) {
 /**
  * Initialize the build state.
  */
-check function initBuildState() {
+function initBuildState() {
 	if (global::buildState === null) {
 		global::buildState = [];
 	}
@@ -201,17 +201,23 @@ check function initBuildState() {
 /**
  * Sets if a target was built.
  */
-check function setBuilt(target) {
+function setBuilt(target) {
 	initBuildState()->setAdd(target);
 }
 
 /**
  * Checks if a target was built.
  */
-check function wasBuilt(target) {
+function wasBuilt(target) {
 	return initBuildState()->setContains(target);
 }
 
+/**
+ * Returns all built targets.
+ */
+function builtTargets() {
+	return initBuildState();
+}
 
 /****************************************************************************
  * Checks if all provided file paths exist, 

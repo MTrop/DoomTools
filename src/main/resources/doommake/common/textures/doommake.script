@@ -22,7 +22,9 @@ check function doTextures() {
 	verifydirs(sourceDir + "/texture1");
 	verifydirs(sourceDir + "/texture2");
 
-	if (checkFileExistenceAndBuildStatuses(outWad, ["convert-texture1", "convert-texture2"])) {
+	built = ["convert-flats", "convert-patches", "convert-texture1", "convert-texture2"];
+
+	if (checkFileExistenceAndBuildStatuses(outWad, built)) {
 		hash = directoryHasChanged(sourceDir);
 		if (hash === null) {
 			println("[Skipped] Textures directory (" + sourceDir + ") up to date.");
