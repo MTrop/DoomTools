@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
@@ -221,6 +222,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 	protected void drawTexture(Graphics2D g2d, boolean outerClip)
 	{
 		Composite prevComposite = g2d.getComposite();
+		Rectangle clip = g2d.getClipBounds();
 		if (outerClip)
 		{
 			g2d.setComposite(PATCH_COMPOSITE_OUTER);
@@ -254,7 +256,7 @@ public class WadTexTextureEditorCanvas extends Canvas
 				);
 			}
 		}
-		
+		g2d.setClip(clip);
 		g2d.setComposite(prevComposite);
 	}
 
