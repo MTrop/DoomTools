@@ -279,6 +279,15 @@ public class EditorMultiFilePanel extends JPanel
 
 	/**
 	 * Creates a new multi-file editor panel with default options.
+	 * @param options the panel options.
+	 */
+	public EditorMultiFilePanel(Options options)
+	{
+		this(options, null);
+	}
+	
+	/**
+	 * Creates a new multi-file editor panel with default options.
 	 * @param listener the listener.
 	 */
 	public EditorMultiFilePanel(Listener listener)
