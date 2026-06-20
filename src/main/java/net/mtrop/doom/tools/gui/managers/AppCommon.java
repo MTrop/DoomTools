@@ -9,6 +9,7 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.separator;
 
 import java.awt.Container;
 import java.awt.Desktop;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -23,6 +24,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import javax.imageio.ImageIO;
+
+import net.mtrop.doom.Wad;
+import net.mtrop.doom.WadFile;
+import net.mtrop.doom.graphics.Palette;
+import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.tools.DMXConvertMain;
 import net.mtrop.doom.tools.DecoHackMain;
 import net.mtrop.doom.tools.DoomImageConvertMain;
@@ -250,6 +257,79 @@ public final class AppCommon
 		}
 	}
 
+	/**
+	 * Attempts to read a palette from an arbitrary file.
+	 * @param paletteFile the file to read for the palette.
+	 * @return a read palette, or null if no palette.
+	 */
+	public Palette readPaletteFromFile(File paletteFile)
+	{
+		if (paletteFile == null)
+			return null;		
+		
+		boolean wadfile = false;
+		try {
+			wadfile = Wad.isWAD(paletteFile);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("palette.source.error.ioerror", paletteFile));
+			return null;		
+		}
+		
+		Palette pal = null;
+	
+		// If WAD, search for PlayPal
+		if (wadfile)
+		{
+			try (WadFile wf = new WadFile(paletteFile)) {
+				pal = wf.getDataAs("PLAYPAL", Palette.class);
+				return pal;
+			} catch (IOException e) {
+				SwingUtils.error(language.getText("palette.source.error.ioerror", paletteFile));
+				return null;		
+			}
+		}
+		
+		// read palette image.
+		BufferedImage paletteImage;
+		try {
+			paletteImage = ImageIO.read(paletteFile);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("palette.source.error.ioerror", paletteFile));
+			return null;		
+		}
+		
+		if (paletteImage != null) // read an image
+		{
+			// SLADE PNG
+			if (paletteImage.getWidth() == 128 && paletteImage.getHeight() == 128)
+			{
+				pal = new Palette();
+				for (int y = 0; y < 16; y++)
+					for (int x = 0; x < 16; x++)
+						pal.setColor(x + (y * 16), paletteImage.getRGB(x * 8, y * 8));
+				return pal;
+			}
+			// DoomTools Palette PNG
+			else if (paletteImage.getWidth() >= 256)
+			{
+				pal = new Palette();
+				for (int i = 0; i < 256; i++)
+					pal.setColor(i, paletteImage.getRGB(i, 0));
+				return pal;
+			}
+		}
+		
+		// else, attempt to load as raw palette.
+		try {
+			pal = BinaryObject.read(Palette.class, paletteFile);
+		} catch (IOException e) {
+			SwingUtils.error(language.getText("palette.source.error.notpal", paletteFile));
+			return null;		
+		}
+		
+		return pal;
+	}
+	
 	/**
 	 * 
 	 * @param parent the parent container for the modal.

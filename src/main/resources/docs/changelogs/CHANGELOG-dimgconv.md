@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.7.1
+
+* `Added` [Offsetter] Accepts more palette types for reading (Enh. #173).
+
+
 ### Changed for 1.7.0
 
 * `Added` [Offsetter] Import/export DIMGCONV graphic offsets (Enh. #161).

@@ -54,7 +54,6 @@ import net.mtrop.doom.WadFile;
 import net.mtrop.doom.WadMap;
 import net.mtrop.doom.exception.WadException;
 import net.mtrop.doom.graphics.PNGPicture;
-import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.object.GraphicObject;
@@ -69,6 +68,7 @@ import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.common.ParseException;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
@@ -535,6 +535,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 				separator(),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.save", saveAction),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.saveas", (i) -> onSaveTextureFileAs()),
+				separator(),
+				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.textedit", (i) -> onTextOpen()),
 				separator(),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.texture", refreshTextureListAction),
 				utils.createItemFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.patch", (i) -> onRefreshPatchList())
@@ -1169,44 +1171,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	
 	private void onPaletteFileSelect(File selectedFile)
 	{
-		if (selectedFile == null)
-		{
-			canvas.setPalette(null);
-			return;
-		}
-		
-		boolean wadfile = false;
-		try {
-			wadfile = Wad.isWAD(selectedFile);
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("wadtex.texture.editor.palette.source.error.ioerror", selectedFile));
-			return;
-		}
-		
-		Palette pal = null;
-	
-		// If WAD, search for PlayPal
-		if (wadfile)
-		{
-			try (WadFile wf = new WadFile(selectedFile)) {
-				pal = wf.getDataAs("PLAYPAL", Palette.class);
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("wadtex.texture.editor.palette.source.error.ioerror", selectedFile));
-				return;
-			}
-		}
-		// else, attempt to load as palette.
-		else
-		{
-			try {
-				pal = BinaryObject.read(Palette.class, selectedFile);
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("wadtex.texture.editor.palette.source.error.notpal", selectedFile));
-				return;
-			}
-		}
-		
-		canvas.setPalette(pal);
+		canvas.setPalette(AppCommon.get().readPaletteFromFile(selectedFile));
 	}
 
 	private void onTextureWidthChanged(Short value)
@@ -1612,50 +1577,12 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			{
 				return true;
 			}
-			
-		}, new EditorMultiFilePanel.Listener() 
-		{
-			@Override
-			public void onTreeRevealRequest(EditorHandle handle)
-			{
-				// Do nothing.
-			}
-			
-			@Override
-			public void onTreeDirectoryRequest(EditorHandle handle)
-			{
-				// Do nothing.
-			}
-			
-			@Override
-			public void onSave(EditorHandle handle)
-			{
-				// Do nothing.
-			}
-			
-			@Override
-			public void onOpen(EditorHandle handle)
-			{
-				// Do nothing.
-			}
-			
-			@Override
-			public void onCurrentEditorChange(EditorHandle previous, EditorHandle next)
-			{
-				// Do nothing.
-			}
-			
-			@Override
-			public void onClose(EditorHandle handle) 
-			{
-				// Do nothing.
-			}
 		});
 		
 		editorModal = modal(getApplicationContainer(),
 			language.getText("wadtex.texture.editor.texteditor.title"),
-			containerOf(dimension(640, 512), node(editorPanel)),
-			utils.createChoiceFromLanguageKey("wadtex.texture.editor.texteditor.nochange", Boolean.TRUE)
+			containerOf(dimension(640, 480), node(editorPanel)),
+			utils.createChoiceFromLanguageKey("wadtex.texture.editor.texteditor.commit", Boolean.TRUE)
 		);
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024 * 16);
@@ -1681,7 +1608,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			handle.setContent(editorContent);
 			result = editorModal.open();
 			
-			if (result == Boolean.TRUE) // DON'T CHANGE
+			if (result != Boolean.TRUE) // DON'T CHANGE
 				return;
 			
 			editorContent = handle.getContent();

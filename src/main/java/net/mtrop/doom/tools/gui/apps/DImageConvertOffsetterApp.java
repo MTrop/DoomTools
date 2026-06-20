@@ -47,15 +47,13 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.filechooser.FileFilter;
 
-import net.mtrop.doom.Wad;
-import net.mtrop.doom.WadFile;
 import net.mtrop.doom.graphics.PNGPicture;
-import net.mtrop.doom.graphics.Palette;
 import net.mtrop.doom.graphics.Picture;
 import net.mtrop.doom.object.BinaryObject;
 import net.mtrop.doom.object.GraphicObject;
 import net.mtrop.doom.struct.io.SerialReader;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
+import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
@@ -501,47 +499,7 @@ public class DImageConvertOffsetterApp extends DoomToolsApplicationInstance
 	
 	private void onPaletteFileSelect(File selectedFile)
 	{
-		if (selectedFile == null)
-		{
-			canvas.setPalette(null);
-			return;
-		}
-		
-		boolean wadfile = false;
-		try {
-			wadfile = Wad.isWAD(selectedFile);
-		} catch (IOException e) {
-			SwingUtils.error(language.getText("dimgconv.offsetter.palette.source.error.ioerror", selectedFile));
-			return;
-		}
-		
-		Palette pal = null;
-
-		// If WAD, search for PlayPal
-		if (wadfile)
-		{
-			try (WadFile wf = new WadFile(selectedFile)) {
-				pal = wf.getDataAs("PLAYPAL", Palette.class);
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("dimgconv.offsetter.palette.source.error.ioerror", selectedFile));
-				return;
-			}
-		}
-		// else, attempt to load as palette.
-		else
-		{
-			try {
-				pal = BinaryObject.read(Palette.class, selectedFile);
-			} catch (IOException e) {
-				SwingUtils.error(language.getText("dimgconv.offsetter.palette.source.error.notpal", selectedFile));
-				return;
-			}
-		}
-		
-		if (pal != null)
-			settings.setLastPaletteFile(selectedFile);
-		
-		canvas.setPalette(pal);
+		canvas.setPalette(AppCommon.get().readPaletteFromFile(selectedFile));
 	}
 	
 	private void onZoomFactorChanged(double zoomFactor)
