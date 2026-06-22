@@ -62,6 +62,7 @@ import net.mtrop.doom.tools.DoomMakeMain.ProjectType;
 import net.mtrop.doom.tools.Version;
 import net.mtrop.doom.tools.common.Utility;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.GraphicUtils;
@@ -328,9 +329,9 @@ public final class WADExploder
 	 * @param targetDirectory the target directory.
 	 * @param convertible if true, opt to output data to the conversion directories.
 	 * @param palette the source palette.
-	 * @throws IOException if a write error occurs.
+	 * @throws ExplodeException if a write error occurs.
 	 */
-	public static void explodeIntoProject(PrintStream log, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
+	public static void explodeIntoProject(PrintStream log, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		Set<WadEntry> entrySet = new HashSet<>(Arrays.asList(wad.getAllEntries()));
 		explodePatchIntoProject(log, entrySet, wad, targetDirectory);
@@ -343,7 +344,7 @@ public final class WADExploder
 		explodeRemainingGlobalsIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
 	}
 	
-	private static void explodePatchIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	private static void explodePatchIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		WadEntry entry;
 		if ((entry = wad.getEntry("DECOHACK")) != null)
@@ -354,6 +355,10 @@ public final class WADExploder
 			{
 				fos.write(wad.getData(entry));
 				log.println("Wrote `" + out.getPath() + "`.");
+			}
+			catch (IOException e) 
+			{
+				throw new ExplodeException("DECOHACK", e);
 			}
 			entrySet.remove(entry);
 
@@ -371,11 +376,15 @@ public final class WADExploder
 				fos.write(wad.getData(entry));
 				log.println("Wrote `" + out.getPath() + "`.");
 			}
+			catch (IOException e) 
+			{
+				throw new ExplodeException("DEHACKED", e);
+			}
 			entrySet.remove(entry);
 		}
 	}
 	
-	private static void explodePalettesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
+	private static void explodePalettesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		if (convertible)
 		{
@@ -390,9 +399,17 @@ public final class WADExploder
 				WadEntry entry = wad.getEntry(entryName);
 				if (entry != null)
 				{
-					Palette[] playpal = wad.getDataAs(entry, Palette.class, Palette.LENGTH);
-					File out = new File(outPaletteDir.getPath() + "/" + entryName + ".png");
-					ImageIO.write(convertPaletteToImage(playpal), "PNG", out);
+					File out;
+					Palette[] playpal;
+					
+					try {
+						playpal = wad.getDataAs(entry, Palette.class, Palette.LENGTH);
+						out = new File(outPaletteDir.getPath() + "/" + entryName + ".png");
+						ImageIO.write(convertPaletteToImage(playpal), "PNG", out);
+					} catch (IOException e) {
+						throw new ExplodeException(entry.getName(), e);
+					}
+					
 					log.println("Wrote `" + out.getPath() + "`.");
 					entrySet.remove(entry);
 					if (entryName.equals("PLAYPAL"))
@@ -405,9 +422,17 @@ public final class WADExploder
 				WadEntry entry = wad.getEntry(entryName);
 				if (entry != null)
 				{
-					Colormap[] colormap = wad.getDataAs(entry, Colormap.class, Colormap.LENGTH);
-					File out = new File(outColormapDir.getPath() + "/" + entryName + ".png");
-					ImageIO.write(convertColormapToImage(colormap, primary), "PNG", out);
+					File out;
+					Colormap[] colormap;
+					
+					try {
+						colormap = wad.getDataAs(entry, Colormap.class, Colormap.LENGTH);
+						out = new File(outColormapDir.getPath() + "/" + entryName + ".png");
+						ImageIO.write(convertColormapToImage(colormap, primary), "PNG", out);
+					} catch (IOException e) {
+						throw new ExplodeException(entry.getName(), e);
+					}
+					
 					log.println("Wrote `" + out.getPath() + "`.");
 					entrySet.remove(entry);
 				}
@@ -419,14 +444,22 @@ public final class WADExploder
 				entrySet.remove(wad.getEntry("C_START"));
 				int cend = wad.indexOf("C_END");
 				if (cend < 0)
-					throw new WadException("Found C_START without C_END.");
+					throw new ExplodeException("C_END", "Found C_START without C_END.");
 				entrySet.remove(wad.getEntry("C_END"));
 				
 				for (WadEntry colormapEntry : wad.mapEntries(cstart + 1, cend - cstart - 1))
 				{
-					Colormap[] colormap = wad.getDataAs(colormapEntry, Colormap.class, Colormap.LENGTH);
-					File out = new File(outColormap2Dir.getPath() + "/" + colormapEntry.getName() + ".png");
-					ImageIO.write(convertColormapToImage(colormap, primary), "PNG", out);
+					File out;
+					Colormap[] colormap;
+					
+					try {
+						colormap = wad.getDataAs(colormapEntry, Colormap.class, Colormap.LENGTH);
+						out = new File(outColormap2Dir.getPath() + "/" + colormapEntry.getName() + ".png");
+						ImageIO.write(convertColormapToImage(colormap, primary), "PNG", out);
+					} catch (IOException e) {
+						throw new ExplodeException(colormapEntry.getName(), e);
+					}
+					
 					log.println("Wrote `" + out.getPath() + "`.");
 					entrySet.remove(colormapEntry);
 				}
@@ -464,7 +497,7 @@ public final class WADExploder
 				entrySet.remove(wad.getEntry("C_START"));
 				int cend = wad.indexOf("C_END");
 				if (cend < 0)
-					throw new WadException("Found C_START without C_END.");
+					throw new ExplodeException("C_END", "Found C_START without C_END.");
 				entrySet.remove(wad.getEntry("C_END"));
 				
 				exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(wad.mapEntries(cstart + 1, cend - cstart - 1)), outColormap2Dir);
@@ -472,7 +505,7 @@ public final class WADExploder
 		}
 	}
 
-	private static void explodeTexturesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
+	private static void explodeTexturesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		File outAnimFlatWad = new File(targetDirectory.getPath() + "/src/textures/animflats.wad");
 		File outDefswani = new File(targetDirectory.getPath() + "/src/textures/defswani.txt");
@@ -480,7 +513,12 @@ public final class WADExploder
 		File outTexture2 = new File(targetDirectory.getPath() + "/src/textures/texture2.txt");
 		
 		// Export ANIMFLATS
-		Animated animated = wad.getDataAs("ANIMATED", Animated.class);
+		Animated animated;
+		try {
+			animated = wad.getDataAs("ANIMATED", Animated.class);
+		} catch (IOException e) {
+			throw new ExplodeException("ANIMATED", e);
+		}
 		if (animated != null)
 		{
 			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
@@ -565,7 +603,13 @@ public final class WADExploder
 			entrySet.remove(h);
 		
 		// Export DEFSWANI
-		Switches switches = wad.getDataAs("SWITCHES", Switches.class);
+		Switches switches;
+		try {
+			switches = wad.getDataAs("SWITCHES", Switches.class);
+		} catch (IOException e) {
+			throw new ExplodeException("SWITCHES", e);
+		}
+		
 		if (animated != null && switches != null)
 		{
 			try (PrintWriter writer = new PrintWriter(new FileOutputStream(outDefswani)))
@@ -573,25 +617,40 @@ public final class WADExploder
 				Utility.writeSwitchAnimatedTables(switches, animated, "# Generated by DoomMake v" + Version.DOOMMAKE, writer);
 				log.println("Wrote `" + outDefswani.getPath() + "`.");
 			}
+			catch (IOException e) 
+			{
+				throw new ExplodeException(outDefswani.getName(), e);
+			}
 			entrySet.remove(wad.getEntry("ANIMATED"));
 			entrySet.remove(wad.getEntry("SWITCHES"));
 		}
 		
 		// Export TEXTURE1/TEXTURE2
-		PatchNames pnames = wad.getDataAs("PNAMES", PatchNames.class); 
+		PatchNames pnames;
+		try {
+			pnames = wad.getDataAs("PNAMES", PatchNames.class);
+		} catch (IOException e) {
+			throw new ExplodeException("PNAMES", e);
+		} 
 		if (pnames != null)
 		{
-			byte[] texData = wad.getData("TEXTURE1");
+			byte[] texData;
 			CommonTextureList<?> texture1, texture2;
-			if (TextureUtils.isStrifeTextureData(texData))
-			{
-				texture1 = wad.getDataAs("TEXTURE1", StrifeTextureList.class);
-				texture2 = wad.getDataAs("TEXTURE2", StrifeTextureList.class);
-			}
-			else
-			{
-				texture1 = wad.getDataAs("TEXTURE1", DoomTextureList.class);
-				texture2 = wad.getDataAs("TEXTURE2", DoomTextureList.class);
+			
+			try {
+				texData = wad.getData("TEXTURE1");
+				if (TextureUtils.isStrifeTextureData(texData))
+				{
+					texture1 = wad.getDataAs("TEXTURE1", StrifeTextureList.class);
+					texture2 = wad.getDataAs("TEXTURE2", StrifeTextureList.class);
+				}
+				else
+				{
+					texture1 = wad.getDataAs("TEXTURE1", DoomTextureList.class);
+					texture2 = wad.getDataAs("TEXTURE2", DoomTextureList.class);
+				}
+			} catch (IOException e) {
+				throw new ExplodeException("TEXTURE1/2", e);
 			}
 			
 			if (texture1 != null)
@@ -601,6 +660,10 @@ public final class WADExploder
 				{
 					Utility.writeDEUTEXFile(textureSet, "; Generated by DoomMake v" + Version.DOOMMAKE, writer);
 					log.println("Wrote `" + outTexture1.getPath() + "`.");
+				}
+				catch (IOException e) 
+				{
+					throw new ExplodeException(outTexture1.getName(), e);
 				}
 				entrySet.remove(wad.getEntry("TEXTURE1"));
 			}
@@ -613,13 +676,17 @@ public final class WADExploder
 					Utility.writeDEUTEXFile(textureSet, "; Generated by DoomMake v" + Version.DOOMMAKE, writer);
 					log.println("Wrote `" + outTexture2.getPath() + "`.");
 				}
+				catch (IOException e) 
+				{
+					throw new ExplodeException(outTexture2.getName(), e);
+				}
 				entrySet.remove(wad.getEntry("TEXTURE2"));
 			}
 			entrySet.remove(wad.getEntry("PNAMES"));
 		}
 	}
 
-	private static void explodeACSLibrariesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	private static void explodeACSLibrariesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src/assets/acslib");
 
@@ -629,23 +696,29 @@ public final class WADExploder
 			entrySet.remove(entry);
 	}
 
-	private static void explodeMapsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	private static void explodeMapsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src/maps");
 		
 		for (String header : MapUtils.getAllMapHeaders(wad))
 		{
 			WadEntry[] entries = MapUtils.getMapEntries(wad, header);
-			WadBuffer buffer = WadBuffer.extract(wad, entries);
 			File outWad = new File(outDir.getPath() + "/" + (header.toUpperCase() + ".wad"));
-			buffer.writeToFile(outWad);
+			WadBuffer buffer;
+			
+			try {
+				buffer = WadBuffer.extract(wad, entries);
+				buffer.writeToFile(outWad);
+			} catch (IOException e) {
+				throw new ExplodeException(header, e);
+			}
 			log.println("Wrote `" + outWad.getPath() + "`.");
 			for (WadEntry e : entries)
 				entrySet.remove(e);
 		}
 	}
 
-	private static void explodeSpritesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
+	private static void explodeSpritesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		if (convertible)
 		{
@@ -675,7 +748,7 @@ public final class WADExploder
 			entrySet.remove(h);
 	}
 
-	private static void explodeInfoAndCreditsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws IOException
+	private static void explodeInfoAndCreditsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src");
 		WadEntry entry;
@@ -688,6 +761,10 @@ public final class WADExploder
 			{
 				fos.write(wad.getData(entry));
 				log.println("Wrote `" + out.getPath() + "`.");
+			} catch (FileNotFoundException e) {
+				throw new ExplodeException(entry.getName(), e);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
 			entrySet.remove(entry);
 		}
@@ -700,146 +777,164 @@ public final class WADExploder
 			{
 				fos.write(wad.getData(entry));
 				log.println("Wrote `" + out.getPath() + "`.");
+			} catch (FileNotFoundException e) {
+				throw new ExplodeException(entry.getName(), e);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
 			entrySet.remove(entry);
 		}	
 	}
 	
-	private static void explodeRemainingGlobalsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws IOException
+	private static void explodeRemainingGlobalsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		StringBuilder flatGraphicData = new StringBuilder();
 		
 		for (WadEntry entry : entrySet)
 		{
-			String entryName = entry.getName();
-			byte[] entryData = wad.getData(entry);
-			
-			if (entryData.length == 0) // skip markers
-				continue;
-
-			if (entryName.startsWith("DEMO"))
-			{
-				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
-				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
-				try (FileOutputStream fos = new FileOutputStream(out))
-				{
-					fos.write(wad.getData(entry));
-					log.println("Wrote `" + out.getPath() + "`.");
-				}
-			}
-			else if (isMusicData(entryName, entryData))
-			{
-				File outMusicDir = new File(targetDirectory.getPath() + "/src/assets/music");
-				File out = new File(outMusicDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getMusicExtensionFor(entryData));
-				try (FileOutputStream fos = new FileOutputStream(out))
-				{
-					fos.write(wad.getData(entry));
-					log.println("Wrote `" + out.getPath() + "`.");
-				}
-			}
-			else if (isDMXSoundData(entryData))
-			{
-				if (isDigitalSoundData(entryData) && convertible)
-				{
-					File outSoundsDir = new File(targetDirectory.getPath() + "/src/convert/sounds");
-					File out = new File(outSoundsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".wav");
-					DMXSound sound = BinaryObject.create(DMXSound.class, entryData);
-					try {
-						SoundUtils.writeSoundToFile(sound, Type.WAVE, out);
-						log.println("Wrote `" + out.getPath() + "`.");
-					} catch (IOException e) {
-						throw e;
-					} catch (UnsupportedAudioFileException e) {
-						log.println("COULD NOT WRITE `" + out.getPath() + "`. INTERNAL ERROR.");
-					}
-				}
-				else
-				{
-					File outSoundsDir = new File(targetDirectory.getPath() + "/src/assets/sounds");
-					File out = new File(outSoundsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".dmx");
-					try (FileOutputStream fos = new FileOutputStream(out))
-					{
-						fos.write(wad.getData(entry));
-						log.println("Wrote `" + out.getPath() + "`.");
-					}
-				}
+			try {
+				String entryName = entry.getName();
+				byte[] entryData = wad.getData(entry);
 				
-			}
-			else if (isRawScreenGraphicData(entryData)) // for Heretic/Hexen flat screens
-			{
-				if (convertible)
-				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
+				if (entryData.length == 0) // skip markers
+					continue;
 
-					Flat flat = new Flat(entryData.length / 200, 200);
-					flat.fromBytes(entryData);
-
-					try (FileOutputStream fos = new FileOutputStream(out))
-					{
-						ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
-						log.println("Wrote `" + out.getPath() + "`.");
-						
-						flatGraphicData.append(sanitizeEntryName(entryName) + " flat").append('\n');
-					}
-				}
-				else
+				if (entryName.startsWith("DEMO"))
 				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+					File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+					File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
 					try (FileOutputStream fos = new FileOutputStream(out))
 					{
 						fos.write(wad.getData(entry));
 						log.println("Wrote `" + out.getPath() + "`.");
 					}
 				}
-			}
-			else if (isGraphicData(entryData))
-			{
-				if (convertible)
+				else if (ANSI_NAMES.contains(entryName))
 				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
-					Picture pictureData = BinaryObject.create(Picture.class, entryData);
-					PNGPicture outpic = GraphicUtils.createPNGImage(pictureData, palette);
-					outpic.setOffsetX(pictureData.getOffsetX());
-					outpic.setOffsetY(pictureData.getOffsetY());
-					try (FileOutputStream fos = new FileOutputStream(out))
-					{
-						fos.write(outpic.toBytes());
-						log.println("Wrote `" + out.getPath() + "`.");
-					}
-				}
-				else
-				{
-					File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
-					File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+					File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+					File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getExtensionFor(entryName, entryData));
 					try (FileOutputStream fos = new FileOutputStream(out))
 					{
 						fos.write(wad.getData(entry));
 						log.println("Wrote `" + out.getPath() + "`.");
 					}
 				}
-			}
-			else if (isDemoData(entryData))
-			{
-				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
-				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
-				try (FileOutputStream fos = new FileOutputStream(out))
+				else if (isMusicData(entryName, entryData))
 				{
-					fos.write(wad.getData(entry));
-					log.println("Wrote `" + out.getPath() + "`.");
+					File outMusicDir = new File(targetDirectory.getPath() + "/src/assets/music");
+					File out = new File(outMusicDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getMusicExtensionFor(entryData));
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						fos.write(wad.getData(entry));
+						log.println("Wrote `" + out.getPath() + "`.");
+					}
 				}
-			}
-			else
-			{
-				File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
-				File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getExtensionFor(entryName, entryData));
-				try (FileOutputStream fos = new FileOutputStream(out))
+				else if (isDMXSoundData(entryData))
 				{
-					fos.write(wad.getData(entry));
-					log.println("Wrote `" + out.getPath() + "`.");
+					if (isDigitalSoundData(entryData) && convertible)
+					{
+						File outSoundsDir = new File(targetDirectory.getPath() + "/src/convert/sounds");
+						File out = new File(outSoundsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".wav");
+						DMXSound sound = BinaryObject.create(DMXSound.class, entryData);
+						try {
+							SoundUtils.writeSoundToFile(sound, Type.WAVE, out);
+							log.println("Wrote `" + out.getPath() + "`.");
+						} catch (IOException e) {
+							throw e;
+						} catch (UnsupportedAudioFileException e) {
+							log.println("COULD NOT WRITE `" + out.getPath() + "`. INTERNAL ERROR.");
+						}
+					}
+					else
+					{
+						File outSoundsDir = new File(targetDirectory.getPath() + "/src/assets/sounds");
+						File out = new File(outSoundsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".dmx");
+						try (FileOutputStream fos = new FileOutputStream(out))
+						{
+							fos.write(wad.getData(entry));
+							log.println("Wrote `" + out.getPath() + "`.");
+						}
+					}
+					
 				}
+				else if (isRawScreenGraphicData(entryData)) // for Heretic/Hexen flat screens
+				{
+					if (convertible)
+					{
+						File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
+						File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
+
+						Flat flat = new Flat(entryData.length / 200, 200);
+						flat.fromBytes(entryData);
+
+						try (FileOutputStream fos = new FileOutputStream(out))
+						{
+							ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
+							log.println("Wrote `" + out.getPath() + "`.");
+							
+							flatGraphicData.append(sanitizeEntryName(entryName) + " flat").append('\n');
+						}
+					}
+					else
+					{
+						File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
+						File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+						try (FileOutputStream fos = new FileOutputStream(out))
+						{
+							fos.write(wad.getData(entry));
+							log.println("Wrote `" + out.getPath() + "`.");
+						}
+					}
+				}
+				else if (isGraphicData(entryData))
+				{
+					if (convertible)
+					{
+						File outGraphicsDir = new File(targetDirectory.getPath() + "/src/convert/graphics");
+						File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".png");
+						Picture pictureData = BinaryObject.create(Picture.class, entryData);
+						PNGPicture outpic = GraphicUtils.createPNGImage(pictureData, palette);
+						outpic.setOffsetX(pictureData.getOffsetX());
+						outpic.setOffsetY(pictureData.getOffsetY());
+						try (FileOutputStream fos = new FileOutputStream(out))
+						{
+							fos.write(outpic.toBytes());
+							log.println("Wrote `" + out.getPath() + "`.");
+						}
+					}
+					else
+					{
+						File outGraphicsDir = new File(targetDirectory.getPath() + "/src/assets/graphics");
+						File out = new File(outGraphicsDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+						try (FileOutputStream fos = new FileOutputStream(out))
+						{
+							fos.write(wad.getData(entry));
+							log.println("Wrote `" + out.getPath() + "`.");
+						}
+					}
+				}
+				else if (isDemoData(entryData))
+				{
+					File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+					File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + ".lmp");
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						fos.write(wad.getData(entry));
+						log.println("Wrote `" + out.getPath() + "`.");
+					}
+				}
+				else
+				{
+					File outDir = new File(targetDirectory.getPath() + "/src/assets/_global");
+					File out = new File(outDir.getPath() + "/" + sanitizeEntryName(entryName) + "." + getExtensionFor(entryName, entryData));
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						fos.write(wad.getData(entry));
+						log.println("Wrote `" + out.getPath() + "`.");
+					}
+				}
+			} catch (Exception e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
 		}
 
@@ -854,6 +949,8 @@ public final class WADExploder
 				IOUtils.relay(reader, writer);
 				writer.flush();
 				log.println("Wrote `" + out.getPath() + "`.");
+			} catch (IOException e) {
+				throw new ExplodeException("dimgconv.txt", e);
 			}
 		}
 	}
@@ -876,25 +973,29 @@ public final class WADExploder
 		return out;
 	}
 	
-	private static void exportEntriesToDirectory(PrintStream log, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir) throws IOException
+	private static void exportEntriesToDirectory(PrintStream log, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir) throws ExplodeException
 	{
 		for (WadEntry entry : entries) 
 		{
 			if (!entrySet.contains(entry)) // catch flats exported to ANIMFLATS.WAD
 				continue;
 			
-			byte[] data = wad.getData(entry);
-			File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + "." + getExtensionFor(entry.getName(), data));
-			try (FileOutputStream fos = new FileOutputStream(out))
-			{
-				fos.write(data);
-				log.println("Wrote `" + out.getPath() + "`.");
+			try {
+				byte[] data = wad.getData(entry);
+				File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + "." + getExtensionFor(entry.getName(), data));
+					try (FileOutputStream fos = new FileOutputStream(out))
+					{
+						fos.write(data);
+						log.println("Wrote `" + out.getPath() + "`.");
+					}
+				entrySet.remove(entry);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
-			entrySet.remove(entry);
 		}
 	}
 	
-	private static void exportAnimFlatsToWAD(PrintStream log, Set<WadEntry> entrySet, Wad wad, Animated animated, WadEntry[] flatEntries, File outAnimFlatWad) throws IOException
+	private static void exportAnimFlatsToWAD(PrintStream log, Set<WadEntry> entrySet, Wad wad, Animated animated, WadEntry[] flatEntries, File outAnimFlatWad) throws ExplodeException
 	{
 		try (WadFile animFlatWad = new WadFile(outAnimFlatWad))
 		{
@@ -907,16 +1008,22 @@ public final class WADExploder
 					{
 						for (WadEntry animFlatEntry : scanEntriesForAnimatedRange(flatEntries, ae.getFirstName(), ae.getLastName()))
 						{
-							adder.addDataAt(ffEnd++, animFlatEntry.getName(), wad.getData(animFlatEntry));
+							try {
+								adder.addDataAt(ffEnd++, animFlatEntry.getName(), wad.getData(animFlatEntry));
+							} catch (IOException e) {
+								throw new ExplodeException(animFlatEntry.getName(), e);
+							}
 							entrySet.remove(animFlatEntry);
 						}
 					}
 				}
 			}
+		} catch (IOException e1) {
+			throw new ExplodeException("ANIMFLATS", e1);
 		}
 	}
 
-	private static void exportFlatGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws IOException
+	private static void exportFlatGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
 	{
 		for (int i = 0; i < entries.length; i++) 
 		{
@@ -925,54 +1032,72 @@ public final class WADExploder
 			if (!entrySet.contains(entry)) // catch flats exported to ANIMFLATS.WAD
 				continue;
 			
-			byte[] data = wad.getData(entry);
-			if (data.length == 0) // ignore markers.
-			{
+			try {
+				byte[] data = wad.getData(entry);
+				if (data.length == 0) // ignore markers.
+				{
+					entrySet.remove(entry);
+					continue;
+				}
+				
+				Flat flatData;
+				if (data.length == 4) // Heretic F_SKY, which 2x2 for whatever reason
+					flatData = new Flat(2, 2);
+				else
+					flatData = new Flat(64, 64);
+				
+				flatData.fromBytes(data);
+				
+				File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + ".png");
+				try (FileOutputStream fos = new FileOutputStream(out))
+				{
+					ImageIO.write(GraphicUtils.createImage(flatData, pal), "PNG", out);
+					log.println("Wrote `" + out.getPath() + "`.");
+				}
 				entrySet.remove(entry);
-				continue;
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
-			
-			Flat flatData;
-			if (data.length == 4) // Heretic F_SKY, which 2x2 for whatever reason
-				flatData = new Flat(2, 2);
-			else
-				flatData = new Flat(64, 64);
-			
-			flatData.fromBytes(data);
-			
-			File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + ".png");
-			try (FileOutputStream fos = new FileOutputStream(out))
-			{
-				ImageIO.write(GraphicUtils.createImage(flatData, pal), "PNG", out);
-				log.println("Wrote `" + out.getPath() + "`.");
-			}
-			entrySet.remove(entry);
 		}
 	}
 	
-	private static void exportPictureGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws IOException
+	private static void exportPictureGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
 	{
 		for (int i = 0; i < entries.length; i++) 
 		{
 			WadEntry entry = entries[i];
 			
-			byte[] data = wad.getData(entry);
+			byte[] data;
+			try {
+				data = wad.getData(entry);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
+			}
 			if (data.length == 0) // ignore markers.
 			{
 				entrySet.remove(entry);
 				continue;
 			}
 			
-			Picture pictureData = BinaryObject.create(Picture.class, data);
+			Picture pictureData;
+			try {
+				pictureData = BinaryObject.create(Picture.class, data);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
+			}
 			PNGPicture outpic = GraphicUtils.createPNGImage(pictureData, pal);
 			outpic.setOffsetX(pictureData.getOffsetX());
 			outpic.setOffsetY(pictureData.getOffsetY());
 
-			File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + ".png");
+			File out =  FileUtils.extendPath(dir, sanitizeEntryName(entry.getName()) + ".png");
 			try (FileOutputStream fos = new FileOutputStream(out))
 			{
 				fos.write(outpic.toBytes());
 				log.println("Wrote `" + out.getPath() + "`.");
+			} catch (FileNotFoundException e) {
+				throw new ExplodeException(entry.getName(), e);
+			} catch (IOException e) {
+				throw new ExplodeException(entry.getName(), e);
 			}
 			entrySet.remove(entry);
 		}
@@ -1342,4 +1467,47 @@ public final class WADExploder
 		}
 	}
 
+	public static class ExplodeException extends Exception
+	{
+		private static final long serialVersionUID = 3689955846975706213L;
+		
+		private String entryName;
+		
+		public ExplodeException(String entryName, Throwable cause)
+		{
+			super(cause.getMessage(), cause);
+			this.entryName = entryName;
+		}
+		
+		public ExplodeException(String entryName, String message)
+		{
+			super(message);
+			this.entryName = entryName;
+		}
+		
+		public ExplodeException(String entryName, String message, Throwable cause)
+		{
+			super(message, cause);
+			this.entryName = entryName;
+		}
+		
+		public String getEntryName()
+		{
+			return entryName;
+		}
+		
+		@Override
+		public String getMessage() 
+		{
+			return entryName + ": " + getCause().getClass().getSimpleName() + ": " + super.getMessage();
+		}
+		
+		@Override
+		public String getLocalizedMessage()
+		{
+			return getMessage();
+		}
+		
+	}
+	
 }

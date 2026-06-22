@@ -141,6 +141,7 @@ public final class FileUtils
 					raf.write(buffer, 0, Math.min(buffer.length, (int)(end - n)));
 					n = raf.getFilePointer();
 				}
+				bitval = !bitval;
 			}
 		}
 		
@@ -553,6 +554,50 @@ public final class FileUtils
 		return changeExtension(file, ".", extension);
 	}
 
+	/**
+	 * Joins an array of strings into one string, with a separator between them.
+	 * @param separator the separator to insert between strings. Can be empty or null.
+	 * @param strings the strings to join.
+	 * @return a string of all joined strings and separators.
+	 */
+	private static String joinStrings(String separator, String ... strings)
+	{
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < strings.length; i++)
+		{
+			sb.append(strings[i]);
+			if (i < strings.length - 1 && separator != null)
+				sb.append(separator);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Extends a path name, joining the provided name nodes with the {@link File#separator}.
+	 * @param basePath the starting path.
+	 * @param nodes the names of folders, ended with an optional file name.
+	 * @return the new path as a File.
+	 * @throws NullPointerException if basePath is null.
+	 */
+	public static File extendPath(File basePath, String ... nodes)
+	{
+		return new File(basePath.getPath() + File.separator + joinStrings(File.separator, nodes));
+	}
+	
+	/**
+	 * Joins the provided files with the {@link File#pathSeparator}.
+	 * @param paths the file paths to join.
+	 * @return the new path as a File.
+	 * @throws NullPointerException if basePath is null.
+	 */
+	public static String pathList(File ... paths)
+	{
+		String[] pathStrings = new String[paths.length];
+		for (int i = 0; i < pathStrings.length; i++)
+			pathStrings[i] = paths[i].getPath();
+		return joinStrings(File.pathSeparator, pathStrings);
+	}
+	
 	/**
 	 * Creates a list of URLs from a list of files or directories.
 	 * Directories in the list of files are exploded down to actual

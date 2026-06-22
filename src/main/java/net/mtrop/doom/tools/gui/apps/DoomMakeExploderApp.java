@@ -41,6 +41,7 @@ import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer.GUIHint;
 import net.mtrop.doom.tools.doommake.WADExploder;
+import net.mtrop.doom.tools.doommake.WADExploder.ExplodeException;
 import net.mtrop.doom.tools.doommake.generators.WADProjectGenerator;
 import net.mtrop.doom.tools.exception.UtilityException;
 import net.mtrop.doom.tools.gui.DoomToolsApplicationInstance;
@@ -573,8 +574,8 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 		log.println("Exploding WAD...");
 		try {
 			WADExploder.explodeIntoProject(log, wadFile, targetDirectory, convert, convertPalette);
-		} catch (IOException e) {
-			log.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+		} catch (ExplodeException e) {
+			log.println("ERROR: " + e.getLocalizedMessage());
 			return 1;
 		} catch (SecurityException e) {
 			log.println("ERROR: (Access Denied): " + e.getLocalizedMessage());

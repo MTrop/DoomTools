@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.35.4
+
+* `Changed` WAD Explosion errors are a little more informative.
+
+
 ### Changed for 0.35.3
 
 * `Changed` New DoomMake projects will check for changes to the flat/patch convert builds for building textures. (Issue #175).

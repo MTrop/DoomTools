@@ -51,6 +51,7 @@ import net.mtrop.doom.tools.doommake.ProjectModule;
 import net.mtrop.doom.tools.doommake.ProjectTemplate;
 import net.mtrop.doom.tools.doommake.ProjectTokenReplacer;
 import net.mtrop.doom.tools.doommake.WADExploder;
+import net.mtrop.doom.tools.doommake.WADExploder.ExplodeException;
 import net.mtrop.doom.tools.doommake.functions.DoomMakeFunctions;
 import net.mtrop.doom.tools.doommake.functions.ToolInvocationFunctions;
 import net.mtrop.doom.tools.doommake.generators.TextureProjectGenerator;
@@ -772,8 +773,8 @@ public final class DoomMakeMain
 				options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
 				try {
 					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
-				} catch (IOException e) {
-					options.stderr.println("ERROR: I/O Error: " + e.getLocalizedMessage());
+				} catch (ExplodeException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
 					return ERROR_IOERROR;
 				} catch (Exception e) {
 					options.stderr.println("ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
