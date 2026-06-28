@@ -8,6 +8,7 @@ DoomMake
 
 ### Changed for 0.35.3
 
+* `Fixed` `doommake --list-templates` works again (Issue #174).
 * `Changed` New DoomMake projects will check for changes to the flat/patch convert builds for building textures. (Issue #175).
 
 
