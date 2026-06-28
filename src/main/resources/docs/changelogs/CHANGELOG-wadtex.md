@@ -7,6 +7,7 @@ WadTex
 * `Added` [GUI-TextureEditor] Auto-select the most recently added patch on add (Enh. #173).
 * `Added` [GUI-TextureEditor] Text editor view for texture information (Enh. #173).
 * `Added` [GUI-TextureEditor] Other palette layout support for palette read (Enh. #173).
+* `Added` [GUI-TextureEditor] Rename patch (Enh. #173).
 * `Changed` [GUI-TextureEditor] Patch pixels outside texture area are faded (Enh. #173).
 
 

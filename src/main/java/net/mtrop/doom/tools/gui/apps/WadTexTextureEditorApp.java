@@ -166,6 +166,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action patchMoveUpAction;
 	private Action patchMoveDownAction;
 	private Action patchCloneAction;
+	private Action patchRenameAction;
 	private Action helpAction;
 
 	private Action copyTextureAction;
@@ -275,6 +276,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.patchAddAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.add", (a) -> onPatchAdd());
 		this.patchRemoveAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.remove", (a) -> onPatchRemove());
 		this.patchCloneAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.clone", (a) -> onPatchClone());
+		this.patchRenameAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.rename", (a) -> onPatchRename());
 		
 		this.textureList.setComponentPopupMenu(popupMenu(
 			menuItem(textureAddAction2),
@@ -287,7 +289,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			menuItem(patchAddAction2),
 			menuItem(patchRemoveAction2),
 			separator(),
-			menuItem(patchCloneAction)
+			menuItem(patchCloneAction),
+			menuItem(patchRenameAction)
 		));
 		
 		this.currentTextureFile = null;
@@ -774,7 +777,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		patchMoveUpAction.setEnabled(currentPatch != null);
 		patchMoveDownAction.setEnabled(currentPatch != null);
 		patchCloneAction.setEnabled(!selectedPatches.isEmpty());
-
+		patchRenameAction.setEnabled(currentPatch != null);
+		
 		textureWidthField.setEnabled(currentTexture != null);
 		textureHeightField.setEnabled(currentTexture != null);
 
@@ -1554,6 +1558,60 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		
 	}
 
+	private void onPatchRename()
+	{
+		int selectedIndex = patchList.getSelectedIndex();
+		PatchGraphic pg = patchList.getSelectedValuesList().get(0);
+		
+		final JFormField<String> nameField = stringField(pg.getPatch().getName(), false, true); 
+
+		String value;
+		
+		Boolean ok = modal(
+			getApplicationContainer(),
+			language.getText("wadtex.texture.editor.patch.rename"),
+			containerOf(borderLayout(),
+				node(BorderLayout.CENTER, utils.createForm(
+					form(LabelSide.LEADING, language.getInteger("wadtex.texture.editor.patch.rename.labelwidth")),
+					utils.formField("wadtex.texture.editor.patch.rename.name", nameField)
+				))
+			),
+			utils.createChoiceFromLanguageKey("doomtools.ok", (Boolean)true),
+			utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok != Boolean.TRUE)
+			return;
+		
+		value = nameField.getValue();
+		
+		if (!projectPatchSources.containsKey(value))
+		{
+			if (SwingUtils.noTo(getApplicationContainer(), language.getText("wadtex.texture.editor.patch.rename.notexist")))
+				return;
+		}
+		
+		// do "rename"
+		TextureSet.Patch origPatch = pg.getPatch();
+		patchListModel.removePatch(selectedIndex);
+		
+		GraphicObject gobj = fetchGraphicObjectForName(value);
+		TextureSet.Patch patch = currentTexture.createPatch(value);
+		patch.setOriginX(origPatch.getOriginX());
+		patch.setOriginY(origPatch.getOriginY());
+		if (gobj != null)
+		{
+			if (gobj instanceof Picture)
+				createPatch(patch, (Picture)gobj, selectedIndex);
+			else
+				createPatch(patch, (PNGPicture)gobj, selectedIndex);
+		}
+		else
+		{
+			createPatch(patch, NO_PATCH, selectedIndex);
+		}
+	}
+
 	private void onTextOpen()
 	{
 		Modal<Boolean> editorModal = null;
@@ -1653,11 +1711,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	 */
 	public PatchGraphic createPatch(TextureSet.Patch patch, Picture p)
 	{
-		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
-		newPatch.setPicture(p);
-		patchListModel.addPatch(newPatch);
-		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		return newPatch;
+		return createPatch(patch, p, patchListModel.getSize());
 	}
 
 	/**
@@ -1668,11 +1722,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	 */
 	public PatchGraphic createPatch(TextureSet.Patch patch, PNGPicture p)
 	{
-		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
-		newPatch.setPNGPicture(p);
-		patchListModel.addPatch(newPatch);
-		patchList.setSelectedIndex(patchListModel.getSize() - 1);
-		return newPatch;
+		return createPatch(patch, p, patchListModel.getSize());
 	}
 
 	/**
@@ -1683,10 +1733,54 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	 */
 	public PatchGraphic createPatch(TextureSet.Patch patch, Image image)
 	{
+		return createPatch(patch, image, patchListModel.getSize());
+	}
+
+	/**
+	 * Adds a patch to this texture canvas.
+	 * @param patch the patch.
+	 * @param p the patch picture.
+	 * @param index the target index.
+	 * @return a reference to the created patch.
+	 */
+	public PatchGraphic createPatch(TextureSet.Patch patch, Picture p, int index)
+	{
+		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
+		newPatch.setPicture(p);
+		patchListModel.addPatch(index, newPatch);
+		patchList.setSelectedIndex(index);
+		return newPatch;
+	}
+
+	/**
+	 * Adds a patch to this texture canvas.
+	 * @param patch the patch.
+	 * @param p the patch picture.
+	 * @param index the target index.
+	 * @return a reference to the created patch.
+	 */
+	public PatchGraphic createPatch(TextureSet.Patch patch, PNGPicture p, int index)
+	{
+		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
+		newPatch.setPNGPicture(p);
+		patchListModel.addPatch(index, newPatch);
+		patchList.setSelectedIndex(index);
+		return newPatch;
+	}
+
+	/**
+	 * Adds a patch to this texture canvas.
+	 * @param patch the patch.
+	 * @param image the patch picture.
+	 * @param index the target index.
+	 * @return a reference to the created patch.
+	 */
+	public PatchGraphic createPatch(TextureSet.Patch patch, Image image, int index)
+	{
 		PatchGraphic newPatch = canvas.new PatchGraphic(patch);
 		newPatch.setImage(image);
-		patchListModel.addPatch(newPatch);
-		patchList.setSelectedIndex(patchListModel.getSize() - 1);
+		patchListModel.addPatch(index, newPatch);
+		patchList.setSelectedIndex(index);
 		return newPatch;
 	}
 
