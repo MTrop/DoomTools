@@ -530,14 +530,16 @@ public final class DoomToolsGUIMain
 			
 			case ApplicationNames.WADTEX_TEXTURE_EDITOR:
 			{
-				String path = ArrayUtils.arrayElement(args, 1);
+				String projectPath = ArrayUtils.arrayElement(args, 1);
 				String iwadBasePath = ArrayUtils.arrayElement(args, 2);
 				String paletteWadPath = ArrayUtils.arrayElement(args, 3);
+				String fileToOpen = ArrayUtils.arrayElement(args, 4);
 				
 				startApplication(new WadTexTextureEditorApp(
-					path != null ? new File(path) : null, 
+					projectPath != null ? new File(projectPath) : null, 
 					iwadBasePath != null ? new File(iwadBasePath) : null,  
-					paletteWadPath != null ? new File(paletteWadPath) : null
+					paletteWadPath != null ? new File(paletteWadPath) : null,
+					fileToOpen != null ? new File(fileToOpen) : null
 				));
 			}
 			break;

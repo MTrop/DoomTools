@@ -177,13 +177,15 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private TextureSet.Texture currentTexture;
 	private TextureSet.Patch currentPatch;
 	
-	public WadTexTextureEditorApp(File projectDirectory, File baseIwadPath, File paletteWadPath)
+	public WadTexTextureEditorApp(File projectDirectory, File baseIwadPath, File paletteWadPath, File fileToOpen)
 	{
 		this();
 		
 		this.projectDirectoryField.setValue(projectDirectory);
 		this.iwadSourceField.setValue(baseIwadPath != null ? baseIwadPath : settings.getLastOpenedWAD());
 		this.paletteSourceField.setValue(paletteWadPath != null ? paletteWadPath : settings.getLastPaletteFile());
+		if (fileToOpen != null)
+			doReopenFile(fileToOpen);
 	}
 
 	public WadTexTextureEditorApp()
