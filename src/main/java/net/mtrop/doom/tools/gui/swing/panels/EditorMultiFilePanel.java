@@ -12,6 +12,8 @@ import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -1275,10 +1277,25 @@ public class EditorMultiFilePanel extends JPanel
 		updateActionStates();
 		updateLabels();
 		updateEditorHooks();
+		
 		if (listener != null)
 			listener.onCurrentEditorChange(previous, handle);
 		if (currentEditor != null)
 			currentEditor.editorPanel.textArea.requestFocus();
+	}
+
+	private void updateCurrentEditorContentStatus()
+	{
+		currentEditor.updateSourceLastModified();
+		
+		// detect change from disk
+		if (currentEditor.sourceWasModified())
+		{
+			if (SwingUtils.yesTo(this, language.getText("texteditor.filechanged", currentEditor.contentSourceFile.getAbsolutePath())))
+				currentEditor.reloadFile();
+			else
+				currentEditor.onChange();
+		}
 	}
 
 	// Opens the save file dialog for saving a file.
@@ -2232,6 +2249,14 @@ public class EditorMultiFilePanel extends JPanel
 		}
 		
 		/**
+		 * @return true if the source is newer than the editor's changes.
+		 */
+		public boolean sourceWasModified()
+		{
+			return contentSourceFileLastModified > contentLastModified;
+		}
+		
+		/**
 		 * @return true if this editor has unsaved data.
 		 */
 		public boolean needsToSave()
@@ -2300,7 +2325,52 @@ public class EditorMultiFilePanel extends JPanel
 			updateIcon();
 			updateActionsIfCurrent(this);
 		}
+		
+		private void updateSourceLastModified()
+		{
+			if (contentSourceFile != null)
+				contentSourceFileLastModified =  contentSourceFile.lastModified();
+		}
+		
+		private boolean reloadFile()
+		{
+			StringWriter writer = new StringWriter();
+			try (Reader reader = new InputStreamReader(new FileInputStream(contentSourceFile), contentCharset))
+			{
+				IOUtils.relay(reader, writer, 8192);
+			} 
+			
+			catch (FileNotFoundException e) 
+			{
+				LOG.errorf(e, "Editor file could not be found: %s", contentSourceFile.getAbsolutePath());
+				SwingUtils.error(editorPanel, language.getText("texteditor.filechanged.notfound", contentSourceFile.getAbsolutePath()));
+				return false;
+			} 
+			catch (IOException e) 
+			{
+				LOG.errorf(e, "Editor file could not be read: %s", contentSourceFile.getAbsolutePath());
+				SwingUtils.error(editorPanel, language.getText("texteditor.filechanged.ioerror", contentSourceFile.getAbsolutePath()));
+				return false;
+			} 
+			catch (SecurityException e) 
+			{
+				LOG.errorf(e, "Editor file could not be read (access denied): %s", contentSourceFile.getAbsolutePath());
+				SwingUtils.error(editorPanel, language.getText("texteditor.filechanged.security", contentSourceFile.getAbsolutePath()));
+				return false;
+			}
 
+			// Remove all CRs for editor, keep LFs.
+			final String textAreaContent = writer.toString().replace("\r", "");
+			editorPanel.textArea.setText(textAreaContent);
+			editorPanel.textArea.setCaretPosition(0);
+			
+			contentLastModified = contentSourceFileLastModified;
+			updateIcon();
+			updateActions();
+
+			return true;
+		}
+		
 	}
 
 	/**
@@ -2421,6 +2491,15 @@ public class EditorMultiFilePanel extends JPanel
 			textArea.addCaretListener((e) -> {
 				updateTextActionStates();
 				updateCaratPositionLabel();
+			});
+			
+			textArea.addFocusListener(new FocusAdapter() 
+			{
+				@Override
+				public void focusGained(FocusEvent e) 
+				{
+					updateCurrentEditorContentStatus();
+				}
 			});
 			
 			textArea.addHyperlinkListener((hevent) -> {

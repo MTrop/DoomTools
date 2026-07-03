@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-07-03** All editors will detect changes outside of the editor and prompt the user to reload them.
 - **2026-07-03** The ESCAPE key should close most, if not all modal dialogs (Enh. #180).
 
 - **2026-06-14** Completion providers did not display templates with convertible HTML entities properly.
