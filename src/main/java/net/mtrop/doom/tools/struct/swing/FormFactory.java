@@ -23,8 +23,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -1148,7 +1146,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(String value)
+			public void setValue(String value, boolean noFire)
 			{
 				field.setText(value);
 			}
@@ -1186,7 +1184,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Boolean value)
+			public void setValue(Boolean value, boolean noFire)
 			{
 				field.setSelected(value);
 			}
@@ -1224,7 +1222,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Boolean value)
+			public void setValue(Boolean value, boolean noFire)
 			{
 				field.setSelected(value);
 			}
@@ -1268,7 +1266,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Integer value)
+			public void setValue(Integer value, boolean noFire)
 			{
 				field.setValue(value);
 			}
@@ -1322,7 +1320,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Object value)
+			public void setValue(T value, boolean noFire)
 			{
 				field.setValue(value);
 			}
@@ -1362,7 +1360,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Object value)
+			public void setValue(T value, boolean noFire)
 			{
 				field.setSelectedItem(value);
 			}
@@ -1401,7 +1399,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Object value)
+			public void setValue(T value, boolean noFire)
 			{
 				field.setSelectedValue(value, true);
 			}
@@ -1454,7 +1452,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Void value)
+			public void setValue(Void value, boolean noFire)
 			{
 				// Do nothing.
 			}
@@ -1492,7 +1490,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Void value)
+			public void setValue(Void value, boolean noFire)
 			{
 				// Do nothing.
 			}
@@ -1531,7 +1529,7 @@ public final class FormFactory
 			}
 
 			@Override
-			public void setValue(Void value)
+			public void setValue(Void value, boolean noFire)
 			{
 				// Do nothing.
 			}
@@ -1855,9 +1853,20 @@ public final class FormFactory
 		
 		/**
 		 * Sets the field's value.
-		 * @param value the new value. 
+		 * Fires to a change listener if any.
+		 * @param value the new value.
 		 */
-		public abstract void setValue(V value);
+		public void setValue(V value)
+		{
+			setValue(value, false);
+		}
+		
+		/**
+		 * Sets the field's value.
+		 * @param value the new value. 
+		 * @param noFire if true, do NOT fire to a change listener.
+		 */
+		public abstract void setValue(V value, boolean noFire);
 
 		/**
 		 * Gets the reference to this field's form component (for state stuff).
@@ -1919,7 +1928,7 @@ public final class FormFactory
 		}
 	
 		@Override
-		public void setValue(T value) 
+		public void setValue(T value, boolean noFire) 
 		{
 			formField.setValue(value);
 		}
@@ -2186,13 +2195,13 @@ public final class FormFactory
 		}
 
 		@Override
-		public void setValue(KeyStroke value) 
+		public void setValue(KeyStroke value, boolean noFire) 
 		{
 			if (value == null)
 				this.textField.setText("");
 			this.textField.setText(value.toString().replace("pressed ", "")); // remove "pressed" - redundant.
 			this.value = value;
-			if (changeListener != null)
+			if (!noFire && changeListener != null)
 				changeListener.onChange(value);
 		}
 
@@ -2299,11 +2308,11 @@ public final class FormFactory
 		}
 		
 		@Override
-		public void setValue(T value)
+		public void setValue(T value, boolean noFire)
 		{
 			this.value = value;
 			textField.setText(converter.getTextFromValue((T)value));
-			if (changeListener != null)
+			if (!noFire && changeListener != null)
 				changeListener.onChange(value);
 		}
 		
@@ -2326,67 +2335,6 @@ public final class FormFactory
 		
 	}
 
-	/**
-	 * A Transferable for File list data.
-	 */
-	private static class FileListTransferable implements Transferable
-	{
-		private static final DataFlavor[] FLAVORS = new DataFlavor[]{ DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor };
-		
-		private List<File> fileList;
-		private String fileListString;
-		
-		/**
-		 * Creates a FileListTransferable for a piece of File list data.
-		 * @param fileList the File list data.
-		 */
-		private FileListTransferable(File ... fileList)
-		{
-			this(Arrays.asList(fileList));
-		}
-		
-		/**
-		 * Creates a FileListTransferable for a piece of File list data.
-		 * @param fileList the File list data.
-		 */
-		private FileListTransferable(List<File> fileList)
-		{
-			this.fileList = fileList;
-			StringBuilder sb = new StringBuilder();
-			for (File file : fileList)
-			{
-				if (sb.length() > 0)
-					sb.append("\n");
-				sb.append(file.getPath());
-			}
-			this.fileListString = sb.toString();
-		}
-		
-		@Override
-		public DataFlavor[] getTransferDataFlavors() 
-		{
-			return FLAVORS;
-		}
-
-		@Override
-		public boolean isDataFlavorSupported(DataFlavor flavor) 
-		{
-			return FLAVORS[0].equals(flavor)
-				|| FLAVORS[1].equals(flavor);
-		}
-
-		@Override
-		public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException 
-		{
-			if (DataFlavor.javaFileListFlavor.equals(flavor))
-				return fileList;
-			else if (DataFlavor.stringFlavor.equals(flavor))
-				return fileListString;
-			else
-				return null;
-		}
-	}
-	
 	// File Drop Handler.
 	private static class FileDropTransferHandler extends TransferHandler
 	{
@@ -2397,27 +2345,6 @@ public final class FormFactory
 		private FileDropTransferHandler(JFormField<File> fileField)
 		{
 			this.fileField = fileField;
-		}
-		
-		@Override
-		public int getSourceActions(JComponent c)
-		{
-			return COPY_OR_MOVE;
-		}
-		
-		@Override
-		protected Transferable createTransferable(JComponent c) 
-		{
-			if (c instanceof JTextField)
-				return new FileListTransferable(new File(((JTextField)c).getSelectedText()));
-			return null;
-		}
-		
-		@Override
-		protected void exportDone(JComponent source, Transferable data, int action)
-		{
-			if (source instanceof JTextField && action == MOVE)
-				((JTextField)source).replaceSelection("");
 		}
 		
 		@Override
@@ -2445,29 +2372,18 @@ public final class FormFactory
 				if (!files.isEmpty())
 					fileField.setValue(files.get(files.size() - 1));
 			}
-			else if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor))
+			else 
 			{
 				String text;
-				try (
-					Reader reader = DataFlavor.stringFlavor.getReaderForText(transferable); 
-					StringWriter writer = new StringWriter()
-				) {
-					int buf;
-					char[] RELAY_BUFFER = new char[8192];
-					while ((buf = reader.read(RELAY_BUFFER)) > 0)
-						writer.write(RELAY_BUFFER, 0, buf);
-					writer.flush();
-					text = writer.toString();
-				} 
-				catch (UnsupportedFlavorException | IOException e) 
-				{
+				try {
+					text = (String)transferable.getTransferData(DataFlavor.stringFlavor);
+				} catch (UnsupportedFlavorException | IOException e) {
 					return false;
 				}
 				
 				fileField.setValue(new File(text));
-				return true;
 			}
-			return false;
+			return true;
 		}
 
 	}
