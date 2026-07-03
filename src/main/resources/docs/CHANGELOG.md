@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-07-03** The ESCAPE key should close most, if not all modal dialogs (Enh. #180).
+
 - **2026-06-14** Completion providers did not display templates with convertible HTML entities properly.
 
 - **2026-06-06** Setting paths fixed for Linux XDG environments. (Issue #172)
