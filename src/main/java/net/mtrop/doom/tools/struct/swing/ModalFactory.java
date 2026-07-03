@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -16,6 +16,7 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.function.Function;
@@ -25,8 +26,11 @@ import java.util.function.Supplier;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
 
 import static javax.swing.BorderFactory.*;
 
@@ -1014,20 +1018,25 @@ public final class ModalFactory
 			buttons[i] = button;
 		}
 		
+		JPanel centerContent = null;
 		JPanel southContent = null;
+		
+		centerContent = new JPanel();
+		centerContent.setBorder(createEmptyBorder(4, 4, 4, 4));
+		centerContent.add(BorderLayout.CENTER, contentPane);
 		
 		if (buttons.length > 0)
 		{
 			southContent = new JPanel();
+			southContent.setBorder(createEmptyBorder(8, 8, 8, 8));
 			southContent.setLayout(new FlowLayout(FlowLayout.TRAILING, 4, 0));
 			for (int i = 0; i < buttons.length; i++) 
 				southContent.add(buttons[i]);
 		}
 		
 		JPanel modalPanel = new JPanel();
-		modalPanel.setLayout(new BorderLayout(0, 4));
-		modalPanel.setBorder(createEmptyBorder(8, 8, 8, 8));
-		modalPanel.add(BorderLayout.CENTER, contentPane);
+		modalPanel.setLayout(new BorderLayout());
+		modalPanel.add(BorderLayout.CENTER, centerContent);
 		if (southContent != null)
 			modalPanel.add(BorderLayout.SOUTH, southContent);
 		
@@ -1342,6 +1351,16 @@ public final class ModalFactory
 		private Modal(Container owner)
 		{
 			super(getWindowForComponent(owner));
+			
+			final ActionListener closeAction = (e) ->
+			{
+				setVisible(false);
+				dispose();
+			};
+			
+			JRootPane rootPane = getRootPane();
+			KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+			rootPane.registerKeyboardAction(closeAction, escapeStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		}
 
 		private static Window getWindowForComponent(Component parent) throws HeadlessException 
