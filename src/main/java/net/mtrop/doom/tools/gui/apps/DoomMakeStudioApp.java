@@ -121,6 +121,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private DoomMakeEditorPanel editorPanel;
 	private DoomToolsStatusPanel statusPanel;
 	
+	private Action openWadTexTextureEditorAction;
 	private Action runWadMergeAction;
 	private Action runWadMergeParametersAction;
 	private Action runWadScriptAction;
@@ -291,6 +292,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.filesSplitPaneHorizontal.setDividerLocation(DEFAULT_WIDTH);
 		this.filesSplitPaneVertical.setDividerLocation(DEFAULT_HEIGHT);
 		
+		this.openWadTexTextureEditorAction = utils.createActionFromLanguageKey("doommake.menu.run.item.texture.editor", (e) -> openInTextureEditor());
 		this.runWadMergeAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.run", (e) -> onRunWadMergeAgain());
 		this.runWadMergeParametersAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadmerge.params", (e) -> onRunWadMergeWithArgs());
 		this.runWadScriptAction = utils.createActionFromLanguageKey("doommake.menu.run.item.wadscript.run", (e) -> onRunWadScriptAgain());
@@ -597,13 +599,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		return ArrayUtils.arrayOf(
 			utils.createItemFromLanguageKey("doommake.menu.utilities.item.offsetter", (e) -> onOpenOffsetterApp()),
-			utils.createItemFromLanguageKey("doommake.menu.utilities.item.texture.editor", (e) -> onOpenTextureEditorApp())
+			utils.createItemFromLanguageKey("doommake.menu.utilities.item.texture.editor", (e) -> onOpenTextureEditorApp(null))
 		);
 	}
 
 	private MenuNode[] createRunMenuItems()
 	{
 		return ArrayUtils.arrayOf(
+			utils.createItemFromLanguageKey("doommake.menu.run.item.texture.editor", openWadTexTextureEditorAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.run", runWadMergeAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadmerge.params", runWadMergeParametersAction),
 			utils.createItemFromLanguageKey("doommake.menu.run.item.wadscript.run", runWadScriptAction),
@@ -712,6 +715,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		{
 			boolean wadscript = currentHandle.getCurrentStyleType().equalsIgnoreCase(DoomToolsEditorProvider.SYNTAX_STYLE_WADSCRIPT);
 			boolean wadmerge = currentHandle.getCurrentStyleType().equalsIgnoreCase(DoomToolsEditorProvider.SYNTAX_STYLE_WADMERGE);
+			boolean deutex = currentHandle.getCurrentStyleType().equalsIgnoreCase(DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX);
+			openWadTexTextureEditorAction.setEnabled(deutex);
 			runWadMergeAction.setEnabled(wadmerge);
 			runWadMergeParametersAction.setEnabled(wadmerge);
 			runWadScriptAction.setEnabled(wadscript);
@@ -719,6 +724,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 		else
 		{
+			openWadTexTextureEditorAction.setEnabled(false);
 			runWadMergeAction.setEnabled(false);
 			runWadMergeParametersAction.setEnabled(false);
 			runWadScriptAction.setEnabled(false);
@@ -889,6 +895,28 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		treePanel.setTemporaryRootDirectory(directory);
 	}
 
+	private void openInTextureEditor()
+	{
+		if (!saveBeforeOpen())
+			return;
+		
+		// Source file should be set if saveBeforeOpen() succeeds.
+		// If no file, then make a temporary one for execution.
+
+		if (currentHandle.getContentSourceFile() != null)
+		{
+			File textureFile = currentHandle.getContentSourceFile();
+			onOpenTextureEditorApp(textureFile);
+		}
+		else
+		{
+			try (TempFile textureFile = currentHandle.createTempCopy())
+			{
+				onOpenTextureEditorApp(textureFile);
+			}
+		}
+	}
+
 	private void onRunWadMergeAgain()
 	{
 		if (!saveBeforeExecute())
@@ -1037,7 +1065,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 	}
 
-	private void onOpenTextureEditorApp()
+	private void onOpenTextureEditorApp(File fileToOpen)
 	{
 		String iwadPath = projectProperties.getProperty("doommake.iwad");
 		String palettePath = projectProperties.getProperty("doommake.iwad");
@@ -1062,13 +1090,40 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 
 		try {
-			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath);
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath, fileToOpen.getCanonicalPath());
 		} catch (IOException e) {
 			SwingUtils.error(language.getText("doommake.texture.editor.ioerror"));
 			LOG.error(e, "I/O Error running texture editor program.");
 		}
 	}
 	
+	private boolean saveBeforeOpen()
+	{
+		final Container parent = getApplicationContainer();
+	
+		if (currentHandle.getContentSourceFile() != null && currentHandle.needsToSave())
+		{
+			Boolean saveChoice = modal(parent, utils.getWindowIcons(), 
+				language.getText("doommake.texture.editor.save.modal.title"),
+				containerOf(label(language.getText("doommake.texture.editor.save.modal.message", currentHandle.getEditorTabName()))), 
+				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.save", true),
+				utils.createChoiceFromLanguageKey("texteditor.action.save.modal.option.nosave", false),
+				utils.createChoiceFromLanguageKey("doomtools.cancel", (Boolean)null)
+			).openThenDispose();
+			
+			if (saveChoice == null)
+				return false;
+			else if (saveChoice == true)
+			{
+				if (!editorPanel.saveCurrentEditor())
+					return false;
+			}
+			// else, continue on.
+		}
+		
+		return true;
+	}
+
 	private boolean saveBeforeExecute()
 	{
 		final Container parent = getApplicationContainer();
@@ -1374,11 +1429,27 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				}
 			});
 		}
+
+		@Override
+		protected MenuNode[] getFileActions(File file)
+		{
+			String style = DoomToolsEditorProvider.get().getStyleByFile(file);
+			if (style == DoomToolsEditorProvider.SYNTAX_STYLE_DEUTEX)
+			{
+				return new MenuNode[]{
+					separator(),
+					utils.createItemFromLanguageKey("doommake.dirtree.popup.menu.item.texture.editor", (item) -> onOpenTextureEditorApp(file))
+				};
+			}
+			
+			return super.getFileActions(file);
+		}
 		
 		@Override
-		protected MenuNode[] getDirectoryActions()
+		protected MenuNode[] getDirectoryActions(File directory)
 		{
 			return new MenuNode[]{
+				separator(),
 				utils.createItemFromLanguageKey("doommake.dirtree.popup.menu.item.offsetter", (item) -> onOpenOffsetterApp())
 			};
 		}

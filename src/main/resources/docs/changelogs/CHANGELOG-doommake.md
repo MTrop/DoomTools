@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.35.5
+
+* `Added` [GUI-Studio] Opening DEUTex texture files in Texture Editor (Enh. #181).
+* `Changed` [GUI-Studio] Scripts that start with "doommake-" are considered DoomMake scripts by default.
+
+
 ### Changed for 0.35.4
 
 * `Changed` WAD Explosion errors are a little more informative.

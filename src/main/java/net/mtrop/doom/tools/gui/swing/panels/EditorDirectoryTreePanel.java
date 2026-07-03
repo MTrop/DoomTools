@@ -61,9 +61,15 @@ public class EditorDirectoryTreePanel extends JPanel
 			private static final long serialVersionUID = -7791199076763197595L;
 
 			@Override
-			protected MenuNode[] getAdditionalDirectoryActions() 
+			protected MenuNode[] getAdditionalFileActions(File file) 
 			{
-				return getDirectoryActions();
+				return getFileActions(file);
+			}
+
+			@Override
+			protected MenuNode[] getAdditionalDirectoryActions(File directory) 
+			{
+				return getDirectoryActions(directory);
 			}
 		};
 
@@ -154,9 +160,20 @@ public class EditorDirectoryTreePanel extends JPanel
 	
 	/**
 	 * Gets additional directory actions for the directory pop-up menu.
+	 * @param file the selected file.
 	 * @return the additional actions to add to the menu.
 	 */
-	protected MenuNode[] getDirectoryActions()
+	protected MenuNode[] getFileActions(File file)
+	{
+		return new MenuNode[]{};
+	}
+	
+	/**
+	 * Gets additional directory actions for the directory pop-up menu.
+	 * @param directory the selected directory.
+	 * @return the additional actions to add to the menu.
+	 */
+	protected MenuNode[] getDirectoryActions(File directory)
 	{
 		return new MenuNode[]{};
 	}
