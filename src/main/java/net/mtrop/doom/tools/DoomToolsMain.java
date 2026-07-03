@@ -52,7 +52,7 @@ public final class DoomToolsMain
 	public static final int ERROR_TIMEOUT = 4;
 	public static final int ERROR_SITE_ERROR = 5;
 	public static final int ERROR_IOERROR = 6;
-	public static final int ERROR_GUI_ALREADY_RUNNING = 7;
+//	public static final int ERROR_GUI_ALREADY_RUNNING = 7;
 	public static final int ERROR_TASK_CANCELLED = 8;
 	public static final int ERROR_UNKNOWN = -1;
 
@@ -456,13 +456,6 @@ public final class DoomToolsMain
 			}
 			else if (options.gui)
 			{
-				try {
-					DoomToolsGUIMain.acquireProcessLock();
-				} catch (IOException e) {
-					options.stderr.println("DoomTools is already running.");
-					return ERROR_GUI_ALREADY_RUNNING;
-				}
-				
 				try {
 					DoomToolsGUIMain.startGUIAppProcess();
 				} catch (IOException e) {
