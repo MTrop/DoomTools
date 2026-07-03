@@ -11,10 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -247,8 +244,7 @@ public final class ComponentFactory
 		default void itemStateChanged(ItemEvent event)
 		{
 			C component = (C)event.getSource();
-			if (event.getStateChange() == ItemEvent.SELECTED)
-				onItemChangeEvent(component, (T)event.getItem());
+			onItemChangeEvent(component, (T)event.getItem());
 		}
 		
 		/**
@@ -554,120 +550,6 @@ public final class ComponentFactory
 		 * @param item the item clicked.
 		 */
 		void onClick(JRadioButtonMenuItem item);
-	}
-
-	/* ==================================================================== */
-	/* ==== Models                                                     ==== */
-	/* ==================================================================== */
-
-	/**
-	 * An expandable model for lists.
-	 * @param <T> the element type.
-	 */
-	public static class StandardListModel<T> extends DefaultListModel<T>
-	{
-		private static final long serialVersionUID = 8827909776263103911L;
-		
-		public StandardListModel()
-		{
-			super();
-		}
-		
-		/**
-		 * Tells the model's listeners to refresh.
-		 */
-		public void refreshElements()
-		{
-			fireContentsChanged(this, 0, getSize() - 1);
-		}
-	}
-	
-	/**
-	 * An array model for lists.
-	 * @param <T> the element type.
-	 */
-	public static class ArrayListModel<T> implements ListModel<T>
-	{
-		private T[] arrayList;
-		private List<ListDataListener> listeners;
-
-		private ArrayListModel(T[] array)
-		{
-			this.arrayList = Arrays.copyOf(array, array.length);
-			this.listeners = Collections.synchronizedList(new ArrayList<>(4));
-		}
-
-		/**
-		 * Gets a copy of all elements in this model.
-		 * @return the elements.
-		 */
-		public T[] getAllElements()
-		{
-			return Arrays.copyOf(arrayList, arrayList.length);
-		}
-		
-		@Override
-		public int getSize()
-		{
-			return arrayList.length;
-		}
-		
-		public void setAllElements(T[] elements)
-		{
-			for (int i = 0; i < elements.length; i++)
-				arrayList[i] = elements[i];
-			listeners.forEach((listener) -> {
-				listener.contentsChanged(
-					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, elements.length - 1)
-				);
-			});
-		}
-
-		/**
-		 * Sets an element at a place in the list.
-		 * @param index the index.
-		 * @param element the element to set.
-		 */
-		public void setElementAt(T element, int index)
-		{
-			arrayList[index] = element;
-			listeners.forEach((listener) -> {
-				listener.contentsChanged(
-					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, index, index)
-				);
-			});
-		}
-		
-		/**
-		 * Tells the model's listeners to refresh.
-		 */
-		public void refreshElements()
-		{
-			listeners.forEach((listener) -> {
-				listener.contentsChanged(
-					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1)
-				);
-			});
-		}
-		
-		@Override
-		public T getElementAt(int index)
-		{
-			return arrayList[index];
-		}
-
-		@Override
-		public void addListDataListener(ListDataListener l)
-		{
-			listeners.add(l);
-		}
-
-		@Override
-		public void removeListDataListener(ListDataListener l)
-		{
-			listeners.remove(l);
-		}
-		
 	}
 	
 	
@@ -1760,19 +1642,6 @@ public final class ComponentFactory
 	 * @param stepSize the step between values.
 	 * @return a new spinner model.
 	 */
-	public static SpinnerNumberModel spinnerModel(long value, long minimum, long maximum, long stepSize)
-	{
-		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
-	}
-
-	/**
-	 * Creates a spinner model for numbers.
-	 * @param value the current value.
-	 * @param minimum the minimum value.
-	 * @param maximum the maximum value.
-	 * @param stepSize the step between values.
-	 * @return a new spinner model.
-	 */
 	public static SpinnerNumberModel spinnerModel(int value, int minimum, int maximum, int stepSize)
 	{
 		return new SpinnerNumberModel(value, minimum, maximum, stepSize);
@@ -1880,7 +1749,9 @@ public final class ComponentFactory
 	 */
 	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects, ListDataListener listener)
 	{
-		ComboBoxModel<E> out = comboBoxModel(objects);
+		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
+		for (E e : objects)
+			out.addElement(e);
 		out.addListDataListener(listener);
 		return out;
 	}
@@ -1969,32 +1840,6 @@ public final class ComponentFactory
 	}
 
 	/**
-	 * Creates an array list model.
-	 * @param <M> the list model type.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
-	 * @return the list component.
-	 */
-	public static <M extends ListModel<E>, E> ArrayListModel<E> listModel(E[] objects, ListDataHandler<M, E> handler)
-	{
-		ArrayListModel<E> out = listModel(objects);
-		out.addListDataListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates an array list model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @return the list component.
-	 */
-	public static <E> ArrayListModel<E> listModel(E[] objects)
-	{
-		return new ArrayListModel<E>(objects);
-	}
-
-	/**
 	 * Creates a list model.
 	 * @param <M> the list model type.
 	 * @param <E> the object type that the model contains.
@@ -2002,9 +1847,11 @@ public final class ComponentFactory
 	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
 	 * @return the list component.
 	 */
-	public static <M extends ListModel<E>, E> StandardListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
+	public static <M extends ListModel<E>, E> ListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
 	{
-		StandardListModel<E> out = listModel(objects);
+		DefaultListModel<E> out = new DefaultListModel<E>();
+		for (E e : objects)
+			out.addElement(e);
 		out.addListDataListener(handler);
 		return out;
 	}
@@ -2015,9 +1862,9 @@ public final class ComponentFactory
 	 * @param objects the objects to put in the list model.
 	 * @return the list component.
 	 */
-	public static <E> StandardListModel<E> listModel(Collection<E> objects)
+	public static <E> ListModel<E> listModel(Collection<E> objects)
 	{
-		StandardListModel<E> out = new StandardListModel<E>();
+		DefaultListModel<E> out = new DefaultListModel<E>();
 		for (E e : objects)
 			out.addElement(e);
 		return out;
