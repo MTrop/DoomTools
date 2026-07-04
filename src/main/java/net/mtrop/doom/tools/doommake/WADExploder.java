@@ -73,7 +73,7 @@ import net.mtrop.doom.util.WadUtils;
 
 /**
  * The WAD exploder process.
- * Takes a WAD file and epxlodes it into 
+ * Takes a WAD file and epxlodes it into a type of WAD project.
  * @author Matthew Tropiano
  */
 public final class WADExploder 
@@ -639,16 +639,21 @@ public final class WADExploder
 			
 			try {
 				texData = wad.getData("TEXTURE1");
-				if (TextureUtils.isStrifeTextureData(texData))
-				{
+				if (texData == null)
+					texture1 = null;
+				else if (TextureUtils.isStrifeTextureData(texData))
 					texture1 = wad.getDataAs("TEXTURE1", StrifeTextureList.class);
-					texture2 = wad.getDataAs("TEXTURE2", StrifeTextureList.class);
-				}
 				else
-				{
 					texture1 = wad.getDataAs("TEXTURE1", DoomTextureList.class);
+
+				texData = wad.getData("TEXTURE2");
+				if (texData == null)
+					texture2 = null;
+				else if (TextureUtils.isStrifeTextureData(texData))
+					texture2 = wad.getDataAs("TEXTURE2", StrifeTextureList.class);
+				else
 					texture2 = wad.getDataAs("TEXTURE2", DoomTextureList.class);
-				}
+
 			} catch (IOException e) {
 				throw new ExplodeException("TEXTURE1/2", e);
 			}
