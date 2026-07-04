@@ -1,3 +1,5 @@
+
+	storeDirectoryChanged(sourceDir, hash);
 	setBuilt("release");
 }
 
@@ -6,6 +8,7 @@
  */
 check function doDist() {
 
+	sourceDir = getSourceDirectory();
 	projectFile = getBuildDirectory() + "/" + getProjectWAD();
 	outTextFile = getBuildDirectory() + "/" + getProjectTXT();
 	outDistZipFile = getDistDirectory() + "/" + getProjectZip();

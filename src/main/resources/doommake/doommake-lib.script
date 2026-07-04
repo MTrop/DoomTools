@@ -161,8 +161,8 @@ check function initBuildLock() {
  * Gets the directory hash string.
  * Returns a string of hexadecimal characters.
  */
-check function getDirectoryHash(dirpath) {
-	return hashdir(dirpath, true)->bufstr();
+check function getDirectoryHash(dirpath, recurse) {
+	return hashdir(dirpath, recurse ?? true)->bufstr();
 }
 
 /**
@@ -171,9 +171,9 @@ check function getDirectoryHash(dirpath) {
  * Returns null if no change.
  * Returns a hash string if a change happened.
  */
-check function directoryHasChanged(dirpath) {
+check function directoryHasChanged(dirpath, recurse) {
 	lockhash = initBuildLock().dirHashes->mapget(dirpath);
-	dirhash = getDirectoryHash(dirpath);
+	dirhash = getDirectoryHash(dirpath, recurse);
 	return (lockhash === null || lockhash !== dirhash) ? dirhash : null;
 }
 

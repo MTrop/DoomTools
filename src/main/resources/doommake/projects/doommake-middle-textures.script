@@ -1,0 +1,24 @@
+}
+
+/**
+ * Merges all components into the project file and creates the distributable.
+ */
+check function doRelease() {
+
+	sourceDir = getSourceDirectory();
+	outFile = getBuildDirectory() + "/" + getProjectWAD();
+
+	if (checkFileExistenceAndBuildStatuses(outFile, ["textures"])) {
+		hash = directoryHasChanged(sourceDir, false); // src root only
+		if (hash === null) {
+			println("[Skipped] No pertinent project data built.");
+			return;
+		}
+	} else {
+		hash = directoryHasChanged(sourceDir, false);
+	}
+	
+	wadmerge(file(MERGESCRIPT_RELEASE), [
+		getBuildDirectory()
+		,getSourceDirectory()
+		,getProjectWad()

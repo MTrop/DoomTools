@@ -517,22 +517,8 @@ public class TextureProjectGenerator extends ProjectGenerator
 
 		// WadMerge Properties Start
 		descriptor(
-			fileContentAppend("doommake.script",
-				"}\n",
-				"/**",
-				" * Merges all components into the project file and creates the distributable.",
-				" */",
-				"check function doRelease() {\n",
-				"\toutFile = getBuildDirectory() + \"/\" + getProjectWAD();\n",
-				"\tif (checkFileExistenceAndBuildStatuses(outFile, [\"textures\"])) {",
-				"\t\tprintln(\"[Skipped] No pertinent project data built.\");",
-				"\t\treturn;",
-				"\t}\n",
-				"\twadmerge(file(MERGESCRIPT_RELEASE), [",
-				"\t\tgetBuildDirectory()",
-				"\t\t,getSourceDirectory()",
-				"\t\t,getProjectWad()"
-			)
+			fileAppend("doommake.script",
+				"doommake/projects/doommake-middle-textures.script")
 		).createIn(targetDirectory, replacerMap);
 		
 		// Add merge script.
