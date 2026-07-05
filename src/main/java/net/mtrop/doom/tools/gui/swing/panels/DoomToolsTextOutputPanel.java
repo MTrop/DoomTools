@@ -8,20 +8,28 @@ package net.mtrop.doom.tools.gui.swing.panels;
 import java.awt.Font;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.Writer;
 
 import javax.swing.JTextArea;
 
+import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
 
 /**
  * Text output panel.
- * This panel also provides two streams for writing to the text panel like a console.
+ * This panel also provides two streams for writing to the text panel like a console or to an optional log file.
  * Both streams are synchronized such that output does not step on each other.
  * @author Matthew Tropiano
  */
@@ -29,9 +37,13 @@ public class DoomToolsTextOutputPanel extends JTextArea
 {
 	private static final long serialVersionUID = -1405465151452714437L;
 
+	/** Logger. */
+	private static final Logger LOG = DoomToolsLogger.getLogger(DoomToolsTextOutputPanel.class); 
+
 	private static final Font DEFAULT_FONT = new Font("Monospaced", Font.PLAIN, 12);
 	
 	private Object printMutex;
+	private Writer logFileWriter;
 	
 	/**
 	 * Creates a new output panel.
@@ -42,6 +54,22 @@ public class DoomToolsTextOutputPanel extends JTextArea
 		this.printMutex = new Object();
 		setFont(DEFAULT_FONT);
 		setEditable(false);
+	}
+
+	/**
+	 * Creates a new output panel.
+	 * @param logFile the file to log the output to.
+	 */
+	public DoomToolsTextOutputPanel(File logFile)
+	{
+		this();
+		this.logFileWriter = null;
+		try {
+			if (FileUtils.createPathForFile(logFile))
+				this.logFileWriter = new OutputStreamWriter(new FileOutputStream(logFile));
+		} catch (FileNotFoundException e) {
+			LOG.error(e, "Could not open log file.");
+		}
 	}
 
 	/**
@@ -117,6 +145,7 @@ public class DoomToolsTextOutputPanel extends JTextArea
 		public void close() throws IOException
 		{
 			flush();
+			IOUtils.close(logFileWriter);
 		}
 		
 		@Override
@@ -130,6 +159,11 @@ public class DoomToolsTextOutputPanel extends JTextArea
 			{
 				charBuffer.getBuffer().delete(0, charBuffer.getBuffer().length());
 				IOUtils.relay(reader, charBuffer);
+				if (logFileWriter != null)
+				{
+					logFileWriter.append(charBuffer.toString());
+					logFileWriter.flush();
+				}
 			}
 			writeString(charBuffer.toString());
 			buffer.reset();

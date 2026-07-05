@@ -5,6 +5,7 @@ DoomMake
 
 * `Fixed` WAD Exploder will explode texture projects missing a TEXTURE1 entry (looking at you, OTEX!).
 * `Added` [GUI-Studio] Opening DEUTex texture files in Texture Editor (Enh. #181).
+* `Added` [GUI-Studio] Output build log to an actual file (`build/build.log`) (Enh. #177).
 * `Changed` [GUI-Studio] Scripts that start with "doommake-" are considered DoomMake scripts by default.
 * `Changed` New projects will factor in the WADINFO and CREDITS file changes for rebuilding the release (Issue #184).
 

@@ -247,7 +247,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		else
 			this.repositoryPanel = containerOf(label(JLabel.CENTER, language.getText("doommake.tab.norepo")));
 		
-		this.loggingPanel = new DoomToolsTextOutputPanel();
+		this.loggingPanel = new DoomToolsTextOutputPanel(FileUtils.extendPath(targetDirectory, "build", "build.log"));
 
 		this.executionPanel = new DoomMakeExecutionPanel(statusPanel, targetDirectory, this.loggingPanel, true, loggingPanel.getPrintStream());		
 
