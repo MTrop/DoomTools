@@ -61,7 +61,6 @@ public enum EditorThemeType
 	SPACEGRAY("Spacegray", "gui/editor/themes/spacegray.xml", true),
 	VUESION_THEME("vuesion-theme", "gui/editor/themes/vuesion-theme.xml", true),
 	XCODE_DARK("Xcode-Dark", "gui/editor/themes/xcode-dark.xml", true),
-
 	;
 	
 	private final String friendlyName;
