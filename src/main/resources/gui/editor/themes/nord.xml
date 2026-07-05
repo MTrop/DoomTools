@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE RSyntaxTheme SYSTEM "theme.dtd">
+
+<RSyntaxTheme version="1.0">
+	<background color="3B4252"/>
+	<caret color="ECEFF4"/>
+	<selection fg="2E3440" useFG="false" bg="88C0D0"/>
+	<currentLineHighlight color="101217" fade="false"/>
+	<marginLine fg="B8BEC9"/>
+	<markAllHighlight color="262628"/>
+	<markOccurrencesHighlight color="262628" border="false"/>
+	<matchedBracket fg="D8DEE9" bg="262628" highlightBoth="false" animate="true"/>
+	<hyperlinks fg="88C0D0"/>
+	<secondaryLanguages>
+		<language index="1" bg="4C566A"/>
+		<language index="2" bg="6C768A"/>
+		<language index="3" bg="8C96AA"/>
+	</secondaryLanguages>
+
+	<gutterBorder color="2E3440"/>
+	<lineNumbers fg="D8DEE9" currentFG="2E3440"/>
+	<foldIndicator fg="C9CED9" armedFg="A9AEB9" iconBg="C9CED9"/>
+	<iconRowHeader activeLineRange="E9EEF9"/>
+
+	<tokenStyles>
+		<style token="IDENTIFIER" fg="D8DEE9" bold="false" italic="false"/>
+		<style token="RESERVED_WORD" fg="818EA8" bold="true" italic="false"/>
+		<style token="RESERVED_WORD_2" fg="818EA8" bold="true" italic="false"/>
+		<style token="ANNOTATION" fg="818EA8" bold="true" italic="false"/>
+		<style token="COMMENT_DOCUMENTATION" fg="F8FEFF" bold="false" italic="true"/>
+		<style token="COMMENT_EOL" fg="D8DEE9" bold="false" italic="true"/>
+		<style token="COMMENT_MULTILINE" fg="D8DEE9" bold="false" italic="true"/>
+		<style token="COMMENT_KEYWORD" fg="F8FEFF" bold="false" italic="true"/>
+		<style token="COMMENT_MARKUP" fg="F8FEFF" bold="false" italic="true"/>
+		<style token="DATA_TYPE" fg="616E88" bold="true" italic="false"/>
+		<style token="FUNCTION" fg="818EA8" bold="true" italic="false"/>
+		<style token="LITERAL_BOOLEAN" fg="88C0D0" bold="true" italic="false"/>
+		<style token="LITERAL_NUMBER_DECIMAL_INT" fg="A8E0F0" bold="true" italic="false"/>
+		<style token="LITERAL_NUMBER_FLOAT" fg="A8E0F0" bold="true" italic="false"/>
+		<style token="LITERAL_NUMBER_HEXADECIMAL" fg="A8E0F0" bold="true" italic="false"/>
+		<style token="LITERAL_STRING_DOUBLE_QUOTE" fg="A8E0F0" bold="false" italic="false"/>
+		<style token="LITERAL_CHAR" fg="A8E0F0" bold="false" italic="false"/>
+		<style token="LITERAL_BACKQUOTE" fg="A8E0F0" bold="false" italic="false"/>
+		<style token="MARKUP_TAG_DELIMITER" fg="D8DEE9" bold="false" italic="false"/>
+		<style token="MARKUP_TAG_NAME" fg="D8DEE9" bold="false" italic="false"/>
+		<style token="MARKUP_TAG_ATTRIBUTE" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_TAG_ATTRIBUTE_VALUE" fg="A8E0F0" bold="false" italic="false"/>
+		<style token="MARKUP_COMMENT" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_DTD" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_PROCESSING_INSTRUCTION" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_CDATA" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_CDATA_DELIMITER" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="MARKUP_ENTITY_REFERENCE" fg="F8FEFF" bold="false" italic="false"/>
+		<style token="OPERATOR" fg="D8DEE9" bold="false" italic="false"/>
+		<style token="PREPROCESSOR" fg="F8FEFF" bold="false" italic="false"/>
+		<style token="REGEX" fg="818EA8" bold="false" italic="false"/>
+		<style token="SEPARATOR" fg="B8BEC9" bold="false" italic="false"/>
+		<style token="VARIABLE" fg="D8DEE9" bold="false" italic="false"/>
+		<style token="WHITESPACE" fg="B8BEC9" bold="false" italic="false"/>
+
+		<style token="ERROR_IDENTIFIER" fg="D8DEE9" bg="BF616A" bold="true" italic="false"/>
+		<style token="ERROR_NUMBER_FORMAT" fg="A8E0F0" bg="BF616A" bold="true" italic="false"/>
+		<style token="ERROR_STRING_DOUBLE" fg="A8E0F0" bg="BF616A" bold="true" italic="false"/>
+		<style token="ERROR_CHAR" fg="A8E0F0" bg="BF616A" bold="true" italic="false"/>
+	</tokenStyles>
+</RSyntaxTheme>

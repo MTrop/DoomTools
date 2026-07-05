@@ -69,6 +69,7 @@ import org.fife.ui.rtextarea.RTextArea;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import net.mtrop.doom.tools.common.Common;
+import net.mtrop.doom.tools.gui.apps.data.EditorThemeType;
 import net.mtrop.doom.tools.gui.managers.DoomToolsEditorProvider;
 import net.mtrop.doom.tools.gui.managers.DoomToolsGUIUtils;
 import net.mtrop.doom.tools.gui.managers.DoomToolsIconManager;
@@ -1974,13 +1975,13 @@ public class EditorMultiFilePanel extends JPanel
 	
 	private Theme loadTheme(EditorThemeType themeType) 
 	{
-		try (InputStream in = IOUtils.openResource(themeType.resourceName))
+		try (InputStream in = IOUtils.openResource(themeType.getResourceName()))
 		{
 			return Theme.load(in);
 		} 
 		catch (IOException e) 
 		{
-			LOG.errorf(e, "Could not load theme: %s", themeType.resourceName);
+			LOG.errorf(e, "Could not load theme: %s", themeType.getResourceName());
 			return null;
 		}
 	}
@@ -3225,38 +3226,6 @@ public class EditorMultiFilePanel extends JPanel
 		}
 	}
 	
-	/**
-	 * Theme types.
-	 */
-	public enum EditorThemeType
-	{
-		DEFAULT("Default", "org/fife/ui/rsyntaxtextarea/themes/default.xml"),
-		DEFAULT_ALT("Default (Alternate)", "org/fife/ui/rsyntaxtextarea/themes/default-alt.xml"),
-		DARK("Dark", "org/fife/ui/rsyntaxtextarea/themes/dark.xml"),
-		DRUID("Druid", "org/fife/ui/rsyntaxtextarea/themes/druid.xml"),
-		ECLIPSE("Eclipse", "org/fife/ui/rsyntaxtextarea/themes/eclipse.xml"),
-		IDEA("IntelliJ IDEA", "org/fife/ui/rsyntaxtextarea/themes/idea.xml"),
-		MONOKAI("Monokai", "org/fife/ui/rsyntaxtextarea/themes/monokai.xml"),
-		VS("Visual Studio", "org/fife/ui/rsyntaxtextarea/themes/vs.xml");
-		
-		private final String friendlyName;
-		private final String resourceName;
-		
-		public static final Map<String, EditorThemeType> THEME_MAP = EnumUtils.createCaseInsensitiveNameMap(EditorThemeType.class);
-		
-		private EditorThemeType(String friendlyName, String resourceName)
-		{
-			this.friendlyName = friendlyName;
-			this.resourceName = resourceName;
-		}
-		
-		public String getFriendlyName() 
-		{
-			return friendlyName;
-		}
-		
-	}
-
 	/**
 	 * Text transformers.
 	 */
