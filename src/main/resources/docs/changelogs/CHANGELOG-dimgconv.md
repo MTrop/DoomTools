@@ -1,6 +1,11 @@
 DImgConv
 --------
 
+### Changed for 1.7.2
+
+* `Fixed` DImgConv will now skip known OS folder files like `Desktop.ini`/`thumbs.db` (Issue #186).
+
+
 ### Changed for 1.7.1
 
 * `Added` [Offsetter] Accepts more palette types for reading (Enh. #173).

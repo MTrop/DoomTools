@@ -596,6 +596,19 @@ public final class DoomImageConvertMain
 			int addFile(File input, Palette palette, MetaInfo info, String path) throws IOException;
 		}
 		
+		// Tests for excluded OS folder files.
+		private boolean isExcludedFile(File f)
+		{
+			String name = f.getName();
+			if (name.equalsIgnoreCase("thumbs.db")) // Windows
+				return true;
+			if (name.equalsIgnoreCase("Desktop.ini")) // Windows
+				return true;
+			if (name.endsWith(".DS_Store")) // macOS
+				return true;
+			return false;
+		}
+
 		private int processDir(File base, File srcDir, boolean recursive, Palette palette, MetaInfo fallback, FileAdder adder) throws IOException, SecurityException, UtilityException
 		{
 			options.verboseln("Scanning directory " + srcDir.getPath() + "...");
@@ -627,6 +640,9 @@ public final class DoomImageConvertMain
 				}
 				else if (!f.getName().equals(options.metaInfoFilename))
 				{
+					if (isExcludedFile(f))
+						continue;
+					
 					String fileName = FileUtils.getFileNameWithoutExtension(f);
 					MetaInfo info = metaMap.getOrDefault(fileName, metaMap.get("*"));
 					info = info == null ? fallback : info;
