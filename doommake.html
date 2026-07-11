@@ -228,7 +228,7 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.35.4 by Matt Tropiano
+DoomMake v0.36.0 by Matt Tropiano
 (using DoomStruct v2.22.2 , WadScript v1.9.3, RookScript v1.19.0, RookScript-Desktop v1.10.2.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
@@ -360,6 +360,17 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.36.0
+
+* &#x60;Fixed&#x60; WAD Exploder will explode texture projects missing a TEXTURE1 entry (looking at you, OTEX!).
+* &#x60;Fixed&#x60; WAD Exploder will not output flats (or some other lump types) as TXT when it&#39;s known to be binary data (Issue #185).
+* &#x60;Added&#x60; [GUI-Studio] Opening DEUTex texture files in Texture Editor (Enh. #181).
+* &#x60;Added&#x60; [GUI-Studio] Output build log to an actual file (&#x60;build&#x2F;build.log&#x60;) (Enh. #177).
+* &#x60;Changed&#x60; [GUI-Studio] Scripts that start with &quot;doommake-&quot; are considered DoomMake scripts by default.
+* &#x60;Changed&#x60; New projects will factor in the WADINFO and CREDITS file changes for rebuilding the release (Issue #184).
+* &#x60;Changed&#x60; New projects will clean a build convert folder before it does conversion (Issue #187).
+
+
 ### Changed for 0.35.4
 
 * &#x60;Changed&#x60; WAD Explosion errors are a little more informative.
