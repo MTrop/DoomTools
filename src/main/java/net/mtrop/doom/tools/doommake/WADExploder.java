@@ -480,7 +480,7 @@ public final class WADExploder
 				if (entry != null)
 					entries.add(entry);
 			}
-			exportEntriesToDirectory(log, entrySet, wad, entries, outPaletteDir);
+			exportEntriesToDirectory(log, entrySet, wad, entries, outPaletteDir, "pal");
 
 			entries = new LinkedList<>(); 
 			for (String entryName : COLORMAP_NAMES)
@@ -489,7 +489,7 @@ public final class WADExploder
 				if (entry != null)
 					entries.add(entry);
 			}
-			exportEntriesToDirectory(log, entrySet, wad, entries, outColormapDir);
+			exportEntriesToDirectory(log, entrySet, wad, entries, outColormapDir, "cmp");
 
 			int cstart = wad.indexOf("C_START");
 			if (cstart >= 0)
@@ -500,7 +500,7 @@ public final class WADExploder
 					throw new ExplodeException("C_END", "Found C_START without C_END.");
 				entrySet.remove(wad.getEntry("C_END"));
 				
-				exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(wad.mapEntries(cstart + 1, cend - cstart - 1)), outColormap2Dir);
+				exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(wad.mapEntries(cstart + 1, cend - cstart - 1)), outColormap2Dir, "cmp");
 			}
 		}
 	}
@@ -544,10 +544,10 @@ public final class WADExploder
 			File outFlatDir = new File(targetDirectory.getPath() + "/src/textures/flats");
 	
 			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outFlatDir);
+			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outFlatDir, "lmp");
 			
 			WadEntry[] patchEntries = getEntriesInNamespace(wad, "P", "PP", Pattern.compile("P[1-9]_(START|END)"));
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(patchEntries), outPatchDir);
+			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(patchEntries), outPatchDir, "lmp");
 		}
 		
 		WadEntry[] headers = WadUtils.withEntries(withoutNulls(
@@ -696,7 +696,7 @@ public final class WADExploder
 		File outDir = new File(targetDirectory.getPath() + "/src/assets/acslib");
 
 		WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "A");
-		exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outDir);
+		exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outDir, "o");
 		for (WadEntry entry : WadUtils.withEntries(withoutNulls(wad.getEntry("A_START"), wad.getEntry("A_END"))).get())
 			entrySet.remove(entry);
 	}
@@ -739,7 +739,7 @@ public final class WADExploder
 			WadEntry[] spriteEntries;
 
 			spriteEntries = getEntriesInNamespace(wad, "S", "SS");
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir);
+			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir, "lmp");
 		}
 		
 		WadEntry[] headers = WadUtils.withEntries(withoutNulls(
@@ -977,8 +977,8 @@ public final class WADExploder
 				out.setRGB(x, y, palette[y].getColorARGB(x));
 		return out;
 	}
-	
-	private static void exportEntriesToDirectory(PrintStream log, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir) throws ExplodeException
+
+	private static void exportEntriesToDirectory(PrintStream log, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir, String forceExtension) throws ExplodeException
 	{
 		for (WadEntry entry : entries) 
 		{
@@ -987,7 +987,7 @@ public final class WADExploder
 			
 			try {
 				byte[] data = wad.getData(entry);
-				File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + "." + getExtensionFor(entry.getName(), data));
+				File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + "." + (forceExtension != null ? forceExtension : getExtensionFor(entry.getName(), data)));
 					try (FileOutputStream fos = new FileOutputStream(out))
 					{
 						fos.write(data);

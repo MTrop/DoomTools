@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.36.0
 
 * `Fixed` WAD Exploder will explode texture projects missing a TEXTURE1 entry (looking at you, OTEX!).
+* `Fixed` WAD Exploder will not output flats (or some other lump types) as TXT when it's known to be binary data (Issue #185).
 * `Added` [GUI-Studio] Opening DEUTex texture files in Texture Editor (Enh. #181).
 * `Added` [GUI-Studio] Output build log to an actual file (`build/build.log`) (Enh. #177).
 * `Changed` [GUI-Studio] Scripts that start with "doommake-" are considered DoomMake scripts by default.
