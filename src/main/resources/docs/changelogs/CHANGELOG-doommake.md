@@ -9,6 +9,7 @@ DoomMake
 * `Added` [GUI-Studio] Output build log to an actual file (`build/build.log`) (Enh. #177).
 * `Changed` [GUI-Studio] Scripts that start with "doommake-" are considered DoomMake scripts by default.
 * `Changed` New projects will factor in the WADINFO and CREDITS file changes for rebuilding the release (Issue #184).
+* `Changed` New projects will clean a build convert folder before it does conversion (Issue #187).
 
 
 ### Changed for 0.35.4

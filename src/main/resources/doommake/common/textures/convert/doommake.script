@@ -21,6 +21,9 @@ check function doConvertFlats() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting flats...");
 
 	convertimg(sourceDir, targetDir, "flats");
@@ -49,6 +52,9 @@ check function doConvertPatches() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting patches...");
 
 	convertimg(sourceDir, targetDir);
@@ -66,6 +72,9 @@ check function doConvertTextureDirectory(sourceDir, targetDir) {
 		return false;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting textures...");
 
 	convertimg(sourceDir, targetDir);

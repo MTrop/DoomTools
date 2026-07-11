@@ -14,13 +14,16 @@ check function doConvertPalettes() {
 	targetDir = getBuildDirectory() + SRC_DIR_CONVERT + "/palettes";
 	verifydirs(sourceDir);
 	verifydirs(targetDir);
-			
+	
 	hash = directoryHasChanged(sourceDir);
 	if (hash === null) {
 		println("[Skipped] Palette conversion directory (" + sourceDir + ") up to date.");
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting palettes...");
 	
 	convertimg(sourceDir, targetDir, "palettes");
@@ -49,6 +52,9 @@ check function doConvertSounds() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting sounds...");
 	
 	convertdmx(sourceDir, targetDir);
@@ -77,6 +83,9 @@ check function doConvertGraphics() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting graphics...");
 	
 	convertimg(sourceDir, targetDir, "graphics");
@@ -105,6 +114,9 @@ check function doConvertSprites() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting sprites...");
 	
 	convertimg(sourceDir, targetDir, "graphics");
@@ -131,6 +143,9 @@ check function doConvertPrimaryColormaps() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting primary colormaps...");
 	
 	convertimg(sourceDir, targetDir, "colormaps");
@@ -157,6 +172,9 @@ check function doConvertSecondaryColormaps() {
 		return;
 	}
 
+	println("Cleaning " + targetDir + "..."); 
+	cleandir(targetDir);
+			
 	println("Converting colormaps...");
 	
 	convertimg(sourceDir, targetDir, "colormaps");
