@@ -76,37 +76,37 @@ public final class DoomToolsMain
 	);
 	
 	private static final List<String> DOCS_DATA = ObjectUtils.createList(
-		"docs/AUTHORS.txt",
-		"docs/CHANGELOG.md",
-		"docs/DECOHack Constants.txt",
-		"docs/DECOHack Help.txt",
-		"docs/DeHackEd Hardcodings.txt",
-		"docs/DoomMake Help.txt",
-		"docs/RookScript Quick Guide.md",
-		"docs/WadMerge Help.txt",
-		"docs/WadScript Help.txt",
-		"docs/changelogs/CHANGELOG-decohack.md",
-		"docs/changelogs/CHANGELOG-dimgconv.md",
-		"docs/changelogs/CHANGELOG-dmxconv.md",
-		"docs/changelogs/CHANGELOG-doomfetch.md",
-		"docs/changelogs/CHANGELOG-doommake.md",
-		"docs/changelogs/CHANGELOG-wadmerge.md",
-		"docs/changelogs/CHANGELOG-wadscript.md",
-		"docs/changelogs/CHANGELOG-wadtex.md",
-		"docs/changelogs/CHANGELOG-wswantbl.md",
-		"docs/changelogs/CHANGELOG-wtexlist.md",
-		"docs/changelogs/CHANGELOG-wtexport.md",
-		"docs/changelogs/CHANGELOG-wtexscan.md",
-		"docs/licenses/LICENSE-AutoComplete.txt",
-		"docs/licenses/LICENSE-BlackRookBase.txt",
-		"docs/licenses/LICENSE-BlackRookJSON.txt",
-		"docs/licenses/LICENSE-CommonMark.txt",
-		"docs/licenses/LICENSE-DoomStruct.txt",
-		"docs/licenses/LICENSE-FlatLaF.txt",
-		"docs/licenses/LICENSE-RookScript.txt",
-		"docs/licenses/LICENSE-RookScript-Desktop.txt",
-		"docs/licenses/LICENSE-RSyntaxTextArea.txt",
-		"docs/licenses/LICENSE-Silk Icons.txt"
+		"AUTHORS.txt",
+		"CHANGELOG.md",
+		"DECOHack Constants.txt",
+		"DECOHack Help.txt",
+		"DeHackEd Hardcodings.txt",
+		"DoomMake Help.txt",
+		"RookScript Quick Guide.md",
+		"WadMerge Help.txt",
+		"WadScript Help.txt",
+		"changelogs/CHANGELOG-decohack.md",
+		"changelogs/CHANGELOG-dimgconv.md",
+		"changelogs/CHANGELOG-dmxconv.md",
+		"changelogs/CHANGELOG-doomfetch.md",
+		"changelogs/CHANGELOG-doommake.md",
+		"changelogs/CHANGELOG-wadmerge.md",
+		"changelogs/CHANGELOG-wadscript.md",
+		"changelogs/CHANGELOG-wadtex.md",
+		"changelogs/CHANGELOG-wswantbl.md",
+		"changelogs/CHANGELOG-wtexlist.md",
+		"changelogs/CHANGELOG-wtexport.md",
+		"changelogs/CHANGELOG-wtexscan.md",
+		"licenses/LICENSE-AutoComplete.txt",
+		"licenses/LICENSE-BlackRookBase.txt",
+		"licenses/LICENSE-BlackRookJSON.txt",
+		"licenses/LICENSE-CommonMark.txt",
+		"licenses/LICENSE-DoomStruct.txt",
+		"licenses/LICENSE-FlatLaF.txt",
+		"licenses/LICENSE-RookScript.txt",
+		"licenses/LICENSE-RookScript-Desktop.txt",
+		"licenses/LICENSE-RSyntaxTextArea.txt",
+		"licenses/LICENSE-Silk Icons.txt"
 	);
 	
 	private static final FileFilter JAR_FILES = (f) -> {
@@ -235,14 +235,15 @@ public final class DoomToolsMain
 		{
 			final String path; 
 			try {
-				path = Environment.getDoomToolsPath();
+				path = Environment.getDoomToolsDocsPath();
 			} catch (SecurityException e) {
 				options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 				return ERROR_SECURITY;
 			}
+			
 			if (ObjectUtils.isEmpty(path))
 			{
-				options.stderr.println("ERROR: DOOMTOOLS_PATH ENVVAR not set. Not invoked via shell?");
+				options.stderr.println("ERROR: DOOMTOOLS_PATH or DOOMTOOLS_DOCPATH ENVVAR not filled with a value.");
 				return ERROR_NOWHERE;
 			}
 			
@@ -257,7 +258,7 @@ public final class DoomToolsMain
 				}
 				
 				try (
-					Reader reader = Common.openResourceReader(docFileResourcePath);
+					Reader reader = Common.openResourceReader("docs/" + docFileResourcePath);
 					Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFilePath)))
 				){
 					IOUtils.relay(reader, writer);
@@ -482,15 +483,16 @@ public final class DoomToolsMain
 			}
 			else if (options.env)
 			{
-				options.stdout.println("DoomTools Path:     " + Environment.getDoomToolsPath());
-				options.stdout.println("DoomTools JAR Path: " + Environment.getDoomToolsJarPath());
-				options.stdout.println("App Config Path:    " + Environment.getApplicationConfigPath());
-				options.stdout.println("App Data Path:      " + Environment.getApplicationDataPath());
-				options.stdout.println("App Cache Path:     " + Environment.getApplicationCachePath());
-				options.stdout.println("App State Path:     " + Environment.getApplicationStatePath());
-				options.stdout.println("System Config Path: " + Environment.getSystemConfigPath());
-				options.stdout.println("System Data Path:   " + Environment.getSystemDataPath());
-				options.stdout.println("System Temp Path:   " + Environment.getSystemTempPath());
+				options.stdout.println("DoomTools Path:      " + Environment.getDoomToolsPath());
+				options.stdout.println("DoomTools JAR Path:  " + Environment.getDoomToolsJarPath());
+				options.stdout.println("DoomTools Docs Path: " + Environment.getDoomToolsDocsPath());
+				options.stdout.println("App Config Path:     " + Environment.getApplicationConfigPath());
+				options.stdout.println("App Data Path:       " + Environment.getApplicationDataPath());
+				options.stdout.println("App Cache Path:      " + Environment.getApplicationCachePath());
+				options.stdout.println("App State Path:      " + Environment.getApplicationStatePath());
+				options.stdout.println("System Config Path:  " + Environment.getSystemConfigPath());
+				options.stdout.println("System Data Path:    " + Environment.getSystemDataPath());
+				options.stdout.println("System Temp Path:    " + Environment.getSystemTempPath());
 				return ERROR_NONE;
 			}
 			else if (options.javaStats)
@@ -529,10 +531,16 @@ public final class DoomToolsMain
 			{
 				String path; 
 				try {
-					path = Environment.getDoomToolsPath();
+					path = Environment.getDoomToolsDocsPath();
 				} catch (SecurityException e) {
 					options.stderr.println("ERROR: Could not fetch value of ENVVAR.");
 					return ERROR_SECURITY;
+				}
+
+				if (ObjectUtils.isEmpty(path))
+				{
+					options.stderr.println("ERROR: DOOMTOOLS_PATH or DOOMTOOLS_DOCPATH ENVVAR not filled with a value.");
+					return ERROR_NOWHERE;
 				}
 				
 				int desktopError;
@@ -540,7 +548,7 @@ public final class DoomToolsMain
 					return desktopError;
 				
 				try {
-					File docsPath = new File(path + File.separator + "docs");
+					File docsPath = new File(path);
 					options.stdout.printf("Opening the DoomTools documentation folder (%s)...\n", docsPath.toString());
 					Desktop.getDesktop().open(docsPath);
 				} catch (IOException e) {

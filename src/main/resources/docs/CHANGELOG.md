@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-07-11** DoomTools will recognize an optional DOOMTOOLS_DOCPATH envvar for locating where its documentation is stored (Issue #183).
 - **2026-07-05** Added more editor themes.
 - **2026-07-03** No more single-instance enforcement of the main GUI.
 - **2026-07-03** All editors will detect changes outside of the editor and prompt the user to reload them.

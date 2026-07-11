@@ -78,6 +78,24 @@ public final class Environment
 		return System.getenv("DOOMTOOLS_JAR");
 	}
 	
+	/**
+	 * Gets the path that DoomTools stores its documentation in.
+	 * If null, this variable may not have been set.
+	 * @return the corresponding value.
+	 * @throws SecurityException if the variable could not be retrieved.
+	 */
+	public static String getDoomToolsDocsPath()
+	{
+		String path = System.getenv("DOOMTOOLS_DOCPATH");
+		if (path == null)
+			path = getDoomToolsPath();
+		
+		if (path == null)
+			return null;
+		else
+			return path + File.separator + "docs";
+	}
+	
 	/** 
 	 * @return the path to where configuration gets stored. 
 	 */
