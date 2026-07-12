@@ -87,9 +87,10 @@ public final class Environment
 	public static String getDoomToolsDocsPath()
 	{
 		String path = System.getenv("DOOMTOOLS_DOCPATH");
-		if (path == null)
-			path = getDoomToolsPath();
-		
+		if (path != null)
+			return path;
+
+		path = getDoomToolsPath();
 		if (path == null)
 			return null;
 		else
