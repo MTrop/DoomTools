@@ -549,8 +549,16 @@ public final class DoomToolsMain
 				
 				try {
 					File docsPath = new File(path);
-					options.stdout.printf("Opening the DoomTools documentation folder (%s)...\n", docsPath.toString());
-					Desktop.getDesktop().open(docsPath);
+					if (!docsPath.exists())
+					{
+						options.stderr.println("ERROR: Cannot open documentation folder. Folder does not exist!");
+						return ERROR_DESKTOP_ERROR;
+					}
+					else
+					{
+						options.stdout.printf("Opening the DoomTools documentation folder (%s)...\n", docsPath.toString());
+						Desktop.getDesktop().open(docsPath);
+					}
 				} catch (IOException e) {
 					options.stderr.println("ERROR: Cannot open documentation folder. I/O Error.");
 					return ERROR_DESKTOP_ERROR;

@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-07-12** DoomTools will error out if it can't find the documentation folder on open.
+
 - **2026-07-11** Fix for optional DOOMTOOLS_DOCPATH envvar (Issue #183).
 
 - **2026-07-11** DoomTools will recognize an optional DOOMTOOLS_DOCPATH envvar for locating where its documentation is stored (Issue #183).
