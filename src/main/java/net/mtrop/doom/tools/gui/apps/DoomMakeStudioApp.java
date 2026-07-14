@@ -1090,7 +1090,16 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 
 		try {
-			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath, fileToOpen.getCanonicalPath());
+			String openPath = null;
+			if (fileToOpen != null)
+			{
+				openPath = fileToOpen.getCanonicalPath();
+				DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath, openPath);
+			}
+			else
+			{
+				DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.WADTEX_TEXTURE_EDITOR, projectDirectory.getCanonicalPath(), iwadPath, palettePath);
+			}
 		} catch (IOException e) {
 			SwingUtils.error(language.getText("doommake.texture.editor.ioerror"));
 			LOG.error(e, "I/O Error running texture editor program.");

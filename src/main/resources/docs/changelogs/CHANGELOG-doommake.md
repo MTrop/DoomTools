@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.36.1
+
+* `Fixed` [GUI-Studio] Opening the Texture Editor without a file no longer NPEs.
+
+
 ### Changed for 0.36.0
 
 * `Fixed` WAD Exploder will explode texture projects missing a TEXTURE1 entry (looking at you, OTEX!).
