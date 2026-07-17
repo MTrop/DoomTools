@@ -1011,7 +1011,6 @@ public enum WadMergeCommand
 			out.println("    ................................");
 			out.println("    Returns: OK if merge successful,");
 			out.println("             BAD_SYMBOL if the destination symbol is invalid,"); 
-			out.println("             BAD_SOURCE_SYMBOL if the source symbol is invalid,");
 			out.println("             BAD_ENTRY if the entry could not be found,");
 			out.println("             BAD_FILE if the file does not exist or is a directory,");
 			out.println("             BAD_WAD if the file is not a WAD.");
@@ -1155,14 +1154,15 @@ public enum WadMergeCommand
 		public void help(PrintStream out)
 		{
 			out.println(usage());
-			out.println("    Imports a directory's files as Doom Patches (or PNGs) and adds them");
-			out.println("    to either a new or already-existing P or PP namespace and texture set entry");
-			out.println("    (plus PNAMES).");
-			out.println("    [symbol]: The symbol to add to.");
-			out.println("    [path]:   The directory to read.");
-			out.println("    [entry]:  The name of the texture entry to write/append to.");
-			out.println("    [strife]: (Optional) If \"strife\", the texture entry is read and/or");
-			out.println("              written as a Strife-formatted texture set.");
+			out.println("    Imports a directory's files (recursively) as Doom Patches (or PNGs) and");
+			out.println("    adds them to either a new or already-existing P or PP namespace and");
+			out.println("    texture set entry (plus PNAMES).");
+			out.println("    [symbol]:    The symbol to add to.");
+			out.println("    [path]:      The directory to read.");
+			out.println("    [entry]:     The name of the texture entry to write/append to.");
+			out.println("    [strife]:    (Optional) If \"strife\", the texture entry is read and/or");
+			out.println("                 written as a Strife-formatted texture set.");
+			out.println("    [nomarkers]: (Optional) If \"nomarkers\", omit the directory markers.");
 			out.println("    ................................");
 			out.println("    Returns: OK if the file was found and contents were merged in,");
 			out.println("             BAD_FILE if a file could not be read,");
@@ -1179,11 +1179,22 @@ public enum WadMergeCommand
 			String textureEntryName = scanner.nextString();
 
 			boolean strife = false;
+			boolean nomarkers = false;
 			if (scanner.hasNext())
-				strife = scanner.nextBoolean("strife");
-			
+			{
+				String token = scanner.nextString();
+				strife = strife || token.equalsIgnoreCase("strife");
+				nomarkers = nomarkers || token.equalsIgnoreCase("nomarkers");
+			}
+			if (scanner.hasNext())
+			{
+				String token = scanner.nextString();
+				strife = strife || token.equalsIgnoreCase("strife");
+				nomarkers = nomarkers || token.equalsIgnoreCase("nomarkers");
+			}
+
 			try {
-				return context.mergeTextureDirectory(symbol, new File(file), strife, textureEntryName);
+				return context.mergeTextureDirectory(symbol, new File(file), strife, nomarkers, textureEntryName);
 			} catch (FileNotFoundException e) {
 				context.logf("ERROR: File %s not found.\n", file);
 				return Response.BAD_FILE;

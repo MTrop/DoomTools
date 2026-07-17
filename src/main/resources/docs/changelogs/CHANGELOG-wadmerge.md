@@ -1,6 +1,12 @@
 WadMerge
 --------
 
+### Changed for 1.12.0
+
+* `Fixed` Some WadMerge documentation.
+* `Changed` `MERGETEXTUREDIR` will now recurse into subdirectories (Enh. #188). NOTE: This change can affect existing projects made with DoomMake!
+
+
 ### Changed for 1.11.1
 
 * `Fixed` WadMerge will not NPE on a bad directory read (Issue #151).

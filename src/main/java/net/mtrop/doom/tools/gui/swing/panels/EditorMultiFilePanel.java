@@ -2313,8 +2313,10 @@ public class EditorMultiFilePanel extends JPanel
 		{
 			editorTab.setTabTitle(path.getName());
 			remapFileTabs(contentSourceFile, path);
+			long now = System.currentTimeMillis();
 			contentSourceFile = path;
-			contentSourceFileLastModified = path.lastModified();
+			contentLastModified = now;
+			contentSourceFileLastModified = now;
 			updateFilePathLabel();
 			updateIcon();
 			updateActions();
@@ -2330,7 +2332,7 @@ public class EditorMultiFilePanel extends JPanel
 		private void updateSourceLastModified()
 		{
 			if (contentSourceFile != null)
-				contentSourceFileLastModified =  contentSourceFile.lastModified();
+				contentSourceFileLastModified = contentSourceFile.lastModified();
 		}
 		
 		private boolean reloadFile()

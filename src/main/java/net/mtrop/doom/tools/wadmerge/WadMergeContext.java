@@ -19,6 +19,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.Wad.Type;
@@ -407,6 +408,28 @@ public class WadMergeContext
 		
 		String marker = NameUtils.toValidEntryName(name);
 		buffer.addMarker(marker);
+		verbosef("Added marker `%s` to buffer `%s`.\n", marker, symbol);
+		return Response.OK;
+	}
+
+	/**
+	 * Adds a marker to a Wad buffer at a specific index.
+	 * Symbol is case-insensitive. The entry is coerced to a valid name.
+	 * @param symbol the symbol to use.
+	 * @param name the entry name.
+	 * @param index the index to add the marker to.
+	 * @return OK if add successful, 
+	 * 		or BAD_SYMBOL if the destination symbol is invalid.
+	 * @throws IOException if an I/O error occurs.
+	 */
+	public Response addMarkerAt(String symbol, String name, int index) throws IOException
+	{
+		Wad buffer;
+		if ((buffer = currentWads.get(symbol)) == null)
+			return Response.BAD_SYMBOL;
+		
+		String marker = NameUtils.toValidEntryName(name);
+		buffer.addMarkerAt(index, marker);
 		verbosef("Added marker `%s` to buffer `%s`.\n", marker, symbol);
 		return Response.OK;
 	}
@@ -952,6 +975,7 @@ public class WadMergeContext
 	 * @param symbol the buffer to write to.
 	 * @param textureDirectory the texture file to parse.
 	 * @param strife if the entry doesn't exist, create in Strife format.
+	 * @param nomarkers if set, omit adding markers to patch namespace for subdirectories.
 	 * @param textureEntryName the name of the texture entry name.
 	 * @return OK if the file was found and contents were merged in, 
 	 * 		or BAD_SYMBOL if the destination symbol is invalid, 
@@ -959,7 +983,7 @@ public class WadMergeContext
 	 * @throws IOException if the file could not be read.
 	 */
 	@SuppressWarnings("unchecked")
-	public Response mergeTextureDirectory(String symbol, File textureDirectory, boolean strife, String textureEntryName) throws IOException
+	public Response mergeTextureDirectory(String symbol, File textureDirectory, boolean strife, boolean nomarkers, String textureEntryName) throws IOException
 	{
 		if (!textureDirectory.exists() || !textureDirectory.isDirectory())
 			return Response.BAD_DIRECTORY;
@@ -995,15 +1019,15 @@ public class WadMergeContext
 		}
 		
 		// Find places to insert patches
-		int insertIndex;
+		AtomicInteger insertIndex = new AtomicInteger(0);
 		if (buffer.contains("PP_END"))
 		{
-			insertIndex = buffer.lastIndexOf("PP_END");
+			insertIndex.set(buffer.lastIndexOf("PP_END"));
 			verbosef("Found existing `PP_END` for insertion point.\n");
 		}
 		else if (buffer.contains("P_END"))
 		{
-			insertIndex = buffer.lastIndexOf("P_END");
+			insertIndex.set(buffer.lastIndexOf("P_END"));
 			verbosef("Found existing `P_END` for insertion point.\n");
 		}
 		else
@@ -1013,57 +1037,21 @@ public class WadMergeContext
 				return resp;
 			if ((resp = addMarker(symbol, "PP_END")) != Response.OK)
 				return resp;
-			insertIndex = buffer.lastIndexOf("PP_END");
+			insertIndex.set(buffer.lastIndexOf("PP_END"));
 		}
 		
+		Response resp;
 		TextureSet textureSet = new TextureSet(pout, tout);
 		WadFile.Adder adder = (buffer instanceof WadFile) ? ((WadFile)buffer).createAdder() : null;
 
-		File[] files = textureDirectory.listFiles();
-		if (files == null)
-		{
-			return Response.BAD_DIRECTORY;
-		}
-		
-		
-		// Sort files first, directories last, alphabetical order.
-		Arrays.sort(files, DIR_FILESORT);
-
 		try {
-			for (File f : files)
-			{
-				if (f.isDirectory())
-				{
-					verbosef("Skipping directory `%s`...\n", f.getPath());
-					continue;
-				}
-				else
-				{
-					Response resp;
-					String namenoext = subCharString(FileUtils.getFileNameWithoutExtension(f));
-					if (adder != null)
-					{
-						if ((resp = mergeFileData(adder, symbol, f, namenoext, insertIndex)) != Response.OK)
-							return resp;
-					}
-					else
-					{
-						if ((resp = mergeFileData(buffer, symbol, f, namenoext, insertIndex)) != Response.OK)
-							return resp;
-					}
-					insertIndex++;
-					
-					String textureName = NameUtils.toValidTextureName(namenoext);
-					Texture texture = textureSet.createTexture(textureName);
-					setTextureDimensions(texture, f);
-					texture.createPatch(textureName);
-					verbosef("Add texture `%s`...\n", textureName);
-				}
-			}
+			if ((resp = mergeTextureDirectoryRecurse(symbol, textureDirectory, buffer, adder, nomarkers, insertIndex, textureSet)) != Response.OK)
+				return resp;
 		} finally {
 			IOUtils.close(adder);
 		}
 
+			
 		if (strife)
 			textureSet.export(pout, (CommonTextureList<StrifeTextureList.Texture>)(tout = new StrifeTextureList(128)));
 		else
@@ -1096,6 +1084,58 @@ public class WadMergeContext
 		}
 
 		return Response.OK;
+	}
+
+	private Response mergeTextureDirectoryRecurse(String symbol, File textureDirectory, Wad buffer, WadFile.Adder adder, Boolean nomarkers, AtomicInteger insertIndex, TextureSet textureSet) throws IOException 
+	{
+		File[] files = textureDirectory.listFiles();
+		if (files == null)
+		{
+			return Response.BAD_DIRECTORY;
+		}
+		
+		// Sort files first, directories last, alphabetical order.
+		Arrays.sort(files, DIR_FILESORT);
+
+		for (File f : files)
+		{
+			if (f.isDirectory())
+			{
+				verbosef("Entering directory `%s`...\n", f.getPath());
+				if (!nomarkers)
+				{
+					String markerName = "\\" + f.getName();
+					Response resp;
+					if ((resp = addMarkerAt(symbol, markerName, insertIndex.getAndIncrement())) != Response.OK)
+						return resp;
+				}
+				mergeTextureDirectoryRecurse(symbol, f, buffer, adder, nomarkers, insertIndex, textureSet);
+			}
+			else
+			{
+				Response resp;
+				String namenoext = subCharString(FileUtils.getFileNameWithoutExtension(f));
+				if (adder != null)
+				{
+					if ((resp = mergeFileData(adder, symbol, f, namenoext, insertIndex.get())) != Response.OK)
+						return resp;
+				}
+				else
+				{
+					if ((resp = mergeFileData(buffer, symbol, f, namenoext, insertIndex.get())) != Response.OK)
+						return resp;
+				}
+				insertIndex.getAndIncrement();
+				
+				String textureName = NameUtils.toValidTextureName(namenoext);
+				Texture texture = textureSet.createTexture(textureName);
+				setTextureDimensions(texture, f);
+				texture.createPatch(textureName);
+				verbosef("Add texture `%s`...\n", textureName);
+			}
+		}
+		
+		return Response.OK; 
 	}
 	
 	/**

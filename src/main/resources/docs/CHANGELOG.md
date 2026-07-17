@@ -7,6 +7,7 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-07-17** Fix editor change detection.
 - **2026-07-16** [GUI] File fields can be copied/cut from (bugfix).
 - **2026-07-12** DoomTools will error out if it can't find the documentation folder on open.
 
