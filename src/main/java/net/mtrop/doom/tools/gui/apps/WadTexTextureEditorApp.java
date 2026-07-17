@@ -245,8 +245,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.canvas = new WadTexTextureEditorCanvas();
 		
 		this.patchListModel = canvas.getPatchListModel();
-		this.patchList = list(patchListModel, listLabelRenderer((i) -> i.toString()), ListSelectionMode.SINGLE, (list, b) -> {
-			PatchGraphic pg = list.isEmpty() ? null : list.get(0);
+		this.patchList = list(patchListModel, listLabelRenderer((i) -> i.toString()), ListSelectionMode.MULTIPLE_INTERVAL, (list, b) -> {
+			PatchGraphic pg = list.isEmpty() || list.size() != 1 ? null : list.get(0);
 			onSwitchToPatch(pg);	
 		});
 		
@@ -691,7 +691,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private void refreshPatchSources()
 	{
-		LOG.debugf("Start patch source refresh...");
+		LOG.debug("Start patch source refresh...");
 		projectPatchSources.clear();
 		
 		if (projectDirectoryField.getValue() != null)
@@ -741,20 +741,20 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			}
 		}
 
-		LOG.debugf("End patch source refresh.");
+		LOG.debug("End patch source refresh.");
 		refeshPatchNameList();
 	}
 	
 	private void refeshPatchNameList()
 	{
-		LOG.debugf("Start patch name refresh...");
+		LOG.debug("Start patch name refresh...");
 		projectPatchNames.clear();
 
 		for (Map.Entry<String, ?> entry : projectPatchSources.entrySet())
 			projectPatchNames.add(entry.getKey());
 		
 		projectPatchNames.sort(String.CASE_INSENSITIVE_ORDER);
-		LOG.debugf("Patch name refresh finished.");
+		LOG.debug("Patch name refresh finished.");
 	}
 
 	private void updateActionsAndFields()
@@ -773,9 +773,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		textureMoveDownAction.setEnabled(currentTexture != null);
 
 		patchAddAction.setEnabled(currentTexture != null);
-		patchRemoveAction.setEnabled(currentPatch != null);
+		patchRemoveAction.setEnabled(!selectedPatches.isEmpty());
 		patchAddAction2.setEnabled(currentTexture != null);
-		patchRemoveAction2.setEnabled(currentPatch != null);
+		patchRemoveAction2.setEnabled(!selectedPatches.isEmpty());
 		patchMoveUpAction.setEnabled(currentPatch != null);
 		patchMoveDownAction.setEnabled(currentPatch != null);
 		patchCloneAction.setEnabled(!selectedPatches.isEmpty());
@@ -1490,10 +1490,12 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private void onPatchRemove()
 	{
-		patchListModel.removePatch(patchList.getSelectedIndex());
-		onSwitchToPatch(null);
-		canvas.repaint();
+		List<PatchGraphic> selected = patchList.getSelectedValuesList();
+		for (PatchGraphic pg : selected)
+			patchListModel.removePatch(pg);
 		currentHasChanged = true;
+		canvas.repaint();
+		onSwitchToPatch(null);
 	}
 
 	private void onPatchMoveUp()
@@ -1540,6 +1542,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private void onPatchTranslate(int x, int y)
 	{
+		if (currentPatch == null)
+			return;
 		patchXField.setValue((short)(currentPatch.getOriginX() + x));
 		patchYField.setValue((short)(currentPatch.getOriginY() + y));
 		canvas.repaint();

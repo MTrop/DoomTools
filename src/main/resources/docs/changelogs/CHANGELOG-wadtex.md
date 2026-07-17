@@ -1,6 +1,12 @@
 WadTex
 ------
 
+### Changed for 1.5.5
+
+* `Added` [GUI-TextureEditor] Multi-patch selection (and clone).
+* `Added` [GUI-TextureEditor] Multi-patch remove from texture.
+
+
 ### Changed for 1.5.4
 
 * `Added` [GUI-TextureEditor] Add clone patch function (Enh. #173).

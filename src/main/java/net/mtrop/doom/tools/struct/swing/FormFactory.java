@@ -12,7 +12,9 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
@@ -52,6 +54,9 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import static javax.swing.BorderFactory.*;
 
@@ -2352,6 +2357,27 @@ public final class FormFactory
 		{
 			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
 				|| support.isDataFlavorSupported(DataFlavor.stringFlavor);
+		}
+		
+		@Override
+		public void exportToClipboard(JComponent comp, Clipboard clip, int action) throws IllegalStateException
+		{
+            JTextComponent text = (JTextComponent)comp;
+            int p0 = text.getSelectionStart();
+            int p1 = text.getSelectionEnd();
+            if (p0 != p1) 
+            {
+                try {
+                    Document doc = text.getDocument();
+                    String srcData = doc.getText(p0, p1 - p0);
+                    StringSelection contents = new StringSelection(srcData);
+                    clip.setContents(contents, null);
+
+                    if (action == TransferHandler.MOVE) {
+                        doc.remove(p0, p1 - p0);
+                    }
+                } catch (BadLocationException ble) {}
+            }
 		}
 		
 		@Override
