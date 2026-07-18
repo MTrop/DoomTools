@@ -89,7 +89,7 @@ end
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WadMerge v1.11.1 by Matt Tropiano (using DoomStruct v2.22.2)
+WadMerge v1.12.0 by Matt Tropiano (using DoomStruct v2.22.2)
 Usage: wadmerge [--help | -h | --version]
                 [switches] [scriptfile] [arguments]
 
@@ -413,7 +413,6 @@ MERGEENTRYFILE [symbol] [entry] [path] [opt:src-entry]
     ................................
     Returns: OK if merge successful,
              BAD_SYMBOL if the destination symbol is invalid,
-             BAD_SOURCE_SYMBOL if the source symbol is invalid,
              BAD_ENTRY if the entry could not be found,
              BAD_FILE if the file does not exist or is a directory,
              BAD_WAD if the file is not a WAD.
@@ -445,14 +444,15 @@ MERGEDEUTEXFILE [symbol] [path] [opt:entry] [opt:strife]
              BAD_FILE if the file does not exist or is a directory.
 
 MERGETEXTUREDIR [symbol] [path] [entry] [opt:strife]
-    Imports a directory&#39;s files as Doom Patches (or PNGs) and adds them
-    to either a new or already-existing P or PP namespace and texture set entry
-    (plus PNAMES).
-    [symbol]: The symbol to add to.
-    [path]:   The directory to read.
-    [entry]:  The name of the texture entry to write&#x2F;append to.
-    [strife]: (Optional) If &quot;strife&quot;, the texture entry is read and&#x2F;or
-              written as a Strife-formatted texture set.
+    Imports a directory&#39;s files (recursively) as Doom Patches (or PNGs) and
+    adds them to either a new or already-existing P or PP namespace and
+    texture set entry (plus PNAMES).
+    [symbol]:    The symbol to add to.
+    [path]:      The directory to read.
+    [entry]:     The name of the texture entry to write&#x2F;append to.
+    [strife]:    (Optional) If &quot;strife&quot;, the texture entry is read and&#x2F;or
+                 written as a Strife-formatted texture set.
+    [nomarkers]: (Optional) If &quot;nomarkers&quot;, omit the directory markers.
     ................................
     Returns: OK if the file was found and contents were merged in,
              BAD_FILE if a file could not be read,
@@ -479,6 +479,12 @@ FILECHARSUB [char] [replacement]
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.12.0
+
+* &#x60;Fixed&#x60; Some WadMerge documentation.
+* &#x60;Changed&#x60; &#x60;MERGETEXTUREDIR&#x60; will now recurse into subdirectories (Enh. #188). NOTE: This change can affect existing projects made with DoomMake!
+
+
 ### Changed for 1.11.1
 
 * &#x60;Fixed&#x60; WadMerge will not NPE on a bad directory read (Issue #151).
