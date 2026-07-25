@@ -128,7 +128,7 @@ public final class AppCommon
 	{
 		final String path; 
 		try {
-			path = Environment.getDoomToolsPath();
+			path = Environment.getDoomToolsDocsPath();
 		} catch (SecurityException e) {
 			SwingUtils.error(language.getText("doomtools.error.pathenvvar"));
 			return;
