@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -43,6 +44,7 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -81,6 +83,8 @@ import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchGraphic;
 import net.mtrop.doom.tools.gui.swing.panels.WadTexTextureEditorCanvas.PatchListModel;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.TokenScanner;
+import net.mtrop.doom.tools.struct.swing.ClipboardUtils;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doom.tools.struct.swing.LayoutFactory.Flow;
@@ -153,6 +157,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action saveAction;
 	private Action refreshTextureListAction;
 	
+	private KeyStroke copyKeyStroke;
+	private KeyStroke pasteKeyStroke;
+	private KeyStroke deleteKeyStroke;
+	
 	private Action textureAddAction;
 	private Action textureAddAction2;
 	private Action textureRemoveAction;
@@ -165,6 +173,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action patchRemoveAction2;
 	private Action patchMoveUpAction;
 	private Action patchMoveDownAction;
+	private Action patchCopyAction;
+	private Action patchPasteAction;
 	private Action patchCloneAction;
 	private Action patchRenameAction;
 	private Action helpAction;
@@ -176,7 +186,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private boolean currentHasChanged;
 	private TextureSet.Texture currentTexture;
 	private TextureSet.Patch currentPatch;
-	
+
 	public WadTexTextureEditorApp(File projectDirectory, File baseIwadPath, File paletteWadPath, File fileToOpen)
 	{
 		this();
@@ -261,6 +271,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.saveAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (a) -> onSaveTextureFile());
 		this.refreshTextureListAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.texture", (a) -> onRefreshTextureList());
 		
+		this.copyKeyStroke = language.getKeyStroke("texteditor.action.copy.keystroke");
+		this.pasteKeyStroke = language.getKeyStroke("texteditor.action.paste.keystroke");
+		this.deleteKeyStroke = language.getKeyStroke("texteditor.action.delete.keystroke");
+		
 		this.textureAddAction = actionItem(icons.getImage("add.png"), (a) -> onTextureAdd());
 		this.textureRemoveAction = actionItem(icons.getImage("remove.png"), (a) -> onTextureRemove());
 		this.textureMoveUpAction = actionItem(icons.getImage("up-arrow.png"), (a) -> onTextureMoveUp());
@@ -277,6 +291,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.renameTextureAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.texture.rename", (a) -> onTextureRename());
 		this.patchAddAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.add", (a) -> onPatchAdd());
 		this.patchRemoveAction2 = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.remove", (a) -> onPatchRemove());
+		this.patchCopyAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.copy", (a) -> onPatchCopy());
+		this.patchPasteAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.paste", (a) -> onPatchPaste());
 		this.patchCloneAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.clone", (a) -> onPatchClone());
 		this.patchRenameAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.rename", (a) -> onPatchRename());
 		
@@ -290,6 +306,9 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.patchList.setComponentPopupMenu(popupMenu(
 			menuItem(patchAddAction2),
 			menuItem(patchRemoveAction2),
+			separator(),
+			menuItem(patchCopyAction),
+			menuItem(patchPasteAction),
 			separator(),
 			menuItem(patchCloneAction),
 			menuItem(patchRenameAction)
@@ -778,6 +797,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		patchRemoveAction2.setEnabled(!selectedPatches.isEmpty());
 		patchMoveUpAction.setEnabled(currentPatch != null);
 		patchMoveDownAction.setEnabled(currentPatch != null);
+		
+		patchCopyAction.setEnabled(!selectedPatches.isEmpty());
+		patchPasteAction.setEnabled(currentTexture != null);
+		
 		patchCloneAction.setEnabled(!selectedPatches.isEmpty());
 		patchRenameAction.setEnabled(currentPatch != null);
 		
@@ -1548,6 +1571,80 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		patchYField.setValue((short)(currentPatch.getOriginY() + y));
 		canvas.repaint();
 		currentHasChanged = true;
+	}
+
+	private void onPatchCopy() 
+	{
+		StringBuffer sb = new StringBuffer();
+		for (PatchGraphic pg : patchList.getSelectedValuesList())
+		{
+			TextureSet.Patch patch = pg.getPatch();
+			sb.append("* ").append(patch.getName()).append(' ');
+			sb.append(patch.getOriginX()).append(' ');
+			sb.append(patch.getOriginY()).append('\n');
+		}
+		
+		ClipboardUtils.sendStringToClipboard(sb.toString());
+	}
+
+	private void onPatchPaste()
+	{
+		String patchData = ClipboardUtils.getStringFromClipboard();
+		if (ObjectUtils.isEmpty(patchData))
+		{
+			SwingUtils.info(language.getText("wadtex.texture.editor.patch.paste.empty"));
+			return;
+		}
+		
+		int linenum = 1;
+		try (BufferedReader br = new BufferedReader(new StringReader(patchData)); )
+		{
+			String line;
+			while ((line = br.readLine()) != null)
+			{
+				String name;
+				int offsetX, offsetY;
+				try (TokenScanner patchScanner = new TokenScanner(line))
+				{
+					patchScanner.nextToken(); // "*"
+					name = patchScanner.nextString();
+					offsetX = patchScanner.nextInt();
+					offsetY = patchScanner.nextInt();
+				}
+
+				GraphicObject gobj = fetchGraphicObjectForName(name);
+				TextureSet.Patch patch = currentTexture.createPatch(name);
+				patch.setOriginX(offsetX);
+				patch.setOriginY(offsetY);
+				if (gobj != null)
+				{
+					if (gobj instanceof Picture)
+						createPatch(patch, (Picture)gobj);
+					else
+						createPatch(patch, (PNGPicture)gobj);
+				}
+				else
+				{
+					createPatch(patch, NO_PATCH);
+				}
+				
+				linenum++;
+			}
+		} 
+		catch (NumberFormatException e)
+		{
+			SwingUtils.error(language.getText("wadtex.texture.editor.patch.paste.error.parse", linenum));
+			return;
+		}
+		catch (NoSuchElementException e)
+		{
+			SwingUtils.error(language.getText("wadtex.texture.editor.patch.paste.error.missing", linenum));
+			return;
+		}
+		catch (IOException e)
+		{
+			// Should not happen.
+		}
 	}
 
 	private void onPatchClone()
