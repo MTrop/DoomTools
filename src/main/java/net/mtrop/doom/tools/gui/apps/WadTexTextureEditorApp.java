@@ -44,7 +44,6 @@ import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.KeyStroke;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -157,10 +156,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 	private Action saveAction;
 	private Action refreshTextureListAction;
 	
-	private KeyStroke copyKeyStroke;
-	private KeyStroke pasteKeyStroke;
-	private KeyStroke deleteKeyStroke;
-	
 	private Action textureAddAction;
 	private Action textureAddAction2;
 	private Action textureRemoveAction;
@@ -270,10 +265,6 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		
 		this.saveAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.file.item.save", (a) -> onSaveTextureFile());
 		this.refreshTextureListAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.file.item.refresh.texture", (a) -> onRefreshTextureList());
-		
-		this.copyKeyStroke = language.getKeyStroke("texteditor.action.copy.keystroke");
-		this.pasteKeyStroke = language.getKeyStroke("texteditor.action.paste.keystroke");
-		this.deleteKeyStroke = language.getKeyStroke("texteditor.action.delete.keystroke");
 		
 		this.textureAddAction = actionItem(icons.getImage("add.png"), (a) -> onTextureAdd());
 		this.textureRemoveAction = actionItem(icons.getImage("remove.png"), (a) -> onTextureRemove());
