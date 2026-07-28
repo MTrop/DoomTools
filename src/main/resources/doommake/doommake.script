@@ -11,6 +11,15 @@
 
 /* ------------------------------------------------------------------------ */
 
+function listUncleanedFiles(dir) {
+	each (f : filelist(file(dir))) {
+		if (fileisdir(f))
+			listUncleanedFiles(f);
+		else
+			printerrln("* " + filepath(f));
+	}
+}
+
 /**
  * Cleans the build directory and distro directory found in the properties.
  */
@@ -19,6 +28,12 @@ function doClean() {
 	println("Cleaning build and dist...");
 	out = cleandir(getBuildDirectory()) && cleandir(getDistDirectory());	
 	println("Done.");
+	if (!out) {
+	    printerrln("ERROR: Clean failed - the following files were not deleted:");
+	    listUncleanedFiles(getBuildDirectory());
+	    listUncleanedFiles(getDistDirectory());
+	}
+		
 	return out; 
 }
 

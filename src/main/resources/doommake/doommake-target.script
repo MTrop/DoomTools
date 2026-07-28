@@ -16,7 +16,8 @@ check entry init(args) {
  * doommake clean
  ****************************************************************************/
 check entry clean(args) {
-	doClean();
+	success = doClean();
+	return success ? 0 : 1;
 }
 
 
@@ -27,6 +28,7 @@ check entry clean(args) {
  * doommake editor
  ****************************************************************************/
 check entry editor(args) {
+	doAll();
 	doEditorAssets();
 }
 

@@ -1,6 +1,12 @@
 DoomMake
 --------
 
+### Changed for 0.37.0
+
+* `Fixed` Doing a `clean` on a new project when files are not deleted will result in an error condition and list the files not deleted.
+* `Fixed` Running an `editor` target on a new project will now attempt to build the project before checking if things were built.
+
+
 ### Changed for 0.36.1
 
 * `Fixed` [GUI-Studio] Opening the Texture Editor without a file no longer NPEs.
