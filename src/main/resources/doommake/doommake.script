@@ -12,11 +12,8 @@
 /* ------------------------------------------------------------------------ */
 
 function listUncleanedFiles(dir) {
-	each (f : filelist(file(dir))) {
-		if (fileisdir(f))
-			listUncleanedFiles(f);
-		else
-			printerrln("* " + filepath(f));
+	each (f : filelist(file(dir), true)) {
+		printerrln("* " + filepath(f));
 	}
 }
 
