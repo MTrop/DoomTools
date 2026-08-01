@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.48.1
+
+* `Changed` DECOHack will warn about certain EdNums having reserved use in other ports. (Issue #192)
+
+
 ### Changed for 0.48.0
 
 * `Changed` DECOHack will now mnemonic-ize non-mnemonic thing pickup strings for ID24 patches under the covers, avoiding crashes. (Enh. #165)

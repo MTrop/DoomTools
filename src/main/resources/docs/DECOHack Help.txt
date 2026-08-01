@@ -2067,6 +2067,8 @@ The following are some available <WarningType>s:
     "clauses"       Will suppress warnings about unnecessary clause use.
     "conversion"    Will suppress warnings about integer to fixed conversion 
                     and vice-versa.
+    "ednums"        Will suppress warnings about certain Thing Editor Numbers
+                    being reserved in other ports.
     "spawnpointer"  Will suppress warnings about action pointers used on the 
                     first spawn frame.
     "thingmissile"  Will suppress warnings about things used as MISSILEs that

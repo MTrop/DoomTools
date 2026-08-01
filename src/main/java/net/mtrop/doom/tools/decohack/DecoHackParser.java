@@ -81,6 +81,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String THINGMISSILE = "thingmissile";
 		String ZERODURATION = "zeroduration";
 		String ADJUSTEDVALUE = "adjustedvalue";
+		String EDNUMS = "ednums";
 	}
 	
 	private interface Keyword
@@ -2833,7 +2834,13 @@ public final class DecoHackParser extends Lexer.Parser
 				addErrorMessage("The editor number %d is either invalid or reserved.", value);
 				return PropertyResult.ERROR;
 			}
-			
+
+			// warnable ednums.
+			if (value >= 4001 && value <= 4004)
+			{
+				addWarningMessage(WarningType.EDNUMS, "The editor number %d is used as a player start in vertain ports. You may want to use a different one.", value);
+			}
+
 			thing.setEditorNumber(value);
 			return PropertyResult.ACCEPTED;
 		}
