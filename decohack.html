@@ -143,7 +143,7 @@ thing MTF_IMP </span><span class="str">"Worse Imp"</span><span class="pln">
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DECOHack v0.48.0 by Matt Tropiano (using DoomStruct v2.22.2)
+DECOHack v0.48.1 by Matt Tropiano (using DoomStruct v2.22.2)
 Addtional feature support by Xaser Acheron.
 With special thanks to Simon &quot;fraggle&quot; Howard (DEH9000)
 and Dennis &quot;exl&quot; Meuwissen (WhackEd).
@@ -2273,6 +2273,8 @@ The following are some available &lt;WarningType&gt;s:
     &quot;clauses&quot;       Will suppress warnings about unnecessary clause use.
     &quot;conversion&quot;    Will suppress warnings about integer to fixed conversion 
                     and vice-versa.
+    &quot;ednums&quot;        Will suppress warnings about certain Thing Editor Numbers
+                    being reserved in other ports.
     &quot;spawnpointer&quot;  Will suppress warnings about action pointers used on the 
                     first spawn frame.
     &quot;thingmissile&quot;  Will suppress warnings about things used as MISSILEs that
@@ -2615,6 +2617,11 @@ block.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.48.1
+
+* &#x60;Changed&#x60; DECOHack will warn about certain EdNums having reserved use in other ports. (Issue #192)
+
+
 ### Changed for 0.48.0
 
 * &#x60;Changed&#x60; DECOHack will now mnemonic-ize non-mnemonic thing pickup strings for ID24 patches under the covers, avoiding crashes. (Enh. #165)
