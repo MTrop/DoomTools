@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
@@ -154,6 +155,36 @@ public class WadTexTextureEditorCanvas extends Canvas
 	{
 		for (int i = 0; i < patchListModel.getSize(); i++)
 			patchListModel.getElementAt(i).rebuildImage();
+	}
+	
+	/**
+	 * Attempts to fetch the patch graphic at a particular canvas point.
+	 * @param point the canvas coordinates.
+	 * @return the graphic found, or null for no graphic.
+	 */
+	public PatchGraphic getPatchGraphicAt(Point point)
+	{
+		PatchGraphic out = null;
+		
+		for (PatchGraphic pg : patchListModel.patches)
+		{
+			// start top-left corner at HUD edge.
+			int pgOriginX = (int)((getWidth() / 2) - (textureDimensions.width / 2 * zoomFactor));
+			int pgOriginY = (int)((getHeight() / 2) - (textureDimensions.height / 2 * zoomFactor));
+			
+			pgOriginX += pg.patch.getOriginX() * zoomFactor;
+			pgOriginY += pg.patch.getOriginY() * zoomFactor;
+
+			int pgWidth = (int)(pg.renderedImage.getWidth(null) * zoomFactor); 
+			int pgHeight = (int)(pg.renderedImage.getHeight(null) * zoomFactor); 
+
+			if (point.x >= pgOriginX && point.x <= pgOriginX + pgWidth && point.y >= pgOriginY && point.y <= pgOriginY + pgHeight)
+			{
+				out = pg;
+			}
+		}
+		
+		return out;
 	}
 	
 	@Override

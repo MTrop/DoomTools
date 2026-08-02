@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -318,6 +319,11 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			@Override
 			public void mousePressed(MouseEvent e) 
 			{
+				Point p = e.getPoint();
+				PatchGraphic pg = canvas.getPatchGraphicAt(p);
+				if (pg != null)
+					patchList.setSelectedValue(pg, true);
+				
 				lastX = e.getX();
 				lastY = e.getY();
 			}
