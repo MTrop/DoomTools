@@ -2838,7 +2838,7 @@ public final class DecoHackParser extends Lexer.Parser
 			// warnable ednums.
 			if (value >= 4001 && value <= 4004)
 			{
-				addWarningMessage(WarningType.EDNUMS, "The editor number %d is used as a player start in vertain ports. You may want to use a different one.", value);
+				addWarningMessage(WarningType.EDNUMS, "The editor number %d is used as a player start in certain ports. You may want to use a different one.", value);
 			}
 
 			thing.setEditorNumber(value);

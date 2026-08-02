@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.48.2
+
+* `Fixed` Typo in EdNums warning.
+
+
 ### Changed for 0.48.1
 
 * `Changed` DECOHack will warn about certain EdNums having reserved use in other ports. (Issue #192)
