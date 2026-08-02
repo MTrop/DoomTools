@@ -5,6 +5,7 @@ WadTex
 
 * `Added` [GUI-TextureEditor] Patch copy/paste between textures (or same texture) (Enh. #173).
 * `Added` [GUI-TextureEditor] Clicking on a patch in the texture canvas will select it (Enh. #173).
+* `Added` [GUI-TextureEditor] Canvas export of texture (Enh. #173).
 
 
 ### Changed for 1.5.5

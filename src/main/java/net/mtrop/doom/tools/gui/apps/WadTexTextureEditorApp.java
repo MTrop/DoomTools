@@ -44,6 +44,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JRadioButton;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataEvent;
@@ -177,11 +178,15 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 	private Action copyTextureAction;
 	private Action renameTextureAction;
+
+	private JPopupMenu canvasPopupMenu;
+	private Action exportCanvasTextureAction;
 	
 	private File currentTextureFile;
 	private boolean currentHasChanged;
 	private TextureSet.Texture currentTexture;
 	private TextureSet.Patch currentPatch;
+
 
 	public WadTexTextureEditorApp(File projectDirectory, File baseIwadPath, File paletteWadPath, File fileToOpen)
 	{
@@ -288,6 +293,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		this.patchCloneAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.clone", (a) -> onPatchClone());
 		this.patchRenameAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.patch.rename", (a) -> onPatchRename());
 		
+		this.exportCanvasTextureAction = utils.createActionFromLanguageKey("wadtex.texture.editor.menu.popup.canvas.export", (e) -> onCanvasTextureExport());
+		
 		this.textureList.setComponentPopupMenu(popupMenu(
 			menuItem(textureAddAction2),
 			menuItem(textureRemoveAction2),
@@ -306,6 +313,10 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			menuItem(patchRenameAction)
 		));
 		
+		this.canvasPopupMenu = popupMenu(
+			menuItem(exportCanvasTextureAction)
+		);
+		
 		this.currentTextureFile = null;
 		this.currentHasChanged = false;
 		this.currentTexture = null;
@@ -319,13 +330,20 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			@Override
 			public void mousePressed(MouseEvent e) 
 			{
-				Point p = e.getPoint();
-				PatchGraphic pg = canvas.getPatchGraphicAt(p);
-				if (pg != null)
-					patchList.setSelectedValue(pg, true);
-				
-				lastX = e.getX();
-				lastY = e.getY();
+				if (e.getButton() == MouseEvent.BUTTON3) // right mouse button
+				{
+					canvasPopupMenu.show(canvas, e.getPoint().x, e.getPoint().y);
+				}
+				else
+				{
+					Point p = e.getPoint();
+					PatchGraphic pg = canvas.getPatchGraphicAt(p);
+					if (pg != null)
+						patchList.setSelectedValue(pg, true);
+					
+					lastX = e.getX();
+					lastY = e.getY();
+				}
 			}
 			
 			@Override
@@ -338,11 +356,14 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 			@Override
 			public void mouseDragged(MouseEvent e) 
 			{
-				if (currentPatch == null)
-					return;
-				onPatchTranslate(-(lastX - e.getX()), -(lastY - e.getY()));
-				lastX = e.getX();
-				lastY = e.getY();
+				if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0)
+				{
+					if (currentPatch == null)
+						return;
+					onPatchTranslate(-(lastX - e.getX()), -(lastY - e.getY()));
+					lastX = e.getX();
+					lastY = e.getY();
+				}
 			}
 			
 			@Override
@@ -809,6 +830,8 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 
 		copyTextureAction.setEnabled(currentTexture != null);
 		renameTextureAction.setEnabled(currentTexture != null);
+		
+		exportCanvasTextureAction.setEnabled(currentTexture != null);
 	}
 	
 	private void doReopenFile(File openedFile)
@@ -1710,6 +1733,41 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		{
 			createPatch(patch, NO_PATCH, selectedIndex);
 		}
+	}
+
+	private void onCanvasTextureExport()
+	{
+		FileFilter gifFilter = utils.createGIFFileFilter();
+		FileFilter pngFilter = utils.createPNGFileFilter();
+		
+		File chosenFile = utils.chooseFile(
+			getApplicationContainer(),
+			language.getText("wadtex.texture.editor.export.file.title"), 
+			language.getText("wadtex.texture.editor.export.file.accept"),
+			settings::getLastTouchedFile,
+			settings::setLastTouchedFile,
+			(filter, selected) -> FileUtils.addMissingExtension(selected, 
+				filter == gifFilter ? "gif" :
+				filter == pngFilter ? "png" : ""
+			),
+			utils.createGIFFileFilter(),
+			utils.createPNGFileFilter()
+		);
+		
+		if (chosenFile == null)
+			return;
+		
+		BufferedImage image = canvas.getCompositeTextureImage();
+		
+		String ext = FileUtils.getFileExtension(chosenFile);
+		
+		try {
+			if (!ImageIO.write(image, ext, chosenFile))
+				SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.export.file.error"));
+		} catch (IOException e) {
+			SwingUtils.error(getApplicationContainer(), language.getText("wadtex.texture.editor.export.file.error.io", e.getLocalizedMessage()));
+		}
+		
 	}
 
 	private void onTextOpen()

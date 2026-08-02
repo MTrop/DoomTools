@@ -187,6 +187,21 @@ public class WadTexTextureEditorCanvas extends Canvas
 		return out;
 	}
 	
+	/**
+	 * Gets an image of the composite texture.
+	 * @return the texture image.
+	 */
+	public BufferedImage getCompositeTextureImage()
+	{
+		BufferedImage out = new BufferedImage(textureDimensions.width, textureDimensions.height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = out.createGraphics();
+		for (PatchGraphic pg : patchListModel.patches)
+		{
+			g2d.drawImage(pg.renderedImage, pg.patch.getOriginX(), pg.patch.getOriginY(), null);
+		}
+		return out;
+	}
+	
 	@Override
 	public void update(Graphics g)
 	{

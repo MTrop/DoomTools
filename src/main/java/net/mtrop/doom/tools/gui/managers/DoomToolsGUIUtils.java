@@ -1019,7 +1019,7 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
-	 * @return the WAdTex file filter.
+	 * @return the WadTex file filter.
 	 */
 	public FileFilter createWadTexFileFilter()
 	{
@@ -1082,6 +1082,38 @@ public final class DoomToolsGUIUtils
 		return fileExtensionFilter(language.getText("doomtools.filter.container.description") + " (*.wad/*.pk3/*.pke/*.zip)", "wad", "pk3", "pke", "zip");
 	}
 	
+	/**
+	 * @return the BMP file filter.
+	 */
+	public FileFilter createBMPFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.bmp.description") + " (*.bmp)", "bmp");
+	}
+
+	/**
+	 * @return the GIF file filter.
+	 */
+	public FileFilter createGIFFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.gif.description") + " (*.gif)", "gif");
+	}
+
+	/**
+	 * @return the JPG file filter.
+	 */
+	public FileFilter createJPGFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.jpg.description") + " (*.jpg)", "jpg");
+	}
+
+	/**
+	 * @return the PNG file filter.
+	 */
+	public FileFilter createPNGFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.png.description") + " (*.png)", "png");
+	}
+
 	/**
 	 * @return the executable file filter.
 	 */
