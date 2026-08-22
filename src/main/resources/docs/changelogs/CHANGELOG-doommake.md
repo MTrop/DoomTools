@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.37.1
+
+* `Fixed` Attempting to make an empty project will no longer cause a crash (Issue #198).
+
+
 ### Changed for 0.37.0
 
 * `Fixed` Doing a `clean` on a new project when files are not deleted will result in an error condition and list the files not deleted.

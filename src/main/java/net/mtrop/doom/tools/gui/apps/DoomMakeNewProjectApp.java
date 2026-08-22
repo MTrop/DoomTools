@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -500,7 +501,7 @@ public class DoomMakeNewProjectApp extends DoomToolsApplicationInstance
 		
 		SortedSet<ProjectModule> selectedModules;
 		try {
-			selectedModules = projectGenerator.getSelectedModules(templateNameSet.get(projectGenerator));
+			selectedModules = projectGenerator.getSelectedModules(templateNameSet.getOrDefault(projectGenerator, Collections.emptySet()));
 		} catch (UtilityException e) {
 			SwingUtils.error(e.getLocalizedMessage());
 			return;
