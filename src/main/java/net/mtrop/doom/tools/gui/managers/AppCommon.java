@@ -154,7 +154,7 @@ public final class AppCommon
 		
 		LOG.info("Opening the DoomTools documentation folder...");
 
-		File docsDir = new File(path + File.separator + "docs");
+		File docsDir = new File(path);
 		if (!docsDir.exists())
 		{
 			SwingUtils.error(language.getText("doomtools.error.opendocs.notfound"));
