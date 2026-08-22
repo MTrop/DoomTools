@@ -1,6 +1,11 @@
 WTexScan
 --------
 
+### Changed for 1.4.0
+
+* `Added` SKYDEFS parsing for sky textures and flats (Enh. #197).
+
+
 ### Changed for 1.3.1
 
 * `Fixed` MAPINFO scanning will not mis-parse comma-separated numbers in certain locales.

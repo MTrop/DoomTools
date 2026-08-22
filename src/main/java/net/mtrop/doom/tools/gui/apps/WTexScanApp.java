@@ -134,7 +134,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		return containerOf(dimension(350, 600), borderLayout(0, 4),
+		return containerOf(dimension(350, 750), borderLayout(0, 4),
 			node(BorderLayout.CENTER, parametersPanel),
 			node(BorderLayout.SOUTH, containerOf(
 				node(BorderLayout.CENTER, statusPanel),
@@ -185,6 +185,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 	{
 		File[] files = parametersPanel.getFiles();
 		File[] mapInfoFiles = parametersPanel.getMapInfoFiles();
+		File[] skydefsFiles = parametersPanel.getSkydefsFiles();
 		TexScanOutputMode mode = parametersPanel.getOutputMode();
 		boolean noSkies = parametersPanel.getSkipSkies();
 		boolean noMessages = parametersPanel.getNoCommentMessages();
@@ -193,6 +194,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		appCommon.onExecuteWTexScan(getApplicationContainer(), statusPanel, 
 			files, 
 			mapInfoFiles,
+			skydefsFiles,
 			mode, 
 			noSkies, 
 			noMessages,

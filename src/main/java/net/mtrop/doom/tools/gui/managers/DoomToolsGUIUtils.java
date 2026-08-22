@@ -1035,6 +1035,14 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
+	 * @return the text or JSON file filter.
+	 */
+	public FileFilter createTextOrJSONFileFilter()
+	{
+		return fileExtensionFilter(language.getText("doomtools.filter.textorjson.description") + " (*.txt, *.json)", "txt", "json");
+	}
+
+	/**
 	 * @return the WadMerge file filter.
 	 */
 	public FileFilter createWadMergeFileFilter()

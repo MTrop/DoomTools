@@ -171,7 +171,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	@Override
 	public Container createContentPane()
 	{
-		return containerOf(dimension(640, 600), borderLayout(0, 4),
+		return containerOf(dimension(640, 750), borderLayout(0, 4),
 			node(BorderLayout.CENTER, containerOf(gridLayout(1, 2, 4, 0),
 				node(utils.createTitlePanel(language.getText("wtexscan.title"), texScanParametersPanel)),
 				node(utils.createTitlePanel(language.getText("wtexport.title"), texportParametersPanel))
@@ -225,6 +225,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 	{
 		File[] files = texScanParametersPanel.getFiles();
 		File[] mapInfoFiles = texScanParametersPanel.getMapInfoFiles();
+		File[] skydefsFiles = texScanParametersPanel.getSkydefsFiles();
 		TexScanOutputMode mode = texScanParametersPanel.getOutputMode();
 		boolean noSkies = texScanParametersPanel.getSkipSkies();
 		boolean noMessages = texScanParametersPanel.getNoCommentMessages();
@@ -253,6 +254,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		appCommon.onExecuteWTexScanToWTExport(getApplicationContainer(), statusPanel, 
 			files,
 			mapInfoFiles,
+			skydefsFiles,
 			mode, 
 			noSkies, 
 			noMessages,

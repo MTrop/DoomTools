@@ -43,6 +43,7 @@ public class WTexScanParametersPanel extends JPanel
 	private JFormField<Boolean> outputFlatsField;
 	private JFormField<Boolean> outputBothField;
 	private FileListPanel mapInfoListField;
+	private FileListPanel skydefsListField;
 	private JFormField<Boolean> skipSkiesField;
 	private JFormField<Boolean> noCommentMessagesField;
 	private JFormField<String> mapNameField;
@@ -73,6 +74,16 @@ public class WTexScanParametersPanel extends JPanel
 		);
 		this.mapInfoListField.setFileFilter(utils.createTextFileFilter());
 		
+		this.skydefsListField = new FileListPanel(language.getText("wtexscan.files.skydefs.label"), 
+			ListSelectionMode.MULTIPLE_INTERVAL, false, true, 
+			(files) -> {
+				if (files != null && files.length > 0)
+					settings.setLastTouchedFile(files[files.length - 1]);
+			},
+			() -> settings.getLastTouchedFile()
+		);
+		this.skydefsListField.setFileFilter(utils.createTextOrJSONFileFilter());
+		
 		JRadioButton textureButton = radio(false);
 		JRadioButton flatButton = radio(false);
 		JRadioButton bothButton = radio(true);
@@ -100,7 +111,10 @@ public class WTexScanParametersPanel extends JPanel
 						))
 					))
 				)),
-				node(BorderLayout.CENTER, mapInfoListField),
+				node(BorderLayout.CENTER, containerOf(borderLayout(0, 4),
+					node(BorderLayout.NORTH, mapInfoListField),
+					node(BorderLayout.SOUTH, skydefsListField)
+				)),
 				node(BorderLayout.SOUTH, containerOf(
 					createTitledBorder(createLineBorder(Color.GRAY), language.getText("wtexscan.other.label"), TitledBorder.LEADING, TitledBorder.TOP), 
 					node(containerOf(createEmptyBorder(4, 4, 4, 4),
@@ -133,6 +147,16 @@ public class WTexScanParametersPanel extends JPanel
 	public void setMapInfoFiles(File[] files)
 	{
 		mapInfoListField.setFiles(files);
+	}
+	
+	public File[] getSkydefsFiles()
+	{
+		return skydefsListField.getFiles();
+	}
+	
+	public void setSkydefsFiles(File[] files)
+	{
+		skydefsListField.setFiles(files);
 	}
 	
 	public TexScanOutputMode getOutputMode() 

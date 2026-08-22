@@ -25,6 +25,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import com.blackrook.json.JSONObject;
+import com.blackrook.json.JSONReader;
+
 import net.mtrop.doom.Wad;
 import net.mtrop.doom.WadBuffer;
 import net.mtrop.doom.WadFile;
@@ -81,6 +84,7 @@ public final class WTexScanMain
 	public static final String SWITCH_CHANGELOG = "--changelog";
 	public static final String SWITCH_GUI = "--gui";
 	public static final String SWITCH_MAPINFO = "--mapinfo";
+	public static final String SWITCH_SKYDEFS = "--skydefs";
 
 	/** Regex pattern for Episode, Map. */
 	private static final Pattern EPISODE_PATTERN = Pattern.compile("E[1-5]M[1-9]");
@@ -111,6 +115,7 @@ public final class WTexScanMain
 		private List<File> wadFiles;
 		private SortedSet<String> mapsToScan;
 		private List<File> mapInfoToScan;
+		private List<File> skydefsToScan;
 		
 		private Options()
 		{
@@ -127,6 +132,7 @@ public final class WTexScanMain
 			this.wadFiles = new LinkedList<>();
 			this.mapsToScan = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
 			this.mapInfoToScan = new LinkedList<>();
+			this.skydefsToScan = new LinkedList<>();
 		}
 		
 		void println(Object msg)
@@ -206,6 +212,12 @@ public final class WTexScanMain
 		public Options addMapInfoToScan(File mapInfoFile)
 		{
 			this.mapInfoToScan.add(mapInfoFile);
+			return this;
+		}
+
+		public Options addSkydefsToScan(File mapInfoFile)
+		{
+			this.skydefsToScan.add(mapInfoFile);
 			return this;
 		}
 
@@ -298,6 +310,17 @@ public final class WTexScanMain
 			}
 		}
 
+		private void processSkydefsFile(File skydefsFile)
+		{
+			options.println("# Inspecting " + skydefsFile.getPath() + "...");
+			options.println("#    Opening file...");
+			try {
+				inspectSkydefsText(TextObject.read(Text.class, skydefsFile, StandardCharsets.UTF_8));
+			} catch (IOException e) {
+				options.println("#        ERROR: Opening file: " + e.getLocalizedMessage());
+			}
+		}
+
 		// Inspect WAD contents.
 		private void inspectWAD(Wad wad) throws IOException
 		{
@@ -307,6 +330,7 @@ public final class WTexScanMain
 					inspectWadMap(wad, mapName);
 			
 			inspectWadMapInfo(wad);
+			inspectWadSkydefs(wad);
 		}
 
 		/**
@@ -505,6 +529,52 @@ public final class WTexScanMain
 			{
 				addFlat(s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_FLOOR));
 				addFlat(s.getString(UDMFDoomSectorAttributes.ATTRIB_TEXTURE_CEILING));
+			}
+		}
+
+		// Adds the texture references from a Map Info lump to the texture list.
+		private void inspectWadSkydefs(Wad wad)
+		{
+			if (wad.contains("SKYDEFS"))
+			{
+				options.println("#    Reading SKYDEFS...");
+				try {
+					inspectSkydefsText(wad.getTextDataAs("SKYDEFS", StandardCharsets.UTF_8, Text.class));
+				} catch (IOException e) {
+					options.println("#        ERROR: Cannot read SKYDEFS. Skipping...");
+				}
+			}
+		}
+		
+		private void inspectSkydefsText(Text text) throws IOException
+		{
+			JSONObject json = JSONReader.readJSON(text.toString());
+			JSONObject data = json.get("data");
+			
+			JSONObject skies = data.get("skies");
+			if (skies.isArray()) for (int i = 0; i < skies.length(); i++)
+			{
+				JSONObject sky = skies.get(i);
+				int type = sky.get("type").getInt();
+				String name = sky.get("name").getString();
+				addTexture(name);
+				
+				if (type == 2) // "With Foreground"
+				{
+					JSONObject foregroundtex = sky.get("foregroundtex");
+					name = foregroundtex.get("name").getString();
+					addTexture(name);
+				}
+			}
+			
+			JSONObject flatmapping = data.get("flatmapping");
+			if (flatmapping.isArray()) for (int i = 0; i < flatmapping.length(); i++)
+			{
+				JSONObject flat = flatmapping.get(i);
+				String flatname = flat.get("flat").getString();
+				String name = flat.get("sky").getString();
+				addTexture(name);
+				addFlat(flatname);
 			}
 		}
 
@@ -752,7 +822,7 @@ public final class WTexScanMain
 				return ERROR_NONE;
 			}
 			
-			if (options.wadFiles.isEmpty() && options.mapInfoToScan.isEmpty())
+			if (options.wadFiles.isEmpty() && options.mapInfoToScan.isEmpty() && options.skydefsToScan.isEmpty())
 			{
 				splash(options.stdout);
 				usage(options.stdout);
@@ -790,6 +860,11 @@ public final class WTexScanMain
 				processMapInfoFile(f);
 			}
 			
+			for (File f : options.skydefsToScan)
+			{
+				processSkydefsFile(f);
+			}
+			
 			if (atLeastOneError)
 				return ERROR_BAD_FILE;
 			
@@ -798,7 +873,7 @@ public final class WTexScanMain
 				return ERROR_NONE;
 			}
 			
-			if (!options.wadFiles.isEmpty() || !options.mapInfoToScan.isEmpty())
+			if (!options.wadFiles.isEmpty() || !options.mapInfoToScan.isEmpty() || !options.skydefsToScan.isEmpty())
 			{
 				if (textureList.isEmpty())
 				{
@@ -853,6 +928,7 @@ public final class WTexScanMain
 		final int STATE_INIT = 0;
 		final int STATE_MAP = 1;
 		final int STATE_MAPINFO = 2;
+		final int STATE_SKYDEFS = 3;
 	
 		int state = STATE_INIT;
 		int i = 0;
@@ -883,6 +959,8 @@ public final class WTexScanMain
 						state = STATE_MAP;
 					else if (arg.equals(SWITCH_MAPINFO))
 						state = STATE_MAPINFO;
+					else if (arg.equals(SWITCH_SKYDEFS))
+						state = STATE_SKYDEFS;
 					else
 						options.addWadFile(new File(arg));
 				}
@@ -898,6 +976,13 @@ public final class WTexScanMain
 				case STATE_MAPINFO:
 				{
 					options.addMapInfoToScan(new File(arg));
+					state = STATE_INIT;
+				}
+				break;
+
+				case STATE_SKYDEFS:
+				{
+					options.addSkydefsToScan(new File(arg));
 					state = STATE_INIT;
 				}
 				break;
@@ -1034,6 +1119,8 @@ public final class WTexScanMain
 		out.println("    --mapinfo [file]    Add a mapinfo file to scan. Valid mapinfo types are:");
 		out.println("                        MAPINFO, ZMAPINFO, EMAPINFO, UMAPINFO. Type is");
 		out.println("                        autodetected.");
+		out.println();
+		out.println("    --skydefs [file]    Add a SKYDEFS file to scan.");
 	}
 	
 }
