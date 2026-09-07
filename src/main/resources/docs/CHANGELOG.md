@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-09-07** Made some tweaks to file save detection in file editors.
+
 - **2026-08-22** ACTUALLY fix documentation folder finding via DOOMTOOLS_DOCPATH in the GUI (Issue #200).
 
 - **2026-07-25** Fix documentation folder finding via DOOMTOOLS_DOCPATH in the GUI (Issue #189).

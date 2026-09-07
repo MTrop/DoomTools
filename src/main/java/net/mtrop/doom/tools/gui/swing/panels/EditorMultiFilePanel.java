@@ -2254,7 +2254,7 @@ public class EditorMultiFilePanel extends JPanel
 		 */
 		public boolean sourceWasModified()
 		{
-			return contentSourceFileLastModified > contentLastModified;
+			return needsToSave();
 		}
 		
 		/**
@@ -2313,10 +2313,9 @@ public class EditorMultiFilePanel extends JPanel
 		{
 			editorTab.setTabTitle(path.getName());
 			remapFileTabs(contentSourceFile, path);
-			long now = System.currentTimeMillis();
 			contentSourceFile = path;
-			contentLastModified = now;
-			contentSourceFileLastModified = now;
+			contentLastModified = contentSourceFile.lastModified();
+			contentSourceFileLastModified = contentSourceFile.lastModified();
 			updateFilePathLabel();
 			updateIcon();
 			updateActions();
