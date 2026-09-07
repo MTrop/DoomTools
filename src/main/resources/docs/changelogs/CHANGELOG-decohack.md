@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.48.3
+
+* `Changed` Dropped Item default on Things is now 0 (Issue #201). 
+
+
 ### Changed for 0.48.2
 
 * `Fixed` Typo in EdNums warning.

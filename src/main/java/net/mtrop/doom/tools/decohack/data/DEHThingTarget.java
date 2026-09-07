@@ -25,7 +25,7 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 	static final int EDITORNUMBER_NONE = -1;
 	static final int SOUND_NONE = 0;
 	static final int FRAME_NULL = 0;
-	static final int NO_ITEM = -1;
+	static final int NO_ITEM = 0;
 	
 	static final int DEFAULT_GROUP = 0;
 	static final int DEFAULT_FASTSPEED = -1;
