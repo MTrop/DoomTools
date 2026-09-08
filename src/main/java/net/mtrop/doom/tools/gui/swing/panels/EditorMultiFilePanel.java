@@ -2254,7 +2254,7 @@ public class EditorMultiFilePanel extends JPanel
 		 */
 		public boolean sourceWasModified()
 		{
-			return needsToSave();
+			return contentSourceFileLastModified > contentLastModified;
 		}
 		
 		/**
