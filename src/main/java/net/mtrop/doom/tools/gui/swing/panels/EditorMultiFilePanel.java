@@ -2341,7 +2341,6 @@ public class EditorMultiFilePanel extends JPanel
 			{
 				IOUtils.relay(reader, writer, 8192);
 			} 
-			
 			catch (FileNotFoundException e) 
 			{
 				LOG.errorf(e, "Editor file could not be found: %s", contentSourceFile.getAbsolutePath());
