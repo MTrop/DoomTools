@@ -47,6 +47,7 @@ have a demo copy buildable at all times?
 
 - [Arch Linux AUR doomtools-bin](https://aur.archlinux.org/packages/doomtools-bin) (courtesy of @sickcodes)
 - [Fedora Linux Copr](https://copr.fedorainfracloud.org/coprs/electricbrass/doom/) (courtesy of @electricbrass)
+- WinGet (courtesy of @electricbrass)
 
 ### Compiling with Ant
 
