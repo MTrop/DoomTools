@@ -17,10 +17,16 @@ import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 
+import com.blackrook.json.JSONObject;
+import com.blackrook.json.JSONWriter;
 import com.blackrook.rookscript.Script;
 import com.blackrook.rookscript.ScriptAssembler;
 import com.blackrook.rookscript.ScriptEnvironment;
@@ -100,6 +106,7 @@ public final class WadScriptMain
 	public static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
+	public static final String SWITCH_FUNCHELP5 = "--function-help-json";
 	public static final String SWITCH_DISASSEMBLE1 = "--disassemble";
 
 	public static final String SWITCH_CHANGELOG = "--changelog";
@@ -739,6 +746,173 @@ public final class WadScriptMain
 
 	}
 	
+	public static class UsageJSONRenderer implements UsageRendererType
+	{
+		private final String title;
+		private final Stack<JSONObject> current;
+		private final PrintStream out;
+		
+		public UsageJSONRenderer(PrintStream stdout, String docsTitle)
+		{
+			this.title = docsTitle;
+			this.current = new Stack<>();
+			this.out = stdout;
+		}
+
+		@Override
+		public void startRender() 
+		{
+			current.push(JSONObject.createEmptyObject());
+			
+			JSONObject meta = JSONObject.createEmptyObject();
+			meta.addMember("title", title);
+			meta.addMember("createdBy", "WadScript v" + Version.WADSCRIPT);
+			
+			SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD'T'HH:mm:ss'Z'");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			
+			meta.addMember("createdAt", dateFormat.format(new Date()));
+			
+			current.peek().addMember("meta", meta);
+		}
+
+		@Override
+		public void startTableOfContents(String[] sections)
+		{
+			JSONObject toc = current.push(JSONObject.createEmptyArray());
+			for (int i = 0; i < sections.length; i++) 
+				toc.push(JSONObject.create(sections[i]));
+		}
+
+		@Override
+		public void finishTableOfContents()
+		{
+			JSONObject toc = current.pop();
+			current.peek().addMember("table_of_contents", toc);
+			
+			JSONObject sections = JSONObject.createEmptyArray();
+			current.push(sections); // sections
+		}
+
+		@Override
+		public void startSection(String title)
+		{
+			JSONObject section = current.push(JSONObject.createEmptyObject());
+			section.addMember("title", title);
+			
+			current.push(JSONObject.createEmptyArray()); // functions
+		}
+
+		@Override
+		public void startFunction(String namespace, String functionName, String[] parameterNames)
+		{
+			JSONObject function = current.push(JSONObject.createEmptyObject());
+			function.addMember("namespace", namespace);
+			function.addMember("name", functionName);
+			
+			if (parameterNames != null)
+				function.addMember("parameter_names", parameterNames);
+			else
+				function.addMember("parameter_names", JSONObject.createEmptyArray());
+		}
+
+		@Override
+		public void startUsage(Usage usage)
+		{
+			JSONObject usageObj = JSONObject.createEmptyObject();
+			current.push(usageObj);
+			
+			instructions(usage.getInstructions());
+			
+			JSONObject parameterUsages = current.push(JSONObject.createEmptyArray());
+			for (ParameterUsage pu : usage.getParameterInstructions())
+				parameterUsage(pu);
+			current.pop();
+			current.peek().addMember("parameters", parameterUsages);
+			
+			JSONObject returnTypes = current.push(JSONObject.createEmptyArray());
+			for (TypeUsage tu : usage.getReturnTypes())
+				typeUsage(tu);
+			current.pop();
+			current.peek().addMember("return_types", returnTypes);
+		}
+
+		private void instructions(String instructions)
+		{
+			current.peek().addMember("instructions", instructions);
+		}
+
+		private void parameterUsage(ParameterUsage pu)
+		{
+			JSONObject puObj = JSONObject.createEmptyObject();
+			
+			puObj.addMember("name", pu.getParameterName());
+			JSONObject typeUsages = current.push(JSONObject.createEmptyArray());
+			for (TypeUsage tu : pu.getTypes())
+				typeUsage(tu);
+			current.pop();
+			puObj.addMember("types", typeUsages);
+			
+			current.peek().push(puObj);
+		}
+
+		private void typeUsage(TypeUsage tu)
+		{
+			JSONObject tuObj = JSONObject.createEmptyObject();
+			
+			tuObj.addMember("type", tu.getType() != null ? tu.getType().name() : "ANY");
+			tuObj.addMember("subtype", tu.getSubType());
+			tuObj.addMember("description", tu.getDescription());
+			
+			current.peek().push(tuObj);
+		}
+
+		@Override
+		public void finishUsage(Usage usage)
+		{
+			JSONObject usageObj = current.pop();
+			
+			current.peek().addMember("usage", usageObj);
+		}
+
+		@Override
+		public void finishFunction(String namespace, String functionName)
+		{
+			JSONObject function = current.pop(); // function
+			current.peek().push(function);
+		}
+
+		@Override
+		public void finishSection(String title)
+		{
+			JSONObject functions = current.pop();
+			current.peek().addMember("functions", functions);
+			
+			JSONObject section = current.pop();
+			current.peek().push(section);
+		}
+
+		@Override
+		public void finishRender()
+		{
+			JSONObject sections = current.pop();
+			current.peek().addMember("sections", sections);
+			
+			JSONWriter.Options jsonOptions = new JSONWriter.Options();
+			jsonOptions.setIndentation("\t");
+			
+			try (PrintWriter pw = new PrintWriter(out))
+			{
+				JSONWriter.writeJSON(current.pop(), jsonOptions, pw);
+			} 
+			catch (IOException e) 
+			{
+				// Do nothing.
+			}
+		}
+		
+	}
+	
 	public enum Mode
 	{
 		VERSION,
@@ -747,6 +921,7 @@ public final class WadScriptMain
 		FUNCTIONHELP_MARKDOWN,
 		FUNCTIONHELP_HTML,
 		FUNCTIONHELP_HTML_DIV,
+		FUNCTIONHELP_JSON,
 		DISASSEMBLE,
 		ENTRYPOINTS,
 		EXECUTE;
@@ -1000,6 +1175,20 @@ public final class WadScriptMain
 				}
 			}
 			
+			if (options.mode == Mode.FUNCTIONHELP_JSON)
+			{
+				try {
+					printFunctionHelp(new UsageJSONRenderer(options.stdout, options.docsTitle), options.resolvers);
+					return ERROR_NONE;
+				} catch (IOException e) {
+					options.stderr.println("ERROR: " + e.getLocalizedMessage());
+					return ERROR_IOERROR;
+				} catch (Exception e) {
+					options.stderr.println("Internal ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
+					return ERROR_INTERNAL;
+				}
+			}
+			
 			if (options.scriptFile == null)
 			{
 				options.stderr.println("ERROR: Bad script file.");
@@ -1230,6 +1419,8 @@ public final class WadScriptMain
 			out.println("                                     HTML format.");
 			out.println("    --function-help-html-div     Prints all available function usages in");
 			out.println("                                     HTML format, but just the content.");
+			out.println("    --function-help-json         Prints all available function usages in");
+			out.println("                                     JSON format.");
 			out.println("    --disassemble                Prints the disassembly for this script");
 			out.println("                                     and exits.");
 			out.println("    --entry-list                 Prints the list of entry point names for this");
@@ -1407,6 +1598,8 @@ public final class WadScriptMain
 						options.mode = Mode.FUNCTIONHELP_HTML;
 					else if (SWITCH_FUNCHELP4.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_HTML_DIV;
+					else if (SWITCH_FUNCHELP5.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_JSON;
 					else if (SWITCH_ENTRY1.equalsIgnoreCase(arg) || SWITCH_ENTRY2.equalsIgnoreCase(arg))
 						state = STATE_SWITCHES_ENTRY;
 					else if (SWITCH_CHARSET1.equalsIgnoreCase(arg) || SWITCH_CHARSET2.equalsIgnoreCase(arg))

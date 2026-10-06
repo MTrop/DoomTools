@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.38.0
+
+* `Added` A way to output all of DoomMake's functions as JSON with the `--function-help-json` switch.
+
+
 ### Changed for 0.37.1
 
 * `Fixed` Attempting to make an empty project will no longer cause a crash (Issue #198).

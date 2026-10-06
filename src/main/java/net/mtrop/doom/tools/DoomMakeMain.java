@@ -97,6 +97,7 @@ public final class DoomMakeMain
 	public static final String SWITCH_FUNCHELP2 = "--function-help-markdown";
 	public static final String SWITCH_FUNCHELP3 = "--function-help-html";
 	public static final String SWITCH_FUNCHELP4 = "--function-help-html-div";
+	public static final String SWITCH_FUNCHELP5 = "--function-help-json";
 	public static final String SWITCH_TARGETS = "--targets";
 	
 	public static final String SWITCH_PROJECTTYPE = "--project-type";
@@ -1013,6 +1014,8 @@ public final class DoomMakeMain
 						options.mode = Mode.FUNCTIONHELP_HTML;
 					else if (SWITCH_FUNCHELP4.equalsIgnoreCase(arg))
 						options.mode = Mode.FUNCTIONHELP_HTML_DIV;
+					else if (SWITCH_FUNCHELP5.equalsIgnoreCase(arg))
+						options.mode = Mode.FUNCTIONHELP_JSON;
 					else if (SWITCH_DISASSEMBLE1.equalsIgnoreCase(arg))
 						options.mode = Mode.DISASSEMBLE;
 					else if (SWITCH_SCRIPTFILE.equalsIgnoreCase(arg) || SWITCH_SCRIPTFILE2.equalsIgnoreCase(arg))
@@ -1345,6 +1348,8 @@ public final class DoomMakeMain
 		out.println("                                       HTML format.");
 		out.println("    --function-help-html-div       Prints all available function usages in");
 		out.println("                                       HTML format, but just the content.");
+		out.println("    --function-help-json           Prints all available function usages in");
+		out.println("                                       JSON format.");
 		out.println("    --disassemble                  Prints the disassembly for the make script");
 		out.println("                                       in use and exits.");
 		out.println();

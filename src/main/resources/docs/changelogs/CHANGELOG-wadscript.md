@@ -1,6 +1,11 @@
 WadScript
 ---------
 
+### Changed for 1.10.0
+
+* `Added` A way to output all of WadScript's functions as JSON with the `--function-help-json` switch.
+
+
 ### Changed for 1.9.3
 
 * `Fixed` Some docs for PK3 functions.
