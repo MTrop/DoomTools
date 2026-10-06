@@ -9,6 +9,7 @@ import java.io.File;
 
 import net.mtrop.doom.tools.struct.util.OSUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.StringUtils;
 
 /**
  * One stop shop for environment variable value fetching.
@@ -319,7 +320,7 @@ public final class Environment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".config" + File.separator + "DoomTools";
 			else
-				return path + File.separator + "DoomTools";
+				return StringUtils.addEndingSequence(path, File.separator) + "DoomTools";
 		}
 
 		@Override
@@ -329,7 +330,7 @@ public final class Environment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".local/share" + File.separator + "DoomTools";
 			else
-				return path + File.separator + "DoomTools";
+				return StringUtils.addEndingSequence(path, File.separator) + "DoomTools";
 		}
 	
 		@Override
@@ -339,7 +340,7 @@ public final class Environment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".cache" + File.separator + "DoomTools";
 			else
-				return path + File.separator + "DoomTools";
+				return StringUtils.addEndingSequence(path, File.separator) + "DoomTools";
 		}
 
 		@Override
@@ -349,7 +350,7 @@ public final class Environment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".local/state" + File.separator + "DoomTools";
 			else
-				return path + File.separator + "DoomTools";
+				return StringUtils.addEndingSequence(path, File.separator) + "DoomTools";
 		}
 	
 		@Override
@@ -361,7 +362,7 @@ public final class Environment
 			else
 			{
 				String[] paths = path.split(File.pathSeparator);
-				return paths[paths.length - 1] + "DoomTools";
+				return StringUtils.addEndingSequence(paths[paths.length - 1], File.separator) + "DoomTools";
 			}
 		}
 
@@ -374,7 +375,7 @@ public final class Environment
 			else
 			{
 				String[] paths = path.split(File.pathSeparator);
-				return paths[paths.length - 1] + "DoomTools";
+				return StringUtils.addEndingSequence(paths[paths.length - 1], File.separator) + "DoomTools";
 			}
 		}
 
