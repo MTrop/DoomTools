@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONWriter;
@@ -55,8 +56,9 @@ import com.blackrook.rookscript.functions.io.StreamingIOFunctions;
 import com.blackrook.rookscript.lang.ScriptFunctionType;
 import com.blackrook.rookscript.lang.ScriptFunctionType.Usage;
 import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.ParameterUsage;
-import com.blackrook.rookscript.lang.ScriptFunctionType.Usage.TypeUsage;
 import com.blackrook.rookscript.resolvers.ScriptFunctionResolver;
+import com.blackrook.rookscript.resolvers.ScriptScopeResolver;
+import com.blackrook.rookscript.resolvers.ScriptScopeUsage;
 import com.blackrook.rookscript.resolvers.ScriptVariableResolver;
 import com.blackrook.rookscript.resolvers.variable.DefaultVariableResolver;
 
@@ -160,7 +162,9 @@ public final class WadScriptMain
 
 	private static final Scope[] SCOPES = 
 	{
-		new Scope("GLOBAL", new DefaultVariableResolver())
+		new Scope("GLOBAL", new DefaultVariableResolver(), () -> ScriptScopeUsage.create()
+			.instructions("The global script space. Can be used as a common variable scope for variables and values that exist outside function space.")
+		)
 	};
 	
 	/**
@@ -194,11 +198,13 @@ public final class WadScriptMain
 	{
 		public final String scopeName;
 		public final ScriptVariableResolver variableResolver;
+		public final Supplier<ScriptScopeResolver.Usage> usageSupplier;
 
-		public Scope(String scopeName, ScriptVariableResolver variableResolver)
+		public Scope(String scopeName, ScriptVariableResolver variableResolver, Supplier<ScriptScopeResolver.Usage> usageSupplier)
 		{
 			this.scopeName = scopeName;
 			this.variableResolver = variableResolver;
+			this.usageSupplier = usageSupplier;
 		}
 	}
 	
@@ -221,6 +227,47 @@ public final class WadScriptMain
 		void finishTableOfContents();
 		
 		/**
+		 * Starts rendering a scope break.
+		 */
+		void startScopes();
+
+		/**
+		 * Starts rendering a scope.
+		 * @param scopeName the scope name.
+		 */
+		void startScope(String scopeName);
+
+		/**
+		 * Starts rendering a scope usage doc.
+		 * @param resolver the variable resolver.
+		 * @param usage the usage to render.
+		 */
+		void startScopeUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage usage);
+
+		/**
+		 * Finishes rendering a scope usage doc.
+		 * @param usage the usage to render.
+		 */
+		void finishScopeUsage(ScriptScopeResolver.Usage usage);
+
+		/**
+		 * Finishes rendering a scope.
+		 * @param scopeName the scope name.
+		 */
+		void finishScope(String scopeName);
+
+		/**
+		 * Finishes rendering a scope break.
+		 */
+		void finishScopes();
+
+		/**
+		 * Starts the sections.
+		 * @param title the section title.
+		 */
+		void startSections();
+
+		/**
 		 * Starts rendering a section break.
 		 * @param title the section title.
 		 */
@@ -235,16 +282,16 @@ public final class WadScriptMain
 		void startFunction(String namespace, String functionName, String[] parameterNames);
 
 		/**
-		 * Starts rendering a usage doc.
+		 * Starts rendering a function usage doc.
 		 * @param usage the usage to render.
 		 */
-		void startUsage(Usage usage);
+		void startFunctionUsage(ScriptFunctionType.Usage usage);
 
 		/**
-		 * Finishes rendering a usage doc.
+		 * Finishes rendering a function usage doc.
 		 * @param usage the usage to render.
 		 */
-		void finishUsage(Usage usage);
+		void finishFunctionUsage(ScriptFunctionType.Usage usage);
 
 		/**
 		 * Finishes rendering a function break.
@@ -258,6 +305,12 @@ public final class WadScriptMain
 		 * @param title the section title.
 		 */
 		void finishSection(String title);
+
+		/**
+		 * Finishes the sections.
+		 * @param title the section title.
+		 */
+		void finishSections();
 
 		/**
 		 * Called on render finish.
@@ -299,6 +352,68 @@ public final class WadScriptMain
 		}
 
 		@Override
+		public void startScopes() 
+		{
+			printSectionHeader("Scopes");
+		}
+
+		@Override
+		public void startScope(String scopeName)
+		{
+			out.println(scopeName);
+		}
+
+		@Override
+		public void startScopeUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage usage)
+		{
+			out.println("    " + usage.getInstructions());
+			
+			for (ScriptScopeResolver.Usage.VariableUsage vu : usage.getVariableInstructions())
+			{
+				out.println();
+				out.print("    " + vu.getVariableName());
+				if (resolver.isReadOnly(vu.getVariableName()))
+					out.print(" (Read-Only)");
+				out.println();
+				
+				for (ScriptScopeResolver.Usage.TypeUsage tu : vu.getTypes())
+				{
+					renderTypeUsage(tu);
+				}
+			}
+		}
+
+		@Override
+		public void finishScopeUsage(ScriptScopeResolver.Usage usage) 
+		{
+			out.println();
+		}
+
+		@Override
+		public void finishScope(String scopeName)
+		{
+			out.println();
+		}
+
+		@Override
+		public void finishScopes()
+		{
+			out.println();
+		}
+
+		@Override
+		public void startSections() 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void finishSections() 
+		{
+			// Do nothing.
+		}
+
+		@Override
 		public void startSection(String title) 
 		{
 			printSectionHeader("[" + getTitleCode(title) + "] " + title);
@@ -336,24 +451,24 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage) 
+		public void startFunctionUsage(Usage usage) 
 		{
 			out.append("    ").println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 			if (!usage.getParameterInstructions().isEmpty()) for (ParameterUsage pu : usage.getParameterInstructions())
 			{
 				out.append("    ").append(pu.getParameterName()).println(":");
-				for (TypeUsage tu : pu.getTypes())
+				for (ScriptFunctionType.Usage.TypeUsage tu : pu.getTypes())
 					renderTypeUsage(tu);
 			}
 			
 			out.append("    ").println("Returns:");
-			for (TypeUsage tu : usage.getReturnTypes())
+			for (ScriptFunctionType.Usage.TypeUsage tu : usage.getReturnTypes())
 				renderTypeUsage(tu);
 			out.println();
 		}
 
 		@Override
-		public void finishUsage(Usage usage) 
+		public void finishFunctionUsage(Usage usage) 
 		{
 			// Do nothing.
 		}
@@ -384,7 +499,15 @@ public final class WadScriptMain
 			return code.substring(0, Math.min(code.length(), 4)).toUpperCase();
 		}
 
-		private void renderTypeUsage(TypeUsage tu)
+		private void renderTypeUsage(ScriptScopeResolver.Usage.TypeUsage tu)
+		{
+			out.append("        (").append(tu.getType() != null 
+					? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
+					: "ANY"
+				).append(") ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
+		}
+
+		private void renderTypeUsage(ScriptFunctionType.Usage.TypeUsage tu)
 		{
 			out.append("        (").append(tu.getType() != null 
 					? (tu.getType().name() + (tu.getSubType() != null ? ":" + tu.getSubType() : "")) 
@@ -431,13 +554,83 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startSection(String title)
+		public void startScopes() 
 		{
-			out.append("# ").append(title).append("<span id=\"").append(getTitleCode(title)).println("\"></span>");
+			out.println("# Scopes");
+			out.println();
+		}
+
+		@Override
+		public void startScope(String scopeName)
+		{
+			out.println("## " + scopeName);
+		}
+
+		@Override
+		public void startScopeUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage usage)
+		{
+			out.println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
+			out.println();
+			
+			for (ScriptScopeResolver.Usage.VariableUsage vu : usage.getVariableInstructions())
+				renderVariableUsage(resolver, vu);
+		}
+
+		private void renderVariableUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage.VariableUsage vu)
+		{
+			out.println("### " + vu.getVariableName());
+			out.println();
+			if (resolver.isReadOnly(vu.getVariableName()))
+			{
+				out.println("(Read-Only)");
+				out.println();
+			}
+			
+			for (ScriptScopeResolver.Usage.TypeUsage tu : vu.getTypes())
+				renderTypeUsage(tu);
 			out.println();
 		}
 		
-		private void renderTypeUsage(TypeUsage tu)
+		private void renderTypeUsage(ScriptScopeResolver.Usage.TypeUsage tu)
+		{
+			out.append("- `").append(tu.getType() != null ? tu.getType().name() : "ANY").append("` ");
+			out.append((tu.getSubType() != null ? "*" + tu.getSubType() + "*" : ""));
+			out.println();
+			out.append("    - ").println(tu.getDescription().replace("\n", NEWLINE_INDENT));
+		}
+		
+		@Override
+		public void finishScopeUsage(ScriptScopeResolver.Usage usage)
+		{
+			out.println();
+		}
+
+		@Override
+		public void finishScope(String scopeName)
+		{
+			out.println();
+		}
+
+		@Override
+		public void finishScopes()
+		{
+			out.println();
+		}
+
+		@Override
+		public void startSections() 
+		{
+			// Do nothing.
+		}
+
+		@Override
+		public void startSection(String title)
+		{
+			out.append("# ").append(title).append(" <span id=\"").append(getTitleCode(title)).println("\"></span>");
+			out.println();
+		}
+		
+		private void renderTypeUsage(ScriptFunctionType.Usage.TypeUsage tu)
 		{
 			out.append("- `").append(tu.getType() != null ? tu.getType().name() : "ANY").append("` ");
 			out.append((tu.getSubType() != null ? "*" + tu.getSubType() + "*" : ""));
@@ -473,7 +666,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage) 
+		public void startFunctionUsage(Usage usage) 
 		{
 			out.println(usage.getInstructions().replace("\n", NEWLINE_INDENT));
 			out.println();
@@ -483,7 +676,7 @@ public final class WadScriptMain
 				{
 					out.append("**").append(pu.getParameterName()).append("**").println(":");
 					out.println();
-					for (TypeUsage tu : pu.getTypes())
+					for (ScriptFunctionType.Usage.TypeUsage tu : pu.getTypes())
 						renderTypeUsage(tu);
 					out.println();
 				}
@@ -492,13 +685,13 @@ public final class WadScriptMain
 
 			out.append("**Returns**").println(":");
 			out.println();
-			for (TypeUsage tu : usage.getReturnTypes())
+			for (ScriptFunctionType.Usage.TypeUsage tu : usage.getReturnTypes())
 				renderTypeUsage(tu);
 			out.println();
 		}
 
 		@Override
-		public void finishUsage(Usage usage) 
+		public void finishFunctionUsage(Usage usage) 
 		{
 			out.println();
 		}
@@ -516,6 +709,12 @@ public final class WadScriptMain
 		}
 
 		@Override
+		public void finishSections() 
+		{
+			// Do nothing.
+		}
+
+		@Override
 		public void finishRender()
 		{
 			// Do nothing.
@@ -528,13 +727,13 @@ public final class WadScriptMain
 
 	}
 	
-	private static class UsageMarkdownHTML implements UsageRendererType
+	private static class UsageHTML implements UsageRendererType
 	{
 		private HTMLWriter htmlout;
 		private boolean contentOnly;
 		private String mainTitle;
 		
-		private UsageMarkdownHTML(PrintStream out, String mainTitle, boolean contentOnly)
+		private UsageHTML(PrintStream out, String mainTitle, boolean contentOnly)
 		{
 			this.mainTitle = mainTitle;
 			this.contentOnly = contentOnly;
@@ -598,6 +797,128 @@ public final class WadScriptMain
 		}
 
 		@Override
+		public void startScopes()
+		{
+			htmlout.push("div", HTMLWriter.id("scopes"), HTMLWriter.classes("scope-section"));
+			
+			htmlout.push("div", HTMLWriter.classes("scope-title"), HTMLWriter.attribute("section-code", "scopes"))
+				.push("h1", HTMLWriter.classes("scope-name"))
+					.text("Scopes")
+					.tag("a", "TOP", HTMLWriter.href("#top"), HTMLWriter.classes("scope-navigation"))
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.id("scope-content"), HTMLWriter.classes("scope-content"));
+		}
+
+		@Override
+		public void startScope(String scopeName)
+		{
+			String scopeCode = scopeName.toLowerCase();
+
+			htmlout.push("div", HTMLWriter.id("scope-" + scopeCode), HTMLWriter.classes("scope-detail-section"));
+			
+			htmlout.push("div", HTMLWriter.classes("scope-detail-title"), HTMLWriter.attribute("section-code", scopeCode))
+				.push("h2", HTMLWriter.classes("scope-detail-name"))
+					.text(scopeName)
+					.tag("a", "TOP", HTMLWriter.href("#top"), HTMLWriter.classes("scope-detail-navigation"))
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.id("scope-detail-content-" + scopeCode), HTMLWriter.classes("scope-detail-content"));
+		}
+
+		@Override
+		public void startScopeUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage usage)
+		{
+			htmlout.push("div", HTMLWriter.classes("scope-instructions"))
+				.push("p")
+					.text(usage.getInstructions())
+				.pop()
+			.pop();
+			
+			htmlout.push("div", HTMLWriter.classes("scope-variable-instructions"));
+			writeVariableInstructions(resolver, usage.getVariableInstructions());
+		}
+
+		private void writeVariableInstructions(ScriptVariableResolver resolver, List<ScriptScopeResolver.Usage.VariableUsage> variableUsages)
+		{
+			for (ScriptScopeResolver.Usage.VariableUsage variableUsage : variableUsages)
+			{
+				htmlout.push("div", HTMLWriter.classes("variable-section"));
+				
+				htmlout.push("div", HTMLWriter.classes("variable-title"))
+					.push("h4", HTMLWriter.classes("variable-name"))
+						.text(variableUsage.getVariableName());
+				if (resolver.isReadOnly(variableUsage.getVariableName()))
+				{
+					htmlout.tag("span", "(Read-Only)", HTMLWriter.classes("variable-readonly"));
+				}
+				htmlout.pop();
+
+				htmlout.pop();
+				
+				writeVariableTypeUsage(variableUsage.getTypes());
+				htmlout.pop();
+			}
+		}
+		
+		private void writeVariableTypeUsage(List<ScriptScopeResolver.Usage.TypeUsage> variableUsageTypes)
+		{
+			htmlout.push("div", HTMLWriter.classes("variable-content"));
+			for (ScriptScopeResolver.Usage.TypeUsage typeUsage : variableUsageTypes)
+			{
+				htmlout.push("div", HTMLWriter.classes("variable-usage"))
+					.push("div", HTMLWriter.classes("variable-type"));
+				
+					String typeName = typeUsage.getType() != null ? typeUsage.getType().name() : "ANY";
+					String subTypeName = typeUsage.getSubType();
+					String description = typeUsage.getDescription();
+					
+					htmlout.tag("span", typeName, HTMLWriter.classes("variable-type-name"));
+					if (subTypeName != null)
+						htmlout.tag("span", subTypeName, HTMLWriter.classes("variable-subtype-name"));
+
+					htmlout.pop();
+				
+				if (description != null)
+				{
+					htmlout.push("div", HTMLWriter.classes("variable-description"))
+						.push("p")
+							.html(description.replace("\n", "<br/>"))
+						.pop()
+					.pop();
+				}
+				htmlout.pop();
+			}
+			htmlout.pop();
+		}
+		
+		@Override
+		public void finishScopeUsage(ScriptScopeResolver.Usage usage)
+		{
+			htmlout.pop();
+		}
+
+		@Override
+		public void finishScope(String scopeName)
+		{
+			htmlout.pop().pop();
+		}
+
+		@Override
+		public void finishScopes()
+		{
+			htmlout.pop().pop();
+		}
+
+		@Override
+		public void startSections() 
+		{
+			// Do nothing.
+		}
+
+		@Override
 		public void startSection(String title)
 		{
 			String titleCode = getTitleCode(title);
@@ -642,7 +963,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage)
+		public void startFunctionUsage(Usage usage)
 		{
 			htmlout.push("div", HTMLWriter.classes("function-description"))
 				.tag("p", usage.getInstructions())
@@ -666,7 +987,7 @@ public final class WadScriptMain
 			htmlout.pop();
 		}
 
-		private void writeParameterReturn(List<TypeUsage> parameterUsageTypes)
+		private void writeParameterReturn(List<ScriptFunctionType.Usage.TypeUsage> parameterUsageTypes)
 		{
 			htmlout.push("div", HTMLWriter.classes("parameter-section"));
 			htmlout.push("div", HTMLWriter.classes("parameter-title", "return"))
@@ -679,10 +1000,10 @@ public final class WadScriptMain
 			htmlout.pop();
 		}
 		
-		private void writeParameterTypeUsage(List<TypeUsage> parameterUsageTypes)
+		private void writeParameterTypeUsage(List<ScriptFunctionType.Usage.TypeUsage> parameterUsageTypes)
 		{
 			htmlout.push("div", HTMLWriter.classes("parameter-content"));
-			for (TypeUsage typeUsage : parameterUsageTypes)
+			for (ScriptFunctionType.Usage.TypeUsage typeUsage : parameterUsageTypes)
 			{
 				htmlout.push("div", HTMLWriter.classes("parameter-usage"))
 					.push("div", HTMLWriter.classes("parameter-type"));
@@ -711,7 +1032,7 @@ public final class WadScriptMain
 		}
 		
 		@Override
-		public void finishUsage(Usage usage) 
+		public void finishFunctionUsage(Usage usage) 
 		{
 			// Do nothing.
 		}
@@ -726,6 +1047,12 @@ public final class WadScriptMain
 		public void finishSection(String title)
 		{
 			htmlout.pop().pop();
+		}
+
+		@Override
+		public void finishSections()
+		{
+			// Do nothing.
 		}
 
 		@Override
@@ -789,7 +1116,82 @@ public final class WadScriptMain
 		{
 			JSONObject toc = current.pop();
 			current.peek().addMember("table_of_contents", toc);
+		}
+
+		@Override
+		public void startScopes()
+		{
+			current.push(JSONObject.createEmptyArray());
+		}
+
+		@Override
+		public void startScope(String scopeName)
+		{
+			JSONObject scope = current.push(JSONObject.createEmptyObject());
+			scope.addMember("name", scopeName);
+		}
+
+		@Override
+		public void startScopeUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage usage) 
+		{
+			JSONObject usageObj = current.push(JSONObject.createEmptyObject());
+			usageObj.addMember("instructions", usage.getInstructions());
 			
+			current.push(JSONObject.createEmptyArray());
+			for (ScriptScopeResolver.Usage.VariableUsage vu : usage.getVariableInstructions())
+				printScopeVariableUsage(resolver, vu);
+			usageObj.addMember("variables", current.pop());
+		}
+		
+		private void printScopeVariableUsage(ScriptVariableResolver resolver, ScriptScopeResolver.Usage.VariableUsage vu)
+		{
+			JSONObject variable = JSONObject.createEmptyObject();
+			
+			variable.addMember("name", vu.getVariableName());
+			variable.addMember("read_only", resolver.isReadOnly(vu.getVariableName()));
+			current.push(JSONObject.createEmptyArray());
+			for (ScriptScopeResolver.Usage.TypeUsage tu : vu.getTypes())
+				printScopeVariableTypeUsage(tu);
+			variable.addMember("types", current.pop());
+			
+			current.peek().push(variable);
+		}
+
+		private void printScopeVariableTypeUsage(ScriptScopeResolver.Usage.TypeUsage tu)
+		{
+			JSONObject tuObj = JSONObject.createEmptyObject();
+
+			tuObj.addMember("type", tu.getType() != null ? tu.getType().name() : "ANY");
+			tuObj.addMember("subtype", tu.getSubType());
+			tuObj.addMember("description", tu.getDescription());
+			
+			current.peek().push(tuObj);
+		}
+
+		@Override
+		public void finishScopeUsage(ScriptScopeResolver.Usage usage)
+		{
+			JSONObject usageObj = current.pop();
+			current.peek().addMember("usage", usageObj);
+		}
+
+		@Override
+		public void finishScope(String scopeName)
+		{
+			JSONObject scope = current.pop();
+			current.peek().push(scope);
+		}
+
+		@Override
+		public void finishScopes()
+		{
+			JSONObject scopes = current.pop();
+			current.peek().addMember("scopes", scopes);
+		}
+		
+		@Override
+		public void startSections()
+		{
 			JSONObject sections = JSONObject.createEmptyArray();
 			current.push(sections); // sections
 		}
@@ -817,7 +1219,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void startUsage(Usage usage)
+		public void startFunctionUsage(Usage usage)
 		{
 			JSONObject usageObj = JSONObject.createEmptyObject();
 			current.push(usageObj);
@@ -831,7 +1233,7 @@ public final class WadScriptMain
 			current.peek().addMember("parameters", parameterUsages);
 			
 			JSONObject returnTypes = current.push(JSONObject.createEmptyArray());
-			for (TypeUsage tu : usage.getReturnTypes())
+			for (ScriptFunctionType.Usage.TypeUsage tu : usage.getReturnTypes())
 				typeUsage(tu);
 			current.pop();
 			current.peek().addMember("return_types", returnTypes);
@@ -848,7 +1250,7 @@ public final class WadScriptMain
 			
 			puObj.addMember("name", pu.getParameterName());
 			JSONObject typeUsages = current.push(JSONObject.createEmptyArray());
-			for (TypeUsage tu : pu.getTypes())
+			for (ScriptFunctionType.Usage.TypeUsage tu : pu.getTypes())
 				typeUsage(tu);
 			current.pop();
 			puObj.addMember("types", typeUsages);
@@ -856,7 +1258,7 @@ public final class WadScriptMain
 			current.peek().push(puObj);
 		}
 
-		private void typeUsage(TypeUsage tu)
+		private void typeUsage(ScriptFunctionType.Usage.TypeUsage tu)
 		{
 			JSONObject tuObj = JSONObject.createEmptyObject();
 			
@@ -868,7 +1270,7 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishUsage(Usage usage)
+		public void finishFunctionUsage(Usage usage)
 		{
 			JSONObject usageObj = current.pop();
 			
@@ -893,11 +1295,15 @@ public final class WadScriptMain
 		}
 
 		@Override
-		public void finishRender()
+		public void finishSections() 
 		{
 			JSONObject sections = current.pop();
 			current.peek().addMember("sections", sections);
-			
+		}
+
+		@Override
+		public void finishRender()
+		{
 			JSONWriter.Options jsonOptions = new JSONWriter.Options();
 			jsonOptions.setIndentation("\t");
 			
@@ -910,7 +1316,7 @@ public final class WadScriptMain
 				// Do nothing.
 			}
 		}
-		
+
 	}
 	
 	public enum Mode
@@ -1062,9 +1468,9 @@ public final class WadScriptMain
 			return this;
 		}
 		
-		public Options addScope(String scopeName, ScriptVariableResolver variableResolver)
+		public Options addScope(String scopeName, ScriptVariableResolver variableResolver, Supplier<ScriptScopeResolver.Usage> usageSupplier)
 		{
-			this.scopes.add(new Scope(scopeName, variableResolver));
+			this.scopes.add(new Scope(scopeName, variableResolver, usageSupplier));
 			return this;
 		}
 		
@@ -1150,7 +1556,7 @@ public final class WadScriptMain
 			if (options.mode == Mode.FUNCTIONHELP_HTML)
 			{
 				try {
-					printFunctionHelp(new UsageMarkdownHTML(options.stdout, options.docsTitle, false), options.resolvers);
+					printFunctionHelp(new UsageHTML(options.stdout, options.docsTitle, false), options.resolvers);
 					return ERROR_NONE;
 				} catch (IOException e) {
 					options.stderr.println("ERROR: " + e.getLocalizedMessage());
@@ -1164,7 +1570,7 @@ public final class WadScriptMain
 			if (options.mode == Mode.FUNCTIONHELP_HTML_DIV)
 			{
 				try {
-					printFunctionHelp(new UsageMarkdownHTML(options.stdout, options.docsTitle, true), options.resolvers);
+					printFunctionHelp(new UsageHTML(options.stdout, options.docsTitle, true), options.resolvers);
 					return ERROR_NONE;
 				} catch (IOException e) {
 					options.stderr.println("ERROR: " + e.getLocalizedMessage());
@@ -1474,8 +1880,8 @@ public final class WadScriptMain
 				renderer.startFunction(namespace, sft.name(), parameters != null ? parameters.toArray(new String[parameters.size()]) : null);
 				if (usage != null)
 				{
-					renderer.startUsage(usage);
-					renderer.finishUsage(usage);
+					renderer.startFunctionUsage(usage);
+					renderer.finishFunctionUsage(usage);
 				}
 				renderer.finishFunction(namespace, sft.name());
 			}
@@ -1503,8 +1909,23 @@ public final class WadScriptMain
 
 			renderer.startTableOfContents(resolverName.toArray(new String[resolverName.size()]));
 			renderer.finishTableOfContents();
+			
+			renderer.startScopes();
+			for (Scope scope : SCOPES)
+			{
+				renderer.startScope(scope.scopeName);
+				ScriptScopeResolver.Usage usage = scope.usageSupplier.get();
+				renderer.startScopeUsage(scope.variableResolver, usage);
+				renderer.finishScopeUsage(usage);
+				renderer.finishScope(scope.scopeName);
+			}
+			
+			renderer.finishScopes();
+
+			renderer.startSections();
 			for (Resolver r : resolverList)
 				printFunctionUsages(renderer, r.sectionName, r.namespace, r.resolver);
+			renderer.finishSections();
 			
 			renderer.finishRender();
 		}
