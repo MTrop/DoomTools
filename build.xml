@@ -23,11 +23,9 @@
 	<property name="json.lib.version" value="1.4.1" />
 	<property name="json.jar" value="json-${json.lib.version}.jar" />
 
-	<property name="rookscript.lib.version" value="1.19.0" />
+	<property name="rookscript.lib.version" value="1.20.1" />
 	<property name="rookscript.jar" value="rookscript-${rookscript.lib.version}.jar" />
-
-	<property name="rookscript.desktop.lib.version" value="1.10.2.1" />
-	<property name="rookscript.desktop.jar" value="rookscript-desktop-${rookscript.desktop.lib.version}.jar" />
+	<property name="rookscript.desktop.jar" value="rookscript-desktop-${rookscript.lib.version}.jar" />
 
 	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
@@ -87,6 +85,7 @@
 		net.mtrop.doom.tools.gui.managers.parsing,
 		net.mtrop.doom.tools.gui.managers.settings,
 		net.mtrop.doom.tools.gui.swing,
+		net.mtrop.doom.tools.gui.swing.adapters,
 		net.mtrop.doom.tools.gui.swing.panels,
 		net.mtrop.doom.tools.gui.swing.panels.settings,
 		net.mtrop.doom.tools.struct,
@@ -282,8 +281,8 @@
 	</target>
 	
 	<target name="dependency.rookscript.desktop">
-		<maven-jar-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.desktop.lib.version}" />
-		<maven-jar-sources-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.desktop.lib.version}" />
+		<maven-jar-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.lib.version}" />
+		<maven-jar-sources-dl group-path="com/blackrooksoftware" artifact="rookscript-desktop" version="${rookscript.lib.version}" />
 	</target>
 
 	<target name="dependency.flatlaf">
