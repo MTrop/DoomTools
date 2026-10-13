@@ -11,6 +11,8 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.Dialog.ModalityType;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.Font;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,6 +28,9 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,6 +43,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JMenu;
 import javax.swing.JRadioButton;
@@ -107,9 +113,10 @@ public final class DoomToolsGUIUtils
 
 	/* ==================================================================== */
 	
-	private DoomToolsLanguageManager language;
-	private DoomToolsImageManager images;
-	private DoomToolsSettingsManager settings;
+	private final DoomToolsLanguageManager language;
+	private final DoomToolsImageManager images;
+	private final DoomToolsSettingsManager settings;
+	private final DoomToolsTaskManager taskManager;
 	
 	private List<Image> windowIcons;
 	private Icon windowIcon;
@@ -119,6 +126,7 @@ public final class DoomToolsGUIUtils
 		this.images = DoomToolsImageManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomToolsSettingsManager.get();
+		this.taskManager = DoomToolsTaskManager.get();
 		
 		final Image icon16  = images.getImage("doomtools-logo-16.png"); 
 		final Image icon32  = images.getImage("doomtools-logo-32.png"); 
@@ -261,6 +269,68 @@ public final class DoomToolsGUIUtils
 	public Modal<Void> createModal(String title, Container contentPane)
 	{
 		return createModal(title, ModalityType.APPLICATION_MODAL, contentPane);
+	}
+
+	/**
+	 * Starts a task-executing modal.
+	 * The current thread will hold until the modal closes.
+	 * The modal is opened on call to this method, and disposed when the task is complete.
+	 * @param <T> the modal return type.
+	 * @param modal the modal that is supposed to display the progress of the task.
+	 * @param runnable the runnable task changing the modal.
+	 * @return the returned data from the modal, if any.
+	 */
+	public <T> T taskModal(final Modal<T> modal, final Runnable runnable)
+	{
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		
+		taskManager.spawn(() -> {
+			signal.poll();  // wait for alert.
+			runnable.run();
+			modal.dispose();
+		});
+
+		signal.offer(true); // alert thread.
+		return modal.openThenDispose();
+	}
+
+	/**
+	 * Starts a task-executing modal with a cancel switch.
+	 * The current thread will hold until the modal closes.
+	 * The modal is opened on call to this method, and disposed when the task is complete.
+	 * The modal should return {@link Boolean#TRUE} if it was cancelled, which sets the cancel switch to true.
+	 * @param modal the modal that is supposed to display the progress of the task.
+	 * @param cancelSwitch the cancel switch.
+	 * @param runnable the runnable task changing the modal.
+	 * @return true if the 
+	 */
+	public boolean taskModal(final Modal<Boolean> modal, final AtomicBoolean cancelSwitch, final Runnable runnable)
+	{
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		
+		// tweak modal to set cancel switch on close.
+		modal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		modal.addWindowListener(new WindowAdapter() 
+		{
+			@Override
+			public void windowClosing(WindowEvent e) 
+			{
+				modal.dispose();
+				cancelSwitch.set(true);
+			}
+		});
+		
+		taskManager.spawn(() -> {
+			signal.poll();  // wait for alert.
+			runnable.run();
+			modal.dispose();
+		});
+
+		signal.offer(true); // alert thread.
+		Boolean out = modal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
+		return cancelSwitch.get();
 	}
 
 	/**
@@ -697,25 +767,6 @@ public final class DoomToolsGUIUtils
 	 * @param parent the parent owner.
 	 * @param title the title of the modal.
 	 * @param inFile the input stream file.
-	 * @param dontOpen if set, the modal is not opened.
-	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
-	 * @return a modal handle to start with a task manager.
-	 */
-	public ProcessModal createProcessModal(
-		final Container parent, 
-		final String title, 
-		final File inFile, 
-		final boolean dontOpen,
-		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
-	){
-		return createProcessModal(parent, title, inFile, new DoomToolsTextOutputPanel(), dontOpen, modalOutFunction);
-	}
-	
-	/**
-	 * Creates a process modal, prepped to start and selectively open.
-	 * @param parent the parent owner.
-	 * @param title the title of the modal.
-	 * @param inFile the input stream file.
 	 * @param outputPanel the output panel to send out and err output to.
 	 * @param dontOpen if set, the modal is not opened.
 	 * @param modalOutFunction function that takes an output stream (STDOUT) and an error output stream (STDERR) and returns an InstancedFuture to start.
@@ -735,6 +786,16 @@ public final class DoomToolsGUIUtils
 		status.setActivityMessage(language.getText("doomtools.process.activity"));
 		
 		final Modal<Void> outputModal;
+
+		final JButton CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.close", (b) -> {
+			Container p = b.getParent();
+			while (p != null && !(p instanceof JDialog))
+				p = p.getParent();
+				
+			if (p != null && p instanceof JDialog)
+				((JDialog)p).dispose();
+		});
+		CLOSE_BUTTON.setEnabled(false);
 		
 		if (!dontOpen)
 		{
@@ -753,11 +814,13 @@ public final class DoomToolsGUIUtils
 							node(createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
 								if (saveToFile(outputPanel, outputPanel.getText()))
 									status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
-							}))
+							})),
+							node(CLOSE_BUTTON)
 						))
 					))
 				)
 			);
+			outputModal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		}
 		else
 		{
@@ -793,6 +856,12 @@ public final class DoomToolsGUIUtils
 					catch (IOException e) 
 					{
 						status.setErrorMessage(language.getText("doomtools.process.error", e.getLocalizedMessage()));
+					}
+					
+					if (outputModal != null)
+					{
+						outputModal.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+						CLOSE_BUTTON.setEnabled(true);
 					}
 					
 					if (onEnd != null)
