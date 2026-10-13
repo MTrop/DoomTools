@@ -23,6 +23,8 @@ import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLanguageManager;
 import net.mtrop.doom.tools.gui.managers.DoomToolsLogger;
+import net.mtrop.doom.tools.gui.managers.DoomToolsProcessBuilder;
+import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.managers.DoomMakeProjectHelper.ProcessCallException;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
@@ -51,11 +53,15 @@ public class DoomMakeExecutionPanel extends JPanel
 	// Singletons
 
 	/** Language. */
-	private DoomToolsLanguageManager language;
+	private final DoomToolsLanguageManager language;
 	/** Project helper. */
-	private DoomMakeProjectHelper helper;
+	private final DoomMakeProjectHelper helper;
+	/** Task manager. */
+	private final DoomToolsTaskManager tasks;
+	/** Process builder. */
+	private final DoomToolsProcessBuilder processes;
 	/** Project helper. */
-	private AppCommon appCommon;
+	private final AppCommon appCommon;
 
 	// Components
 	
@@ -94,6 +100,8 @@ public class DoomMakeExecutionPanel extends JPanel
 	{
 		this.language = DoomToolsLanguageManager.get();
 		this.helper = DoomMakeProjectHelper.get();
+		this.tasks = DoomToolsTaskManager.get();
+		this.processes = DoomToolsProcessBuilder.get();
 		this.appCommon = AppCommon.get();
 
 		this.listPanel = new DoomMakeProjectTargetListPanel(
@@ -295,7 +303,7 @@ public class DoomMakeExecutionPanel extends JPanel
 			{
 				try {
 					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
-					int result = appCommon.callDoomMake(projectDirectory, target, true, NO_ARGS, outputStream, outputStream, null).get();
+					int result = tasks.spawn(processes.createDoomMake(projectDirectory, target, true, NO_ARGS, outputStream, outputStream, null)).get();
 					DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
 					if (result != 0)
 					{

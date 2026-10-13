@@ -681,39 +681,18 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	 * honor the request, but does not need to guarantee it. 
 	 * @param <T> the result type.
 	 */
-	public static abstract class Cancellable<T> implements Callable<T>
+	public static interface Cancellable<T> extends Callable<T>
 	{
-		private boolean isCancelled;
-
 		/**
-		 * Creates the Cancellable.
+		 * Attempts to cancel this Cancellable.
 		 */
-		public Cancellable()
-		{
-			isCancelled = false;
-		}
-
-		/**
-		 * Flags this Cancellable for cancellation.
-		 */
-		public void cancel()
-		{
-			isCancelled = true;
-		}
+		void cancel();
 		
 		/**
-		 * Checks if this has been flagged for cancellation.
-		 * @return true if so, false if not.
-		 * @see #cancel()
+		 * @return true if {@link #cancel()} was called on this Cancellable, false if not.
 		 */
-		public final boolean isCancelled()
-		{
-			return isCancelled;
-		}
-
-		@Override
-		public abstract T call() throws Exception;
-
+		boolean isCancelled();
+		
 	}
 	
 	/**

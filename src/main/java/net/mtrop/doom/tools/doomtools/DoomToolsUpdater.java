@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -37,7 +36,7 @@ import net.mtrop.doom.tools.struct.util.HTTPUtils.HTTPResponse;
  * The {@link #call()} method will return a {@link DoomToolsMain} result.
  * @author Matthew Tropiano
  */
-public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
+public class DoomToolsUpdater implements InstancedFuture.Cancellable<Integer>
 {
 	public static final String UPDATE_GITHUB_API = "https://api.github.com/";
 	public static final String UPDATE_REPO_NAME = "DoomTools";
@@ -58,7 +57,7 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	/** DoomTools updater listener. */
 	private Listener listener;
 	/** Cancel switch. */
-	private AtomicBoolean cancelSwitch;
+	private volatile boolean cancelled;
 	
 	/**
 	 * Creates an updater instance.
@@ -70,16 +69,21 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 	{
 		this.toolsRootDirectory = Objects.requireNonNull(toolsRootDirectory);
 		this.listener = Objects.requireNonNull(listener);
-		this.cancelSwitch = new AtomicBoolean(false);
+		this.cancelled = false;
 	}
 	
 	@Override
 	public void cancel() 
 	{
-		cancelSwitch.set(true);
-		super.cancel();
+		cancelled = true;
 	}
 	
+	@Override
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
+
 	@Override
 	public Integer call() throws Exception
 	{
@@ -88,8 +92,6 @@ public class DoomToolsUpdater extends InstancedFuture.Cancellable<Integer>
 			listener.onUpdateAbort();
 			return DoomToolsMain.ERROR_TASK_CANCELLED;
 		}
-		
-		cancelSwitch.set(false);
 		
 		// grab date from current JAR.
 		String currentVersion = getLatestJarFile(new File(toolsRootDirectory.getAbsolutePath() + "/jar")).getName().substring(10, 30);

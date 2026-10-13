@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020-2023 Matt Tropiano
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * you'll have to create a {@link FileOutputStream} for it to take advantage.
  * @author Matthew Tropiano
  */
-public class ProcessCallable implements Callable<Integer>
+public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 {
 	private static final AtomicLong INSTANCE_ID = new AtomicLong(0L); 
 	
@@ -140,6 +140,9 @@ public class ProcessCallable implements Callable<Integer>
 	private StreamExceptionListener stdErrListener;
 	private StreamExceptionListener stdInListener;
 
+	private volatile boolean cancelled;
+	private volatile Process calledProcess;
+	
 	private ProcessCallable(String callName)
 	{
 		setCallName(callName);
@@ -153,6 +156,9 @@ public class ProcessCallable implements Callable<Integer>
 		this.stdOutListener = null;
 		this.stdErrListener = null;
 		this.stdInListener = null;
+		
+		this.cancelled = false;
+		this.calledProcess = null;
 	}
 	
 	/**
@@ -734,11 +740,14 @@ public class ProcessCallable implements Callable<Integer>
 	@Override
 	public final Integer call() throws Exception 
 	{
-		Process process = exec();
+		if (calledProcess != null)
+			throw new IllegalStateException("Process \"" + callName + "\" was already started.");
 		
-		PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(process) : null;
-		PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(process) : null;
-		PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(process)  : null;
+		calledProcess = exec();
+		
+		PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(calledProcess) : null;
+		PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(calledProcess) : null;
+		PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(calledProcess)  : null;
 
 		long instanceId = INSTANCE_ID.getAndIncrement();
 
@@ -758,7 +767,7 @@ public class ProcessCallable implements Callable<Integer>
 			inThread.start();
 		}
 
-		int out = process.waitFor();
+		int out = calledProcess.waitFor();
 		
 		if (outThread != null)
 		{
@@ -779,6 +788,7 @@ public class ProcessCallable implements Callable<Integer>
 				stdInListener.onException(inThread.getException());
 		}
 		
+		calledProcess = null;
 		return out;
 	}
 	
@@ -813,6 +823,20 @@ public class ProcessCallable implements Callable<Integer>
 		}
 	
 		return Runtime.getRuntime().exec(cmd, env, workingDirectory);
+	}
+
+	@Override
+	public boolean isCancelled()
+	{
+		return cancelled;
+	}
+
+	@Override
+	public void cancel() 
+	{
+		if (calledProcess != null)
+			calledProcess.destroy();
+		cancelled = true;
 	}
 	
 	/**
