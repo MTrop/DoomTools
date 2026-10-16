@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.InstancedFuture.Cancellable;
 import net.mtrop.doom.tools.struct.InstancedFuture.InstanceListener;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.SingletonProvider;
@@ -64,6 +65,19 @@ public final class DoomToolsTaskManager
 	public <T> InstancedFuture<T> spawn(Callable<T> callable)
 	{
 		return InstancedFuture.instance(callable)
+			.listener(createListener())
+			.spawn(executor);
+	}
+
+	/**
+	 * Spawns a new asynchronous task from a {@link Cancellable}.
+	 * @param <T> the return type for the future.
+	 * @param cancellable the cancellable to use.
+	 * @return the new instance.
+	 */
+	public <T> InstancedFuture<T> spawn(Cancellable<T> cancellable)
+	{
+		return InstancedFuture.instance(cancellable)
 			.listener(createListener())
 			.spawn(executor);
 	}

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -49,7 +50,7 @@ import net.mtrop.doom.tools.gui.managers.AppCommon;
 import net.mtrop.doom.tools.gui.managers.DoomToolsTaskManager;
 import net.mtrop.doom.tools.gui.managers.settings.DoomMakeSettingsManager;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
-import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.InstancedFuture.Cancellable;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.StringUtils;
@@ -493,6 +494,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 
 	private void startProjectExplodeProcess(WadFile sourceWADFile, Palette convertPalette)
 	{
+		/*
 		utils.createProcessModal(getApplicationContainer(), language.getText("doommake.exploder.process.title"), null, 
 			(stdout, stderr, stdin) -> AppCommon.get().execute(
 				new DoomToolsStatusPanel(),
@@ -500,94 +502,139 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 				language.getText("doommake.exploder.success"),
 				language.getText("doommake.exploder.interrupt"),
 				language.getText("doommake.exploder.error"),
-				InstancedFuture.instance(() -> explodeProject(stdout, sourceWADFile, convertPalette)).spawn()
+				explodeProject(stdout, sourceWADFile, convertPalette)
 			)
 		).start(DoomToolsTaskManager.get(), null, (result) -> {if (result == 0) finishExplode();});
+		*/
 	}
 
-	private int explodeProject(PrintStream log, Wad wadFile, Palette convertPalette)
+	private Cancellable<Integer> explodeProject(PrintStream log, Wad wadFile, Palette convertPalette)
 	{
-		ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
-		if (projectType == null)
+		return new Cancellable<Integer>()
 		{
-			log.println("ERROR: Could not detect project type from provided WAD.");
-			return 2;
-		}
-		
-		log.println("Detected project type: " + projectType.name());
-		
-		ProjectGenerator projectGenerator = projectType.createGenerator();
-
-		List<String> outTemplates = new ArrayList<>();
-		outTemplates.addAll(templateNameList);
-		
-		try {
-			WADExploder.getTemplatesFromWAD(projectType, wadFile, outTemplates);
-		} catch (WadException e) {
-			log.println("ERROR: " + e.getLocalizedMessage());
-			return 1;
-		} 
-		
-		log.println("Using templates: " + outTemplates.toString());
-		
-		SortedSet<ProjectModule> selectedModules;
-		try {
-			selectedModules = projectGenerator.getSelectedModules(outTemplates);
-		} catch (UtilityException e) {
-			SwingUtils.error(e.getLocalizedMessage());
-			return 3;
-		}
-		
-		Map<String, String> replacerMap;
-		if ((replacerMap = getReplacerMap(selectedModules)) == null)
-			return 3;
-		
-		try {
-			projectGenerator.createProject(selectedModules, replacerMap, targetDirectory);
-		} catch (IOException e) {
-			SwingUtils.error(e.getLocalizedMessage());
-			return 3;
-		}
-		
-		try {
-			File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.md");
-			List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
-			
-			if (!todoList.isEmpty())
+			private AtomicBoolean cancelled = new AtomicBoolean(false);
+				
+			@Override
+			public Integer call() throws Exception
 			{
-				try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
+				ProjectType projectType = WADExploder.getProjectTypeFromWAD(wadFile);
+				if (projectType == null)
 				{
-					todoPrinter.println("# Stuff To Do\n");
-					int i = 1;
-					for (String t : todoList)
-					{
-						todoPrinter.println(i + ") " + t);
-						i++;
-					}
+					log.println("ERROR: Could not detect project type from provided WAD.");
+					return 2;
 				}
-			}
-		} catch (IOException e) {
-			SwingUtils.error(e.getLocalizedMessage());
-			return 3;
-		}
+				
+				if (cancelled.get())
+					return -1;
+				
+				log.println("Detected project type: " + projectType.name());
+				
+				ProjectGenerator projectGenerator = projectType.createGenerator();
 
-		log.println("Exploding WAD...");
-		try {
-			WADExploder.explodeIntoProject(log, wadFile, targetDirectory, convert, convertPalette);
-		} catch (ExplodeException e) {
-			log.println("ERROR: " + e.getLocalizedMessage());
-			return 1;
-		} catch (SecurityException e) {
-			log.println("ERROR: (Access Denied): " + e.getLocalizedMessage());
-			return 1;
-		} catch (Exception e) {
-			log.println("ERROR: " + e.getLocalizedMessage());
-			SwingUtils.error(getApplicationContainer(), StringUtils.getJREExceptionString(e));
-			return 1;
-		}
+				List<String> outTemplates = new ArrayList<>();
+				outTemplates.addAll(templateNameList);
+				
+				if (cancelled.get())
+					return -1;
+
+				try {
+					WADExploder.getTemplatesFromWAD(projectType, wadFile, outTemplates);
+				} catch (WadException e) {
+					log.println("ERROR: " + e.getLocalizedMessage());
+					return 1;
+				} 
+				
+				if (cancelled.get())
+					return -1;
+				
+				log.println("Using templates: " + outTemplates.toString());
+				
+				SortedSet<ProjectModule> selectedModules;
+				try {
+					selectedModules = projectGenerator.getSelectedModules(outTemplates);
+				} catch (UtilityException e) {
+					SwingUtils.error(e.getLocalizedMessage());
+					return 3;
+				}
+				
+				if (cancelled.get())
+					return -1;
+
+				Map<String, String> replacerMap;
+				if ((replacerMap = getReplacerMap(selectedModules)) == null)
+					return 3;
+				
+				if (cancelled.get())
+					return -1;
+
+				try {
+					projectGenerator.createProject(selectedModules, replacerMap, targetDirectory);
+				} catch (IOException e) {
+					SwingUtils.error(e.getLocalizedMessage());
+					return 3;
+				}
+				
+				if (cancelled.get())
+					return -1;
+
+				try {
+					File todoPath = new File(targetDirectory.getPath() + File.separator + "TODO.md");
+					List<String> todoList = ProjectGenerator.getTODOs(selectedModules);
+					
+					if (!todoList.isEmpty())
+					{
+						try (PrintStream todoPrinter = new PrintStream(new FileOutputStream(todoPath)))
+						{
+							todoPrinter.println("# Stuff To Do\n");
+							int i = 1;
+							for (String t : todoList)
+							{
+								todoPrinter.println(i + ") " + t);
+								i++;
+							}
+						}
+					}
+				} catch (IOException e) {
+					SwingUtils.error(e.getLocalizedMessage());
+					return 3;
+				}
+
+				if (cancelled.get())
+					return -1;
+
+				log.println("Exploding WAD...");
+				try {
+					WADExploder.explodeIntoProject(log, cancelled, wadFile, targetDirectory, convert, convertPalette);
+				} catch (ExplodeException e) {
+					log.println("ERROR: " + e.getLocalizedMessage());
+					return 1;
+				} catch (SecurityException e) {
+					log.println("ERROR: (Access Denied): " + e.getLocalizedMessage());
+					return 1;
+				} catch (Exception e) {
+					log.println("ERROR: " + e.getLocalizedMessage());
+					SwingUtils.error(getApplicationContainer(), StringUtils.getJREExceptionString(e));
+					return 1;
+				}
+				
+				log.println("Done!");
+				return 0;
+			}
+
+			@Override
+			public void cancel() 
+			{
+				cancelled.set(true);
+			}
+
+			@Override
+			public boolean isCancelled()
+			{
+				return cancelled.get();
+			}
+			
+		};
 		
-		log.println("Done!");
-		return 0;
 	}
 	
 	private void finishExplode()

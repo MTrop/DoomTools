@@ -303,7 +303,9 @@ public class DoomMakeExecutionPanel extends JPanel
 			{
 				try {
 					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
-					int result = tasks.spawn(processes.createDoomMake(projectDirectory, target, true, NO_ARGS, outputStream, outputStream, null)).get();
+					int result = tasks.spawn(
+						processes.attachStreams(processes.createDoomMake(projectDirectory, target, true, NO_ARGS), outputStream, outputStream) 
+					).get();
 					DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
 					if (result != 0)
 					{

@@ -45,10 +45,7 @@ public final class DoomToolsProcessBuilder
 
 	/* ==================================================================== */
 
-	private DoomToolsProcessBuilder()
-	{
-		
-	}
+	private DoomToolsProcessBuilder() {	}
 	
 	/**
 	 * 
@@ -57,11 +54,9 @@ public final class DoomToolsProcessBuilder
 	 * @param outSourceFile
 	 * @param outTargetFile
 	 * @param budget
-	 * @param stdout
-	 * @param stderr
 	 * @return the future task
 	 */
-	public ProcessCallable createDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createDecoHack(File scriptFile, Charset encoding, File outSourceFile, File outTargetFile, boolean budget)
 	{
 		ProcessCallable callable = Common.spawnJava(DecoHackMain.class).setWorkingDirectory(scriptFile.getParentFile());
 		
@@ -75,14 +70,7 @@ public final class DoomToolsProcessBuilder
 		if (budget)
 			callable.arg(DecoHackMain.SWITCH_BUDGET);
 		
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DECOHack STDERR."));
-		
-		LOG.infof("Calling DECOHack (%s).", scriptFile);
+		LOG.infof("Creating DECOHack (%s).", scriptFile);
 		return callable;
 	}
 
@@ -94,11 +82,9 @@ public final class DoomToolsProcessBuilder
 	 * @param paletteSource the palette source file or WAD.
 	 * @param mode the default mode.
 	 * @param infoFileName the alternate name for the info file.
-	 * @param stdout
-	 * @param stderr
 	 * @return the future task
 	 */
-	public ProcessCallable createDImgConv(File inputFile, File outputFile, boolean recursive, File paletteSource, AppCommon.GraphicsMode mode, String infoFileName, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createDImgConv(File inputFile, File outputFile, boolean recursive, File paletteSource, AppCommon.GraphicsMode mode, String infoFileName)
 	{
 		ProcessCallable callable = Common.spawnJava(DoomImageConvertMain.class);
 		
@@ -135,14 +121,7 @@ public final class DoomToolsProcessBuilder
 		
 		callable.arg(DoomImageConvertMain.SWITCH_VERBOSE);
 		
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DImgConv STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DImgConv STDERR."))
-		;
-	
-		LOG.infof("Calling DMXConv.");
+		LOG.infof("Creating DMXConv.");
 		return callable;
 	}
 
@@ -153,11 +132,9 @@ public final class DoomToolsProcessBuilder
 	 * @param ffmpegOnly 
 	 * @param recursive
 	 * @param outputDir 
-	 * @param stdout
-	 * @param stderr
 	 * @return the future task
 	 */
-	public ProcessCallable createDMXConv(File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, Boolean recursive, File outputDir, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createDMXConv(File[] inputFiles, File ffmpegPath, Boolean ffmpegOnly, Boolean recursive, File outputDir)
 	{
 		ProcessCallable callable = Common.spawnJava(DMXConvertMain.class);
 		
@@ -181,48 +158,31 @@ public final class DoomToolsProcessBuilder
 		if (outputDir != null)
 			callable.arg(DMXConvertMain.SWITCH_OUTPUTDIR).arg(outputDir.getAbsolutePath());
 	
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DMXConv STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DMXConv STDERR."))
-		;
-	
-		LOG.infof("Calling DMXConv.");
+		LOG.infof("Creating DMXConv.");
 		return callable;
 	}
 
 	/**
 	 * Calls a DoomMake project target.
 	 * @param projectDirectory the project directory.
-	 * @param stdout the standard out stream. 
-	 * @param stderr the standard error stream. 
 	 * @param targetName the target name.
 	 * @param agentOverride if true, bypasses agent detection.
 	 * @param args script arguments.
-	 * @param stdin standard in.
 	 * @return the list of project targets.
 	 */
-	public ProcessCallable createDoomMake(File projectDirectory, String targetName, boolean agentOverride, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public ProcessCallable createDoomMake(File projectDirectory, String targetName, boolean agentOverride, String[] args)
 	{
 		ProcessCallable callable = Common.spawnJava(DoomMakeMain.class).setWorkingDirectory(projectDirectory);
 		if (agentOverride)
 			callable.arg(DoomMakeMain.SWITCH_AGENT_BYPASS);
 		
-		callable.arg(targetName)
-			.args(args)
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(stdin)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDERR."))
-			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on DoomMake STDIN."));
+		callable.arg(targetName).args(args);
 		
-		LOG.infof("Calling DoomMake (%s).", targetName);
+		LOG.infof("Creating DoomMake (%s).", targetName);
 		return callable;
 	}
 
-	public ProcessCallable createWadMerge(File scriptFile, File workingDirectory, boolean verbose, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createWadMerge(File scriptFile, File workingDirectory, boolean verbose, Charset encoding, String[] args)
 	{
 		ProcessCallable callable = Common.spawnJava(WadMergeMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
@@ -231,35 +191,26 @@ public final class DoomToolsProcessBuilder
 		if (verbose)
 			callable.arg(WadMergeMain.SWITCH_VERBOSE);
 		
-		callable.args(args)
-			.setOut(stdout)
-			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadMerge STDERR."));
+		callable.args(args);
 		
-		LOG.infof("Calling WadMerge (%s).", scriptFile.getAbsolutePath());
+		LOG.infof("Creating WadMerge (%s).", scriptFile.getAbsolutePath());
 		return callable;
 	}
 
-	public ProcessCallable createWadScript(File scriptFile, File workingDirectory, String entryPoint, Charset encoding, String[] args, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public ProcessCallable createWadScript(File scriptFile, File workingDirectory, String entryPoint, Charset encoding, String[] args)
 	{
 		ProcessCallable callable = Common.spawnJava(WadScriptMain.class).setWorkingDirectory(workingDirectory);
 		callable.arg(scriptFile.getAbsolutePath())
 			.arg(WadScriptMain.SWITCH_ENTRY1).arg(entryPoint)
 			.arg(WadScriptMain.SWITCH_CHARSET1).arg(encoding.displayName())
 			.args(args)
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(stdin)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDERR."))
-			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WadScript STDIN."));
+		;
 		
-		LOG.infof("Calling WadScript (%s:%s).", scriptFile, entryPoint);
+		LOG.infof("Creating WadScript (%s:%s).", scriptFile, entryPoint);
 		return callable;
 	}
 
-	public ProcessCallable createWadTex(File sourceFile, File outputWAD, String nameOverride, boolean appendMode, boolean forceStrife, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createWadTex(File sourceFile, File outputWAD, String nameOverride, boolean appendMode, boolean forceStrife)
 	{
 		ProcessCallable callable = Common.spawnJava(WADTexMain.class);
 		callable.arg(outputWAD.getAbsolutePath())
@@ -276,17 +227,11 @@ public final class DoomToolsProcessBuilder
 	
 		callable.arg(WADTexMain.SWITCH_VERBOSE1);
 		
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WadTex STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WadTex STDERR."));
-		
-		LOG.infof("Calling WadTex (%s <- %s).", outputWAD.getAbsolutePath(), sourceFile.getAbsolutePath());
+		LOG.infof("Creating WadTex (%s <- %s).", outputWAD.getAbsolutePath(), sourceFile.getAbsolutePath());
 		return callable;
 	}
 
-	public ProcessCallable createWSwAnTbl(File sourceFile, File outWAD, boolean addSource, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createWSwAnTbl(File sourceFile, File outWAD, boolean addSource)
 	{
 		ProcessCallable callable = Common.spawnJava(WSwAnTablesMain.class)
 			.setWorkingDirectory(sourceFile.getParentFile()); // unnecessary, but do it anyway
@@ -299,18 +244,11 @@ public final class DoomToolsProcessBuilder
 		if (addSource)
 			callable.arg(WSwAnTablesMain.SWITCH_ADDSOURCE1);
 		
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WSwAnTbl STDERR."));
-		
-		LOG.infof("Calling WSwAnTbl (%s).", sourceFile);
+		LOG.infof("Creating WSwAnTbl (%s).", sourceFile);
 		return callable;
 	}
 
-	public ProcessCallable createWTexList(File[] sourceFiles, AppCommon.TexScanOutputMode outputMode, boolean noMessages, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createWTexList(File[] sourceFiles, AppCommon.TexScanOutputMode outputMode, boolean noMessages)
 	{
 		ProcessCallable callable = Common.spawnJava(WTexListMain.class);
 		
@@ -335,18 +273,11 @@ public final class DoomToolsProcessBuilder
 		if (noMessages)
 			callable.arg(WTexListMain.SWITCH_QUIET);
 	
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexList STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexList STDERR."));
-		
-		LOG.infof("Calling WTexList.");
+		LOG.infof("Creating WTexList.");
 		return callable;
 	}
 
-	public ProcessCallable createWTexScan(File[] sourceFiles, File[] mapInfoFiles, File[] skydefsFiles, AppCommon.TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName, PrintStream stdout, PrintStream stderr)
+	public ProcessCallable createWTexScan(File[] sourceFiles, File[] mapInfoFiles, File[] skydefsFiles, AppCommon.TexScanOutputMode outputMode, boolean noSkies, boolean noMessages, String mapName)
 	{
 		ProcessCallable callable = Common.spawnJava(WTexScanMain.class);
 		
@@ -383,18 +314,11 @@ public final class DoomToolsProcessBuilder
 		for (File f : skydefsFiles)
 			callable.arg(WTexScanMain.SWITCH_SKYDEFS).arg(f.getAbsolutePath());
 	
-		callable
-			.setOut(stdout)
-			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexScan STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTexScan STDERR."));
-		
-		LOG.infof("Calling WTexScan.");
+		LOG.infof("Creating WTexScan.");
 		return callable;
 	}
 
-	public ProcessCallable createWTExport(File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public ProcessCallable createWTExport(File[] sourceTextureFiles, File baseFile, File outputFile, boolean create, boolean noAnim, boolean noSwitch, String nullTex)
 	{
 		ProcessCallable callable = Common.spawnJava(WTExportMain.class);
 		
@@ -420,16 +344,48 @@ public final class DoomToolsProcessBuilder
 		if (nullTex != null)
 			callable.arg(WTExportMain.SWITCH_NULLTEX).arg(nullTex);
 		
-		callable
+		LOG.infof("Creating WTExport.");
+		return callable;
+	}
+	
+	/**
+	 * Attaches streams to a callable process.
+	 * @param callable the callable process.
+	 * @param stdout the standard out stream.
+	 * @param stderr the standard error stream.
+	 * @return the passed-in callable.
+	 */
+	public ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr)
+	{
+		final String callableName = callable.getCallName(); 
+		return callable
+			.setOut(stdout)
+			.setErr(stderr)
+			.setIn(IOUtils.getNullInputStream())
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDERR."))
+		;
+	}
+
+	/**
+	 * Attaches streams to a callable process.
+	 * @param callable the callable process.
+	 * @param stdout the standard out stream.
+	 * @param stderr the standard error stream.
+	 * @param stdin the standard in stream.
+	 * @return the passed-in callable.
+	 */
+	public ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	{
+		final String callableName = callable.getCallName(); 
+		return callable
 			.setOut(stdout)
 			.setErr(stderr)
 			.setIn(stdin)
-			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDOUT."))
-			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDERR."))
-			.setInListener((exception) -> LOG.errorf(exception, "Exception occurred on WTExport STDIN."));
-		
-		LOG.infof("Calling WTExport.");
-		return callable;
+			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDOUT."))
+			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDERR."))
+			.setInListener((exception) ->  LOG.errorf(exception, "Exception occurred on " + callableName + " STDIN."))
+		;
 	}
-
+	
 }

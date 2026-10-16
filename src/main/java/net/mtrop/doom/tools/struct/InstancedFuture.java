@@ -223,6 +223,17 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	}
 
 	/**
+	 * Creates a new instance builder.
+	 * @param <T> the Cancellable return type.
+	 * @param cancellable the Cancellable that gets called in the instance.
+	 * @return a new instance builder.
+	 */
+	public static <T> Builder<T> instance(Cancellable<T> cancellable)
+	{
+		return new Builder<>(cancellable);
+	}
+
+	/**
 	 * Waits for all of the provided instances to complete, then continues execution.
 	 * @param <T> the return type of each of the instances.
 	 * @param instances the list of instances.

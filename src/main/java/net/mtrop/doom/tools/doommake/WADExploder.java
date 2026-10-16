@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
@@ -325,23 +326,40 @@ public final class WADExploder
 	/**
 	 * Explodes a WAD into a project scaffolding.
 	 * @param log the logging stream for files written.
+	 * @param cancelSwitch if set, cancel the explode.
 	 * @param wad the WAD to explode.
 	 * @param targetDirectory the target directory.
 	 * @param convertible if true, opt to output data to the conversion directories.
 	 * @param palette the source palette.
 	 * @throws ExplodeException if a write error occurs.
 	 */
-	public static void explodeIntoProject(PrintStream log, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
+	public static void explodeIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		Set<WadEntry> entrySet = new HashSet<>(Arrays.asList(wad.getAllEntries()));
+		if (cancelSwitch.get())
+			return;
 		explodePatchIntoProject(log, entrySet, wad, targetDirectory);
-		explodeMapsIntoProject(log, entrySet, wad, targetDirectory);
-		explodeTexturesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
-		explodeSpritesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
-		explodePalettesIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
-		explodeACSLibrariesIntoProject(log, entrySet, wad, targetDirectory);
+		if (cancelSwitch.get())
+			return;
+		explodeMapsIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory);
+		if (cancelSwitch.get())
+			return;
+		explodeTexturesIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory, convertible, palette);
+		if (cancelSwitch.get())
+			return;
+		explodeSpritesIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory, convertible, palette);
+		if (cancelSwitch.get())
+			return;
+		explodePalettesIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory, convertible, palette);
+		if (cancelSwitch.get())
+			return;
+		explodeACSLibrariesIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory);
+		if (cancelSwitch.get())
+			return;
 		explodeInfoAndCreditsIntoProject(log, entrySet, wad, targetDirectory);
-		explodeRemainingGlobalsIntoProject(log, entrySet, wad, targetDirectory, convertible, palette);
+		if (cancelSwitch.get())
+			return;
+		explodeRemainingGlobalsIntoProject(log, cancelSwitch, entrySet, wad, targetDirectory, convertible, palette);
 	}
 	
 	private static void explodePatchIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
@@ -384,7 +402,7 @@ public final class WADExploder
 		}
 	}
 	
-	private static void explodePalettesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
+	private static void explodePalettesIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		if (convertible)
 		{
@@ -396,6 +414,9 @@ public final class WADExploder
 
 			for (String entryName : PALETTE_NAMES)
 			{
+				if (cancelSwitch.get())
+					return;
+
 				WadEntry entry = wad.getEntry(entryName);
 				if (entry != null)
 				{
@@ -419,6 +440,9 @@ public final class WADExploder
 
 			for (String entryName : COLORMAP_NAMES)
 			{
+				if (cancelSwitch.get())
+					return;
+
 				WadEntry entry = wad.getEntry(entryName);
 				if (entry != null)
 				{
@@ -449,6 +473,9 @@ public final class WADExploder
 				
 				for (WadEntry colormapEntry : wad.mapEntries(cstart + 1, cend - cstart - 1))
 				{
+					if (cancelSwitch.get())
+						return;
+
 					File out;
 					Colormap[] colormap;
 					
@@ -476,12 +503,18 @@ public final class WADExploder
 			entries = new LinkedList<>(); 
 			for (String entryName : PALETTE_NAMES)
 			{
+				if (cancelSwitch.get())
+					return;
+
 				WadEntry entry = wad.getEntry(entryName);
 				if (entry != null)
 					entries.add(entry);
 			}
-			exportEntriesToDirectory(log, entrySet, wad, entries, outPaletteDir, "pal");
+			exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, entries, outPaletteDir, "pal");
 
+			if (cancelSwitch.get())
+				return;
+			
 			entries = new LinkedList<>(); 
 			for (String entryName : COLORMAP_NAMES)
 			{
@@ -489,7 +522,10 @@ public final class WADExploder
 				if (entry != null)
 					entries.add(entry);
 			}
-			exportEntriesToDirectory(log, entrySet, wad, entries, outColormapDir, "cmp");
+			exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, entries, outColormapDir, "cmp");
+
+			if (cancelSwitch.get())
+				return;
 
 			int cstart = wad.indexOf("C_START");
 			if (cstart >= 0)
@@ -500,12 +536,12 @@ public final class WADExploder
 					throw new ExplodeException("C_END", "Found C_START without C_END.");
 				entrySet.remove(wad.getEntry("C_END"));
 				
-				exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(wad.mapEntries(cstart + 1, cend - cstart - 1)), outColormap2Dir, "cmp");
+				exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, Arrays.asList(wad.mapEntries(cstart + 1, cend - cstart - 1)), outColormap2Dir, "cmp");
 			}
 		}
 	}
 
-	private static void explodeTexturesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
+	private static void explodeTexturesIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		File outAnimFlatWad = new File(targetDirectory.getPath() + "/src/textures/animflats.wad");
 		File outDefswani = new File(targetDirectory.getPath() + "/src/textures/defswani.txt");
@@ -533,10 +569,10 @@ public final class WADExploder
 			File outFlatDir = new File(targetDirectory.getPath() + "/src/convert/flats");
 	
 			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
-			exportFlatGraphicsToDirectory(log, entrySet, palette, wad, flatEntries, outFlatDir);
+			exportFlatGraphicsToDirectory(log, cancelSwitch, entrySet, palette, wad, flatEntries, outFlatDir);
 	
 			WadEntry[] patchEntries = getEntriesInNamespace(wad, "P", "PP", Pattern.compile("P[1-9]_(START|END)"));
-			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, patchEntries, outPatchDir);
+			exportPictureGraphicsToDirectory(log, cancelSwitch, entrySet, palette, wad, patchEntries, outPatchDir);
 		}
 		else
 		{
@@ -544,10 +580,10 @@ public final class WADExploder
 			File outFlatDir = new File(targetDirectory.getPath() + "/src/textures/flats");
 	
 			WadEntry[] flatEntries = getEntriesInNamespace(wad, "F", "FF", Pattern.compile("F[1-9]_(START|END)"));
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outFlatDir, "lmp");
+			exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, Arrays.asList(flatEntries), outFlatDir, "lmp");
 			
 			WadEntry[] patchEntries = getEntriesInNamespace(wad, "P", "PP", Pattern.compile("P[1-9]_(START|END)"));
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(patchEntries), outPatchDir, "lmp");
+			exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, Arrays.asList(patchEntries), outPatchDir, "lmp");
 		}
 		
 		WadEntry[] headers = WadUtils.withEntries(withoutNulls(
@@ -691,22 +727,25 @@ public final class WADExploder
 		}
 	}
 
-	private static void explodeACSLibrariesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
+	private static void explodeACSLibrariesIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src/assets/acslib");
 
 		WadEntry[] flatEntries = WadUtils.getEntriesInNamespace(wad, "A");
-		exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(flatEntries), outDir, "o");
+		exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, Arrays.asList(flatEntries), outDir, "o");
 		for (WadEntry entry : WadUtils.withEntries(withoutNulls(wad.getEntry("A_START"), wad.getEntry("A_END"))).get())
 			entrySet.remove(entry);
 	}
 
-	private static void explodeMapsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
+	private static void explodeMapsIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory) throws ExplodeException
 	{
 		File outDir = new File(targetDirectory.getPath() + "/src/maps");
 		
 		for (String header : MapUtils.getAllMapHeaders(wad))
 		{
+			if (cancelSwitch.get())
+				break;
+			
 			WadEntry[] entries = MapUtils.getMapEntries(wad, header);
 			File outWad = new File(outDir.getPath() + "/" + (header.toUpperCase() + ".wad"));
 			WadBuffer buffer;
@@ -723,7 +762,7 @@ public final class WADExploder
 		}
 	}
 
-	private static void explodeSpritesIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
+	private static void explodeSpritesIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		if (convertible)
 		{
@@ -731,7 +770,7 @@ public final class WADExploder
 			WadEntry[] spriteEntries;
 			
 			spriteEntries = getEntriesInNamespace(wad, "S", "SS");
-			exportPictureGraphicsToDirectory(log, entrySet, palette, wad, spriteEntries, outSpriteDir);
+			exportPictureGraphicsToDirectory(log, cancelSwitch, entrySet, palette, wad, spriteEntries, outSpriteDir);
 		}
 		else
 		{
@@ -739,8 +778,11 @@ public final class WADExploder
 			WadEntry[] spriteEntries;
 
 			spriteEntries = getEntriesInNamespace(wad, "S", "SS");
-			exportEntriesToDirectory(log, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir, "lmp");
+			exportEntriesToDirectory(log, cancelSwitch, entrySet, wad, Arrays.asList(spriteEntries), outSpriteDir, "lmp");
 		}
+		
+		if (cancelSwitch.get())
+			return;
 		
 		WadEntry[] headers = WadUtils.withEntries(withoutNulls(
 			wad.getEntry("SS_START"),
@@ -791,12 +833,15 @@ public final class WADExploder
 		}	
 	}
 	
-	private static void explodeRemainingGlobalsIntoProject(PrintStream log, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
+	private static void explodeRemainingGlobalsIntoProject(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, File targetDirectory, boolean convertible, Palette palette) throws ExplodeException
 	{
 		StringBuilder flatGraphicData = new StringBuilder();
 		
 		for (WadEntry entry : entrySet)
 		{
+			if (cancelSwitch.get())
+				break;
+			
 			try {
 				String entryName = entry.getName();
 				byte[] entryData = wad.getData(entry);
@@ -978,10 +1023,13 @@ public final class WADExploder
 		return out;
 	}
 
-	private static void exportEntriesToDirectory(PrintStream log, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir, String forceExtension) throws ExplodeException
+	private static void exportEntriesToDirectory(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Wad wad, Iterable<WadEntry> entries, File dir, String forceExtension) throws ExplodeException
 	{
 		for (WadEntry entry : entries) 
 		{
+			if (cancelSwitch.get())
+				break;
+			
 			if (!entrySet.contains(entry)) // catch flats exported to ANIMFLATS.WAD
 				continue;
 			
@@ -1028,10 +1076,13 @@ public final class WADExploder
 		}
 	}
 
-	private static void exportFlatGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
+	private static void exportFlatGraphicsToDirectory(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
 	{
 		for (int i = 0; i < entries.length; i++) 
 		{
+			if (cancelSwitch.get())
+				break;
+			
 			WadEntry entry = entries[i];
 			
 			if (!entrySet.contains(entry)) // catch flats exported to ANIMFLATS.WAD
@@ -1066,10 +1117,13 @@ public final class WADExploder
 		}
 	}
 	
-	private static void exportPictureGraphicsToDirectory(PrintStream log, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
+	private static void exportPictureGraphicsToDirectory(PrintStream log, AtomicBoolean cancelSwitch, Set<WadEntry> entrySet, Palette pal, Wad wad, WadEntry[] entries, File dir) throws ExplodeException
 	{
 		for (int i = 0; i < entries.length; i++) 
 		{
+			if (cancelSwitch.get())
+				break;
+			
 			WadEntry entry = entries[i];
 			
 			byte[] data;

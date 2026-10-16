@@ -10,11 +10,8 @@ import static net.mtrop.doom.tools.struct.swing.ComponentFactory.separator;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -37,10 +34,12 @@ import net.mtrop.doom.tools.gui.apps.data.MergeSettings;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsStatusPanel;
 import net.mtrop.doom.tools.gui.swing.panels.DoomToolsTextOutputPanel;
 import net.mtrop.doom.tools.struct.InstancedFuture;
+import net.mtrop.doom.tools.struct.InstancedFuture.Cancellable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.swing.ComponentFactory.MenuNode;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
+import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
@@ -334,7 +333,7 @@ public final class AppCommon
 				language.getText("decohack.export.message.success"), 
 				language.getText("decohack.export.message.interrupt"), 
 				language.getText("decohack.export.message.error"),
-				tasks.spawn(processes.createDecoHack(sourceFile, encoding, sourceOutputFile, outputFile, budget, stdout, stderr))
+				processes.attachStreams(processes.createDecoHack(sourceFile, encoding, sourceOutputFile, outputFile, budget), stdout, stderr)
 			) 
 		).start(tasks);
 	}
@@ -362,7 +361,7 @@ public final class AppCommon
 				language.getText("dimgconv.status.message.success"), 
 				language.getText("dimgconv.status.message.interrupt"), 
 				language.getText("dimgconv.status.message.error"), 
-				tasks.spawn(processes.createDImgConv(inputFile, outputFile, recursive, paletteSource, mode, infoFileName, stdout, stderr))
+				processes.attachStreams(processes.createDImgConv(inputFile, outputFile, recursive, paletteSource, mode, infoFileName), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -389,7 +388,7 @@ public final class AppCommon
 				language.getText("dmxconv.status.message.success"), 
 				language.getText("dmxconv.status.message.interrupt"), 
 				language.getText("dmxconv.status.message.error"), 
-				tasks.spawn(processes.createDMXConv(inputFiles, ffmpegPath, ffmpegOnly, recursive, outputDir, stdout, stderr))
+				processes.attachStreams(processes.createDMXConv(inputFiles, ffmpegPath, ffmpegOnly, recursive, outputDir), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -470,7 +469,7 @@ public final class AppCommon
 				language.getText("doommake.project.build.message.success"), 
 				language.getText("doommake.project.build.message.interrupt"), 
 				language.getText("doommake.project.build.message.error"), 
-				tasks.spawn(processes.createDoomMake(projectDirectory, target, agentOverride, args, stdout, stderr, stdin))
+				processes.attachStreams(processes.createDoomMake(projectDirectory, target, agentOverride, args), stdout, stderr, stdin)
 			)
 		).start(tasks, onStart, onEnd);
 	}
@@ -499,7 +498,7 @@ public final class AppCommon
 				language.getText("wadmerge.run.message.success"), 
 				language.getText("wadmerge.run.message.interrupt"), 
 				language.getText("wadmerge.run.message.error"), 
-				tasks.spawn(processes.createWadMerge(scriptFile, workingDirectory, verbose, encoding, args, stdout, stderr))
+				processes.attachStreams(processes.createWadMerge(scriptFile, workingDirectory, verbose, encoding, args), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -529,7 +528,7 @@ public final class AppCommon
 				language.getText("wadscript.run.message.success"), 
 				language.getText("wadscript.run.message.interrupt"),
 				language.getText("wadscript.run.message.error"),
-				tasks.spawn(processes.createWadScript(scriptFile, workingDirectory, entryPoint, encoding, args, stdout, stderr, stdin))
+				processes.attachStreams(processes.createWadScript(scriptFile, workingDirectory, entryPoint, encoding, args), stdout, stderr, stdin)
 			)
 		).start(tasks);
 	}
@@ -558,7 +557,7 @@ public final class AppCommon
 				language.getText("wadtex.export.message.success"), 
 				language.getText("wadtex.export.message.interrupt"),
 				language.getText("wadtex.export.message.error"),
-				tasks.spawn(processes.createWadTex(sourceFile, outputWAD, nameOverride, appendMode, forceStrife, stdout, stderr))
+				processes.attachStreams(processes.createWadTex(sourceFile, outputWAD, nameOverride, appendMode, forceStrife), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -585,7 +584,7 @@ public final class AppCommon
 				language.getText("wswantbl.export.message.success"), 
 				language.getText("wswantbl.export.message.interrupt"), 
 				language.getText("wswantbl.export.message.error"), 
-				tasks.spawn(processes.createWSwAnTbl(scriptFile, outWAD, outputSource, stdout, stderr))
+				processes.attachStreams(processes.createWSwAnTbl(scriptFile, outWAD, outputSource), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -610,7 +609,7 @@ public final class AppCommon
 				language.getText("wtexlist.status.message.success"), 
 				language.getText("wtexlist.status.message.interrupt"), 
 				language.getText("wtexlist.status.message.error"), 
-				tasks.spawn(processes.createWTexList(sourceFiles, outputMode, noMessages, stdout, stderr))
+				processes.attachStreams(processes.createWTexList(sourceFiles, outputMode, noMessages), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -639,7 +638,7 @@ public final class AppCommon
 				language.getText("wtexscan.status.message.success"), 
 				language.getText("wtexscan.status.message.interrupt"), 
 				language.getText("wtexscan.status.message.error"), 
-				tasks.spawn(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName, stdout, stderr))
+				processes.attachStreams(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName), stdout, stderr)
 			)
 		).start(tasks);
 	}
@@ -669,7 +668,7 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"), 
-				tasks.spawn(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, stdin))
+				processes.attachStreams(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr, stdin)
 			)
 		).start(tasks);
 	}
@@ -700,20 +699,8 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"),
-				tasks.spawn(() -> {
-					int result;
-					
-					ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
-					PrintStream byteOut = new PrintStream(bos);
-					
-					result = tasks.spawn(processes.createWTexList(sourceFiles, outputMode, noMessages, byteOut, stderr)).result();
-					if (result != 0)
-						return result;
-					
-					ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-					
-					return tasks.spawn(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, bis)).result();
-				})
+				processes.createWTexList(sourceFiles, outputMode, noMessages)
+					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr)) 
 			)
 		).start(tasks);
 	}
@@ -749,32 +736,19 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"),
-				tasks.spawn(() -> {
-					int result;
-					
-					ByteArrayOutputStream bos = new ByteArrayOutputStream(16 * 1024);
-					PrintStream byteOut = new PrintStream(bos);
-					
-					result = tasks.spawn(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName, byteOut, stderr)).result();
-					if (result != 0)
-						return result;
-					
-					ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-					
-					return tasks.spawn(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex, stdout, stderr, bis)).result();
-				})
+				processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName)
+					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr)) 
 			)
 		).start(tasks);
 	}
 
 	/**
-	 * 
 	 * @param statusPanel the status panel of the primary app.
 	 * @param activityMessage the message to display in the modal during execution.
 	 * @param successMessage the message to display in the modal on successful finish.
 	 * @param interruptMessage the message to display in the modal on interruption.
 	 * @param errorMessage the message to display in the modal on error.
-	 * @param task the instanced future to execute.
+	 * @param cancellable the cancellable to execute.
 	 * @return an InstancedFuture to queue in a task manager.
 	 */
 	public InstancedFuture<Integer> execute(
@@ -783,31 +757,59 @@ public final class AppCommon
 		final String successMessage, 
 		final String interruptMessage,
 		final String errorMessage,
-		final InstancedFuture<Integer> task
+		final ProcessCallable cancellable
 	){
-		return tasks.spawn(() -> {
-			Integer result = null;
-			try
+		return tasks.spawn(new Cancellable<Integer>() 
+		{
+			@Override
+			public Integer call() throws Exception
 			{
-				statusPanel.setActivityMessage(activityMessage);
-				result = task.get();
-				if (result == 0)
+				Integer result = null;
+				try
 				{
-					statusPanel.setSuccessMessage(successMessage);
-				}
-				else
-				{
-					LOG.errorf(errorMessage);
+					statusPanel.setActivityMessage(activityMessage);
+					
+					result = cancellable.call();
+					
+					if (cancellable.isCancelled())
+					{
+						statusPanel.setErrorMessage(interruptMessage);
+						return result;
+					}
+					
+					if (result != 0)
+					{
+						LOG.errorf(errorMessage);
+						statusPanel.setErrorMessage(errorMessage);
+						return result;
+					}
+					else
+					{
+						statusPanel.setSuccessMessage(successMessage);
+					}
+
+				} catch (InterruptedException e) {
+					LOG.warnf(interruptMessage);
+					statusPanel.setErrorMessage(interruptMessage);
+				} catch (ExecutionException e) {
+					LOG.errorf(e, errorMessage);
 					statusPanel.setErrorMessage(errorMessage);
 				}
-			} catch (InterruptedException e) {
-				LOG.warnf(interruptMessage);
-				statusPanel.setErrorMessage(interruptMessage);
-			} catch (ExecutionException e) {
-				LOG.errorf(e, errorMessage);
-				statusPanel.setErrorMessage(errorMessage);
+				return result;
 			}
-			return result;
+
+			@Override
+			public void cancel()
+			{
+				cancellable.cancel();
+			}
+
+			@Override
+			public boolean isCancelled()
+			{
+				return cancellable.isCancelled();
+			}
+			
 		});
 	}
 	

@@ -15,8 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -27,6 +25,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -38,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * you'll have to create a {@link FileOutputStream} for it to take advantage.
  * @author Matthew Tropiano
  */
-public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
+public class ProcessCallable implements Future<Integer>, Callable<Integer>
 {
 	private static final AtomicLong INSTANCE_ID = new AtomicLong(0L); 
 	
@@ -120,15 +122,10 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	/** A null file. */
 	private static final File NULL_FILE = new File(System.getProperty("os.name").contains("Windows") ? "NUL" : "/dev/null");
 
-	private static final PipeThreadCreator NULLOUT_REDIRECTOR =
-		(process) -> new InputToOutputStreamThread(process.getInputStream(), OUTPUTSTREAM_NULL);
-	private static final PipeThreadCreator NULLERR_REDIRECTOR =
-		(process) -> new InputToOutputStreamThread(process.getErrorStream(), OUTPUTSTREAM_NULL);
-	private static final PipeThreadCreator NULLIN_REDIRECTOR =
-		(process) -> new InputToOutputStreamThread(INPUTSTREAM_NULL, process.getOutputStream());
-	
 	/* ==================================================================== */
-		
+	
+	// Builder	
+	
 	private String callName;
 	private Deque<String> command;
 	private Map<String, Object> envMap;
@@ -139,10 +136,20 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	private StreamExceptionListener stdOutListener;
 	private StreamExceptionListener stdErrListener;
 	private StreamExceptionListener stdInListener;
-
-	private volatile boolean cancelled;
-	private volatile Process calledProcess;
+	private ProcessCallable pipeToCallable;
 	
+	// Run state
+
+	private final Object waitMutex;
+	private volatile boolean cancelled;
+	private volatile boolean done;
+	private volatile Process runningProcess;
+	private PipeThread outThread;
+	private PipeThread errThread;
+	private PipeThread inThread;
+	private volatile Exception exception;
+	private volatile Integer finishedResult;
+
 	private ProcessCallable(String callName)
 	{
 		setCallName(callName);
@@ -150,15 +157,23 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		this.command = new LinkedList<>();
 		this.envMap = new HashMap<>();
 		this.workingDirectory = null;
-		this.stdOutRedirector = NULLOUT_REDIRECTOR;
-		this.stdErrRedirector = NULLERR_REDIRECTOR;
-		this.stdInRedirector = NULLIN_REDIRECTOR;
+		this.stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), OUTPUTSTREAM_NULL, stdOutListener);
+		this.stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), OUTPUTSTREAM_NULL, stdErrListener);
+		this.stdInRedirector =  (process) -> new InputToOutputStreamThread(INPUTSTREAM_NULL, process.getOutputStream(), stdInListener);
 		this.stdOutListener = null;
 		this.stdErrListener = null;
 		this.stdInListener = null;
+		this.pipeToCallable = null;
 		
+		this.waitMutex = new Object();
 		this.cancelled = false;
-		this.calledProcess = null;
+		this.done = false;
+		this.runningProcess = null;
+		this.outThread = null;
+		this.errThread = null;
+		this.inThread = null;
+		this.exception = null;
+		this.finishedResult = null;
 	}
 	
 	/**
@@ -284,6 +299,14 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	}
 	
 	/**
+	 * @return this callable's call name. 
+	 */
+	public String getCallName()
+	{
+		return callName;
+	}
+	
+	/**
 	 * Adds a command line argument.
 	 * Command line arguments are sent in the order added.
 	 * @param arg the command argument to add.
@@ -355,7 +378,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setOut(final OutputStream newOut)
 	{
 		final OutputStream stream = newOut == null ? OUTPUTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), stream); 
+		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), stream, stdOutListener); 
 		return this;
 	}
 	
@@ -368,7 +391,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setOut(final Writer newOut)
 	{
 		final Writer stream = newOut == null ? WRITER_NULL : newOut;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), stream); 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), stream, stdOutListener); 
 		return this;
 	}
 	
@@ -381,7 +404,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setOut(final PrintStream newOut)
 	{
 		final PrintStream stream = newOut == null ? PRINTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream())), stream); 
+		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream())), stream, stdOutListener); 
 		return this;
 	}
 	
@@ -394,7 +417,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setOut(final Charset encoding, final Writer newOut)
 	{
 		final Writer stream = newOut == null ? WRITER_NULL : newOut;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), encoding), stream); 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), encoding), stream, stdOutListener); 
 		return this;
 	}
 	
@@ -407,7 +430,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setOut(final Charset encoding, final PrintStream newOut)
 	{
 		final PrintStream stream = newOut == null ? PRINTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream(), encoding)), stream); 
+		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream(), encoding)), stream, stdOutListener); 
 		return this;
 	}
 	
@@ -423,7 +446,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), new FileOutputStream(target)) 
+		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), new FileOutputStream(target), stdOutListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -448,7 +471,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset)) 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdOutListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -473,7 +496,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset)) 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdOutListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -492,7 +515,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setErr(final OutputStream newErr)
 	{
 		final OutputStream stream = newErr == null ? OUTPUTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), stream); 
+		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), stream, stdErrListener); 
 		return this;
 	}
 	
@@ -504,7 +527,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setErr(final Writer newErr)
 	{
 		final Writer stream = newErr == null ? WRITER_NULL : newErr;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), stream); 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), stream, stdErrListener); 
 		return this;
 	}
 	
@@ -516,7 +539,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setErr(final PrintStream newErr)
 	{
 		final PrintStream stream = newErr == null ? PRINTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream())), stream); 
+		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream())), stream, stdErrListener); 
 		return this;
 	}
 	
@@ -529,7 +552,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setErr(final Charset encoding, final Writer newErr)
 	{
 		final Writer stream = newErr == null ? WRITER_NULL : newErr;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), encoding), stream); 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), encoding), stream, stdErrListener); 
 		return this;
 	}
 	
@@ -542,7 +565,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setErr(final Charset encoding, final PrintStream newErr)
 	{
 		final PrintStream stream = newErr == null ? PRINTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding)), stream); 
+		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding)), stream, stdErrListener); 
 		return this;
 	}
 	
@@ -558,7 +581,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), new FileOutputStream(target)) 
+		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), new FileOutputStream(target), stdErrListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -583,7 +606,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset)) 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdErrListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -608,7 +631,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset)) 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdErrListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -627,7 +650,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setIn(final InputStream newIn)
 	{
 		final InputStream stream = newIn == null ? INPUTSTREAM_NULL : newIn;
-		stdInRedirector = (process) -> new InputToOutputStreamThread(stream, process.getOutputStream());
+		stdInRedirector = (process) -> new InputToOutputStreamThread(stream, process.getOutputStream(), stdInListener);
 		return this;
 	}
 	
@@ -639,7 +662,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setIn(final Reader newIn)
 	{
 		final Reader stream = newIn == null ? READER_NULL : newIn;
-		stdInRedirector = (process) -> new ReaderToWriterThread(stream, new OutputStreamWriter(process.getOutputStream()));
+		stdInRedirector = (process) -> new ReaderToWriterThread(stream, new OutputStreamWriter(process.getOutputStream()), stdInListener);
 		return this;
 	}
 	
@@ -651,7 +674,7 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	public ProcessCallable setIn(final File sourceFile)
 	{
 		final File src = sourceFile == null ? NULL_FILE : sourceFile;
-		stdInRedirector = (process) -> new InputToOutputStreamThread(new FileInputStream(src), process.getOutputStream()) 
+		stdInRedirector = (process) -> new InputToOutputStreamThread(new FileInputStream(src), process.getOutputStream(), stdInListener) 
 		{
 			@Override
 			public void afterClose() throws IOException
@@ -696,22 +719,19 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	}
 
 	/**
-	 * Redirects the STDOUT of this ProcessCallable to the STDIN
-	 * of another ProcessCallable, piping the output to the input.
+	 * Redirects the STDOUT of this ProcessCallable to the STDIN of another ProcessCallable, piping the output to the input.
+	 * The ProcessCallable passed in is also executed at the same time as this ProcessCallable, when {@link #call()} is called.
 	 * @param target the target ProcessCallable. 
 	 * @return this, for chaining.
 	 */
 	public ProcessCallable pipeOutTo(ProcessCallable target)
 	{
-		PipedOutputStream pipeOut = new PipedOutputStream();
-		PipedInputStream pipeIn = new PipedInputStream();
-		this.setOut(pipeOut);
+		BufferedRing ring = new BufferedRing(8192); 
+		InputStream pipeIn = ring.getInputStream();
+		OutputStream pipeOut = ring.getOutputStream();
+		setOut(pipeOut);
 		target.setIn(pipeIn);
-		try {
-			pipeOut.connect(pipeIn);
-		} catch (IOException e) {
-			// Not possible. Only thrown if already connected.
-		}
+		pipeToCallable = target;
 		return this;
 	}
 	
@@ -728,68 +748,6 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		setOut(System.out);
 		setErr(System.err);
 		return this;
-	}
-	
-	/**
-	 * Computes a result, or throws an exception if unable to do so.
-	 * <p> This will create the process, bind the redirects, and wait for its completion and
-	 * thread termination, returning the Process result.
-	 * @return computed result
-	 * @throws Exception if unable to compute a result
-	 */
-	@Override
-	public final Integer call() throws Exception 
-	{
-		if (calledProcess != null)
-			throw new IllegalStateException("Process \"" + callName + "\" was already started.");
-		
-		calledProcess = exec();
-		
-		PipeThread outThread = stdOutRedirector != null ? stdOutRedirector.getThread(calledProcess) : null;
-		PipeThread errThread = stdErrRedirector != null ? stdErrRedirector.getThread(calledProcess) : null;
-		PipeThread inThread =  stdInRedirector  != null ? stdInRedirector.getThread(calledProcess)  : null;
-
-		long instanceId = INSTANCE_ID.getAndIncrement();
-
-		if (outThread != null)
-		{
-			outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
-			outThread.start();
-		}
-		if (errThread != null)
-		{
-			errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
-			errThread.start();
-		}
-		if (inThread != null)
-		{
-			inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
-			inThread.start();
-		}
-
-		int out = calledProcess.waitFor();
-		
-		if (outThread != null)
-		{
-			outThread.join();
-			if (stdOutListener != null && outThread.getException() != null)
-				stdOutListener.onException(outThread.getException());
-		}
-		if (errThread != null)
-		{
-			errThread.join();
-			if (stdErrListener != null && errThread.getException() != null)
-				stdErrListener.onException(errThread.getException());
-		}
-		if (inThread != null)
-		{
-			inThread.join();
-			if (stdInListener != null && inThread.getException() != null)
-				stdInListener.onException(inThread.getException());
-		}
-		
-		calledProcess = null;
-		return out;
 	}
 	
 	/**
@@ -825,6 +783,127 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		return Runtime.getRuntime().exec(cmd, env, workingDirectory);
 	}
 
+	/**
+	 * Executes and attaches all relevant streams and processes to the Process.
+	 * @throws Exception if the process could not be started.
+	 */
+	private void executePipeline() throws Exception
+	{
+		// start pipe targets.
+		if (pipeToCallable != null)
+			pipeToCallable.executePipeline();
+		
+		runningProcess = exec();
+		outThread = stdOutRedirector != null ? stdOutRedirector.getThread(runningProcess) : null;
+		errThread = stdErrRedirector != null ? stdErrRedirector.getThread(runningProcess) : null;
+		inThread =  stdInRedirector  != null ? stdInRedirector.getThread(runningProcess)  : null;
+
+		long instanceId = INSTANCE_ID.getAndIncrement();
+
+		if (outThread != null)
+		{
+			outThread.setName(callName + "-out-" + outThread.getName() + "-" + instanceId);
+			outThread.start();
+		}
+		if (errThread != null)
+		{
+			errThread.setName(callName + "-err-" + errThread.getName() + "-" + instanceId);
+			errThread.start();
+		}
+		if (inThread != null)
+		{
+			inThread.setName(callName + "-in-" + inThread.getName() + "-" + instanceId);
+			inThread.start();
+		}
+	}
+	
+	/**
+	 * Waits for the pipeline to finish, returning the last result in the pipeline.
+	 * @throws InterruptedException if a thread is interrupted during wait.
+	 */
+	private Integer waitForPipeline() throws InterruptedException
+	{
+		int out = runningProcess.waitFor();
+		if (pipeToCallable != null)
+			return pipeToCallable.waitForPipeline();
+		return out;
+	}
+	
+	/**
+	 * Cancels the whole pipeline.
+	 * @param mayInterruptIfRunning if true, forcibly cancel it.
+	 * @return true if one or more processes were cancelled before they finished.
+	 */
+	private boolean cancelPipeline(boolean mayInterruptIfRunning)
+	{
+		if (runningProcess != null)
+		{
+			if (mayInterruptIfRunning)
+				runningProcess.destroyForcibly();
+			else
+				runningProcess.destroy();
+			cancelled = true;
+		}
+		
+		if (pipeToCallable != null)
+			return pipeToCallable.cancelPipeline(mayInterruptIfRunning);
+		else
+			return cancelled;
+	}
+
+	/**
+	 * Cleans up execution for this process.
+	 * @throws InterruptedException if a thread is interrupted on join.
+	 */
+	private void cleanUpPipeline() throws InterruptedException
+	{
+		runningProcess = null;
+	
+		if (outThread != null)
+			outThread.join();
+		if (errThread != null)
+			errThread.join();
+		if (inThread != null)
+			inThread.join();
+		
+		if (pipeToCallable != null)
+			pipeToCallable.cleanUpPipeline();
+	}
+
+	/**
+	 * Computes a result, or throws an exception if unable to do so.
+	 * <p> This will create the process, bind the redirects, and wait for its completion and
+	 * thread termination, returning the Process result.
+	 * @return the computed result of the process, or null if cancelled.
+	 * @throws Exception if unable to compute a result
+	 */
+	@Override
+	public final Integer call() throws Exception 
+	{
+		if (runningProcess != null)
+			throw new IllegalStateException("Process \"" + callName + "\" was already started.");
+		
+		executePipeline();
+		
+		try {
+			finishedResult = waitForPipeline();
+		} catch (InterruptedException t) {
+			exception = t;
+		} finally {
+			cleanUpPipeline();
+			done = true;
+			synchronized (waitMutex)
+			{
+				waitMutex.notifyAll();
+			}
+		}
+		
+		if (exception != null)
+			throw exception;
+		else
+			return finishedResult;
+	}
+
 	@Override
 	public boolean isCancelled()
 	{
@@ -832,11 +911,58 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	}
 
 	@Override
-	public void cancel() 
+	public boolean isDone()
 	{
-		if (calledProcess != null)
-			calledProcess.destroy();
-		cancelled = true;
+		return done;
+	}
+
+	@Override
+	public Integer get() throws InterruptedException, ExecutionException
+	{
+		while (!isDone())
+		{
+			synchronized (waitMutex)
+			{
+				if (!isDone())
+					waitMutex.wait();
+			}
+		}
+		
+		if (exception != null)
+			throw new ExecutionException(exception);
+		
+		return finishedResult;
+	}
+
+	@Override
+	public Integer get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException
+	{
+		if (!isDone())
+		{
+			synchronized (waitMutex)
+			{
+				unit.timedWait(waitMutex, timeout);
+				if (!isDone())
+					throw new TimeoutException("Wait for process completion timed out!");
+			}
+		}
+		return get();
+	}
+
+	@Override
+	public boolean cancel(boolean mayInterruptIfRunning) 
+	{
+		return cancelPipeline(mayInterruptIfRunning);
+	}
+
+	/**
+	 * Cancels this process.
+	 * @return true if this process was cancelled, false if not (because it was already terminated).
+	 * @see #cancel(boolean)
+	 */
+	public boolean cancel() 
+	{
+		return cancel(false);
 	}
 	
 	/**
@@ -854,6 +980,145 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 	}
 	
 	/**
+	 * This buffer is for piped streams, such that shared data is not lost when one stream closes.
+	 */
+	public static class BufferedRing
+	{
+		private Object waitMutex;
+		private byte[] buffer;
+		private int size;
+		private int readidx;
+		private int writeidx;
+		private boolean inClosed;
+		private boolean outClosed;
+		private InputStream inputStream;
+		private OutputStream outputStream;
+		
+		public BufferedRing(int capacity)
+		{
+			this.waitMutex = new Object();
+			this.buffer = new byte[capacity];
+			this.readidx = 0;
+			this.writeidx = 0;
+			this.inClosed = false;
+			this.outClosed = false;
+			
+			this.inputStream = new InputStream() 
+			{
+				@Override
+				public int read() throws IOException 
+				{
+					synchronized (waitMutex)
+					{
+						if (inClosed)
+							throw new IOException("stream is closed");
+						
+						if (readidx == buffer.length)
+							readidx = 0;
+						if (size == 0) // buffer empty.
+						{
+							if (outClosed) // nothing coming
+								return -1;
+							else
+							{
+								awaitRead();
+								if (outClosed)
+									return -1;
+							}
+						}
+						
+						int out = buffer[readidx++];
+						size--;
+						return out;
+					}
+				}
+				
+				@Override
+				public void close() throws IOException 
+				{
+					synchronized (waitMutex)
+					{
+						inClosed = true;
+					}
+				}
+				
+			};
+			
+			this.outputStream = new OutputStream() 
+			{
+				@Override
+				public void write(int b) throws IOException 
+				{
+					synchronized (waitMutex)
+					{
+						if (outClosed)
+							throw new IOException("stream is closed");
+
+						if (writeidx == buffer.length)
+							writeidx = 0;
+						if (size == buffer.length) // buffer full.
+							expandBuffer();
+						buffer[writeidx++] = (byte)b;
+						size++;
+						waitMutex.notify();
+					}
+				}
+				
+				@Override
+				public void close() throws IOException 
+				{
+					synchronized (waitMutex)
+					{
+						outClosed = true;
+						waitMutex.notify();
+					}
+				}
+			};
+		}
+		
+		private void expandBuffer()
+		{
+			byte[] newbuf = new byte[buffer.length * 2];
+			int segment = buffer.length - readidx;
+			System.arraycopy(buffer, readidx, newbuf, 0, segment);
+			System.arraycopy(buffer, 0, newbuf, segment, buffer.length - segment);
+			writeidx = buffer.length;
+			readidx = 0;
+			buffer = newbuf;
+		}
+		
+		private void awaitRead()
+		{
+			while (size == 0 && !outClosed)
+			{
+				synchronized (waitMutex)
+				{
+					try {
+						waitMutex.wait();
+					} catch (InterruptedException e) {
+						try {
+							inputStream.close();
+						} catch (IOException e1) {
+							// Eat exception.
+						}
+					}
+				}
+			}
+		}
+		
+		public InputStream getInputStream() 
+		{
+			return inputStream;
+		}
+		
+		public OutputStream getOutputStream()
+		{
+			return outputStream;
+		}
+		
+	}
+	
+	/**
 	 * BufferedReader to Writer stream thread.
 	 * Transfers characters buffered at one line at a time until the source stream is closed.
 	 * <p> The thread terminates if the reader is closed. The target writer is not closed.
@@ -864,9 +1129,9 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		protected PrintStream targetPrintStream;
 		private Object targetMutex;
 		
-		private LineReaderToWriterThread(BufferedReader reader)
+		private LineReaderToWriterThread(BufferedReader reader, StreamExceptionListener listener)
 		{
-			super("LineReaderToWriterThread");
+			super("LineReaderToWriterThread", listener);
 			this.sourceReader = reader;
 			this.targetMutex = new Object();
 		}
@@ -877,9 +1142,9 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		 * @param reader the BufferedReader to read from.
 		 * @param stream the PrintStream to write to.
 		 */
-		public LineReaderToWriterThread(BufferedReader reader, PrintStream stream)
+		private LineReaderToWriterThread(BufferedReader reader, PrintStream stream, StreamExceptionListener listener)
 		{
-			this(reader);
+			this(reader, listener);
 			this.targetPrintStream = stream;
 		}
 	
@@ -925,9 +1190,9 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		 * @param reader the Reader to read from.
 		 * @param writer the Writer to write to.
 		 */
-		private ReaderToWriterThread(Reader reader, Writer writer)
+		private ReaderToWriterThread(Reader reader, Writer writer, StreamExceptionListener listener)
 		{
-			super("ReaderToWriterThread");
+			super("ReaderToWriterThread", listener);
 			this.sourceReader = reader;
 			this.targetWriter = writer;
 		}
@@ -976,9 +1241,9 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		 * @param sourceStream the InputStream to read from. 
 		 * @param targetStream the OutputStream to write to.
 		 */
-		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream)
+		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream, StreamExceptionListener listener)
 		{
-			super("InputToOutputStreamThread");
+			super("InputToOutputStreamThread", listener);
 			this.sourceStream = sourceStream;
 			this.targetStream = targetStream;
 		}
@@ -1002,12 +1267,12 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 
 	private static abstract class PipeThread extends Thread
 	{
-		private IOException exception;
-
-		protected PipeThread(String name)
+		private StreamExceptionListener listener;
+		
+		protected PipeThread(String name, StreamExceptionListener listener)
 		{
 			super(name);
-			this.exception = null;
+			this.listener = listener;
 		}
 		
 		@Override
@@ -1016,12 +1281,14 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			try {
 				relay();
 			} catch (IOException e) {
-				exception = e;
+				if (listener != null)
+					listener.onException(e);
 			} finally {
 				try {
 					afterClose();
 				} catch (IOException e) {
-					exception = e;
+					if (listener != null)
+						listener.onException(e);
 				}
 			}
 		}
@@ -1043,14 +1310,6 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 			// Do nothing by default.
 		}
 
-		/**
-		 * @return the exception thrown during streaming, if any.
-		 */
-		public IOException getException()
-		{
-			return exception;
-		}
-		
 	}
 	
 	@FunctionalInterface
@@ -1064,6 +1323,6 @@ public class ProcessCallable implements InstancedFuture.Cancellable<Integer>
 		 */
 		PipeThread getThread(Process process) throws Exception;
 	}
-	
+
 }
 

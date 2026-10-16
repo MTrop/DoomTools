@@ -28,9 +28,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -116,7 +113,6 @@ public final class DoomToolsGUIUtils
 	private final DoomToolsLanguageManager language;
 	private final DoomToolsImageManager images;
 	private final DoomToolsSettingsManager settings;
-	private final DoomToolsTaskManager taskManager;
 	
 	private List<Image> windowIcons;
 	private Icon windowIcon;
@@ -126,7 +122,6 @@ public final class DoomToolsGUIUtils
 		this.images = DoomToolsImageManager.get();
 		this.language = DoomToolsLanguageManager.get();
 		this.settings = DoomToolsSettingsManager.get();
-		this.taskManager = DoomToolsTaskManager.get();
 		
 		final Image icon16  = images.getImage("doomtools-logo-16.png"); 
 		final Image icon32  = images.getImage("doomtools-logo-32.png"); 
@@ -272,42 +267,17 @@ public final class DoomToolsGUIUtils
 	}
 
 	/**
-	 * Starts a task-executing modal.
-	 * The current thread will hold until the modal closes.
-	 * The modal is opened on call to this method, and disposed when the task is complete.
-	 * @param <T> the modal return type.
-	 * @param modal the modal that is supposed to display the progress of the task.
-	 * @param runnable the runnable task changing the modal.
-	 * @return the returned data from the modal, if any.
-	 */
-	public <T> T taskModal(final Modal<T> modal, final Runnable runnable)
-	{
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		
-		taskManager.spawn(() -> {
-			signal.poll();  // wait for alert.
-			runnable.run();
-			modal.dispose();
-		});
-
-		signal.offer(true); // alert thread.
-		return modal.openThenDispose();
-	}
-
-	/**
 	 * Starts a task-executing modal with a cancel switch.
 	 * The current thread will hold until the modal closes.
 	 * The modal is opened on call to this method, and disposed when the task is complete.
 	 * The modal should return {@link Boolean#TRUE} if it was cancelled, which sets the cancel switch to true.
+	 * @param <T> the future return type.
 	 * @param modal the modal that is supposed to display the progress of the task.
-	 * @param cancelSwitch the cancel switch.
-	 * @param runnable the runnable task changing the modal.
-	 * @return true if the 
+	 * @param future the future task running in the modal.
+	 * @return the 
 	 */
-	public boolean taskModal(final Modal<Boolean> modal, final AtomicBoolean cancelSwitch, final Runnable runnable)
+	public <T> T taskModal(final Modal<Boolean> modal, final InstancedFuture<T> future)
 	{
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		
 		// tweak modal to set cancel switch on close.
 		modal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		modal.addWindowListener(new WindowAdapter() 
@@ -316,21 +286,18 @@ public final class DoomToolsGUIUtils
 			public void windowClosing(WindowEvent e) 
 			{
 				modal.dispose();
-				cancelSwitch.set(true);
+				future.cancel();
 			}
 		});
-		
-		taskManager.spawn(() -> {
-			signal.poll();  // wait for alert.
-			runnable.run();
-			modal.dispose();
-		});
 
-		signal.offer(true); // alert thread.
-		Boolean out = modal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-		return cancelSwitch.get();
+		try {
+			future.waitForDone();
+		} catch (InterruptedException e) {
+			future.cancel();
+		}
+		
+		modal.dispose();
+		return future.result();
 	}
 
 	/**
@@ -786,19 +753,20 @@ public final class DoomToolsGUIUtils
 		status.setActivityMessage(language.getText("doomtools.process.activity"));
 		
 		final Modal<Void> outputModal;
+		final JButton CLOSE_BUTTON;
 
-		final JButton CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.cancel", (b) -> {
-			Container p = b.getParent();
-			while (p != null && !(p instanceof JDialog))
-				p = p.getParent();
-				
-			if (p != null && p instanceof JDialog)
-				((JDialog)p).dispose();
-		});
-		CLOSE_BUTTON.setEnabled(false);
-		
 		if (!dontOpen)
 		{
+			CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.close", (b) -> {
+				Container p = b.getParent();
+				while (p != null && !(p instanceof JDialog))
+					p = p.getParent();
+					
+				if (p != null && p instanceof JDialog)
+					((JDialog)p).dispose();
+			});
+			CLOSE_BUTTON.setEnabled(false);
+			
 			outputModal = modal(
 				parent, 
 				title,
@@ -820,11 +788,11 @@ public final class DoomToolsGUIUtils
 					))
 				)
 			);
-			outputModal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		}
 		else
 		{
 			outputModal = null;
+			CLOSE_BUTTON = null;
 		}
 		
 		return new ProcessModal() 

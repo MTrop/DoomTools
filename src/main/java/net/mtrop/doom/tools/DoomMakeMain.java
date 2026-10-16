@@ -32,6 +32,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.blackrook.json.JSONConversionException;
 import com.blackrook.json.JSONObject;
@@ -772,15 +773,19 @@ public final class DoomMakeMain
 					return err;
 		
 				options.stdout.println("Exploding " + options.explodeWad.getPath() + "...");
+				final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 				try {
-					WADExploder.explodeIntoProject(options.stdout, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
+					WADExploder.explodeIntoProject(options.stdout, cancelSwitch, wadFile, new File(options.targetName), options.explodeConvertible, convertPalette);
 				} catch (ExplodeException e) {
 					options.stderr.println("ERROR: " + e.getLocalizedMessage());
 					return ERROR_IOERROR;
 				} catch (Exception e) {
 					options.stderr.println("ERROR: " + e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
 					return ERROR_UNKNOWN;
-				} 
+				}
+				
+				if (cancelSwitch.get())
+					return ERROR_UNKNOWN;
 					
 				options.stdout.println("Done!");
 			}
