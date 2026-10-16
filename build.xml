@@ -163,7 +163,7 @@
 		<echo file="${build.versions.dir}/json.version" message="${json.lib.version}" />
 		<echo file="${build.versions.dir}/doom.version" message="${doom.lib.version}" />
 		<echo file="${build.versions.dir}/rookscript.version" message="${rookscript.lib.version}" />
-		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.desktop.lib.version}" />
+		<echo file="${build.versions.dir}/rookscript-desktop.version" message="${rookscript.lib.version}" />
 		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 		<echo file="${build.versions.dir}/rsyntaxtextarea.version" message="${rsyntaxtextarea.lib.version}" />
 		<echo file="${build.versions.dir}/autocomplete.version" message="${autocomplete.lib.version}" />
