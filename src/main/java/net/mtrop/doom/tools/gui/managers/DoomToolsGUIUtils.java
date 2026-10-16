@@ -787,7 +787,7 @@ public final class DoomToolsGUIUtils
 		
 		final Modal<Void> outputModal;
 
-		final JButton CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.cancel", (b) -> {
+		final JButton CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.close", (b) -> {
 			Container p = b.getParent();
 			while (p != null && !(p instanceof JDialog))
 				p = p.getParent();
