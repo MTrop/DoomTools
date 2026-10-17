@@ -83,7 +83,7 @@ public class WTexScanApp extends DoomToolsApplicationInstance
 		state.put("mode", mode.name());
 		state.put("noskies", String.valueOf(noSkies));
 		state.put("nomessages", String.valueOf(noMessages));
-		state.put("mapname", mapName != null ? mapName : "");
+		state.put("mapname", mapName != null ? mapName : null);
 		
 		return state;
 	}

@@ -494,7 +494,6 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 
 	private void startProjectExplodeProcess(WadFile sourceWADFile, Palette convertPalette)
 	{
-		/*
 		utils.createProcessModal(getApplicationContainer(), language.getText("doommake.exploder.process.title"), null, 
 			(stdout, stderr, stdin) -> AppCommon.get().execute(
 				new DoomToolsStatusPanel(),
@@ -505,7 +504,6 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 				explodeProject(stdout, sourceWADFile, convertPalette)
 			)
 		).start(DoomToolsTaskManager.get(), null, (result) -> {if (result == 0) finishExplode();});
-		*/
 	}
 
 	private Cancellable<Integer> explodeProject(PrintStream log, Wad wadFile, Palette convertPalette)
@@ -524,7 +522,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 					return 2;
 				}
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 				
 				log.println("Detected project type: " + projectType.name());
@@ -534,7 +532,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 				List<String> outTemplates = new ArrayList<>();
 				outTemplates.addAll(templateNameList);
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 
 				try {
@@ -544,7 +542,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 					return 1;
 				} 
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 				
 				log.println("Using templates: " + outTemplates.toString());
@@ -557,14 +555,14 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 					return 3;
 				}
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 
 				Map<String, String> replacerMap;
 				if ((replacerMap = getReplacerMap(selectedModules)) == null)
 					return 3;
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 
 				try {
@@ -574,7 +572,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 					return 3;
 				}
 				
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 
 				try {
@@ -599,7 +597,7 @@ public class DoomMakeExploderApp extends DoomToolsApplicationInstance
 					return 3;
 				}
 
-				if (cancelled.get())
+				if (isCancelled())
 					return -1;
 
 				log.println("Exploding WAD...");

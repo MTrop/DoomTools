@@ -1,6 +1,11 @@
 WTexScan
 --------
 
+### Changed for 1.4.1
+
+* `Fixed` [GUI] Loading "Map Name" from workspace state would set bad information.
+
+
 ### Changed for 1.4.0
 
 * `Added` SKYDEFS parsing for sky textures and flats (Enh. #197).

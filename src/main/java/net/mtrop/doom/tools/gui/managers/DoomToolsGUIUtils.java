@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -73,6 +74,7 @@ import net.mtrop.doom.tools.struct.swing.ContainerFactory.ScrollPolicy;
 import net.mtrop.doom.tools.struct.swing.FileChooserFactory;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormField;
 import net.mtrop.doom.tools.struct.swing.FormFactory.JFormPanel;
+import net.mtrop.doom.tools.struct.swing.ModalFactory.Modal;
 import net.mtrop.doom.tools.struct.swing.SwingUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.IOUtils;
@@ -712,6 +714,16 @@ public final class DoomToolsGUIUtils
 		return selected;
 	}
 
+	private void closeParentDialog(JButton b)
+	{
+		Container p = b.getParent();
+		while (p != null && !(p instanceof JDialog))
+			p = p.getParent();
+			
+		if (p != null && p instanceof JDialog)
+			((JDialog)p).dispose();
+	}
+	
 	/**
 	 * Creates a process modal, prepped to start and open.
 	 * @param parent the parent owner.
@@ -753,19 +765,28 @@ public final class DoomToolsGUIUtils
 		status.setActivityMessage(language.getText("doomtools.process.activity"));
 		
 		final Modal<Void> outputModal;
-		final JButton CLOSE_BUTTON;
+		final JButton CLIPBOARD_COPY;
+		final JButton CLIPBOARD_SAVE;
+		final JButton CANCEL_BUTTON;
 
+		AtomicReference<ProcessModal> processModal = new AtomicReference<>(null);
+		
 		if (!dontOpen)
 		{
-			CLOSE_BUTTON = createButtonFromLanguageKey("doomtools.close", (b) -> {
-				Container p = b.getParent();
-				while (p != null && !(p instanceof JDialog))
-					p = p.getParent();
-					
-				if (p != null && p instanceof JDialog)
-					((JDialog)p).dispose();
+			CANCEL_BUTTON = createButtonFromLanguageKey("doomtools.cancel", (b) -> {
+				processModal.get().cancel();
+				closeParentDialog(b);
 			});
-			CLOSE_BUTTON.setEnabled(false);
+			
+			CLIPBOARD_COPY = createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
+				copyToClipboard(outputPanel.getText());
+				status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
+			});
+			
+			CLIPBOARD_SAVE = createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
+				if (saveToFile(outputPanel, outputPanel.getText()))
+					status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
+			});
 			
 			outputModal = modal(
 				parent, 
@@ -775,28 +796,39 @@ public final class DoomToolsGUIUtils
 					node(BorderLayout.SOUTH, containerOf(
 						node(BorderLayout.WEST, status),
 						node(BorderLayout.EAST, containerOf(flowLayout(Flow.RIGHT, 4, 0),
-							node(createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
-								copyToClipboard(outputPanel.getText());
-								status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
-							})),
-							node(createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
-								if (saveToFile(outputPanel, outputPanel.getText()))
-									status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
-							})),
-							node(CLOSE_BUTTON)
+							node(CLIPBOARD_COPY),
+							node(CLIPBOARD_SAVE),
+							node(CANCEL_BUTTON)
 						))
 					))
 				)
 			);
+			outputModal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+			outputModal.addWindowListener(new WindowAdapter() // on close 
+			{
+				@Override
+				public void windowClosing(WindowEvent e)
+				{
+					processModal.get().cancel();
+					outputModal.dispose();
+				}
+			});
+			
+			CLIPBOARD_COPY.setEnabled(false);
+			CLIPBOARD_SAVE.setEnabled(false);
 		}
 		else
 		{
 			outputModal = null;
-			CLOSE_BUTTON = null;
+			CLIPBOARD_COPY = null;
+			CLIPBOARD_SAVE = null;
+			CANCEL_BUTTON = null;
 		}
 		
-		return new ProcessModal() 
+		processModal.set(new ProcessModal() 
 		{
+			private InstancedFuture<Integer> runInstance = null;
+			
 			@Override
 			public void start(DoomToolsTaskManager tasks, final Runnable onStart, final Consumer<Integer> onEnd) 
 			{
@@ -810,7 +842,11 @@ public final class DoomToolsGUIUtils
 					Integer result = -1;
 					try (InputStream stdin = inFile != null ? new FileInputStream(inFile) : IOUtils.getNullInputStream()) 
 					{
-						InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
+						runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
+
+						if (outputModal != null)
+							CANCEL_BUTTON.setEnabled(true);
+
 						result = runInstance.result();
 						if (result == 0)
 							status.setSuccessMessage(language.getText("doomtools.process.success"));
@@ -829,7 +865,9 @@ public final class DoomToolsGUIUtils
 					if (outputModal != null)
 					{
 						outputModal.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-						CLOSE_BUTTON.setEnabled(true);
+						CLIPBOARD_COPY.setEnabled(true);
+						CLIPBOARD_SAVE.setEnabled(true);
+						CANCEL_BUTTON.setEnabled(false);
 					}
 					
 					if (onEnd != null)
@@ -838,10 +876,17 @@ public final class DoomToolsGUIUtils
 				if (!dontOpen)
 					outputModal.openThenDispose();
 			}
-		};
+
+			@Override
+			public void cancel()
+			{
+				if (runInstance != null)
+					runInstance.cancel();
+			}
+		});
+		
+		return processModal.get(); 
 	}
-	
-	
 
 	/**
 	 * Creates a help modal, modeless.
@@ -1332,7 +1377,6 @@ public final class DoomToolsGUIUtils
 	/**
 	 * Process modal.
 	 */
-	@FunctionalInterface
 	public interface ProcessModal
 	{
 		/**
@@ -1353,6 +1397,11 @@ public final class DoomToolsGUIUtils
 		 * @param onEnd called on end.
 		 */
 		void start(DoomToolsTaskManager tasks, Runnable onStart, Consumer<Integer> onEnd);
+		
+		/**
+		 * Cancels the encapsulated task.
+		 */
+		void cancel();
 	}
 	
 	/**

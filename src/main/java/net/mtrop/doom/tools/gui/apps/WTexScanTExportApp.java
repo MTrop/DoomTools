@@ -88,7 +88,7 @@ public class WTexScanTExportApp extends DoomToolsApplicationInstance
 		state.put("wtexscan.mode", mode.name());
 		state.put("wtexscan.noskies", String.valueOf(noSkies));
 		state.put("wtexscan.nomessages", String.valueOf(noMessages));
-		state.put("wtexscan.mapname", mapName != null ? mapName : "");
+		state.put("wtexscan.mapname", mapName != null ? mapName : null);
 		
 		File[] textureWads = texportParametersPanel.getTextureWads();
 		File baseWad = texportParametersPanel.getBaseWad();

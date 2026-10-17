@@ -236,6 +236,30 @@ public final class AppCommon
 		}
 	}
 
+	private Cancellable<Integer> asCancellable(final ProcessCallable pc)
+	{
+		return new Cancellable<Integer>() 
+		{
+			@Override
+			public Integer call() throws Exception 
+			{
+				return pc.call();
+			}
+			
+			@Override
+			public boolean isCancelled() 
+			{
+				return pc.isCancelled();
+			}
+			
+			@Override
+			public void cancel() 
+			{
+				pc.cancel();
+			}
+		};
+	}
+
 	/**
 	 * Attempts to read a palette from an arbitrary file.
 	 * @param paletteFile the file to read for the palette.
@@ -333,7 +357,7 @@ public final class AppCommon
 				language.getText("decohack.export.message.success"), 
 				language.getText("decohack.export.message.interrupt"), 
 				language.getText("decohack.export.message.error"),
-				processes.attachStreams(processes.createDecoHack(sourceFile, encoding, sourceOutputFile, outputFile, budget), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createDecoHack(sourceFile, encoding, sourceOutputFile, outputFile, budget), stdout, stderr))
 			) 
 		).start(tasks);
 	}
@@ -361,7 +385,7 @@ public final class AppCommon
 				language.getText("dimgconv.status.message.success"), 
 				language.getText("dimgconv.status.message.interrupt"), 
 				language.getText("dimgconv.status.message.error"), 
-				processes.attachStreams(processes.createDImgConv(inputFile, outputFile, recursive, paletteSource, mode, infoFileName), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createDImgConv(inputFile, outputFile, recursive, paletteSource, mode, infoFileName), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -388,7 +412,7 @@ public final class AppCommon
 				language.getText("dmxconv.status.message.success"), 
 				language.getText("dmxconv.status.message.interrupt"), 
 				language.getText("dmxconv.status.message.error"), 
-				processes.attachStreams(processes.createDMXConv(inputFiles, ffmpegPath, ffmpegOnly, recursive, outputDir), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createDMXConv(inputFiles, ffmpegPath, ffmpegOnly, recursive, outputDir), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -469,7 +493,7 @@ public final class AppCommon
 				language.getText("doommake.project.build.message.success"), 
 				language.getText("doommake.project.build.message.interrupt"), 
 				language.getText("doommake.project.build.message.error"), 
-				processes.attachStreams(processes.createDoomMake(projectDirectory, target, agentOverride, args), stdout, stderr, stdin)
+				asCancellable(processes.attachStreams(processes.createDoomMake(projectDirectory, target, agentOverride, args), stdout, stderr, stdin))
 			)
 		).start(tasks, onStart, onEnd);
 	}
@@ -498,7 +522,7 @@ public final class AppCommon
 				language.getText("wadmerge.run.message.success"), 
 				language.getText("wadmerge.run.message.interrupt"), 
 				language.getText("wadmerge.run.message.error"), 
-				processes.attachStreams(processes.createWadMerge(scriptFile, workingDirectory, verbose, encoding, args), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createWadMerge(scriptFile, workingDirectory, verbose, encoding, args), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -528,7 +552,7 @@ public final class AppCommon
 				language.getText("wadscript.run.message.success"), 
 				language.getText("wadscript.run.message.interrupt"),
 				language.getText("wadscript.run.message.error"),
-				processes.attachStreams(processes.createWadScript(scriptFile, workingDirectory, entryPoint, encoding, args), stdout, stderr, stdin)
+				asCancellable(processes.attachStreams(processes.createWadScript(scriptFile, workingDirectory, entryPoint, encoding, args), stdout, stderr, stdin))
 			)
 		).start(tasks);
 	}
@@ -557,7 +581,7 @@ public final class AppCommon
 				language.getText("wadtex.export.message.success"), 
 				language.getText("wadtex.export.message.interrupt"),
 				language.getText("wadtex.export.message.error"),
-				processes.attachStreams(processes.createWadTex(sourceFile, outputWAD, nameOverride, appendMode, forceStrife), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createWadTex(sourceFile, outputWAD, nameOverride, appendMode, forceStrife), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -584,7 +608,7 @@ public final class AppCommon
 				language.getText("wswantbl.export.message.success"), 
 				language.getText("wswantbl.export.message.interrupt"), 
 				language.getText("wswantbl.export.message.error"), 
-				processes.attachStreams(processes.createWSwAnTbl(scriptFile, outWAD, outputSource), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createWSwAnTbl(scriptFile, outWAD, outputSource), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -609,7 +633,7 @@ public final class AppCommon
 				language.getText("wtexlist.status.message.success"), 
 				language.getText("wtexlist.status.message.interrupt"), 
 				language.getText("wtexlist.status.message.error"), 
-				processes.attachStreams(processes.createWTexList(sourceFiles, outputMode, noMessages), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createWTexList(sourceFiles, outputMode, noMessages), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -638,7 +662,7 @@ public final class AppCommon
 				language.getText("wtexscan.status.message.success"), 
 				language.getText("wtexscan.status.message.interrupt"), 
 				language.getText("wtexscan.status.message.error"), 
-				processes.attachStreams(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName), stdout, stderr)
+				asCancellable(processes.attachStreams(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName), stdout, stderr))
 			)
 		).start(tasks);
 	}
@@ -668,7 +692,7 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"), 
-				processes.attachStreams(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr, stdin)
+				asCancellable(processes.attachStreams(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr, stdin))
 			)
 		).start(tasks);
 	}
@@ -699,8 +723,8 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"),
-				processes.createWTexList(sourceFiles, outputMode, noMessages)
-					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr)) 
+				asCancellable(processes.createWTexList(sourceFiles, outputMode, noMessages)
+					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr))) 
 			)
 		).start(tasks);
 	}
@@ -736,8 +760,8 @@ public final class AppCommon
 				language.getText("wtexport.status.message.success"), 
 				language.getText("wtexport.status.message.interrupt"), 
 				language.getText("wtexport.status.message.error"),
-				processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName)
-					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr)) 
+				asCancellable(processes.createWTexScan(sourceFiles, mapInfoFiles, skydefsFiles, outputMode, noSkies, noMessages, mapName)
+					.pipeOutTo(processes.attachStreams(processes.createWTExport(sourceTextureFiles, baseFile, outputFile, create, noAnim, noSwitch, nullTex), stdout, stderr))) 
 			)
 		).start(tasks);
 	}
@@ -757,7 +781,7 @@ public final class AppCommon
 		final String successMessage, 
 		final String interruptMessage,
 		final String errorMessage,
-		final ProcessCallable cancellable
+		final Cancellable<Integer> cancellable
 	){
 		return tasks.spawn(new Cancellable<Integer>() 
 		{

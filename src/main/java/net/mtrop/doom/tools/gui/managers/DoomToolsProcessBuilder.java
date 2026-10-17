@@ -21,7 +21,6 @@ import net.mtrop.doom.tools.struct.ProcessCallable;
 import net.mtrop.doom.tools.struct.SingletonProvider;
 import net.mtrop.doom.tools.struct.LoggingFactory.Logger;
 import net.mtrop.doom.tools.struct.util.FileUtils;
-import net.mtrop.doom.tools.struct.util.IOUtils;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
@@ -361,7 +360,6 @@ public final class DoomToolsProcessBuilder
 		return callable
 			.setOut(stdout)
 			.setErr(stderr)
-			.setIn(IOUtils.getNullInputStream())
 			.setOutListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDOUT."))
 			.setErrListener((exception) -> LOG.errorf(exception, "Exception occurred on " + callableName + " STDERR."))
 		;
