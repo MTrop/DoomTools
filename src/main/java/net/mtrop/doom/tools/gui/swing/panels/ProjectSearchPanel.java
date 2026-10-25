@@ -56,9 +56,9 @@ public class ProjectSearchPanel extends JPanel
 	/** Logger. */
 	private static final Logger LOG = DoomToolsLogger.getLogger(ProjectSearchPanel.class); 
 
-	private DoomToolsTaskManager tasks;
-	private DoomToolsLanguageManager language;
-	private DoomToolsGUIUtils utils;
+	private final DoomToolsTaskManager tasks;
+	private final DoomToolsLanguageManager language;
+	private final DoomToolsGUIUtils utils;
 	
 	private Set<File> registeredFiles;
 	
@@ -314,7 +314,7 @@ public class ProjectSearchPanel extends JPanel
 		public void clear()
 		{
 			results.clear();
-			listeners.forEach((listener) -> listener.intervalAdded(
+			listeners.forEach((listener) -> listener.contentsChanged(
 				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, 0)
 			));
 		}
@@ -326,8 +326,8 @@ public class ProjectSearchPanel extends JPanel
 		public void addResult(SearchResult result)
 		{
 			results.add(result);
-			listeners.forEach((listener) -> listener.intervalAdded(
-				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, 0)
+			listeners.forEach((listener) -> listener.contentsChanged(
+				new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, results.size() - 1, results.size() - 1)
 			));
 		}
 

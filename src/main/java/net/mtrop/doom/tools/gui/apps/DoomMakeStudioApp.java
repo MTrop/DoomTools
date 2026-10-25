@@ -18,9 +18,13 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.Action;
@@ -65,6 +69,7 @@ import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.ActionNames;
 import net.mtrop.doom.tools.gui.swing.panels.EditorMultiFilePanel.EditorHandle;
 import net.mtrop.doom.tools.gui.swing.panels.settings.DoomMakeSettingsPanel;
 import net.mtrop.doom.tools.gui.swing.panels.GitRepositoryPanel;
+import net.mtrop.doom.tools.gui.swing.panels.MapBrowserPanel;
 import net.mtrop.doom.tools.gui.swing.panels.MercurialRepositoryPanel;
 import net.mtrop.doom.tools.gui.swing.panels.ProjectSearchPanel;
 import net.mtrop.doom.tools.gui.swing.panels.WadMergeExecuteWithArgsPanel;
@@ -78,6 +83,7 @@ import net.mtrop.doom.tools.struct.util.ArrayUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils;
 import net.mtrop.doom.tools.struct.util.FileUtils.TempFile;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
+import net.mtrop.doom.tools.struct.util.ThreadUtils;
 import net.mtrop.doom.util.MapUtils;
 import net.mtrop.doom.util.WadUtils;
 
@@ -113,6 +119,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private JTabbedPane tabPanel;
 	private JSplitPane filesSplitPaneHorizontal;
 	private JSplitPane filesSplitPaneVertical;
+	private MapBrowserPanel mapBrowserPanel;
 	private ProjectSearchPanel searchPanel;
 	private JComponent repositoryPanel;
 	private DoomToolsTextOutputPanel loggingPanel;
@@ -142,6 +149,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	private Map<EditorHandle, MergeSettings> handleToWadMergeSettingsMap;
 	private ScriptExecutionSettings doomMakeSettings;
 	
+	private RepositoryDeferralThread repoDeferrer;
+	private FileModifyDeferralThread fileDeferrer;
 	private ProjectWatcher watcher;
 	
 	/**
@@ -197,7 +206,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			{
 				File sourceFile = handle.getContentSourceFile();
 				statusPanel.setSuccessMessage(language.getText("doommake.status.message.saved", sourceFile.getName()));
-				refreshRepository();
+				//refreshRepository();
 				onHandleChange();
 			}
 
@@ -236,8 +245,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		this.treePanel.setRootDirectory(targetDirectory);
 		this.treePanel.setLabel(targetDirectory.getName());
 		
+		this.mapBrowserPanel = new MapBrowserPanel((map) -> {
+			if (map != null)
+				openInMapEditor(map.getWadFile());
+		});
+		
 		this.searchPanel = new ProjectSearchPanel((result) -> {
-			onOpenFile(result.getSource(), (int)result.getOffset());
+			if (result != null)
+				onOpenFile(result.getSource(), (int)result.getOffset());
 		});
 		
 		if (Git.isGit(targetDirectory))		
@@ -262,6 +277,9 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				containerOf(dimension(DEFAULT_WIDTH, 150), node(executionPanel))
 			))
 		);
+		JComponent mapTab = containerOf(createEmptyBorder(4, 4, 4, 4),
+			node(mapBrowserPanel)
+		);
 		JComponent searchTab = containerOf(createEmptyBorder(4, 4, 4, 4), 
 			node(searchPanel)
 		);
@@ -276,6 +294,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 		this.tabPanel = tabs(TabPlacement.LEFT, TabLayoutPolicy.SCROLL, 
 			tab(icons.getImage("doommake-folder.png"), fileTab), 
+			tab(icons.getImage("doommake-maps.png"), mapTab), 
 			tab(icons.getImage("doommake-search.png"), searchTab),
 			tab(icons.getImage("doommake-repo.png"), repoTab),
 			tab(icons.getImage("doommake-log.png"), loggingTab)
@@ -306,6 +325,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		this.projectDirectory = targetDirectory;
 		refreshProperties();
+		refreshMapRegistry();
 		refreshSearchRegistry();
 		onHandleChange();
 	}
@@ -321,6 +341,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		loadProperties(props, projectPropertiesFile);
 		
 		this.projectProperties = props;
+	}
+
+	private void refreshMapRegistry() 
+	{
+		mapBrowserPanel.buildRegistry(getMapFiles(projectDirectory));
 	}
 
 	private void refreshSearchRegistry() 
@@ -344,6 +369,28 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 	}
 	
+	private File[] getMapFiles(File projectDirectory) 
+	{
+		List<File> fileList = new ArrayList<>(256);  
+
+		String src = projectProperties.getProperty("doommake.dir.src");
+		if (ObjectUtils.isEmpty(src))
+			src = "src";
+		
+		File mapsDir = FileUtils.extendPath(projectDirectory, src, "maps");
+		
+		if (mapsDir.exists())
+		{
+			File[] mapWads = mapsDir.listFiles((df) -> df.getName().toLowerCase().endsWith(".wad"));
+			if (mapWads == null)
+				LOG.info("Error fetching map WADs from " + mapsDir.getPath());
+			else for (File f : mapWads)
+				fileList.add(f);
+		}
+
+		return fileList.toArray(new File[fileList.size()]);
+	}
+
 	private File[] getSearchableFiles(File directory)
 	{
 		List<File> fileList = new ArrayList<>(256);  
@@ -518,7 +565,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		// Set the last directory successfully opened.
 		settings.setLastProjectDirectory(projectDirectory);
 		onNewEditor();
+		repoDeferrer = new RepositoryDeferralThread();
+		fileDeferrer = new FileModifyDeferralThread();
 		watcher = new ProjectWatcher();
+		repoDeferrer.start();
+		fileDeferrer.start();
 		watcher.start();
 	}
 	
@@ -841,27 +892,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		
 		if (mapHeaders != null && mapHeaders.length > 0 && SwingUtils.yesTo(language.getText("doommake.open.mapeditor", mapHeaders.length)))
 		{
-			File editorExe = settings.getPathToMapEditor();
-			if (editorExe == null || !editorExe.exists())
-			{
-				SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.notfound", file.getAbsolutePath()));
-				return true;
-			}
-			
-			ProcessCallable callable = ProcessCallable.create(editorExe)
-				.setWorkingDirectory(editorExe.getParentFile());
-			callable.arg(file.getAbsolutePath());
-			
-			try {
-				callable.exec();
-				return true;
-			} catch (IOException e) {
-				SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.ioerror", file.getAbsolutePath()));
-				return true;
-			} catch (SecurityException e) {
-				SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.security", file.getAbsolutePath()));
-				return true;
-			}
+			return openInMapEditor(file);
 		}
 		else if (SwingUtils.yesTo(language.getText("doommake.open.slade")))
 		{
@@ -888,6 +919,31 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			}
 		}
 		return false;
+	}
+
+	private Boolean openInMapEditor(File file)
+	{
+		File editorExe = settings.getPathToMapEditor();
+		if (editorExe == null || !editorExe.exists())
+		{
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.notfound", file.getAbsolutePath()));
+			return true;
+		}
+		
+		ProcessCallable callable = ProcessCallable.create(editorExe)
+			.setWorkingDirectory(editorExe.getParentFile());
+		callable.arg(file.getAbsolutePath());
+		
+		try {
+			callable.exec();
+			return true;
+		} catch (IOException e) {
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.ioerror", file.getAbsolutePath()));
+			return true;
+		} catch (SecurityException e) {
+			SwingUtils.error(getApplicationContainer(), language.getText("doommake.open.mapeditor.security", file.getAbsolutePath()));
+			return true;
+		}
 	}
 
 	private void onOpenDirectory(File directory)
@@ -1345,52 +1401,73 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			|| relativePath.equalsIgnoreCase("doommake.project.properties");
 	}
 	
-	private void onProjectFileCreated(File file)
+	private boolean acceptIncomingWatchFile(File file)
 	{
 		// ignore changes to repository directories.
 		if (fileWasRepository(file))
-			return;
+			return false;
+		// operate on files, not directories.
+		if (file.isDirectory())
+			return false;
+		
+		return true;
+	}
+	
+	private void onProjectFileCreated(File file)
+	{
+		LOG.debugf("File CREATE: %s", file.getPath());
 		
 		if (fileWasProjectPropertyFile(file))
 		{
 			refreshProperties();
+			refreshMapRegistry();
 			refreshSearchRegistry();
 		}
 		
-		searchPanel.registerFile(file);
-		refreshRepository();
+		repoDeferrer.callRepository();
 	}
 	
 	private void onProjectFileModified(File file)
 	{
-		// ignore changes to repository directories.
-		if (fileWasRepository(file))
-			return;
-		
+		fileDeferrer.addFile(file);
+	}
+
+	private void handleFileModified(File file)
+	{
+		LOG.debugf("File MODIFY: %s", file.getPath());
+
 		if (fileWasProjectPropertyFile(file))
 		{
 			refreshProperties();
+			refreshMapRegistry();
 			refreshSearchRegistry();
 		}
+		else
+		{
+			mapBrowserPanel.registerFile(file);
+			searchPanel.registerFile(file);
+		}
 
-		searchPanel.registerFile(file);
-		refreshRepository();
+		repoDeferrer.callRepository();
 	}
 	
 	private void onProjectFileDeleted(File file)
 	{
-		// ignore changes to repository directories.
-		if (fileWasRepository(file))
-			return;
-		
+		LOG.debugf("File DELETE: %s", file.getPath());
+
 		if (fileWasProjectPropertyFile(file))
 		{
 			refreshProperties();
+			refreshMapRegistry();
 			refreshSearchRegistry();
 		}
-
-		searchPanel.deregisterFile(file);
-		refreshRepository();
+		else
+		{
+			mapBrowserPanel.deregisterFile(file);
+			searchPanel.deregisterFile(file);
+		}
+		
+		repoDeferrer.callRepository();
 	}
 	
 	private void onWatcherError(String message)
@@ -1485,7 +1562,134 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			settings.setLastTouchedFile(saved);
 		}
 	}
+
+	/**
+	 * Sometimes a boatload of file events happen and we don't need the repo to refresh every time.
+	 * This creates a moratorium for those events.
+	 */
+	private class RepositoryDeferralThread extends Thread
+	{
+		private final AtomicBoolean callSwitch;
+		private volatile long nextFlushTimeMillis;
+		
+		private RepositoryDeferralThread()
+		{
+			setName("RepositoryDeferralThread");
+			setDaemon(true);
+			this.callSwitch = new AtomicBoolean(false);
+			this.nextFlushTimeMillis = 1L;
+		}
+		
+		private void callRepository()
+		{
+			synchronized (callSwitch)
+			{
+				callSwitch.set(true);
+				callSwitch.notify();
+			}
+			nextFlushTimeMillis = System.currentTimeMillis() + 500L;
+		}
+		@Override
+		public void run() 
+		{
+			while (true)
+			{
+				if (System.currentTimeMillis() < nextFlushTimeMillis)
+				{
+					ThreadUtils.sleep(10L);
+					continue;
+				}
+				
+				synchronized (callSwitch)
+				{
+					refreshRepository();
+					callSwitch.set(false);
+					LOG.debug("Refreshed repository.");
+				}
+				
+				while (!callSwitch.get())
+				{
+					synchronized (callSwitch)
+					{
+						try {
+							callSwitch.wait();
+						} catch (InterruptedException e) {
+							// Eat exception.
+						}
+					}
+				}
+			}
+		}
+		
+	}
 	
+	/**
+	 * Sometimes files have channels open to them on MODIFY events.
+	 * This creates a moratorium for those events.
+	 */
+	private class FileModifyDeferralThread extends Thread
+	{
+		private final Set<File> aggregatorSet;
+		private volatile long nextFlushTimeMillis;
+		
+		private FileModifyDeferralThread()
+		{
+			setName("FileModifyDeferralThread");
+			setDaemon(true);
+			this.aggregatorSet = new HashSet<>();
+			this.nextFlushTimeMillis = -1L;
+		}
+		
+		private void addFile(File file)
+		{
+			synchronized (aggregatorSet)
+			{
+				if (!aggregatorSet.contains(file))
+				{
+					aggregatorSet.add(file);
+					aggregatorSet.notify();
+				}
+			}
+			nextFlushTimeMillis = System.currentTimeMillis() + 100L;
+		}
+		
+		@Override
+		public void run() 
+		{
+			while (true)
+			{
+				if (System.currentTimeMillis() < nextFlushTimeMillis)
+				{
+					ThreadUtils.sleep(10L);
+					continue;
+				}
+				
+				synchronized (aggregatorSet)
+				{
+					for (Iterator<File> it = aggregatorSet.iterator(); it.hasNext(); )
+					{
+						handleFileModified(it.next());
+						it.remove();
+					}
+					LOG.debug("Flushed MODIFIED files.");
+				}
+				
+				while (aggregatorSet.isEmpty())
+				{
+					synchronized (aggregatorSet)
+					{
+						try {
+							aggregatorSet.wait();
+						} catch (InterruptedException e) {
+							// Eat exception.
+						}
+					}
+				}
+			}
+		}
+		
+	}
+
 	private class ProjectWatcher extends WatchServiceThread
 	{
 		private ProjectWatcher()
@@ -1496,8 +1700,10 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				SELF::onProjectFileCreated,
 				SELF::onProjectFileModified,
 				SELF::onProjectFileDeleted,
-				SELF::onWatcherError
+				SELF::onWatcherError,
+				SELF::acceptIncomingWatchFile
 			);
 		}
 	}
+	
 }

@@ -33,8 +33,9 @@ public class WatchServiceThread extends Thread
 	private Consumer<File> onFileModified;
 	private Consumer<File> onFileDeleted;
 	private Consumer<String> onErrorMessage;
+	private FileFilter filter;
 
-	private WatchService service;
+	private volatile WatchService service;
 	
 	/**
 	 * Creates the new Watch Service thread.
@@ -44,8 +45,9 @@ public class WatchServiceThread extends Thread
 	 * @param onFileModified the function to call on file modification. Can be null.
 	 * @param onFileDeleted the function to call on file deletion. Can be null.
 	 * @param onErrorMessage the function to call when an error message is produced. Can be null.
+	 * @param filter the file filter for what to ignore.
 	 */
-	public WatchServiceThread(File directory, boolean recursive, Consumer<File> onFileCreated, Consumer<File> onFileModified, Consumer<File> onFileDeleted, Consumer<String> onErrorMessage)
+	public WatchServiceThread(File directory, boolean recursive, Consumer<File> onFileCreated, Consumer<File> onFileModified, Consumer<File> onFileDeleted, Consumer<String> onErrorMessage, FileFilter filter)
 	{
 		super("WatchThread-" + directory.getName());
 		setDaemon(true);
@@ -57,6 +59,8 @@ public class WatchServiceThread extends Thread
 		this.onFileModified = onFileModified;
 		this.onFileDeleted = onFileDeleted;
 		this.onErrorMessage = onErrorMessage;
+		this.filter = filter;
+		
 		this.service = null;
 	}
 	
@@ -141,7 +145,8 @@ public class WatchServiceThread extends Thread
 						continue;
 					Path p = ((Path)key.watchable()).resolve(eventPath);
 					File f = p.toFile();
-					switch (event.kind().name())
+					
+					if (filter.accept(f)) switch (event.kind().name())
 					{
 						default:
 							break;
