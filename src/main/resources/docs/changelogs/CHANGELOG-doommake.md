@@ -4,6 +4,7 @@ DoomMake
 ### Changed for 0.38.0
 
 * `Added` A way to output all of DoomMake's functions as JSON with the `--function-help-json` switch.
+* `Changed` [GUI-Studio] A slight change to pop-up menu layouts for single selected files.
 
 
 ### Changed for 0.37.1
