@@ -1,6 +1,11 @@
 WadTex
 ------
 
+### Changed for 1.5.7
+
+* `Fixed` [GUI-TextureEditor] Sometimes the first patch of a texture would not be "current", even if selected by default. (Issue #204)
+
+
 ### Changed for 1.5.6
 
 * `Added` [GUI-TextureEditor] Patch copy/paste between textures (or same texture) (Enh. #173).

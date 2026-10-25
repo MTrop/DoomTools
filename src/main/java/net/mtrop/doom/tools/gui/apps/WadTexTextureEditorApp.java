@@ -1133,7 +1133,7 @@ public class WadTexTextureEditorApp extends DoomToolsApplicationInstance
 		});
 		
 		currentTexture = texture;
-		onSwitchToPatch(null);
+		onSwitchToPatch(patchList.getSelectedValue());
 		
 		textureWidthField.setValue((short)texture.getWidth());
 		textureHeightField.setValue((short)texture.getHeight());
