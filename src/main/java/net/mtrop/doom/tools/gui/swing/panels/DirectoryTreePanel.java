@@ -198,6 +198,9 @@ public class DirectoryTreePanel extends JPanel
 					separator(),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.reveal", (i) -> onRevealSelectedFileInSystem()),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.terminal", (i) -> onOpenTerminalHere()),
+				},
+				getAdditionalFileActions(file),
+				new MenuNode[] {
 					separator(),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy", (i) -> onCopySelectedFiles()),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.copy.path", (i) -> onCopySelectedFilePath()),
@@ -205,8 +208,7 @@ public class DirectoryTreePanel extends JPanel
 					separator(),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.paste", (i) -> onPasteClipboardFilesIntoSelectedDirectory()),
 					utils.createItemFromLanguageKey("dirtree.popup.menu.item.delete", (i) -> onDeleteSelectedFiles()),
-				},
-				getAdditionalFileActions(file)
+				}
 			)
 		);
 	}
