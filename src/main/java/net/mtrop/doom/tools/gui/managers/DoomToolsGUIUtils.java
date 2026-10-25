@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -768,22 +769,31 @@ public final class DoomToolsGUIUtils
 		final JButton CLIPBOARD_COPY;
 		final JButton CLIPBOARD_SAVE;
 		final JButton CANCEL_BUTTON;
+		final AtomicBoolean running = new AtomicBoolean(false);
 
 		AtomicReference<ProcessModal> processModal = new AtomicReference<>(null);
 		
 		if (!dontOpen)
 		{
-			CANCEL_BUTTON = createButtonFromLanguageKey("doomtools.cancel", (b) -> {
-				processModal.get().cancel();
-				closeParentDialog(b);
+			Predicate<Void> CANCEL_ASK = (unused) -> SwingUtils.yesTo(language.getText("doomtools.process.cancel"));
+			
+			CANCEL_BUTTON = createButtonFromLanguageKey("doomtools.cancel", (b) -> 
+			{
+				if (running.get() && CANCEL_ASK.test(null))
+				{
+					processModal.get().cancel();
+					closeParentDialog(b);
+				}
 			});
 			
-			CLIPBOARD_COPY = createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> {
+			CLIPBOARD_COPY = createButtonFromLanguageKey("doomtools.clipboard.copy", (b) -> 
+			{
 				copyToClipboard(outputPanel.getText());
 				status.setSuccessMessage(language.getText("doomtools.clipboard.copy.message"));
 			});
 			
-			CLIPBOARD_SAVE = createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> {
+			CLIPBOARD_SAVE = createButtonFromLanguageKey("doomtools.clipboard.save", (b) -> 
+			{
 				if (saveToFile(outputPanel, outputPanel.getText()))
 					status.setSuccessMessage(language.getText("doomtools.clipboard.save.message"));
 			});
@@ -809,8 +819,18 @@ public final class DoomToolsGUIUtils
 				@Override
 				public void windowClosing(WindowEvent e)
 				{
-					processModal.get().cancel();
-					outputModal.dispose();
+					if (running.get())
+					{
+						if (CANCEL_ASK.test(null))
+						{
+							processModal.get().cancel();
+							outputModal.dispose();
+						}
+					}
+					else
+					{
+						outputModal.dispose();
+					}
 				}
 			});
 			
@@ -836,6 +856,8 @@ public final class DoomToolsGUIUtils
 				final PrintStream errorStream = outputPanel.getErrorPrintStream();
 				tasks.spawn(() -> 
 				{
+					running.set(true);
+					
 					if (onStart != null)
 						onStart.run();
 					
@@ -862,6 +884,8 @@ public final class DoomToolsGUIUtils
 						status.setErrorMessage(language.getText("doomtools.process.error", e.getLocalizedMessage()));
 					}
 					
+					running.set(false);
+
 					if (outputModal != null)
 					{
 						outputModal.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
