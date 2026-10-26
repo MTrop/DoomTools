@@ -1385,6 +1385,30 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			((MercurialRepositoryPanel)repositoryPanel).refreshEntries();
 	}
 
+	private boolean fileWasBuildOrDist(File file)
+	{
+		String projectPath = projectDirectory.getPath();
+		String relativePath = file.getPath().substring(projectPath.length() + 1); 
+
+		String build = projectProperties.getProperty("doommake.dir.build");
+		if (ObjectUtils.isEmpty(build))
+			build = "build";
+
+		String dist = projectProperties.getProperty("doommake.dir.dist");
+		if (ObjectUtils.isEmpty(dist))
+			dist = "dist";
+		
+		// Ignore build directory files.
+		if (relativePath.startsWith(build + "\\") || relativePath.startsWith(build + "/"))
+			return true;
+
+		// Ignore distribution directory files.
+		if (relativePath.startsWith(dist + "\\") || relativePath.startsWith(dist + "/"))
+			return true;
+		
+		return false;
+	}
+	
 	private boolean fileWasRepository(File file)
 	{
 		String projectPath = projectDirectory.getPath();
@@ -1405,6 +1429,12 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		// ignore changes to repository directories.
 		if (fileWasRepository(file))
+			return false;
+		// ignore changes to build directories.
+		if (fileWasBuildOrDist(file))
+			return false;
+		// operate on files, not directories.
+		if (file.isDirectory())
 			return false;
 		// operate on files, not directories.
 		if (file.isDirectory())
