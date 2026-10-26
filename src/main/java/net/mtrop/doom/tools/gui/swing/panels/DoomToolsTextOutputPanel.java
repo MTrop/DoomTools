@@ -145,7 +145,6 @@ public class DoomToolsTextOutputPanel extends JTextArea
 		public void close() throws IOException
 		{
 			flush();
-			IOUtils.close(logFileWriter);
 		}
 		
 		@Override

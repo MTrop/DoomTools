@@ -144,6 +144,10 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	// State
 
 	private Properties projectProperties;
+	private File projectBuildDirectory;
+	private File projectDistDirectory;
+	private File projectSourceDirectory;
+	
 	private EditorHandle currentHandle;
 	private Map<EditorHandle, ScriptExecutionSettings> handleToWadScriptSettingsMap;
 	private Map<EditorHandle, MergeSettings> handleToWadMergeSettingsMap;
@@ -341,16 +345,38 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		loadProperties(props, projectPropertiesFile);
 		
 		this.projectProperties = props;
+
+		String build = projectProperties.getProperty("doommake.dir.build");
+		if (ObjectUtils.isEmpty(build))
+			build = "build";
+
+		String dist = projectProperties.getProperty("doommake.dir.dist");
+		if (ObjectUtils.isEmpty(dist))
+			dist = "dist";
+
+		String src = projectProperties.getProperty("doommake.dir.src");
+		if (ObjectUtils.isEmpty(src))
+			src = "src";
+		
+		this.projectBuildDirectory = (new File(build)).isAbsolute()
+			? FileUtils.canonizeFile((new File(build))) 
+			: FileUtils.canonizeFile(FileUtils.extendPath(projectDirectory, build));
+		this.projectDistDirectory = (new File(dist)).isAbsolute()
+			? FileUtils.canonizeFile(new File(dist))
+			: FileUtils.canonizeFile(FileUtils.extendPath(projectDirectory, dist));
+		this.projectSourceDirectory = (new File(src)).isAbsolute()
+			? FileUtils.canonizeFile(new File(src))
+			: FileUtils.canonizeFile(FileUtils.extendPath(projectDirectory, src));
 	}
 
 	private void refreshMapRegistry() 
 	{
-		mapBrowserPanel.buildRegistry(getMapFiles(projectDirectory));
+		mapBrowserPanel.buildRegistry(getMapFiles());
 	}
 
 	private void refreshSearchRegistry() 
 	{
-		searchPanel.buildRegistry(getSearchableFiles(projectDirectory));
+		searchPanel.buildRegistry(getSearchableFiles());
 	}
 	
 	private static void loadProperties(Properties props, File propertiesFile) 
@@ -369,15 +395,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 	}
 	
-	private File[] getMapFiles(File projectDirectory) 
+	private File[] getMapFiles() 
 	{
 		List<File> fileList = new ArrayList<>(256);  
 
-		String src = projectProperties.getProperty("doommake.dir.src");
-		if (ObjectUtils.isEmpty(src))
-			src = "src";
-		
-		File mapsDir = FileUtils.extendPath(projectDirectory, src, "maps");
+		File mapsDir = FileUtils.extendPath(projectSourceDirectory, "maps");
 		
 		if (mapsDir.exists())
 		{
@@ -391,24 +413,18 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		return fileList.toArray(new File[fileList.size()]);
 	}
 
-	private File[] getSearchableFiles(File directory)
+	private File[] getSearchableFiles()
 	{
 		List<File> fileList = new ArrayList<>(256);  
 		
-		String build = projectProperties.getProperty("doommake.dir.build");
-		if (ObjectUtils.isEmpty(build))
-			build = "build";
-
-		String dist = projectProperties.getProperty("doommake.dir.dist");
-		if (ObjectUtils.isEmpty(dist))
-			dist = "dist";
-		
-		for (File f : FileUtils.explodeFiles(directory))
+		for (File f : FileUtils.explodeFiles(projectDirectory))
 		{
+			f = FileUtils.canonizeFile(f);
+
 			if (f.isHidden())
 				continue;
 			
-			String projectPath = directory.getPath();
+			String projectPath = projectDirectory.getPath();
 			String relativePath = f.getPath().substring(projectPath.length() + 1);
 			
 			// Ignore repository files.
@@ -416,11 +432,11 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 				continue;
 
 			// Ignore build directory files.
-			if (relativePath.startsWith(build + "\\") || relativePath.startsWith(build + "/"))
+			if (f.getPath().startsWith(projectBuildDirectory.getPath() + File.separator))
 				continue;
 
 			// Ignore distribution directory files.
-			if (relativePath.startsWith(dist + "\\") || relativePath.startsWith(dist + "/"))
+			if (f.getPath().startsWith(projectDistDirectory.getPath() + File.separator))
 				continue;
 			
 			fileList.add(f);
@@ -1094,27 +1110,21 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		}
 		
 		String palettePath = projectProperties.getProperty("doommake.iwad");
-		String build = projectProperties.getProperty("doommake.dir.build");
-		if (ObjectUtils.isEmpty(build))
-			build = "build";
-		String source = projectProperties.getProperty("doommake.dir.src");
-		if (ObjectUtils.isEmpty(source))
-			source = "src";
 		
-		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
+		File paletteFile = FileUtils.searchDirectory(new File(projectBuildDirectory.getPath() + "/convert/palettes"), "PLAYPAL", true, false);
 		if (paletteFile != null)
 		{
 			palettePath = paletteFile.getPath();
 		}
 		else
 		{
-			paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
+			paletteFile = FileUtils.searchDirectory(new File(projectSourceDirectory.getPath() + "/assets/palettes"), "PLAYPAL", true, false);
 			if (paletteFile != null)
 				palettePath = paletteFile.getPath();	
 		}
 
 		try {
-			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, selected.getCanonicalPath(), palettePath);
+			DoomToolsGUIMain.startGUIAppProcess(ApplicationNames.DIMGCONVERT_OFFSETTER, FileUtils.canonizeFile(selected).getPath(), palettePath);
 		} catch (IOException e) {
 			SwingUtils.error(language.getText("doommake.offsetter.ioerror"));
 			LOG.error(e, "I/O Error running graphic offsetter program.");
@@ -1126,21 +1136,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		String iwadPath = projectProperties.getProperty("doommake.iwad");
 		String palettePath = projectProperties.getProperty("doommake.iwad");
 		
-		String build = projectProperties.getProperty("doommake.dir.build");
-		if (ObjectUtils.isEmpty(build))
-			build = "build";
-		String source = projectProperties.getProperty("doommake.dir.src");
-		if (ObjectUtils.isEmpty(source))
-			source = "src";
-
-		File paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + build + "/convert/palettes"), "PLAYPAL", true, false);
+		File paletteFile = FileUtils.searchDirectory(new File(projectBuildDirectory.getPath() + "/convert/palettes"), "PLAYPAL", true, false);
 		if (paletteFile != null)
 		{
 			palettePath = paletteFile.getPath();
 		}
 		else
 		{
-			paletteFile = FileUtils.searchDirectory(new File(projectDirectory.getPath() + "/" + source + "/assets/palettes"), "PLAYPAL", true, false);
+			paletteFile = FileUtils.searchDirectory(new File(projectSourceDirectory.getPath() + "/assets/palettes"), "PLAYPAL", true, false);
 			if (paletteFile != null)
 				palettePath = paletteFile.getPath();	
 		}
@@ -1387,23 +1390,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 
 	private boolean fileWasBuildOrDist(File file)
 	{
-		String projectPath = projectDirectory.getPath();
-		String relativePath = file.getPath().substring(projectPath.length() + 1); 
-
-		String build = projectProperties.getProperty("doommake.dir.build");
-		if (ObjectUtils.isEmpty(build))
-			build = "build";
-
-		String dist = projectProperties.getProperty("doommake.dir.dist");
-		if (ObjectUtils.isEmpty(dist))
-			dist = "dist";
+		file = FileUtils.canonizeFile(file);
 		
 		// Ignore build directory files.
-		if (relativePath.startsWith(build + "\\") || relativePath.startsWith(build + "/"))
+		if (file.getPath().startsWith(projectBuildDirectory.getPath() + File.separator))
 			return true;
 
 		// Ignore distribution directory files.
-		if (relativePath.startsWith(dist + "\\") || relativePath.startsWith(dist + "/"))
+		if (file.getPath().startsWith(projectDistDirectory.getPath() + File.separator))
 			return true;
 		
 		return false;
@@ -1427,17 +1421,14 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	
 	private boolean acceptIncomingWatchFile(File file)
 	{
+		// operate on files, not directories.
+		if (file.isDirectory())
+			return false;
 		// ignore changes to repository directories.
 		if (fileWasRepository(file))
 			return false;
 		// ignore changes to build directories.
 		if (fileWasBuildOrDist(file))
-			return false;
-		// operate on files, not directories.
-		if (file.isDirectory())
-			return false;
-		// operate on files, not directories.
-		if (file.isDirectory())
 			return false;
 		
 		return true;
