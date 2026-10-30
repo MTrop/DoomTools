@@ -3,7 +3,7 @@ DoomMake
 
 ### Changed for 0.38.0
 
-* `Added` A way to output all of DoomMake's functions as JSON with the `--function-help-json` switch.
+* `Added` A way to output all of DoomMake's functions and scopes as JSON with the `--function-help-json` switch.
 * `Added` [GUI-Studio] A Map Browser tab for quick-finding maps (Enh. #205).
 * `Changed` [GUI-Studio] A slight change to pop-up menu layouts for single selected files.
 * `Changed` [GUI-Studio] More efficient handling for file system changes and responses.
