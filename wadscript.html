@@ -106,8 +106,8 @@
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-WadScript v1.9.3 by Matt Tropiano
-(using DoomStruct v2.22.2, RookScript v1.19.0, RookScript-Desktop v1.10.2.1)
+WadScript v1.10.0 by Matt Tropiano
+(using DoomStruct v2.22.2, RookScript v1.20.1, RookScript-Desktop v1.20.1)
 Usage: wadscript [filename] [switches | scriptargs]
                  [--help | -h | --version | --changelog]
                  [--function-help]
@@ -127,6 +127,8 @@ Usage: wadscript [filename] [switches | scriptargs]
                                      HTML format.
     --function-help-html-div     Prints all available function usages in
                                      HTML format, but just the content.
+    --function-help-json         Prints all available function usages in
+                                     JSON format.
     --disassemble                Prints the disassembly for this script
                                      and exits.
     --entry-list                 Prints the list of entry point names for this
@@ -167,6 +169,11 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 1.10.0
+
+* &#x60;Added&#x60; A way to output all of WadScript&#39;s functions and scopes as JSON with the &#x60;--function-help-json&#x60; switch.
+
+
 ### Changed for 1.9.3
 
 * &#x60;Fixed&#x60; Some docs for PK3 functions.

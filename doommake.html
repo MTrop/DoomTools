@@ -228,8 +228,8 @@ Path to project IWAD (blank to skip)? H:\Doom\IWADs\DOOM2.WAD</pre>
 		</div>
     <!-- ^^^ HEADER ^^^ -->
         <pre id="readme" class="text-documentation">
-DoomMake v0.37.1 by Matt Tropiano
-(using DoomStruct v2.22.2 , WadScript v1.9.3, RookScript v1.19.0, RookScript-Desktop v1.10.2.1)
+DoomMake v0.38.0 by Matt Tropiano
+(using DoomStruct v2.22.2 , WadScript v1.10.0, RookScript v1.20.1, RookScript-Desktop v1.20.1)
 Usage: doommake [target] [args] [switches]
                 [directory] --new-project [templates...]
                 [--gui | --new-project-gui]
@@ -265,6 +265,8 @@ Usage: doommake [target] [args] [switches]
                                        HTML format.
     --function-help-html-div       Prints all available function usages in
                                        HTML format, but just the content.
+    --function-help-json           Prints all available function usages in
+                                       JSON format.
     --disassemble                  Prints the disassembly for the make script
                                        in use and exits.
 
@@ -360,6 +362,14 @@ to initialize once.
 			<h3 id="changelog" class="main-title-name w3-center">CHANGELOG</h3>
 		</div>
 		<pre class="text-changelog">
+### Changed for 0.38.0
+
+* &#x60;Added&#x60; A way to output all of DoomMake&#39;s functions and scopes as JSON with the &#x60;--function-help-json&#x60; switch.
+* &#x60;Added&#x60; [GUI-Studio] A Map Browser tab for quick-finding maps (Enh. #205).
+* &#x60;Changed&#x60; [GUI-Studio] A slight change to pop-up menu layouts for single selected files.
+* &#x60;Changed&#x60; [GUI-Studio] More efficient handling for file system changes and responses.
+
+
 ### Changed for 0.37.1
 
 * &#x60;Fixed&#x60; Attempting to make an empty project will no longer cause a crash (Issue #198).
