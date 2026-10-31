@@ -12,6 +12,11 @@ BODY {
 	margin: 16px;
 }
 
+.script-docs > .scope-section {
+	background-color: rgb(80, 80, 80);
+	margin: 16px;
+}
+
 .script-docs > .category-section {
 	background-color: rgb(80, 80, 80);
 	margin: 16px;
@@ -66,6 +71,159 @@ BODY {
 	box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.5);
 }
 
+.scope-title {
+	background-color: rgb(200, 200, 200);
+	color: rgb(0, 0, 0);
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-left: 16px;
+	padding-right: 16px;
+}
+
+.scope-content {
+	padding-top: 8px;
+	padding-bottom: 8px;
+	margin-left: 16px;
+	margin-right: 16px;
+}
+
+.scope-name {
+	margin: 0;
+}
+
+.scope-navigation {
+	float: right;
+	display: block;
+	font-size: 50%;
+	color: rgb(0, 0, 0);
+}
+
+.scope-navigation:visited {
+	color: rgb(0, 0, 0);
+}
+
+.scope-navigation:hover {
+	color: rgb(40, 40, 40);
+}
+
+.scope-detail-section {
+	margin-top: 16px;
+	margin-bottom: 32px;
+}
+
+.scope-detail-section:hover {
+	box-shadow: 0px 8px 8px rgba(0, 0, 0, 0.5);
+}
+
+.scope-detail-title {
+	background-color: rgb(60, 60, 60);
+}
+
+.scope-detail-title:hover {
+	background-color: rgb(100, 100, 100);
+}
+
+.scope-detail-content {
+	background-color: rgb(45, 45, 45);
+	padding-top: 8px;
+	padding-bottom: 8px;
+	padding-left: 16px;
+	padding-right: 16px;
+	display: none;
+}
+
+.scope-detail-name {
+	margin: 0;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	margin-left: 16px;
+	margin-right: 16px;
+}
+
+.scope-instructions {
+	font-weight: 400;
+}
+
+.scope-detail-navigation {
+	float: right;
+	display: none;
+	font-size: 50%;
+	color: rgb(140, 140, 140);
+}
+
+.scope-detail-navigation:visited {
+	color: rgb(140, 140, 140);
+}
+
+.scope-detail-navigation:hover {
+	color: rgb(180, 180, 180);
+}
+
+.variable-section {
+	margin-top: 8px;
+	margin-bottom: 16px;
+	margin-left: 16px;
+	margin-right: 16px;
+	box-shadow: 0 4px 4px rgba(0, 0, 0, 0.5);
+}
+
+.variable-title {
+	background-color: rgb(30, 30, 30);
+	padding-top: 4px;
+	padding-bottom: 4px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.variable-content {
+	background-color: rgb(70, 70, 70);
+	padding-top: 4px;
+	padding-bottom: 4px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
+.variable-name {
+	margin: 0;
+}
+
+.variable-readonly {
+	color: rgb(180, 180, 180);
+}
+
+.variable-usage {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.variable-type {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+
+.variable-type-name {
+	background-color: rgb(180, 180, 180);
+	color: rgb(0, 0, 0);
+	display: inline;
+	border-radius: 4px;
+	padding: 2px;
+	font-weight: 800;
+}
+
+.variable-subtype-name {
+	color: rgb(224, 224, 224);
+	display: inline;
+	font-weight: 600;
+}
+
+.variable-description {
+	margin-left: 32px;
+}
+
+.variable-description > p {
+	margin: 0;
+}
+
 .category-title {
 	background-color: rgb(160, 160, 160);
 	color: rgb(0, 0, 0);
@@ -112,7 +270,7 @@ BODY {
 
 .function-title {
 	background-color: rgb(60, 60, 60);
-	cursor: pointer;
+		cursor: pointer;
 }
 
 .function-title:hover {
