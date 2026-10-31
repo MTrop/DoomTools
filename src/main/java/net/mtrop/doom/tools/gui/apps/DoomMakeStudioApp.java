@@ -593,6 +593,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	public void onClose(Object frame) 
 	{
 		watcher.interrupt();
+		fileDeferrer.interrupt();
+		repoDeferrer.interrupt();
 		executionPanel.shutDownAgent();
 		if (frame instanceof JFrame)
 		{
@@ -1592,13 +1594,15 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		private final AtomicBoolean callSwitch;
 		private volatile long nextFlushTimeMillis;
-		
+		private volatile boolean keepAlive;
+
 		private RepositoryDeferralThread()
 		{
 			setName("RepositoryDeferralThread");
 			setDaemon(true);
 			this.callSwitch = new AtomicBoolean(false);
 			this.nextFlushTimeMillis = 1L;
+			this.keepAlive = true;
 		}
 		
 		private void callRepository()
@@ -1613,7 +1617,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		@Override
 		public void run() 
 		{
-			while (true)
+			while (keepAlive)
 			{
 				if (System.currentTimeMillis() < nextFlushTimeMillis)
 				{
@@ -1635,7 +1639,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 						try {
 							callSwitch.wait();
 						} catch (InterruptedException e) {
-							// Eat exception.
+							keepAlive = false;
+							break;
 						}
 					}
 				}
@@ -1652,6 +1657,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 	{
 		private final Set<File> aggregatorSet;
 		private volatile long nextFlushTimeMillis;
+		private volatile boolean keepAlive;
 		
 		private FileModifyDeferralThread()
 		{
@@ -1659,6 +1665,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 			setDaemon(true);
 			this.aggregatorSet = new HashSet<>();
 			this.nextFlushTimeMillis = -1L;
+			this.keepAlive = true;
 		}
 		
 		private void addFile(File file)
@@ -1677,7 +1684,7 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 		@Override
 		public void run() 
 		{
-			while (true)
+			while (keepAlive)
 			{
 				if (System.currentTimeMillis() < nextFlushTimeMillis)
 				{
@@ -1702,7 +1709,8 @@ public class DoomMakeStudioApp extends DoomToolsApplicationInstance
 						try {
 							aggregatorSet.wait();
 						} catch (InterruptedException e) {
-							// Eat exception.
+							keepAlive = false;
+							break;
 						}
 					}
 				}

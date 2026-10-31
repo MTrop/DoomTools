@@ -1,6 +1,11 @@
 DoomMake
 --------
 
+### Changed for 0.38.1
+
+* `Fixed` [GUI-Studio] Daemon threads get a chance to terminate gracefully on close.
+
+
 ### Changed for 0.38.0
 
 * `Added` A way to output all of DoomMake's functions and scopes as JSON with the `--function-help-json` switch.
