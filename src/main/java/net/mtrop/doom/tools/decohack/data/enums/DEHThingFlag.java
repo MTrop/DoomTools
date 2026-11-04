@@ -5,7 +5,9 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -58,7 +60,6 @@ public interface DEHThingFlag
 	
 	static final Map<String, DEHFlag> MNEMONIC_MAP = new TreeMap<String, DEHFlag>(String.CASE_INSENSITIVE_ORDER) 
 	{
-		private static final long serialVersionUID = 5554097245644939005L;
 		{
 			for (DEHThingDoom19Flag flag : DEHThingDoom19Flag.values())
 				put(flag.name(), flag);
@@ -66,6 +67,18 @@ public interface DEHThingFlag
 				put(flag.name(), flag);
 			for (DEHThingBoomFlag flag : DEHThingBoomFlag.values())
 				put(flag.name(), flag);
+		}
+	};
+	
+	static final Set<DEHFlag> FLAGSET = new HashSet<DEHFlag>() 
+	{
+		{
+			for (DEHThingDoom19Flag flag : DEHThingDoom19Flag.values())
+				add(flag);
+			for (DEHThingMBFFlag flag : DEHThingMBFFlag.values())
+				add(flag);
+			for (DEHThingBoomFlag flag : DEHThingBoomFlag.values())
+				add(flag);
 		}
 	};
 	

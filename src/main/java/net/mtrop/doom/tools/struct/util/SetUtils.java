@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2022 Black Rook Software
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -135,6 +135,34 @@ public final class SetUtils
 				out.add(val);
 		}
 		return (S)out;
+	}
+
+	/**
+	 * Checks if two sets are equal.
+	 * @param <T> the object type in the provided set.
+	 * @param <S> the set table that contains type T. 
+	 * @param set1 the first set.
+	 * @param set2 the second set.
+	 * @return true if equal, false if not.
+	 */
+	public static <T, S extends Set<T>> boolean equals(S set1, S set2)
+	{
+		if (set1.size() != set2.size())
+			return false;
+		
+		for (T val : set1)
+		{
+			if (!set2.contains(val))
+				return false;
+		}
+
+		for (T val : set2)
+		{
+			if (!set1.contains(val))
+				return false;
+		}
+
+		return true;
 	}
 
 }

@@ -7,11 +7,13 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBFFlag;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
@@ -39,7 +41,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	private int damage;
 	private int reactionTime;
 	private int painChance;
-	private int flags;
+	private DEHFlagSet flags;
 	private int mass;
 
 	/** State indices (label name to index). */
@@ -60,7 +62,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	private int droppedItem;
 
 	/** MBF21 flags. */
-	private int mbf21Flags;
+	private DEHFlagSet mbf21Flags;
 	/** Infighting group. */
 	private int infightingGroup;
 	/** Projectile group. */
@@ -76,7 +78,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	private int ripSoundPosition;
 
 	/** ID24 flags. */
-	private int id24Flags;
+	private DEHFlagSet id24Flags;
 	private int minRespawnTics;
 	private int respawnDice;
 	private int pickupAmmoType;
@@ -98,6 +100,10 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		this.editorKeyMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
+		this.flags = new DEHFlagSet();
+		this.mbf21Flags = new DEHFlagSet();
+		this.id24Flags = new DEHFlagSet();
+		
 		setName("");
 		clearProperties();
 		clearEditorKeys();
@@ -128,7 +134,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setDamage(source.damage);
 		setReactionTime(source.reactionTime);
 		setPainChance(source.painChance);
-		setFlags(source.flags);
+		setFlags(source.flags.flags());
 		setMass(source.mass);
 		
 		setSeeSoundPosition(source.seeSoundPosition);
@@ -149,7 +155,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setDroppedItem(source.droppedItem);
 
 		// MBF21
-		setMBF21Flags(source.mbf21Flags);
+		setMBF21Flags(source.mbf21Flags.flags());
 		setInfightingGroup(source.infightingGroup);
 		setProjectileGroup(source.projectileGroup);
 		setSplashGroup(source.splashGroup);
@@ -158,7 +164,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		setRipSoundPosition(source.ripSoundPosition);
 
 		// ID24
-		setID24Flags(source.id24Flags);
+		setID24Flags(source.id24Flags.flags());
 		setMinRespawnTics(source.minRespawnTics);
 		setRespawnDice(source.respawnDice);
 		setPickupAmmoType(source.pickupAmmoType);
@@ -231,9 +237,9 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public DEHThing clearFlags() 
 	{
-		setFlags(0x00000000);
-		setMBF21Flags(0x00000000);
-		setID24Flags(0x00000000);
+		setFlags();
+		setMBF21Flags();
+		setID24Flags();
 		return this;
 	}
 
@@ -411,67 +417,79 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		return this;
 	}
 
-	public int getFlags() 
+	public DEHFlagSet getFlags() 
 	{
 		return flags;
 	}
 
-	@Override
-	public DEHThing setFlags(int bits) 
+	public DEHThing setFlags(Collection<DEHFlag> flagset, int bits) 
 	{
-		this.flags = bits;
+		this.flags.setFlags(flagset, bits);
 		return this;
 	}
 
 	@Override
-	public DEHThing addFlag(int bits)
+	public DEHThing setFlags(DEHFlag ... flags) 
 	{
-		this.flags |= bits;
+		this.flags.setFlags(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThing removeFlag(int bits)
+	public DEHThing addFlag(DEHFlag flag)
 	{
-		this.flags &= ~bits;
+		this.flags.addFlag(flag);
 		return this;
 	}
 
 	@Override
-	public boolean hasFlag(int bit)
+	public DEHThing removeFlag(DEHFlag flag)
 	{
-		return (this.flags & bit) != 0;
+		this.flags.removeFlag(flag);
+		return this;
+	}
+
+	@Override
+	public boolean hasFlag(DEHFlag flag)
+	{
+		return this.flags.containsFlag(flag);
 	}
 
 	public int getMBF21Flags() 
 	{
-		return mbf21Flags;
+		return mbf21Flags.getValue();
 	}
 
-	public DEHThing setMBF21Flags(int bits) 
+	public DEHThing setMBF21Flags(Collection<DEHFlag> flagset,  int bits) 
 	{
-		this.mbf21Flags = bits;
+		this.mbf21Flags.setFlags(flagset, bits);
+		return this;
+	}
+
+	public DEHThing setMBF21Flags(DEHFlag ... flags) 
+	{
+		this.mbf21Flags.setFlags(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThing addMBF21Flag(int bits)
+	public DEHThing addMBF21Flag(DEHFlag flag)
 	{
-		this.mbf21Flags |= bits;
+		this.mbf21Flags.addFlag(flag);
 		return this;
 	}
 
 	@Override
-	public DEHThing removeMBF21Flag(int bits)
+	public DEHThing removeMBF21Flag(DEHFlag flag)
 	{
-		this.mbf21Flags &= ~bits;
+		this.mbf21Flags.removeFlag(flag);
 		return this;
 	}
 
 	@Override
-	public boolean hasMBF21Flag(int bit) 
+	public boolean hasMBF21Flag(DEHFlag flag) 
 	{
-		return (this.mbf21Flags & bit) != 0;
+		return this.mbf21Flags.containsFlag(flag);
 	}
 
 	public int getMass() 
@@ -755,30 +773,30 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	}
 
 	@Override
-	public DEHThing setID24Flags(int bits) 
+	public DEHThing setID24Flags(DEHFlag ... flags) 
 	{
-		id24Flags = bits;
+		this.id24Flags.setFlags(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThing addID24Flag(int bits) 
+	public DEHThing addID24Flag(DEHFlag flag) 
 	{
-		id24Flags |= bits;
+		this.id24Flags.addFlag(flag);
 		return this;
 	}
 
 	@Override
-	public DEHThing removeID24Flag(int bits) 
+	public DEHThing removeID24Flag(DEHFlag flag) 
 	{
-		id24Flags &= ~bits;
+		this.id24Flags.removeFlag(flag);
 		return this;
 	}
 
 	@Override
-	public boolean hasID24Flag(int bit) 
+	public boolean hasID24Flag(DEHFlag flag) 
 	{
-		return (this.id24Flags & bit) != 0;
+		return this.id24Flags.containsFlag(flag);
 	}
 
 	@Override
@@ -934,7 +952,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			&& damage == obj.damage
 			&& reactionTime == obj.reactionTime
 			&& painChance == obj.painChance
-			&& flags == obj.flags
+			&& flags.equals(obj.flags)
 			&& mass == obj.mass
 			&& getSpawnFrameIndex() == obj.getSpawnFrameIndex()
 			&& getWalkFrameIndex() == obj.getWalkFrameIndex()
@@ -952,14 +970,14 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			// EXTENDED
 			&& droppedItem == obj.droppedItem
 			// MBF21
-			&& mbf21Flags == obj.mbf21Flags
+			&& mbf21Flags.equals(obj.mbf21Flags)
 			&& meleeRange == obj.meleeRange
 			&& infightingGroup == obj.infightingGroup
 			&& projectileGroup == obj.projectileGroup
 			&& splashGroup == obj.splashGroup
 			&& ripSoundPosition == obj.ripSoundPosition
 			// ID24
-			&& id24Flags == obj.id24Flags
+			&& id24Flags.equals(obj.id24Flags)
 			&& minRespawnTics == obj.minRespawnTics
 			&& respawnDice == obj.respawnDice
 			&& pickupAmmoType == obj.pickupAmmoType
@@ -977,8 +995,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 	@Override
 	public void writeObject(Writer writer, DEHThing thing, DEHFeatureLevel level) throws IOException
 	{
-		boolean isProjectile = (flags & DEHThingFlag.MISSILE.getValue()) != 0 || (flags & DEHThingMBFFlag.BOUNCES.getValue()) != 0;
-		boolean thingIsProjectile = (thing.flags & DEHThingFlag.MISSILE.getValue()) != 0|| (thing.flags & DEHThingMBFFlag.BOUNCES.getValue()) != 0;
+		boolean isProjectile = flags.containsFlag(DEHThingFlag.MISSILE) || flags.containsFlag(DEHThingMBFFlag.BOUNCES);
+		boolean thingIsProjectile = thing.flags.containsFlag(DEHThingFlag.MISSILE) || thing.flags.containsFlag(DEHThingMBFFlag.BOUNCES);
 
 		int speedVal;
 		if (fixedSpeed != null)
@@ -1040,8 +1058,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 			writer.append("Reaction time = ").append(String.valueOf(reactionTime)).append("\r\n");
 		if (forceOutput || painChance != thing.painChance)
 			writer.append("Pain chance = ").append(String.valueOf(painChance)).append("\r\n");
-		if (forceOutput || flags != thing.flags)
-			writer.append("Bits = ").append(String.valueOf(flags)).append("\r\n");
+		if (forceOutput || !flags.equals(thing.flags))
+			writer.append("Bits = ").append(String.valueOf(flags.getValue())).append("\r\n");
 		if (forceOutput || mass != thing.mass)
 			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 
@@ -1083,8 +1101,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		// MBF21 features
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
-			if (forceOutput || mbf21Flags != thing.mbf21Flags)
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+			if (forceOutput || !mbf21Flags.equals(thing.mbf21Flags))
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
 			if (forceOutput || infightingGroup != thing.infightingGroup)
 				writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
 			if (forceOutput || projectileGroup != thing.projectileGroup)
@@ -1102,8 +1120,8 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		// ID24 features
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
-			if (forceOutput || id24Flags != thing.id24Flags)
-				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags)).append("\r\n");
+			if (forceOutput || !id24Flags.equals(thing.id24Flags))
+				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags.getValue())).append("\r\n");
 			if (forceOutput || minRespawnTics != thing.minRespawnTics)
 				writer.append("Min respawn tics = ").append(String.valueOf(minRespawnTics)).append("\r\n");
 			if (forceOutput || respawnDice != thing.respawnDice)

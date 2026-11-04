@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
@@ -31,9 +32,9 @@ public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 	/** Ammo per shot. */
 	private Integer ammoPerShot;
 	/** Flags. */
-	private Integer mbf21Flags;
-	private int addMBF21Flags;
-	private int remMBF21Flags;
+	private DEHFlagSet mbf21Flags;
+	private DEHFlagSet addMBF21Flags;
+	private DEHFlagSet remMBF21Flags;
 
 	// ID24
 	
@@ -60,8 +61,8 @@ public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		this.mbf21Flags = null;
-		this.addMBF21Flags = 0;
-		this.remMBF21Flags = 0;
+		this.addMBF21Flags = new DEHFlagSet();
+		this.remMBF21Flags = new DEHFlagSet();
 
 		this.customProperties = new HashMap<>();
 	}
@@ -83,12 +84,14 @@ public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 			destination.setAmmoPerShot(ammoPerShot);
 		// if flags altered, replace.
 		if (mbf21Flags != null)
-			destination.setMBF21Flags(mbf21Flags);
+			destination.setMBF21Flags(mbf21Flags.flags());
 		// else, just alter the adjustments.
 		else
 		{
-			destination.addMBF21Flag(addMBF21Flags);
-			destination.removeMBF21Flag(remMBF21Flags);
+			for (DEHFlag flag : addMBF21Flags)
+				destination.addMBF21Flag(flag);
+			for (DEHFlag flag : remMBF21Flags)
+				destination.removeMBF21Flag(flag);
 		}
 		
 		if (slot != null)
@@ -174,7 +177,7 @@ public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 	@Override
 	public DEHWeaponSchema clearFlags() 
 	{
-		setMBF21Flags(0x00000000);
+		setMBF21Flags();
 		return this;
 	}
 
@@ -222,32 +225,32 @@ public class DEHWeaponSchema implements DEHWeaponTarget<DEHWeaponSchema>
 	
 	/**
 	 * Sets weapon flags.
-	 * @param bits the weapon flags to set.
+	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
-	public DEHWeaponSchema setMBF21Flags(int bits) 
+	public DEHWeaponSchema setMBF21Flags(DEHFlag ... flags) 
 	{
-		this.mbf21Flags = bits;
+		this.mbf21Flags = new DEHFlagSet(flags);
 		return this;
 	}
 
 	@Override
-	public DEHWeaponSchema addMBF21Flag(int bits)
+	public DEHWeaponSchema addMBF21Flag(DEHFlag flag)
 	{
 		if (this.mbf21Flags != null)
-			this.mbf21Flags |= bits;
+			this.mbf21Flags.addFlag(flag);
 		else
-			this.addMBF21Flags |= bits; // added later
+			this.addMBF21Flags.addFlag(flag); // added later
 		return this;
 	}
 
 	@Override
-	public DEHWeaponSchema removeMBF21Flag(int bits)
+	public DEHWeaponSchema removeMBF21Flag(DEHFlag flag)
 	{
 		if (this.mbf21Flags != null)
-			this.mbf21Flags &= ~bits;
+			this.mbf21Flags.removeFlag(flag);
 		else
-			this.remMBF21Flags |= bits; // removed later
+			this.remMBF21Flags.addFlag(flag); // removed later
 		return this;
 	}
 

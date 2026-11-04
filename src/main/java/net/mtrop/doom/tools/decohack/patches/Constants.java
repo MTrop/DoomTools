@@ -10,7 +10,6 @@ import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
-import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingID24Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingMBF21Flag;
@@ -1011,7 +1010,7 @@ interface Constants
 
 	static final DEHWeapon[] DEHWEAPON = 
 	{
-		DEHWeapon.create("Fist",            5, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.AUTOSWITCHFROM, DEHWeaponMBF21Flag.NOAUTOSWITCHTO))
+		DEHWeapon.create("Fist",            5, S_PUNCHUP, S_PUNCHDOWN, S_PUNCH, S_PUNCH1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.AUTOSWITCHFROM, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)
 			.setSlot(1)
 			.setSlotPriority(0)
 			.setSwitchPriority(0)
@@ -1019,7 +1018,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMFIST")
 		,
-		DEHWeapon.create("Pistol",          0, S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.AUTOSWITCHFROM))
+		DEHWeapon.create("Pistol",          0, S_PISTOLUP, S_PISTOLDOWN, S_PISTOL, S_PISTOL1, S_PISTOLFLASH, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHWeaponMBF21Flag.AUTOSWITCHFROM)
 			.setSlot(2)
 			.setSlotPriority(0)
 			.setSwitchPriority(6)
@@ -1027,7 +1026,7 @@ interface Constants
 			.setInitialRaised(true)
 			.setCarouselIcon("SMPISG")
 		,
-		DEHWeapon.create("Shotgun",         1, S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+		DEHWeapon.create("Shotgun",         1, S_SGUNUP, S_SGUNDOWN, S_SGUN, S_SGUN1, S_SGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT)
 			.setSlot(3)
 			.setSlotPriority(0)
 			.setSwitchPriority(7)
@@ -1035,7 +1034,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMSHOT")
 		,
-		DEHWeapon.create("Chaingun",        0, S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+		DEHWeapon.create("Chaingun",        0, S_CHAINUP, S_CHAINDOWN, S_CHAIN, S_CHAIN1, S_CHAINFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT)
 			.setSlot(4)
 			.setSlotPriority(0)
 			.setSwitchPriority(8)
@@ -1043,7 +1042,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMMGUN")
 		,
-		DEHWeapon.create("Rocket launcher", 3, S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE))
+		DEHWeapon.create("Rocket launcher", 3, S_MISSILEUP, S_MISSILEDOWN, S_MISSILE, S_MISSILE1, S_MISSILEFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHWeaponMBF21Flag.NOAUTOFIRE)
 			.setSlot(5)
 			.setSlotPriority(0)
 			.setSwitchPriority(4)
@@ -1051,7 +1050,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMLAUN")
 		,
-		DEHWeapon.create("Plasma rifle",    2, S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+		DEHWeapon.create("Plasma rifle",    2, S_PLASMAUP, S_PLASMADOWN, S_PLASMA, S_PLASMA1, S_PLASMAFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT)
 			.setSlot(6)
 			.setSlotPriority(0)
 			.setSwitchPriority(10)
@@ -1059,7 +1058,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMPLAS")
 		,
-		DEHWeapon.create("BFG9000",         2, S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOAUTOFIRE))
+		DEHWeapon.create("BFG9000",         2, S_BFGUP, S_BFGDOWN, S_BFG, S_BFG1, S_BFGFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHWeaponMBF21Flag.NOAUTOFIRE)
 			.setSlot(7)
 			.setSlotPriority(0)
 			.setSwitchPriority(2)
@@ -1067,7 +1066,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMBFGG")
 		,
-		DEHWeapon.create("Chainsaw",        5, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHFlag.flags(DEHWeaponMBF21Flag.NOTHRUST, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.NOAUTOSWITCHTO))
+		DEHWeapon.create("Chainsaw",        5, S_SAWUP, S_SAWDOWN, S_SAW, S_SAW1, S_NULL, DEHWeapon.DEFAULT_AMMO_PER_SHOT, DEHWeaponMBF21Flag.NOTHRUST, DEHWeaponMBF21Flag.FLEEMELEE, DEHWeaponMBF21Flag.NOAUTOSWITCHTO)
 			.setSlot(1)
 			.setSlotPriority(1)
 			.setSwitchPriority(5)
@@ -1075,7 +1074,7 @@ interface Constants
 			.setInitialRaised(false)
 			.setCarouselIcon("SMCSAW")
 		,
-		DEHWeapon.create("Super-shotgun",   1, S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT, 0)
+		DEHWeapon.create("Super-shotgun",   1, S_DSGUNUP, S_DSGUNDOWN, S_DSGUN, S_DSGUN1, S_DSGUNFLASH1, DEHWeapon.DEFAULT_AMMO_PER_SHOT)
 			.setSlot(3)
 			.setSlotPriority(1)
 			.setSwitchPriority(9)
@@ -1210,13 +1209,13 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(0)
 			.setPainChance(255)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.PICKUP,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(149)
 			.setWalkFrameIndex(150)
@@ -1240,11 +1239,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(200)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(174)
 			.setWalkFrameIndex(176)
@@ -1269,11 +1268,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(170)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(207)
 			.setWalkFrameIndex(209)
@@ -1298,11 +1297,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(10)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(500)
 			.setSpawnFrameIndex(241)
 			.setWalkFrameIndex(243)
@@ -1317,11 +1316,11 @@ interface Constants
 			.setPainSoundPosition(28)
 			.setDeathSoundPosition(71)
 			.setActiveSoundPosition(80)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.SHORTMRANGE,
 				DEHThingMBF21Flag.DMGIGNORED,
 				DEHThingMBF21Flag.NOTHRESHOLD
-			)),
+			),
 		(new DEHThing()).setName("Archvile attack")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1331,11 +1330,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(281)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1359,11 +1358,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(100)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(500)
 			.setSpawnFrameIndex(321)
 			.setWalkFrameIndex(323)
@@ -1378,10 +1377,10 @@ interface Constants
 			.setPainSoundPosition(27)
 			.setDeathSoundPosition(74)
 			.setActiveSoundPosition(105)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.LONGMELEE,
 				DEHThingMBF21Flag.RANGEHALF
-			)),
+			),
 		(new DEHThing()).setName("Revenant fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1391,12 +1390,12 @@ interface Constants
 			.setDamage(10)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(316)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1420,11 +1419,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(311)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1448,11 +1447,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(80)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(1000)
 			.setSpawnFrameIndex(362)
 			.setWalkFrameIndex(364)
@@ -1467,9 +1466,9 @@ interface Constants
 			.setPainSoundPosition(29)
 			.setDeathSoundPosition(100)
 			.setActiveSoundPosition(75)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.MAP07BOSS1
-			)),
+			),
 		(new DEHThing()).setName("Mancubus fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
 			.setHealth(1000)
@@ -1479,13 +1478,13 @@ interface Constants
 			.setDamage(8)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(357)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1509,11 +1508,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(170)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(406)
 			.setWalkFrameIndex(408)
@@ -1538,11 +1537,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(200)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(442)
 			.setWalkFrameIndex(444)
@@ -1566,11 +1565,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(180)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(400)
 			.setSpawnFrameIndex(475)
 			.setWalkFrameIndex(477)
@@ -1594,12 +1593,12 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(180)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.SHADOW,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(400)
 			.setSpawnFrameIndex(475)
 			.setWalkFrameIndex(477)
@@ -1623,13 +1622,13 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(128)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.FLOAT,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(400)
 			.setSpawnFrameIndex(502)
 			.setWalkFrameIndex(503)
@@ -1653,11 +1652,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(50)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(1000)
 			.setSpawnFrameIndex(527)
 			.setWalkFrameIndex(529)
@@ -1672,9 +1671,9 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(67)
 			.setActiveSoundPosition(77)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.E1M8BOSS
-			))
+			)
 			.setProjectileGroup(1),
 		(new DEHThing()).setName("Baron fireball")
 			.setEditorNumber(DEHThing.EDITORNUMBER_NONE)
@@ -1685,13 +1684,13 @@ interface Constants
 			.setDamage(8)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(522)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1716,11 +1715,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(50)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(1000)
 			.setSpawnFrameIndex(556)
 			.setWalkFrameIndex(558)
@@ -1745,12 +1744,12 @@ interface Constants
 			.setDamage(3)
 			.setReactionTime(8)
 			.setPainChance(256)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.FLOAT
-			))
+			)
 			.setMass(50)
 			.setSpawnFrameIndex(585)
 			.setWalkFrameIndex(587)
@@ -1765,9 +1764,9 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(17)
 			.setActiveSoundPosition(77)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.RANGEHALF
-			)),
+			),
 		(new DEHThing()).setName("Spiderdemon")
 			.setEditorNumber(7)
 			.setHealth(3000)
@@ -1777,11 +1776,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(40)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(1000)
 			.setSpawnFrameIndex(601)
 			.setWalkFrameIndex(603)
@@ -1796,13 +1795,13 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(69)
 			.setActiveSoundPosition(77)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.NORADIUSDMG,
 				DEHThingMBF21Flag.RANGEHALF,
 				DEHThingMBF21Flag.FULLVOLSOUNDS,
 				DEHThingMBF21Flag.E3M8BOSS,
 				DEHThingMBF21Flag.E4M8BOSS
-			)),
+			),
 		(new DEHThing()).setName("Arachnotron")
 			.setEditorNumber(68)
 			.setHealth(500)
@@ -1812,11 +1811,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(128)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(600)
 			.setSpawnFrameIndex(632)
 			.setWalkFrameIndex(634)
@@ -1831,9 +1830,9 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(70)
 			.setActiveSoundPosition(78)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.MAP07BOSS2
-			)),
+			),
 		(new DEHThing()).setName("Cyberdemon")
 			.setEditorNumber(16)
 			.setHealth(4000)
@@ -1843,11 +1842,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(20)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(1000)
 			.setSpawnFrameIndex(674)
 			.setWalkFrameIndex(676)
@@ -1862,14 +1861,14 @@ interface Constants
 			.setPainSoundPosition(26)
 			.setDeathSoundPosition(68)
 			.setActiveSoundPosition(77)
-			.setMBF21Flags(DEHFlag.flags(
+			.setMBF21Flags(
 				DEHThingMBF21Flag.NORADIUSDMG,
 				DEHThingMBF21Flag.HIGHERMPROB,
 				DEHThingMBF21Flag.RANGEHALF,
 				DEHThingMBF21Flag.FULLVOLSOUNDS,
 				DEHThingMBF21Flag.E2M8BOSS,
 				DEHThingMBF21Flag.E4M6BOSS
-			)),
+			),
 		(new DEHThing()).setName("Pain Elemental")
 			.setEditorNumber(71)
 			.setHealth(400)
@@ -1879,13 +1878,13 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(128)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.FLOAT,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(400)
 			.setSpawnFrameIndex(701)
 			.setWalkFrameIndex(702)
@@ -1909,11 +1908,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(170)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(726)
 			.setWalkFrameIndex(728)
@@ -1938,13 +1937,13 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(256)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.COUNTKILL
-			))
+			)
 			.setMass(10000000)
 			.setSpawnFrameIndex(763)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1968,10 +1967,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(255)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE
-			))
+			)
 			.setMass(10000000)
 			.setSpawnFrameIndex(778)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1995,10 +1994,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOSECTOR,
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(784)
 			.setWalkFrameIndex(785)
@@ -2022,10 +2021,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOSECTOR,
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(DEHThing.FRAME_NULL)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2049,13 +2048,13 @@ interface Constants
 			.setDamage(3)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.NOCLIP,
 				DEHThingFlag.MISSILE
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(787)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2079,11 +2078,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(791)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2107,11 +2106,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SHOOTABLE,
 				DEHThingFlag.NOBLOOD
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(806)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2135,13 +2134,13 @@ interface Constants
 			.setDamage(3)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(97)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2166,13 +2165,13 @@ interface Constants
 			.setDamage(5)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(102)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2197,12 +2196,12 @@ interface Constants
 			.setDamage(20)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(114)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2226,13 +2225,13 @@ interface Constants
 			.setDamage(5)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(107)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2256,13 +2255,13 @@ interface Constants
 			.setDamage(100)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(115)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2286,13 +2285,13 @@ interface Constants
 			.setDamage(5)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.DROPOFF,
 				DEHThingFlag.MISSILE,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(667)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2316,11 +2315,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(93)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2344,9 +2343,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(90)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2370,11 +2369,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(130)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2398,11 +2397,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(142)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2426,10 +2425,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOSECTOR,
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(DEHThing.FRAME_NULL)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2453,10 +2452,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(123)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2481,9 +2480,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(802)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2508,9 +2507,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(804)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2535,10 +2534,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(816)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2563,10 +2562,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(822)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2591,10 +2590,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(828)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2610,9 +2609,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTBLUECARD")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Red keycard")
 			.setEditorNumber(13)
 			.setHealth(1000)
@@ -2622,10 +2621,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(830)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2641,9 +2640,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTREDCARD")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Yellow keycard")
 			.setEditorNumber(6)
 			.setHealth(1000)
@@ -2653,10 +2652,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(832)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2672,9 +2671,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTYELWCARD")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Yellow skull key")
 			.setEditorNumber(39)
 			.setHealth(1000)
@@ -2684,10 +2683,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(838)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2703,9 +2702,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTYELWSKUL")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Red skull key")
 			.setEditorNumber(38)
 			.setHealth(1000)
@@ -2715,10 +2714,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(836)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2734,9 +2733,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTREDSKULL")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Blue skull key")
 			.setEditorNumber(40)
 			.setHealth(1000)
@@ -2746,10 +2745,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.NOTDEATHMATCH
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(834)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2765,9 +2764,9 @@ interface Constants
 			.setDeathSoundPosition(DEHThing.SOUND_NONE)
 			.setActiveSoundPosition(DEHThing.SOUND_NONE)
 			.setPickupMessageMnemonic("GOTBLUESKUL")
-			.setID24Flags(DEHFlag.flags(
+			.setID24Flags(
 				DEHThingID24Flag.SPECIALSTAYSCOOP
-			)),
+			),
 		(new DEHThing()).setName("Stimpack")
 			.setEditorNumber(2011)
 			.setHealth(1000)
@@ -2777,9 +2776,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(840)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2803,9 +2802,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(841)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2830,11 +2829,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(842)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2859,11 +2858,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(848)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2888,10 +2887,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(852)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2916,11 +2915,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(853)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2945,9 +2944,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(861)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -2972,10 +2971,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(862)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3000,10 +2999,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(868)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3028,11 +3027,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL,
 				DEHThingFlag.COUNTITEM,
 				DEHThingFlag.TRANSLUCENT
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(857)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3057,9 +3056,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(870)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3084,9 +3083,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(871)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3111,9 +3110,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(872)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3138,9 +3137,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(873)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3165,9 +3164,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(874)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3192,9 +3191,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(875)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3219,9 +3218,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(876)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3246,9 +3245,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(877)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3273,9 +3272,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(878)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3300,9 +3299,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(879)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3327,9 +3326,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(880)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3354,9 +3353,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(881)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3381,9 +3380,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(882)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3408,9 +3407,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(883)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3435,9 +3434,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(884)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3462,9 +3461,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPECIAL
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(885)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3490,9 +3489,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(959)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3516,9 +3515,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(963)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3542,9 +3541,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(886)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3568,9 +3567,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(907)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3594,9 +3593,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(908)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3620,9 +3619,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(909)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3646,9 +3645,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(910)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3672,9 +3671,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(913)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3698,9 +3697,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(924)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3724,9 +3723,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(917)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3750,9 +3749,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(921)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3776,9 +3775,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(914)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3802,9 +3801,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(926)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3828,9 +3827,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(930)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3854,9 +3853,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(934)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3880,9 +3879,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(938)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3906,9 +3905,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(942)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3932,9 +3931,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(946)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3958,9 +3957,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(906)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -3984,9 +3983,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(916)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4010,7 +4009,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(911)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4034,9 +4033,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(912)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4060,11 +4059,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(888)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4088,11 +4087,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(902)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4116,11 +4115,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(903)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4144,11 +4143,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(904)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4172,11 +4171,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(905)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4200,10 +4199,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(902)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4227,10 +4226,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(904)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4254,10 +4253,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(903)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4281,10 +4280,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(905)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4308,10 +4307,10 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(888)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4335,7 +4334,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(515)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4359,7 +4358,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(164)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4383,7 +4382,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(193)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4407,7 +4406,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(495)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4431,7 +4430,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(600)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4455,7 +4454,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(461)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4479,7 +4478,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(226)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4503,7 +4502,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(173)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4527,7 +4526,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(173)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4551,9 +4550,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(894)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4577,7 +4576,7 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(0)
+			.setFlags()
 			.setMass(100)
 			.setSpawnFrameIndex(895)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4601,9 +4600,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(896)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4627,9 +4626,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(897)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4653,9 +4652,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(899)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4679,9 +4678,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(900)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4705,9 +4704,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(915)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4731,9 +4730,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(813)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4757,11 +4756,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(950)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4785,11 +4784,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(951)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4813,11 +4812,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(952)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4841,11 +4840,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(953)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4869,11 +4868,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(954)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4897,11 +4896,11 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.SOLID,
 				DEHThingFlag.SPAWNCEILING,
 				DEHThingFlag.NOGRAVITY
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(955)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4925,9 +4924,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(956)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4951,9 +4950,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(957)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -4977,9 +4976,9 @@ interface Constants
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
+			.setFlags(
 				DEHThingFlag.NOBLOCKMAP
-			))
+			)
 			.setMass(100)
 			.setSpawnFrameIndex(958)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)

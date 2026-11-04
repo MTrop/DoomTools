@@ -1,6 +1,11 @@
 DECOHack
 --------
 
+### Changed for 0.49.0
+
+* `Added` DECOHack can now output flag mnemonic strings for bitfields in Things, Weapons and States. (Enh. #206)
+ 
+
 ### Changed for 0.48.3
 
 * `Changed` Dropped Item default on Things is now 0 (Issue #201). 

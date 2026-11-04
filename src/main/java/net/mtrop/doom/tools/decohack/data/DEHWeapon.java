@@ -7,11 +7,13 @@ package net.mtrop.doom.tools.decohack.data;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 
 /**
@@ -29,7 +31,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	/** Ammo per shot. */
 	private int ammoPerShot;
 	/** Flags. */
-	private int mbf21Flags;
+	private DEHFlagSet mbf21Flags;
 
 	// ID24
 	private int slot;
@@ -50,6 +52,8 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	{
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
+		this.mbf21Flags = new DEHFlagSet();
+		
 		setName("");
 		clearProperties();
 		clearFlags();
@@ -69,7 +73,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	 * @param flags weapon flags.
 	 * @return a weapon entry.
 	 */
-	public static DEHWeapon create(String name, int ammoType, int raise, int lower, int ready, int fire, int flash, int ammoPerShot, int flags)
+	public static DEHWeapon create(String name, int ammoType, int raise, int lower, int ready, int fire, int flash, int ammoPerShot, DEHFlag ... flags)
 	{
 		DEHWeapon out = new DEHWeapon(); 
 		out.setName(name);
@@ -115,7 +119,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 			setCustomPropertyValue(entry.getKey(), entry.getValue());
 
 		setAmmoPerShot(source.ammoPerShot);
-		setMBF21Flags(source.mbf21Flags);
+		setMBF21Flags(source.mbf21Flags.flags());
 		
 		setSlot(source.slot);
 		setSlotPriority(source.slotPriority);
@@ -155,7 +159,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	@Override
 	public DEHWeapon clearFlags() 
 	{
-		setMBF21Flags(0x00000000);
+		setMBF21Flags();
 		return this;
 	}
 
@@ -227,33 +231,39 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	/**
 	 * @return this weapon's flags.
 	 */
-	public int getMBF21Flags() 
+	public DEHFlagSet getMBF21Flags() 
 	{
 		return mbf21Flags;
 	}
 	
+	public DEHWeapon setMBF21Flags(Collection<DEHFlag> flagset,  int bits) 
+	{
+		this.mbf21Flags.setFlags(flagset, bits);
+		return this;
+	}
+
 	/**
 	 * Sets weapon flags.
 	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
-	public DEHWeapon setMBF21Flags(int flags)
+	public DEHWeapon setMBF21Flags(DEHFlag ... flags)
 	{
-		this.mbf21Flags = flags;
+		this.mbf21Flags.setFlags(flags);
 		return this;
 	}
 	
 	@Override
-	public DEHWeapon addMBF21Flag(int bits)
+	public DEHWeapon addMBF21Flag(DEHFlag flag)
 	{
-		this.mbf21Flags |= bits;
+		this.mbf21Flags.addFlag(flag);
 		return this;
 	}
 
 	@Override
-	public DEHWeapon removeMBF21Flag(int bits)
+	public DEHWeapon removeMBF21Flag(DEHFlag flag)
 	{
-		this.mbf21Flags &= ~bits;
+		this.mbf21Flags.removeFlag(flag);
 		return this;
 	}
 
@@ -520,7 +530,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 			&& getFlashFrameIndex() == obj.getFlashFrameIndex()
 			// MBF21
 			&& ammoPerShot == obj.ammoPerShot
-			&& mbf21Flags == obj.mbf21Flags
+			&& mbf21Flags.equals(obj.mbf21Flags)
 			// ID24
 			&& slot == obj.slot
 			&& slotPriority == obj.slotPriority
@@ -559,8 +569,8 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 			if (forceOutput || ammoPerShot != weapon.ammoPerShot)
 				writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 			
-			if (forceOutput || mbf21Flags != weapon.mbf21Flags)
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+			if (forceOutput || !mbf21Flags.equals(weapon.mbf21Flags))
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
 		}
 		
 		if (level.supports(DEHFeatureLevel.ID24))

@@ -5,7 +5,9 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
@@ -39,6 +41,14 @@ public enum DEHThingMBF21Flag implements DEHFlag
 
 	private static final Map<String, DEHThingMBF21Flag> MNEMONIC_MAP = EnumUtils.createCaseInsensitiveNameMap(DEHThingMBF21Flag.class);
 
+	public static final Set<DEHFlag> FLAGSET = new HashSet<DEHFlag>() 
+	{
+		{
+			for (DEHThingMBF21Flag flag : DEHThingMBF21Flag.values())
+				add(flag);
+		}
+	};
+	
 	public static DEHThingMBF21Flag getByMnemonic(String mnemonic)
 	{
 		return MNEMONIC_MAP.get(mnemonic);

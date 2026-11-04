@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.util.RangeUtils;
 
 /**
@@ -36,11 +37,11 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	private Integer damage;
 	private Integer reactionTime;
 	private Integer painChance;
-	private Integer flags;
+	private DEHFlagSet flags;
 	private Integer mass;
 	
-	private int addFlags;
-	private int remFlags;
+	private DEHFlagSet addFlags;
+	private DEHFlagSet remFlags;
 	
 	/** State indices (label name to index). */
 	private Map<String, Integer> stateIndexMap;
@@ -60,10 +61,10 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	private Integer droppedItem;
 
 	/** MBF21 flags. */
-	private Integer mbf21Flags;
+	private DEHFlagSet mbf21Flags;
 	
-	private int addMBF21Flags;
-	private int remMBF21Flags;
+	private DEHFlagSet addMBF21Flags;
+	private DEHFlagSet remMBF21Flags;
 
 	/** Infighting group. */
 	private Integer infightingGroup;
@@ -80,10 +81,10 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	private Integer ripSoundPosition;
 
 	/** ID24 flags. */
-	private Integer id24Flags;
+	private DEHFlagSet id24Flags;
 	
-	private int addID24Flags;
-	private int remID24Flags;
+	private DEHFlagSet addID24Flags;
+	private DEHFlagSet remID24Flags;
 
 	private Integer minRespawnTics;
 	private Integer respawnDice;
@@ -120,8 +121,8 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 		this.mass = null;
 
 		this.flags = null;
-		this.addFlags = 0;
-		this.remFlags = 0;
+		this.addFlags = new DEHFlagSet();
+		this.remFlags = new DEHFlagSet();
 		
 		this.stateIndexMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
@@ -136,8 +137,8 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 
 		// MBF21
 		this.mbf21Flags = null;
-		this.addMBF21Flags = 0;
-		this.remMBF21Flags = 0;
+		this.addMBF21Flags = new DEHFlagSet();
+		this.remMBF21Flags = new DEHFlagSet();
 		
 		this.infightingGroup = null;
 		this.projectileGroup = null;
@@ -148,8 +149,8 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 
 		// ID24
 		this.id24Flags = null;
-		this.addID24Flags = 0;
-		this.remID24Flags = 0;
+		this.addID24Flags = new DEHFlagSet();
+		this.remID24Flags = new DEHFlagSet();
 		
 		this.minRespawnTics = null;
 		this.respawnDice = null;
@@ -205,12 +206,14 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 
 		// if flags altered, replace.
 		if (flags != null)
-			destination.setFlags(flags);
+			destination.setFlags(flags.flags());
 		// else, just alter the adjustments.
 		else
 		{
-			destination.addFlag(addFlags);
-			destination.removeFlag(remFlags);
+			for (DEHFlag flag : addFlags)
+				destination.addFlag(flag);
+			for (DEHFlag flag : remFlags)
+				destination.removeFlag(flag);
 		}
 			
 		if (seeSoundPosition != null)
@@ -236,12 +239,14 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 
 		// if flags altered, replace.
 		if (mbf21Flags != null)
-			destination.setMBF21Flags(mbf21Flags);
+			destination.setMBF21Flags(mbf21Flags.flags());
 		// else, just alter the adjustments.
 		else
 		{
-			destination.addMBF21Flag(addMBF21Flags);
-			destination.removeMBF21Flag(remMBF21Flags);
+			for (DEHFlag flag : addMBF21Flags)
+				destination.addMBF21Flag(flag);
+			for (DEHFlag flag : remMBF21Flags)
+				destination.removeMBF21Flag(flag);
 		}
 		
 		if (infightingGroup != null)
@@ -261,12 +266,14 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 
 		// if flags altered, replace.
 		if (id24Flags != null)
-			destination.setID24Flags(id24Flags);
+			destination.setID24Flags(id24Flags.flags());
 		// else, just alter the adjustments.
 		else
 		{
-			destination.addID24Flag(addID24Flags);
-			destination.removeID24Flag(remID24Flags);
+			for (DEHFlag flag : addMBF21Flags)
+				destination.addID24Flag(flag);
+			for (DEHFlag flag : addMBF21Flags)
+				destination.removeID24Flag(flag);
 		}
 
 		if (minRespawnTics != null)
@@ -384,9 +391,9 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	@Override
 	public DEHThingSchema clearFlags() 
 	{
-		setFlags(0x00000000);
-		setMBF21Flags(0x00000000);
-		setID24Flags(0x00000000);
+		setFlags();
+		setMBF21Flags();
+		setID24Flags();
 		return this;
 	}
 
@@ -523,86 +530,86 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	}
 
 	@Override
-	public DEHThingSchema setFlags(int bits) 
+	public DEHThingSchema setFlags(DEHFlag ... flags) 
 	{
-		this.flags = bits;
+		this.flags = new DEHFlagSet(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThingSchema addFlag(int bits)
-	{
-		if (this.flags != null)
-			this.flags |= bits;
-		else
-			this.addFlags |= bits;
-		return this;
-	}
-
-	@Override
-	public DEHThingSchema removeFlag(int bits)
+	public DEHThingSchema addFlag(DEHFlag flag)
 	{
 		if (this.flags != null)
-			this.flags &= ~bits;
+			this.flags.addFlag(flag);
 		else
-			this.remFlags |= bits; // removed later
+			this.addFlags.addFlag(flag);
 		return this;
 	}
 
 	@Override
-	public boolean hasFlag(int bit)
+	public DEHThingSchema removeFlag(DEHFlag flag)
+	{
+		if (this.flags != null)
+			this.flags.removeFlag(flag);
+		else
+			this.remFlags.addFlag(flag); // removed later
+		return this;
+	}
+
+	@Override
+	public boolean hasFlag(DEHFlag flag)
 	{
 		if (this.flags == null)
 		{
-			return (this.addFlags & bit) != 0
-				&& (this.remFlags & bit) == 0
+			return this.addFlags.containsFlag(flag)
+				&& !this.remFlags.containsFlag(flag)
 			;
 		}
 		else
 		{
-			return (this.flags & bit) != 0;
+			return this.flags.containsFlag(flag);
 		}
 	}
 
 	@Override
-	public DEHThingSchema setMBF21Flags(int bits) 
+	public DEHThingSchema setMBF21Flags(DEHFlag ... flags) 
 	{
-		this.mbf21Flags = bits;
+		this.mbf21Flags = new DEHFlagSet(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThingSchema addMBF21Flag(int bits)
-	{
-		if (this.mbf21Flags != null)
-			this.mbf21Flags |= bits;
-		else
-			this.addMBF21Flags |= bits; // added later
-		return this;
-	}
-
-	@Override
-	public DEHThingSchema removeMBF21Flag(int bits)
+	public DEHThingSchema addMBF21Flag(DEHFlag flag)
 	{
 		if (this.mbf21Flags != null)
-			this.mbf21Flags &= ~bits;
+			this.mbf21Flags.addFlag(flag);
 		else
-			this.remMBF21Flags |= bits; // removed later
+			this.addMBF21Flags.addFlag(flag); // added later
 		return this;
 	}
 
 	@Override
-	public boolean hasMBF21Flag(int bit)
+	public DEHThingSchema removeMBF21Flag(DEHFlag flag)
+	{
+		if (this.mbf21Flags != null)
+			this.mbf21Flags.removeFlag(flag);
+		else
+			this.remMBF21Flags.addFlag(flag); // removed later
+		return this;
+	}
+
+	@Override
+	public boolean hasMBF21Flag(DEHFlag flag)
 	{
 		if (this.mbf21Flags == null)
 		{
-			return (this.addMBF21Flags & bit) != 0
-				&& (this.remMBF21Flags & bit) == 0
+			return this.addMBF21Flags.containsFlag(flag)
+				&& !this.remMBF21Flags.containsFlag(flag)
 			;
 		}
 		else
 		{
-			return (this.mbf21Flags & bit) != 0;
+			return this.mbf21Flags.containsFlag(flag);
 		}
 	}
 
@@ -795,44 +802,44 @@ public class DEHThingSchema implements DEHThingTarget<DEHThingSchema>
 	}
 
 	@Override
-	public DEHThingSchema setID24Flags(int bits) 
+	public DEHThingSchema setID24Flags(DEHFlag ... flags) 
 	{
-		this.id24Flags = bits;
+		this.id24Flags = new DEHFlagSet(flags);
 		return this;
 	}
 
 	@Override
-	public DEHThingSchema addID24Flag(int bits)
-	{
-		if (this.id24Flags != null)
-			this.id24Flags |= bits;
-		else
-			this.addID24Flags |= bits; // added later
-		return this;
-	}
-
-	@Override
-	public DEHThingSchema removeID24Flag(int bits)
+	public DEHThingSchema addID24Flag(DEHFlag flag)
 	{
 		if (this.id24Flags != null)
-			this.id24Flags &= ~bits;
+			this.id24Flags.addFlag(flag);
 		else
-			this.remID24Flags |= bits; // removed later
+			this.addID24Flags.addFlag(flag); // added later
 		return this;
 	}
 
 	@Override
-	public boolean hasID24Flag(int bit)
+	public DEHThingSchema removeID24Flag(DEHFlag flag)
+	{
+		if (this.id24Flags != null)
+			this.id24Flags.removeFlag(flag);
+		else
+			this.remID24Flags.addFlag(flag); // removed later
+		return this;
+	}
+
+	@Override
+	public boolean hasID24Flag(DEHFlag flag)
 	{
 		if (this.id24Flags == null)
 		{
-			return (this.addID24Flags & bit) != 0
-				&& (this.remID24Flags & bit) == 0
+			return this.addID24Flags.containsFlag(flag)
+				&& !this.remID24Flags.containsFlag(flag)
 			;
 		}
 		else
 		{
-			return (this.id24Flags & bit) != 0;
+			return this.id24Flags.containsFlag(flag);
 		}
 	}
 

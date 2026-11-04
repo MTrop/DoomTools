@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.struct.util.ObjectUtils;
 import net.mtrop.doom.util.RangeUtils;
 
@@ -31,7 +32,7 @@ public class DEHState extends DEHObject<DEHState>
 
 	// MBF21
 	private int[] args;
-	private int mbf21Flags;
+	private DEHFlagSet mbf21Flags;
 	
 	// ID24
 	private String tranmap;
@@ -41,6 +42,8 @@ public class DEHState extends DEHObject<DEHState>
 	 */
 	public DEHState()
 	{
+		this.mbf21Flags = new DEHFlagSet();
+		
 		set(
 			0,
 			0, 
@@ -49,23 +52,22 @@ public class DEHState extends DEHObject<DEHState>
 			-1,
 			0,
 			0,
-			new int[0],
-			0x00
+			new int[0]
 		);
 		setTranmap(null);
 	}
 	
 	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
+		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int mbfFlags)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, DEHFlag ... mbfFlags)
 	{
 		return create(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], mbfFlags);
 	}
 
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags)
+	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, DEHFlag ... mbfFlags)
 	{
 		return (new DEHState()).set(
 			spriteIndex,
@@ -78,21 +80,6 @@ public class DEHState extends DEHObject<DEHState>
 			args,
 			mbfFlags
 		).setTranmap(null);
-	}
-
-	public static DEHState create(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags, String tranmap)
-	{
-		return (new DEHState()).set(
-			spriteIndex,
-			frameIndex, 
-			bright,
-			nextStateIndex, 
-			duration,
-			misc1,
-			misc2,
-			args,
-			mbfFlags
-		).setTranmap(tranmap);
 	}
 
 	@Override
@@ -115,7 +102,7 @@ public class DEHState extends DEHObject<DEHState>
 
 		// MBF21
 		setArgs(source.args);
-		setMBF21Flags(source.mbf21Flags);
+		setMBF21Flags(source.mbf21Flags.flags());
 
 		// ID24
 		setTranmap(source.tranmap);
@@ -125,10 +112,10 @@ public class DEHState extends DEHObject<DEHState>
 	
 	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration)
 	{
-		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0], 0);
+		return set(spriteIndex, frameIndex, bright, nextStateIndex, duration, 0, 0, new int[0]);
 	}
 	
-	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, int mbfFlags)
+	public DEHState set(int spriteIndex, int frameIndex, boolean bright, int nextStateIndex, int duration, int misc1, int misc2, int[] args, DEHFlag ... mbfFlags)
 	{
 		setSpriteIndex(spriteIndex);
 		setFrameIndex(frameIndex);
@@ -247,14 +234,26 @@ public class DEHState extends DEHObject<DEHState>
 		return this;
 	}
 	
-	public int getMBF21Flags() 
+	public DEHFlagSet getMBF21Flags() 
 	{
 		return mbf21Flags;
 	}
 	
-	public DEHState setMBF21Flags(int flags) 
+	public DEHState setMBF21Flags(DEHFlag ... flags) 
 	{
-		this.mbf21Flags = flags;
+		this.mbf21Flags.setFlags(flags);
+		return this;
+	}
+	
+	public DEHState addMBF21Flag(DEHFlag flag) 
+	{
+		this.mbf21Flags.addFlag(flag);
+		return this;
+	}
+	
+	public DEHState removeMBF21Flag(DEHFlag flag) 
+	{
+		this.mbf21Flags.removeFlag(flag);
 		return this;
 	}
 	
@@ -288,7 +287,7 @@ public class DEHState extends DEHObject<DEHState>
 			&& misc2 == obj.misc2
 			// MBF21
 			&& Arrays.equals(args, obj.args)
-			&& mbf21Flags == obj.mbf21Flags
+			&& mbf21Flags.equals(obj.mbf21Flags)
 			// ID24
 			&& ObjectUtils.areEqual(tranmap, obj.tranmap)
 		;
@@ -315,8 +314,8 @@ public class DEHState extends DEHObject<DEHState>
 			for (int i = 0; i < args.length; i++)
 				if (i >= frame.args.length || args[i] != frame.args[i])
 					writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
-			if (forceOutput || mbf21Flags != frame.mbf21Flags)
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+			if (forceOutput || !mbf21Flags.equals(frame.mbf21Flags))
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
 		}
 
 		if (level.supports(DEHFeatureLevel.ID24))

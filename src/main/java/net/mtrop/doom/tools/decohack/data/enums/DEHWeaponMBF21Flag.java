@@ -5,7 +5,9 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data.enums;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.mtrop.doom.tools.struct.util.EnumUtils;
 
@@ -30,6 +32,14 @@ public enum DEHWeaponMBF21Flag implements DEHFlag
 	{
 		return MNEMONIC_MAP.get(mnemonic);
 	}
+	
+	public static final Set<DEHFlag> FLAGSET = new HashSet<DEHFlag>() 
+	{
+		{
+			for (DEHWeaponMBF21Flag flag : DEHWeaponMBF21Flag.values())
+				add(flag);
+		}
+	};
 	
 	private int value;
 	private String usage;

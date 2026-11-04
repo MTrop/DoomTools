@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+
 /**
  * An interface that describes a Thing whose information can be set.
  * NOTE: All sound positions are 1-BASED. 0 = no sound, [index+1] is the sound.
@@ -114,21 +116,21 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 
 	SELF setPainChance(int painChance);
 
-	SELF setFlags(int bits);
+	SELF setFlags(DEHFlag ... flags);
 
-	SELF addFlag(int bits);
+	SELF addFlag(DEHFlag flag);
 	
-	SELF removeFlag(int bits);
+	SELF removeFlag(DEHFlag flag);
 	
-	boolean hasFlag(int bit);
+	boolean hasFlag(DEHFlag flag);
 
-	SELF setMBF21Flags(int bits);
+	SELF setMBF21Flags(DEHFlag ... flags);
 
-	SELF addMBF21Flag(int bits);
+	SELF addMBF21Flag(DEHFlag flag);
 	
-	SELF removeMBF21Flag(int bits);
+	SELF removeMBF21Flag(DEHFlag flag);
 
-	boolean hasMBF21Flag(int bit);
+	boolean hasMBF21Flag(DEHFlag flag);
 
 	SELF setMass(int mass);
 
@@ -172,13 +174,13 @@ public interface DEHThingTarget<SELF extends DEHThingTarget<SELF>> extends DEHAc
 
 	SELF setRipSoundPosition(int ripSoundPosition);
 
-	SELF setID24Flags(int bits);
+	SELF setID24Flags(DEHFlag ... flags);
 
-	SELF addID24Flag(int bits);
+	SELF addID24Flag(DEHFlag flag);
 
-	SELF removeID24Flag(int bits);
+	SELF removeID24Flag(DEHFlag flag);
 
-	boolean hasID24Flag(int bit);
+	boolean hasID24Flag(DEHFlag flag);
 	
 	SELF setMinRespawnTics(int tics);
 	

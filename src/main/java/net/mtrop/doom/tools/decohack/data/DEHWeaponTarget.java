@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doom.tools.decohack.data;
 
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
+
 /**
  * An interface that describes a Weapon whose information can be set.
  * @author Matthew Tropiano
@@ -63,21 +65,21 @@ public interface DEHWeaponTarget<SELF extends DEHWeaponTarget<SELF>> extends DEH
 	 * @param flags the weapon flags to set.
 	 * @return this object.
 	 */
-	SELF setMBF21Flags(int flags);
+	SELF setMBF21Flags(DEHFlag ... flags);
 	
 	/**
 	 * Sets weapon flags, or'ing them into the current value.
-	 * @param bits the weapon flags to set.
+	 * @param flag the weapon flag to set.
 	 * @return this object.
 	 */
-	SELF addMBF21Flag(int bits);
+	SELF addMBF21Flag(DEHFlag flag);
 	
 	/**
 	 * Clears weapon flags, and-not'ing them into the current value.
-	 * @param bits the weapon flags to set.
+	 * @param flag the weapon flag to set.
 	 * @return this object.
 	 */
-	SELF removeMBF21Flag(int bits);
+	SELF removeMBF21Flag(DEHFlag flag);
 
 	/**
 	 * Sets the slot binding for this weapon.

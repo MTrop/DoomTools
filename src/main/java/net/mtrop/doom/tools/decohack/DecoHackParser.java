@@ -36,6 +36,7 @@ import net.mtrop.doom.tools.decohack.data.DEHActionPointer;
 import net.mtrop.doom.tools.decohack.data.DEHActionPointerEntry;
 import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
+import net.mtrop.doom.tools.decohack.data.DEHFlagSet;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHProperty;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
@@ -2521,6 +2522,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		
 		String mnemonic;
+		DEHFlag flag;
 		Integer value;
 		while (currentType(DecoHackKernel.TYPE_IDENTIFIER, DecoHackKernel.TYPE_PLUS, DecoHackKernel.TYPE_DASH))
 		{
@@ -2537,23 +2539,25 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchType(DecoHackKernel.TYPE_PLUS))
 			{
-				if ((value = matchThingFlagMnemonic()) != null)
+				if ((flag = matchThingFlagMnemonic()) != null)
 				{
-					thing.addFlag(value);
+					thing.addFlag(flag);
 				}
-				else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
+				else if ((flag = matchThingMBF21FlagMnemonic(context)) != null)
 				{
-					thing.addMBF21Flag(value);
+					thing.addMBF21Flag(flag);
 				}
-				else if ((value = matchThingID24FlagMnemonic(context)) != null)
+				else if ((flag = matchThingID24FlagMnemonic(context)) != null)
 				{
-					thing.addID24Flag(value);
+					thing.addID24Flag(flag);
 				}
 				else if (matchIdentifierIgnoreCase(Keyword.MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.addMBF21Flag(value);
+						for (DEHFlag mf : DEHThingMBF21Flag.FLAGSET)
+							if ((mf.getValue() & value) != 0)
+								thing.addMBF21Flag(mf);
 					}
 					else
 					{
@@ -2565,7 +2569,9 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.addID24Flag(value);
+						for (DEHFlag mf : DEHThingID24Flag.FLAGSET)
+							if ((mf.getValue() & value) != 0)
+								thing.addID24Flag(mf);
 					}
 					else
 					{
@@ -2575,7 +2581,9 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((value = matchPositiveInteger()) != null)
 				{
-					thing.addFlag(value);
+					for (DEHFlag mf : DEHThingFlag.FLAGSET)
+						if ((mf.getValue() & value) != 0)
+							thing.addFlag(mf);
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
@@ -2613,23 +2621,25 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 			else if (matchType(DecoHackKernel.TYPE_DASH))
 			{
-				if ((value = matchThingFlagMnemonic()) != null)
+				if ((flag = matchThingFlagMnemonic()) != null)
 				{
-					thing.removeFlag(value);
+					thing.removeFlag(flag);
 				}
-				else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
+				else if ((flag = matchThingMBF21FlagMnemonic(context)) != null)
 				{
-					thing.removeMBF21Flag(value);
+					thing.removeMBF21Flag(flag);
 				}
-				else if ((value = matchThingID24FlagMnemonic(context)) != null)
+				else if ((flag = matchThingID24FlagMnemonic(context)) != null)
 				{
-					thing.removeID24Flag(value);
+					thing.removeID24Flag(flag);
 				}
 				else if (matchIdentifierIgnoreCase(Keyword.MBF21))
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.removeMBF21Flag(value);
+						for (DEHFlag mf : DEHThingMBF21Flag.FLAGSET)
+							if ((mf.getValue() & value) != 0)
+								thing.removeMBF21Flag(mf);
 					}
 					else
 					{
@@ -2641,7 +2651,9 @@ public final class DecoHackParser extends Lexer.Parser
 				{
 					if ((value = matchPositiveInteger()) != null)
 					{
-						thing.removeID24Flag(value);
+						for (DEHFlag mf : DEHThingID24Flag.FLAGSET)
+							if ((mf.getValue() & value) != 0)
+								thing.removeID24Flag(mf);
 					}
 					else
 					{
@@ -2651,7 +2663,9 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((value = matchPositiveInteger()) != null)
 				{
-					thing.removeFlag(value);
+					for (DEHFlag mf : DEHThingFlag.FLAGSET)
+						if ((mf.getValue() & value) != 0)
+							thing.removeFlag(mf);
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
@@ -2790,7 +2804,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (thing instanceof DEHThing)
 			{
 				DEHThing dehThing = (DEHThing)thing;
-				if (dehThing.getMass() == 0 && dehThing.hasFlag(DEHThingFlag.SHOOTABLE.getValue()))
+				if (dehThing.getMass() == 0 && dehThing.hasFlag(DEHThingFlag.SHOOTABLE))
 				{
 					addWarningMessage(WarningType.ADJUSTEDVALUE, "Thing is SHOOTABLE and Mass was set to 0. This may crash certain ports, so Mass was set to 100.");
 					dehThing.setMass(100);
@@ -2856,7 +2870,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.SPEED))
 		{
-			if (thing.hasFlag(DEHThingFlag.MISSILE.getValue()))
+			if (thing.hasFlag(DEHThingFlag.MISSILE))
 			{
 				if ((value = matchFixed(false)) == null)
 				{
@@ -2945,7 +2959,12 @@ public final class DecoHackParser extends Lexer.Parser
 				addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
 				return PropertyResult.ERROR;
 			}
-			thing.setFlags(pv.value);
+
+			thing.setFlags(); // clear base flags.
+			for (DEHFlag mf : DEHThingFlag.FLAGSET)
+				if ((mf.getValue() & pv.value) != 0)
+					thing.addFlag(mf);
+			
 			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.SEESOUND))
@@ -3796,19 +3815,22 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 
 				String mnemonic;
-				Integer flags;
-				if ((flags = matchWeaponMBF21FlagMnemonic(context)) != null)
+				DEHFlag flag;
+				Integer bits;
+				if ((flag = matchWeaponMBF21FlagMnemonic(context)) != null)
 				{
-					weapon.addMBF21Flag(flags);
+					weapon.addMBF21Flag(flag);
 				}
-				else if ((flags = matchPositiveInteger()) != null)
+				else if ((bits = matchPositiveInteger()) != null)
 				{
-					weapon.addMBF21Flag(flags);
+					for (DEHFlag wf : DEHWeaponMBF21Flag.FLAGSET)
+						if ((wf.getValue() & bits) != 0)
+							weapon.addMBF21Flag(wf);
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomFlag(DEHWeapon.class, mnemonic)) == null)
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
 						return false;
@@ -3819,19 +3841,19 @@ public final class DecoHackParser extends Lexer.Parser
 					
 					if (stringValue == null)
 					{
-						flags = 0;
+						bits = 0;
 					}
 					else
 					{
 						try {
-							flags = Integer.parseInt(stringValue);
+							bits = Integer.parseInt(stringValue);
 						} catch (NumberFormatException e) {
 							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
 							return false;
 						}
 					}
-					flags = flags | keyValue.getValue();
-					weapon.setCustomPropertyValue(property, String.valueOf(flags));
+					bits = bits | keyValue.getValue();
+					weapon.setCustomPropertyValue(property, String.valueOf(bits));
 				}
 				else
 				{
@@ -3848,19 +3870,22 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 
 				String mnemonic;
-				Integer flags;
-				if ((flags = matchWeaponMBF21FlagMnemonic(context)) != null)
+				DEHFlag flag;
+				Integer bits;
+				if ((flag = matchWeaponMBF21FlagMnemonic(context)) != null)
 				{
-					weapon.removeMBF21Flag(flags);
+					weapon.removeMBF21Flag(flag);
 				}
-				else if ((flags = matchPositiveInteger()) != null)
+				else if ((bits = matchPositiveInteger()) != null)
 				{
-					weapon.removeMBF21Flag(flags);
+					for (DEHFlag wf : DEHWeaponMBF21Flag.FLAGSET)
+						if ((wf.getValue() & bits) != 0)
+							weapon.removeMBF21Flag(wf);
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomFlag(DEHWeapon.class, mnemonic)) == null)
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
 						return false;
@@ -3871,19 +3896,19 @@ public final class DecoHackParser extends Lexer.Parser
 					
 					if (stringValue == null)
 					{
-						flags = 0;
+						bits = 0;
 					}
 					else
 					{
 						try {
-							flags = Integer.parseInt(stringValue);
+							bits = Integer.parseInt(stringValue);
 						} catch (NumberFormatException e) {
 							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
 							return false;
 						}
 					}
-					flags = flags & ~keyValue.getValue();
-					weapon.setCustomPropertyValue(property, String.valueOf(flags));
+					bits = bits & ~keyValue.getValue();
+					weapon.setCustomPropertyValue(property, String.valueOf(bits));
 				}
 				else
 				{
@@ -4034,15 +4059,18 @@ public final class DecoHackParser extends Lexer.Parser
 				return PropertyResult.ERROR;
 			}
 			
-			Integer flags;
-			if ((flags = matchPositiveInteger()) == null)
+			Integer bits;
+			if ((bits = matchPositiveInteger()) == null)
 			{
 				addErrorMessage("Expected positive integer after \"%s\".", Keyword.FLAGS);
 				return PropertyResult.ERROR;
 			}
 			else
 			{
-				weapon.setMBF21Flags(flags);
+				weapon.setMBF21Flags(); // clear mbf21 flags
+				for (DEHFlag wf : DEHWeaponMBF21Flag.FLAGSET)
+					if ((wf.getValue() & bits) != 0)
+						weapon.addMBF21Flag(wf);
 				return PropertyResult.ACCEPTED;
 			}
 		}
@@ -4570,7 +4598,7 @@ public final class DecoHackParser extends Lexer.Parser
 				.setTranmap(parsedAction.tranmap)
 			;
 			if (parsedState.mbf21Flags != null && state.getMBF21Flags() != parsedState.mbf21Flags)
-				state.setMBF21Flags(parsedState.mbf21Flags);
+				state.setMBF21Flags(parsedState.mbf21Flags.flags());
 	
 			// Try to parse next state clause.
 			nextStateIndex = parseNextStateIndex(context, null, null, stateIndex);
@@ -4790,13 +4818,13 @@ public final class DecoHackParser extends Lexer.Parser
 	{
 		if (matchIdentifierIgnoreCase(Keyword.STATE_FAST))
 		{
-			state.setMBF21Flags(state.getMBF21Flags() | DEHStateMBF21Flag.SKILL5FAST.getValue());
+			state.addMBF21Flag(DEHStateMBF21Flag.SKILL5FAST);
 			notModified.set(false);
 			return PropertyResult.ACCEPTED;
 		}
 		else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
 		{
-			state.setMBF21Flags(state.getMBF21Flags() & ~DEHStateMBF21Flag.SKILL5FAST.getValue());
+			state.removeMBF21Flag(DEHStateMBF21Flag.SKILL5FAST);
 			notModified.set(false);
 			return PropertyResult.ACCEPTED;
 		}
@@ -5736,7 +5764,7 @@ public final class DecoHackParser extends Lexer.Parser
 			if (paramType == DEHValueType.THINGMISSILE)
 			{
 				DEHThing thing = context.getThing(thingIndex);
-				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0)
+				if (!thing.hasFlag(DEHThingFlag.MISSILE))
 					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE.");
 			}
 			
@@ -5865,7 +5893,7 @@ public final class DecoHackParser extends Lexer.Parser
 				;
 				
 				if (parsedState.mbf21Flags != null && fillState.getMBF21Flags() != parsedState.mbf21Flags)
-					fillState.setMBF21Flags(parsedState.mbf21Flags);
+					fillState.setMBF21Flags(parsedState.mbf21Flags.flags());
 
 				cursor.lastStateFilled = fillState;
 		
@@ -6523,8 +6551,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", Keyword.STATE_FAST);
 					return false;
 				}
-				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
-				state.mbf21Flags |= DEHStateMBF21Flag.SKILL5FAST.getValue();
+				state.mbf21Flags.addFlag(DEHStateMBF21Flag.SKILL5FAST);
 			}
 			else if (matchIdentifierIgnoreCase(Keyword.STATE_NOTFAST))
 			{
@@ -6533,8 +6560,7 @@ public final class DecoHackParser extends Lexer.Parser
 					addErrorMessage("MBF21 state flags (e.g. \"%s\") are not available. Not an MBF21 patch.", Keyword.STATE_NOTFAST);
 					return false;
 				}
-				state.mbf21Flags = state.mbf21Flags != null ? state.mbf21Flags : 0;
-				state.mbf21Flags &= ~DEHStateMBF21Flag.SKILL5FAST.getValue();
+				state.mbf21Flags.removeFlag(DEHStateMBF21Flag.SKILL5FAST);
 			}
 			else
 			{
@@ -6548,36 +6574,31 @@ public final class DecoHackParser extends Lexer.Parser
 	// Matches an identifier that references a thing flag mnemonic.
 	// If match, advance token and return bitflags.
 	// Else, return null.
-	private Integer matchThingFlagMnemonic()
+	private DEHFlag matchThingFlagMnemonic()
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 
-		Integer out = null;
 		DEHFlag flag;
 		if ((flag = DEHThingFlag.getByMnemonic(currentLexeme())) != null)
 		{
-			out = flag.getValue();
 			nextToken();
 		}
 		
-		return out;
+		return flag;
 	}
 	
 	// Matches an identifier that references an MBF thing flag mnemonic.
 	// If match, advance token and return bitflags.
 	// Else, return null.
-	private Integer matchThingMBF21FlagMnemonic(AbstractPatchContext<?> context)
+	private DEHFlag matchThingMBF21FlagMnemonic(AbstractPatchContext<?> context)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 
-		Integer out = null;
 		DEHThingMBF21Flag flag;
 		if ((flag = DEHThingMBF21Flag.getByMnemonic(currentLexeme())) != null)
 		{
-			out = flag.getValue();
-
 			if (!context.supports(DEHFeatureLevel.MBF21))
 			{
 				addErrorMessage("MBF21 thing flags are not available. Not an MBF21 patch.");
@@ -6587,23 +6608,20 @@ public final class DecoHackParser extends Lexer.Parser
 			nextToken();
 		}
 		
-		return out;
+		return flag;
 	}
 	
 	// Matches an identifier that references an MBF thing flag mnemonic.
 	// If match, advance token and return bitflags.
 	// Else, return null.
-	private Integer matchThingID24FlagMnemonic(AbstractPatchContext<?> context)
+	private DEHFlag matchThingID24FlagMnemonic(AbstractPatchContext<?> context)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 
-		Integer out = null;
 		DEHThingID24Flag flag;
 		if ((flag = DEHThingID24Flag.getByMnemonic(currentLexeme())) != null)
 		{
-			out = flag.getValue();
-
 			if (!context.supports(DEHFeatureLevel.ID24))
 			{
 				addErrorMessage("ID24 thing flags are not available. Not an ID24 patch.");
@@ -6613,23 +6631,20 @@ public final class DecoHackParser extends Lexer.Parser
 			nextToken();
 		}
 		
-		return out;
+		return flag;
 	}
 	
 	// Matches an identifier that references a weapon flag mnemonic. 
 	// If match, advance token and return bitflags. 
 	// Else, return null.
-	private Integer matchWeaponMBF21FlagMnemonic(AbstractPatchContext<?> context)
+	private DEHFlag matchWeaponMBF21FlagMnemonic(AbstractPatchContext<?> context)
 	{
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 			return null;
 		
-		Integer out = null;
 		DEHWeaponMBF21Flag flag;
 		if ((flag = DEHWeaponMBF21Flag.getByMnemonic(currentLexeme())) != null)
 		{
-			out = flag.getValue();
-
 			if (!context.supports(DEHFeatureLevel.MBF21))
 			{
 				addErrorMessage("MBF21 weapon flags are not available. Not an MBF21 patch.");
@@ -6639,7 +6654,7 @@ public final class DecoHackParser extends Lexer.Parser
 			nextToken();
 		}
 		
-		return out;
+		return flag;
 	}
 
 	// Matches an identifier or string that references an action pointer name.
@@ -6778,6 +6793,7 @@ public final class DecoHackParser extends Lexer.Parser
 			
 			case FLAGS:
 			{
+				DEHFlag flag;
 				Integer value;
 				
 				if (!currentType(DecoHackKernel.TYPE_DASH, DecoHackKernel.TYPE_NUMBER, DecoHackKernel.TYPE_IDENTIFIER))
@@ -6807,9 +6823,9 @@ public final class DecoHackParser extends Lexer.Parser
 						}
 						out |= value;
 					}
-					else if ((value = matchThingFlagMnemonic()) != null)
+					else if ((flag = matchThingFlagMnemonic()) != null)
 					{
-						out |= value;
+						out |= flag.getValue();
 						
 						flagInclusionMask |= FIM_THING_DOOM19;
 						if ((flagInclusionMask & ~FIM_THING_DOOM19) != 0)
@@ -6818,9 +6834,9 @@ public final class DecoHackParser extends Lexer.Parser
 							return null;
 						}
 					}
-					else if ((value = matchThingMBF21FlagMnemonic(context)) != null)
+					else if ((flag = matchThingMBF21FlagMnemonic(context)) != null)
 					{
-						out |= value;
+						out |= flag.getValue();
 
 						flagInclusionMask |= FIM_THING_MBF21;
 						if ((flagInclusionMask & ~FIM_THING_MBF21) != 0)
@@ -6829,9 +6845,9 @@ public final class DecoHackParser extends Lexer.Parser
 							return null;
 						}
 					}
-					else if ((value = matchThingID24FlagMnemonic(context)) != null)
+					else if ((flag = matchThingID24FlagMnemonic(context)) != null)
 					{
-						out |= value;
+						out |= flag.getValue();
 
 						flagInclusionMask |= FIM_THING_ID24;
 						if ((flagInclusionMask & ~FIM_THING_ID24) != 0)
@@ -6840,9 +6856,9 @@ public final class DecoHackParser extends Lexer.Parser
 							return null;
 						}
 					}
-					else if ((value = matchWeaponMBF21FlagMnemonic(context)) != null)
+					else if ((flag = matchWeaponMBF21FlagMnemonic(context)) != null)
 					{
-						out |= value;
+						out |= flag.getValue();
 						
 						flagInclusionMask |= FIM_WEAPON_MBF21;
 						if ((flagInclusionMask & ~FIM_WEAPON_MBF21) != 0)
@@ -6906,8 +6922,8 @@ public final class DecoHackParser extends Lexer.Parser
 				
 				// Verify missile type.
 				DEHThing thing = context.getThing(index);
-				if ((thing.getFlags() & DEHFlag.flags(DEHThingFlag.MISSILE)) == 0 && (thing.getFlags() & DEHFlag.flags(DEHThingFlag.BOUNCES)) == 0)
-					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE or BOUNCE (or both).");
+				if (!thing.hasFlag(DEHThingFlag.MISSILE) && !thing.hasFlag(DEHThingFlag.BOUNCES))
+					addWarningMessage(WarningType.THINGMISSILE, "This action pointer requires a Thing that is flagged with MISSILE or BOUNCES (or both).");
 				
 				return ParameterValue.createValue(value);
 			}
@@ -7465,13 +7481,14 @@ public final class DecoHackParser extends Lexer.Parser
 		private Deque<Integer> frameList;
 		private Integer duration;
 		private boolean bright;
-		private Integer mbf21Flags;
+		private DEHFlagSet mbf21Flags;
 		private List<ParsedAction> parsedActions;
 		
 		private ParsedState()
 		{
 			this.frameList = new LinkedList<>();
 			this.parsedActions = new ArrayList<>();
+			this.mbf21Flags = new DEHFlagSet();
 			reset();
 		}
 		
@@ -7480,7 +7497,7 @@ public final class DecoHackParser extends Lexer.Parser
 			this.spriteIndex = null;
 			this.duration = null;
 			this.bright = false;
-			this.mbf21Flags = null;
+			this.mbf21Flags.setFlags(); // clear
 			this.frameList.clear();
 			this.parsedActions.clear();
 		}

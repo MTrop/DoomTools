@@ -10,7 +10,6 @@ import static net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerDoom19.*;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHState;
 import net.mtrop.doom.tools.decohack.data.DEHThing;
-import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHStateMBF21Flag;
 import net.mtrop.doom.tools.decohack.data.enums.DEHThingFlag;
 
@@ -499,19 +498,19 @@ interface ConstantsBoom
 		PatchBoom.State.create(DEHState.create(0, 8, false, 444, 6), NULL),
 		PatchBoom.State.create(DEHState.create(39, 0, false, 476, 10), LOOK),
 		PatchBoom.State.create(DEHState.create(39, 1, false, 475, 10), LOOK),
-		PatchBoom.State.create(DEHState.create(39, 0, false, 478, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 0, false, 479, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 1, false, 480, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 1, false, 481, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 2, false, 482, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 2, false, 483, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 3, false, 484, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 3, false, 477, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), CHASE),
-		PatchBoom.State.create(DEHState.create(39, 4, false, 486, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), FACETARGET),
-		PatchBoom.State.create(DEHState.create(39, 5, false, 487, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), FACETARGET),
-		PatchBoom.State.create(DEHState.create(39, 6, false, 477, 8, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), SARGATTACK),
-		PatchBoom.State.create(DEHState.create(39, 7, false, 489, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), NULL),
-		PatchBoom.State.create(DEHState.create(39, 7, false, 477, 2, DEHFlag.flags(DEHStateMBF21Flag.SKILL5FAST)), PAIN),
+		PatchBoom.State.create(DEHState.create(39, 0, false, 478, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 0, false, 479, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 1, false, 480, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 1, false, 481, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 2, false, 482, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 2, false, 483, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 3, false, 484, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 3, false, 477, 2, DEHStateMBF21Flag.SKILL5FAST), CHASE),
+		PatchBoom.State.create(DEHState.create(39, 4, false, 486, 8, DEHStateMBF21Flag.SKILL5FAST), FACETARGET),
+		PatchBoom.State.create(DEHState.create(39, 5, false, 487, 8, DEHStateMBF21Flag.SKILL5FAST), FACETARGET),
+		PatchBoom.State.create(DEHState.create(39, 6, false, 477, 8, DEHStateMBF21Flag.SKILL5FAST), SARGATTACK),
+		PatchBoom.State.create(DEHState.create(39, 7, false, 489, 2, DEHStateMBF21Flag.SKILL5FAST), NULL),
+		PatchBoom.State.create(DEHState.create(39, 7, false, 477, 2, DEHStateMBF21Flag.SKILL5FAST), PAIN),
 		PatchBoom.State.create(DEHState.create(39, 8, false, 491, 8), NULL),
 		PatchBoom.State.create(DEHState.create(39, 9, false, 492, 8), SCREAM),
 		PatchBoom.State.create(DEHState.create(39, 10, false, 493, 4), NULL),
@@ -1003,9 +1002,7 @@ interface ConstantsBoom
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
-				DEHThingFlag.NOBLOCKMAP
-			))
+			.setFlags(DEHThingFlag.NOBLOCKMAP)
 			.setMass(10)
 			.setSpawnFrameIndex(967)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)
@@ -1029,9 +1026,7 @@ interface ConstantsBoom
 			.setDamage(0)
 			.setReactionTime(8)
 			.setPainChance(0)
-			.setFlags(DEHFlag.flags(
-				DEHThingFlag.NOBLOCKMAP
-			))
+			.setFlags(DEHThingFlag.NOBLOCKMAP)
 			.setMass(10)
 			.setSpawnFrameIndex(967)
 			.setWalkFrameIndex(DEHThing.FRAME_NULL)

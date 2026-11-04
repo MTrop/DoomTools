@@ -28,13 +28,5 @@ public interface DEHFlag
 	{
 		return "";
 	}
-	
-	static int flags(DEHFlag ... flags)
-	{
-		int out = 0;
-		for (DEHFlag flag : flags)
-			out |= flag.getValue();
-		return out;
-	}
-	
+
 }
