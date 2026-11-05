@@ -33,7 +33,7 @@ public enum DEHStateMBF21Flag implements DEHFlag
 		this.value = value;
 	}
 
-	public int getValue()
+	public Integer getValue()
 	{
 		return value;
 	}

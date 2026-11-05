@@ -47,7 +47,7 @@ public enum DEHThingID24Flag implements DEHFlag
 		this.usage = usage;
 	}
 
-	public int getValue()
+	public Integer getValue()
 	{
 		return value;
 	}

@@ -100,6 +100,19 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 	}
 
 	/**
+	 * Checks if this flag set contains a pure mnemonic flag type.
+	 * This affects export via {@link #toString()}.
+	 * @return true if so, false if not.
+	 */
+	public boolean containsPureMnemonic()
+	{
+		for (DEHFlag flag : this)
+			if (flag.isPureMnemonic())
+				return true;
+		return false;
+	}
+	
+	/**
 	 * @return an array of the flags in this set.
 	 */
 	public DEHFlag[] flags()
@@ -108,7 +121,7 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 	}
 	
 	/**
-	 * @return the integer value fo this set.
+	 * @return the integer value for this set.
 	 */
 	public int getValue()
 	{
@@ -128,6 +141,12 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 	}
 	
 	@Override
+	public Iterator<DEHFlag> iterator()
+	{
+		return flagSet.iterator();
+	}
+
+	@Override
 	public boolean equals(Object obj) 
 	{
 		if (obj instanceof DEHFlagSet)
@@ -141,11 +160,14 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 	}
 	
 	/**
-	 * @return the mnemonic string for this set.
+	 * @return the value for this set (can be a mnemonic string).
 	 */
 	@Override
 	public String toString()
 	{
+		if (!containsPureMnemonic())
+			return String.valueOf(getValue());
+		
 		StringBuilder sb = new StringBuilder();
 		for (DEHFlag flag : flagSet)
 		{
@@ -154,12 +176,6 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 			sb.append(flag.name());
 		}
 		return sb.toString();
-	}
-
-	@Override
-	public Iterator<DEHFlag> iterator()
-	{
-		return flagSet.iterator();
 	}
 	
 }

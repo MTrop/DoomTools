@@ -33,7 +33,7 @@ public enum DEHThingBoomFlag implements DEHFlag
 		this.usage = usage;
 	}
 
-	public int getValue()
+	public Integer getValue()
 	{
 		return value;
 	}

@@ -12,14 +12,22 @@ package net.mtrop.doom.tools.decohack.data.enums;
 public interface DEHFlag
 {
 	/**
-	 * @return this flag's name/mnemonic.
+	 * @return this flag's name/mnemonic. Cannot be null.
 	 */
 	String name();
 	
 	/**
-	 * @return the bit value of this flag.
+	 * @return the bit value of this flag, or null if purely mnemonic.
 	 */
-	int getValue();
+	Integer getValue();
+	
+	/**
+	 * @return true if this is a pure mnemonic, false if it has a value.
+	 */
+	default boolean isPureMnemonic()
+	{
+		return getValue() == null;
+	}
 	
 	/**
 	 * @return the usage info for this flag.

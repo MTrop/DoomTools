@@ -315,7 +315,7 @@ public class DEHState extends DEHObject<DEHState>
 				if (i >= frame.args.length || args[i] != frame.args[i])
 					writer.append("Args").append(String.valueOf(i+1)).append(" = ").append(String.valueOf(args[i])).append("\r\n");
 			if (forceOutput || !mbf21Flags.equals(frame.mbf21Flags))
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
 
 		if (level.supports(DEHFeatureLevel.ID24))

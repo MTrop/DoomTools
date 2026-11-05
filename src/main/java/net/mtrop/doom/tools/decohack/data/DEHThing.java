@@ -1059,7 +1059,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		if (forceOutput || painChance != thing.painChance)
 			writer.append("Pain chance = ").append(String.valueOf(painChance)).append("\r\n");
 		if (forceOutput || !flags.equals(thing.flags))
-			writer.append("Bits = ").append(String.valueOf(flags.getValue())).append("\r\n");
+			writer.append("Bits = ").append(String.valueOf(flags)).append("\r\n");
 		if (forceOutput || mass != thing.mass)
 			writer.append("Mass = ").append(String.valueOf(mass)).append("\r\n");
 
@@ -1102,7 +1102,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		if (level.supports(DEHFeatureLevel.MBF21))
 		{
 			if (forceOutput || !mbf21Flags.equals(thing.mbf21Flags))
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 			if (forceOutput || infightingGroup != thing.infightingGroup)
 				writer.append("Infighting group = ").append(String.valueOf(infightingGroup)).append("\r\n");
 			if (forceOutput || projectileGroup != thing.projectileGroup)
@@ -1121,7 +1121,7 @@ public class DEHThing extends DEHObject<DEHThing> implements DEHThingTarget<DEHT
 		if (level.supports(DEHFeatureLevel.ID24))
 		{
 			if (forceOutput || !id24Flags.equals(thing.id24Flags))
-				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags.getValue())).append("\r\n");
+				writer.append("ID24 Bits = ").append(String.valueOf(id24Flags)).append("\r\n");
 			if (forceOutput || minRespawnTics != thing.minRespawnTics)
 				writer.append("Min respawn tics = ").append(String.valueOf(minRespawnTics)).append("\r\n");
 			if (forceOutput || respawnDice != thing.respawnDice)

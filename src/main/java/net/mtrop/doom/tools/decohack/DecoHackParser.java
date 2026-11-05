@@ -133,6 +133,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String NEXTSTATE = "nextstate";
 		String POINTER = "pointer";
 		String PROPERTY = "property";
+		String FLAG = "flag";
 
 		String ALIAS = "alias";
 		String TEMPLATE = "template";
@@ -1311,9 +1312,13 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				return parseCustomPropertyClause(context, DEHThing.class);
 			}
+			else if (matchIdentifierIgnoreCase(Keyword.FLAG))
+			{
+				return parseCustomFlagClause(context, DEHThing.class);
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.THING);
+				addErrorMessage("Expected \"%s\" or \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.FLAG, Keyword.THING);
 				return false;
 			}
 		}
@@ -1333,9 +1338,13 @@ public final class DecoHackParser extends Lexer.Parser
 			{
 				return parseCustomPropertyClause(context, DEHWeapon.class);
 			}
+			else if (matchIdentifierIgnoreCase(Keyword.FLAG))
+			{
+				return parseCustomFlagClause(context, DEHWeapon.class);
+			}
 			else
 			{
-				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.WEAPON);
+				addErrorMessage("Expected \"%s\" or \"%s\" or \"%s\" after \"%s\".", Keyword.POINTER, Keyword.PROPERTY, Keyword.FLAG, Keyword.WEAPON);
 				return false;
 			}
 		}
@@ -1580,6 +1589,67 @@ public final class DecoHackParser extends Lexer.Parser
 		return true;
 	}
 
+	// Parses a custom flag.
+	private boolean parseCustomFlagClause(AbstractPatchContext<?> context, Class<?> objectClass)
+	{
+		String mnemonic;
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+		{
+			addErrorMessage("Expected flag name after \"%s\".", Keyword.FLAG);
+			return false;			
+		}
+		
+		if ((mnemonic = matchIdentifier()) == null)
+		{
+			addErrorMessage("INTERNAL ERROR: EXPECTED MNEMONIC FOR FLAG.");
+			return false;
+		}
+		
+		DEHFlag flag;
+		if ((flag = context.getCustomFlag(objectClass, mnemonic)) != null)
+		{
+			addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+			return false;
+		}
+		else if (context.getCustomBitFlag(objectClass, mnemonic) != null)
+		{
+			addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+			return false;
+		}
+		
+		if (objectClass == DEHThing.class)
+		{
+			if (DEHThingFlag.getByMnemonic(mnemonic) != null)
+			{
+				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				return false;
+			}
+			else if (DEHThingMBF21Flag.getByMnemonic(mnemonic) != null)
+			{
+				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				return false;
+			}
+			else if (DEHThingID24Flag.getByMnemonic(mnemonic) != null)
+			{
+				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				return false;
+			}
+		}
+		else if (objectClass == DEHWeapon.class)
+		{
+			if (DEHWeaponMBF21Flag.getByMnemonic(mnemonic) != null)
+			{
+				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				return false;
+			}
+		}
+		
+		flag = new AbstractPatchContext.CustomFlag(mnemonic);
+		context.addCustomFlag(objectClass, flag);
+		
+		return true;
+	}
+	
 	// Parses an ammo type alias line.
 	private boolean parseAmmoAliasLine(AbstractPatchContext<?> context)
 	{
@@ -2587,31 +2657,38 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
+					DEHFlag customFlag;
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomBitFlag(DEHThing.class, mnemonic)) != null)
+					{
+						DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+						String stringValue = thing.getCustomPropertyValue(property);
+						
+						if (stringValue == null)
+						{
+							value = 0;
+						}
+						else
+						{
+							try {
+								value = Integer.parseInt(stringValue);
+							} catch (NumberFormatException e) {
+								addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
+								return false;
+							}
+						}
+						value = value | keyValue.getValue();
+						thing.setCustomPropertyValue(property, String.valueOf(value));
+					}
+					else if ((customFlag = context.getCustomFlag(DEHThing.class, mnemonic)) != null)
+					{
+						thing.addFlag(customFlag);
+					}
+					else
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Things has not been defined.", mnemonic);
 						return false;
 					}
-					
-					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
-					String stringValue = thing.getCustomPropertyValue(property);
-					
-					if (stringValue == null)
-					{
-						value = 0;
-					}
-					else
-					{
-						try {
-							value = Integer.parseInt(stringValue);
-						} catch (NumberFormatException e) {
-							addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
-							return false;
-						}
-					}
-					value = value | keyValue.getValue();
-					thing.setCustomPropertyValue(property, String.valueOf(value));
 				}
 				else
 				{
@@ -2669,31 +2746,39 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
+					DEHFlag customFlag;
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHThing.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomBitFlag(DEHThing.class, mnemonic)) != null)
+					{					
+						DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+						String stringValue = thing.getCustomPropertyValue(property);
+						
+						if (stringValue == null)
+						{
+							value = 0;
+						}
+						else
+						{
+							try {
+								value = Integer.parseInt(stringValue);
+							} catch (NumberFormatException e) {
+								addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
+								return false;
+							}
+						}
+						value = value & ~keyValue.getValue();
+						thing.setCustomPropertyValue(property, String.valueOf(value));
+					}
+					else if ((customFlag = context.getCustomFlag(DEHThing.class, mnemonic)) != null)
+					{
+						thing.removeFlag(customFlag);
+					}
+					else
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Things has not been defined.", mnemonic);
 						return false;
 					}
-					
-					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
-					String stringValue = thing.getCustomPropertyValue(property);
-					
-					if (stringValue == null)
-					{
-						value = 0;
-					}
-					else
-					{
-						try {
-							value = Integer.parseInt(stringValue);
-						} catch (NumberFormatException e) {
-							addErrorMessage("INTERNAL ERROR: Thing Property %s value is not an integer!");
-							return false;
-						}
-					}
-					value = value & ~keyValue.getValue();
-					thing.setCustomPropertyValue(property, String.valueOf(value));
+
 				}
 				else
 				{
@@ -3829,31 +3914,38 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
+					DEHFlag customFlag;
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHWeapon.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomBitFlag(DEHWeapon.class, mnemonic)) != null)
+					{
+						DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+						String stringValue = weapon.getCustomPropertyValue(property);
+						
+						if (stringValue == null)
+						{
+							bits = 0;
+						}
+						else
+						{
+							try {
+								bits = Integer.parseInt(stringValue);
+							} catch (NumberFormatException e) {
+								addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
+								return false;
+							}
+						}
+						bits = bits | keyValue.getValue();
+						weapon.setCustomPropertyValue(property, String.valueOf(bits));
+					}
+					else if ((customFlag = context.getCustomFlag(DEHWeapon.class, mnemonic)) != null)
+					{
+						weapon.addMBF21Flag(customFlag);
+					}
+					else
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
 						return false;
 					}
-					
-					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
-					String stringValue = weapon.getCustomPropertyValue(property);
-					
-					if (stringValue == null)
-					{
-						bits = 0;
-					}
-					else
-					{
-						try {
-							bits = Integer.parseInt(stringValue);
-						} catch (NumberFormatException e) {
-							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
-							return false;
-						}
-					}
-					bits = bits | keyValue.getValue();
-					weapon.setCustomPropertyValue(property, String.valueOf(bits));
 				}
 				else
 				{
@@ -3884,31 +3976,38 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
+					DEHFlag customFlag;
 					ObjectPair<String, Integer> keyValue;
-					if ((keyValue = context.getCustomFlag(DEHWeapon.class, mnemonic)) == null)
+					if ((keyValue = context.getCustomBitFlag(DEHWeapon.class, mnemonic)) != null)
+					{
+						DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
+						String stringValue = weapon.getCustomPropertyValue(property);
+						
+						if (stringValue == null)
+						{
+							bits = 0;
+						}
+						else
+						{
+							try {
+								bits = Integer.parseInt(stringValue);
+							} catch (NumberFormatException e) {
+								addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
+								return false;
+							}
+						}
+						bits = bits & ~keyValue.getValue();
+						weapon.setCustomPropertyValue(property, String.valueOf(bits));
+					}
+					else if ((customFlag = context.getCustomFlag(DEHWeapon.class, mnemonic)) != null)
+					{
+						weapon.removeMBF21Flag(customFlag);
+					}
+					else
 					{
 						addErrorMessage("Flag mnemonic \"%s\" for Weapons has not been defined.", mnemonic);
 						return false;
 					}
-					
-					DEHProperty property = context.getCustomPropertyByKeyword(DEHThing.class, keyValue.getKey());
-					String stringValue = weapon.getCustomPropertyValue(property);
-					
-					if (stringValue == null)
-					{
-						bits = 0;
-					}
-					else
-					{
-						try {
-							bits = Integer.parseInt(stringValue);
-						} catch (NumberFormatException e) {
-							addErrorMessage("INTERNAL ERROR: Weapon Property %s value is not an integer!");
-							return false;
-						}
-					}
-					bits = bits & ~keyValue.getValue();
-					weapon.setCustomPropertyValue(property, String.valueOf(bits));
 				}
 				else
 				{

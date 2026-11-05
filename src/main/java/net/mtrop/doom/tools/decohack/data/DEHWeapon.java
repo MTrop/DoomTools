@@ -570,7 +570,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 				writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 			
 			if (forceOutput || !mbf21Flags.equals(weapon.mbf21Flags))
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags.getValue())).append("\r\n");
+				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
 		}
 		
 		if (level.supports(DEHFeatureLevel.ID24))

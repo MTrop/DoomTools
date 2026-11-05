@@ -1856,6 +1856,32 @@ NEWFLAG2 will be 0x001 and 0x002, respectively.
 
 
 ==============================================================================
+===== Custom Flags
+==============================================================================
+
+You can also define flags without values to be used as part of a flag
+expression as-is for ports that understand them:
+
+    custom thing flag ZDOOMFLAG 
+
+And its use in an object:
+
+    auto thing NewThing
+    {
+        +SPECIAL
+        +COUNTKILL
+        +ZDOOMFLAG
+    }
+
+Will cause it to be output like so to the patch:
+
+    Bits = SPECIAL+COUNTKILL+ZDOOMFLAG
+
+
+Works on Things and Weapons.
+
+
+==============================================================================
 ===== Templates
 ==============================================================================
 

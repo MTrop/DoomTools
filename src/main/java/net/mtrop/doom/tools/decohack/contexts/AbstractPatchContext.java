@@ -31,6 +31,7 @@ import net.mtrop.doom.tools.decohack.data.DEHThing;
 import net.mtrop.doom.tools.decohack.data.DEHWeapon;
 import net.mtrop.doom.tools.decohack.data.enums.DEHActionPointerType;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
+import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.struct.IntervalMap;
 
@@ -75,6 +76,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected Map<String, Integer> globalStateMap;
 	
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
+	protected Map<Class<?>, Map<String, DEHFlag>> customFlagMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
 	protected Map<Class<?>, Map<String, ObjectPair<String, Integer>>> customBitflagMap;
 	
@@ -163,6 +165,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		this.globalStateMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		
 		this.pointerMnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+		this.customFlagMap = new HashMap<>();
 		this.customPropertyMap = new HashMap<>();
 		this.customBitflagMap = new HashMap<>();
 		
@@ -301,6 +304,33 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	/**
 	 * Adds a custom property to a DEH object class.
 	 * @param objectClass the class itself.
+	 * @param flag the flag to add.
+	 */
+	public void addCustomFlag(Class<?> objectClass, DEHFlag flag)
+	{
+		Map<String, DEHFlag> propMap;
+		if ((propMap = customFlagMap.get(objectClass)) == null)
+			customFlagMap.put(objectClass, propMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
+		propMap.put(flag.name(), flag);
+	}
+	
+	/**
+	 * Gets a flag from an object class type and mnemonic name.
+	 * @param objectClass the object class.
+	 * @param mnemonic the flag mnemonic.
+	 * @return the resultant flag, or null if no flag.
+	 */
+	public DEHFlag getCustomFlag(Class<?> objectClass, String mnemonic)
+	{
+		Map<String, DEHFlag> mnemonicMap;
+		if ((mnemonicMap = customFlagMap.get(objectClass)) == null)
+			return null;
+		return mnemonicMap.get(mnemonic);
+	}
+	
+	/**
+	 * Adds a custom property to a DEH object class.
+	 * @param objectClass the class itself.
 	 * @param property the property to add.
 	 */
 	public void addCustomProperty(Class<?> objectClass, DEHProperty property)
@@ -359,7 +389,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param mnemonic the flag mnemonic.
 	 * @return the resultant property name and value, or null if no flag.
 	 */
-	public ObjectPair<String, Integer> getCustomFlag(Class<?> objectClass, String mnemonic)
+	public ObjectPair<String, Integer> getCustomBitFlag(Class<?> objectClass, String mnemonic)
 	{
 		Map<String, ObjectPair<String, Integer>> mnemonicMap;
 		if ((mnemonicMap = customBitflagMap.get(objectClass)) == null)
@@ -1453,6 +1483,36 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			V prev = this.value;
 			this.value = value; 
 			return prev;
+		}
+		
+	}
+	
+	public static class CustomFlag implements DEHFlag
+	{
+		private String name;
+		private Integer value;
+		
+		public CustomFlag(String name)
+		{
+			this(name, null);
+		}
+
+		public CustomFlag(String name, Integer value)
+		{
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public String name()
+		{
+			return name;
+		}
+
+		@Override
+		public Integer getValue()
+		{
+			return value;
 		}
 		
 	}
