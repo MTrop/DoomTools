@@ -361,7 +361,7 @@ public class DEHAmmo extends DEHObject<DEHAmmo>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHAmmo ammo, DEHFeatureLevel level) throws IOException
+	public void writeObject(Writer writer, DEHAmmo ammo, DEHOptions options, DEHFeatureLevel level) throws IOException
 	{
 		if (forceOutput || max != ammo.max)
 			writer.append("Max ammo = ").append(String.valueOf(max)).append("\r\n");

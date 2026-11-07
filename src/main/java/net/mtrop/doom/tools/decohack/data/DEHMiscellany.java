@@ -338,7 +338,7 @@ public class DEHMiscellany extends DEHObject<DEHMiscellany>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHMiscellany misc, DEHFeatureLevel level) throws IOException
+	public void writeObject(Writer writer, DEHMiscellany misc, DEHOptions options, DEHFeatureLevel level) throws IOException
 	{
 		if (forceOutput || monsterInfightingEnabled != misc.monsterInfightingEnabled)
 			writer.append("Monsters Infight = ").append(String.valueOf(221)).append("\r\n");

@@ -546,7 +546,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 	}	
 	
 	@Override
-	public void writeObject(Writer writer, DEHWeapon weapon, DEHFeatureLevel level) throws IOException 
+	public void writeObject(Writer writer, DEHWeapon weapon, DEHOptions options, DEHFeatureLevel level) throws IOException 
 	{
 		if (forceOutput || ammoType != weapon.ammoType)
 			writer.append("Ammo type = ").append(String.valueOf(ammoType)).append("\r\n");
@@ -570,7 +570,7 @@ public class DEHWeapon extends DEHObject<DEHWeapon> implements DEHWeaponTarget<D
 				writer.append("Ammo per shot = ").append(String.valueOf(ammoPerShot)).append("\r\n");
 			
 			if (forceOutput || !mbf21Flags.equals(weapon.mbf21Flags))
-				writer.append("MBF21 Bits = ").append(String.valueOf(mbf21Flags)).append("\r\n");
+				writer.append("MBF21 Bits = ").append(mbf21Flags.getOutput(options.outputFlagMnemonics)).append("\r\n");
 		}
 		
 		if (level.supports(DEHFeatureLevel.ID24))

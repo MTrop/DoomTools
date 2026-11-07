@@ -294,7 +294,7 @@ public class DEHState extends DEHObject<DEHState>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHState frame, DEHFeatureLevel level) throws IOException
+	public void writeObject(Writer writer, DEHState frame, DEHOptions options, DEHFeatureLevel level) throws IOException
 	{
 		if (forceOutput || spriteIndex != frame.spriteIndex)
 			writer.append("Sprite number = ").append(String.valueOf(spriteIndex)).append("\r\n");

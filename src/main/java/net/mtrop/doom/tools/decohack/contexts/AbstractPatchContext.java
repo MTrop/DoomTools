@@ -24,6 +24,7 @@ import net.mtrop.doom.tools.decohack.data.DEHActor;
 import net.mtrop.doom.tools.decohack.data.DEHAmmo;
 import net.mtrop.doom.tools.decohack.data.DEHMiscellany;
 import net.mtrop.doom.tools.decohack.data.DEHObject;
+import net.mtrop.doom.tools.decohack.data.DEHOptions;
 import net.mtrop.doom.tools.decohack.data.DEHProperty;
 import net.mtrop.doom.tools.decohack.data.DEHSound;
 import net.mtrop.doom.tools.decohack.data.DEHState;
@@ -56,6 +57,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	private int freeStateCount;
 	private int freePointerStateCount;
 
+	protected DEHOptions options;
 	protected boolean stateSafetySwitch;
 	protected IntervalMap<Boolean> alreadyFreeStatesMap;
 
@@ -142,6 +144,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		
 		this.freeStateCount = 0;
 		
+		this.options = new DEHOptions();
 		this.stateSafetySwitch = false;
 		this.alreadyFreeStatesMap = new IntervalMap<>(0, getStateCount() - 1, false);
 		
@@ -300,6 +303,14 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	public Set<Integer> getUsedStateIndices()
 	{
 		return states.keySet();
+	}
+	
+	/**
+	 * @return the options object.
+	 */
+	public DEHOptions getOptions() 
+	{
+		return options;
 	}
 	
 	/**
@@ -1349,7 +1360,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 					.append(String.valueOf(thing.getName()))
 					.append(")")
 					.append(CRLF);
-				thing.writeObject(writer, original, getSupportedFeatureLevel());
+				thing.writeObject(writer, original, options, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
 		}
@@ -1364,7 +1375,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			if (state.isForceOutput() || !state.equals(original) || state.hasCustomProperties())
 			{
 				writer.append("Frame ").append(String.valueOf(i)).append(CRLF);
-				state.writeObject(writer, original, getSupportedFeatureLevel());
+				state.writeObject(writer, original, options, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
 		}
@@ -1379,7 +1390,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			if (sound.isForceOutput() || !sound.equals(original) || sound.hasCustomProperties())
 			{
 				writer.append("Sound ").append(String.valueOf(i)).append(CRLF);
-				sound.writeObject(writer, original, getSupportedFeatureLevel());
+				sound.writeObject(writer, original, options, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
 		}
@@ -1399,7 +1410,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 					.append(String.valueOf(weapon.getName()))
 					.append(")")
 					.append(CRLF);
-				weapon.writeObject(writer, original, getSupportedFeatureLevel());
+				weapon.writeObject(writer, original, options, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
 		}
@@ -1419,7 +1430,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 					.append(String.valueOf(ammo.getName()))
 					.append(")")
 					.append(CRLF);
-				ammo.writeObject(writer, original, getSupportedFeatureLevel());
+				ammo.writeObject(writer, original, options, getSupportedFeatureLevel());
 				writer.append(CRLF);
 			}
 		}
@@ -1430,7 +1441,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		if (misc.isForceOutput() || !misc.equals(miscOriginal) || misc.hasCustomProperties())
 		{
 			writer.append("Misc ").append(String.valueOf(0)).append(CRLF);
-			misc.writeObject(writer, miscOriginal, getSupportedFeatureLevel());
+			misc.writeObject(writer, miscOriginal, options, getSupportedFeatureLevel());
 			writer.append(CRLF);
 		}
 		writer.flush();

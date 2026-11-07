@@ -120,7 +120,7 @@ public class DEHSound extends DEHObject<DEHSound>
 	}	
 		
 	@Override
-	public void writeObject(Writer writer, DEHSound sound, DEHFeatureLevel level) throws IOException
+	public void writeObject(Writer writer, DEHSound sound, DEHOptions options, DEHFeatureLevel level) throws IOException
 	{
 		if (forceOutput || priority != sound.priority)
 			writer.append("Value = ").append(String.valueOf(priority)).append("\r\n");

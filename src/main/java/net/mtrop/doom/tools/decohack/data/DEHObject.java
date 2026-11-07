@@ -109,9 +109,10 @@ public abstract class DEHObject<SELF>
 	 * Writes this object to a DeHackEd file stream.
 	 * @param writer the writer to write to.
 	 * @param original the original object to compare to for writing changed fields.
+	 * @param options additional output options.
 	 * @param level the highest feature level to export for.
 	 * @throws IOException if a write error occurs.
 	 */
-	public abstract void writeObject(Writer writer, SELF original, DEHFeatureLevel level) throws IOException;
+	public abstract void writeObject(Writer writer, SELF original, DEHOptions options, DEHFeatureLevel level) throws IOException;
 	
 }

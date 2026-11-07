@@ -132,6 +132,29 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 	}
 	
 	/**
+	 * @return this set as a mnemonic string.
+	 */
+	public String getMnemonicString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for (DEHFlag flag : flagSet)
+		{
+			if (sb.length() > 0)
+				sb.append("+");
+			sb.append(flag.name());
+		}
+		return sb.toString();
+	}
+	
+	public String getOutput(boolean outputMnemonics)
+	{
+		if (outputMnemonics)
+			return getMnemonicString();
+		else
+			return String.valueOf(this);
+	}
+	
+	/**
 	 * Checks if this set is empty.
 	 * @return true if so, false if not.
 	 */
@@ -168,14 +191,7 @@ public class DEHFlagSet implements Iterable<DEHFlag>
 		if (!containsPureMnemonic())
 			return String.valueOf(getValue());
 		
-		StringBuilder sb = new StringBuilder();
-		for (DEHFlag flag : flagSet)
-		{
-			if (sb.length() > 0)
-				sb.append("+");
-			sb.append(flag.name());
-		}
-		return sb.toString();
+		return getMnemonicString();
 	}
 	
 }

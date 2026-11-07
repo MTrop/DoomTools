@@ -135,6 +135,7 @@ public final class DecoHackParser extends Lexer.Parser
 		String POINTER = "pointer";
 		String PROPERTY = "property";
 		String FLAG = "flag";
+		String MNEMONICS = "mnemonics";
 
 		String ALIAS = "alias";
 		String TEMPLATE = "template";
@@ -683,7 +684,39 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a "set" clause.
 	private boolean parseSetClause(AbstractPatchContext<?> context) 
 	{
-		if (matchIdentifierIgnoreCase(Keyword.STATE))
+		if (matchIdentifierIgnoreCase(Keyword.OUTPUT))
+		{
+			if (!matchIdentifierIgnoreCase(Keyword.FLAG))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.FLAG, Keyword.OUTPUT);
+				return false;
+			}
+
+			if (!matchIdentifierIgnoreCase(Keyword.MNEMONICS))
+			{
+				addErrorMessage("Expected \"%s\" after \"%s\".", Keyword.MNEMONICS, Keyword.FLAG);
+				return false;
+			}
+			
+			if (matchIdentifierIgnoreCase(Keyword.ON))
+			{
+				context.getOptions().outputFlagMnemonics = true;
+				return true;
+			}
+			else if (matchIdentifierIgnoreCase(Keyword.OFF))
+			{
+				context.getOptions().outputFlagMnemonics = false;
+				return true;
+			}
+			else
+			{
+				addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.ON, Keyword.OFF, Keyword.MNEMONICS);
+				return false;
+			}
+
+			
+		}
+		else if (matchIdentifierIgnoreCase(Keyword.STATE))
 		{
 			if (!matchIdentifierIgnoreCase(Keyword.FREE))
 			{
@@ -894,7 +927,7 @@ public final class DecoHackParser extends Lexer.Parser
 		}
 		else
 		{
-			addErrorMessage("Expected \"%s\" or \"%s\" after \"%s\".", Keyword.NEXT, Keyword.STATE, Keyword.SET);
+			addErrorMessage("Expected \"%s\" or \"%s\" or \"%s\" after \"%s\".", Keyword.NEXT, Keyword.STATE, Keyword.OUTPUT, Keyword.SET);
 			return false;
 		}
 	}

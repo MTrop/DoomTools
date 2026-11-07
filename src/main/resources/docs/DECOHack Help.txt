@@ -1685,6 +1685,20 @@ Example:
     +RANGEHALF
 
 
+------------------------------------------------------------------------------
+Output Flag Mnemonics
+------------------------------------------------------------------------------
+
+To make your patches output flag mnemonic strings instead of bit values,
+you can add the following to your patches:
+
+    set output flag mnemonics on
+
+
+...and that will make DECOHack output flag mnemonic strings instead of just
+bit values for bitfield fields on objects.
+
+
 ==============================================================================
 ===== Custom Action Pointers
 ==============================================================================
