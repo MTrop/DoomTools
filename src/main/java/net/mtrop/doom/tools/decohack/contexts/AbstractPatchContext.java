@@ -302,7 +302,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	}
 	
 	/**
-	 * Adds a custom property to a DEH object class.
+	 * Adds a custom flag to a DEH object class.
 	 * @param objectClass the class itself.
 	 * @param flag the flag to add.
 	 */
