@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import net.mtrop.doom.tools.common.Common;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext;
+import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext.FlagType;
 import net.mtrop.doom.tools.decohack.contexts.AbstractPatchContext.ObjectPair;
 import net.mtrop.doom.tools.decohack.contexts.PatchBoomContext;
 import net.mtrop.doom.tools.decohack.contexts.PatchDSDHackedContext;
@@ -1592,6 +1593,13 @@ public final class DecoHackParser extends Lexer.Parser
 	// Parses a custom flag.
 	private boolean parseCustomFlagClause(AbstractPatchContext<?> context, Class<?> objectClass)
 	{
+		FlagType type;
+		if ((type = matchFlagType()) == null)
+		{
+			addErrorMessage("Flag type must be one of: %s", Arrays.toString(FlagType.values()));
+			return false;
+		}
+		
 		String mnemonic;
 		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
 		{
@@ -1605,8 +1613,7 @@ public final class DecoHackParser extends Lexer.Parser
 			return false;
 		}
 		
-		DEHFlag flag;
-		if ((flag = context.getCustomFlag(objectClass, mnemonic)) != null)
+		if (context.getCustomFlag(objectClass, mnemonic) != null)
 		{
 			addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
 			return false;
@@ -1621,22 +1628,27 @@ public final class DecoHackParser extends Lexer.Parser
 		{
 			if (DEHThingFlag.getByMnemonic(mnemonic) != null)
 			{
-				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				addErrorMessage("Base flag mnemonic \"%s\" is already defined.", mnemonic);
 				return false;
 			}
-			else if (DEHThingMBF21Flag.getByMnemonic(mnemonic) != null)
+			if (DEHThingMBF21Flag.getByMnemonic(mnemonic) != null)
 			{
-				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				addErrorMessage("MBF21 flag mnemonic \"%s\" is already defined.", mnemonic);
 				return false;
 			}
-			else if (DEHThingID24Flag.getByMnemonic(mnemonic) != null)
+			if (DEHThingID24Flag.getByMnemonic(mnemonic) != null)
 			{
-				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
+				addErrorMessage("ID24 flag mnemonic \"%s\" is already defined.", mnemonic);
 				return false;
 			}
 		}
 		else if (objectClass == DEHWeapon.class)
 		{
+			if (type != FlagType.MBF21)
+			{
+				addErrorMessage("Flag type must be MBF21 for weapons.");
+				return false;
+			}
 			if (DEHWeaponMBF21Flag.getByMnemonic(mnemonic) != null)
 			{
 				addErrorMessage("Flag mnemonic \"%s\" is already defined.", mnemonic);
@@ -1644,8 +1656,8 @@ public final class DecoHackParser extends Lexer.Parser
 			}
 		}
 		
-		flag = new AbstractPatchContext.CustomFlag(mnemonic);
-		context.addCustomFlag(objectClass, flag);
+		DEHFlag parsedflag = new AbstractPatchContext.CustomFlag(mnemonic);
+		context.addCustomFlag(objectClass, type, parsedflag);
 		
 		return true;
 	}
@@ -2657,7 +2669,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
-					DEHFlag customFlag;
+					ObjectPair<FlagType, DEHFlag> customFlag;
 					ObjectPair<String, Integer> keyValue;
 					if ((keyValue = context.getCustomBitFlag(DEHThing.class, mnemonic)) != null)
 					{
@@ -2682,7 +2694,18 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((customFlag = context.getCustomFlag(DEHThing.class, mnemonic)) != null)
 					{
-						thing.addFlag(customFlag);
+						switch (customFlag.getKey())
+						{
+							case BASE:
+								thing.addFlag(customFlag.getValue());
+								break;
+							case MBF21:
+								thing.addMBF21Flag(customFlag.getValue());
+								break;
+							case ID24:
+								thing.addID24Flag(customFlag.getValue());
+								break;
+						}
 					}
 					else
 					{
@@ -2746,7 +2769,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
-					DEHFlag customFlag;
+					ObjectPair<FlagType, DEHFlag> customFlag;
 					ObjectPair<String, Integer> keyValue;
 					if ((keyValue = context.getCustomBitFlag(DEHThing.class, mnemonic)) != null)
 					{					
@@ -2771,7 +2794,18 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((customFlag = context.getCustomFlag(DEHThing.class, mnemonic)) != null)
 					{
-						thing.removeFlag(customFlag);
+						switch (customFlag.getKey())
+						{
+							case BASE:
+								thing.removeFlag(customFlag.getValue());
+								break;
+							case MBF21:
+								thing.removeMBF21Flag(customFlag.getValue());
+								break;
+							case ID24:
+								thing.removeID24Flag(customFlag.getValue());
+								break;
+						}
 					}
 					else
 					{
@@ -3914,7 +3948,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
-					DEHFlag customFlag;
+					ObjectPair<FlagType, DEHFlag> customFlag;
 					ObjectPair<String, Integer> keyValue;
 					if ((keyValue = context.getCustomBitFlag(DEHWeapon.class, mnemonic)) != null)
 					{
@@ -3939,7 +3973,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((customFlag = context.getCustomFlag(DEHWeapon.class, mnemonic)) != null)
 					{
-						weapon.addMBF21Flag(customFlag);
+						weapon.addMBF21Flag(customFlag.getValue());
 					}
 					else
 					{
@@ -3976,7 +4010,7 @@ public final class DecoHackParser extends Lexer.Parser
 				}
 				else if ((mnemonic = matchIdentifier()) != null)
 				{
-					DEHFlag customFlag;
+					ObjectPair<FlagType, DEHFlag> customFlag;
 					ObjectPair<String, Integer> keyValue;
 					if ((keyValue = context.getCustomBitFlag(DEHWeapon.class, mnemonic)) != null)
 					{
@@ -4001,7 +4035,7 @@ public final class DecoHackParser extends Lexer.Parser
 					}
 					else if ((customFlag = context.getCustomFlag(DEHWeapon.class, mnemonic)) != null)
 					{
-						weapon.removeMBF21Flag(customFlag);
+						weapon.removeMBF21Flag(customFlag.getValue());
 					}
 					else
 					{
@@ -6585,6 +6619,23 @@ public final class DecoHackParser extends Lexer.Parser
 		return itemType;
 	}
 	
+	// Matches a flag type.
+	// If match, advance token and return lexeme.
+	// Else, return null.
+	private FlagType matchFlagType()
+	{
+		if (!currentType(DecoHackKernel.TYPE_IDENTIFIER))
+			return null;
+		
+		String lexeme = currentLexeme();
+		FlagType out = FlagType.LOOKUP.get(lexeme);
+
+		if (out != null)
+			nextToken();
+		
+		return out;
+	}
+
 	// Matches an identifier.
 	// If match, advance token and return lexeme.
 	// Else, return null.

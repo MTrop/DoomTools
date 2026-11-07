@@ -34,6 +34,7 @@ import net.mtrop.doom.tools.decohack.data.enums.DEHFeatureLevel;
 import net.mtrop.doom.tools.decohack.data.enums.DEHFlag;
 import net.mtrop.doom.tools.decohack.patches.DEHPatch;
 import net.mtrop.doom.tools.struct.IntervalMap;
+import net.mtrop.doom.tools.struct.util.EnumUtils;
 
 /**
  * Abstract patch context.
@@ -76,7 +77,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	protected Map<String, Integer> globalStateMap;
 	
 	protected Map<String, DEHActionPointer> pointerMnemonicMap;
-	protected Map<Class<?>, Map<String, DEHFlag>> customFlagMap;
+	protected Map<Class<?>, Map<String, ObjectPair<FlagType, DEHFlag>>> customFlagMap;
 	protected Map<Class<?>, Map<String, DEHProperty>> customPropertyMap;
 	protected Map<Class<?>, Map<String, ObjectPair<String, Integer>>> customBitflagMap;
 	
@@ -304,14 +305,15 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	/**
 	 * Adds a custom flag to a DEH object class.
 	 * @param objectClass the class itself.
+	 * @param type the flag type to add.
 	 * @param flag the flag to add.
 	 */
-	public void addCustomFlag(Class<?> objectClass, DEHFlag flag)
+	public void addCustomFlag(Class<?> objectClass, FlagType type, DEHFlag flag)
 	{
-		Map<String, DEHFlag> propMap;
+		Map<String, ObjectPair<FlagType, DEHFlag>> propMap;
 		if ((propMap = customFlagMap.get(objectClass)) == null)
 			customFlagMap.put(objectClass, propMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		propMap.put(flag.name(), flag);
+		propMap.put(flag.name(), new ObjectPair<>(type, flag));
 	}
 	
 	/**
@@ -320,9 +322,9 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 	 * @param mnemonic the flag mnemonic.
 	 * @return the resultant flag, or null if no flag.
 	 */
-	public DEHFlag getCustomFlag(Class<?> objectClass, String mnemonic)
+	public ObjectPair<FlagType, DEHFlag> getCustomFlag(Class<?> objectClass, String mnemonic)
 	{
-		Map<String, DEHFlag> mnemonicMap;
+		Map<String, ObjectPair<FlagType, DEHFlag>> mnemonicMap;
 		if ((mnemonicMap = customFlagMap.get(objectClass)) == null)
 			return null;
 		return mnemonicMap.get(mnemonic);
@@ -380,7 +382,7 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 		Map<String, ObjectPair<String, Integer>> mnemonicMap;
 		if ((mnemonicMap = customBitflagMap.get(objectClass)) == null)
 			customBitflagMap.put(objectClass, mnemonicMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
-		mnemonicMap.put(mnemonic, new ObjectPair<String, Integer>(propertyName, value));
+		mnemonicMap.put(mnemonic, new ObjectPair<>(propertyName, value));
 	}
 	
 	/**
@@ -1485,6 +1487,15 @@ public abstract class AbstractPatchContext<P extends DEHPatch> implements DEHPat
 			return prev;
 		}
 		
+	}
+	
+	public enum FlagType
+	{
+		BASE,
+		MBF21,
+		ID24;
+		
+		public static final Map<String, FlagType> LOOKUP = EnumUtils.createCaseInsensitiveNameMap(FlagType.class);
 	}
 	
 	public static class CustomFlag implements DEHFlag

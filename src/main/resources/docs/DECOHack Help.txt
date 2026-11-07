@@ -1862,7 +1862,17 @@ NEWFLAG2 will be 0x001 and 0x002, respectively.
 You can also define flags without values to be used as part of a flag
 expression as-is for ports that understand them:
 
-    custom thing flag ZDOOMFLAG 
+    custom <ObjectType> flag <FlagType> <IDENTIFIER>
+
+
+Where <ObjectType> is one of: thing, weapon
+
+And <FlagType> is one of: base, mbf21, id24
+
+For example, its possible use:
+
+    custom thing flag base ZDOOMFLAG 
+
 
 And its use in an object:
 
@@ -1873,12 +1883,10 @@ And its use in an object:
         +ZDOOMFLAG
     }
 
+
 Will cause it to be output like so to the patch:
 
     Bits = SPECIAL+COUNTKILL+ZDOOMFLAG
-
-
-Works on Things and Weapons.
 
 
 ==============================================================================
