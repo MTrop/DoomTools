@@ -49,6 +49,10 @@ have a demo copy buildable at all times?
 - [Fedora Linux Copr](https://copr.fedorainfracloud.org/coprs/electricbrass/doom/) (courtesy of @electricbrass)
 - WinGet (courtesy of @electricbrass)
 
+#### Via Github Actions
+
+- [setup-doomtools](https://github.com/marketplace/actions/setup-doomtools) (courtesy of @electricbrass)
+
 ### Compiling with Ant
 
 **First**, to download dependencies for this project, type (`build.properties` will also be altered/created):
