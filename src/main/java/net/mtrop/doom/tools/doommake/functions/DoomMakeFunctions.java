@@ -17,6 +17,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -692,6 +694,9 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 				} catch (MalformedURLException e) {
 					returnValue.setError("BadURL", e.getMessage(), e.getLocalizedMessage());
 					return true;
+				} catch (URISyntaxException e) {
+					returnValue.setError("BadURL", e.getMessage(), e.getLocalizedMessage());
+					return true;
 				}
 
 				if (url == null || destFile == null)
@@ -1200,7 +1205,7 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	 * @param temp the temporary script value.
 	 * @return a URL object.
 	 */
-	private static URL popURL(ScriptInstance scriptInstance, ScriptValue temp) throws MalformedURLException 
+	private static URL popURL(ScriptInstance scriptInstance, ScriptValue temp) throws MalformedURLException, URISyntaxException
 	{
 		scriptInstance.popStackValue(temp);
 		return getURL(temp);
@@ -1218,14 +1223,14 @@ public enum DoomMakeFunctions implements ScriptFunctionType
 	}
 	
 	// Get URL.
-	private static URL getURL(ScriptValue temp) throws MalformedURLException 
+	private static URL getURL(ScriptValue temp) throws MalformedURLException, URISyntaxException 
 	{
 		if (temp.isNull())
 			return null;
 		else if (temp.isObjectRef(URL.class))
 			return temp.asObjectType(URL.class);
 		else
-			return new URL(temp.asString());
+			return new URI(temp.asString()).toURL();
 	}
 	
 	// Scans a directory for a file (recursively).

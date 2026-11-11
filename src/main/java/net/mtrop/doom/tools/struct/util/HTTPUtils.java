@@ -2811,8 +2811,10 @@ public final class HTTPUtils
 		private static URL checkURL(String url)
 		{
 			try {
-				return new URL(url);
+				return new URI(url).toURL();
 			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException("URL is malformed.", e);
+			} catch (URISyntaxException e) {
 				throw new IllegalArgumentException("URL is malformed.", e);
 			}
 		}
@@ -2994,13 +2996,15 @@ public final class HTTPUtils
 						sb.append(redirectURI.getQuery());
 					else if (out.url.getQuery() != null)
 						sb.append(out.url.getQuery());
-					out.url = new URL(sb.toString());
+					out.url = new URI(sb.toString()).toURL();
 				}
 				else
 				{
-					out.url = new URL(redirectURI.toString());
+					out.url = new URI(redirectURI.toString()).toURL();
 				}
 			} catch (MalformedURLException e) {
+				throw new IllegalArgumentException("Reconstructed URL is malformed. INTERNAL ERROR.", e);
+			} catch (URISyntaxException e) {
 				throw new IllegalArgumentException("Reconstructed URL is malformed. INTERNAL ERROR.", e);
 			} 
 			
@@ -3732,7 +3736,13 @@ public final class HTTPUtils
 		String requestMethod = request.method;
 		Objects.requireNonNull(cancelSwitch, "cancelSwitch is null");
 		Objects.requireNonNull(requestMethod, "request method is null");
-		URL url = new URL(urlParams(request.url.toString(), request.parameters));
+		URL url;
+		String urlString = urlParams(request.url.toString(), request.parameters);
+		try {
+			url = new URI(urlString).toURL();
+		} catch (URISyntaxException e) {
+			throw new IOException("Malformed URL: " + urlString, e);
+		}
 		
 		if (Arrays.binarySearch(VALID_HTTP, url.getProtocol()) < 0)
 			throw new ProtocolException("This is not an HTTP URL.");
