@@ -17,7 +17,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -464,7 +463,7 @@ public final class DecoHackMain
 					options.outFile = new File(DEFAULT_OUTFILENAME);
 				}
 
-				try (Reader reader = new BufferedReader(new InputStreamReader(options.stdin, options.inCharset))) 
+				try
 				{
 					DecoHackParser.Result result;
 					result = DecoHackParser.read("STDIN", options.stdin, options.inCharset);

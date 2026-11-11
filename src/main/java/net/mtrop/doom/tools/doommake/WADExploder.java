@@ -917,13 +917,10 @@ public final class WADExploder
 						Flat flat = new Flat(entryData.length / 200, 200);
 						flat.fromBytes(entryData);
 
-						try (FileOutputStream fos = new FileOutputStream(out))
-						{
-							ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
-							log.println("Wrote `" + out.getPath() + "`.");
-							
-							flatGraphicData.append(sanitizeEntryName(entryName) + " flat").append('\n');
-						}
+						ImageIO.write(GraphicUtils.createImage(flat, palette), "PNG", out);
+						log.println("Wrote `" + out.getPath() + "`.");
+						
+						flatGraphicData.append(sanitizeEntryName(entryName) + " flat").append('\n');
 					}
 					else
 					{
@@ -1105,11 +1102,10 @@ public final class WADExploder
 				flatData.fromBytes(data);
 				
 				File out = new File(dir.getPath() + "/" + sanitizeEntryName(entry.getName()) + ".png");
-				try (FileOutputStream fos = new FileOutputStream(out))
-				{
-					ImageIO.write(GraphicUtils.createImage(flatData, pal), "PNG", out);
-					log.println("Wrote `" + out.getPath() + "`.");
-				}
+
+				ImageIO.write(GraphicUtils.createImage(flatData, pal), "PNG", out);
+				log.println("Wrote `" + out.getPath() + "`.");
+				
 				entrySet.remove(entry);
 			} catch (IOException e) {
 				throw new ExplodeException(entry.getName(), e);
