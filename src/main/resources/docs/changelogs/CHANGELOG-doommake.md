@@ -1,9 +1,10 @@
 DoomMake
 --------
 
-### Changed for 0.38.1
+### Changed for 0.39.0
 
 * `Fixed` [GUI-Studio] Daemon threads get a chance to terminate gracefully on close.
+* `Added` Auto-build now can take a target with args instead of just calling `make`.
 
 
 ### Changed for 0.38.0

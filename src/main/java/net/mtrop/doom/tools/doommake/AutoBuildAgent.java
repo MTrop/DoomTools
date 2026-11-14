@@ -38,6 +38,11 @@ public class AutoBuildAgent
 	/** Agent listener. */
 	private Listener listener;
 	
+	/** Make target. */
+	private String currentTarget;
+	/** Make args. */
+	private String[] currentArgs;
+	
 	/** Properties. */
 	private Properties mergedProperties;
 	/** Local Project properties path. */
@@ -57,13 +62,18 @@ public class AutoBuildAgent
 	/**
 	 * Creates an auto-build agent class.
 	 * @param projectDirectory the project directory to listen to.
+	 * @param currentTarget the target to execute for auto-build.
+	 * @param args the build args to use each make.
 	 * @param listener the listener for this agent.
 	 */
-	public AutoBuildAgent(File projectDirectory, Listener listener)
+	public AutoBuildAgent(File projectDirectory, String currentTarget, String[] args, Listener listener)
 	{
 		this.projectDirectory = Objects.requireNonNull(projectDirectory);
 		this.listener = Objects.requireNonNull(listener);
 
+		this.currentTarget = currentTarget;
+		this.currentArgs = args;
+		
 		try {
 			this.mergedProperties = Common.createProjectProperties(projectDirectory);
 		} catch (IOException e) {
@@ -236,10 +246,10 @@ public class AutoBuildAgent
 			listener.onAgentStoppedException(message, e);
 	}
 
-	private int fireCallBuild(String target)
+	private int fireCallBuild(String target, String[] args)
 	{
 		if (listener != null)
-			return listener.callBuild(target);
+			return listener.callBuild(target, args);
 		return 0;
 	}
 	
@@ -249,10 +259,10 @@ public class AutoBuildAgent
 			listener.onBuildPrepared();		
 	}
 	
-	private void fireBuildStart()
+	private void fireBuildStart(String targetName, String[] args)
 	{
 		if (listener != null)
-			listener.onBuildStart();		
+			listener.onBuildStart(targetName, args);		
 	}
 	
 	private void fireBuildEnd(int result) 
@@ -337,9 +347,10 @@ public class AutoBuildAgent
 		/**
 		 * Called to perform the actual build.
 		 * @param target the DoomMake target to call.
+		 * @param args the build arguments, if any.
 		 * @return the result from the call.
 		 */
-		default int callBuild(String target)
+		default int callBuild(String target, String[] args)
 		{
 			return 0;
 		}
@@ -391,8 +402,10 @@ public class AutoBuildAgent
 		
 		/**
 		 * Called when a build starts.
+		 * @param targetName the target name called.
+		 * @param args the build arguments.
 		 */
-		default void onBuildStart()
+		default void onBuildStart(String targetName, String[] args)
 		{
 			// Do nothing.
 		}
@@ -492,6 +505,7 @@ public class AutoBuildAgent
 				return;
 			if (!d.isDirectory())
 				return;
+			d = FileUtils.canonizeFile(d);
 			Path dirPath = Paths.get(d.getPath());
 			try {
 				dirPath.register(service, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
@@ -609,7 +623,7 @@ public class AutoBuildAgent
 					}
 					else if (!isInterrupted())
 					{
-						build("make");
+						build(currentTarget, currentArgs);
 						synchronized (MUTEX) 
 						{
 							MUTEX.wait();
@@ -624,14 +638,14 @@ public class AutoBuildAgent
 		/**
 		 * Calls the build.
 		 */
-		private void build(String target)
+		private void build(String target, String[] args)
 		{
 			currentlyBuilding = true;
 			try {
-				fireBuildStart();
+				fireBuildStart(target, args);
 				int result = -1;
 				try {
-					result = fireCallBuild(target); 
+					result = fireCallBuild(target, args); 
 				} finally {
 					fireBuildEnd(result);
 				}

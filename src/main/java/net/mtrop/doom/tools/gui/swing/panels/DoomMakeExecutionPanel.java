@@ -114,7 +114,7 @@ public class DoomMakeExecutionPanel extends JPanel
 		);
 		this.autoBuildCheckbox = checkBox(language.getText("doommake.project.autobuild"), false, (v) -> {
 			if (v)
-				startAgent(outputStream);
+				startAgent(currentTarget == null ? "make" : currentTarget, NO_ARGS, outputStream);
 			else
 				shutDownAgent();
 		});
@@ -218,12 +218,12 @@ public class DoomMakeExecutionPanel extends JPanel
 	}
 	
 	// Starts the agent.
-	private void startAgent(final PrintStream outputStream)
+	private void startAgent(String target, String[] args, final PrintStream outputStream)
 	{
 		if (autoBuildAgent != null)
 			throw new IllegalStateException("INTERNAL ERROR: Start agent while agent running!");
 		
-		autoBuildAgent = new AutoBuildAgent(projectDirectory, new Listener() 
+		autoBuildAgent = new AutoBuildAgent(projectDirectory, target, args, new Listener() 
 		{
 			@Override
 			public void onAgentStarted() 
@@ -279,9 +279,9 @@ public class DoomMakeExecutionPanel extends JPanel
 			}
 
 			@Override
-			public void onBuildStart() 
+			public void onBuildStart(String targetName, String[] args) 
 			{
-				String out = "Build started.";
+				String out = "Build started: [" + targetName + "]" + (args.length > 0 ? " (" + args.length + " args)" : "");
 				if (outputStream != null)
 					outputStream.println("Auto-build: " + out);
 				else
@@ -299,12 +299,12 @@ public class DoomMakeExecutionPanel extends JPanel
 			}
 			
 			@Override
-			public int callBuild(String target)
+			public int callBuild(String target, String[] args)
 			{
 				try {
 					statusPanel.setActivityMessage(language.getText("doommake.project.build.message.running", target));
 					int result = tasks.spawn(
-						processes.attachStreams(processes.createDoomMake(projectDirectory, target, true, NO_ARGS), outputStream, outputStream) 
+						DoomToolsProcessBuilder.attachStreams(processes.createDoomMake(projectDirectory, target, true, args), outputStream, outputStream) 
 					).get();
 					DoomMakeSettingsManager settings = DoomMakeSettingsManager.get();
 					if (result != 0)

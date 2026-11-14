@@ -55,17 +55,6 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			// Do nothing.
 		}
 		
-		@Override
-		public void write(byte[] b) throws IOException
-		{
-			// Do nothing.
-		}
-	
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException 
-		{
-			// Do nothing.
-		}
 	};
 	
 	/** A null inputstream. */
@@ -76,45 +65,19 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		{
 			return -1;
 		}
+		
+		public int available() throws IOException 
+		{
+			return 0;
+		}
+		
 	};
 
 	/** A null writer. */
-	private static final Writer WRITER_NULL = new Writer()
-	{
-		@Override
-		public void write(char[] cbuf, int off, int len) throws IOException 
-		{
-			// Do nothing.
-		}
-	
-		@Override
-		public void flush() throws IOException 
-		{
-			// Do nothing.
-		}
-	
-		@Override
-		public void close() throws IOException 
-		{
-			// Do nothing.
-		}
-	};
-	
-	/** A null reader. */
-	private static final Reader READER_NULL = new Reader()
-	{
-		@Override
-		public int read(char[] cbuf, int off, int len) throws IOException 
-		{
-			return -1;
-		}
+	private static final Writer WRITER_NULL = new OutputStreamWriter(OUTPUTSTREAM_NULL);
 
-		@Override
-		public void close() throws IOException 
-		{
-			// Do nothing.
-		}
-	};
+	/** A null reader. */
+	private static final Reader READER_NULL = new InputStreamReader(INPUTSTREAM_NULL);
 
 	/** A null printstream. */
 	private static final PrintStream PRINTSTREAM_NULL = new PrintStream(OUTPUTSTREAM_NULL);
@@ -157,9 +120,9 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		this.command = new LinkedList<>();
 		this.envMap = new HashMap<>();
 		this.workingDirectory = null;
-		this.stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), OUTPUTSTREAM_NULL, stdOutListener);
-		this.stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), OUTPUTSTREAM_NULL, stdErrListener);
-		this.stdInRedirector =  (process) -> new InputToOutputStreamThread(INPUTSTREAM_NULL, process.getOutputStream(), stdInListener);
+		this.stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), OUTPUTSTREAM_NULL, true, true, stdOutListener);
+		this.stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), OUTPUTSTREAM_NULL, true, true, stdErrListener);
+		this.stdInRedirector =  (process) -> new InputToOutputStreamThread(INPUTSTREAM_NULL, process.getOutputStream(), true, true, stdInListener);
 		this.stdOutListener = null;
 		this.stdErrListener = null;
 		this.stdInListener = null;
@@ -377,8 +340,25 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	 */
 	public ProcessCallable setOut(final OutputStream newOut)
 	{
+		return setOut(newOut, false);
+	}
+	
+	/**
+	 * Redirects standard out to another destination.
+	 * @param newOut the new output stream to redirect STDOUT to. Null is acceptable.
+	 * @param closeOut if true, close the output stream after the process terminates.
+	 * @return this, for chaining.
+	 */
+	private ProcessCallable setOut(final OutputStream newOut, boolean closeOut)
+	{
 		final OutputStream stream = newOut == null ? OUTPUTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), stream, stdOutListener); 
+		stdOutRedirector = (process) -> new InputToOutputStreamThread(
+			process.getInputStream(), 
+			stream, 
+			true,
+			closeOut,
+			stdOutListener
+		); 
 		return this;
 	}
 	
@@ -391,7 +371,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setOut(final Writer newOut)
 	{
 		final Writer stream = newOut == null ? WRITER_NULL : newOut;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), stream, stdOutListener); 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getInputStream()), 
+			stream,
+			true,
+			false,
+			stdOutListener
+		); 
 		return this;
 	}
 	
@@ -404,7 +390,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setOut(final PrintStream newOut)
 	{
 		final PrintStream stream = newOut == null ? PRINTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream())), stream, stdOutListener); 
+		stdOutRedirector = (process) -> new LineReaderToWriterThread(
+			new BufferedReader(new InputStreamReader(process.getInputStream())), 
+			stream,
+			true,
+			false,
+			stdOutListener
+		); 
 		return this;
 	}
 	
@@ -417,7 +409,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setOut(final Charset encoding, final Writer newOut)
 	{
 		final Writer stream = newOut == null ? WRITER_NULL : newOut;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), encoding), stream, stdOutListener); 
+		stdOutRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getInputStream(), encoding), 
+			stream, 
+			true,
+			false,
+			stdOutListener
+		); 
 		return this;
 	}
 	
@@ -430,7 +428,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setOut(final Charset encoding, final PrintStream newOut)
 	{
 		final PrintStream stream = newOut == null ? PRINTSTREAM_NULL : newOut;
-		stdOutRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getInputStream(), encoding)), stream, stdOutListener); 
+		stdOutRedirector = (process) -> new LineReaderToWriterThread(
+			new BufferedReader(new InputStreamReader(process.getInputStream(), encoding)), 
+			stream, 
+			true,
+			false,
+			stdOutListener
+		); 
 		return this;
 	}
 	
@@ -446,7 +450,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new InputToOutputStreamThread(process.getInputStream(), new FileOutputStream(target), stdOutListener);
+		stdOutRedirector = (process) -> new InputToOutputStreamThread(
+			process.getInputStream(), 
+			new FileOutputStream(target), 
+			true,
+			true,
+			stdOutListener
+		);
 		return this;
 	}
 	
@@ -464,7 +474,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdOutListener);
+		stdOutRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getInputStream()), 
+			new OutputStreamWriter(new FileOutputStream(target), outCharset), 
+			true,
+			true,
+			stdOutListener
+		);
 		return this;
 	}
 	
@@ -482,7 +498,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdOutRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getInputStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdOutListener);
+		stdOutRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getInputStream(), processCharset), 
+			new OutputStreamWriter(new FileOutputStream(target), outCharset), 
+			true,
+			true,
+			stdOutListener
+		);
 		return this;
 	}
 	
@@ -494,7 +516,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setErr(final OutputStream newErr)
 	{
 		final OutputStream stream = newErr == null ? OUTPUTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), stream, stdErrListener); 
+		stdErrRedirector = (process) -> new InputToOutputStreamThread(
+			process.getErrorStream(), 
+			stream, 
+			true,
+			false,
+			stdErrListener
+		); 
 		return this;
 	}
 	
@@ -506,7 +534,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setErr(final Writer newErr)
 	{
 		final Writer stream = newErr == null ? WRITER_NULL : newErr;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), stream, stdErrListener); 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getErrorStream()), 
+			stream, 
+			true,
+			false,
+			stdErrListener
+		); 
 		return this;
 	}
 	
@@ -518,7 +552,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setErr(final PrintStream newErr)
 	{
 		final PrintStream stream = newErr == null ? PRINTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream())), stream, stdErrListener); 
+		stdErrRedirector = (process) -> new LineReaderToWriterThread(
+			new BufferedReader(new InputStreamReader(process.getErrorStream())), 
+			stream, 
+			true,
+			false,
+			stdErrListener
+		); 
 		return this;
 	}
 	
@@ -531,7 +571,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setErr(final Charset encoding, final Writer newErr)
 	{
 		final Writer stream = newErr == null ? WRITER_NULL : newErr;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), encoding), stream, stdErrListener); 
+		stdErrRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getErrorStream(), encoding), 
+			stream, 
+			true,
+			false,
+			stdErrListener
+		); 
 		return this;
 	}
 	
@@ -544,7 +590,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setErr(final Charset encoding, final PrintStream newErr)
 	{
 		final PrintStream stream = newErr == null ? PRINTSTREAM_NULL : newErr;
-		stdErrRedirector = (process) -> new LineReaderToWriterThread(new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding)), stream, stdErrListener); 
+		stdErrRedirector = (process) -> new LineReaderToWriterThread(
+			new BufferedReader(new InputStreamReader(process.getErrorStream(), encoding)), 
+			stream, 
+			true,
+			false,
+			stdErrListener
+		); 
 		return this;
 	}
 	
@@ -560,7 +612,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new InputToOutputStreamThread(process.getErrorStream(), new FileOutputStream(target), stdErrListener);
+		stdErrRedirector = (process) -> new InputToOutputStreamThread(
+			process.getErrorStream(), 
+			new FileOutputStream(target), 
+			true,
+			true,
+			stdErrListener
+		);
 		return this;
 	}
 	
@@ -578,7 +636,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream()), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdErrListener);
+		stdErrRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getErrorStream()), 
+			new OutputStreamWriter(new FileOutputStream(target), outCharset), 
+			true,
+			true,
+			stdErrListener
+		);
 		return this;
 	}
 	
@@ -596,7 +660,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 			throw new FileNotFoundException("output file is a directory");
 		
 		final File target = outFile == null ? NULL_FILE : outFile;
-		stdErrRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(process.getErrorStream(), processCharset), new OutputStreamWriter(new FileOutputStream(target), outCharset), stdErrListener);
+		stdErrRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(process.getErrorStream(), processCharset), 
+			new OutputStreamWriter(new FileOutputStream(target), outCharset), 
+			true,
+			true,
+			stdErrListener
+		);
 		return this;
 	}
 	
@@ -607,8 +677,25 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	 */
 	public ProcessCallable setIn(final InputStream newIn)
 	{
+		return setIn(newIn, false);
+	}
+	
+	/**
+	 * Redirects standard in.
+	 * @param newIn the new input stream to redirect STDIN from. Null is acceptable.
+	 * @param closeIn if true, close the input stream after the process terminates.
+	 * @return this, for chaining.
+	 */
+	private ProcessCallable setIn(final InputStream newIn, boolean closeIn)
+	{
 		final InputStream stream = newIn == null ? INPUTSTREAM_NULL : newIn;
-		stdInRedirector = (process) -> new InputToOutputStreamThread(stream, process.getOutputStream(), stdInListener);
+		stdInRedirector = (process) -> new InputToOutputStreamThread(
+			stream, 
+			process.getOutputStream(), 
+			closeIn,
+			true,
+			stdInListener
+		);
 		return this;
 	}
 	
@@ -620,7 +707,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setIn(final Reader newIn)
 	{
 		final Reader stream = newIn == null ? READER_NULL : newIn;
-		stdInRedirector = (process) -> new ReaderToWriterThread(stream, new OutputStreamWriter(process.getOutputStream()), stdInListener);
+		stdInRedirector = (process) -> new ReaderToWriterThread(
+			stream, 
+			new OutputStreamWriter(process.getOutputStream()), 
+			false,
+			true,
+			stdInListener
+		);
 		return this;
 	}
 	
@@ -632,7 +725,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setIn(final File sourceFile)
 	{
 		final File src = sourceFile == null ? NULL_FILE : sourceFile;
-		stdInRedirector = (process) -> new InputToOutputStreamThread(new FileInputStream(src), process.getOutputStream(), stdInListener);
+		stdInRedirector = (process) -> new InputToOutputStreamThread(
+			new FileInputStream(src), 
+			process.getOutputStream(), 
+			true,
+			true,
+			stdInListener
+		);
 		return this;
 	}
 	
@@ -645,7 +744,13 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	public ProcessCallable setIn(final Charset sourceCharset, final File sourceFile)
 	{
 		final File src = sourceFile == null ? NULL_FILE : sourceFile;
-		stdInRedirector = (process) -> new ReaderToWriterThread(new InputStreamReader(new FileInputStream(src), sourceCharset), new OutputStreamWriter(process.getOutputStream()), stdInListener);
+		stdInRedirector = (process) -> new ReaderToWriterThread(
+			new InputStreamReader(new FileInputStream(src), sourceCharset), 
+			new OutputStreamWriter(process.getOutputStream()), 
+			true,
+			true,
+			stdInListener
+		);
 		return this;
 	}
 
@@ -693,8 +798,8 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		BufferedRing ring = new BufferedRing(8192); 
 		InputStream pipeIn = ring.getInputStream();
 		OutputStream pipeOut = ring.getOutputStream();
-		setOut(pipeOut);
-		target.setIn(pipeIn);
+		setOut(pipeOut, true);
+		target.setIn(pipeIn, true);
 		pipeToCallable = target;
 		return this;
 	}
@@ -998,6 +1103,12 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 				}
 				
 				@Override
+				public int available() throws IOException 
+				{
+					return size;
+				}
+				
+				@Override
 				public void close() throws IOException 
 				{
 					synchronized (waitMutex)
@@ -1093,9 +1204,9 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		protected PrintStream targetPrintStream;
 		private Object targetMutex;
 		
-		private LineReaderToWriterThread(BufferedReader reader, StreamExceptionListener listener)
+		private LineReaderToWriterThread(BufferedReader reader, boolean closeIn, boolean closeOut, StreamExceptionListener listener)
 		{
-			super("LineReaderToWriterThread", listener);
+			super("LineReaderToWriterThread", closeIn, closeOut, listener);
 			this.sourceReader = reader;
 			this.targetMutex = new Object();
 		}
@@ -1106,9 +1217,9 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		 * @param reader the BufferedReader to read from.
 		 * @param stream the PrintStream to write to.
 		 */
-		private LineReaderToWriterThread(BufferedReader reader, PrintStream stream, StreamExceptionListener listener)
+		private LineReaderToWriterThread(BufferedReader reader, PrintStream stream, boolean closeIn, boolean closeOut, StreamExceptionListener listener)
 		{
-			this(reader, listener);
+			this(reader, closeIn, closeOut, listener);
 			this.targetPrintStream = stream;
 		}
 	
@@ -1129,8 +1240,10 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		@Override
 		protected void close() throws IOException 
 		{
-			sourceReader.close();
-			targetPrintStream.close();
+			if (closeIn)
+				sourceReader.close();
+			if (closeOut)
+				targetPrintStream.close();
 		}
 		
 	}
@@ -1151,9 +1264,9 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		 * @param reader the Reader to read from.
 		 * @param writer the Writer to write to.
 		 */
-		private ReaderToWriterThread(Reader reader, Writer writer, StreamExceptionListener listener)
+		private ReaderToWriterThread(Reader reader, Writer writer, boolean closeIn, boolean closeOut, StreamExceptionListener listener)
 		{
-			super("ReaderToWriterThread", listener);
+			super("ReaderToWriterThread", closeIn, closeOut, listener);
 			this.sourceReader = reader;
 			this.targetWriter = writer;
 		}
@@ -1176,8 +1289,10 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		@Override
 		protected void close() throws IOException 
 		{
-			sourceReader.close();
-			targetWriter.close();
+			if (closeIn)
+				sourceReader.close();
+			if (closeOut)
+				targetWriter.close();
 		}
 		
 	}
@@ -1198,9 +1313,9 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		 * @param sourceStream the InputStream to read from. 
 		 * @param targetStream the OutputStream to write to.
 		 */
-		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream, StreamExceptionListener listener)
+		private InputToOutputStreamThread(InputStream sourceStream, OutputStream targetStream, boolean closeIn, boolean closeOut, StreamExceptionListener listener)
 		{
-			super("InputToOutputStreamThread", listener);
+			super("InputToOutputStreamThread", closeIn, closeOut, listener);
 			this.sourceStream = sourceStream;
 			this.targetStream = targetStream;
 		}
@@ -1223,8 +1338,10 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 		@Override
 		protected void close() throws IOException 
 		{
-			sourceStream.close();
-			targetStream.close();
+			if (closeIn)
+				sourceStream.close();
+			if (closeOut)
+				targetStream.close();
 		}
 		
 	}
@@ -1232,10 +1349,14 @@ public class ProcessCallable implements Future<Integer>, Callable<Integer>
 	private static abstract class PipeThread extends Thread
 	{
 		private StreamExceptionListener listener;
+		protected boolean closeIn;
+		protected boolean closeOut;
 		
-		protected PipeThread(String name, StreamExceptionListener listener)
+		protected PipeThread(String name, boolean closeIn, boolean closeOut, StreamExceptionListener listener)
 		{
 			super(name);
+			this.closeIn = closeIn;
+			this.closeOut = closeOut;
 			this.listener = listener;
 		}
 		

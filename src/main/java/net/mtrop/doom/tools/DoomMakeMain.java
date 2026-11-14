@@ -479,22 +479,24 @@ public final class DoomMakeMain
 			}
 			
 			if (options.agent)
-				return startAgent();
+				return startAgent(options.targetName, options.args.toArray(new String[options.args.size()]));
 			else
 				return executeTarget();
 		}
 
-		private int startAgent()
+		private int startAgent(String target, String ... args)
 		{
 			File workDir = new File(".");
 			
-			final AutoBuildAgent agent = new AutoBuildAgent(workDir, new AutoBuildAgent.Listener() 
+			final AutoBuildAgent agent = new AutoBuildAgent(workDir, target, args, new AutoBuildAgent.Listener()
 			{
 				@Override
-				public int callBuild(String target) 
+				public int callBuild(String target, String[] args) 
 				{
 					try {
 						return InstancedFuture.instance(Common.spawnJava(DoomMakeMain.class)
+							.arg(target)
+							.args(args)
 							.arg(SWITCH_AGENT_BYPASS)
 							.setOut(options.stdout)
 							.setErr(options.stderr)
@@ -512,9 +514,9 @@ public final class DoomMakeMain
 				}
 
 				@Override
-				public void onBuildStart() 
+				public void onBuildStart(String targetName, String[] args) 
 				{
-					options.stdout.println("***** Calling DoomMake");
+					options.stdout.println("***** Calling DoomMake [" + targetName + "]" + (args.length > 0 ? " (" + args.length + " args)" : ""));
 				}
 				
 				@Override

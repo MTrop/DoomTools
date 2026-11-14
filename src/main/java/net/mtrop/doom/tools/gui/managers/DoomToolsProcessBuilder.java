@@ -354,7 +354,7 @@ public final class DoomToolsProcessBuilder
 	 * @param stderr the standard error stream.
 	 * @return the passed-in callable.
 	 */
-	public ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr)
+	public static ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr)
 	{
 		final String callableName = callable.getCallName(); 
 		return callable
@@ -373,7 +373,7 @@ public final class DoomToolsProcessBuilder
 	 * @param stdin the standard in stream.
 	 * @return the passed-in callable.
 	 */
-	public ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr, InputStream stdin)
+	public static ProcessCallable attachStreams(ProcessCallable callable, PrintStream stdout, PrintStream stderr, InputStream stdin)
 	{
 		final String callableName = callable.getCallName(); 
 		return callable
