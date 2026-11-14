@@ -46,6 +46,10 @@ WizardStyle=modern
 WizardImageFile=installer-image.bmp
 WizardImageStretch=yes
 
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
+UsePreviousPrivileges=yes
+
 AppCopyright=(C) 2019-2026 Matt Tropiano
 
 
@@ -57,8 +61,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 #ifdef SrcJREDirectory
 Name: "embedJRE"; Description: "Embed a minified Java Runtime (REQUIRED if not already installed, 47.7 MB)"; GroupDescription: "May Be Required:"
 #endif
-Name: "envPath"; Description: "Add DoomTools to System PATH (for using the Command Line tools)"; GroupDescription: "More Actions:"
-Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; GroupDescription: "More Actions:"; Flags: unchecked
+Name: "envPath"; Description: "Add DoomTools to PATH (for using the Command Line tools)"; GroupDescription: "More Actions:"
+Name: "addToExplorerShell"; Description: "Add DoomTools Context Commands to Explorer"; GroupDescription: "More Actions:"; Flags: unchecked; Check: IsAdminInstallMode
 
 [Files]
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
@@ -106,7 +110,10 @@ begin
 
         if WizardIsTaskSelected('envPath') then
         begin
-            EnvAddPath(appPath);
+        	if IsAdminInstallMode then
+            	EnvAddPath(appPath)
+            else
+            	EnvAddPathUser(appPath);
         end;
 
         if WizardIsTaskSelected('addToExplorerShell') then 
@@ -124,6 +131,7 @@ begin
     if (CurUninstallStep = usPostUninstall) then
     begin
         EnvRemovePath(ExpandConstant('{app}'));
+        EnvRemovePathUser(ExpandConstant('{app}'));
         ExplorerRemoveCommandItem('doommake-new');
         ExplorerRemoveCommandItem('doommake-open');
         ExplorerRemoveCommandItem('doommake-studio');

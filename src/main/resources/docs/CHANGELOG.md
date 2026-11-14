@@ -7,6 +7,8 @@ This log is for tracking changes that may not be pertinent to the individual too
 Changes
 -------
 
+- **2026-11-14** Installer can now be installed for current user only.
+
 - **2026-10-16** Made process modals cancellable.
 - **2026-10-10** Updated RookScript to `1.20.1`. [Changes here.](https://github.com/BlackRookSoftware/RookScript/releases/tag/1.20.1-RELEASE)
 - **2026-10-06** Fixes to potential file separators in XDG paths.
