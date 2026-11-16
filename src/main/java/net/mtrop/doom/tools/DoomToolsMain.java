@@ -54,6 +54,7 @@ public final class DoomToolsMain
 	public static final int ERROR_IOERROR = 6;
 //	public static final int ERROR_GUI_ALREADY_RUNNING = 7;
 	public static final int ERROR_TASK_CANCELLED = 8;
+	public static final int ERROR_UPDATE_UNSUPPORTED = 9;
 	public static final int ERROR_UNKNOWN = -1;
 
 	private static final String SHELL_OPTIONS = "-Xms64M -Xmx4G";
@@ -233,6 +234,13 @@ public final class DoomToolsMain
 
 		public int doUpdateDocs()
 		{
+			String noUpdate = Common.getNoUpdateString();
+			if (noUpdate != null)
+			{
+				options.stdout.println(noUpdate);
+				return ERROR_UPDATE_UNSUPPORTED;
+			}
+			
 			final String path; 
 			try {
 				path = Environment.getDoomToolsDocsPath();
@@ -278,6 +286,13 @@ public final class DoomToolsMain
 		
 		public int doUpdateShell()
 		{
+			String noUpdate = Common.getNoUpdateString();
+			if (noUpdate != null)
+			{
+				options.stdout.println(noUpdate);
+				return ERROR_UPDATE_UNSUPPORTED;
+			}
+			
 			final String path; 
 			try {
 				path = Environment.getDoomToolsPath();
@@ -333,7 +348,14 @@ public final class DoomToolsMain
 		
 		public int doUpdateCleanup()
 		{
-			final String path; 
+			String noUpdate = Common.getNoUpdateString();
+			if (noUpdate != null)
+			{
+				options.stdout.println(noUpdate);
+				return ERROR_UPDATE_UNSUPPORTED;
+			}
+			
+			final String path;
 			try {
 				path = Environment.getDoomToolsPath();
 			} catch (SecurityException e) {
@@ -364,6 +386,13 @@ public final class DoomToolsMain
 		
 		public int doUpdate()
 		{
+			String noUpdate = Common.getNoUpdateString();
+			if (noUpdate != null)
+			{
+				options.stdout.println(noUpdate);
+				return ERROR_UPDATE_UNSUPPORTED;
+			}
+			
 			final String path; 
 			try {
 				path = Environment.getDoomToolsPath();

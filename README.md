@@ -154,6 +154,24 @@ deployment root.
 This is similar to how DoomTools updates itself - it just downloads the latest stand-alone JAR from its main releases.
 
 
+### Creating Distributables for Package Managers
+
+Certain package managers require both a build from source and a disallowing of updating DoomTools through means other
+than the OS's package manager system. In order to accommodate this, you may build a DoomTools package like so:
+
+    ant dist.bash -Dnoupdate.message=[MESSAGE]
+
+Building a package this way will create a Bash shell distributable that contains a resource that, if read, will
+prevent updating DoomTools the conventional ways and require the user to update via their package manager, 
+outputting the provided message if they try (and resulting in a nonzero error code).
+
+You may want to add `noupdate.message` to your `build.properties` file if you are the maintainer.
+
+**NOTE:** This means that some packages will have a major version offset by a certain time from the main
+releases. This is fine. The versions to pay attention to remain the individual utility version numbers
+(and the contained libraries' versions) and the changelogs.   
+
+
 ### Other Notes
 
 Even though this project can technically be used as a library, use caution when integrating this package 

@@ -61,6 +61,25 @@ public final class Common
 	}
 	
 	/**
+	 * Gets the embedded "no update allowed" message.
+	 * This is for packages that must be updated via a package manager.
+	 * No message (<code>null</code>) means this can update the usual route.
+	 * @return the message, or null for no message.
+	 */
+	public static String getNoUpdateString()
+	{
+		String out = null;
+		try (InputStream in = IOUtils.openResource("net/mtrop/doom/tools/noupdate.message")) {
+			if (in != null)
+				out = IOUtils.getTextualContents(in, "UTF-8").trim();
+		} catch (IOException e) {
+			/* Do nothing. */
+		}
+		
+		return out;
+	}
+	
+	/**
 	 * Opens an {@link InputStream} to a resource using the current thread's {@link ClassLoader}.
 	 * Assumes platform default encoding.
 	 * @param pathString the resource pathname.

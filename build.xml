@@ -119,6 +119,7 @@
 	<!-- Filenames -->
 	<property name="build.versions.dir" value="${build.dir}/versions" />
 	<property name="build.installer.dir" value="${build.dir}/installer" />
+	<property name="build.other.dir" value="${build.dir}/other" />	
 	<property name="jar.dist.filename" value="${project.archive}-jar-${build.version.number}.zip" />
 	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version.number}.zip" />
 	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version.number}.tar.gz" />
@@ -153,7 +154,15 @@
 		<mkdir dir="${dist.dir}" />
 	</target>
 
-	<target name="clean.versions" description="Cleans up the distributables folder.">
+	<target name="clean.other">
+		<delete dir="${build.other.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+	
+	<target name="init.other" depends="clean.other">
+		<mkdir dir="${build.other.dir}" />
+	</target>
+	
+	<target name="clean.versions">
 		<delete dir="${build.versions.dir}" includeemptydirs="true" casesensitive="false" /> 
 	</target>
 
@@ -184,6 +193,18 @@
 		<echo file="${build.versions.dir}/doomfetch.version" message="${doomfetch.version}" />
 	</target>
 
+	<target name="compile.noupdate" depends="init.other" if="noupdate.message">
+		<echo file="${build.other.dir}/noupdate.message" message="${noupdate.message}" />
+	</target>
+	
+	<!-- !Override -->
+	<target name="compile.resources" depends="compile.noupdate" if="resource.dir.available">
+		<copy todir="${bin.dir}">
+			<fileset dir="${resource.dir}" />
+		</copy>
+	</target>
+
+	<!-- !Override -->
 	<target name="javadoc" depends="init.docs" description="Builds the Java documentation.">
         <javadoc access="protected" 
         	additionalparam="-J-Xmx512m  " author="true" 
@@ -205,29 +226,6 @@
         </javadoc>
     </target>	
 
-	<macrodef name="jar-lib">
-		<attribute name="destfile" />
-		<attribute name="jar" />
-		<attribute name="update" default="false" />
-		<sequential>
-			<jar destfile="@{destfile}" update="@{update}" filesetmanifest="skip">
-				<zipfileset src="@{jar}">
-					<include name="**/*.class" />
-					<include name="**/*.properties" />
-					<include name="**/*.xml" />
-					<include name="**/*.dtd" />
-					<include name="**/*.dll" />
-					<include name="**/*.dynlib" />
-					<include name="**/*.so" />
-					<include name="**/*.png" />
-					<include name="**/*.jpg" />
-					<include name="**/*.gif" />
-					<exclude name="module-info.class" />
-				</zipfileset>
-			</jar>
-		</sequential>
-	</macrodef>
-	
 	<target name="jar.one" depends="init.jar, compile, init.versions">
 		<jar destfile="${jar.dir}/${jar.filename}">
 			<zipfileset src="${dependencies.dir}/${json.jar}">
@@ -261,7 +259,8 @@
 				<patternset refid="pattern.jar.lib.contents" />
 			</zipfileset>
 			<zipfileset dir="${bin.dir}"/>
-			<zipfileset dir="${build.dir}/versions" prefix="net/mtrop/doom/tools/" />
+			<zipfileset dir="${build.versions.dir}" prefix="net/mtrop/doom/tools/" />
+			<zipfileset dir="${build.other.dir}" prefix="net/mtrop/doom/tools/" />
 		</jar>
 	</target>
 
