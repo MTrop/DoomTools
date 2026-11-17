@@ -1,6 +1,11 @@
 DoomFetch
 ---------
 
+### Changed for 1.3.0
+
+* `Changed` Omit DoomShack driver for now until the site is back up.
+
+
 ### Changed for 1.2.4
 
 * `Fixed` The idGames driver did not sort by filename properly (thanks, @electricbrass).

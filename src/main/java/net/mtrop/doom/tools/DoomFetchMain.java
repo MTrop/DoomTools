@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 
 import net.mtrop.doom.tools.doomfetch.DogSoftDriver;
-import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
+//import net.mtrop.doom.tools.doomfetch.DoomShackDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver;
 import net.mtrop.doom.tools.doomfetch.FetchDriver.Response;
 import net.mtrop.doom.tools.doomfetch.IdGamesDriver;
@@ -70,7 +70,7 @@ public final class DoomFetchMain
 		private static final long serialVersionUID = 3458742412979808872L;
 		{
 			put("idgames", (out, err) -> new IdGamesDriver(out, err));
-			put("doomshack", (out, err) -> new DoomShackDriver(out, err));
+		//	put("doomshack", (out, err) -> new DoomShackDriver(out, err));
 			put("dogsoft", (out, err) -> new DogSoftDriver(out, err));
 			put("tspgpk", (out, err) -> new TSPGPainkillerDriver(out, err));
 			put("tspgeuro", (out, err) -> new TSPGEuroborosDriver(out, err));
